@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）</title>
+<style>
+  :root{
+    --ink:#1a2233; --sub:#5a6478; --line:#dfe4ee; --bg:#f7f8fb; --card:#ffffff;
+    --blue:#2563eb; --blue-soft:#eaf1fe; --green:#0e9f6e; --green-soft:#e6f7f0;
+    --amber:#b45309; --amber-soft:#fdf3e3; --red:#b91c1c; --purple:#6d28d9;
+    --code-bg:#0f172a; --code-ink:#dbe4f3;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; font-family:"Segoe UI","Microsoft YaHei","PingFang SC",-apple-system,sans-serif; color:var(--ink); background:var(--bg); line-height:1.75; font-size:16px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px 80px;}
+
+  header.hero{background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 60%,#2563eb 100%); color:#fff; padding:64px 28px 48px; }
+  header.hero .inner{max-width:1080px; margin:0 auto;}
+  header.hero h1{margin:0 0 14px; font-size:34px; line-height:1.3; letter-spacing:.5px;}
+  header.hero p.sub{margin:0 0 22px; font-size:16.5px; color:#c7d6f5; max-width:900px;}
+  .meta-chips{display:flex; flex-wrap:wrap; gap:10px;}
+  .chip{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:4px 14px; font-size:13px; color:#e6eefc;}
+
+  nav.toc{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 24px; margin:26px 0 34px; font-size:14.5px;}
+  nav.toc b{display:block; margin-bottom:8px; font-size:15px;}
+  nav.toc a{color:var(--blue); text-decoration:none; margin-right:18px; white-space:nowrap; display:inline-block;}
+  nav.toc a:hover{text-decoration:underline;}
+
+  section{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:30px 34px; margin:26px 0;}
+  h2{font-size:24px; margin:2px 0 6px; border-left:6px solid var(--blue); padding-left:14px;}
+  h2 .num{color:#9aa6bd; font-weight:600; margin-right:6px; font-size:18px;}
+  h3{font-size:19px; margin:30px 0 8px; color:#12305e;}
+  h4{font-size:16.5px; margin:22px 0 6px; color:#333f57;}
+  p{margin:10px 0;}
+  .lead{font-size:17px; color:#22314d;}
+
+  sup.cite{font-size:11px; background:var(--blue-soft); color:var(--blue); border-radius:5px; padding:1.5px 6px; margin-left:3px; white-space:nowrap; font-weight:600; vertical-align:super;}
+  sup.cite.g{background:var(--green-soft); color:var(--green);}
+  sup.cite.a{background:var(--amber-soft); color:var(--amber);}
+  .cite-note{font-size:12.5px; color:#69758e; background:#f4f6fb; border-left:3px solid #c9d4ec; padding:7px 12px; margin:8px 0 14px; border-radius:0 8px 8px 0; line-height:1.65;}
+  .cite-note em{color:#8a94ab;}
+  .cite-note .en{font-style:italic;}
+
+  pre{background:var(--code-bg); color:var(--code-ink); padding:16px 18px; border-radius:10px; overflow-x:auto; font-size:12.8px; line-height:1.6; font-family:"Cascadia Code",Consolas,"JetBrains Mono",monospace;}
+  pre .cm{color:#7c8db0;} /* comment */
+  pre .kw{color:#7dd3fc;} /* keyword */
+  pre .st{color:#fca5a5;}
+  code.inline{background:#eef1f7; border:1px solid #dfe4ee; border-radius:5px; padding:1px 6px; font-size:13px; font-family:Consolas,monospace; color:#0f3d91;}
+  .code-caption{font-size:12.5px; color:var(--sub); margin:-6px 0 14px;}
+  .code-caption code{font-family:Consolas,monospace; font-size:12px; background:#eef1f7; padding:1px 5px; border-radius:4px;}
+
+  table{border-collapse:collapse; width:100%; margin:14px 0 18px; font-size:13.8px;}
+  th{background:#eef2fa; text-align:left; padding:8px 10px; border:1px solid var(--line); font-size:13px;}
+  td{padding:7px 10px; border:1px solid var(--line); vertical-align:top;}
+  tr:nth-child(even) td{background:#fafbfe;}
+
+  .box{border-radius:10px; padding:14px 18px; margin:14px 0; font-size:14.5px;}
+  .box.blue{background:var(--blue-soft); border:1px solid #c9dbfb;}
+  .box.green{background:var(--green-soft); border:1px solid #bfe8d6;}
+  .box.amber{background:var(--amber-soft); border:1px solid #f2dcb1;}
+  .box.gray{background:#f1f3f8; border:1px solid var(--line);}
+  .box b.tag{display:inline-block; margin-right:8px;}
+
+  .formula{background:#f4f6fb; border:1px dashed #c9d4ec; padding:10px 16px; border-radius:8px; text-align:center; font-family:"Times New Roman",Georgia,serif; font-size:17px; margin:12px 0;}
+  .formula small{display:block; color:var(--sub); font-family:inherit; margin-top:4px; font-size:13px;}
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:860px){.grid2{grid-template-columns:1fr;}}
+
+  .tl{list-style:none; padding:0; margin:14px 0 0; position:relative;}
+  .tl::before{content:""; position:absolute; left:118px; top:6px; bottom:6px; width:3px; background:linear-gradient(#bfdbfe,#93c5fd,#60a5fa,#2563eb); border-radius:3px;}
+  .tl li{position:relative; padding:0 0 20px 150px; min-height:56px;}
+  .tl .when{position:absolute; left:0; top:2px; width:100px; text-align:right; font-weight:700; color:var(--blue); font-size:13.5px; font-family:Consolas,monospace;}
+  .tl .dot{position:absolute; left:112px; top:6px; width:15px; height:15px; border-radius:50%; background:#fff; border:4px solid var(--blue); z-index:1;}
+  .tl .era{font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#fff; background:var(--purple); display:inline-block; padding:2px 10px; border-radius:999px; margin-bottom:2px;}
+  .tl h5{margin:4px 0 4px; font-size:15.5px;}
+  .tl p{margin:0; font-size:14px; color:#3b4761;}
+
+  .ascii{background:#0f172a; color:#a7c4e8; padding:14px 16px; border-radius:10px; font-family:Consolas,monospace; font-size:12.3px; line-height:1.45; overflow-x:auto; white-space:pre;}
+  .ascii .hot{color:#fbbf24; font-weight:700;}
+
+  .badge{display:inline-block; font-size:11.5px; font-weight:700; border-radius:5px; padding:1.5px 8px; margin-right:6px; vertical-align:1px;}
+  .b-prune{background:#fdecec; color:#b91c1c;} .b-merge{background:#e6f7f0; color:#0e9f6e;}
+  .b-sparse{background:#eaf1fe; color:#2563eb;} .b-cache{background:#fdf3e3; color:#b45309;}
+  .b-sys{background:#f3e8ff; color:#6d28d9;}
+
+  footer{color:#8a94ab; font-size:13px; text-align:center; padding:20px 0 10px;}
+  .refs ol{font-size:13.5px; padding-left:22px;}
+  .refs li{margin:5px 0;}
+  .refs a{color:var(--blue); text-decoration:none;}
+  .refs a:hover{text-decoration:underline;}
+  .backtop{position:fixed; right:22px; bottom:26px; background:#fff; border:1px solid var(--line); box-shadow:0 4px 14px rgba(15,23,42,.08); border-radius:10px; padding:8px 12px; font-size:13px; color:var(--blue); text-decoration:none;}
+</style>
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
+
+<header class="hero" id="top">
+  <div class="inner">
+    <h1>ViT 稀疏化技术梳理<br><span style="font-size:20px; font-weight:400; color:#bcd0f7;">从 Attention 结构稀疏、Token 压缩到步间缓存 —— 在 VLM 与 DiT 两大架构中的应用（2017–2026）</span></h1>
+    <p class="sub">本报告面向具备基础深度学习知识（了解 CNN / Transformer 基本概念）的本科生，结合 6 个开源仓库的一手代码讲解原理，梳理 ViT 稀疏化的完整发展脉络，并综述 2025–2026 年学界与业界的最新进展和未来方向。</p>
+    <div class="meta-chips">
+      <span class="chip">撰写日期：2026-08-17</span>
+      <span class="chip">代码仓库：ToMe · DiT · FastV · VisionZip · Sparse-VideoGen · TeaCache（本地克隆分析）</span>
+      <span class="chip">引用格式：出处+发表时间标注于引用处，小字附原文/译文</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <b>目录</b>
+  <a href="#s0">0. 太长不看（TL;DR）</a>
+  <a href="#s1">1. 预备知识：把图变成序列</a>
+  <a href="#s2">2. 概念地图：稀疏化的三大技术族</a>
+  <a href="#s3">3. 发展历程时间线</a>
+  <a href="#s4">4. VLM 中的应用（含代码解析）</a>
+  <a href="#s5">5. DiT / 视频生成中的应用（含代码解析）</a>
+  <a href="#s6">6. 最新进展（2025–2026）</a>
+  <a href="#s7">7. 未来发展方向</a>
+  <a href="#s8">8. 参考文献</a>
+</nav>
+
+<!-- ================================================================ -->
+<section id="s0">
+  <h2><span class="num">0</span>太长不看（TL;DR）</h2>
+  <div class="box blue">
+    <b>一句话定义：</b>ViT 稀疏化 = 在 Vision Transformer（及以其为骨架的视觉语言模型 VLM、扩散 Transformer DiT）中，<b>只计算"重要的"部分，跳过"冗余的"部分</b>，从而降低计算量与显存占用。它有三个互补的技术族：
+    <span class="badge b-sparse">稀疏 Attention</span>改连接结构（哪些 token 看哪些 token）；
+    <span class="badge b-prune">Token 剪枝</span><span class="badge b-merge">/ 合并</span>减序列长度（哪些 token 留下来）；
+    <span class="badge b-cache">缓存复用</span>砍时间维度（哪些步/哪些 KV 可以不重算）。
+  </div>
+  <ul>
+    <li><b>历史主线</b>：2019 年 NLP 的 Sparse Transformer / Longformer 提出结构化稀疏注意力 → 2020 年 ViT 把图像变成 token 序列 → 2021 年 Swin（窗口注意力）与 DynamicViT（可学习 token 剪枝）分出两条路 → 2022 年 ToMe 证明"免训练合并 token"可行 → 2023 年起 LLaVA 等 VLM 的"视觉 token 爆炸"让 FastV、VisionZip 等推理期剪枝爆发；同期 DiT 统治视频生成，T-GATE / PAB / TeaCache 利用<b>步间冗余</b>缓存、Sparse VideoGen（SVG）利用<b>3D 注意力稀疏模式</b>加速。</li>
+    <li><b>两大架构的痛点不同</b>：VLM 是自回归解码，视觉 token 既拖慢 prefill 又膨胀 KV Cache，主流做法是<b>在 LLM 内部按注意力分数剪/并视觉 token</b>（FastV 只需几十行补丁）；DiT 是迭代去噪，序列长（720p 5 秒视频 ≈ 3 万+ token），主流做法是<b>按注意力头分类做稀疏 attention + 跨时间步缓存</b>。</li>
+    <li><b>2025–2026 前沿</b>：从"免训练启发式"走向<b>原生可训练稀疏</b>（Sparse Forcing、Veda）；从"平均精度"走向<b>角色感知 / 后果感知</b>的 token 管理；从"算法单点"走向<b>算法-硬件协同</b>（SPADE 稀疏引擎、FVAttn 负载均衡、块稀疏 kernel）；自回归视频扩散的 <b>KV Cache 压缩</b>成为新战场（VideoMLA、Forcing-KV、FadeMem）。</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="s1">
+  <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
+  <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>
+
+  <h3>1.1 ViT：图像切块 → 序列 → Transformer</h3>
+  <p>2020 年 10 月，Google 提出 Vision Transformer（ViT），第一次证明"不需要卷积、不需要归纳偏置，纯 Transformer 直接吃图像块序列就能做好分类"<sup class="cite">[ViT · Dosovitskiy et al. · ICLR 2021 · arXiv:2010.11929 · 2020-10-22]</sup>。</p>
+  <div class="cite-note"><span class="en">"An image is worth 16x16 words: Transformers for image recognition at scale… We show that this reliance on CNNs is not necessary and a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks."</span><br>
+  <em>译文："一幅图像值 16×16 个词：大规模图像识别的 Transformer……我们证明对 CNN 的这种依赖并非必要，直接作用于图像块序列的纯 Transformer 就能在图像分类任务上表现得非常好。"（论文标题与摘要原文）</em></div>
+  <div class="ascii">输入图像 224×224
+   ┌────┬────┬────┬────┬────┬────┬────┐      每个 patch 16×16×3 = 768 维
+   │ P1 │ P2 │ P3 │ P4 │ …  │ …  │ …  │  →   展平 + 线性投影 → token 向量 xᵢ ∈ ℝᴰ
+   ├────┼────┼────┼────┼────┼────┼────┤      加上位置编码，再拼一个可学习的 [CLS] token
+   │ …  │ …  │ …  │ …  │ …  │ …  │ …  │      → 得到长度 N = 14×14 + 1 = 197 的序列
+   └────┴────┴────┴────┴────┴────┴────┘      → 送入 12/24 层标准 Transformer Encoder</div>
+  <p><b>关键性质</b>：与 CNN 不同，Transformer 对输入序列长度 N 没有任何结构假设——序列可以是 197 个 token，也可以是 3 万个。正是这个"长度自由"的性质，让后来所有的 token 剪枝/合并成为可能：扔掉一半 token，模型照常运转<sup class="cite">[DynamicViT · Rao et al. · NeurIPS 2021 · arXiv:2106.02034 · 2021-06]</sup>。</p>
+  <div class="cite-note"><span class="en">"This is only possible for the transformer-like models where the self-attention module can take the token sequence of variable length as input, and the unstructured pruned input will not affect the self-attention module."</span><br>
+  <em>译文："这只有在 Transformer 类模型中才可能——其自注意力模块可以接受变长 token 序列作为输入，且非结构化剪枝后的输入不会影响该模块的运行。"（DynamicViT 论文第 1 节）</em></div>
+
+  <h3>1.2 Self-Attention 的计算与 O(N²) 复杂度</h3>
+  <p>每一层中，序列 X（N 个 token，每个 D 维）先经过三个线性层得到 <b>Q</b>uery、<b>K</b>ey、<b>V</b>alue 三个矩阵，然后：</p>
+  <div class="formula">Attention(Q, K, V) = softmax( QK<sup>T</sup> / √d ) · V
+    <small>N×N 的注意力矩阵是复杂度的罪魁祸首：乘 QKᵀ 是 O(N²·d)，乘 ·V 又是 O(N²·d)</small></div>
+  <ul>
+    <li>直观理解：<b>QKᵀ 的第 (i,j) 个元素 = 第 i 个 token "想看" 第 j 个 token 的程度</b>（相似度打分）；softmax 归一化成权重后，用这些权重对 V 加权求和，即"每个 token 的新表示 = 它看过的所有 token 的加权平均"。</li>
+    <li>当 N 从 197（ViT-B/16@224）涨到 28,800（HunyuanVideo 720p×128 帧，每帧 3600 token<sup class="cite">[SVG · Xi et al. · ICML 2025 · arXiv:2502.01776 · 2025-02]</sup>），注意力开销涨了约 <b>2.1 万倍</b>——这就是视频生成"一张 A100 跑一小时才出 5 秒视频"的根源。</li>
+  </ul>
+  <div class="cite-note"><span class="en">"For CogVideoX-v1 and -v1.5 with 17k and 45k context length, attention takes 51% and 73% of the latency, respectively. For HunyuanVideo with 120k context length, attention can take over 80% amount of the runtime latency."</span><br>
+  <em>译文："上下文长度为 1.7 万和 4.5 万的 CogVideoX-v1 / v1.5 中，注意力分别占总延迟的 51% 和 73%；上下文 12 万的 HunyuanVideo 中，注意力可占运行时延迟的 80% 以上。"（Sparse VideoGen 论文图 2 说明）</em></div>
+  <p>此外，注意 softmax 的一个细节（后面 ToMe 会用到）：<b>若两个 token 的 Key 相同，合并它们后再做 softmax，等价于在 softmax 里放两份同样的 Key</b>——合并 token 会改变 softmax 的有效温度，因此需要"比例注意力"补偿（见 §3 ToMe 一节）。</p>
+
+  <h3>1.3 KV Cache：自回归模型（LLM/VLM）的第二个开销来源</h3>
+  <p>GPT 类模型逐词生成。生成第 t 个词时，需要用新 query 去 attend 前面所有 t−1 个词的 K 和 V。为避免重复计算，推理系统会把历史每层的 K、V 缓存下来，这就是 <b>KV Cache</b>。它的问题是<b>显存随序列长度线性增长</b>（层数 × 序列长 × 隐藏维 × 2）。在 VLM 中，一张高分辨率图 = 数千个视觉 token，全部进入 KV Cache：视觉 token 既拖慢 prefill（首次前向），又长期占用显存——这是第 4 章 VLM 稀疏化的核心动机。</p>
+
+  <h3>1.4 DiT：把 U-Net 换成 Transformer 的扩散模型</h3>
+  <p>扩散模型的生成是一个<b>迭代去噪循环</b>：从纯噪声出发，网络 ε(x<sub>t</sub>, t) 反复预测噪声，跑 20–50 步得到干净样本。2022 年 12 月，Peebles &amp; Xie 提出 Diffusion Transformer（DiT），用 Transformer 替代 U-Net 骨干，通过 adaLN（自适应层归一化）把时间步嵌入 t 和条件（文本）注入每个块，证明扩散骨架同样服从缩放定律<sup class="cite">[DiT · Peebles &amp; Xie · ICCV 2023 · arXiv:2212.09748 · 2022-12]</sup>。Sora（2024-02）、SD3、Flux、CogVideoX、HunyuanVideo、Wan2.1 均为 DiT 架构。其开销 = <b>（序列长度 N）²×（去噪步数 T）</b>，因此稀疏化也天然分成两轴：<b>空间轴</b>（N：稀疏注意力 + token 合并）与<b>时间轴</b>（T：跨步缓存）。</p>
+
+  <h3>1.5 冗余从哪里来？——稀疏化的四类"可乘之机"</h3>
+  <table>
+    <tr><th>冗余类型</th><th>直观解释</th><th>典型证据</th><th>对应技术</th></tr>
+    <tr><td><b>内容冗余</b><br>（同层内）</td><td>天空、墙面等大片相似 patch，token 特征高度相似</td><td>ToMe 合并 96–98% token 仅掉 0.3% 精度<sup class="cite g">[ToMe]</sup></td><td>Token 合并 / 剪枝</td></tr>
+    <tr><td><b>深度冗余</b><br>（跨层）</td><td>浅层已把视觉信息汇聚到少数"锚点" token，深层图像 token 几乎无人问津</td><td>FastV：第 2 层后图像 token 平均注意力仅为系统提示词的 0.21%<sup class="cite">[FastV]</sup></td><td>深层视觉 token 剪枝（VLM）</td></tr>
+    <tr><td><b>结构冗余</b><br>（注意力模式）</td><td>注意力矩阵不是稠密随机的：大量头只看"同帧内"或"同位置跨帧"</td><td>SVG：attention 头可分成 Spatial / Temporal 两类<sup class="cite">[SVG]</sup></td><td>稀疏 Attention（模式化）</td></tr>
+    <tr><td><b>时间冗余</b><br>（去噪步之间）</td><td>相邻去噪步的模型输出几乎不变</td><td>TeaCache：输入的相对 L1 差作为输出差指示器，4.41× 加速<sup class="cite">[TeaCache]</sup></td><td>跨步缓存（DiT）/ KV Cache 压缩（LLM）</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ -->
+<section id="s2">
+  <h2><span class="num">2</span>概念地图：稀疏化的三大技术族</h2>
+  <p class="lead">所有方法都可以放进下面这张地图。判断一个新方法时，先问三个问题：它动的是<b>注意力结构</b>、<b>序列长度</b>，还是<b>计算复用</b>？是<b>训练时学出来的</b>还是<b>免训练的</b>？信号来自<b>哪里</b>（注意力分数 / 特征相似度 / 文本引导）？</p>
+
+  <div class="ascii">                        ┌──────────────── ViT 稀疏化 ────────────────┐
+                        │                                             │
+        A. 稀疏 Attention（改连接结构）          B. Token 压缩（改序列长度 N）         C. 缓存复用（改计算次数）
+        ─────────────────────────────           ─────────────────────────            ─────────────────────────
+        固定模式：滑窗/分块/跨步                  剪枝 Pruning：直接丢弃                LLM/VLM：KV Cache 压缩
+          Sparse Transformer(2019)                DynamicViT(2021)                    H2O / StreamingLLM(2023)
+          Longformer/BigBird(2020)                A-ViT, EViT, ATS(2022)              (VLM 视觉 token 不进/少进 KV)
+          Swin 窗口注意力(2021)   ←结构级                                                                  
+        动态/学习模式：Top-k、头分类              合并 Merging：聚合成新 token          DiT：跨去噪步缓存
+          Native Sparse Attn(2025,LLM)            ToMe(2022)                          T-GATE(2024) cross-attn 收敛
+          SVG 空间/时间头(2025,DiT)               VisionZip 上下文合并(2024)           Delta-DiT / FORA(2024) 残差
+          FlashMask/FlexAttn(系统层)              SVG2 语义聚类(2025)                  PAB(2024) 金字塔广播
+                                                                                       TeaCache(2024) 调制差指示器
+                                                                                       FasterCache(2024) CFG 复用</div>
+
+  <h3>2.1 A 族：稀疏 Attention —— "不是每个 token 都需要看所有 token"</h3>
+  <p>把 N×N 的全连接注意力矩阵换成稀疏矩阵：每个 query 只 attend 一小部分 key。<b>难点不在"想剪"，而在"剪得硬件友好"</b>——不规则的非零元分布会让 GPU 张量核无法发力，所以现代方法都采用<b>块级（block-level）稀疏</b>：以 64×64 或 128×128 的块为最小单位决定算/不算（如 SVG 用 BSR 稀疏矩阵格式 + FlashInfer 块稀疏 kernel）。设计维度有两个：</p>
+  <table>
+    <tr><th></th><th>固定/结构化模式</th><th>动态/内容自适应模式</th></tr>
+    <tr><td><b>思路</b></td><td>人为规定连接拓扑：滑窗、跨步、全局 token、窗口位移</td><td>运行时根据统计量选块：Top-k 分数、注意力头画像、聚类</td></tr>
+    <tr><td><b>代表</b></td><td>Sparse Transformer（2019）、Longformer（2020）、Swin（2021）、DiTFastAttn（2024）</td><td>MInference（2024）、SVG（2025）、SVG2（2025）、LoSA（2026）</td></tr>
+    <tr><td><b>优点</b></td><td>零额外决策开销，kernel 友好</td><td>稀疏率更高、精度损失更小</td></tr>
+    <tr><td><b>代价</b></td><td>模式未必匹配数据（如文本做条件的方式）</td><td>需要在线画像/预测，引入少量开销</td></tr>
+  </table>
+
+  <h3>2.2 B 族：Token 剪枝 / 合并 —— "不是每个 patch 都值得一个 token"</h3>
+  <div class="grid2">
+    <div class="box" style="background:#fdecec; border:1px solid #f5c9c9;">
+      <b class="tag" style="color:#b91c1c;">剪枝（Pruning）</b>给每个 token 打重要性分（注意力收到的分数、可学习打分器、CLS 注意力……），低分 token 直接<b>丢弃</b>。信息不可恢复，但实现最简单、加速最彻底（attention + FFN 一起省）。代表：DynamicViT（2021，训练式）、FastV（2024，免训练）。
+    </div>
+    <div class="box" style="background:#e6f7f0; border:1px solid #bfe8d6;">
+      <b class="tag" style="color:#0e9f6e;">合并（Merging）</b>把相似 token <b>加权平均</b>成一个新 token，信息以 softer 的方式保留。代表：ToMe（2022，Key 余弦相似度 + 双边匹配）、VisionZip 的上下文合并（2024）。合并后 token 带一个"尺寸 s"（代表几个原始 patch），做 softmax 时用 log s 修正（比例注意力）。
+    </div>
+  </div>
+
+  <h3>2.3 C 族：缓存复用 —— "这一步和上一步几乎没变，能不能不重算"</h3>
+  <p>在 LLM/VLM 侧表现为 KV Cache 压缩（淘汰不重要的历史 K/V，或让视觉 token 少进缓存）；在 DiT 侧表现为<b>跨去噪步缓存</b>：相邻步模型输出变化极小，可以把某步的输出/残差缓存，后续若干步直接复用（T-GATE、PAB、TeaCache、Delta-DiT）。与 A/B 两族正交，可叠加。</p>
+
+  <div class="box amber"><b>一个重要提醒（贯穿全文的工程视角）：</b>"理论 FLOPs 减少"不等于"墙钟时间减少"。稀疏化要真正跑得快，必须让非零计算<b>块状、连续、负载均衡</b>，并配合定制 kernel（FlashInfer / Triton / SageAttention）。这正是 2025–2026 年方向从算法转向"算法-系统协同"的原因（见 §6、§7）。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="s3">
+  <h2><span class="num">3</span>发展历程时间线（2017–2026）</h2>
+  <p class="lead">ViT 稀疏化并非凭空出现——它的两个源头都在 NLP（稀疏注意力、token 剪枝），2020 年 ViT 诞生后，视觉社区先在图像分类上验证了 token 稀疏化（2021–2022），随后被 VLM 和 DiT 两大新架构各自"重新发明"并推向极限。</p>
+
+  <ul class="tl">
+    <li>
+      <span class="when">2017-06</span><span class="dot"></span>
+      <span class="era">史前 · NLP</span>
+      <h5>Transformer（Vaswani et al. · NeurIPS 2017 · arXiv:1706.03762）</h5>
+      <p>提出全连接 Self-Attention。O(N²) 复杂度在句子长度（&lt;1k token）下不是问题，但为后来的一切"长序列焦虑"埋下伏笔。</p>
+    </li>
+    <li>
+      <span class="when">2019-04</span><span class="dot"></span>
+      <span class="era">史前 · NLP</span>
+      <h5>Sparse Transformer（Child et al. · ICML 2019 · arXiv:1904.10509）</h5>
+      <p><b>稀疏注意力的开山之作</b>：把注意力分解为"局部滑窗 + 跨步（strided）"两种因子化模式，在自回归图像生成与长文本上把上下文扩到 128k。核心洞见：<b>注意力矩阵天然稀疏，且稀疏模式可以被预先设计</b>。</p>
+    </li>
+    <li>
+      <span class="when">2020-04/07</span><span class="dot"></span>
+      <span class="era">史前 · NLP</span>
+      <h5>Longformer（Beltagy et al. · arXiv:2004.05150）/ BigBird（Zaheer et al. · NeurIPS 2020 · arXiv:2007.14062）</h5>
+      <p>"滑窗 + 少量全局 token + 随机连接"的组合；BigBird 还证明了这类图灵完备性质。<b>"全局 token / attention sink"概念</b>后来被 StreamingLLM（2023）和 SVG（2025）反复借用——保留少量关键 token，其余局部化。</p>
+    </li>
+    <li>
+      <span class="when">2020-10</span><span class="dot"></span>
+      <span class="era">ViT 原生时代</span>
+      <h5>ViT（Dosovitskiy et al. · ICLR 2021 · arXiv:2010.11929）</h5>
+      <p>图像 → patch 序列 → 纯 Transformer。序列长度自由性为 token 稀疏化打开大门（见 §1.1 引文）。</p>
+    </li>
+    <li>
+      <span class="when">2021-03</span><span class="dot"></span>
+      <span class="era">ViT 原生时代</span>
+      <h5>Swin Transformer（Liu et al. · ICCV 2021 最佳论文（Marr Prize）· arXiv:2103.14030）</h5>
+      <p><b>结构级稀疏注意力的视觉版</b>：把注意力限制在不重叠窗口内，通过逐层窗口位移（shifted window）跨窗通信，配合 patch merging 层层下采样。它回答了"ViT 能否高效"——但走的是<b>改架构</b>路线，需要从头训练；后文的所有方法则追求"不动架构、只动推理/训练过程"。</p>
+    </li>
+    <li>
+      <span class="when">2021-06</span><span class="dot"></span>
+      <span class="era">ViT 原生时代</span>
+      <h5>DynamicViT（Rao et al. · NeurIPS 2021 · arXiv:2106.02034）—— 可学习 token 剪枝的开山</h5>
+      <p>在 transformer 块之间插入轻量预测模块，为每个 token 输出"保留概率"，用 Gumbel-Softmax 可微采样 + 注意力掩码端到端训练；推理时按比例直接丢弃。层级剪掉 66% token → FLOPs 降 31–37%、吞吐 +40%+，精度损失 &lt;0.5%<sup class="cite">[DynamicViT]</sup>。</p>
+      <div class="cite-note"><span class="en">"Attention is sparse in vision transformers. We observe the final prediction in vision transformers is only based on a subset of most informative tokens, which is sufficient for accurate image recognition."</span><br>
+      <em>译文："视觉 Transformer 中的注意力是稀疏的。我们观察到，最终的预测仅基于一小部分信息量最大的 token，而这足以完成准确的图像识别。"（DynamicViT 摘要首句）</em></div>
+    </li>
+    <li>
+      <span class="when">2021-11 ~ 12</span><span class="dot"></span>
+      <span class="era">ViT 原生时代</span>
+      <h5>ATS（Alvar et al. · NeurIPS 2022 · arXiv:2111.15667）/ EViT（Liang et al. · ICLR 2022 · arXiv:2202.07800）/ A-ViT（Yin et al. · CVPR 2022）</h5>
+      <p>三篇并发的经典：ATS 用 CLS-注意力做<b>重要性采样</b>（自适应保留数量）；EViT 做 <b>token 重组</b>——保留 informative token、把被弃 token 融合为一个"fused token"防止信息丢失，并被用于加速视觉-语言预训练；A-ViT 借鉴 ACT 的<b>自适应暂停</b>机制让不重要 token 提前"停机"。</p>
+    </li>
+    <li>
+      <span class="when">2022-10</span><span class="dot"></span>
+      <span class="era">免训练时代</span>
+      <h5>ToMe：Token Merging（Bolya et al. · ICLR 2023 · arXiv:2210.09461）—— 里程碑</h5>
+      <p><b>第一个无需重训练、即插即用的 token 压缩方法</b>：用注意力 Key 的余弦相似度做"双边软匹配"（见 §3.1 代码解析），每层合并 r 个 token。免训练让 ViT-L@512 吞吐 ×2（精度仅降 0.2–0.3%），视频 ×2.2，训练 MAE 也能 ×2<sup class="cite">[ToMe]</sup>。</p>
+      <div class="cite-note"><span class="en">"We introduce Token Merging (ToMe), a simple method to increase the throughput of existing ViT models without needing to train. ToMe gradually combines similar tokens in a transformer using a general and light-weight matching algorithm that is as fast as pruning while being more accurate."</span><br>
+      <em>译文："我们提出 Token Merging（ToMe），一种无需训练即可提升现有 ViT 模型吞吐量的简单方法。ToMe 使用通用且轻量的匹配算法逐渐合并 Transformer 中的相似 token，速度与剪枝一样快，精度却更高。"（ToMe 摘要）</em></div>
+      <pre style="margin-top:10px;"><span class="cm"># ToMe/tome/merge.py  L18-97（bipartite_soft_matching 核心，节选注释版）</span>
+<span class="kw">with</span> torch.no_grad():
+    metric = metric / metric.norm(dim=-1, keepdim=True)   <span class="cm"># metric = 注意力的 Key，L2 归一化后点积即余弦相似度</span>
+    a, b = metric[..., ::2, :], metric[..., 1::2, :]      <span class="cm"># ① 奇偶交替切成两个集合 A、B（各约 N/2）</span>
+    scores = a @ b.transpose(-1, -2)                      <span class="cm"># ② 只算 A×B 的相似度（跳过 A×A、B×B → 计算量减半以上）</span>
+    scores[..., 0, :] = -math.inf                         <span class="cm">#    CLS token 永不参与合并</span>
+    node_max, node_idx = scores.max(dim=-1)               <span class="cm"># ③ A 中每个 token 只连向 B 中最相似的一个（各出一条边）</span>
+    edge_idx = node_max.argsort(dim=-1, descending=True)[..., None]
+    unm_idx = edge_idx[..., r:, :]                        <span class="cm">#    相似度排名靠后的 A token：本轮不合并（unmerged）</span>
+    src_idx = edge_idx[..., :r, :]                        <span class="cm"># ④ 前 r 条边对应的 A token：将被合并进 B（source）</span>
+    dst_idx = node_idx[..., None].gather(dim=-2, index=src_idx)   <span class="cm">#    它们各自匹配的 B token（destination）</span>
+
+<span class="kw">def</span> merge(x, mode=<span class="st">"mean"</span>):                                <span class="cm"># ⑤ 对特征 x 执行同样的匹配（scatter_reduce 聚合）</span>
+    src, dst = x[..., ::2, :], x[..., 1::2, :]
+    unm  = src.gather(dim=-2, index=unm_idx.expand(n, t1 - r, c))
+    src  = src.gather(dim=-2, index=src_idx.expand(n, r, c))
+    dst  = dst.scatter_reduce(-2, dst_idx.expand(n, r, c), src, reduce=mode)
+    <span class="kw">return</span> torch.cat([unm, dst], dim=1)             <span class="cm"># ⑥ 序列长度 N → N−r，逐层递减</span></pre>
+      <p class="code-caption" style="margin-top:6px;">这就是<b>"双边软匹配"</b>：因为 A→B 每点只出一条边，找连通分量是平凡的，整个匹配<b>一次并行完成、与 r 无关的常数开销</b>（论文实测几乎和随机丢 token 一样快）；又因为只合并"最相似的 r 对"，避免了 kmeans 聚类"一窝蜂并进同一簇"的误差。合并时按 token 尺寸 s 加权平均（merge_wavg），softmax 里加 log s 修正（比例注意力）。仓库配套的 <code class="inline">tome/timm/</code> 展示了如何把该模块插入任意 timm ViT——"改几行代码、不用重训"。</p>
+      <p><b>为什么是里程碑</b>：它把该领域的问题从"如何训练一个稀疏模型"转变为"如何免训练地加速既有模型"——这一范式直接被后来的 VLM 推理加速（FastV 等）和 Stable Diffusion 加速（ToMeSD）继承。</p>
+    </li>
+    <li>
+      <span class="when">2022-12</span><span class="dot"></span>
+      <span class="era">DiT 时代</span>
+      <h5>DiT（Peebles &amp; Xie · ICCV 2023 · arXiv:2212.09748）</h5>
+      <p>扩散模型的 Transformer 骨干。此后 Sora（2024-02）、CogVideoX、HunyuanVideo、Wan2.1、SD3、Flux 全面转向 DiT，注意力成为视频生成第一瓶颈（占延迟 51–80%+，见 §1.2 引文）。</p>
+    </li>
+    <li>
+      <span class="when">2023-03</span><span class="dot"></span>
+      <span class="era">DiT 时代</span>
+      <h5>ToMeSD：Token Merging for Fast Stable Diffusion（Bolya &amp; Hoffman · arXiv:2303.17604）</h5>
+      <p>ToMe 思想移植到 U-Net 扩散模型：在 self-attention 后合并相似 token、cross-attention 后不合并，可减 60% token、约 2× 加速且画质基本不变。以 <code class="inline">tomesd</code> 包发布并被 HuggingFace diffusers 官方文档收录为标准优化手段<sup class="cite">[ToMeSD · 2023-03]</sup>——<b>稀疏化第一次进入工业界生产力工具链</b>。</p>
+      <div class="cite-note"><span class="en">"In this paper, we instead speed up diffusion models by exploiting natural redundancy in generated images by merging redundant tokens."（arXiv:2303.17604 摘要节选；配套开源库 tomesd，diffusers 官方文档 Token merging 页面）</span><br>
+      <em>译文："本文转而利用生成图像中的天然冗余、合并冗余 token 来加速扩散模型。"（toymesd 通过 <code class="inline">tomesd.apply_patch(model)</code> 一行接入 diffusers 管线）</em></div>
+    </li>
+    <li>
+      <span class="when">2023-04</span><span class="dot"></span>
+      <span class="era">VLM 时代</span>
+      <h5>LLaVA（Liu et al. · NeurIPS 2023 Oral · arXiv:2304.08485）</h5>
+      <p>CLIP-ViT + 线性投影 + Vicuna 的极简 VLM 范式。336×336 图 → 576 视觉 token；LLaVA-1.5-13B 处理 672×672 时 2304 token——<b>视觉 token 爆炸</b>问题正式登场，为下一波 VLM 稀疏化提供了舞台。</p>
+    </li>
+    <li>
+      <span class="when">2024-03</span><span class="dot"></span>
+      <span class="era">VLM 时代</span>
+      <h5>FastV（Chen et al. · ECCV 2024 Oral · arXiv:2403.06764）—— VLM 免训练剪枝的开山</h5>
+      <p>发现：深层中图像 token 收到的平均注意力只有系统提示词的 0.21%（前两层是 50%）——浅层已把信息汇聚到"锚点" token。于是第 2 层后按注意力分数丢弃一半图像 token：45% FLOPs 降低几乎无损，13B 模型推理比 7B 还快<sup class="cite">[FastV]</sup>（代码解析见 §4.2）。</p>
+      <div class="cite-note"><span class="en">"We find that the attention computation over visual tokens is extremely inefficient in the deep layers of popular LVLMs… FastV's ability to dramatically reduce computational costs (e.g., a 45% reduction in FLOPs for LLaVA-1.5-13B) without sacrificing performance."</span><br>
+      <em>译文："我们发现，在主流大型视觉语言模型的深层中，对视觉 token 的注意力计算极其低效……FastV 能大幅降低计算成本（如 LLaVA-1.5-13B 上降低 45% FLOPs）而不牺牲性能。"（FastV 摘要节选）</em></div>
+    </li>
+    <li>
+      <span class="when">2024-04 ~ 08</span><span class="dot"></span>
+      <span class="era">DiT 时代</span>
+      <h5>T-GATE（arXiv:2404.02747 · ECCV 2024）/ Delta-DiT（arXiv:2406.01125）/ FORA（arXiv:2407.01425）/ Learning-to-Cache（arXiv:2406.01733 · NeurIPS 2024）/ PAB（arXiv:2408.12588 · VideoSys 团队）</h5>
+      <p><b>DiT 步间冗余的系列发掘</b>：T-GATE 发现 cross-attention 在早期去噪步后收敛、此后可跳过（"语义规划期 vs 保真细化期"两阶段论）；Delta-DiT 缓存相邻步残差增量；PAB 按时序/空间/交叉注意力三种收敛速度设置金字塔式广播间隔，实现首个实时（&gt;20 FPS）DiT 视频生成。</p>
+    </li>
+    <li>
+      <span class="when">2024-10 ~ 12</span><span class="dot"></span>
+      <span class="era">VLM 时代</span>
+      <h5>SparseVLM（arXiv:2410.04417 · ICML 2025）/ PyramidDrop（arXiv:2410.17247）/ FasterVLM（arXiv:2412.01818 · CVPR 2025）/ VisionZip（arXiv:2412.04467 · CVPR 2025）</h5>
+      <p>FastV 之后半年内的密集跟进：SparseVLM 用<b>文本引导</b>免训练稀疏化（54% FLOPs↓、37% 延迟↓）；PyramidDrop 跨层<b>渐进丢弃</b>；FasterVLM 用 <b>CLS-注意力</b>替代 FastV 的输出 token 注意力（更准，可剪 95%）；VisionZip 提出"主导 token + 上下文合并"双通道（保留 10% token 保住约 95% 性能，见 §4.3 代码解析）。</p>
+    </li>
+    <li>
+      <span class="when">2024-11</span><span class="dot"></span>
+      <span class="era">DiT 时代</span>
+      <h5>TeaCache（Liu et al. · ICML 2025 · arXiv:2411.19108）</h5>
+      <p>用"时间步嵌入调制的输入"的相对 L1 差（经多项式重标定）作为<b>输出差的无代价指示器</b>，累积超阈值才真正计算，否则复用缓存残差。Open-Sora-Plan 上 4.41×（VBench 仅 −0.07%）、Latte 3.28×、多 GPU 下 Open-Sora-Plan 甚至 32×<sup class="cite">[TeaCache]</sup>（代码解析见 §5.3）。</p>
+      <div class="cite-note"><span class="en">"TeaCache focuses on model inputs, which have a strong correlation with the model outputs while incurring negligible computational cost… TeaCache achieves up to 4.41× acceleration over Open-Sora-Plan with negligible (-0.07% Vbench score) degradation of visual quality."</span><br>
+      <em>译文："TeaCache 聚焦于模型输入——它与模型输出强相关，而计算代价可忽略……TeaCache 在 Open-Sora-Plan 上取得最高 4.41× 加速，视觉质量退化可忽略（VBench 分数 −0.07%）。"（TeaCache 摘要节选）</em></div>
+    </li>
+    <li>
+      <span class="when">2025-02</span><span class="dot"></span>
+      <span class="era">DiT 时代</span>
+      <h5>Sparse VideoGen / SVG（Xi et al. · ICML 2025 · arXiv:2502.01776）—— 视频 DiT 稀疏注意力代表作</h5>
+      <p>系统画像发现注意力头可二分为 <b>Spatial Head</b>（只看同帧 token，注意力图呈块状）与 <b>Temporal Head</b>（只看跨帧同位置 token，注意力图呈等间隔斜线），加上文本/首帧 attention sink。在线采样 1% query 即可给头分类；配合 token 重排的布局变换 + FlashInfer 块稀疏 kernel + FP8，端到端 2.33×（HunyuanVideo）/ 2.28×（CogVideoX-v1.5）/ 1.51×（Wan2.1），PSNR &gt; 29<sup class="cite">[SVG]</sup>（代码解析见 §5.4）。</p>
+      <div class="cite-note"><span class="en">"We reveal that the attention heads can be dynamically classified into two groups depending on distinct sparse patterns: (1) Spatial Head, where only spatially-related tokens within each frame dominate the attention output, and (2) Temporal Head, where only temporally-related tokens across different frames dominate."</span><br>
+      <em>译文："我们揭示注意力头可依据不同的稀疏模式动态分为两组：(1) 空间头——帧内空间相关的 token 主导注意力输出；(2) 时间头——跨帧时间相关的 token 主导。"（SVG 摘要节选）</em></div>
+    </li>
+    <li>
+      <span class="when">2025-05 ~ 08</span><span class="dot"></span>
+      <span class="era">2026 新浪潮</span>
+      <h5>SVG2（arXiv:2505.18875 · NeurIPS 2025）→ 2026 年的爆发（详见 §6）</h5>
+      <p>SVG2 把"手工分类空间/时间头"升级为<b>语义 token 聚类</b>驱动的稀疏模式（HunyuanVideo 2.30× / Wan2.1 1.89×）。2026 年：原生可训练稀疏（Sparse Forcing）、蒸馏稀疏（Veda）、近无损稀疏（LoSA）、稀疏注意力专用引擎（SPADE）、AR 视频扩散 KV 压缩（Forcing-KV / VideoMLA / FadeMem）、VLM 侧的角色感知 / 后果感知剪枝、全模态统一压缩（OmniPack）……</p>
+    </li>
+  </ul>
+
+  <div class="box green"><b>脉络总结：</b>每一代都在重复同一个剧本——<b>(1) 发现一种新的冗余 → (2) 用启发式方法免训练地利用它 → (3) 借鉴上一代的方法学把它变成可学习/原生训练的 → (4) 与硬件协同固化到推理系统</b>。token 剪枝（2021 训练式 → 2024 免训练式 → 2026 AI 搜索式）和稀疏注意力（2019 固定模式 → 2025 在线画像 → 2026 原生可训练）都走完了或正在走这条路径。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="s4">
+  <h2><span class="num">4</span>VLM 中的稀疏化：让"视觉 token 爆炸"降级（含代码解析）</h2>
+
+  <h3>4.1 问题定义：为什么 VLM 的视觉 token 这么贵</h3>
+  <p>以 LLaVA 系为代表的 VLM = CLIP-ViT 视觉编码器 + 投影层 + LLM 解码器。图像被编码为数百至上万个 token 后<b>拼进 LLM 的输入序列</b>：</p>
+  <table>
+    <tr><th>输入</th><th>视觉 token 数（典型）</th><th>后果</th></tr>
+    <tr><td>336×336 图（LLaVA-1.5）</td><td>576</td><td rowspan="4">① prefill 延迟随序列长度平方增长；<br>② 全部视觉 token 进入 KV Cache，生成每个词都要对它们做注意力；<br>③ 高分辨率/多图/视频场景下数万 token，直接 OOM 或慢到不可用。</td></tr>
+    <tr><td>672×672 图</td><td>2,304</td></tr>
+    <tr><td>AnyRes 高分辨率（LLaVA-NeXT）</td><td>~2,880+</td></tr>
+    <tr><td>8 帧视频（Video-LLaVA，每帧 256）</td><td>2,048</td></tr>
+  </table>
+  <p>FastV 的关键观察让这个问题有了一个出乎意料简单的解法——<b>问题不在视觉编码器，而在 LLM 深层根本"不看"这些视觉 token</b>：</p>
+  <div class="cite-note"><span class="en">"In the image captioning tasks, we observed that within the deep layers (after layer 2) of renowned LVLMs such as LLaVA 1.5, image tokens garner an average attention score that amounts to only 0.21% of the score attributed to system prompts. In contrast, this figure reaches 50% in the initial two layers."</span><br>
+  <em>译文："在图像描述任务中我们观察到：在 LLaVA-1.5 等知名 LVLM 的深层（第 2 层之后），图像 token 获得的平均注意力分数仅相当于系统提示词的 0.21%；而在最初两层，这一比例高达 50%。"（FastV 论文 §1）</em></div>
+  <p>FastV 的解释是：浅层自注意力已把图像中与指令相关的特征<b>聚合到少数"锚点"（anchor）token</b>（多为文本 token），深层注意力都聚焦在锚点上，图像 token 本身成了"陪跑"。既然如此，深层何必继续带着它们计算？——直接在第 K 层按注意力分数重排并丢弃。</p>
+
+  <h3>4.2 代码解析 ①：FastV（本地仓库 <code class="inline">FastV/</code>）</h3>
+  <p>FastV 的实现小到令人吃惊：只在 LLaMA 解码器的 forward 循环里插入约 30 行。核心文件是 <code class="inline">FastV/src/FastV/llava-hf/transformers/.../models/llama/modeling_llama.py</code>（对 HuggingFace transformers 的 fork），三个超参：<code class="inline">fastv_k</code>（在第几层剪，论文默认 2）、<code class="inline">fastv_r</code>（剪掉比例，默认 0.5）、图像 token 的区间位置。</p>
+  <pre><span class="cm"># FastV/src/FastV/llava-hf/transformers/src/transformers/models/llama/modeling_llama.py  L1031-1064</span>
+<span class="kw">for</span> layer_idx, decoder_layer <span class="kw">in</span> enumerate(self.layers):
+    <span class="cm"># pruning hidden states after layer k, no kv cache</span>
+    <span class="kw">if</span> use_cache:
+        <span class="kw">if</span> hidden_states.shape[1] != 1:              <span class="cm"># 只在 prefill（多 token 前向）时剪枝</span>
+            <span class="kw">if</span> layer_idx &lt; FASTV_k:
+                pruned_attention_mask = causal_mask      <span class="cm"># 前 k 层照常计算（保留完整注意力统计）</span>
+            <span class="kw">elif</span> layer_idx == FASTV_k:
+                last_layer_attention = layer_outputs[1]               <span class="cm"># 上一层的注意力图 A</span>
+                <span class="cm"># ① 对所有注意力头取平均，取“最后一个 token”的行</span>
+                last_layer_attention_avg = torch.mean(last_layer_attention, dim=1)[0]
+                last_layer_attention_avg_last_tok = last_layer_attention_avg[-1]
+                <span class="cm"># ② 截取这段行里“图像 token 区间”的注意力</span>
+                last_layer_attention_avg_last_tok_image = last_layer_attention_avg_last_tok[
+                    FASTV_image_token_start_index : FASTV_image_token_start_index+FASTV_image_token_length]
+                <span class="cm"># ③ 保留注意力最高的 (1-r) 比例图像 token（topk 索引 + 偏移回全局位置）</span>
+                top_attention_rank_index = last_layer_attention_avg_last_tok_image.topk(
+                    round(FASTV_image_token_length*(1-FASTV_r))).indices + FASTV_image_token_start_index
+                <span class="cm"># ④ 拼回“图像前的文本 + 精选图像 token + 图像后的文本”，排序得到保留序列</span>
+                keep_indexs = torch.cat((torch.arange(FASTV_image_token_start_index,device=device),
+                                         top_attention_rank_index,
+                                         torch.arange(FASTV_image_token_start_index+FASTV_image_token_length,
+                                                      seq_length_with_past,device=device)))
+                keep_indexs = keep_indexs.sort().values
+                <span class="cm"># ⑤ 对 hidden_states / position_ids / mask / cache_position 同步“物理删除”</span>
+                hidden_states = hidden_states[:,keep_indexs,:]
+                position_ids   = keep_indexs.unsqueeze(0)
+                pruned_attention_mask = self._update_causal_mask(None, hidden_states, 0)
+                cache_position = cache_position[:new_seq_length]</pre>
+  <p class="code-caption">逐行拆解（本科生版）：</p>
+  <ul>
+    <li><b>为什么用"最后一个 token"的注意力？</b> 自回归解码时，即将生成的词就是序列末端的 token；它"回头看"的注意力分布，就是模型<b>当前真正依赖</b>哪些输入 token 的直接证据。被它几乎不看图像 token，就可以扔。</li>
+    <li><b>为什么对头取平均？</b> 不同头关注不同子空间，平均后的分数是"全体头的共识"，比单头更稳。</li>
+    <li><b>为什么前 k=2 层不剪？</b> 浅层注意力还均匀分布在图像上（50% vs 0.21% 的对比说明信息聚合发生在前两层），此时剪会伤及信息汇聚过程。</li>
+    <li><b>⑤ 是关键工程细节</b>：FastV 做的是<b>物理删除</b>（gather 索引），不是 mask 掩盖——后续所有层的 attention、FFN、KV Cache 都在变短的序列上计算，这才是 FLOPs 与显存双降的原因（对比 DynamicViT：训练时用 mask 保并行，推理时才物理删除）。</li>
+  </ul>
+  <div class="box gray"><b>延伸</b>：demo 脚本 <code class="inline">FastV/demo-hf.py</code> 中默认 <code class="inline">{"fastv_k": 3, "fastv_r": 0.75}</code>（更激进配置）；论文主结果用 K=2、R=50% 得到 45% FLOPs↓，且 OCR-VQA 等依赖密集视觉的任务建议调大 K。这个"K、R 可调的 Pareto 前沿"设计被后续所有工作继承。</div>
+
+  <h3>4.3 代码解析 ②：VisionZip（本地仓库 <code class="inline">VisionZip/</code>）—— 选择 + 合并的"双通道"</h3>
+  <p>FastV 有两个可改进点：(a) 剪枝发生在 LLM <b>内部</b>第 2 层，视觉 token 还是先进了 LLM；(b) 被丢弃 token 的信息完全损失。VisionZip（CVPR 2025）把操作前移到<b>视觉编码器出口</b>，并把 token 分成两条通道：用 CLS 注意力选 <b>Dominant（主导）token</b>，其余用 ToMe 式合并成 <b>Contextual（上下文）token</b>：</p>
+  <pre><span class="cm"># VisionZip/visionzip/clip_encoder.py  L31-85（CLIPVisionTower_VisionZip.forward，节选注释版）</span>
+attn_weights   = image_forward_outs.attentions[-2]      <span class="cm"># 倒数第二层的注意力图</span>
+hidden_states  = image_forward_outs.hidden_states[-2]
+metric         = self.vision_tower.vision_model.encoder.layers[-2].metric  <span class="cm"># 该层的 Key（合并相似度用）</span>
+
+<span class="cm">## 通道一：Dominant Visual Tokens —— 谁被 CLS 看得最多，谁主导</span>
+cls_attention = attn_weights[:, :, 0, 1:]               <span class="cm"># CLS token 对所有 patch 的注意力（CLS 是“全局摘要者”）</span>
+cls_attention_sum = cls_attention.sum(dim=1)            <span class="cm"># 头求和</span>
+topk_indices = cls_attention_sum.topk(dominant_num, dim=1).indices + 1
+dominant_tokens = ...                                   <span class="cm"># 直接保留 top-k 的隐状态（含 CLS 自身）</span>
+
+<span class="cm">## 通道二：Contextual Visual Tokens —— 剩余 token 均匀设锚点，按 Key 相似度就近合并</span>
+metric_normalized = metric_filtered / metric_filtered.norm(dim=-1, keepdim=True)
+step = max(1, metric_normalized.shape[1] // contextual_num)     <span class="cm"># 均匀采样 contextual_num 个锚点</span>
+target_indices = torch.arange(0, metric_normalized.shape[1], step)[:contextual_num]
+similarity = torch.bmm(tokens_to_merge, target_tokens.transpose(1, 2))  <span class="cm"># 其余 token × 锚点 的 Key 余弦相似度</span>
+assign_one_hot.scatter_(2, similarity.argmax(dim=2).unsqueeze(-1), 1)   <span class="cm"># 每个 token 分给最相似锚点（one-hot 分配）</span>
+aggregated_hidden = torch.bmm(assign_one_hot.transpose(1, 2), hidden_to_merge) / counts  <span class="cm"># 分组平均</span>
+contextual_tokens = target_hidden + aggregated_hidden    <span class="cm"># 锚点也吸收同组成员的信息</span>
+
+hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <span class="cm"># 两通道拼接 → 送入 LLM</span></pre>
+  <p class="code-caption">要点：<b>Dominant 通道</b>解决"哪些 token 必须原样保留"（细节、OCR、小物体）；<b>Contextual 通道</b>解决"背景别丢信息，但可以压缩"（每个合并 token ≈ 一块语义区域的平均特征，继承自 ToMe 的 Key 相似度思想，但用"均匀锚点 + 就近分配"代替双边匹配，更适合一次性压缩 90% 的大比例场景）。</p>
+  <div class="box blue"><b>效果与语义对齐</b>：VisionZip 只保留 10% 视觉 token 即可保住约 95% 的性能<sup class="cite">[VisionZip · Yang et al. · CVPR 2025 · arXiv:2412.04467 · 2024-12]</sup>。仓库中另有 <code class="inline">VisionZip/Qwen2_5_VL/qwen2_5vl_visionzip.py</code>，展示了如何把同一策略移植到 Qwen2.5-VL 的原生动态分辨率编码器上——体现了"编码器出口压缩"与具体 VLM 解耦的普适性。</div>
+
+  <h3>4.4 VLM 稀疏化方法对比（2024–2026）</h3>
+  <table>
+    <tr><th>方法（年份/venue）</th><th>类型</th><th>重要性信号</th><th>作用位置</th><th>训练?</th><th>代表性数字</th></tr>
+    <tr><td>FastV（ECCV'24 Oral）</td><td><span class="badge b-prune">剪枝</span></td><td>LLM 第 k 层最后一个 token 的注意力</td><td>LLM 内部第 2 层起</td><td>免训练</td><td>45% FLOPs↓ 无损（13B）</td></tr>
+    <tr><td>LLaVA-PruMerge（2024-03）</td><td><span class="badge b-prune">剪</span>+<span class="badge b-merge">并</span></td><td>CLIP 空间相似度 + 预留簇</td><td>进 LLM 前</td><td>轻量微调</td><td>~50% token，性能接近全量</td></tr>
+    <tr><td>SparseVLM（ICML'25）</td><td><span class="badge b-prune">剪枝</span></td><td>文本 token 引导的视觉相关性</td><td>LLM 各层渐进</td><td>免训练</td><td>54% FLOPs↓ / 37% 延迟↓，保 ~97% 精度</td></tr>
+    <tr><td>PyramidDrop（2024-10）</td><td><span class="badge b-prune">渐进剪枝</span></td><td>层间分阶段丢弃</td><td>跨 LLM 层</td><td>免训练</td><td>高压缩比下优于单点剪枝</td></tr>
+    <tr><td>FasterVLM（CVPR'25）</td><td><span class="badge b-prune">剪枝</span></td><td>视觉编码器 <b>CLS 注意力</b></td><td>进 LLM 前</td><td>免训练</td><td>剪 95% 仍保 90% 性能</td></tr>
+    <tr><td>VisionZip（CVPR'25）</td><td><span class="badge b-prune">选</span>+<span class="badge b-merge">并</span></td><td>CLS 注意力 + Key 相似度合并</td><td>编码器出口</td><td>免训练</td><td>10% token ≈ 95% 性能</td></tr>
+    <tr><td>PVC（OpenGVLab · CVPR'25）</td><td><span class="badge b-merge">渐进压缩</span></td><td>跨层渐进压缩</td><td>编码器 + LLM</td><td>训练式</td><td>更适配训练/推理一体</td></tr>
+    <tr><td>VScan（2025-05）</td><td><span class="badge b-prune">剪枝</span></td><td>重估"该在哪层剪"的扫描分析</td><td>LLM</td><td>免训练</td><td>对既有方法层位置再优化</td></tr>
+    <tr><td>2026 系列：RoRA / SlimVLM / OmniPack / AI4AI 等</td><td>混合</td><td>角色感知 / 敏感度感知 / AI 搜索策略</td><td>全栈</td><td>混合</td><td>详见 §6.1</td></tr>
+  </table>
+  <p><b>三个演进规律</b>：① 信号来源从"输出 token 的注意力"（FastV）→ "文本引导"（SparseVLM）→ "CLS 注意力"（FasterVLM/VisionZip）→ "token 角色与任务后果"（2026）；② 位置从 LLM 深层前移到编码器出口（更早压缩、KV Cache 直接受益）；③ 从纯剪枝到"剪 + 合 + 缓存"组合。</p>
+
+  <h3>4.5 训练侧加速与视频/长上下文 VLM</h3>
+  <ul>
+    <li><b>训练侧</b>：EViT 早在 2021 年就用于视觉-语言预训练加速（token 重组）；ToMe 在 MAE 微调中实测训练时间减半（"cutting the total training time in half"<sup class="cite">[ToMe]</sup>）。PVC（CVPR 2025）代表 2025 年"训练-推理一体化"的渐进压缩路线。</li>
+    <li><b>视频理解 VLM</b>：数千帧 × 数百 token 的极端序列下，2026 年出现 GSTEP（全局时空密度驱动剪枝，arXiv:2608.03083 · 2026-08）等专门针对 VideoLLM 的工作；LAST（arXiv:2607.27952 · 2026-07）甚至把 token 剪枝用作<b>端云协同</b>的接口——边缘设备只上传精选 token。</li>
+    <li><b>KV Cache 视角</b>：视频 VLM 的历史帧 KV 可用与 LLM 相同的技术压缩（H2O 重击者驱逐、滑窗 + 汇总 token 等），与视觉 token 剪枝正交叠加；2026 年这一方向在<b>自回归视频生成</b>侧爆发（Forcing-KV、VideoMLA、FadeMem，见 §6.2）。</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="s5">
+  <h2><span class="num">5</span>DiT / 视频生成中的稀疏化（含代码解析）</h2>
+
+  <h3>5.1 问题定义：N² × T 的双重爆炸</h3>
+  <p>视频 DiT（CogVideoX、HunyuanVideo、Wan2.1、Flux…）把<b>所有帧的所有 patch + 文本 token</b> 拼成一条长序列做 3D 全注意力，再重复 30–50 个去噪步。720p×128 帧的 HunyuanVideo 序列长约 12 万（33 个压缩帧 × 3600 token + 文本），注意力占端到端延迟 80%+，单 A100 需约 1 小时生成 5 秒视频<sup class="cite">[SVG]</sup>。因此 DiT 稀疏化天然分三条线：</p>
+  <table>
+    <tr><th>路线</th><th>利用的冗余</th><th>代表方法</th></tr>
+    <tr><td><b>token 合并</b>（序列轴）</td><td>生成内容自身的空间冗余</td><td>ToMeSD（2023-03）</td></tr>
+    <tr><td><b>跨步缓存</b>（时间轴）</td><td>相邻去噪步输出几乎不变</td><td>T-GATE、Delta-DiT、PAB、TeaCache、FasterCache（2024）</td></tr>
+    <tr><td><b>稀疏注意力</b>（结构轴）</td><td>注意力头的空间/时间固定聚焦模式</td><td>DiTFastAttn、MInference 迁移、SVG（2024–2025）、SVG2（2025）</td></tr>
+  </table>
+
+  <h3>5.2 token 合并：ToMeSD（2023-03）——ToMe 的扩散版</h3>
+  <p>Bolya &amp; Hoffman 把 ToMe 插入 Stable Diffusion U-Net 的每个 self-attention 块（cross-attention 处不合并，因为文本 token 短且关键），随去噪步推进逐步加大合并率：最多减 60% token、约 2× 加速，画质基本无损<sup class="cite">[ToMeSD · arXiv:2303.17604 · 2023-03]</sup>。它以 <code class="inline">tomesd</code> 库开源，经 diffusers issue #2940 讨论后进入官方优化文档（<code class="inline">pip install tomesd</code> → <code class="inline">tomesd.apply_patch(pipe.unet)</code> 一行接入），是<b>学术稀疏化方法进入工业工具链的第一个案例</b>。后续 ToMA（注意力感知合并，OpenReview）等工作把合并相似度从 Key 换成更精细的注意力度量。</p>
+
+  <h3>5.3 跨步缓存：从 T-GATE 到 TeaCache（本地仓库 <code class="inline">TeaCache/</code>）</h3>
+  <p><b>思想演进三步曲</b>：</p>
+  <ul>
+    <li><b>T-GATE</b>（ECCV 2024）：发现文生图中 <b>cross-attention（文本↔图像）在早期去噪步后收敛</b>——语义布局在第几步就定下来了，之后模型主要靠 self-attention 磨细节。于是缓存收敛后的 cross-attention 输出，后续步直接复用<sup class="cite">[T-GATE · Zhang, Liu et al. · ECCV 2024 · arXiv:2404.02747 · 2024-04]</sup>。</li>
+    <li><b>PAB / Delta-DiT / FORA</b>（2024）：把"哪些算子可以跨步复用"系统化——PAB 发现时序/空间/交叉三种注意力的跨步变化速度不同，按"金字塔"间隔广播（temporal 变化最快 → 缓存间隔最短）；Delta-DiT 缓存相邻步的<b>残差</b>而非全量输出。</li>
+    <li><b>TeaCache</b>（ICML 2025）：解决"该在哪些步缓存"的<b>自适应决策</b>问题——固定间隔浪费（变化小的步被重算了）或冒进（变化大的步被复用了）。它的钥匙是：<b>用输入差预测输出差</b>。</li>
+  </ul>
+  <pre><span class="cm"># TeaCache/TeaCache4FLUX/teacache_flux.py  L105-130（Flux transformer 前向，节选注释版）</span>
+<span class="kw">if</span> self.enable_teacache:
+    inp = hidden_states.clone()
+    <span class="cm"># ① 用第一个 transformer 块的 adaLN，把时间步嵌入 temb 调制进输入 → 得到“调制输入”</span>
+    modulated_inp, gate_msa, shift_mlp, scale_mlp, gate_mlp = self.transformer_blocks[0].norm1(inp, emb=temb_)
+    <span class="kw">if</span> self.cnt == 0 <span class="kw">or</span> self.cnt == self.num_steps-1:   <span class="cm"># 首步与末步强制计算（保收敛）</span>
+        should_calc = True; self.accumulated_rel_l1_distance = 0
+    <span class="kw">else</span>:
+        coefficients = [4.98651651e+02, -2.83781631e+02, 5.58554382e+01, -3.82021401e+00, 2.64230861e-01]
+        rescale_func = np.poly1d(coefficients)     <span class="cm"># ② 离线拟合的 4 次多项式：校正输入差→输出差的尺度偏差</span>
+        <span class="cm"># ③ 当前步与上一步“调制输入”的相对 L1 差，经多项式重标定后累加</span>
+        self.accumulated_rel_l1_distance += rescale_func(
+            ((modulated_inp - self.previous_modulated_input).abs().mean()
+             / self.previous_modulated_input.abs().mean()).cpu().item())
+        <span class="kw">if</span> self.accumulated_rel_l1_distance &lt; self.rel_l1_thresh:
+            should_calc = False                     <span class="cm"># ④ 累积差未超阈值：本步不计算</span>
+        <span class="kw">else</span>:
+            should_calc = True; self.accumulated_rel_l1_distance = 0
+    self.previous_modulated_input = modulated_inp
+
+<span class="kw">if</span> not should_calc:
+    hidden_states += self.previous_residual        <span class="cm"># ⑤ 复用：直接加上一次缓存的“块输出残差”</span>
+<span class="kw">else</span>:
+    ori_hidden_states = hidden_states.clone()
+    <span class="kw">for</span> index_block, block <span class="kw">in</span> enumerate(self.transformer_blocks):
+        ...                                          <span class="cm">#    正常计算全部 transformer 块</span>
+    self.previous_residual = hidden_states - ori_hidden_states   <span class="cm"># ⑥ 缓存本次的残差供后续复用</span></pre>
+  <p class="code-caption">本科生版解读：把 DiT 的 50 个去噪步想象成 50 个"几乎连续"的帧。<b>调制输入</b>（时间步嵌入调制后的噪声隐状态）是模型对"现在噪声水平下该做什么"的摘要——两步之间它变得少，输出也变得少。TeaCache 用相对 L1 差量化这个"变了多少"，多项式只是校准量纲（输入差和输出差不是同一尺度）。累积到阈值才真正算一步，并把该步所有块的<b>输出残差</b>（输出 − 输入）存起来，未达阈值的步直接"复用上次的更新量"。</p>
+  <div class="box green"><b>工程要点</b>：缓存的是<b>残差</b>而非输出（数值上更稳，且下一步输入变化时仍近似成立）；首末步强制计算；每个模型需离线拟合一次多项式系数（论文用 70 个提示词）。这一"指示器 + 阈值 + 残差缓存"三件套已成为后续所有缓存方法（FasterCache、Learning-to-Cache 的后续）的标准组件。FasterCache（arXiv:2410.19355 · 2024-10 · CVPR 2025）进一步发掘了 <b>CFG 双分支冗余</b>（条件/无条件分支输出高度相似，可交叉复用）。</div>
+
+  <h3>5.4 稀疏注意力：Sparse VideoGen（本地仓库 <code class="inline">Sparse-VideoGen/</code>）</h3>
+  <p>SVG 的出发点是一张"注意力模式画像"：把训练好的视频 DiT 的注意力图画出来，发现绝大多数头呈现两种高度规整的稀疏模式（加上所有头都有的 <b>attention sink</b>——文本 token 和首帧 token 汇聚大量注意力）：</p>
+  <div class="ascii">3D 全注意力矩阵（行=query，列=key；■=高注意力）        Spatial Head（块状：只看同帧）      Temporal Head（斜线：只看跨帧同位置）
+      帧1  帧2  帧3  帧4                                   帧1  帧2  帧3  帧4                  帧1  帧2  帧3  帧4
+帧1 [■■■ ░░░ ░░░ ░░░]                                  帧1 [■■■ ░░░ ░░░ ░░░]               帧1 [■ ░ ░ ░ ░ ■ ░ ░ ░ ░ ■ ...]
+帧2 [░░░ ■■■ ░░░ ░░░]                                  帧2 [░░░ ■■■ ░░░ ░░░]               帧2 [░ ■ ░ ░ ░ ░ ■ ░ ░ ░ ░ ...]
+帧3 [░░░ ░░░ ■■■ ░░░]   ← 每帧 3600 token，            帧3 [░░░ ░░░ ■■■ ░░░]               帧3 [░ ░ ■ ...        斜率=每帧token数
+帧4 [░░░ ░░░ ░░░ ■■■]     “块”=帧内全部 token           帧4 [░░░ ░░░ ░░░ ■■■]               帧4 [░ ░ ░ ■ ...          （等间隔斜线）</div>
+  <p>于是加速方案 = <b>给每个头选一种稀疏模式，只算高注意力块</b>。三个关键设计：</p>
+  <ol>
+    <li><b>在线画像（≈3% 开销）</b>：每个去噪步随机抽 1% 的 query 行，分别按全量/空间/时间三种方式算一遍，哪种稀疏近似与全量误差（MSE）最小就选哪种——论文验证 1% 采样已接近 100% 画像的准确度。</li>
+    <li><b>布局变换</b>：时间头的斜线模式在内存中<b>不连续</b>，张量核吃不满。SVG 把 Q/K/V 从 token 主序重排为帧主序（数学上等价，因为注意力对 key 的求和次序无关），把斜线变成连续块——稀疏 kernel 额外提速 1.7×。</li>
+    <li><b>块稀疏 kernel + FP8</b>：注意力掩码用 BSR（块稀疏行）格式表达，走 FlashInfer 块稀疏注意力 kernel；叠加 FP8 量化再提 1.3×。</li>
+  </ol>
+  <pre><span class="cm"># Sparse-VideoGen/svg/kernels/ops/attention_ops_wan.py  L48-93（时间头掩码生成，节选注释版）</span>
+<span class="kw">def</span> gen_temporal_mask(num_frames, num_tokens_per_frame, multiplier):
+    <span class="cm"># 为“时间注意力头”生成重排后的滑动窗口掩码：|q_idx - kv_idx| &lt; multiplier * 每帧token数</span>
+    <span class="cm"># 掩码以块为单位（row/col block 尺寸取每帧 token 数的最大因数，&lt;256）</span>
+    row_block_size = column_block_size = get_factor(num_frames, num_tokens_per_frame)
+    num_row_blocks = num_col_blocks = num_frames * num_tokens_per_frame // row_block_size
+
+    attn_mask = np.full((num_row_blocks, num_col_blocks), -1)          <span class="cm"># -1 = 不计算该块</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(num_row_blocks):
+        <span class="kw">for</span> j <span class="kw">in</span> range(num_col_blocks):
+            row_token_idx = i * row_block_size + row_block_size // 2   <span class="cm"># 用块中心代表整块</span>
+            col_token_idx = j * column_block_size + column_block_size // 2
+            <span class="kw">if</span> abs(row_token_idx - col_token_idx) &lt; multiplier * num_tokens_per_frame:
+                attn_mask[i, j] = j                                    <span class="cm"># 窗口内的块才保留</span>
+    <span class="cm"># → 转成 BSR（row_indices + column_indices）张量，交给 FlashInfer 块稀疏注意力 kernel</span>
+    row_indices = torch.from_numpy(host_row_indices).to(torch.int32).cuda()
+    host_column_indices = np.concatenate((host_column_indices, [0] * 256))  <span class="cm"># 256 个 padding 防止不规则访存</span>
+    <span class="kw">return</span> row_indices, column_indices, (row_block_size, column_block_size)</pre>
+  <p class="code-caption">配套的 <code class="inline">svg/models/hyvideo/placement.py</code> 负责把时间头的 Q/K/V 从"token 主序"重排为"帧主序"（<code class="inline">hunyuan_token_reorder_to_token_major</code> 等函数），即上述"布局变换"的实现；<code class="inline">svg/kernels/</code> 下还有自研的 QK-Norm / RoPE CUDA kernel（相对 PyTorch 实现分别提速 ~7.4× / ~15.5×——小算子的并行度问题在长序列下同样致命）。</p>
+  <div class="box blue"><b>为什么 MInference（LLM 稀疏注意力）直接搬过来会失败？</b>SVG 论文对比：MInference 的均值池化块选择无法捕捉<b>斜线状</b>的时间稀疏（PSNR 掉到 22–23，画面模糊/失联）；PAB 靠复用层间结果跳过 3D 注意力也伤质量。视频 DiT 的稀疏模式必须<b>按头分类 + 按视频几何（帧/token 结构）设计</b>，这是"LLM 稀疏化 → 视觉稀疏化"不可直接迁移的核心教训，也是 SVG 拿到 ICML 2025 的原因。</div>
+  <p><b>后续 SVG2</b>（arXiv:2505.18875 · NeurIPS 2025）把"空间/时间二分类"升级为<b>语义 token 聚类</b>——按内容聚类出重要 token 集合统一处理，不再依赖手工模式，在 HunyuanVideo / Wan2.1 上达 2.30× / 1.89× 端到端加速。</p>
+
+  <h3>5.5 DiT 加速方法一览（免训练为主）</h3>
+  <table>
+    <tr><th>方法（年份）</th><th>路线</th><th>核心机制</th><th>端到端加速</th></tr>
+    <tr><td>ToMeSD（2023-03）</td><td><span class="badge b-merge">token 合并</span></td><td>U-Net self-attn 后 Key 相似度合并，步间递增合并率</td><td>~2×（SD）</td></tr>
+    <tr><td>T-GATE（2024-04）</td><td><span class="badge b-cache">跨步缓存</span></td><td>cross-attn 收敛后缓存跳过（两阶段论）</td><td>~1.1–1.5×</td></tr>
+    <tr><td>Delta-DiT / FORA（2024-06/07）</td><td><span class="badge b-cache">跨步缓存</span></td><td>缓存相邻步残差增量</td><td>~1.1–2×</td></tr>
+    <tr><td>PAB（2024-08）</td><td><span class="badge b-cache">跨步缓存</span></td><td>三类注意力按变化速度金字塔广播</td><td>实时级（&gt;10 FPS）</td></tr>
+    <tr><td>TeaCache（2024-11）</td><td><span class="badge b-cache">跨步缓存</span></td><td>调制输入差指示 + 阈值 + 残差缓存</td><td>2.25–6.83×（模型而异）</td></tr>
+    <tr><td>FasterCache（2024-10）</td><td><span class="badge b-cache">跨步缓存</span></td><td>CFG 条件/无条件分支交叉复用</td><td>~1.5×+，可与上述叠加</td></tr>
+    <tr><td>SVG（2025-02）</td><td><span class="badge b-sparse">稀疏注意力</span></td><td>空间/时间头分类 + 布局变换 + 块稀疏 kernel（+FP8）</td><td>1.51–2.33×，PSNR&gt;29</td></tr>
+    <tr><td>SVG2（2025-05）</td><td><span class="badge b-sparse">稀疏注意力</span></td><td>语义 token 聚类代替手工模式</td><td>1.89–2.30×</td></tr>
+    <tr><td>2026 系列（LoSA/SPADE/FVAttn/Veda/Sparse Forcing…）</td><td>混合</td><td>近无损 / 硬件引擎 / 负载均衡 / 蒸馏 / 原生训练</td><td>详见 §6.2</td></tr>
+  </table>
+  <div class="box amber"><b>正交性</b>：token 合并 × 稀疏注意力 × 跨步缓存 × 量化（FP8/SageAttention INT8）× 步数削减（蒸馏/ODE 求解器）理论上可连乘。SVG+FP8 已示范"稀疏 + 量化"叠加（2.33×）；TeaCache 与 SVG 的组合也是社区常见配置。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="s6">
+  <h2><span class="num">6</span>最新进展（2025–2026）：学界与业界</h2>
+
+  <h3>6.1 VLM 视觉 token 压缩的新趋势</h3>
+  <p><b>综述定调</b>：2025 年 7 月，NUS / 浙大 / 西湖 / 哥大等联合发表首篇系统性综述，把 token 压缩划分为剪枝、合并、KV 压缩等统一分类法，标志着该方向从"技巧集锦"走向成熟学科<sup class="cite">[Token Compression Survey · arXiv:2507.20198 · 2025-07-27]</sup>；斯坦福同期提出 token 序列压缩的统一多模态计算视角<sup class="cite">[arXiv:2504.17892 · 2025-04-24]</sup>。</p>
+  <p><b>2026 年的五个新动向</b>（均为 2026 年 arXiv 新作）：</p>
+  <table>
+    <tr><th>动向</th><th>代表工作</th><th>核心想法</th></tr>
+    <tr><td>① <b>角色/结构分析</b>：不再笼统问"哪个 token 重要"，而是问"这个 token 扮演什么角色"</td><td>Not All Redundant Tokens Are Alike（arXiv:2608.04483 · 2026-08）；RoRA（arXiv:2608.07088 · 2026-08）</td><td>分析被剪 token 的功能角色（前景/背景/边界/文本锚点），按区域-角色分配预算，而非全局统一比例</td></tr>
+    <tr><td>② <b>后果感知</b>：从"平均精度无损"到"别在关键样本上出错"</td><td>Consequence-Sensitive Visual Token Compression（arXiv:2608.09176 · 2026-08）</td><td>压缩决策显式考虑误删的下游后果（安全性、罕见能力），区别于仅优化平均准确率</td></tr>
+    <tr><td>③ <b>跨模态引导升级</b>：文本引导 → 跨模态残差引导</td><td>When Vision Becomes Text（arXiv:2608.10489 · 2026-08）；Capturing Token Tendencies（arXiv:2607.28341 · 2026-07）</td><td>用语言侧残差/倾向性轨迹指导视觉剪枝；从"瞬时启发式"转向"轨迹趋势"判断</td></tr>
+    <tr><td>④ <b>自动化策略搜索</b>：用 AI 设计剪枝策略</td><td>An AI4AI Framework for Visual Token Pruning（arXiv:2608.07193 · 2026-08）</td><td>把"何时/在哪/怎么剪"的规则设计交给智能体自动探索，替代人工试错</td></tr>
+    <tr><td>⑤ <b>扩展到全模态与端云</b></td><td>OmniPack（arXiv:2608.03812 · 2026-08，音频+视觉统一压缩）；SlimVLM（arXiv:2608.03580 · 2026-08，结构化剪枝 + token 选择协同）；LAST（arXiv:2607.27952 · 2026-07，边缘-云端协同）；GSTEP（arXiv:2608.03083 · 2026-08，视频 LLM 时空密度剪枝）</td><td>token 成为跨模态/跨设备的统一"信息货币"：统一压缩框架、结构化稀疏协同、token 级端云分工</td></tr>
+  </table>
+
+  <h3>6.2 DiT / 视频生成稀疏化的新趋势</h3>
+  <table>
+    <tr><th>动向</th><th>代表工作</th><th>核心想法</th></tr>
+    <tr><td>① <b>近无损稀疏</b>：从 PSNR≈29 追到接近无损</td><td>LoSA（arXiv:2608.12032 · 2026-08）</td><td>长序列下更精细的稀疏模式选择，训练无关且近无损</td></tr>
+    <tr><td>② <b>原生可训练稀疏</b>：不再"事后"加速，训练时就稀疏</td><td>Sparse Forcing（arXiv:2604.21221 · 2026-04）；Veda（arXiv:2605.30325 · 2026-05）</td><td>自回归视频扩散在训练中直接用稀疏注意力（Sparse Forcing：训练-推理一致的原生稀疏）；蒸馏出适配高稀疏度的模型（Veda）</td></tr>
+    <tr><td>③ <b>硬件/系统协同</b>：稀疏性成为一级系统公民</td><td>SPADE 输入自适应稀疏引擎（arXiv:2608.03335 · 2026-08）；FVAttn 运行时负载均衡（arXiv:2607.16190 · 2026-07，腾讯/中大）；Token Radius Attention（arXiv:2608.02504 · 2026-08）</td><td>稀疏选择→kernel 调度→负载不均的全栈联合设计；按 token 半径而非全局预算分配注意力</td></tr>
+    <tr><td>④ <b>选择策略精细化</b></td><td>累积能量过滤（arXiv:2606.16317 · 2026-06）；HyperVAttention 时空聚类（arXiv:2607.03012 · 2026-07）；SAFE-DiT 语义快速路径（arXiv:2606.29360 · 2026-06）</td><td>能量/聚类/语义条件驱动的 token 选择取代固定模式</td></tr>
+    <tr><td>⑤ <b>AR 视频扩散的 KV Cache 压缩</b>（长视频新战场）</td><td>Forcing-KV（arXiv:2605.09681 · 2026-05）；VideoMLA 低秩潜在 KV（arXiv:2605.30351 · 2026-05）；FadeMem 距离感知记忆固化（arXiv:2606.10671 · 2026-06）</td><td>流式自回归生成时历史 KV 无限增长 → 滑窗/低秩/记忆固化的有界缓存（思想直承 LLM KV 压缩）</td></tr>
+  </table>
+
+  <h3>6.3 业界动态（系统与产品侧）</h3>
+  <ul>
+    <li><b>推理系统</b>：HuggingFace diffusers 内置 ToMe 优化文档（2023 起）；NUS-HPC-AI-Lab 的 <b>VideoSys</b>（PAB 的工程化，2024）把缓存加速做成可复用系统；Berkeley 的 <b>FastVideo</b> 团队与 <b>FastWan</b>（Hao AI Lab，2025）将稀疏注意力 + FP8 后训练用于 Wan2.2，实现 H200 上约 5 秒生成 5 秒视频。</li>
+    <li><b>kernel 生态</b>：FlashAttention（2022-05）确立 IO 感知精确注意力的基线后，<b>FlashInfer</b> 块稀疏 kernel、<b>SageAttention</b>（INT8 量化注意力）、<b>SpargeAttention / XAttention</b>（2025，通用训练无关稀疏加速，跨 LLM/VLM/视频 DiT）逐步把"稀疏"下沉为推理基础设施的原生能力；PyTorch <b>FlexAttention</b> 允许研究者以类 Python 掩码函数定义稀疏模式并自动编译高效 kernel。</li>
+    <li><b>架构侧的"原生稀疏"</b>：Qwen2-VL（arXiv:2409.12191 · 2024-09）用<b>原生动态分辨率</b>从源头避免 AnyRes 的 token 乘法；NVIDIA <b>Sana</b>（arXiv:2410.10629 · 2024-12）用<b>线性注意力 DiT</b> 生成 4096×4096 图像——线性注意力可视为"极端稀疏化"的极限形式，与本文所有方法构成同一光谱的两端。</li>
+    <li><b>LLM 侧反哺</b>：NSA / MoBA / Quest 等 LLM 稀疏注意力与 KV 压缩研究（2024–2025）持续为视觉侧提供"按头分类、按块稀疏、KV 分级"的方法论与 kernel。</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="s7">
+  <h2><span class="num">7</span>未来发展方向</h2>
+  <p class="lead">综合发展脉络与 2026 年最新动态，以下七个方向最值得关注（按"距离成熟"从近到远排序）：</p>
+  <ol>
+    <li><b>训练时原生稀疏（Native Sparsity）</b>。当前主流仍是"训练完再加速"，天花板明显。Sparse Forcing（训练-推理一致的原生稀疏自回归扩散）和 Veda（蒸馏适配稀疏）已示范：让模型<b>在训练中就适应稀疏计算</b>，可在同等质量下把稀疏率推到免训练方法不敢碰的水平。预期下一代视频基础模型会把稀疏注意力掩码作为可学习参数端到端训练。</li>
+    <li><b>算法-硬件协同设计（Co-design）</b>。SVG 的布局变换、SPADE 的专用引擎、FVAttn 的负载均衡都指向同一结论：<b>稀疏化的下一个数量级来自系统层</b>。块稀疏 BSR 格式、FP8/INT4 低精度、算子融合（QK-Norm/RoPE 定制 kernel）与稀疏模式联合优化；负载不均衡（不同头/不同步稀疏率不同）是头号工程敌人。FlexAttention 类编译基础设施会大幅降低定制 kernel 门槛。</li>
+    <li><b>语义与任务感知的 token 管理</b>。从"注意力分数高=重要"进化到"理解 token 的角色与后果"：2026 年的角色分析、后果敏感压缩、跨模态残差引导表明，<b>剪枝决策本身正在从规则变成模型</b>（AI4AI）。终极形态可能是一个轻量的"token 路由器"，按任务、按样本动态分配计算预算（SAFE-DiT 的语义快速路径是雏形）。</li>
+    <li><b>长视频的极端序列：分钟级生成与理解</b>。视频生成走向自回归流式（Self Forcing 范式）后，KV Cache 随时长线性膨胀——<b>AR 视频扩散的 KV 压缩</b>（Forcing-KV、VideoMLA、FadeMem）与视频理解的时空密度剪枝（GSTEP）正在汇合成同一个问题：<b>有界的时空记忆表示</b>。这一方向直接决定"小时级世界模型"是否可行。</li>
+    <li><b>统一理解与生成的稀疏化</b>。OmniPack 等开始把音频、视觉 token 纳入统一压缩框架；未来单一模型同时做理解与生成（GPT-4o 式 omni 模型）时，<b>视觉 token 的"读路径"（理解，可激进压缩）与"写路径"（生成，需保真）需要不同的稀疏策略</b>——如何在共享骨干中路由两种预算，是开放问题。</li>
+    <li><b>理论分析与安全边界</b>。现有方法大多靠基准试错。何时可以安全剪枝？视觉信息在层间如何流动（FastV 的锚点假设、token 角色分析）？误差在数十步去噪中如何累积？后果敏感压缩提出了"安全剪枝"概念——<b>稀疏化的可靠性理论</b>（尤其对 OCR、医疗、自动驾驶等高风险任务）是学界明显欠账的方向。</li>
+    <li><b>与线性注意力 / SSM 的光谱融合</b>。线性注意力（Sana、LinFusion）与 Mamba 类 SSM 可视为"每 token 固定邻居数"的极端稀疏化。混合架构（浅层全局/深层稀疏、按头异构）+ 可学习稀疏度调度，可能在"表达力-效率"曲线上同时超越稠密 Transformer 与纯线性模型；评测基准（VBench + 延迟/能耗联合指标）将随之标准化。</li>
+  </ol>
+  <div class="box blue"><b>给入门研究者的建议路径</b>：① 跑通本地 <code class="inline">FastV</code>（改 K/R 画 Pareto 曲线）与 <code class="inline">TeaCache</code>（改阈值观察质量-速度权衡），建立手感；② 读 <code class="inline">ToMe/tome/merge.py</code>（200 行理解合并本质）与 <code class="inline">Sparse-VideoGen/svg/kernels/</code>（理解稀疏如何落到 kernel）；③ 从 §6 表格中选一个 2026 动向（如角色感知或 AR-KV 压缩）复现并组合两个正交方法——组合创新在这个领域回报率极高。</div>
+</section>
+
+<!-- ================================================================ -->
+<section id="s8" class="refs">
+  <h2><span class="num">8</span>参考文献（按主题分组，含发表时间）</h2>
+  <h4>基础架构与早期稀疏注意力</h4>
+  <ol>
+    <li>Vaswani et al. <i>Attention Is All You Need</i>. NeurIPS 2017. arXiv:1706.03762（2017-06）.</li>
+    <li>Child et al. <i>Generating Long Sequences with Sparse Transformers</i>. ICML 2019. arXiv:1904.10509（2019-04）.</li>
+    <li>Beltagy et al. <i>Longformer: The Long-Document Transformer</i>. arXiv:2004.05150（2020-04）.</li>
+    <li>Zaheer et al. <i>Big Bird: Transformers for Longer Sequences</i>. NeurIPS 2020. arXiv:2007.14062（2020-07）.</li>
+    <li>Dosovitskiy et al. <i>An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</i>（ViT）. ICLR 2021. arXiv:2010.11929（2020-10-22）.</li>
+    <li>Liu et al. <i>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</i>. ICCV 2021（Marr Prize）. arXiv:2103.14030（2021-03）.</li>
+    <li>Dao et al. <i>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</i>. NeurIPS 2022. arXiv:2205.14135（2022-05）.</li>
+  </ol>
+  <h4>ViT token 剪枝 / 合并（图像时代）</h4>
+  <ol start="8">
+    <li>Rao et al. <i>DynamicViT: Efficient Vision Transformers with Dynamic Token Sparsification</i>. NeurIPS 2021. arXiv:2106.02034（2021-06）. <a href="https://github.com/raoyongming/DynamicViT">code</a></li>
+    <li>Yin et al. <i>A-ViT: Adaptive Tokens for Efficient Vision Transformer</i>. CVPR 2022（arXiv 2021-12）.</li>
+    <li>Alvar et al. <i>Adaptive Token Sampling for Efficient Vision Transformers</i>（ATS）. NeurIPS 2022. arXiv:2111.15667（2021-11）.</li>
+    <li>Liang et al. <i>EViT: Expediting Vision Transformers via Token Reorganizations</i>. ICLR 2022. arXiv:2202.07800（2021-10）.</li>
+    <li>Bolya et al. <i>Token Merging: Your ViT But Faster</i>（ToMe）. ICLR 2023. arXiv:2210.09461（2022-10）. <a href="https://github.com/facebookresearch/ToMe">code（本地已克隆）</a></li>
+  </ol>
+  <h4>VLM 视觉 token 压缩</h4>
+  <ol start="13">
+    <li>Liu et al. <i>Visual Instruction Tuning</i>（LLaVA）. NeurIPS 2023 Oral. arXiv:2304.08485（2023-04）.</li>
+    <li>Chen et al. <i>An Image is Worth 1/2 Tokens After Layer 2: Plug-and-Play Inference Acceleration for Large Vision-Language Models</i>（FastV）. ECCV 2024 Oral. arXiv:2403.06764（2024-03）. <a href="https://github.com/pkunlp-icler/FastV">code（本地已克隆）</a></li>
+    <li>Shang et al. <i>LLaVA-PruMerge: Adaptive Token Reduction for Efficient Large Multimodal Models</i>. arXiv:2403.15388（2024-03）.</li>
+    <li>Zhang et al. <i>SparseVLM: Visual Token Sparsification for Efficient Vision-Language Model Inference</i>. ICML 2025. arXiv:2410.04417（2024-10）.</li>
+    <li>Xing et al. <i>PyramidDrop: Accelerating Your Large Vision-Language Models via Pyramid Visual Redundancy Reduction</i>. CVPR 2025. arXiv:2410.17247（2024-10）.</li>
+    <li>Amjad et al. <i>Make VLM Inference Faster: Need for Training-Free Visual Token Pruning</i>（FasterVLM）. CVPR 2025. arXiv:2412.01818（2024-12）.</li>
+    <li>Yang et al. <i>VisionZip: Longer is Better but Not Necessary in Vision Language Models</i>. CVPR 2025. arXiv:2412.04467（2024-12）. <a href="https://github.com/JIA-Lab-research/VisionZip">code（本地已克隆）</a></li>
+    <li>OpenGVLab. <i>PVC: Progressive Visual Token Compression</i>. CVPR 2025. <a href="https://github.com/OpenGVLab/PVC">code</a></li>
+    <li><i>VScan: Rethinking Visual Token Reduction for Efficient Large Vision-Language Models</i>. arXiv:2505.22654（2025-05）.</li>
+    <li>NUS/ZJU/Westlake/Columbia 等. <i>A Survey of Token Compression for Efficient Multimodal Large Language Models</i>. arXiv:2507.20198（2025-07-27）.</li>
+    <li>Stanford. <i>Token Sequence Compression for Efficient Multimodal Computing</i>. arXiv:2504.17892（2025-04-24）.</li>
+    <li>2026 新作：arXiv:2608.04483（token 角色）、2608.10489（跨模态残差引导）、2608.07193（AI4AI）、2608.09176（后果敏感）、2608.03580（SlimVLM）、2608.07088（RoRA）、2608.03812（OmniPack）、2607.27952（LAST 端云）、2608.03083（GSTEP）、2607.28341（token tendencies）.</li>
+  </ol>
+  <h4>DiT 与视频生成加速</h4>
+  <ol start="25">
+    <li>Peebles &amp; Xie. <i>Scalable Diffusion Models with Transformers</i>（DiT）. ICCV 2023. arXiv:2212.09748（2022-12）. <a href="https://github.com/facebookresearch/DiT">code（本地已克隆）</a></li>
+    <li>Bolya &amp; Hoffman. <i>Token Merging for Fast Stable Diffusion</i>（ToMeSD）. arXiv:2303.17604（2023-03）；diffusers 官方文档 <a href="https://huggingface.co/docs/diffusers/en/optimization/tome">Token merging</a>.</li>
+    <li>Zhang, Liu et al. <i>Cross Attention Makes Inference Cumbersome in Text-to-Image Diffusion Models</i>（T-GATE）. ECCV 2024. arXiv:2404.02747（2024-04-03）.</li>
+    <li>Chen et al. <i>δ-DiT: A Training-Free Acceleration Method Tailored for Diffusion Transformers</i>. arXiv:2406.01125（2024-06）；Selvaraju et al. <i>FORA: Fast-Forward Caching in Diffusion Transformer Acceleration</i>. arXiv:2407.01425（2024-07）；Ma et al. <i>Learning-to-Cache</i>. NeurIPS 2024. arXiv:2406.01733.</li>
+    <li>Zhao et al. <i>Real-Time Video Generation with Pyramid Attention Broadcast</i>（PAB）. arXiv:2408.12588（2024-08-22）；工程化于 VideoSys.</li>
+    <li>Lv et al. <i>FasterCache: Training-Free Video Diffusion Model Acceleration with High Quality</i>. CVPR 2025. arXiv:2410.19355（2024-10）.</li>
+    <li>Liu et al. <i>Timestep Embedding Tells: It's Time to Cache for Video Diffusion Model</i>（TeaCache）. ICML 2025. arXiv:2411.19108（2024-11）. <a href="https://github.com/ali-vilab/TeaCache">code（本地已克隆）</a></li>
+    <li>Xi et al. <i>Sparse VideoGen: Accelerating Video Diffusion Transformers with Spatial-Temporal Sparsity</i>（SVG）. ICML 2025. arXiv:2502.01776（2025-02）. <a href="https://github.com/svg-project/Sparse-VideoGen">code（本地已克隆）</a></li>
+    <li><i>Sparse VideoGen 2: Semantic Token Clustering for Asynchronous Sparse Attention</i>（SVG2）. NeurIPS 2025. arXiv:2505.18875（2025-05）.</li>
+    <li>Yuan et al. <i>DiTFastAttn: Attention Compression for Diffusion Transformer Models</i>. arXiv:2406.08552（2024-06）；Jiang et al. <i>MInference: Long-Context LLM Inference</i>. arXiv:2407.02490（2024）.</li>
+    <li>2026 新作：arXiv:2608.12032（LoSA）、2608.03335（SPADE）、2608.02504（Token Radius）、2607.16190（FVAttn）、2605.30325（Veda）、2605.30351（VideoMLA）、2605.09681（Forcing-KV）、2607.03012（HyperVAttention）、2606.29360（SAFE-DiT）、2606.16317（能量过滤）、2606.10671（FadeMem）、2604.21221（Sparse Forcing）、2607.22231（TRaM-VSR）.</li>
+  </ol>
+  <h4>架构与系统侧</h4>
+  <ol start="36">
+    <li>Wang et al. <i>Qwen2-VL: To See the World More Clearly</i>. arXiv:2409.12191（2024-09，原生动态分辨率）.</li>
+    <li>Li et al. <i>Sana: Efficient High-Resolution Image Synthesis with Linear DiT</i>. arXiv:2410.10629（2024-12，线性注意力 DiT）.</li>
+    <li>Zhang et al. <i>SpargeAttention</i> / Xu et al. <i>XAttention</i>（2025，通用训练无关稀疏注意力）；<i>SageAttention</i>（INT8）；FlashInfer 块稀疏 kernel 生态.</li>
+  </ol>
+  <p style="font-size:12.5px; color:#8a94ab;">注：标注"本地已克隆"的 6 个仓库（ToMe / DiT / FastV / VisionZip / Sparse-VideoGen / TeaCache）均在当前目录下，本文代码解析均引自这些仓库的实际源码（文件路径与行号已标注）。引用处的小字引文来自论文原文（arXiv 版本），译文为本报告作者翻译。</p>
+</section>
+
+<footer>
+  ViT 稀疏化技术梳理 · 2026-08-17 · 基于 6 个开源仓库代码分析与 40+ 篇文献调研生成
+</footer>
+
+
+
+
+</div>
+<a class="backtop" href="#top">↑ 回到顶部</a>
+</body>
+</html>

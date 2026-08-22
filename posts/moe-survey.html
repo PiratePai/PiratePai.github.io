@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e8eaed; --ink-dim:#aeb4bd;
+    --brand:#6ea8ff; --brand2:#9d7bff; --accent:#41d1a7; --warn:#ffb454; --danger:#ff6b6b;
+    --line:#2a2f3a; --code-bg:#11141a; --quote-bg:#141a14;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:linear-gradient(180deg,#0c0e12 0%,#0f1115 100%); color:var(--ink);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px 120px}
+  header.hero{
+    padding:64px 24px 48px; text-align:center; position:relative; overflow:hidden;
+    background:
+      radial-gradient(900px 380px at 20% -10%, rgba(110,168,255,.18), transparent 70%),
+      radial-gradient(700px 360px at 90% 0%, rgba(157,123,255,.18), transparent 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero .kicker{color:var(--accent); letter-spacing:.22em; font-size:13px; text-transform:uppercase; font-weight:700}
+  .hero h1{font-size:clamp(28px,5vw,46px); line-height:1.2; margin:14px 0 6px; font-weight:800;
+    background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff); -webkit-background-clip:text; background-clip:text; color:transparent}
+  .hero p.sub{color:var(--ink-dim); max-width:780px; margin:10px auto 0; font-size:16px}
+  .hero .meta{margin-top:22px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  .chip{font-size:12.5px; color:var(--ink-dim); border:1px solid var(--line); background:var(--panel);
+    padding:5px 12px; border-radius:999px}
+  .chip b{color:var(--brand)}
+  h2.sec{font-size:27px; margin:64px 0 6px; padding-top:18px; border-top:1px solid var(--line); font-weight:800; display:flex; align-items:center; gap:12px}
+  h2.sec .num{font-size:14px; color:#0f1115; background:linear-gradient(135deg,var(--brand),var(--brand2));
+    width:34px;height:34px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+  h2.sec .roadmap{font-size:13px;font-weight:600;color:var(--ink-dim);margin-left:auto;max-width:520px;text-align:right}
+  h3{font-size:20px;margin:34px 0 8px;color:#dfe5f0;font-weight:700}
+  h4{font-size:16.5px;margin:22px 0 6px;color:var(--brand);font-weight:700}
+  p{margin:10px 0}
+  .lead{font-size:17px;color:#d7dce6}
+  a{color:var(--brand);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"JetBrains Mono","Fira Code",Consolas,monospace; font-size:13.5px;
+    background:#20242f; padding:2px 6px; border-radius:5px; color:#ffd9a8}
+  .grid{display:grid;gap:16px;margin:18px 0}
+  .grid.two{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .card h4{margin-top:0}
+  .stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+  .stat .s{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:center}
+  .stat .s .v{font-size:22px;font-weight:800;color:var(--accent)}
+  .stat .s .l{font-size:12.5px;color:var(--ink-dim);margin-top:2px}
+  sup.ref{font-size:.72em;color:var(--accent);font-weight:700;margin:0 1px}
+  sup.ref a{color:inherit}
+  .q{margin:14px 0;border-left:3px solid var(--accent);background:var(--quote-bg);
+     border-radius:0 10px 10px 0;padding:8px 14px;font-size:13px;color:#bfc6d2}
+  .q .en{font-family:"Georgia",serif;font-style:italic;color:#d7e0cf}
+  .q .zh{color:var(--ink-dim);margin-top:4px}
+  .q .src{display:block;margin-top:6px;color:var(--warn);font-size:12px;font-weight:600}
+  .note{background:rgba(110,168,255,.08);border:1px solid rgba(110,168,255,.25);border-radius:10px;
+     padding:12px 16px;font-size:14.5px;margin:14px 0}
+  .note.ok{background:rgba(65,209,167,.08);border-color:rgba(65,209,167,.25)}
+  .note.warn{background:rgba(255,180,84,.08);border-color:rgba(255,180,84,.25)}
+  .note b{color:var(--brand)}
+  .note.ok b{color:var(--accent)}
+  .note.warn b{color:var(--warn)}
+  .qa{background:rgba(157,123,255,.07);border:1px dashed rgba(157,123,255,.4);border-radius:10px;padding:10px 16px;margin:14px 0;font-size:14.5px}
+  .qa .q1{font-weight:700;color:#d2c2ff}
+  pre{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;
+     font-size:13px;line-height:1.6;margin:14px 0;font-family:"JetBrains Mono","Fira Code",Consolas,monospace}
+  pre .c{color:#5f6b7e}
+  pre .k{color:#c792ea}
+  pre .s{color:#c3e88d}
+  pre .f{color:#82aaff}
+  pre .n{color:#f78c6c}
+  pre .d{color:#ffcb6b}
+  pre .v{color:#f07178}
+  pre .self{color:#ff9cac;font-style:italic}
+  pre .out{color:#7fd8c0}
+  pre.title{margin-bottom:-6px;border-bottom-left-radius:0;border-bottom-right-radius:0;
+     background:#161a24;color:var(--ink-dim);font-size:12px;padding:8px 16px}
+  pre.title + pre{border-top-left-radius:0;border-top-right-radius:0;margin-top:0}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cfd6e4;font-weight:700}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+  .tl{position:relative;margin:24px 0 24px 8px;padding-left:26px;border-left:2px solid var(--line)}
+  .tl .e{position:relative;margin:0 0 22px}
+  .tl .e::before{content:"";position:absolute;left:-33px;top:5px;width:14px;height:14px;border-radius:50%;
+     background:var(--brand);box-shadow:0 0 0 4px rgba(110,168,255,.18)}
+  .tl .yr{font-weight:800;color:var(--warn);font-size:13px;letter-spacing:.05em}
+  .tl .t{font-weight:700;color:#e9edf5;margin:2px 0 3px}
+  .tl .d{color:var(--ink-dim);font-size:14.5px}
+  nav.toc{position:sticky;top:0;z-index:5;background:rgba(15,17,21,.88);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);margin:0 -24px 8px;padding:10px 24px}
+  nav.toc .in{max-width:1080px;margin:0 auto;display:flex;gap:6px 16px;flex-wrap:wrap;font-size:13.5px}
+  nav.toc a{color:var(--ink-dim)}
+  nav.toc a:hover{color:var(--brand)}
+  .math{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;
+    margin:12px 0;font-family:"Cambria Math","Times New Roman",serif;overflow-x:auto;font-size:15.5px}
+  .math .i{font-style:italic}
+  sub, sup{font-size:.7em}
+  figure{margin:20px 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px 10px;overflow-x:auto}
+  figure svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  figure figcaption{font-size:13px;color:var(--ink-dim);text-align:center;margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+  figure figcaption b{color:var(--warn)}
+  .diagram{background:var(--code-bg);border:1px solid var(--line);border-radius:12px;padding:18px;
+    font-family:"JetBrains Mono",monospace;font-size:12.5px;line-height:1.5;overflow-x:auto;color:#cdd6e3;white-space:pre}
+  details.sum{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 16px;margin:14px 0}
+  details.sum summary{cursor:pointer;font-weight:700;color:var(--brand2);padding:8px 0}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);color:var(--ink-dim);font-size:13.5px}
+  .ref-list{font-size:13px;color:var(--ink-dim);line-height:1.9}
+  .ref-list li{margin:6px 0}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px;vertical-align:middle}
+  .pill.llm{background:rgba(110,168,255,.18);color:#bcd4ff}
+  .pill.vlm{background:rgba(65,209,167,.18);color:#9ee9cf}
+  .pill.dit{background:rgba(255,180,84,.18);color:#ffd9a8}
+  .pill.fund{background:rgba(157,123,255,.18);color:#d2c2ff}
+  .anchor{display:block;position:relative;top:-90px;visibility:hidden}
+  ul.tight{margin:8px 0;padding-left:22px}
+  ul.tight li{margin:4px 0}
+  @media(max-width:640px){.hero{padding:44px 18px 34px}.wrap{padding:0 16px 80px} nav.toc .in{font-size:12px} h2.sec .roadmap{display:none}}
+</style>
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
+
+<header class="hero">
+  <div class="kicker">深度学习架构调研 · 2026</div>
+  <h1>混合专家（MoE）全景</h1>
+  <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的本科生。</p>
+  <div class="meta">
+    <span class="chip">调研日期：<b>2026-08-14</b></span>
+    <span class="chip">覆盖模型：<b>Switch / GShard / Mixtral / DeepSeek-V3·R1 / Kimi K2 / Qwen3 / MoE-LLaVA / DiT-MoE / EC-DiT / Race-DiT / DSMoE / Wan2.2 / HunyuanImage3 / Mamoda2.5 / MAGI-2 / HunyuanVideo / LTX-2</b></span>
+    <span class="chip">工业数据来源：<b>InfraInsight 架构分析报告库</b></span>
+    <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="in">
+    <a href="#s0">导读</a>
+    <a href="#s1">① 原理入门</a>
+    <a href="#s2">② 发展历程</a>
+    <a href="#s3">③ LLM 应用</a>
+    <a href="#s4">④ VLM 应用</a>
+    <a href="#s5">⑤ DiT 应用</a>
+    <a href="#s6">⑥ 前沿与未来</a>
+    <a href="#s7">⑦ 参考资料</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ===================== 导读 ===================== -->
+<span class="anchor" id="s0"></span>
+<h2 class="sec"><span class="num">0</span>导读：一句话理解 MoE<span class="roadmap">为什么需要 MoE → 它如何工作 → 三大架构各自怎么用 → 还有哪些没解决的问题</span></h2>
+<p class="lead">普通的神经网络是「一个学生应付所有题」，而 <b>混合专家（Mixture of Experts, MoE）</b> 是「一群各有专长的老师，每来一道题，先由一个<b>门控路由器（router）</b>判断该找哪几位老师来答，其余老师休息」。结果是：<b>总参数量变得巨大（知识面广），但每次推理只激活其中一小部分（算得快）</b>。这正是 DeepSeek-V3（671B 总参数 / 37B 激活）、Mixtral 8x7B（47B / 13B）、Kimi K2（约 1T / 32B）等当今顶尖模型能又大又快的核心秘密。</p>
+
+<div class="note ok"><b>核心权衡（贯穿全文的一句话）</b>：MoE 把「参数量」和「计算量」<b>解耦</b>。专家数 <span class="i">n</span> 增大时总参数线性增长；只要每 token 激活的专家数 <span class="i">k</span> 不变，单 token 计算量几乎不变。代价是<b>显存要装下全部专家</b>、以及<b>路由带来的系统复杂度</b>（§1.5）。</div>
+
+<p><b>本报告的阅读逻辑</b>：§1 先把 MoE 的 4 块基石讲透（稀疏激活、路由器、负载均衡、系统并行）——<b>后面所有应用都只是在这 4 块基石上做变奏</b>；§2 用时间线建立全局图景；§3–§5 分别讲 LLM / VLM / DiT 三个战场，每章统一按「<b>该领域有什么独特问题 → 谁用什么创新解决 → 代码怎么写 → 效果数据</b>」展开；§6 汇总前沿与未来。</p>
+
+<div class="stat">
+  <div class="s"><div class="v">1991</div><div class="l">MoE 概念提出<br>(Jacobs &amp; Hinton)</div></div>
+  <div class="s"><div class="v">1.6T</div><div class="l">Switch Transformer<br>(2021)</div></div>
+  <div class="s"><div class="v">671B / 37B</div><div class="l">DeepSeek-V3<br>总参/激活(2024)</div></div>
+  <div class="s"><div class="v">~1T / 32B</div><div class="l">Kimi K2<br>开源万亿稀疏(2025)</div></div>
+</div>
+
+<!-- ===================== 第一章 原理 ===================== -->
+<span class="anchor" id="s1"></span>
+<h2 class="sec"><span class="num">1</span>MoE 原理入门（给本科生）<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
+
+<h3>1.1 基石一：从「密集」到「稀疏」—— 为什么要 MoE</h3>
+<p>标准 Transformer 里，每个 token 都要走完<b>同一套</b>全连接网络（FFN），所有参数都被激活——这叫 <b>dense（密集）模型</b>。模型越大，计算量与参数量同步增长，又贵又慢。</p>
+<p>MoE 的思路是 <b>条件计算（conditional computation）</b>：把一个大的 FFN 换成「若干个并列的小 FFN（专家）」，再让一个轻量路由器按 token <b>挑几个</b>专家来算，其余专家直接跳过。<sup class="ref"><a href="#r1">[1]</a></sup></p>
+
+<div class="q">
+  <div class="en">"Conditional computation, where parts of the network are active on a per-example basis, has been proposed in theory as a way of dramatically increasing model capacity without a proportional increase in computation."</div>
+  <div class="zh">「条件计算——即网络的一部分针对每个样本决定是否激活——在理论上被提出，作为在不按比例增加计算量的前提下，极大提升模型容量的一种方式。」</div>
+  <span class="src">— Shazeer et al., <i>Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer</i>, ICLR 2017 (arXiv:1701.06538)</span>
+</div>
+
+<figure>
+<svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8fa3c4"/>
+    </marker>
+  </defs>
+  <!-- Left: dense -->
+  <rect x="8" y="26" width="452" height="272" rx="12" fill="#141822" stroke="#2a2f3a"/>
+  <text x="234" y="52" text-anchor="middle" fill="#cfd6e4" font-size="15" font-weight="700">稠密 Transformer Block（传统）</text>
+  <circle cx="52" cy="104" r="13" fill="#2b3550" stroke="#6ea8ff"/><text x="52" y="109" text-anchor="middle" fill="#bcd4ff" font-size="11">x₁</text>
+  <circle cx="52" cy="164" r="13" fill="#2b3550" stroke="#6ea8ff"/><text x="52" y="169" text-anchor="middle" fill="#bcd4ff" font-size="11">x₂</text>
+  <circle cx="52" cy="224" r="13" fill="#2b3550" stroke="#6ea8ff"/><text x="52" y="229" text-anchor="middle" fill="#bcd4ff" font-size="11">x₃</text>
+  <line x1="65" y1="104" x2="198" y2="140" stroke="#8fa3c4" marker-end="url(#arr)"/>
+  <line x1="65" y1="164" x2="198" y2="164" stroke="#8fa3c4" marker-end="url(#arr)"/>
+  <line x1="65" y1="224" x2="198" y2="188" stroke="#8fa3c4" marker-end="url(#arr)"/>
+  <rect x="202" y="112" width="150" height="104" rx="10" fill="#233049" stroke="#6ea8ff" stroke-width="1.5"/>
+  <text x="277" y="152" text-anchor="middle" fill="#e8eaed" font-size="14" font-weight="700">FFN</text>
+  <text x="277" y="174" text-anchor="middle" fill="#aeb4bd" font-size="11">全部参数激活</text>
+  <line x1="352" y1="164" x2="430" y2="164" stroke="#8fa3c4" marker-end="url(#arr)"/>
+  <text x="234" y="252" text-anchor="middle" fill="#ff9c9c" font-size="12">每个 token × 全部参数</text>
+  <text x="234" y="272" text-anchor="middle" fill="#8b93a2" font-size="11.5">计算量 ∝ 参数量，模型越大越慢</text>
+  <!-- Right: MoE -->
+  <rect x="500" y="26" width="452" height="272" rx="12" fill="#141822" stroke="#2a2f3a"/>
+  <text x="726" y="52" text-anchor="middle" fill="#cfd6e4" font-size="15" font-weight="700">稀疏 MoE Block（本文主角）</text>
+  <circle cx="544" cy="164" r="13" fill="#2b3550" stroke="#41d1a7"/><text x="544" y="169" text-anchor="middle" fill="#9ee9cf" font-size="11">x</text>
+  <rect x="590" y="146" width="92" height="36" rx="8" fill="#1f3a33" stroke="#41d1a7"/>
+  <text x="636" y="169" text-anchor="middle" fill="#9ee9cf" font-size="12.5" font-weight="700">Router</text>
+  <line x1="557" y1="164" x2="590" y2="164" stroke="#8fa3c4" marker-end="url(#arr)"/>
+  <g font-size="11.5">
+    <rect x="722" y="78"  width="120" height="34" rx="8" fill="#233049" stroke="#6ea8ff" stroke-width="1.6"/><text x="782" y="99" text-anchor="middle" fill="#e8eaed">专家 1 ✔ (p=.58)</text>
+    <rect x="722" y="122" width="120" height="34" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="782" y="143" text-anchor="middle" fill="#5f6b7e">专家 2 ✘ 跳过</text>
+    <rect x="722" y="166" width="120" height="34" rx="8" fill="#233049" stroke="#6ea8ff" stroke-width="1.6"/><text x="782" y="187" text-anchor="middle" fill="#e8eaed">专家 3 ✔ (p=.42)</text>
+    <rect x="722" y="210" width="120" height="34" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="782" y="231" text-anchor="middle" fill="#5f6b7e">专家 4 ✘ 跳过</text>
+  </g>
+  <line x1="682" y1="156" x2="722" y2="98"  stroke="#6ea8ff" stroke-width="1.6" marker-end="url(#arr)"/>
+  <line x1="682" y1="172" x2="722" y2="182" stroke="#6ea8ff" stroke-width="1.6" marker-end="url(#arr)"/>
+  <path d="M842,95 C886,95 886,150 892,158" fill="none" stroke="#41d1a7" marker-end="url(#arr)"/>
+  <path d="M842,183 C880,183 880,165 892,162" fill="none" stroke="#41d1a7" marker-end="url(#arr)"/>
+  <text x="905" y="166" fill="#9ee9cf" font-size="11.5">Σ 加权</text>
+  <text x="726" y="272" text-anchor="middle" fill="#9ee9cf" font-size="12">每个 token 只激活 K=2 个专家：参数量大 ↑，计算量小 ↓</text>
+</svg>
+<figcaption><b>图 1</b>：稠密 FFN 与稀疏 MoE 层对比。MoE 通常只替换 Transformer Block 中的 FFN 子层，自注意力保持稠密。✔ 表示被激活，✘ 表示跳过（不参与计算）。</figcaption>
+</figure>
+
+<h3>1.2 一个 MoE 层的数学定义</h3>
+<p>MoE 通常替换 Transformer Block 中的 <b>FFN 子层</b>（注意力层一般保持密集）。最朴素的 MoE 层输出为：</p>
+<div class="math">
+<span class="i">y</span> = Σ<sub>i=1..n</sub> <span class="i">G</span>(<span class="i">x</span>)<sub>i</sub> · <span class="i">E</span><sub>i</sub>(<span class="i">x</span>)
+</div>
+<p>其中 <code>E<sub>i</sub></code> 是第 <code>i</code> 个专家（本身就是一个 FFN，如 SwiGLU），<code>G(x)</code> 是路由器输出的 <code>n</code> 维权重向量。如果 <code>G(x)<sub>i</sub> = 0</code>，就<b>不必计算</b> <code>E<sub>i</sub>(x)</code>——这正是省算力的来源<sup class="ref"><a href="#r1">[1]</a></sup>。</p>
+
+<h4>50 行从零实现一个 MoE（教学版，可直接运行）</h4>
+<pre class="title">toy_moe.py —— 一个最小可运行的 MoE，帮助建立直觉（教学版用循环逐 token 路由；工业实现按专家分组做批量矩阵乘）</pre>
+<pre><span class="k">import</span> torch
+<span class="k">import</span> torch.nn <span class="k">as</span> nn
+<span class="k">import</span> torch.nn.functional <span class="k">as</span> F
+
+<span class="k">class</span> <span class="d">Expert</span>(nn.Module):              <span class="c"># 每个"专家"就是一个普通的 SwiGLU FFN，没有任何魔法</span>
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, dim, hidden):
+        <span class="v">super</span>().__init__()
+        <span class="self">self</span>.w1 = nn.Linear(dim, hidden)
+        <span class="self">self</span>.w3 = nn.Linear(dim, hidden)
+        <span class="self">self</span>.w2 = nn.Linear(hidden, dim)
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, x):
+        <span class="k">return</span> <span class="self">self</span>.w2(F.silu(<span class="self">self</span>.w1(x)) * <span class="self">self</span>.w3(x))
+
+<span class="k">class</span> <span class="d">MoELayer</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, dim, hidden, n_experts=<span class="n">4</span>, top_k=<span class="n">2</span>):
+        <span class="v">super</span>().__init__()
+        <span class="self">self</span>.experts = nn.ModuleList([Expert(dim, hidden) <span class="k">for</span> _ <span class="k">in</span> range(n_experts)])
+        <span class="self">self</span>.gate   = nn.Linear(dim, n_experts)   <span class="c"># ★ 路由器: 本质只是一层线性投影!</span>
+        <span class="self">self</span>.top_k  = top_k
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, x):                        <span class="c"># x: [T, D]  T个token</span>
+        logits  = <span class="self">self</span>.gate(x)                      <span class="c"># [T, E]  每个token给每个专家打分</span>
+        probs   = logits.softmax(dim=<span class="n">-1</span>)
+        weights, idx = probs.topk(<span class="self">self</span>.top_k, dim=<span class="n">-1</span>)  <span class="c"># [T, K]  挑K个分数最高的专家</span>
+        weights = weights / weights.sum(<span class="n">-1</span>, keepdim=<span class="v">True</span>)     <span class="c"># 归一化, 权重和=1</span>
+        out = torch.zeros_like(x)
+        <span class="k">for</span> t <span class="k">in</span> range(x.size(<span class="n">0</span>)):                    <span class="c"># 教学版: 逐token加权求和(工业版见§3.2)</span>
+            <span class="k">for</span> k, e <span class="k">in</span> <span class="f">enumerate</span>(idx[t].tolist()):
+                out[t] += weights[t, k] * <span class="self">self</span>.experts[e](x[t])
+        <span class="k">return</span> out                                  <span class="c"># 输出维度与输入相同, 可无缝替换FFN</span>
+
+moe = MoELayer(dim=<span class="n">512</span>, hidden=<span class="n">1024</span>)
+y = moe(torch.randn(<span class="n">10</span>, <span class="n">512</span>))          <span class="c"># 10个token, 每个只真正计算了2/4个专家</span>
+<span class="f">print</span>(y.shape)                          <span class="c"># torch.Size([10, 512])</span></pre>
+
+<h3>1.3 基石二：路由器（Router / Gate）到底怎么挑专家</h3>
+<p>路由器本质就是「一个小线性层 + 一个挑选函数」。最经典的是 Shazeer 提出的 <b>Noisy Top-K 门控</b><sup class="ref"><a href="#r1">[1]</a></sup>：</p>
+<div class="math">
+<span class="i">G</span>(<span class="i">x</span>) = Softmax( KeepTopK( <span class="i">H</span>(<span class="i">x</span>), <span class="i">k</span> ) ),　<span class="i">H</span>(<span class="i">x</span>)<sub>i</sub> = (<span class="i">x</span>·<span class="i">W<sub>g</sub></span>)<sub>i</sub> + ε·Softplus((<span class="i">x</span>·<span class="i">W<sub>noise</sub></span>)<sub>i</sub>)
+</div>
+<p>翻译成人话：<b>打分 → 只留 Top-K → 归一化成权重</b>。下面用一个具体数字例子走一遍全过程：</p>
+
+<figure>
+<svg viewBox="0 0 960 250" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8fa3c4"/></marker></defs>
+  <g font-size="12.5">
+    <rect x="10" y="60" width="130" height="90" rx="10" fill="#1d212b" stroke="#2a2f3a"/>
+    <text x="75" y="88" text-anchor="middle" fill="#e8eaed" font-weight="700">① token 向量</text>
+    <text x="75" y="112" text-anchor="middle" fill="#ffd9a8" font-family="JetBrains Mono">x = [0.2, -1.0, …]</text>
+    <text x="75" y="132" text-anchor="middle" fill="#8b93a2">维度 d=7168</text>
+
+    <rect x="170" y="60" width="130" height="90" rx="10" fill="#1d212b" stroke="#2a2f3a"/>
+    <text x="235" y="88" text-anchor="middle" fill="#e8eaed" font-weight="700">② 线性打分</text>
+    <text x="235" y="112" text-anchor="middle" fill="#ffd9a8" font-family="JetBrains Mono">s = x·W_g</text>
+    <text x="235" y="132" text-anchor="middle" fill="#8b93a2">得 E 个分数</text>
+
+    <rect x="330" y="60" width="150" height="90" rx="10" fill="#1d212b" stroke="#2a2f3a"/>
+    <text x="405" y="88" text-anchor="middle" fill="#e8eaed" font-weight="700">③ Top-K 掩码 (K=2)</text>
+    <text x="405" y="112" text-anchor="middle" fill="#ffd9a8" font-family="JetBrains Mono">[0.9, <tspan fill="#41d1a7" font-weight="700">2.1</tspan>, 0.3, <tspan fill="#41d1a7" font-weight="700">1.7</tspan>]</text>
+    <text x="405" y="132" text-anchor="middle" fill="#8b93a2">其余置 −∞</text>
+
+    <rect x="510" y="60" width="150" height="90" rx="10" fill="#1d212b" stroke="#2a2f3a"/>
+    <text x="585" y="88" text-anchor="middle" fill="#e8eaed" font-weight="700">④ softmax 归一化</text>
+    <text x="585" y="112" text-anchor="middle" fill="#ffd9a8" font-family="JetBrains Mono">[0, <tspan fill="#41d1a7" font-weight="700">0.58</tspan>, 0, <tspan fill="#41d1a7" font-weight="700">0.42</tspan>]</text>
+    <text x="585" y="132" text-anchor="middle" fill="#8b93a2">非选中者恒为 0</text>
+
+    <rect x="690" y="60" width="260" height="90" rx="10" fill="#1f3a33" stroke="#41d1a7"/>
+    <text x="820" y="88" text-anchor="middle" fill="#9ee9cf" font-weight="700">⑤ 加权融合专家输出</text>
+    <text x="820" y="115" text-anchor="middle" fill="#e8eaed" font-family="JetBrains Mono">y = 0.58·E₂(x) + 0.42·E₄(x)</text>
+
+    <line x1="140" y1="105" x2="170" y2="105" stroke="#8fa3c4" marker-end="url(#arr2)"/>
+    <line x1="300" y1="105" x2="330" y2="105" stroke="#8fa3c4" marker-end="url(#arr2)"/>
+    <line x1="480" y1="105" x2="510" y2="105" stroke="#8fa3c4" marker-end="url(#arr2)"/>
+    <line x1="660" y1="105" x2="690" y2="105" stroke="#8fa3c4" marker-end="url(#arr2)"/>
+    <text x="480" y="190" text-anchor="middle" fill="#8b93a2">梯度如何回传？—— softmax 输出的门控值 p 连续可导，损失对 W_g 的梯度经由 p 流回路由器（"软选择、硬计算"）</text>
+    <text x="480" y="212" text-anchor="middle" fill="#8b93a2">即使 K=1（只选 1 个专家），p 本身仍可导 —— 这就是 Switch Transformer 敢用 top-1 的理论依据<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[2]</tspan></text>
+  </g>
+</svg>
+<figcaption><b>图 2</b>：路由器解剖（以 4 个专家、K=2 为例）。整个路由器参数量仅为 d×E（如 7168×256 ≈ 1.8M），相对于专家本体（数百 MB）可忽略不计。</figcaption>
+</figure>
+
+<div class="qa"><span class="q1">Q：K=1 真的能训练吗？路由是"硬选择"啊。</span><br>
+A：能。Shazeer 2017 曾猜测 K&gt;1 才能给路由器提供有效梯度<sup class="ref"><a href="#r1">[1]</a></sup>；Switch Transformer 用实验推翻了这一点——因为门控值 <span class="i">p<sub>i</sub>(x)</span> 本身连续可导，梯度照样能流过路由器，K=1 反而「保持模型质量、降低路由计算、效果更好」<sup class="ref"><a href="#r2">[2]</a></sup>。</div>
+
+<h4>Noisy Top-K 门控的忠实实现（Shazeer 2017）</h4>
+<pre class="title">noisy_topk_gate.py —— 原论文公式 (3)(4) 的 PyTorch 版本；噪声项的作用见 §1.4（帮助负载均衡）</pre>
+<pre><span class="k">class</span> <span class="d">NoisyTopKGating</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, dim, n_experts, k):
+        <span class="v">super</span>().__init__()
+        <span class="self">self</span>.w_gate  = nn.Linear(dim, n_experts)   <span class="c"># 打分矩阵 W_g</span>
+        <span class="self">self</span>.w_noise = nn.Linear(dim, n_experts)   <span class="c"># 噪声幅度矩阵 W_noise (可学习)</span>
+        <span class="self">self</span>.k = k
+
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, x):                         <span class="c"># x: [T, D]</span>
+        logits    = <span class="self">self</span>.w_gate(x)                    <span class="c"># 原始得分</span>
+        noise_std = F.softplus(<span class="self">self</span>.w_noise(x))        <span class="c"># Softplus保证噪声幅度&gt;0</span>
+        noisy     = logits + torch.randn_like(logits) * noise_std  <span class="c"># ★ 加性高斯噪声</span>
+        topk_val, topk_idx = noisy.topk(<span class="self">self</span>.k, dim=<span class="n">-1</span>)
+        gates = torch.zeros_like(noisy).scatter_(
+            <span class="n">-1</span>, topk_idx, topk_val.softmax(<span class="n">-1</span>))  <span class="c"># 未选中位置恒为0</span>
+        <span class="k">return</span> gates, topk_idx</pre>
+
+<div class="note"><b>三个关键超参</b>：
+<ul class="tight">
+<li><b>专家数 n</b>：总参数量随它线性增长（Grok-1 8 个、Mixtral 8 个、DeepSeek-V3 256+1 个）。</li>
+<li><b>激活专家数 K（top-k）</b>：决定每个 token 的计算量。Switch K=1<sup class="ref"><a href="#r2">[2]</a></sup>、Mixtral K=2<sup class="ref"><a href="#r3">[3]</a></sup>、DeepSeek-V3 K=8<sup class="ref"><a href="#r4">[4]</a></sup>。</li>
+<li><b>容量因子（capacity factor）</b>：每个专家设「容量上限」= (批内 token 数 ÷ 专家数) × 容量因子。超限 token 被<b>丢弃</b>（dropped token），直接经残差连接进入下一层<sup class="ref"><a href="#r2">[2]</a></sup>。</li>
+</ul></div>
+
+<h3>1.4 基石三：负载均衡与「路由崩溃」—— MoE 的头号难题</h3>
+<p>如果不加约束，路由器会陷入一个<b>自我强化的恶性循环</b>：</p>
+
+<figure>
+<svg viewBox="0 0 960 285" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs><marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff8f8f"/></marker></defs>
+  <g>
+    <rect x="380" y="20"  width="200" height="52" rx="10" fill="#2a1e22" stroke="#ff6b6b"/><text x="480" y="42" text-anchor="middle" fill="#ffc9c9" font-size="13" font-weight="700">专家 i 被频繁选中</text><text x="480" y="60" text-anchor="middle" fill="#8b93a2" font-size="11">负载远超均值</text>
+    <rect x="660" y="105" width="230" height="52" rx="10" fill="#2a1e22" stroke="#ff6b6b"/><text x="775" y="127" text-anchor="middle" fill="#ffc9c9" font-size="13" font-weight="700">专家 i 得到更多训练</text><text x="775" y="145" text-anchor="middle" fill="#8b93a2" font-size="11">梯度更新更多 → 拟合更好</text>
+    <rect x="380" y="195" width="200" height="52" rx="10" fill="#2a1e22" stroke="#ff6b6b"/><text x="480" y="217" text-anchor="middle" fill="#ffc9c9" font-size="13" font-weight="700">专家 i 分数更高</text><text x="480" y="235" text-anchor="middle" fill="#8b93a2" font-size="11">下次 top-k 更容易选中它</text>
+    <rect x="80"  y="105" width="230" height="52" rx="10" fill="#2a1e22" stroke="#ff6b6b"/><text x="195" y="127" text-anchor="middle" fill="#ffc9c9" font-size="13" font-weight="700">其余专家「饿死」</text><text x="195" y="145" text-anchor="middle" fill="#8b93a2" font-size="11">参数白占显存却不干活</text>
+    <path d="M582,50 C680,58 760,70 770,103" fill="none" stroke="#ff8f8f" stroke-width="1.6" marker-end="url(#arr3)"/>
+    <path d="M772,159 C770,190 700,205 584,220" fill="none" stroke="#ff8f8f" stroke-width="1.6" marker-end="url(#arr3)"/>
+    <path d="M378,220 C300,215 250,190 240,160" fill="none" stroke="#ff8f8f" stroke-width="1.6" marker-end="url(#arr3)"/>
+    <path d="M242,103 C260,70 320,52 378,45" fill="none" stroke="#ff8f8f" stroke-width="1.6" marker-end="url(#arr3)"/>
+    <text x="480" y="150" text-anchor="middle" fill="#ff6b6b" font-size="14" font-weight="800">路由崩溃</text>
+    <text x="480" y="170" text-anchor="middle" fill="#8b93a2" font-size="11.5">routing collapse (Shazeer et al. 2017)</text>
+    <text x="480" y="272" text-anchor="middle" fill="#8b93a2" font-size="12">Shazeer 实测：不加任何约束时，最忙专家负载达平均的 <tspan fill="#ffb454" font-weight="700">17.8 倍</tspan>，负载变异系数高达 3.01<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[1]</tspan></text>
+  </g>
+</svg>
+<figcaption><b>图 3</b>：路由崩溃的恶性循环。Shazeer 2017 表 6 数据：无约束 → CV(Load)=3.01、max/mean=17.8；加均衡损失后 → CV≈0.05、max/mean≈1.14<sup class="ref"><a href="#r1">[1]</a></sup>。</figcaption>
+</figure>
+
+<div class="q">
+  <div class="en">"We have observed that the gating network tends to converge to a state where it always produces large weights for the same few experts. This imbalance is self-reinforcing, as the favored experts are trained more rapidly and thus are selected even more by the gating network."</div>
+  <div class="zh">「我们观察到，门控网络倾向于收敛到这样一种状态：它总是给同样几个专家分配很大的权重。这种失衡会自我强化——被偏爱的专家训练得更快，于是又被门控网络更多地选中。」</div>
+  <span class="src">— Shazeer et al., 2017 (arXiv:1701.06538)</span>
+</div>
+
+<h4>亲手复现「路由崩溃」（NumPy 数值模拟）</h4>
+<pre class="title">collapse_sim.py —— 30 行复现图 3 的恶性循环：不加约束时负载迅速集中到少数专家</pre>
+<pre><span class="k">import</span> numpy <span class="k">as</span> np
+
+<span class="k">def</span> <span class="f">softmax</span>(v): e = np.exp(v - v.<span class="f">max</span>()); <span class="k">return</span> e / e.<span class="f">sum</span>()
+
+n_experts, n_tokens, steps = <span class="n">8</span>, <span class="n">1024</span>, <span class="n">60</span>
+scores = np.zeros(n_experts)              <span class="c"># 初始时所有专家平起平坐</span>
+<span class="k">for</span> step <span class="k">in</span> range(steps):
+    probs = softmax(scores)               <span class="c"># 路由器按分数分配 token</span>
+    load  = np.random.multinomial(n_tokens, probs) / n_tokens
+    scores += <span class="n">4.0</span> * (load - load.mean())  <span class="c"># ★ 被选越多→训练越多→分数越高 (正反馈)</span>
+    <span class="k">if</span> step % <span class="n">10</span> == <span class="n">0</span>:
+        <span class="f">print</span>(<span class="s">f"step=</span>{step:<span class="n">2</span><span class="s">} 最忙专家占比=</span>{load.<span class="f">max</span>():.<span class="n">2</span>f}<span class="s">"</span>)
+
+<span class="c"># 实测输出 (seed=0):  step= 0 最忙专家占比=0.15   ← 接近均匀 1/8</span>
+<span class="c">#                   step=10 最忙专家占比=0.72</span>
+<span class="c">#                   step=20 最忙专家占比=1.00   ← 8个专家只剩1个在干活!</span>
+<span class="c">#                   step=30+ 最忙专家占比=1.00   ← 路由彻底崩溃, 其余7个专家"饿死"</span></pre>
+
+<p><b>经典解法：辅助损失（auxiliary loss）</b>。给总损失加一项惩罚，鼓励每个专家收到的 token 比例与平均路由概率都接近 1/n。Switch Transformer 的版本最简洁<sup class="ref"><a href="#r2">[2]</a></sup>：</p>
+<div class="math">
+loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub></span> · <span class="i">P<sub>i</sub></span>，　<span class="i">f<sub>i</sub></span> = 分到专家 i 的 token 比例（不可导），　<span class="i">P<sub>i</sub></span> = 路由器给专家 i 的平均概率（可导）
+</div>
+<p>负载完全均匀时该损失取最小值 1/n；α 通常取 0.01 量级<sup class="ref"><a href="#r2">[2]</a></sup>。<b>但辅助损失有副作用</b>——它把「均匀」这个与主任务无关的目标混入梯度，会损害模型性能。这正是 2024 年 DeepSeek-V3 提出「无辅助损失负载均衡」的动机（§3.2 ③，一条完整的「问题→方案→验证」逻辑线）。</p>
+
+<h4>Switch 辅助负载损失的 PyTorch 实现</h4>
+<pre class="title">switch_balance_loss.py —— Switch Transformer 论文公式 (4)(5)(6)，10 行核心逻辑</pre>
+<pre><span class="k">def</span> <span class="f">switch_load_balance_loss</span>(router_probs, expert_mask, alpha=<span class="n">0.01</span>):
+    <span class="sd">"""</span>
+<span class="sd">    router_probs: [T, E]  softmax后的路由概率 (可导, 梯度由此回传)</span>
+<span class="sd">    expert_mask : [T, E]  实际选中专家的 one-hot (K=1时每行一个1)</span>
+<span class="sd">    """</span>
+    n_experts = router_probs.size(<span class="n">-1</span>)
+    f = expert_mask.mean(dim=<span class="n">0</span>)        <span class="c"># 每个专家收到的 token 比例 (目标: 1/E)</span>
+    P = router_probs.mean(dim=<span class="n">0</span>)        <span class="c"># 每个专家的平均路由概率 (目标: 1/E)</span>
+    loss = n_experts * torch.sum(f * P)  <span class="c"># 均匀时 = 1, 越不均匀越大</span>
+    <span class="k">return</span> alpha * loss
+<span class="c"># 实测验证: 8个专家、4096个token —— 完全均匀时 loss=1.00 (理论最小值);</span>
+<span class="c">#           全部token挤到1个专家时 loss=8.00 (=E, 理论最大值)。梯度经 P 回传。</span></pre>
+
+<div class="note"><b>一个跨越 25 年的源码事实</b>：Switch 论文附录 F 给出的 router 伪代码会产出两个张量——<code>dispatch_tensor</code>（决定 token 去哪个专家）与 <code>combine_tensor</code>（把专家输出按门控值加权合并）。这套「dispatch/combine 张量」范式从 2020 年的 GShard 一路传到今天：本报告 §5.6 中 HunyuanImage-3 的官方开源代码（<code>topkgating()</code> 函数）仍在计算一模一样的 <code>dispatch_mask / combine_weights</code>。<b>读懂 §1 的基础实现，就等于读懂了 2026 年生产代码的一半</b>。</div>
+
+<h3>1.5 基石四：系统视角 —— 专家并行与 All-to-All 通信</h3>
+<p>MoE 不只是算法问题，更是<b>系统问题</b>：一台 GPU 装不下几百个专家时怎么办？答案是 <b>专家并行（Expert Parallelism, EP）</b>，由 GShard 首创<sup class="ref"><a href="#r2">[2]</a></sup>：</p>
+<ul class="tight">
+<li><b>切分</b>：把不同专家放到不同 GPU 上（如 256 个专家平摊到 64 张卡）；注意力、嵌入等「稠密部分」仍按数据并行复制。</li>
+<li><b>分发（Dispatch）</b>：每张卡本地算完路由后，用一次 <b>all-to-all 通信</b> 把 token 发往其目标专家所在的卡。</li>
+<li><b>计算</b>：各卡对收到的 token 跑本地专家的 FFN。</li>
+<li><b>回收（Combine）</b>：再一次 all-to-all 把结果送回原卡，加权相加。</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 960 300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs>
+    <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6ea8ff"/></marker>
+    <marker id="arr5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#41d1a7"/></marker>
+  </defs>
+  <g font-size="12">
+    <rect x="60"  y="30" width="240" height="86" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
+    <text x="180" y="54" text-anchor="middle" fill="#bcd4ff" font-weight="700" font-size="13">GPU 0</text>
+    <rect x="80" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="126" y="88" text-anchor="middle" fill="#e8eaed">专家 0</text>
+    <rect x="184" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="230" y="88" text-anchor="middle" fill="#e8eaed">专家 1</text>
+    <rect x="360" y="30" width="240" height="86" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
+    <text x="480" y="54" text-anchor="middle" fill="#bcd4ff" font-weight="700" font-size="13">GPU 1</text>
+    <rect x="380" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="426" y="88" text-anchor="middle" fill="#e8eaed">专家 2</text>
+    <rect x="484" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="530" y="88" text-anchor="middle" fill="#e8eaed">专家 3</text>
+    <rect x="660" y="30" width="240" height="86" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
+    <text x="780" y="54" text-anchor="middle" fill="#bcd4ff" font-weight="700" font-size="13">GPU 2</text>
+    <rect x="680" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="726" y="88" text-anchor="middle" fill="#e8eaed">专家 4</text>
+    <rect x="784" y="66" width="92" height="36" rx="7" fill="#233049" stroke="#3a4a6e"/><text x="830" y="88" text-anchor="middle" fill="#e8eaed">专家 5</text>
+
+    <rect x="120" y="215" width="720" height="52" rx="10" fill="#141822" stroke="#2a2f3a"/>
+    <text x="480" y="237" text-anchor="middle" fill="#8b93a2">本批 token（每张卡持有一份，颜色 = 目标专家所在 GPU）</text>
+    <g font-family="JetBrains Mono">
+      <circle cx="200" cy="252" r="8" fill="#6ea8ff"/><circle cx="222" cy="252" r="8" fill="#6ea8ff"/><circle cx="244" cy="252" r="8" fill="#41d1a7"/>
+      <circle cx="266" cy="252" r="8" fill="#6ea8ff"/><circle cx="288" cy="252" r="8" fill="#ffb454"/><circle cx="310" cy="252" r="8" fill="#41d1a7"/>
+      <circle cx="470" cy="252" r="8" fill="#41d1a7"/><circle cx="492" cy="252" r="8" fill="#ffb454"/><circle cx="514" cy="252" r="8" fill="#6ea8ff"/>
+      <circle cx="536" cy="252" r="8" fill="#ffb454"/><circle cx="740" cy="252" r="8" fill="#ffb454"/><circle cx="762" cy="252" r="8" fill="#41d1a7"/>
+    </g>
+    <line x1="200" y1="207" x2="160" y2="122" stroke="#6ea8ff" stroke-width="1.5" marker-end="url(#arr4)"/>
+    <line x1="266" y1="207" x2="440" y2="122" stroke="#41d1a7" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr5)"/>
+    <line x1="514" y1="207" x2="740" y2="122" stroke="#ffb454" stroke-width="1.5" marker-end="url(#arr4)"/>
+    <line x1="310" y1="207" x2="820" y2="122" stroke="#ffb454" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#arr4)"/>
+    <text x="480" y="180" text-anchor="middle" fill="#9ee9cf" font-size="13" font-weight="700">① All-to-All 分发：token 按路由结果跨卡流动 → ② 各卡本地算专家 → ③ All-to-All 回收加权</text>
+    <text x="480" y="290" text-anchor="middle" fill="#8b93a2" font-size="11.5">负载不均 = 有的卡忙死有的卡闲死 → all-to-all 时间由最慢的卡决定，这就是负载均衡在系统层的意义</text>
+  </g>
+</svg>
+<figcaption><b>图 4</b>：专家并行与 all-to-all 通信（GShard, 2020<sup class="ref"><a href="#r2">[2]</a></sup>）。DeepSeek-V3 进一步用「节点受限路由」（每 token 最多送往 4 个节点）压缩跨机通信<sup class="ref"><a href="#r4">[4]</a></sup>。</figcaption>
+</figure>
+
+<div class="note warn"><b>本科生关键认知</b>：MoE 不是「免费午餐」。它用 <b>更高的显存占用</b>（要装下所有专家）和 <b>更复杂的通信</b>（all-to-all 对互联带宽极敏感），换取 <b>更低的单 token 计算量</b>。「总参数 vs 激活参数」是衡量一切 MoE 模型的两把尺子：前者决定显存，后者决定算力。DeepSeek-V3 甚至专门设计了 DualPipe 算法让计算与通信重叠、逼近「零开销」<sup class="ref"><a href="#r4">[4]</a></sup>。</div>
+
+<!-- ===================== 第二章 历史 ===================== -->
+<span class="anchor" id="s2"></span>
+<h2 class="sec"><span class="num">2</span>发展历程：从 1991 到万亿参数<span class="roadmap">四块基石是如何被逐一补齐的：稀疏门控(2017) → 系统并行(2020) → top-1 简化(2021) → 开源爆发(2023–)</span><span class="pill fund">历史</span></h2>
+<p class="lead">回看时间线会发现一条清晰的主线：<b>每一代工作都是在对 §1 的某块基石做「减法」或「补丁」</b>——Shazeer 补上稀疏门控、GShard 补上系统并行、Switch 做减法（K=2→1）、DeepSeek 把负载均衡的辅助损失也做成了减法。</p>
+
+<div class="tl">
+  <div class="e"><span class="yr">1991</span>
+    <div class="t">Adaptive Mixtures of Local Experts — MoE 概念诞生</div>
+    <div class="d">Jacobs、Jordan、Nowlan、Hinton 提出：多个「专家网络」+ 一个「门控网络」分而治之。当时用于浅层监督学习，路由是密集的（所有专家都激活）。</div>
+  </div>
+  <div class="e"><span class="yr">2017 · ICLR</span>
+    <div class="t">Sparsely-Gated MoE Layer（Shazeer 等，Google Brain）<sup class="ref"><a href="#r1">[1]</a></sup></div>
+    <div class="d">首次实现<b>稀疏门控 + Noisy Top-K</b>，把 MoE 作为通用组件插进 LSTM 之间。在 10 亿词语言建模上做到「算力基本不变、模型容量提升 1000 倍以上」，最大 137B 参数。奠定今天所有 MoE 的范式（基石一、二）。</div>
+  </div>
+  <div class="e"><span class="yr">2020 · GShard</span>
+    <div class="t">GShard：条件计算 + 专家并行，6000 亿参数机器翻译模型<sup class="ref"><a href="#r2">[2]</a></sup></div>
+    <div class="d">Lepikhin 等首创 <b>专家并行（EP）</b>与 all-to-all 分发（基石四）；top-2 路由、隔层 MoE、辅助负载损失、容量因子等一整套工程约定沿用至今。</div>
+  </div>
+  <div class="e"><span class="yr">2021 · JMLR</span>
+    <div class="t">Switch Transformer：大胆做减法到 top-1，1.6 万亿参数<sup class="ref"><a href="#r2">[2]</a></sup></div>
+    <div class="d">Fedus、Zoph、Shazeer 的关键判断：每个 token 只路由到 <b>1 个</b>专家就够，反而更好更省（§1.3 Q&amp;A）。同算力下预训练比 T5 快 7 倍；还给出选择性精度、蒸馏等训练技巧。MoE 第一次稳定训到万亿级。</div>
+    <div class="q" style="margin-top:8px">
+      <div class="en">"Contrary to these ideas, we instead use a simplified strategy where we route to only a single expert. We show this simplification preserves model quality, reduces routing computation and performs better."</div>
+      <div class="zh">「与上述观点相反，我们采用一种简化策略：每个 token 只路由到单个专家。我们证明这种简化能保持模型质量、降低路由计算量，且效果更好。」</div>
+      <span class="src">— Fedus, Zoph, Shazeer, <i>Switch Transformers</i>, JMLR 2022 (arXiv:2101.03961)</span>
+    </div>
+  </div>
+  <div class="e"><span class="yr">2021–2022</span>
+    <div class="t">V-MoE 与 Expert-Choice：MoE 进入视觉与「反向路由」时代</div>
+    <div class="d">Riquelme 等（NeurIPS 2021）把 MoE 引入 ViT（V-MoE）；Zhou 等（NeurIPS 2022）提出 <b>Expert-Choice 路由</b>——让<b>专家反过来挑 token</b>，天然负载均衡，这为后来 Apple 的 EC-DiT（§5）铺路。</div>
+  </div>
+  <div class="e"><span class="yr">2023.03–12</span>
+    <div class="t">Grok-1 与 Mixtral 8x7B：开源 MoE 浪潮引爆<sup class="ref"><a href="#r3">[3]</a></sup></div>
+    <div class="d">xAI 开源 314B 的 Grok-1（8 选 2）；Mistral 发布 Mixtral 8x7B，47B 总参/13B 激活，以 5 倍更少激活参数击败 Llama 2 70B，「稀疏 MoE」从此成为开源社区主流选项。（业界亦普遍推测 GPT-4 采用 MoE，但未经官方证实。）</div>
+  </div>
+  <div class="e"><span class="yr">2024.01–05</span>
+    <div class="t">DeepSeekMoE / V2：细粒度专家 + 共享专家 + MLA<sup class="ref"><a href="#r4">[4]</a></sup></div>
+    <div class="d">DeepSeek 相继提出 <b>细粒度专家切分</b>（大专家拆成小专家、组合数暴涨）、<b>共享专家隔离</b>（常驻专家抓通用知识、消除冗余）与 <b>多头潜在注意力 MLA</b>（KV 缓存压缩 93.3%）。开源 16B / 236B 模型。</div>
+  </div>
+  <div class="e"><span class="yr">2024.12</span>
+    <div class="t">DeepSeek-V3：无辅助损失负载均衡 + MTP + FP8<sup class="ref"><a href="#r4">[4]</a></sup></div>
+    <div class="d">671B/37B。首创 <b>auxiliary-loss-free</b> 偏置项负载均衡与 <b>多 token 预测（MTP）</b>；FP8 训练 + DualPipe 通信重叠。全程训练仅 2.788M H800 GPU 小时 / 558 万美元，性能比肩 GPT-4o 与 Claude-3.5-Sonnet。里程碑。</div>
+  </div>
+  <div class="e"><span class="yr">2025</span>
+    <div class="t">万亿稀疏时代：DeepSeek-R1 / Kimi K2 / GLM-4.5 / Qwen3 / Llama 4<sup class="ref"><a href="#r6">[6]</a></sup><sup class="ref"><a href="#r7">[7]</a></sup></div>
+    <div class="d">开源稀疏 MoE 全面迈向万亿（Kimi K2 约 1.04T/32B，384 专家选 8）。R1 用 RL 让 MoE 学会长链推理；K2 用 MuonClip/QK-clip 解决万亿级训练稳定性。MoE 成为顶级大模型的事实标准。</div>
+  </div>
+</div>
+
+<!-- ===================== 第三章 LLM ===================== -->
+<span class="anchor" id="s3"></span>
+<h2 class="sec"><span class="num">3</span>MoE 在大语言模型（LLM）中的应用<span class="roadmap">本章逻辑：开源引爆(Mixtral) → 结构革新(DeepSeekMoE) → 均衡革新(无辅助损失) → 训练革新(MTP/稳定性) → 万亿俱乐部</span><span class="pill llm">LLM</span></h2>
+<p class="lead">LLM 是 MoE 落地最成熟、收益最大的领域。本章的叙事主线是「三代革新」：<b>结构革新</b>（专家怎么切）、<b>均衡革新</b>（负载怎么调）、<b>训练革新</b>（目标函数与稳定性）。</p>
+
+<h3>3.1 Mixtral 8x7B：把 MoE 带入主流开源世界</h3>
+<p>Mixtral 几乎就是 Mistral 7B 把<b>每一层</b>的 FFN 换成「8 个 SwiGLU 专家、top-2 路由」<sup class="ref"><a href="#r3">[3]</a></sup>：</p>
+<div class="math">
+<span class="i">y</span> = Σ<sub>i=0..7</sub> Softmax(Top2(<span class="i">x</span>·<span class="i">W<sub>g</sub></span>))<sub>i</sub> · SwiGLU<sub>i</sub>(<span class="i">x</span>)
+</div>
+<div class="q">
+  <div class="en">"Mixtral has the same architecture as Mistral 7B, with the difference that each layer is composed of 8 feedforward blocks (i.e. experts). For every token, at each layer, a router network selects two experts… each token has access to 47B parameters, but only uses 13B active parameters during inference."</div>
+  <div class="zh">「Mixtral 与 Mistral 7B 架构相同，区别在于每一层由 8 个前馈块（即专家）组成。每个 token 在每层由一个路由网络挑选两个专家……每个 token 可访问 47B 参数，但推理时只使用 13B 激活参数。」</div>
+  <span class="src">— Jiang et al., <i>Mixtral of Experts</i>, 2024.01 (arXiv:2401.04088)</span>
+</div>
+
+<h4>Mixtral 路由实现：官方参考源码（真实代码）</h4>
+<pre class="title">mistral-src/src/mistral_inference/moe.py —— Mistral 官方发布的 Mixtral 参考实现，全文仅 33 行（本目录已克隆该仓库；注释为本报告所加）</pre>
+<pre><span class="c"># 官方源码: https://github.com/mistralai/mistral-src  (Apache 2.0)</span>
+<span class="k">class</span> <span class="d">MoeLayer</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, experts: List[nn.Module], gate: nn.Module, moe_args: MoeArgs):
+        <span class="v">super</span>().__init__()
+        <span class="self">self</span>.experts = nn.ModuleList(experts)
+        <span class="self">self</span>.gate = gate
+        <span class="self">self</span>.args = moe_args             <span class="c"># num_experts=8, num_experts_per_tok=2</span>
+
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, inputs: torch.Tensor) -&gt; torch.Tensor:
+        gate_logits = <span class="self">self</span>.gate(inputs)                                  <span class="c"># [T, 8] 原始logits</span>
+        weights, selected_experts = torch.topk(gate_logits,
+                            <span class="self">self</span>.args.num_experts_per_tok)             <span class="c"># ★ 先topk(在logits上,等价于在概率上)</span>
+        weights = F.softmax(weights, dim=<span class="n">1</span>, dtype=torch.float).to(inputs.dtype)  <span class="c"># ★ 再对"选中者"softmax</span>
+        results = torch.zeros_like(inputs)
+        <span class="k">for</span> i, expert <span class="k">in</span> <span class="f">enumerate</span>(<span class="self">self</span>.experts):                <span class="c"># 外层循环=专家(非token), 便于批量计算</span>
+            batch_idx, nth_expert = torch.where(selected_experts == i)          <span class="c"># 本专家处理哪些(token, 第几槽位)</span>
+            results[batch_idx] += weights[batch_idx, nth_expert, <span class="v">None</span>] * expert(inputs[batch_idx])
+        <span class="k">return</span> results</pre>
+<div class="note"><b>源码级洞察</b>：① 官方实现是「<b>先 topk（在原始 logits 上）→ 再对选中的 logits 做 softmax</b>」——与论文公式 <span class="i">Softmax(TopK(·))</span> 字面一致；由于 softmax 单调，先 topk 再局部 softmax ≡ 先全局 softmax 再选出并归一化，两者数学等价，但前者省去了对全部 8 个专家求指数；② <b>推理代码里没有任何负载均衡</b>——辅助损失只存在于训练期（这也解释了为何开源仓库普遍不带均衡代码）；③ 循环以「专家」为外层，被选中的 token 整批送入该专家做一次矩阵乘——这就是 §1.2 教学版「逐 token 循环」的工业化写法。</div>
+
+<p><b>有趣发现</b>：Mixtral 团队分析路由后发现，专家并<b>不</b>按「数学/生物/哲学」等领域分工，而是更偏向<b>语法层分工</b>——比如 Python 里的 <code>self</code>、缩进 token 倾向于被路由到同一批专家<sup class="ref"><a href="#r3">[3]</a></sup>。这提醒我们：「专家专业化」的直觉常与实际不符。</p>
+
+<table>
+<thead><tr><th>模型（时间）</th><th>路由设置</th><th>总参数</th><th>激活参数</th><th>标志性贡献</th></tr></thead>
+<tbody>
+<tr><td>Switch-C（2021）</td><td>top-1，2048 专家</td><td>1.6T</td><td>—</td><td>首个万亿级稀疏模型<sup class="ref"><a href="#r2">[2]</a></sup></td></tr>
+<tr><td>Grok-1（2024.03）</td><td>top-2，8 专家</td><td>314B</td><td>~79B</td><td>首个开源百亿级 MoE 权重</td></tr>
+<tr><td>Mixtral 8x7B（2023.12）</td><td>top-2，8 专家</td><td>~47B</td><td>13B</td><td>击败 Llama2-70B<sup class="ref"><a href="#r3">[3]</a></sup></td></tr>
+<tr><td>Mixtral 8x22B（2024.04）</td><td>top-2，8 专家</td><td>~141B</td><td>39B</td><td>开源性能新标杆</td></tr>
+<tr><td>DeepSeek-V2（2024.05）</td><td>top-6，160 路由 + 2 共享</td><td>236B</td><td>21B</td><td>MLA + 细粒度/共享专家<sup class="ref"><a href="#r4">[4]</a></sup></td></tr>
+<tr><td>DeepSeek-V3（2024.12）</td><td>top-8，256 路由 + 1 共享</td><td>671B</td><td>37B</td><td>无辅助损失 + MTP + FP8<sup class="ref"><a href="#r4">[4]</a></sup></td></tr>
+<tr><td>Qwen3-235B-A22B（2025.04）</td><td>top-8，128 专家</td><td>235B</td><td>22B</td><td>无辅助损失 + Thinking 模式</td></tr>
+<tr><td>GLM-4.5（2025.07）</td><td>sigmoid 门控，无损负载</td><td>355B</td><td>32B</td><td>Agentic/Reasoning/Coding<sup class="ref"><a href="#r7">[7]</a></sup></td></tr>
+<tr><td>Kimi K2（2025.07）</td><td>top-8，384 专家 + 1 共享</td><td>~1.04T</td><td>32B</td><td>开源万亿 + MuonClip<sup class="ref"><a href="#r6">[6]</a></sup></td></tr>
+<tr><td>Llama 4 Maverick（2025.04）</td><td>17B 激活</td><td>~400B</td><td>17B</td><td>Meta 首次转投 MoE</td></tr>
+</tbody>
+</table>
+
+<h3>3.2 DeepSeek-V3：当代 MoE 的集大成者（含真实代码）</h3>
+<p>DeepSeek-V3 是理解「现代 MoE 怎么做」的最佳样本。它把 DeepSeek-V2 验证过的 <b>MLA</b> 与 <b>DeepSeekMoE</b> 两项架构，叠加上 <b>无辅助损失负载均衡</b> 和 <b>MTP</b> 两大新策略<sup class="ref"><a href="#r4">[4]</a></sup>。以下按四项创新逐一拆解。</p>
+
+<h4>① 结构革新：细粒度专家 + 共享专家（源自 DeepSeekMoE，2024.01）</h4>
+<p>传统 MoE（GShard/Mixtral）用少数「大」专家。DeepSeek 的洞察有两点<sup class="ref"><a href="#r4">[4]</a></sup>：</p>
+<ul class="tight">
+<li><b>细粒度切分</b>：把每个专家的中间维度缩小、专家数量增多。在<b>激活参数量不变</b>的前提下，可选择的专家组合数从 C(8,2)=28 暴涨到近乎无穷（V3：256 选 8），知识组合的灵活性大增。</li>
+<li><b>共享专家隔离</b>：留少量<b>常驻</b>专家处理所有 token 都需要的通用知识，避免每个路由专家重复学这部分，减少冗余。</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 960 380" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <text x="480" y="28" text-anchor="middle" fill="#cfd6e4" font-size="14.5" font-weight="700">GShard / Mixtral 风格：少数「大」专家，top-2</text>
+  <g>
+    <rect x="120" y="48" width="100" height="56" rx="8" fill="#233049" stroke="#6ea8ff" stroke-width="1.8"/><text x="170" y="72" text-anchor="middle" fill="#e8eaed" font-size="12">专家1 (大)</text><text x="170" y="90" text-anchor="middle" fill="#41d1a7" font-size="11">✔ 选中</text>
+    <rect x="235" y="48" width="100" height="56" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="285" y="72" text-anchor="middle" fill="#5f6b7e" font-size="12">专家2 (大)</text>
+    <rect x="350" y="48" width="100" height="56" rx="8" fill="#233049" stroke="#6ea8ff" stroke-width="1.8"/><text x="400" y="72" text-anchor="middle" fill="#e8eaed" font-size="12">专家3 (大)</text><text x="400" y="90" text-anchor="middle" fill="#41d1a7" font-size="11">✔ 选中</text>
+    <rect x="465" y="48" width="100" height="56" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="515" y="72" text-anchor="middle" fill="#5f6b7e" font-size="12">专家4 (大)</text>
+    <rect x="580" y="48" width="100" height="56" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="630" y="72" text-anchor="middle" fill="#5f6b7e" font-size="12">专家5 (大)</text>
+    <rect x="695" y="48" width="100" height="56" rx="8" fill="#161a22" stroke="#3a4152" stroke-dasharray="4 3"/><text x="745" y="72" text-anchor="middle" fill="#5f6b7e" font-size="12">…</text>
+  </g>
+  <text x="480" y="132" text-anchor="middle" fill="#8b93a2" font-size="12">组合数 = C(8,2) = 28 种；专家之间知识冗余度高</text>
+
+  <text x="480" y="180" text-anchor="middle" fill="#9ee9cf" font-size="14.5" font-weight="700">DeepSeekMoE：共享专家(常亮) + 细粒度「小」专家，top-8</text>
+  <rect x="80" y="200" width="130" height="56" rx="8" fill="#1f3a33" stroke="#41d1a7" stroke-width="2"/>
+  <text x="145" y="224" text-anchor="middle" fill="#9ee9cf" font-size="12.5" font-weight="700">共享专家</text>
+  <text x="145" y="242" text-anchor="middle" fill="#41d1a7" font-size="11">每个 token 必算</text>
+  <g font-size="10.5">
+    <rect x="240" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="266" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="298" y="200" width="52" height="34" rx="6" fill="#161a22" stroke="#3a4152"/><text x="324" y="221" text-anchor="middle" fill="#5f6b7e">跳过</text>
+    <rect x="356" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="382" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="414" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="440" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="472" y="200" width="52" height="34" rx="6" fill="#161a22" stroke="#3a4152"/><text x="498" y="221" text-anchor="middle" fill="#5f6b7e">跳过</text>
+    <rect x="530" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="556" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="588" y="200" width="52" height="34" rx="6" fill="#161a22" stroke="#3a4152"/><text x="614" y="221" text-anchor="middle" fill="#5f6b7e">跳过</text>
+    <rect x="646" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="672" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="704" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="730" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <rect x="762" y="200" width="52" height="34" rx="6" fill="#233049" stroke="#6ea8ff" stroke-width="1.4"/><text x="788" y="221" text-anchor="middle" fill="#41d1a7">路由✔</text>
+    <text x="800" y="256" text-anchor="middle" fill="#8b93a2">… 共 256 个路由专家（图示前 9 个）</text>
+  </g>
+  <text x="480" y="292" text-anchor="middle" fill="#8b93a2" font-size="12">组合数 = C(256,8) ≈ 10¹⁴ 种；每个专家更小（中间维度 ≈ 1/4），总激活 FLOPs 可与左边持平</text>
+  <text x="480" y="318" text-anchor="middle" fill="#9ee9cf" font-size="12.5" font-weight="700">输出 = 共享专家(全算) + 8 个被选中路由专家的加权和</text>
+  <text x="480" y="352" text-anchor="middle" fill="#8b93a2" font-size="11.5">对应公式: h′ₜ = uₜ + Σ FFN⁽ˢ⁾ᵢ(uₜ) + Σ gᵢ,ₜ·FFN⁽ʳ⁾ᵢ(uₜ)　(DeepSeek-V3 技术报告 式(12))<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[4]</tspan></text>
+</svg>
+<figcaption><b>图 5</b>：DeepSeekMoE 的「细粒度 + 共享」双革新。共享专家承担通用知识、路由专家专注特定模式，且小专家带来指数级增长的组合灵活性。</figcaption>
+</figure>
+
+<h4>② MLA（多头潜在注意力）：给推理省显存</h4>
+<p>MoE 已让 FFN 算得少了，但长上下文下 <b>KV 缓存</b>（每个 token 每层都要缓存 K、V 向量供注意力回看）仍吃满显存。MLA 的思路像「<b>存压缩包、用时解压</b>」：把 K、V 先压成一个低维<b>潜在向量</b> c<sub>KV</sub> 存起来，需要时再上采样还原；RoPE 位置信息通过一条解耦的共享小 key 单独处理<sup class="ref"><a href="#r4">[4]</a></sup>。DeepSeek-V2 报告 KV 缓存压缩约 93.3%<sup class="ref"><a href="#r4">[4]</a></sup>。</p>
+
+<figure>
+<svg viewBox="0 0 960 280" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs><marker id="arr6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8fa3c4"/></marker></defs>
+  <text x="250" y="30" text-anchor="middle" fill="#cfd6e4" font-size="14" font-weight="700">标准 MHA 的 KV 缓存</text>
+  <rect x="180" y="50" width="140" height="180" rx="8" fill="#2a1e22" stroke="#ff6b6b"/>
+  <text x="250" y="140" text-anchor="middle" fill="#ffc9c9" font-size="12" transform="rotate(-90 250 140)">2 × n_h × d_h = 2×128×128</text>
+  <text x="250" y="252" text-anchor="middle" fill="#ff9c9c" font-size="12">每 token 每层 ~32K 元素</text>
+
+  <text x="700" y="30" text-anchor="middle" fill="#9ee9cf" font-size="14" font-weight="700">MLA 的 KV 缓存</text>
+  <rect x="655" y="150" width="90" height="26" rx="6" fill="#1f3a33" stroke="#41d1a7"/>
+  <text x="700" y="167" text-anchor="middle" fill="#9ee9cf" font-size="11">c_KV + k_R</text>
+  <text x="700" y="200" text-anchor="middle" fill="#9ee9cf" font-size="12">仅 ~576 元素（压缩约 93%）</text>
+
+  <path d="M480,140 C540,140 560,163 645,163" fill="none" stroke="#8fa3c4" stroke-width="1.6" marker-end="url(#arr6)"/>
+  <text x="558" y="128" text-anchor="middle" fill="#ffd9a8" font-size="12">W_DKV 下投影压缩</text>
+  <path d="M755,163 C800,163 820,120 840,110" fill="none" stroke="#8fa3c4" stroke-width="1.6" marker-end="url(#arr6)"/>
+  <text x="855" y="100" text-anchor="middle" fill="#ffd9a8" font-size="11">W_UK / W_UV</text>
+  <text x="855" y="116" text-anchor="middle" fill="#ffd9a8" font-size="11">用时再还原</text>
+
+  <text x="480" y="252" text-anchor="middle" fill="#8b93a2" font-size="12">缓存里存"压缩包"(蓝框)，注意力计算前解压 —— 显存大降、性能基本不损<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[4]</tspan></text>
+</svg>
+<figcaption><b>图 6</b>：MLA 低秩压缩示意。与 MoE 互补：MoE 省「权重计算」，MLA 省「KV 缓存显存」，两者叠加构成 DeepSeek 的推理成本优势。</figcaption>
+</figure>
+
+<h4>③ 均衡革新：无辅助损失负载均衡（auxiliary-loss-free）</h4>
+<p>如 §1.4 所述，传统辅助损失会污染主任务梯度。DeepSeek 的做法极其简洁：给每个专家的亲和分数 <b>加一个偏置项 b<sub>i</sub></b> 来决定 top-K 路由，但<b>偏置只用于选专家，不进入最终加权</b><sup class="ref"><a href="#r4">[4]</a></sup>：</p>
+<div class="math">
+g′<sub>i,t</sub> = s<sub>i,t</sub>，若 s<sub>i,t</sub>+b<sub>i</sub> ∈ Topk({s<sub>j,t</sub>+b<sub>j</sub>})；否则为 0
+</div>
+<p>训练中持续监控每个专家的负载：某专家<b>过载</b>就把它的 b<sub>i</sub> <b>减小 γ</b>，<b>欠载</b>就<b>增大 γ</b>。由于偏置不进梯度、不影响主损失，负载均衡与模型性能彻底解耦——相当于一个「只踩油门刹车、不碰方向盘」的自动控制器。</p>
+<div class="q">
+  <div class="en">"We introduce a bias term b<sub>i</sub> for each expert and add it to the corresponding affinity scores s<sub>i,t</sub> to determine the top-K routing… the bias term is only used for routing. The gating value, which will be multiplied with the FFN output, is still derived from the original affinity score."</div>
+  <div class="zh">「我们为每个专家引入一个偏置项 b<sub>i</sub>，加到对应的亲和分数 s<sub>i,t</sub> 上来决定 top-K 路由……偏置项仅用于路由。最终与 FFN 输出相乘的门控值，仍由原始亲和分数计算得到。」</div>
+  <span class="src">— DeepSeek-AI, <i>DeepSeek-V3 Technical Report</i>, 2024.12 (arXiv:2412.19437)</span>
+</div>
+<p>消融实验显示，无辅助损失方案在大多数基准上一致优于纯辅助损失方案：大尺度 MoE 上 MATH 39.6 vs 37.2、HumanEval 46.3 vs 40.2、GSM8K 74.5 vs 70.7<sup class="ref"><a href="#r4">[4]</a></sup>。V3 还保留了一个<b>极小权重（α=0.0001）的序列级辅助损失</b>兜底，防止单条序列内极端失衡<sup class="ref"><a href="#r4">[4]</a></sup>。</p>
+
+<h4>④ 训练革新：MTP（多 token 预测）</h4>
+<p>训练时让模型一次预测<b>后面多个 token</b>（而非只预测下一个），可提升效果，推理时还能配合投机解码加速。DeepSeek-V3 的第二 token 接受率高达 85%–90%，端到端解码速度提升 1.8 倍 TPS<sup class="ref"><a href="#r4">[4]</a></sup>。</p>
+
+<figure>
+<svg viewBox="0 0 960 190" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <g font-size="12">
+    <rect x="40" y="60" width="150" height="56" rx="10" fill="#1d212b" stroke="#6ea8ff"/><text x="115" y="83" text-anchor="middle" fill="#e8eaed">主干 Transformer</text><text x="115" y="101" text-anchor="middle" fill="#8b93a2">读到 x₁…xₜ</text>
+    <rect x="260" y="24" width="180" height="46" rx="9" fill="#233049" stroke="#41d1a7"/><text x="350" y="44" text-anchor="middle" fill="#e8eaed" font-weight="700">主头：预测 xₜ₊₁</text><text x="350" y="60" text-anchor="middle" fill="#8b93a2" font-size="11">正常自回归目标</text>
+    <rect x="260" y="106" width="180" height="46" rx="9" fill="#1f3a33" stroke="#41d1a7" stroke-dasharray="5 4"/><text x="350" y="126" text-anchor="middle" fill="#9ee9cf" font-weight="700">MTP 模块：预测 xₜ₊₂</text><text x="350" y="142" text-anchor="middle" fill="#8b93a2" font-size="11">共享主干+小投影头, 权重λ=0.3</text>
+    <line x1="190" y1="78" x2="260" y2="48" stroke="#8fa3c4" marker-end="url(#arr6)"/>
+    <line x1="190" y1="98" x2="260" y2="126" stroke="#8fa3c4" marker-end="url(#arr6)"/>
+    <rect x="500" y="106" width="420" height="46" rx="9" fill="#141822" stroke="#2a2f3a"/>
+    <text x="710" y="126" text-anchor="middle" fill="#d7dce6">推理时可直接丢弃 MTP 头 → 推理零开销</text>
+    <text x="710" y="142" text-anchor="middle" fill="#8b93a2" font-size="11">或用它做投机解码: 一次猜2个token, 接受率85-90% → 1.8×加速<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[4]</tspan></text>
+  </g>
+</svg>
+<figcaption><b>图 7</b>：MTP 训练目标：「一个主干、两个预测头」。训练时多一份监督信号；推理时可弃可加速，进退自如。</figcaption>
+</figure>
+
+<h4>真实代码：DeepSeek-V3 的 MoE 实现（官方推理版）</h4>
+<p>下面是本目录已克隆的 <code>DeepSeek-V3/inference/model.py</code> 中 <b>路由器（Gate）</b> 与 <b>MoE 层</b> 的核心实现，可直接对照上面的公式阅读：</p>
+<pre class="title">DeepSeek-V3/inference/model.py —— 官方推理实现（节选，注释为本报告所加）</pre>
+<pre><span class="c"># ---- 路由器：实现 "无辅助损失负载均衡" + "节点受限分组路由" ----</span>
+<span class="k">class</span> <span class="d">Gate</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, args):
+        <span class="c"># topk = 激活专家数(V3 为 8); n_groups/topk_groups = 节点受限路由</span>
+        <span class="self">self</span>.topk = args.n_activated_experts
+        <span class="self">self</span>.weight = nn.Parameter(torch.empty(args.n_routed_experts, args.dim))
+        <span class="c"># ★ 偏置项就是 "无辅助损失" 的关键 —— 但仅 dim==7168(671B) 才启用</span>
+        <span class="self">self</span>.bias = nn.Parameter(torch.empty(args.n_routed_experts, dtype=torch.float32)) \
+                   <span class="k">if</span> <span class="self">self</span>.dim == <span class="n">7168</span> <span class="k">else</span> <span class="v">None</span>
+
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, x):
+        scores = linear(x, <span class="self">self</span>.weight)
+        scores = scores.sigmoid()             <span class="c"># DeepSeek-V3 用 sigmoid 计算亲和分数(V2用softmax)</span>
+        original_scores = scores              <span class="c"># 记住原始分数(最终加权用它, 不含偏置)</span>
+        <span class="k">if</span> <span class="self">self</span>.bias <span class="k">is not</span> <span class="v">None</span>:
+            scores = scores + <span class="self">self</span>.bias    <span class="c"># ★ 偏置只用于 "选专家", 不进加权</span>
+        <span class="c"># 节点受限路由: 256个专家分8组, 先选4个组, 屏蔽其余 → 每 token 最多跨4节点</span>
+        <span class="k">if</span> <span class="self">self</span>.n_groups &gt; <span class="n">1</span>:
+            scores = scores.view(x.size(<span class="n">0</span>), <span class="self">self</span>.n_groups, <span class="n">-1</span>)
+            group_scores = scores.topk(<span class="n">2</span>, dim=<span class="n">-1</span>)[<span class="n">0</span>].sum(dim=<span class="n">-1</span>)
+            indices = group_scores.topk(<span class="self">self</span>.topk_groups, dim=<span class="n">-1</span>)[<span class="n">1</span>]
+            scores = scores.masked_fill_(非选中组, <span class="n">-inf</span>).flatten(<span class="n">1</span>)
+        indices = torch.topk(scores, <span class="self">self</span>.topk, dim=<span class="n">-1</span>)[<span class="n">1</span>]     <span class="c"># 选出 top-8 专家</span>
+        weights = original_scores.gather(<span class="n">1</span>, indices)            <span class="c"># ★ 用原始(无偏置)分数加权</span>
+        weights /= weights.sum(dim=<span class="n">-1</span>, keepdim=<span class="v">True</span>)
+        <span class="k">return</span> weights, indices
+
+<span class="c"># ---- MoE 层: 路由专家 + 永远在线的共享专家 ----</span>
+<span class="k">class</span> <span class="d">MoE</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, args):
+        <span class="self">self</span>.gate = Gate(args)
+        <span class="c"># 每个 GPU 只持有属于自己的那部分专家(专家并行, 见图4)</span>
+        <span class="self">self</span>.experts = nn.ModuleList([Expert(...) <span class="k">for</span> i <span class="k">in</span> range(n_routed_experts)])
+        <span class="c"># ★ 共享专家: 对所有 token 都激活, 抓通用知识 (图5绿色方块)</span>
+        <span class="self">self</span>.shared_experts = MLP(args.dim, args.n_shared_experts * args.moe_inter_dim)
+
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, x):
+        weights, indices = <span class="self">self</span>.gate(x)          <span class="c"># 路由</span>
+        y = torch.zeros_like(x)
+        <span class="k">for</span> i <span class="k">in</span> range(<span class="self">self</span>.experts_start_idx, <span class="self">self</span>.experts_end_idx):
+            y[idx] += expert(x[idx]) * weights[...]  <span class="c"># 仅计算被路由到本 GPU 的专家</span>
+        z = <span class="self">self</span>.shared_experts(x)            <span class="c"># 共享专家(常驻)</span>
+        <span class="k">if</span> world_size &gt; <span class="n">1</span>: dist.all_reduce(y)  <span class="c"># 跨卡归约(对应all-to-all回收)</span>
+        <span class="k">return</span> (y + z)                      <span class="c"># 路由专家 + 共享专家</span></pre>
+
+<h4>训练侧：偏置项 b<sub>i</sub> 是如何被更新的（论文描述的训练逻辑）</h4>
+<p>上面的推理代码里 <code>bias</code> 是冻结的；它在<b>训练时</b>由负载统计驱动更新——这也是「无辅助损失」名称的由来：不产生任何梯度，纯粹是控制论式的反馈调节<sup class="ref"><a href="#r4">[4]</a></sup>：</p>
+<pre class="title">aux_free_balance.py —— DeepSeek-V3「偏置更新」逻辑（按论文 §2.1.2 描述还原；γ 即 bias update speed，V3 前期取 0.001）</pre>
+<pre><span class="c"># 每个训练 step 结束时执行 (伪代码, 不产生梯度, 不进 loss.backward())</span>
+<span class="k">with</span> torch.no_grad():
+    counts = token_counts_per_expert        <span class="c"># 本 step 全 batch 各专家接收的 token 数</span>
+    avg    = counts.mean()
+    <span class="k">for</span> i <span class="k">in</span> range(n_routed_experts):
+        <span class="k">if</span> counts[i] &gt; avg:                <span class="c"># 过载 → 降低偏置, 让它更难被 top-k 选中</span>
+            gate.bias[i] -= gamma
+        <span class="k">else</span>:                              <span class="c"># 欠载 → 抬高偏置, 增加被选机会</span>
+            gate.bias[i] += gamma
+<span class="c"># 直觉: 一个只有"油门/刹车"的控制器——只影响谁被选中(路由),</span>
+<span class="c">#       不影响选中后权重多大(门控值), 因此完全不干扰主任务的学习。</span></pre>
+
+<div class="note"><b>读代码要点</b>：① <code>bias</code> 加在 <code>scores</code> 上只用于 <code>topk</code>，加权用的是 <code>original_scores</code>——严格对应论文「偏置只用于路由」；② <code>shared_experts</code> 常驻、不经过 gate；③ 分组逻辑是<b>节点受限路由</b>（8 组选 4 组），把跨节点 all-to-all 通信压到可承受范围（呼应图 4）。</div>
+
+<h3>3.3 DeepSeek-R1：让 MoE 学会「推理」</h3>
+<p>R1（2025.01）沿用 V3 架构，关键不在结构而在训练：用 <b>强化学习（RLVR）</b>激励模型产生长链思维（long-CoT），把推理能力「内化」进稀疏 MoE，在数学/代码上达到接近 OpenAI o1 的水平<sup class="ref"><a href="#r6">[6]</a></sup>。同时 V3 又反过来从 R1 <b>蒸馏</b>推理能力，形成 V3↔R1 互相强化的闭环<sup class="ref"><a href="#r4">[4]</a></sup>。这证明 MoE 不只擅长「知识记忆」，也能承载复杂推理。</p>
+
+<h3>3.4 GLM-4.5 / Kimi K2 / Qwen3：2025 万亿稀疏新势力</h3>
+<div class="grid two">
+  <div class="card"><h4>GLM-4.5（Z.ai, 2025.07）</h4>
+    <p>355B 总参 / 32B 激活（Air 版 106B/12B）。采用 <b>sigmoid 门控 + 无损负载均衡（loss-free loading）</b>、GQA + 部分 RoPE，强调 Agentic/Reasoning/Coding 三类能力<sup class="ref"><a href="#r7">[7]</a></sup>。可见 DeepSeek 式负载方案已成为行业共识。</p>
+  </div>
+  <div class="card"><h4>Kimi K2（Moonshot, 2025.07）</h4>
+    <p>开源 <b>~1.04T 总参 / 32B 激活</b>（384 路由专家选 8 + 1 共享），128K 上下文，15.5T tokens 训练。核心工程突破是 <b>MuonClip 优化器</b>——用 QK-clip 技术抑制注意力 logits 爆炸，首次稳定训出万亿稀疏 MoE<sup class="ref"><a href="#r6">[6]</a></sup>。</p>
+  </div>
+  <div class="card"><h4>Qwen3 系列（2025.04）</h4>
+    <p>旗舰 Qwen3-235B-A22B：235B 总参 / 22B 激活、128 专家选 8，同样采用无辅助损失均衡；小型版 Qwen3-30B-A3B（3B 激活）主打端侧。</p>
+  </div>
+  <div class="card"><h4>Llama 4（Meta, 2025.04）</h4>
+    <p>Scout（~109B 总参 / 17B 激活）与 Maverick（~400B 总参 / 17B 激活）。Meta 放弃纯稠密路线转投 MoE，标志着该架构在工业界的大一统。</p>
+  </div>
+</div>
+
+<div class="note ok"><b>§3 小结（逻辑链回顾）</b>：Mixtral 证明了开源稀疏可行（沿用 2017 范式）→ DeepSeekMoE 证明「专家怎么切」还有巨大设计空间（结构革新）→ V3 把 2017 年以来一直在用的辅助损失也革掉了（均衡革新）→ MTP/MuonClip/FP8 把「怎么训」推向极限（训练革新）→ 万亿俱乐部（K2/Qwen3/GLM-4.5/Llama 4）集体收网。<b>四块基石未变，变的是每块基石的打磨精度。</b></div>
+
+<!-- ===================== 第四章 VLM ===================== -->
+<span class="anchor" id="s4"></span>
+<h2 class="sec"><span class="num">4</span>MoE 在视觉-语言模型（VLM）中的应用<span class="roadmap">本章逻辑：VLM 的独特问题 → 先驱探索(VLMo) → 核心工作(MoE-LLaVA 三阶段) → 后续发展</span><span class="pill vlm">VLM</span></h2>
+<p class="lead">VLM（如 LLaVA）= 视觉编码器 + 投影层 + LLM。它的痛点是：<b>一张图动辄数百个视觉 token，稠密模型每张图都要全参数计算</b>，又慢又贵。MoE 在这里的核心逻辑与 LLM 一致，但多了一个新问题——<b>多模态训练中直接稀疏化会崩</b>。</p>
+
+<h3>4.1 先驱：VLMo 的「模态专家」（2022）</h3>
+<p>微软 VLMo（NeurIPS 2022）在<b>预训练阶段</b>把 FFN 拆成三类专家——<b>视觉专家、语言专家、视觉-语言专家</b>，按输入模态切换激活（属 §4.3 将讲的「硬路由」）。它证明了「不同模态可以用不同参数处理」的可行性，为 MoE-VLM 铺路。</p>
+
+<h3>4.2 MoE-LLaVA：3B 激活打平 7B 稠密</h3>
+<p>MoE-LLaVA（北大等，2024.01）结构上很直白：在 LLaVA 的 LLM 后端，把<b>部分</b> FFN 层（隔层交替）替换成 MoE，每个 MoE 含 4 个专家、top-2 激活<sup class="ref"><a href="#r5">[5]</a></sup>。真正关键的是它发现的<b>核心矛盾</b>与给出的解法。</p>
+
+<div class="q">
+  <div class="en">"directly applying MoE to train sparse LVLMs is challenging. We observe that simultaneously converting LLM to LVLM and sparsifying the model leads to significant performance degradation."</div>
+  <div class="zh">「直接把 MoE 用于训练稀疏 LVLM 是有挑战的。我们观察到，同时把 LLM 转换成 LVLM 并把模型稀疏化，会导致显著的性能退化。」</div>
+  <span class="src">— Lin et al., <i>MoE-LLaVA</i>, 2024.01 (arXiv:2401.15947, IEEE TMM 2025)</span>
+</div>
+<p>解法：<b>不要同时学两件难事</b>。先把「LLM→LVLM」学会（密集），再学「LVLM→稀疏 MoE」——这就是 <b>三阶段 MoE-Tuning</b><sup class="ref"><a href="#r5">[5]</a></sup>：</p>
+
+<figure>
+<svg viewBox="0 0 960 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs><marker id="arr7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8fa3c4"/></marker></defs>
+  <g font-size="11.5">
+    <!-- Stage I -->
+    <rect x="15" y="30" width="280" height="180" rx="12" fill="#141822" stroke="#2a2f3a"/>
+    <text x="155" y="55" text-anchor="middle" fill="#cfd6e4" font-size="13.5" font-weight="700">Stage I · 对齐</text>
+    <rect x="35"  y="72" width="110" height="34" rx="7" fill="#1b1f28" stroke="#4a5266"/><text x="90" y="93" text-anchor="middle" fill="#7a8496">视觉编码器 ❄</text>
+    <rect x="35"  y="116" width="110" height="34" rx="7" fill="#1f3a33" stroke="#41d1a7" stroke-width="1.6"/><text x="90" y="137" text-anchor="middle" fill="#9ee9cf">投影 MLP 🔥</text>
+    <rect x="35"  y="160" width="110" height="34" rx="7" fill="#1b1f28" stroke="#4a5266"/><text x="90" y="181" text-anchor="middle" fill="#7a8496">LLM ❄</text>
+    <text x="185" y="100" fill="#8b93a2">图像-字幕数据</text>
+    <text x="185" y="120" fill="#8b93a2">(558K)</text>
+    <text x="185" y="146" fill="#ffd9a8">只训 MLP:</text>
+    <text x="185" y="164" fill="#ffd9a8">让 LLM"看懂图"</text>
+    <text x="155" y="205" text-anchor="middle" fill="#5f6b7e" font-size="10.5">❄冻结 🔥训练</text>
+
+    <line x1="297" y1="120" x2="330" y2="120" stroke="#8fa3c4" stroke-width="1.6" marker-end="url(#arr7)"/>
+    <!-- Stage II -->
+    <rect x="340" y="30" width="280" height="180" rx="12" fill="#141822" stroke="#2a2f3a"/>
+    <text x="480" y="55" text-anchor="middle" fill="#cfd6e4" font-size="13.5" font-weight="700">Stage II · 密集多模态训练</text>
+    <rect x="360" y="72" width="110" height="34" rx="7" fill="#1b1f28" stroke="#4a5266"/><text x="415" y="93" text-anchor="middle" fill="#7a8496">视觉编码器 ❄</text>
+    <rect x="360" y="116" width="110" height="34" rx="7" fill="#1f3a33" stroke="#41d1a7" stroke-width="1.6"/><text x="415" y="137" text-anchor="middle" fill="#9ee9cf">投影 MLP 🔥</text>
+    <rect x="360" y="160" width="110" height="34" rx="7" fill="#1f3a33" stroke="#41d1a7" stroke-width="1.6"/><text x="415" y="181" text-anchor="middle" fill="#9ee9cf">LLM(稠密) 🔥</text>
+    <text x="510" y="100" fill="#8b93a2">多任务指令数据</text>
+    <text x="510" y="120" fill="#8b93a2">(964K)</text>
+    <text x="510" y="146" fill="#ffd9a8">★ 关键铺垫:</text>
+    <text x="510" y="164" fill="#ffd9a8">先训好"稠密LVLM"</text>
+    <text x="480" y="205" text-anchor="middle" fill="#5f6b7e" font-size="10.5">此阶段尚无 MoE</text>
+
+    <line x1="622" y1="120" x2="655" y2="120" stroke="#8fa3c4" stroke-width="1.6" marker-end="url(#arr7)"/>
+    <!-- Stage III -->
+    <rect x="665" y="30" width="280" height="180" rx="12" fill="#141822" stroke="#2a2f3a"/>
+    <text x="805" y="55" text-anchor="middle" fill="#9ee9cf" font-size="13.5" font-weight="700">Stage III · 稀疏化</text>
+    <rect x="685" y="72" width="110" height="34" rx="7" fill="#1b1f28" stroke="#4a5266"/><text x="740" y="93" text-anchor="middle" fill="#7a8496">视觉编码器 ❄</text>
+    <rect x="685" y="116" width="110" height="34" rx="7" fill="#1f3a33" stroke="#41d1a7" stroke-width="1.6"/><text x="740" y="137" text-anchor="middle" fill="#9ee9cf">MoE 层 🔥</text>
+    <rect x="685" y="160" width="110" height="34" rx="7" fill="#1b1f28" stroke="#4a5266"/><text x="740" y="181" text-anchor="middle" fill="#7a8496">其余层 ❄</text>
+    <g>
+      <rect x="812" y="102" width="40" height="22" rx="5" fill="#233049" stroke="#6ea8ff"/><text x="832" y="117" text-anchor="middle" fill="#bcd4ff" font-size="10">E1</text>
+      <rect x="856" y="102" width="40" height="22" rx="5" fill="#233049" stroke="#6ea8ff"/><text x="876" y="117" text-anchor="middle" fill="#bcd4ff" font-size="10">E2</text>
+      <rect x="812" y="128" width="40" height="22" rx="5" fill="#233049" stroke="#6ea8ff"/><text x="832" y="143" text-anchor="middle" fill="#bcd4ff" font-size="10">E3</text>
+      <rect x="856" y="128" width="40" height="22" rx="5" fill="#233049" stroke="#6ea8ff"/><text x="876" y="143" text-anchor="middle" fill="#bcd4ff" font-size="10">E4</text>
+    </g>
+    <text x="880" y="170" fill="#ffd9a8" font-size="10.5">复制 FFN×4 初始化</text>
+    <text x="805" y="205" text-anchor="middle" fill="#5f6b7e" font-size="10.5">隔层替换 FFN → MoE(4专家选2)</text>
+
+    <rect x="15" y="240" width="930" height="70" rx="12" fill="#1d212b" stroke="#2a2f3a"/>
+    <text x="480" y="266" text-anchor="middle" fill="#d7dce6" font-size="13" font-weight="700">为什么必须分三步？消融实验：直接从 LLM 上 MoE（跳过 Stage II 铺垫）→ GQA 58.4 / POPE 81.9；完整三阶段 → GQA 61.5 / POPE 87.0<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[5]</tspan></text>
+    <text x="480" y="290" text-anchor="middle" fill="#8b93a2" font-size="12">"同时学两件难事"（多模态对齐 + 稀疏路由）会顾此失彼；先密后疏，每步只学一件事 —— 对一切"给稠密模型加 MoE"的场景都有借鉴意义</text>
+  </g>
+</svg>
+<figcaption><b>图 8</b>：MoE-LLaVA 三阶段训练管线<sup class="ref"><a href="#r5">[5]</a></sup>。Stage III 的专家用 Stage II 训好的 FFN <b>复制初始化</b>（代码见下）。</figcaption>
+</figure>
+
+<h4>Stage III「复制 FFN 初始化专家」的实现（示意）</h4>
+<pre class="title">moe_llava_init.py —— 为什么复制 FFN？让所有专家从"同一个及格水平"出发，避免初始化随机性 + 路由冷启动互相拖累</pre>
+<pre><span class="c"># MoE-LLaVA 第三阶段: 用 Stage II 训好的稠密 FFN 复制出 E 个专家作为初始化</span>
+<span class="k">import</span> copy
+<span class="k">for</span> layer <span class="k">in</span> llm_layers:                          <span class="c"># 只处理隔层替换的那些层</span>
+    ffn_state = layer.ffn.state_dict()            <span class="c"># Stage II 训好的 FFN 权重</span>
+    layer.moe = MoEBlock(n_experts=<span class="n">4</span>, top_k=<span class="n">2</span>, ffn_config=...)
+    <span class="k">for</span> e <span class="k">in</span> range(<span class="n">4</span>):
+        layer.moe.experts[e].load_state_dict(copy.deepcopy(ffn_state))  <span class="c"># ★ E份相同拷贝</span>
+    <span class="k">del</span> layer.ffn
+<span class="c"># 效果: 训练开始时 4 个专家能力完全相同且都"及格", 路由器可以安全地</span>
+<span class="c"># 从随机初始化慢慢学出分工, 不会因为某个专家太弱而陷入§1.4的崩溃循环</span></pre>
+
+<h4>MoE-LLaVA 的真实源码：它其实「站在 DeepSpeed 肩膀上」（本目录已克隆仓库）</h4>
+<pre class="title">MoE-LLaVA/moellava/model/language_model/llava_llama_moe.py —— 真实源码节选：仓库自己只做"接线"，MoE 层本体复用 DeepSpeed</pre>
+<pre><span class="k">from</span> deepspeed.moe.layer <span class="k">import</span> MoE          <span class="c"># ★ MoE层本体来自 DeepSpeed 框架!</span>
+
+<span class="k">class</span> <span class="d">MoELLaVALlamaConfig</span>(LlamaConfig):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>,
+                 moe_enable=<span class="v">True</span>,
+                 moe_mode=<span class="s">'sparse'</span>,          <span class="c"># sparse = 每token只激活top-k个专家</span>
+                 moe_layers_idx=<span class="v">None</span>,        <span class="c"># ★ "隔层插入MoE"就是靠这个索引列表实现的(图8)</span>
+                 ep_size=<span class="n">1</span>,                  <span class="c"># 专家并行度</span>
+                 top_k_experts=<span class="n">2</span>,             <span class="c"># 4个专家选2个</span>
+                 capacity_factor=<span class="n">1.</span>,           <span class="c"># 容量因子(§1.3): 专家缓冲区大小</span>
+                 min_capacity=<span class="n">4</span>,
+                 use_residual=<span class="v">False</span>,
+                 router_aux_loss_coef=<span class="n">0.01</span>,    <span class="c"># 辅助损失系数 α (§1.4)</span>
+                 **kwargs): ...
+
+<span class="c"># ---- 损失聚合(训练循环里, 真实源码) ----</span>
+moe_loss, moe_losses = <span class="v">None</span>, []
+<span class="k">if</span> <span class="f">len</span>(outputs[<span class="n">-1</span>]) &gt; <span class="n">0</span>:                  <span class="c"># 每个 MoE 层吐出一个 aux loss</span>
+    <span class="k">for</span> moe_loss <span class="k">in</span> outputs[<span class="n">-1</span>]:
+        <span class="k">if</span> moe_loss <span class="k">is not</span> <span class="v">None</span>: moe_losses.append(moe_loss)
+    moe_loss = <span class="self">self</span>.router_aux_loss_coef * <span class="f">sum</span>(moe_losses)
+    loss += moe_loss                      <span class="c"># 总损失 = 自回归损失 + α·Σ(各层均衡损失)</span></pre>
+<div class="note"><b>源码级洞察</b>：① MoE-LLaVA 没有自己实现 MoE 数学，而是复用 <code>deepspeed.moe.layer.MoE</code>——<b>研究代码普遍复用框架级 MoE（DeepSpeed/Megatron）</b>，论文里的「我们的 MoE 层」常常只是配置接线；② 图 8 的「隔层替换 FFN」在源码中就是 <code>moe_layers_idx</code> 这个索引列表；③ 论文公式(9)的辅助损失 <span class="i">L<sub>aux</sub> = E·ΣF<sub>i</sub>·G<sub>i</sub></span> 由 DeepSpeed 层内部计算、经 <code>outputs[-1]</code> 逐层传出、最后乘 α 求和进总损失——<b>读论文时建议同时读这条「损失流动路径」</b>。</div>
+
+<p><b>结果</b>：仅约 3B 激活参数，在多个视觉理解基准上与 LLaVA-1.5-7B 相当，甚至在物体幻觉（POPE）上超过 LLaVA-1.5-13B<sup class="ref"><a href="#r5">[5]</a></sup>。另一个反直觉发现：MoE-LLaVA 的专家<b>并非按模态分工</b>——每个专家都同时处理图文 token，文本与图像的路由分布高度相似，说明软路由学出的是比「模态」更细粒度的分工<sup class="ref"><a href="#r5">[5]</a></sup>（与 §3.1 Mixtral「专家按语法而非领域分工」的发现遥相呼应）。</p>
+
+<h3>4.3 硬路由 vs 软路由：VLM 的两种专家观</h3>
+<table>
+<thead><tr><th></th><th>硬路由（Hard Router）</th><th>软路由（Soft Router）</th></tr></thead>
+<tbody>
+<tr><td><b>谁决定分工</b></td><td>人为预设（按模态/任务指定专家）</td><td>路由器自学（按 token 内容动态分配）</td></tr>
+<tr><td><b>代表工作</b></td><td>VLMo（视觉/语言/VL 三类专家）、MoCLE（按指令聚类分配）</td><td>MoE-LLaVA、DeepSeek-VL2、LLaVA-MoLE</td></tr>
+<tr><td><b>优点</b></td><td>无需学路由、稳定、可解释</td><td>灵活、专家分工更细、跨模态交互强</td></tr>
+<tr><td><b>缺点</b></td><td>分工僵化，难以发现人想不到的模式</td><td>训练更难（需初始化策略/均衡损失）</td></tr>
+</tbody>
+</table>
+
+<div class="note"><b>后续发展</b>：DeepSeek-VL2（2024.12）把 DeepSeek-MoE（细粒度+共享专家）直接搬进 VLM 骨干，说明 <b>LLM 侧的 MoE 创新正在快速「下放」到 VLM</b>——这印证了本报告的主线：基石相同，各领域只是变奏。</div>
+
+<div class="note ok"><b>§4 小结</b>：VLM 的独特问题是「多模态对齐与稀疏化不能同时学」；MoE-LLaVA 用三阶段管线（先密后疏）+ FFN 复制初始化解决。加上 VLMo 的模态专家探索，VLM 领域证明了 MoE 在「混合分布数据」上的普适价值。</div>
+
+<!-- ===================== 第五章 DiT ===================== -->
+<span class="anchor" id="s5"></span>
+<h2 class="sec"><span class="num">5</span>MoE 在扩散 Transformer（DiT）中的应用<span class="roadmap">本章逻辑：为何适合MoE → 路由范式三次进化 → 新共识「架构优先于路由」 → 工业落地全景(Wan2.2→Mamoda→HunyuanImage3→MAGI-2) → MoE vs 稠密的算力账 → 设计模式清单</span><span class="pill dit">DiT</span></h2>
+<p class="lead">DiT（Peebles &amp; Xie, ICCV 2023）把扩散模型的骨干从 U-Net 换成 Transformer，成为 Sora、SD3、Flux 等的基础。把 MoE 加进 DiT 在 2024 年是学术前沿，到 2025–2026 已进入<b>工业落地期</b>（HunyuanImage 3.0 的 80B/13B、MAGI-2 的 114B/6B 都是产品级 MoE-DiT）。注意这里有<b>两种动机并存</b>：学术侧看中的是「<b>按难度分配算力</b>」，工业侧则更接近 LLM 的逻辑——「<b>在受限激活算力下把容量做到最大</b>」（§5.6）。与此同时，稠密阵营以「压 token 数」对抗「压激活参数」（§5.7），两条路线的竞争远未结束。</p>
+
+<h3>5.1 为什么 DiT 特别适合 MoE？两个天然的「不均匀」</h3>
+<div class="grid two">
+  <div class="card"><h4>① 空间冗余</h4><p>一张图里，背景区域信息密度低、好生成；前景细节（人脸、文字）信息密度高、难生成。理应给难 token 分配更多专家。</p></div>
+  <div class="card"><h4>② 时间步差异</h4><p>去噪早期（纯噪声）预测简单；去噪后期（细节重建）预测难。不同 timestep 难度不同，算力分配应随之变化。</p></div>
+</div>
+<div class="q">
+  <div class="en">"visual information tends to have high spatial redundancy… significant disparity in information density exists between the background and foreground regions… denoising task complexity exhibits temporal variation across different timesteps."</div>
+  <div class="zh">「视觉信息往往具有高度的空间冗余……背景与前景区域之间存在显著的信息密度差异......去噪任务的复杂度在不同时间步之间也表现出变化。」</div>
+  <span class="src">— Yuan et al., <i>Race-DiT (Expert Race)</i>, 2025.03 (arXiv:2503.16057)</span>
+</div>
+
+<figure>
+<svg viewBox="0 0 960 270" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <g font-size="11.5">
+    <rect x="40"  y="40" width="120" height="90" rx="8" fill="#2b3550" opacity="0.55"/><text x="100" y="90" text-anchor="middle" fill="#cfd6e4">t=T 纯噪声</text>
+    <rect x="185" y="40" width="120" height="90" rx="8" fill="#283148" opacity="0.75"/><text x="245" y="90" text-anchor="middle" fill="#cfd6e4">t=750</text>
+    <rect x="330" y="40" width="120" height="90" rx="8" fill="#26304a" opacity="0.95"/><text x="390" y="90" text-anchor="middle" fill="#cfd6e4">t=500 轮廓</text>
+    <rect x="475" y="40" width="120" height="90" rx="8" fill="#233049"/><text x="535" y="90" text-anchor="middle" fill="#cfd6e4">t=250</text>
+    <rect x="620" y="40" width="120" height="90" rx="8" fill="#1f3a33" stroke="#41d1a7"/><text x="680" y="90" text-anchor="middle" fill="#9ee9cf">t=0 成图</text>
+    <text x="390" y="22" text-anchor="middle" fill="#8b93a2">去噪时间步 →（随机图示）</text>
+    <path d="M60,215 C250,215 500,205 800,150" fill="none" stroke="#ffb454" stroke-width="2.4"/>
+    <text x="860" y="150" fill="#ffb454" font-size="12.5" font-weight="700">难度↑</text>
+    <text x="120" y="245" fill="#8b93a2">预测"整体结构"相对容易 → 少分配专家</text>
+    <text x="700" y="245" fill="#9ee9cf">细节重建最难 → 多分配专家（MoE 的价值主张）</text>
+    <text x="390" y="132" text-anchor="middle" fill="#8b93a2">早期证据: eDiff-I(NeurIPS 2022) 发现不同 timestep 的去噪器权重差异巨大 → 为何不干脆给不同难度配不同专家?</text>
+  </g>
+</svg>
+<figcaption><b>图 9</b>：扩散去噪的难度随时间步上升。早期工作（eDiff-I 的专家集成、MEME 的异构专家、DTR 的通道路由）已验证「分 timestep 配专家」有效，MoE 让这一思路可端到端学习。</figcaption>
+</figure>
+
+<h3>5.2 路由范式的三次进化：Token-Choice → Expert-Choice → Expert-Race</h3>
+<p>DiT+MoE 的主线是「路由灵活度」的持续放开。三种范式的本质区别在于「谁有选择权、在哪个维度上选」：</p>
+
+<figure>
+<svg viewBox="0 0 960 360" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <g font-size="11">
+    <!-- Token choice -->
+    <rect x="20" y="20" width="292" height="300" rx="12" fill="#141822" stroke="#2a2f3a"/>
+    <text x="166" y="45" text-anchor="middle" fill="#cfd6e4" font-size="13" font-weight="700">① Token-Choice</text>
+    <text x="166" y="63" text-anchor="middle" fill="#8b93a2">Shazeer'17 / Mixtral / DiT-MoE</text>
+    <g>
+      <rect x="52" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="80" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="108" y="84" width="24" height="20" fill="#22293a"/><rect x="136" y="84" width="24" height="20" fill="#22293a"/><rect x="164" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="192" y="84" width="24" height="20" fill="#22293a"/><rect x="220" y="84" width="24" height="20" fill="#22293a"/><rect x="248" y="84" width="24" height="20" fill="#6ea8ff"/>
+      <rect x="52" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="80" y="110" width="24" height="20" fill="#22293a"/><rect x="108" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="136" y="110" width="24" height="20" fill="#22293a"/><rect x="164" y="110" width="24" height="20" fill="#22293a"/><rect x="192" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="220" y="110" width="24" height="20" fill="#22293a"/><rect x="248" y="110" width="24" height="20" fill="#22293a"/>
+      <rect x="52" y="136" width="24" height="20" fill="#22293a"/><rect x="80" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="108" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="136" y="136" width="24" height="20" fill="#22293a"/><rect x="164" y="136" width="24" height="20" fill="#22293a"/><rect x="192" y="136" width="24" height="20" fill="#22293a"/><rect x="220" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="248" y="136" width="24" height="20" fill="#22293a"/>
+      <rect x="52" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="80" y="162" width="24" height="20" fill="#22293a"/><rect x="108" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="136" y="162" width="24" height="20" fill="#22293a"/><rect x="164" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="192" y="162" width="24" height="20" fill="#22293a"/><rect x="220" y="162" width="24" height="20" fill="#22293a"/><rect x="248" y="162" width="24" height="20" fill="#22293a"/>
+    </g>
+    <text x="166" y="205" text-anchor="middle" fill="#8b93a2">每行(=每token)固定选 k 个 ← 行内均匀</text>
+    <text x="166" y="240" text-anchor="middle" fill="#ff9c9c">问题: 专家间负载可失衡 → 需均衡损失</text>
+    <text x="166" y="262" text-anchor="middle" fill="#8b93a2">token 无权少要/多要专家</text>
+    <text x="166" y="290" text-anchor="middle" fill="#ffd9a8">FID (Race-DiT 对照) : 9.50</text>
+    <text x="166" y="310" text-anchor="middle" fill="#5f6b7e" font-size="10">行=tokens(含不同样本/时间步) 列=experts</text>
+
+    <!-- Expert choice -->
+    <rect x="334" y="20" width="292" height="300" rx="12" fill="#141822" stroke="#2a2f3a"/>
+    <text x="480" y="45" text-anchor="middle" fill="#cfd6e4" font-size="13" font-weight="700">② Expert-Choice</text>
+    <text x="480" y="63" text-anchor="middle" fill="#8b93a2">Zhou'22 / EC-DiT (Apple)</text>
+    <g>
+      <rect x="366" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="394" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="422" y="84" width="24" height="20" fill="#22293a"/><rect x="450" y="84" width="24" height="20" fill="#22293a"/><rect x="478" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="506" y="84" width="24" height="20" fill="#6ea8ff"/><rect x="534" y="84" width="24" height="20" fill="#22293a"/><rect x="562" y="84" width="24" height="20" fill="#22293a"/>
+      <rect x="366" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="394" y="110" width="24" height="20" fill="#22293a"/><rect x="422" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="450" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="478" y="110" width="24" height="20" fill="#22293a"/><rect x="506" y="110" width="24" height="20" fill="#22293a"/><rect x="534" y="110" width="24" height="20" fill="#6ea8ff"/><rect x="562" y="110" width="24" height="20" fill="#22293a"/>
+      <rect x="366" y="136" width="24" height="20" fill="#22293a"/><rect x="394" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="422" y="136" width="24" height="20" fill="#22293a"/><rect x="450" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="478" y="136" width="24" height="20" fill="#6ea8ff"/><rect x="506" y="136" width="24" height="20" fill="#22293a"/><rect x="534" y="136" width="24" height="20" fill="#22293a"/><rect x="562" y="136" width="24" height="20" fill="#6ea8ff"/>
+      <rect x="366" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="394" y="162" width="24" height="20" fill="#22293a"/><rect x="422" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="450" y="162" width="24" height="20" fill="#22293a"/><rect x="478" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="506" y="162" width="24" height="20" fill="#6ea8ff"/><rect x="534" y="162" width="24" height="20" fill="#22293a"/><rect x="562" y="162" width="24" height="20" fill="#22293a"/>
+    </g>
+    <text x="480" y="205" text-anchor="middle" fill="#8b93a2">每列(=每专家)固定收 capacity 个 ← 列内均匀</text>
+    <text x="480" y="240" text-anchor="middle" fill="#9ee9cf">优点: 天然负载均衡, 无需均衡损失</text>
+    <text x="480" y="262" text-anchor="middle" fill="#ff9c9c">问题: 有的token抢手(3个专家)有的落选(0个)</text>
+    <text x="480" y="290" text-anchor="middle" fill="#ffd9a8">FID : 10.13 (与因果注意力冲突,难用于LLM)</text>
+    <text x="480" y="310" text-anchor="middle" fill="#5f6b7e" font-size="10">扩散无因果掩码 → DiT 里可用!</text>
+
+    <!-- Expert race -->
+    <rect x="648" y="20" width="292" height="300" rx="12" fill="#12201c" stroke="#41d1a7"/>
+    <text x="794" y="45" text-anchor="middle" fill="#9ee9cf" font-size="13" font-weight="700">③ Expert-Race（Race-DiT）</text>
+    <text x="794" y="63" text-anchor="middle" fill="#8b93a2">ByteDance Seed, 2025.03</text>
+    <g>
+      <rect x="680" y="84" width="24" height="20" fill="#41d1a7"/><rect x="708" y="84" width="24" height="20" fill="#41d1a7"/><rect x="736" y="84" width="24" height="20" fill="#22293a"/><rect x="764" y="84" width="24" height="20" fill="#41d1a7"/><rect x="792" y="84" width="24" height="20" fill="#22293a"/><rect x="820" y="84" width="24" height="20" fill="#22293a"/><rect x="848" y="84" width="24" height="20" fill="#41d1a7"/><rect x="876" y="84" width="24" height="20" fill="#22293a"/>
+      <rect x="680" y="110" width="24" height="20" fill="#41d1a7"/><rect x="708" y="110" width="24" height="20" fill="#22293a"/><rect x="736" y="110" width="24" height="20" fill="#41d1a7"/><rect x="764" y="110" width="24" height="20" fill="#22293a"/><rect x="792" y="110" width="24" height="20" fill="#22293a"/><rect x="820" y="110" width="24" height="20" fill="#22293a"/><rect x="848" y="110" width="24" height="20" fill="#22293a"/><rect x="876" y="110" width="24" height="20" fill="#41d1a7"/>
+      <rect x="680" y="136" width="24" height="20" fill="#22293a"/><rect x="708" y="136" width="24" height="20" fill="#41d1a7"/><rect x="736" y="136" width="24" height="20" fill="#22293a"/><rect x="764" y="136" width="24" height="20" fill="#41d1a7"/><rect x="792" y="136" width="24" height="20" fill="#41d1a7"/><rect x="820" y="136" width="24" height="20" fill="#41d1a7"/><rect x="848" y="136" width="24" height="20" fill="#22293a"/><rect x="876" y="136" width="24" height="20" fill="#41d1a7"/>
+      <rect x="680" y="162" width="24" height="20" fill="#41d1a7"/><rect x="708" y="162" width="24" height="20" fill="#22293a"/><rect x="736" y="162" width="24" height="20" fill="#22293a"/><rect x="764" y="162" width="24" height="20" fill="#41d1a7"/><rect x="792" y="162" width="24" height="20" fill="#41d1a7"/><rect x="820" y="162" width="24" height="20" fill="#22293a"/><rect x="848" y="162" width="24" height="20" fill="#41d1a7"/><rect x="876" y="162" width="24" height="20" fill="#22293a"/>
+    </g>
+    <text x="794" y="205" text-anchor="middle" fill="#8b93a2">B×L×E 全空间一起赛跑, 全局 Top-k</text>
+    <text x="794" y="240" text-anchor="middle" fill="#9ee9cf">每 token 可得 0~多个专家; 每专家可收 0~多个 token</text>
+    <text x="794" y="262" text-anchor="middle" fill="#9ee9cf">难 token(如细节patch)自动多拿算力, 简单的少拿</text>
+    <text x="794" y="290" text-anchor="middle" fill="#ffd9a8">FID : <tspan font-weight="800" font-size="13">8.03</tspan> (三范式中最优)<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[8]</tspan></text>
+    <text x="794" y="310" text-anchor="middle" fill="#5f6b7e" font-size="10">"比赛"维度: Batch×Length×Expert 全展开</text>
+  </g>
+</svg>
+<figcaption><b>图 10</b>：三种路由范式对比（染色格 = 被选中；数据取自 Race-DiT 论文表 6 的 FID 对照实验<sup class="ref"><a href="#r8">[8]</a></sup>）。灵活度逐代提升：固定行 → 固定列 → 全局自由竞争。</figcaption>
+</figure>
+
+<h4>Expert-Choice 路由的核心代码（EC-DiT 所用，Zhou et al. 2022）</h4>
+<pre class="title">expert_choice.py —— 只需把 softmax 的维度从"专家维"换到"token维", 选择权就反转了</pre>
+<pre><span class="k">def</span> <span class="f">expert_choice_routing</span>(x, W_router, expert_capacity):
+    logits = x @ W_router.T                    <span class="c"># [T, E]  T个token, E个专家</span>
+    probs  = logits.softmax(dim=<span class="n">0</span>)            <span class="c"># ★ 沿 token 维 softmax (token-choice是dim=-1!)</span>
+    top_val, top_tok = probs.topk(expert_capacity, dim=<span class="n">0</span>)
+    <span class="c"># 每个专家挑它最想要的前 capacity 个 token →</span>
+    <span class="c"># ① 负载天然均衡(每个专家恰好capacity个) ② 难/重要token会被多个专家抢走</span>
+    <span class="k">return</span> top_tok, top_val
+
+<span class="c"># 注意: 落选 token 直接走残差 → 对自回归 LLM 是灾难(后面的token看不到前面?),</span>
+<span class="c"># 但 DiT 是双向注意力、且整图一起训练 → EC-DiT (Apple) 把它用到 97B 规模<sup class="ref">[10]</sup></span></pre>
+
+<h3>5.3 学术界代表工作总览（以图像 / 类条件 ImageNet 阵线为主）</h3>
+<table>
+<thead><tr><th>工作</th><th>团队/时间</th><th>路由策略</th><th>规模与亮点</th></tr></thead>
+<tbody>
+<tr><td><b>DiT-MoE</b><sup class="ref"><a href="#r9">[9]</a></sup></td><td>Fei et al., 2024</td><td>经典 top-k + PHLatent 路由，含 router z-loss 防数值不稳</td><td>DiT-MoE-XL/2：4.1B 总参 / 1.53B 激活，ImageNet 256² FID <b>1.72</b><sup class="ref"><a href="#r8">[8]</a></sup></td></tr>
+<tr><td><b>EC-DiT</b><sup class="ref"><a href="#r10">[10]</a></sup></td><td>Apple, 2024.10</td><td><b>专家选择路由</b> + 序列级信息自适应路由</td><td>放大到 <b>97B 参数</b>，把更多算力分给复杂区域/文本；GenEval 71.68%，速度仍具竞争力</td></tr>
+<tr><td><b>Race-DiT</b><sup class="ref"><a href="#r8">[8]</a></sup></td><td>字节跳动, 2025.03</td><td><b>Expert Race</b>：B×L×E 全局 Top-k</td><td>同激活参数下收敛比 DiT-XL 快 <b>7.2×</b>；同激活参数下超过大它一倍半的稠密 XL 模型</td></tr>
+<tr><td><b>DiffMoE</b><sup class="ref"><a href="#r12">[12]</a></sup></td><td>ICML 2025</td><td><b>时间感知 + 空间自适应专家</b>、动态 token 选择</td><td>按噪声水平与空间区域差异化路由，是「按难度分配」路线的代表</td></tr>
+<tr><td><b>ProMoE</b><sup class="ref"><a href="#r12">[12]</a></sup></td><td>2025.10 (arXiv:2510.24711)</td><td><b>显式路由引导</b>（explicit routing guidance）</td><td>用稠密教师模型的知识指导路由初始化/选择，缓解冷启动</td></tr>
+<tr><td><b>DSMoE / JiTMoE</b><sup class="ref"><a href="#r12">[12]</a></sup></td><td>快手, 2025.12</td><td>不折腾路由——直接移植 DeepSeek-V3 式 MoE 块（详见 §5.5）</td><td>「架构优先于路由」：DSMoE-3B FID 2.38@700K 步（DiffMoE 2.30 但需 7000K 步）；首个该方向开源模型</td></tr>
+<tr><td><b>RemixDiT</b></td><td>NeurIPS 2024</td><td>按<b>去噪 timestep</b> 构造多专家</td><td>免训 N 个独立模型，解决「不同 timestep 共用一组参数」的低效</td></tr>
+<tr><td><b>MEME / DTR / eDiff-I</b></td><td>2022–2024</td><td>多专家去噪器 / 通道路由（MoE 前身）</td><td>验证「分 timestep 配专家」的价值，为 MoE-DiT 铺路</td></tr>
+<tr><td><b>MiM-DiT / DICE</b></td><td>2026.03 / ICCV 2025</td><td>MoE-in-MoE 双层稀疏（图像复原）/ 并行推理系统</td><td>应用面扩展：复原任务、以及扩散 MoE 的多卡推理调度（staleness 优化）</td></tr>
+</tbody>
+</table>
+
+<h4>DiT-MoE 的真实源码：共享专家 + 辅助损失的「梯度挂载」技巧（本目录已克隆仓库）</h4>
+<pre class="title">DiT-MoE/models.py —— 真实源码节选（单文件实现）：注意它已经带上 DeepSeekMoE 式的共享专家与序列级辅助损失</pre>
+<pre><span class="k">class</span> <span class="d">SparseMoeBlock</span>(nn.Module):
+    <span class="sd">"""</span>
+<span class="sd">    A mixed expert module containing shared experts.</span>
+<span class="sd">    """</span>
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, embed_dim, mlp_ratio=<span class="n">4</span>, num_experts=<span class="n">16</span>, num_experts_per_tok=<span class="n">2</span>, ...):
+        <span class="self">self</span>.experts = nn.ModuleList([MoeMLP(...) <span class="k">for</span> i <span class="k">in</span> range(num_experts)])
+        <span class="self">self</span>.gate = MoEGate(embed_dim, num_experts, num_experts_per_tok)
+        <span class="self">self</span>.n_shared_experts = <span class="n">2</span>          <span class="c"># ★ 2个常驻共享专家(DeepSeekMoE式, 图5)</span>
+        <span class="self">self</span>.shared_experts = MoeMLP(hidden_size=embed_dim,
+                                    intermediate_size=embed_dim * <span class="self">self</span>.n_shared_experts)
+
+    <span class="k">def</span> <span class="f">forward</span>(<span class="self">self</span>, hidden_states):
+        topk_idx, topk_weight, aux_loss = <span class="self">self</span>.gate(hidden_states)
+        ...
+        <span class="k">if</span> <span class="self">self</span>.training:
+            <span class="c"># 训练路径: 复制token→按专家分组计算→加权求和</span>
+            y = (y.view(*topk_weight.shape, <span class="n">-1</span>) * topk_weight.unsqueeze(<span class="n">-1</span>)).sum(dim=<span class="n">1</span>)
+            y = AddAuxiliaryLoss.apply(y, aux_loss)      <span class="c"># ★ 把aux loss"挂"到激活值上带走</span>
+        <span class="k">else</span>:
+            y = <span class="self">self</span>.moe_infer(...)                <span class="c"># 推理路径: 分块缓存版</span>
+        <span class="k">if</span> <span class="self">self</span>.n_shared_experts <span class="k">is not</span> <span class="v">None</span>:
+            y = y + <span class="self">self</span>.shared_experts(identity)   <span class="c"># ★ 路由专家输出 + 共享专家输出(全token常驻)</span>
+        <span class="k">return</span> y
+
+<span class="c"># ---- MoEGate 中的辅助损失: 同时支持 batch 级与序列级(DeepSeek-V2式) ----</span>
+mask_ce = F.one_hot(topk_idx.view(<span class="n">-1</span>), num_classes=<span class="self">self</span>.n_routed_experts)
+ce = mask_ce.float().mean(<span class="n">0</span>)                <span class="c"># f_i: 每个专家收到的token比例</span>
+Pi = scores.mean(<span class="n">0</span>)                        <span class="c"># P_i: 平均路由概率 (梯度由此回传)</span>
+fi = ce * <span class="self">self</span>.n_routed_experts
+aux_loss = (Pi * fi).sum() * <span class="self">self</span>.alpha      <span class="c"># = α·E·Σ f_i·P_i  (与§1.4 Switch损失同族)</span>
+
+<span class="c"># ---- AddAuxiliaryLoss: 教科书级的工程技巧 ----</span>
+<span class="k">class</span> <span class="d">AddAuxiliaryLoss</span>(torch.autograd.Function):
+    <span class="sd">"""</span><span class="s">把标量损失"缝"进前向激活值, 使其梯度随主损失一起反传</span><span class="sd">"""</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="f">forward</span>(ctx, x, loss):          <span class="c"># 前向: 原样返回x, 不动loss</span>
+        ctx.required_aux_loss = loss.requires_grad
+        <span class="k">return</span> x
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="f">backward</span>(ctx, grad_output):     <span class="c"># 反向: 对loss注入梯度1, 自动求和</span>
+        <span class="k">return</span> grad_output, torch.ones_like(grad_output)[:<span class="n">1</span>]</pre>
+<div class="note"><b>源码级洞察</b>：① <code>AddAuxiliaryLoss</code> 解决的问题是——MoE 层深埋在网络中间，它的 aux loss 无法直接访问顶层损失函数；这个自定义 <code>autograd.Function</code> 把标量损失「缝」进激活值，反向时注入单位梯度，让 autograd 自动完成 <code>∂L_aux/∂θ</code> 的回传——<b>DeepSeek-MoE、Qwen-MoE 的开源实现用的都是同一招</b>；② 训练/推理走两条不同路径（分组复制 vs 分块缓存）——生产 MoE 的常见模式；③ 共享专家在 2024 年的 DiT-MoE 中已经出现，比 §5.5 的 DSMoE「发现」早了一年——学术共识的形成往往早于系统验证。</div>
+
+<h3>5.4 Race-DiT 的两个精彩洞察（DiT+MoE 独有的坑）</h3>
+<h4>洞察一：传统均衡损失会引发「模式崩溃」</h4>
+<p>负载损失只管「每个专家收到的 token <b>数</b>均匀」，但看图 10 ①的极端情形：专家 1、2 总被<b>一起</b>选中、专家 3、4 也总被一起选中——负载完美均衡，但 2-in-4 的 MoE 实际退化成了 1-in-2，专家组合的多样性丧失<sup class="ref"><a href="#r8">[8]</a></sup>。Race-DiT 提出 <b>router similarity loss</b>：通过路由概率的相关矩阵，惩罚专家两两「共选模式」的雷同（对角项等价于平衡损失，非对角项促进组合多样化）。4-in-32 MoE 上：无约束 FID 11.38 / 传统平衡损失 11.67 / 相似性损失 <b>10.77</b>，同时专家组合利用率从 72% 升到 83%<sup class="ref"><a href="#r8">[8]</a></sup>。</p>
+<h4>洞察二：DiT 的浅层 MoE「学不动」</h4>
+<p>DiT 用自适应层归一化（AdaLN）注入条件，而 AdaLN 会<b>逐层放大深层输出、削弱浅层输出</b>——浅层在残差流中的占比被压小，梯度不足，导致浅层的路由学不动（高噪声输入时尤其严重）<sup class="ref"><a href="#r8">[8]</a></sup>。解法是 <b>per-layer 正则</b>：给每一层接一个轻量投影头直接预测最终去噪目标，等于「命令」每一层都要独立有用。加入该正则后 FID 从 11.56 降至 8.95，是所有组件中收益最大的一项<sup class="ref"><a href="#r8">[8]</a></sup>。</p>
+
+<h3>5.5 学术新共识：「架构优先于路由」（DSMoE，2025.12）</h3>
+<p>2024–2025 年的主流叙事是：视觉 token 与文本 token 本质不同，所以要设计更精巧的路由（按噪声水平、按输入条件）。快手团队的 DSMoE/JiTMoE 系统性地检验了这一假设，得出一个反直觉的结论：<b>性能差距的主因不是路由不够聪明，而是 MoE 的架构设计空间根本没被认真探索过</b><sup class="ref"><a href="#r12">[12]</a></sup>。</p>
+<div class="q">
+  <div class="en">"Our investigation reveals that the core limitation lies elsewhere: the architectural design space of MoE for diffusion models remains significantly under-explored… MoE modules that have proven effective in LLMs remain highly effective in diffusion models. For example, the DeepSeek-V3 MoE block, with minor modifications, already yields strong performance in diffusion tasks."</div>
+  <div class="zh">「我们的研究表明，核心瓶颈在别处：扩散模型 MoE 的架构设计空间仍被严重低估……在 LLM 中已被验证有效的 MoE 模块，在扩散模型中依然高度有效。例如 DeepSeek-V3 的 MoE 块只需微小改动，就能在扩散任务上取得强劲性能。」</div>
+  <span class="src">— Liu et al. (快手), <i>Efficient Training of Diffusion Mixture-of-Experts Models: A Practical Recipe</i>, 2025.12 (arXiv:2512.01252)</span>
+</div>
+<p>这印证了本报告的主线——<b>§1 的四块基石通用，LLM 侧打磨好的组件可以直接「下放」到 DiT</b>。DSMoE 的完整配方只有四条<sup class="ref"><a href="#r12">[12]</a></sup>：</p>
+<ul class="tight">
+<li><b>DeepSeek 式专家模块</b>：细粒度专家 + 1 个共享专家 + sigmoid 亲和 + 无辅助损失偏置均衡（=§3.2 的完整搬运）；</li>
+<li><b>中间层变窄、专家数变多</b>：如 48 个中间层仅为 hidden×0.3 的窄专家，替代 16 个 hidden×4 的宽专家——总参数和激活参数同时下降，效果反而更好；</li>
+<li><b>2D RoPE 位置编码</b>：为注意力注入行/列结构信息（扩散 token 本是 2D 网格被展平的）；</li>
+<li><b>隔层使用 MoE</b>：保留部分稠密 FFN 层，稠密/稀疏交替稳定优化。</li>
+</ul>
+<table>
+<thead><tr><th>消融项（DSMoE-S，ImageNet 256²）</th><th>对照</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td>专家切法</td><td>E16 宽（FID 39.84）vs <b>E48 窄（更优）</b></td><td>窄而多 &gt; 宽而少（呼应 DeepSeekMoE，图 5）</td></tr>
+<tr><td>2D RoPE</td><td>APE 45.13 → RoPE-1D 44.75 → <b>2D RoPE 39.84</b></td><td>2D 结构信息是扩散 MoE 的「免费午餐」</td></tr>
+<tr><td>共享专家</td><td>去掉共享专家（改激活+1 个路由专家）</td><td>收敛变慢——共享专家是「跨 token/时间步的稳定兜底」，起正则作用</td></tr>
+<tr><td>隔层 MoE</td><td>全部 FFN 都换 MoE</td><td>反而更慢——稠密/稀疏交替提供表征平滑性</td></tr>
+<tr><td>GQA</td><td>给 DiT 注意力换 GQA 省 KV</td><td>轻微掉点——削弱空间细粒度注意力多样性，对去噪有害</td></tr>
+</tbody>
+</table>
+<p><b>结果</b>：DSMoE-L-E48 以 44% 更少的总参数打败 DiffMoE-L（FID 9.19 vs 11.16）；DSMoE-3B 仅 700K 步达到 FID 2.38，而 DiffMoE 报告的 2.30 用了 <b>10 倍训练量（7000K 步）</b><sup class="ref"><a href="#r12">[12]</a></sup>。</p>
+
+<h3>5.6 工业落地全景：MoE-DiT 的四代形态<span class="pill dit">InfraInsight</span></h3>
+<p class="lead">以下工业模型的结构数据均转引自 <b>InfraInsight 模型架构分析报告库</b><sup class="ref"><a href="#r13">[13]</a></sup>（该库对开源权重做了逐层逆向分析）。四代形态正好展示了「路由粒度」的持续细化：<b>按时间步切换 → token 级路由 → 统一骨干容量扩展 → 超细粒度多头专家</b>。</p>
+
+<h4>第一代：Wan 2.2 ——「按噪声步切换」的极简 MoE（2025.07）</h4>
+<p>阿里 Wan 2.2（A14B）把「不同 timestep 难度不同」做到了最粗粒度：<b>只有两个专家</b>——高噪声专家负责全局结构、低噪声专家负责细节精修，以某个 timestep 阈值为界硬切换<sup class="ref"><a href="#r13">[13]</a></sup><sup class="ref"><a href="#r14">[14]</a></sup>。无路由器、天然负载均衡、零额外通信；代价是粒度极粗（仅 2 档），本质是 §4.3 的「硬路由」思想在时间维度的应用。</p>
+
+<h4>第二代：Mamoda 2.5 —— token 级路由 + 稠密初始化（字节跳动）</h4>
+<p>字节 Mamoda 2.5（统一多模态生成/编辑模型）的 DiT 骨干用 <b>「E128A8」</b>配置：128 个路由专家 top-8 + 1 个共享专家，25B 总参 / 约 3B 激活（约 12%）<sup class="ref"><a href="#r13">[13]</a></sup>。三个工程细节尤其值得注意：</p>
+<ul class="tight">
+<li><b>路由与 DeepSeek-V3 完全同构</b>：sigmoid 亲和 + 无损偏置——「Top-8(s+b)，但门控权重仍用原始亲和度归一化 g = s/Σs」<sup class="ref"><a href="#r13">[13]</a></sup>；</li>
+<li><b>稠密权重上采样初始化</b>：从 Wan2.2-5B 稠密权重「三步上采样」初始化专家——与 MoE-LLaVA 的「复制 FFN 初始化专家」（图 8、§4.2）思路同源，都是「先密后疏」；</li>
+<li><b>精度分离</b>：路由 gate 全程 fp32、主计算 bf16；训练用分组 GEMM、开源推理代码退化为 masked-matmul 循环<sup class="ref"><a href="#r13">[13]</a></sup>。</li>
+</ul>
+
+<h4>第三代：HunyuanImage 3.0 —— 80B/13B，当前最大开源图像 MoE（腾讯，2025 下半年）</h4>
+<p>64 个路由专家 top-8 + 1 个共享专家（每层中间维 3072，32 层），80B 总参 / 13B 激活，bf16 权重约 160GB，须以 <b>TP+EP</b> 分片部署（TP4+EP 下每卡约 40GB）<sup class="ref"><a href="#r13">[13]</a></sup>。两个独特设计：</p>
+<ul class="tight">
+<li><b>统一 AR+DiT 骨干</b>：同一份 Transformer 权重既做自回归文本生成（lm_head）、又做 flow-matching 去噪（final_layer），且 AR 阶段的 KV 缓存直接复用给 DiT 阶段——省一份文本编码器；</li>
+<li><b>算力占比佐证 MoE 价值</b>：其逐层 FLOPs 分析显示 MoE 专家+共享专家约占每层计算的 <b>69%</b>（注意力仅约 10%）——图像 DiT 的算力大头在 FFN，正是 MoE 的用武之地（对比视频见 §5.7）<sup class="ref"><a href="#r13">[13]</a></sup>。</li>
+</ul>
+
+<h4>HunyuanImage-3 的真实源码：一座「活着的 MoE 博物馆」（本目录已克隆仓库 hyimg3/）</h4>
+<pre class="title">hunyuan_image_3/modeling_hunyuan_image_3.py —— 官方开源实现节选：一个文件里同时能看到 2017/2020/2024 三个时代的遗产</pre>
+<pre><span class="k">class</span> <span class="d">HunyuanTopKGate</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, config, layer_idx=<span class="v">None</span>):
+        ...
+        <span class="c"># DeepSeek gating args        ← ★ 源码里 literally 写着这句注释!</span>
+        <span class="self">self</span>.routed_scaling_factor = config.routed_scaling_factor
+        <span class="self">self</span>.n_group = config.n_group             <span class="c"># 分组路由(2024, DeepSeek-V3式)</span>
+        <span class="self">self</span>.topk_group = config.topk_group
+        <span class="self">self</span>.group_limited_greedy = config.group_limited_greedy
+        <span class="c"># ★ 路由器权重直接以 float32 存储 —— 印证§5.8模式3</span>
+        <span class="self">self</span>.wg = nn.Linear(config.hidden_size, num_experts, bias=<span class="v">False</span>,
+                          dtype=torch.float32)
+
+<span class="k">def</span> <span class="f">topkgating</span>(logits, topk, group_limited_greedy=<span class="v">False</span>, n_group=<span class="v">None</span>,
+               topk_group=<span class="v">None</span>, ..., drop_tokens=<span class="v">False</span>):
+    logits = logits.float()                          <span class="c"># 路由全程FP32</span>
+    gates = F.softmax(logits, dim=<span class="n">1</span>)
+    <span class="k">if</span> group_limited_greedy:                      <span class="c"># 先选组、再组内选专家(压缩跨卡通信,图4)</span>
+        group_scores = gates.reshape(n, n_group, -<span class="n">1</span>).max(dim=<span class="n">-1</span>).values
+        group_idx = torch.topk(group_scores, topk_group, dim=<span class="n">-1</span>)[<span class="n">1</span>]
+        gates = gates.masked_fill(~score_mask.bool(), <span class="n">0.0</span>)
+    expert_gate, expert_index = torch.topk(gates, topk)
+    ...
+    l_aux = num_experts**<span class="n">2</span> * torch.mean(tokens_per_group_and_expert
+                          * router_prob_per_group_and_expert)   <span class="c"># GShard式辅助损失(2020)</span>
+    <span class="k">if</span> drop_tokens:
+        expert_capacity = <span class="f">int</span>(max(topk, topk*n//E) * capacity_factor)
+    <span class="k">else</span>:                                          <span class="c"># ★ 生产默认: 容量=实际最大负载, 一个token都不丢</span>
+        tokens_per_expert = torch.bincount(expert_index.flatten(), minlength=E)
+        expert_capacity = torch.max(tokens_per_expert).item()
+    ...
+    token_priority = torch.cumsum(expert_mask, dim=<span class="n">0</span>) * expert_mask - <span class="n">1</span>
+    dispatch_mask = F.one_hot(token_priority, expert_capacity)   <span class="c"># ★ dispatch/combine 张量(§1.4注, 2020遗产)</span>
+    combine_weights = torch.einsum(<span class="s">"...te,...tec->...tec"</span>, router_probs, dispatch_mask)
+    <span class="k">return</span> [l_aux, exp_capacity_rate], combine_weights, dispatch_mask, exp_counts
+
+<span class="k">class</span> <span class="d">HunyuanMoE</span>(nn.Module):
+    <span class="k">def</span> <span class="f">__init__</span>(<span class="self">self</span>, config, layer_idx):
+        <span class="k">if</span> config.use_mixed_mlp_moe:
+            <span class="self">self</span>.shared_mlp = HunyuanMLP(config, is_shared_mlp=<span class="v">True</span>)   <span class="c"># 共享专家(2024,图5)</span>
+        <span class="self">self</span>.gate = HunyuanTopKGate(config, layer_idx)
+        <span class="self">self</span>.experts = nn.ModuleList([HunyuanMLP(config, is_moe=<span class="v">True</span>)
+                                    <span class="k">for</span> _ <span class="k">in</span> range(<span class="self">self</span>.num_experts)])</pre>
+<div class="note"><b>源码级洞察（「三代同堂」）</b>：① 代码注释 <code># DeepSeek gating args</code> 直接坐实了「LLM 组件下放 DiT」——工程师自己都这么标注谱系；② <code>topkgating()</code> 的骨架（token_priority→dispatch_mask→combine_weights 的 einsum）与 GShard/Switch 论文附录伪代码一脉相承（§1.4 尾注）；③ 与训练期研究代码不同，<b>生产推理默认 <code>drop_tokens=False</code></b>——专家容量取「实际最大负载」而非「预算值」，宁可靠后调容量也不丢 token：图像生成丢一个 patch 就是坏图，这与 LLM「丢 token 走残差无伤大雅」的取舍截然不同；④ 路由器权重以 <code>dtype=torch.float32</code> 显式存储，与 §5.8 模式 3 相互印证<sup class="ref"><a href="#r13">[13]</a></sup>。</div>
+
+<h4>第四代：MAGI-2 —— 超细粒度 MagiMoE + Head Parallel（2026）</h4>
+<p>MAGI-2（视频生成，约 114B 总参 / 约 6B 激活）把「细粒度」推到极致——<b>超细粒度 MagiMoE</b><sup class="ref"><a href="#r13">[13]</a></sup>：</p>
+<ul class="tight">
+<li><b>多头专家</b>：每个稀疏层把隐状态切成 12 个 latent head（各 256 维），每个 head 配 256 个窄专家（FFN 256→1280→256），每 head 独立 top-6 → 每层激活 72/3072 个专家单元（<b>2.3%</b>）；40 层中 36 层稀疏、4 层保留稠密（又是「隔层思想」的变体）；</li>
+<li><b>模态专属共享专家</b>：共享专家 + 按模态区分的共享专家常驻，缓解稀疏冷启动；每 head 独立 sigmoid 路由 + 无辅助损失偏置（DeepSeek 式），路由全程 fp32；</li>
+<li><b>Head Parallel 通信</b>：token 按 head 维度分发（而非按专家），通信量 ∝ N·H 且形状固定——对比标准 token-choice 专家并行的 ∝ N·k·H 且形状动态，消除了随 k 增长的通信/负载/元数据开销（引 Multi-Head MoE<sup class="ref"><a href="#r14">[14]</a></sup>）；运行时把「路由→top-k→按专家紧凑重排→融合分组 FFN→加权合并」整链融合<sup class="ref"><a href="#r13">[13]</a></sup>；</li>
+<li><b>动机陈述</b>（为何视频必须稀疏）：「数十万 spatiotemporal token 每步都要跑一遍去噪网络」——若 114B 全量激活，每步成本不可接受<sup class="ref"><a href="#r13">[13]</a></sup>。</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 960 260" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <g font-size="12">
+    <text x="480" y="28" text-anchor="middle" fill="#cfd6e4" font-size="14" font-weight="700">工业 MoE-DiT 的激活率持续下探（激活参数 / 总参数）</text>
+    <text x="150" y="62"  text-anchor="end" fill="#e8eaed">HunyuanImage 3.0（80B/13B）</text>
+    <rect x="160" y="48" width="196" height="24" rx="5" fill="#6ea8ff"/><text x="366" y="65" fill="#bcd4ff" font-weight="700">16.3%</text>
+    <text x="150" y="102" text-anchor="end" fill="#e8eaed">Mamoda 2.5（25B/3B）</text>
+    <rect x="160" y="88" width="144" height="24" rx="5" fill="#41d1a7"/><text x="314" y="105" fill="#9ee9cf" font-weight="700">12%</text>
+    <text x="150" y="142" text-anchor="end" fill="#e8eaed">MAGI-2（114B/6B）</text>
+    <rect x="160" y="128" width="64" height="24" rx="5" fill="#ffb454"/><text x="234" y="145" fill="#ffd9a8" font-weight="700">5.3%</text>
+    <text x="150" y="182" text-anchor="end" fill="#e8eaed">MAGI-2 专家单元级</text>
+    <rect x="160" y="168" width="28" height="24" rx="5" fill="#ff8f6b"/><text x="198" y="185" fill="#ffc0ad" font-weight="700">2.3%（72/3072）</text>
+    <text x="150" y="222" text-anchor="end" fill="#8b93a2" font-style="italic">（参照）Kimi K2（LLM，1T/32B）</text>
+    <rect x="160" y="208" width="38" height="24" rx="5" fill="#3a4152"/><text x="208" y="225" fill="#8b93a2">≈3.2%</text>
+    <text x="620" y="70" fill="#8b93a2">← 越晚发布的模型，专家切得越细、激活率越低；</text>
+    <text x="620" y="92" fill="#8b93a2">    视频 MoE（MAGI-2）的稀疏度已追平顶级 LLM，</text>
+    <text x="620" y="114" fill="#8b93a2">    达到「百亿量级激活驾驭千亿量级容量」。</text>
+    <text x="620" y="150" fill="#8b93a2">横条长度按激活率等比绘制（12px/%）。</text>
+    <text x="480" y="252" text-anchor="middle" fill="#5f6b7e" font-size="11">数据来源：InfraInsight 架构报告[13]；激活率为报告给出的总参/激活换算</text>
+  </g>
+</svg>
+<figcaption><b>图 11</b>：工业 MoE-DiT 激活率演进。从 HunyuanImage 3.0 的 16% 到 MAGI-2 的 5.3%（专家单元级 2.3%），「超细粒度」是明确趋势——与 LLM 侧 DeepSeekMoE（图 5）的设计哲学完全一致。</figcaption>
+</figure>
+
+<h3>5.7 MoE vs 稠密：两条路线的算力账<span class="pill dit">InfraInsight</span></h3>
+<p>MoE 并非 DiT 的唯一出路。<b>稠密阵营同样在狂飙</b>——而且他们的武器恰恰是另一条效率杠杆。先把一步去噪的成本拆开：</p>
+<div class="math">
+单步去噪成本 ≈ <span class="i">Token 数</span> × <span class="i">每 Token 激活参数</span> × <span class="i">去噪步数 × CFG 倍数</span>
+</div>
+
+<figure>
+<svg viewBox="0 0 960 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs><marker id="arr8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8fa3c4"/></marker></defs>
+  <g font-size="12">
+    <rect x="140" y="16" width="680" height="44" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
+    <text x="480" y="43" text-anchor="middle" fill="#e8eaed" font-size="13.5" font-weight="700">单步去噪成本 = Token 数 × 每 Token 激活参数 ×（步数 × CFG）</text>
+    <line x1="240" y1="60" x2="180" y2="96" stroke="#8fa3c4" marker-end="url(#arr8)"/>
+    <line x1="480" y1="60" x2="480" y2="96" stroke="#8fa3c4" marker-end="url(#arr8)"/>
+    <line x1="720" y1="60" x2="780" y2="96" stroke="#8fa3c4" marker-end="url(#arr8)"/>
+    <rect x="30" y="100" width="290" height="120" rx="12" fill="#1f3a33" stroke="#41d1a7"/>
+    <text x="175" y="126" text-anchor="middle" fill="#9ee9cf" font-weight="700" font-size="13">杠杆① 压 Token 数（稠密阵营）</text>
+    <text x="175" y="150" text-anchor="middle" fill="#d7dce6">高压缩 VAE + 长步长调度</text>
+    <text x="175" y="172" text-anchor="middle" fill="#8b93a2">LTX-2: 8×32×32 压缩 · 128 通道</text>
+    <text x="175" y="192" text-anchor="middle" fill="#8b93a2">→ 比 Wan2.2-14B 快约 18×<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[13]</tspan></text>
+    <rect x="335" y="100" width="290" height="120" rx="12" fill="#233049" stroke="#6ea8ff"/>
+    <text x="480" y="126" text-anchor="middle" fill="#bcd4ff" font-weight="700" font-size="13">杠杆② 压激活参数（MoE 阵营）</text>
+    <text x="480" y="150" text-anchor="middle" fill="#d7dce6">稀疏专家路由</text>
+    <text x="480" y="172" text-anchor="middle" fill="#8b93a2">HunyuanImage3: 13B/80B</text>
+    <text x="480" y="192" text-anchor="middle" fill="#8b93a2">MAGI-2: 6B/114B<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[13]</tspan></text>
+    <rect x="640" y="100" width="290" height="120" rx="12" fill="#332a1e" stroke="#ffb454"/>
+    <text x="785" y="126" text-anchor="middle" fill="#ffd9a8" font-weight="700" font-size="13">杠杆③ 压步数（蒸馏/流匹配）</text>
+    <text x="785" y="150" text-anchor="middle" fill="#d7dce6">蒸馏 + 更好 ODE 求解器</text>
+    <text x="785" y="172" text-anchor="middle" fill="#8b93a2">Cosmos3: 50 步 → 4 步策略模式</text>
+    <text x="785" y="192" text-anchor="middle" fill="#8b93a2">CFG 蒸馏免双倍前向<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[13]</tspan></text>
+    <rect x="90" y="250" width="780" height="52" rx="10" fill="#141822" stroke="#41d1a7" stroke-dasharray="6 4"/>
+    <text x="480" y="271" text-anchor="middle" fill="#9ee9cf" font-weight="700">最优解 = 多杠杆同拉：Mamoda 2.5 = MoE(3B/25B) + 高压缩 VAE(4×16×16) → 单卡约 12× 加速 vs Wan2.2-A14B<tspan dy="-4" font-size="9" fill="#41d1a7" font-weight="700">[13]</tspan></text>
+    <text x="480" y="292" text-anchor="middle" fill="#8b93a2" font-size="11.5">「压 token」与「压激活参数」正交——只拉一根杠杆的模型（LTX-2 或纯 MoE）都在另一维度留有收益空间</text>
+  </g>
+</svg>
+<figcaption><b>图 12</b>：扩散模型效率的「三根杠杆」。MoE 只作用于「每 token 激活参数」一项；稠密阵营（LTX-2、Cosmos3）在另外两根杠杆上同样能拿到数量级收益。</figcaption>
+</figure>
+
+<p><b>为什么视频和图像的结论不同？</b>关键在<b>注意力与 FFN 的算力占比</b>——MoE 只能稀疏化 FFN，动不了注意力：</p>
+<table>
+<thead><tr><th>模型</th><th>类型</th><th>每层 FLOPs 主导项</th><th>对 MoE 的启示</th></tr></thead>
+<tbody>
+<tr><td>HunyuanVideo（13B，2024.12）</td><td>稠密视频 MMDiT</td><td><b>注意力 ≈ 83%</b>（S≈119K token）<sup class="ref"><a href="#r13">[13]</a></sup></td><td rowspan="2">视频长序列下注意力主导——只稀疏化 FFN 的 MoE 收益有限，须先解决 token 数（高压缩 VAE）或注意力本身</td></tr>
+<tr><td>Cosmos3（16B）</td><td>稠密双塔 MoT</td><td>注意力 ≈ 66%<sup class="ref"><a href="#r13">[13]</a></sup></td></tr>
+<tr><td>Qwen-Image（20B，2025.08）</td><td>稠密图像 MMDiT</td><td>FFN ≈ 52%、注意力 ≈ 22%<sup class="ref"><a href="#r13">[13]</a></sup></td><td>图像序列短、FFN 占比高——MoE 有施展空间</td></tr>
+<tr><td>HunyuanImage 3.0（80B/13B）</td><td><b>MoE 图像</b></td><td>MoE 专家+共享 ≈ <b>69%</b>、注意力 ≈ 10%<sup class="ref"><a href="#r13">[13]</a></sup></td><td>MoE 接管了算力大头，稀疏化收益直接（但这 69% 本身就是「换成 MoE 之后」的占比）</td></tr>
+<tr><td>LTX-2（19B 稠密音视频）</td><td>稠密不对称双流</td><td>效率来自 token 数（8×32×32 VAE）+ fp8<sup class="ref"><a href="#r13">[13]</a></sup></td><td>稠密阵营的反证：不稀疏化也能快 18×——两条路线尚未分胜负</td></tr>
+</tbody>
+</table>
+
+<div class="note warn"><b>算力账小结</b>：① 图像 DiT（序列短、FFN 占比高）是 MoE 的主场——工业界图像侧已全面 MoE 化（HunyuanImage3、Mamoda、GPT-类图像模型）；② 视频 DiT（序列长、注意力主导）中 MoE 必须与「压 token」联动才有意义（Mamoda/MAGI-2 都是「高压缩 VAE + MoE」组合拳）；③ 稠密 + 极致 token 压缩（LTX-2）仍是有力竞争路线。这解释了为什么「MoE 化与否」在 2026 年的扩散模型界仍是<b>按瓶颈位置 case-by-case 的工程决策</b>，而非信仰。</div>
+
+<h3>5.8 设计模式清单与术语辨析</h3>
+<p>把 §5.5 的学术配方与 §5.6 的工业实践合并，可以提炼出当前 MoE-DiT 的<b>八条设计共识</b>：</p>
+<table>
+<thead><tr><th>#</th><th>设计模式</th><th>出处</th><th>呼应本报告</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><b>细粒度专家 + 共享专家</b>（共享专家兼「稳定兜底」与正则）</td><td>DSMoE / Mamoda / MAGI-2 / HunyuanImage3</td><td>图 5（DeepSeekMoE）</td></tr>
+<tr><td>2</td><td><b>sigmoid 亲和 + 无辅助损失偏置</b>（偏置只影响选择、不影响权重）</td><td>DSMoE / Mamoda / MAGI-2</td><td>§3.2③（含代码）</td></tr>
+<tr><td>3</td><td><b>路由器全程 FP32</b>、主计算 bf16/fp8</td><td>HunyuanImage3 / Mamoda / MAGI-2</td><td>§1.3（路由数值敏感）</td></tr>
+<tr><td>4</td><td><b>稠密权重初始化专家</b>（复制/上采样，先密后疏）</td><td>Mamoda「三步上采样」、ProMoE 显式路由引导</td><td>图 8（MoE-LLaVA Stage III）</td></tr>
+<tr><td>5</td><td><b>隔层 MoE / 保留部分稠密层</b>（稠密-稀疏交替稳定优化）</td><td>DSMoE 消融 / MAGI-2（36 稀疏 + 4 稠密）</td><td>§4.2（MoE-LLaVA 交替插入）</td></tr>
+<tr><td>6</td><td><b>2D RoPE</b>（为视觉 token 恢复网格结构）</td><td>DSMoE（FID 45.13→39.84）</td><td>扩散特有</td></tr>
+<tr><td>7</td><td><b>训练分组 GEMM / 推理融合整链</b>（路由→top-k→重排→分组 FFN→合并）</td><td>Mamoda / MAGI-2 运行时</td><td>§1.5（系统基石）</td></tr>
+<tr><td>8</td><td><b>TP+EP 混合并行部署</b>（MoE 权重按专家切卡）</td><td>HunyuanImage3（160GB→40GB/卡）</td><td>图 4（专家并行）</td></tr>
+</tbody>
+</table>
+
+<h4>硬路由 vs 软路由在 DiT 中的真实对照（Wan 2.2 vs Mamoda）</h4>
+<pre class="title">dit_routing_two_generations.py —— 同一个"分难度去噪"的目标, 两代实现方式; 一个不需要路由器, 一个完全复用 DeepSeek 方案</pre>
+<pre><span class="c"># ── 第一代: Wan 2.2 式"按噪声步切换" (硬路由, 2025.07) ──────────────</span>
+<span class="k">def</span> <span class="f">wan22_style_forward</span>(x, t, high_noise_expert, low_noise_expert):
+    <span class="k">if</span> t &gt; T_SWITCH:                <span class="c"># 高噪声阶段: 负责全局结构/构图</span>
+        <span class="k">return</span> high_noise_expert(x)
+    <span class="k">return</span> low_noise_expert(x)      <span class="c"># 低噪声阶段: 负责细节/纹理精修</span>
+<span class="c"># 优点: 无路由器、天然负载均衡、零 all-to-all 通信</span>
+<span class="c"># 缺点: 粒度极粗(仅2档), 无法按空间区域/样本难度分配</span>
+
+<span class="c"># ── 第二代: Mamoda 2.5 式 token 级路由 (软路由) ────────────────────</span>
+<span class="c"># 与 DeepSeek-V3 完全同构 (见§3.2代码):</span>
+<span class="c">#   s   = sigmoid(x @ W_gate.T)          # 128个专家的亲和分数</span>
+<span class="c">#   选中 = TopK(s + b, k=8)              # ★ b 为无损均衡偏置(只影响选择)</span>
+<span class="c">#   g   = s_selected / s_selected.sum()  #   门控权重仍用原始亲和度归一化</span>
+<span class="c">#   out = SharedFFN(x) + Σ g_i · FFN_i(x)</span>
+<span class="c"># 粒度: 每 token 独立路由 → 前景细节patch与背景patch自动获得不同专家组合</span></pre>
+
+<div class="qa"><span class="q1">Q：常听说的「Expert Transformer」（CogVideoX）和「Mixture-of-Transformers」（Cosmos3）是 MoE 吗？</span><br>
+A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transformer（arXiv:2408.06072）是让<b>空间专家块与时间专家块交替</b>处理帧内/帧间注意力——「专家」是整块子网络、按位置硬编码，无学习型路由<sup class="ref"><a href="#r14">[14]</a></sup>；Cosmos3 的 MoT 是「理解塔 + 生成塔」两座独立 Transformer（按模态分工）<sup class="ref"><a href="#r13">[13]</a></sup>。它们属于 §4.3 的<b>硬路由</b>家族（按架构固定分工），而严格意义的 MoE 指「FFN 级、路由器可学习」的稀疏结构。读论文时务必分清粒度：<b>参数级路由（MoE）vs 块级交替（Expert Transformer）vs 塔级分工（MoT）</b>。</div>
+
+<div class="note ok"><b>§5 小结（完整逻辑链）</b>：扩散模型天然「难易不均」（空间冗余 + timestep 差异）→ 学术界先在<b>路由</b>上发力（token→expert→race→时间/空间感知）→ DSMoE 证明<b>架构搬运比路由创新收益更大</b>（DeepSeek 配方直接有效）→ 工业界四代落地（噪声步切换 → token 级路由 → 80B 统一骨干 → 超细粒度多头专家+Head Parallel），激活率下探至 5% 以下 → 但<b>算力账</b>显示视频场景注意力主导、MoE 须与「压 token」联动，稠密阵营（LTX-2）仍有力。<b>LLM 用 MoE 为「省」，图像 DiT 为「扩」，视频 DiT 为「组合拳」。</b></div>
+
+<!-- ===================== 第六章 最新与未来 ===================== -->
+<span class="anchor" id="s6"></span>
+<h2 class="sec"><span class="num">6</span>最新进展与未来发展方向<span class="roadmap">正在发生的6大趋势 → 7个值得投入的研究方向</span><span class="pill fund">前沿</span></h2>
+
+<h3>6.1 正在发生的几大趋势（2024–2026）</h3>
+<div class="grid two">
+  <div class="card"><h4>① 无辅助损失 / 无损负载均衡成新标准</h4>
+    <p>DeepSeek-V3 的偏置项方案<sup class="ref"><a href="#r4">[4]</a></sup>、GLM-4.5 的 loss-free loading<sup class="ref"><a href="#r7">[7]</a></sup>、Qwen3 同款设计，正快速取代 2017 年以来的辅助损失传统。</p></div>
+  <div class="card"><h4>② 细粒度 + 共享专家的「双轨」结构</h4>
+    <p>更多更小的路由专家（灵活性）+ 少量常驻共享专家（通用知识），已成 DeepSeek 系、Kimi K2、DeepSeek-VL2 等的标配<sup class="ref"><a href="#r4">[4]</a></sup><sup class="ref"><a href="#r6">[6]</a></sup>。</p></div>
+  <div class="card"><h4>③ 万亿稀疏 + 训练稳定性突破</h4>
+    <p>Kimi K2 用 <b>MuonClip/QK-clip</b> 压制注意力 logits 爆炸，首次稳定训出开源万亿 MoE<sup class="ref"><a href="#r6">[6]</a></sup>。稳定性是 MoE 放大的最大工程瓶颈。</p></div>
+  <div class="card"><h4>④ 系统/精度协同设计</h4>
+    <p>DeepSeek-V3 用 <b>FP8 训练</b> + <b>DualPipe</b>（计算-通信重叠）+ 跨节点 all-to-all 优化，把 671B 模型全程训练费压到 558 万美元（每万亿 token 仅 18 万 H800 卡时）<sup class="ref"><a href="#r4">[4]</a></sup>。</p></div>
+  <div class="card"><h4>⑤ MoE × 推理（RL）</h4>
+    <p>DeepSeek-R1 证明稀疏 MoE 能承载长链推理<sup class="ref"><a href="#r6">[6]</a></sup>；MoE+RL 成为 2025 热点，也暴露「训推数值不一致」等新稳定性问题。</p></div>
+  <div class="card"><h4>⑥ 扩散/视频模型的 MoE 化（工业落地期）</h4>
+    <p>2025–2026 从学术论文走向产品级：HunyuanImage 3.0（80B/13B，最大开源图像 MoE）、Mamoda 2.5（25B/3B）、MAGI-2（114B/6B，超细粒度+Head Parallel）<sup class="ref"><a href="#r13">[13]</a></sup>；但稠密阵营以高压缩 VAE 对抗（LTX-2 快约 18×）——路线之争未定，按瓶颈位置取舍。DICE（ICCV 2025）等开始研究扩散 MoE 的并行推理系统。</p></div>
+</div>
+
+<h3>6.2 未来发展方向</h3>
+<table>
+<thead><tr><th>方向</th><th>核心问题与思路</th></tr></thead>
+<tbody>
+<tr><td><b>动态专家数量</b></td><td>打破「每 token 固定激活 k 个」。ReMoE / DYN-MoE 等用阈值/正则让简单 token 用更少专家、难 token 用更多，进一步省算力；Race-DiT 的全局 Top-k 已是此方向雏形<sup class="ref"><a href="#r8">[8]</a></sup>。</td></tr>
+<tr><td><b>专家合并 / 剪枝</b></td><td>训练后发现高度相似的专家可合并（如按使用频率合并最常用的两个），推理时瘦身；2025 年已有专门 survey 与 NeurIPS 工作探讨<sup class="ref"><a href="#r11">[11]</a></sup>。</td></tr>
+<tr><td><b>注意力即专家 / 更广的稀疏</b></td><td>把 MoE 思想从 FFN 扩展到注意力（Switch 原论文附录已探讨 Switch-Attention），或与稀疏注意力、线性注意力结合。</td></tr>
+<tr><td><b>持续学习与免灾难遗忘</b></td><td>新增专家来学新任务/新模态，旧专家冻结——MoE 天然适合增量学习，是迈向「终身学习模型」的有希望路径<sup class="ref"><a href="#r11">[11]</a></sup>。</td></tr>
+<tr><td><b>路由可解释性与「专家到底学了啥」</b></td><td>Mixtral、MoE-LLaVA 的分析都表明专家分工常与直觉相悖（按语法而非领域）。需要更好的工具来理解、调控路由<sup class="ref"><a href="#r3">[3]</a></sup><sup class="ref"><a href="#r5">[5]</a></sup>。</td></tr>
+<tr><td><b>端侧 / 边缘 MoE</b></td><td>大稀疏模型显存占用大，如何在手机/PC 上通过 offloading、专家缓存高效部署（Mixtral 已有 offload 推理工作）是落地关键。</td></tr>
+<tr><td><b>硬件协同设计</b></td><td>DeepSeek 公开呼吁更好的通信硬件与低精度算力<sup class="ref"><a href="#r4">[4]</a></sup>。MoE 的 all-to-all 通信模式对下一代 GPU/互联提出新需求。</td></tr>
+</tbody>
+</table>
+
+<div class="note ok"><b>给本科生的展望</b>：MoE 已从「小众技巧」变成「顶级模型的默认骨架」。未来 2–3 年，胜负手不在「要不要用 MoE」，而在 <b>如何让路由更智能（动态化）、训练更稳定（万亿级）、部署更便宜（合并/端侧）、专家更可解释</b>——这四个方向都还有大量本科生能上手的好问题（本报告 §1 的 toy 代码与 collapse 模拟就是很好的起点）。</div>
+
+<!-- ===================== 参考资料 ===================== -->
+<span class="anchor" id="s7"></span>
+<h2 class="sec"><span class="num">7</span>参考资料与引用出处</h2>
+<ol class="ref-list" id="refs">
+<li id="r1">Shazeer, Mirhoseini, Maziarz, Davis, Le, Hinton, Dean. <i>Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer</i>. ICLR 2017. arXiv:<a href="https://arxiv.org/abs/1701.06538" target="_blank">1701.06538</a>.（首次稀疏门控 MoE，1000× 容量；本文图 3、路由崩溃数据出处）</li>
+<li id="r2">Fedus, Zoph, Shazeer. <i>Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity</i>. JMLR 2022（提交 2021.01）. arXiv:<a href="https://arxiv.org/pdf/2101.03961" target="_blank">2101.03961</a>.（top-1 路由、辅助损失、1.6T 参数；同源 GShard: Lepikhin et al. 2020, arXiv:2006.16668，专家并行/all-to-all 出处）</li>
+<li id="r3">Jiang et al. (Mistral AI). <i>Mixtral of Experts</i>. 2024.01. arXiv:<a href="https://arxiv.org/abs/2401.04088" target="_blank">2401.04088</a>.（8 专家 top-2，47B/13B；专家按语法分工的分析出处）</li>
+<li id="r4">DeepSeek-AI. <i>DeepSeek-V3 Technical Report</i>. 2024.12. arXiv:<a href="https://arxiv.org/abs/2412.19437" target="_blank">2412.19437</a>.（671B/37B；MLA、DeepSeekMoE 细粒度+共享专家、无辅助损失负载均衡、MTP、FP8/DualPipe；KV 缓存 93.3% 压缩数据出自 DeepSeek-V2, arXiv:2405.04434；细粒度/共享专家首见于 DeepSeekMoE, arXiv:2401.06066。代码：本目录已克隆 DeepSeek-V3/inference/model.py）</li>
+<li id="r5">Lin et al. <i>MoE-LLaVA: Mixture of Experts for Large Vision-Language Models</i>. 2024.01（IEEE TMM 2025）. arXiv:<a href="https://arxiv.org/pdf/2401.15947" target="_blank">2401.15947</a>.（三阶段 MoE-Tuning、专家不按模态分工的发现）</li>
+<li id="r6">DeepSeek-R1（arXiv:2501.12948, 2025.01）；Kimi K2 / MuonClip（Moonshot AI, arXiv:2507.20534, 2025.07，1.04T/32B、384 专家选 8、QK-clip）.</li>
+<li id="r7">Z.ai. <i>GLM-4.5: Reasoning, Coding, and Agentic Abilities</i>. 2025.07. <a href="https://z.ai/blog/glm-4.5" target="_blank">z.ai/blog/glm-4.5</a>（355B/32B，sigmoid 门控 + 无损负载）.</li>
+<li id="r8">Yuan et al. (ByteDance Seed). <i>Expert Race: A Flexible Routing Strategy for Scaling Diffusion Transformer with Mixture of Experts (Race-DiT)</i>. 2025.03. arXiv:<a href="https://arxiv.org/abs/2503.16057" target="_blank">2503.16057</a>.（Expert Race、router similarity loss、per-layer 正则；含三种路由策略 FID 对照与 DiT-MoE 对比数据）</li>
+<li id="r9">Fei et al. <i>DiT-MoE: Scaling Diffusion Transformers with Mixture of Experts</i>. 2024. 代码：<a href="https://github.com/feizc/DiT-MoE" target="_blank">github.com/feizc/DiT-MoE</a>.</li>
+<li id="r10">Sun et al. (Apple). <i>EC-DiT: Scaling Diffusion Transformers with Adaptive Expert-Choice Routing</i>. 2024.10. arXiv:2410.02098. <a href="https://machinelearning.apple.com/research/ec-dit" target="_blank">Apple ML Research</a>.（Expert-Choice 路由思想源自 Zhou et al., <i>Mixture-of-Experts with Expert Choice Routing</i>, NeurIPS 2022）</li>
+<li id="r11">MoE 综述与未来方向：<i>A Comprehensive Survey of Mixture-of-Experts</i>（arXiv:2503.07137, 2025.03，含专家合并）；<i>A Survey on Mixture of Experts</i>（arXiv:2407.06204）；Fedus, Dean, Zoph, <i>A Review of Sparse Expert Models in Deep Learning</i>（arXiv:2209.01667, 2022）；VLMo（arXiv:2111.02358, NeurIPS 2022）；eDiff-I（arXiv:2211.01324, NeurIPS 2022）.</li>
+<li id="r12">Liu et al.（快手）. <i>Efficient Training of Diffusion Mixture-of-Experts Models: A Practical Recipe</i>（DSMoE / JiTMoE）. 2025.12. arXiv:<a href="https://arxiv.org/abs/2512.01252" target="_blank">2512.01252</a>.（「架构优先于路由」：DeepSeek-V3 式专家块 + 窄中间层 + 共享专家 + 2D RoPE + 隔层 MoE；代码 <a href="https://github.com/yhlleo/EfficientMoE" target="_blank">github.com/yhlleo/EfficientMoE</a>。相关：DiffMoE（ICML 2025，时间感知+空间自适应专家）；ProMoE（arXiv:2510.24711, 2025.10，显式路由引导））</li>
+<li id="r13">InfraInsight 模型架构分析报告库（blian6）. <a href="https://blian6.github.io/InfraInsight/" target="_blank">blian6.github.io/InfraInsight</a>（访问于 2026-08-14）.（§5.6/§5.7 工业模型结构数据的来源，基于开源权重逐层分析：HunyuanImage3（80B/13B，64+1 专家 top-8，AR+DiT 统一骨干，MoE≈69% 层算力）；HunyuanVideo（13B 稠密，注意力≈83%）；Qwen-Image（20B 稠密 MMDiT，FFN≈52%）；LTX-2（19B 稠密不对称双流，8×32×32 VAE）；MiniMax H3（33B 稠密）；Cosmos3（MoT 双塔，注意力≈66%）；Mamoda 2.5（25B/3B，E128A8+共享，sigmoid+无损偏置，稠密上采样初始化）；MAGI-2（114B/6B，MagiMoE 超细粒度 12 头×256 专家、Head Parallel、MagiMuon））</li>
+<li id="r14">Wan 2.2 技术报告（阿里巴巴, 2025.07，High-Noise/Low-Noise 双专家按噪声步切换）；CogVideoX 的 Expert Transformer（arXiv:2408.06072, 2024.08，空间/时间专家块交替）；Multi-Head MoE（arXiv:2404.15045, 2024.04）；LatentMoE + Head Parallel（arXiv:2602.04870, 2026.02，MAGI-2 所引）；MiM-DiT（arXiv:2603.02710, 2026.03，MoE-in-MoE 图像复原）；DICE（ICCV 2025，扩散 MoE 并行推理的 staleness 优化）.</li>
+<li id="r15">本报告源码分析的官方仓库（均已 <code>git clone</code> 至本目录）：DeepSeek-V3（<a href="https://github.com/deepseek-ai/DeepSeek-V3" target="_blank">deepseek-ai/DeepSeek-V3</a>，§3.2，inference/model.py）；Mixtral（<a href="https://github.com/mistralai/mistral-src" target="_blank">mistralai/mistral-src</a>，§3.1，src/mistral_inference/moe.py）；MoE-LLaVA（<a href="https://github.com/PKU-YuanGroup/MoE-LLaVA" target="_blank">PKU-YuanGroup/MoE-LLaVA</a>，§4.2，moellava/model/language_model/llava_llama_moe.py，其 MoE 层本体来自 DeepSpeed）；DiT-MoE（<a href="https://github.com/feizc/DiT-MoE" target="_blank">feizc/DiT-MoE</a>，§5.3，models.py）；HunyuanImage-3（Tencent-Hunyuan，§5.6，hunyuan_image_3/modeling_hunyuan_image_3.py）；以及原版稠密 DiT（facebookresearch/DiT，§5.1 对照）.</li>
+</ol>
+
+<div class="footer">
+  <p>📝 <b>关于本报告</b>：所有引用均标注出处与发表时间，关键论断附近以小字（绿色引用框）附英文原文与中文译文。图 1–12 均为本报告绘制的原创示意图。<b>源码分析</b>基于本目录下 5 个官方仓库的克隆（DeepSeek-V3、mistral-src、MoE-LLaVA、DiT-MoE、HunyuanImage-3，另含原版稠密 DiT 作对照，见 <sup class="ref"><a href="#r15">[15]</a></sup>），所有「真实源码」块均节选自上述仓库并附文件路径；toy_moe / noisy_topk_gate / collapse_sim / switch_balance_loss / aux_free_balance / expert_choice / dit_routing_two_generations 等教学示例为依据对应论文公式撰写的可运行/可复现代码（其中 collapse_sim、switch_balance_loss、toy_moe、expert_choice 已实际运行验证）。§5.6/§5.7 的工业模型结构数据（HunyuanImage3、HunyuanVideo、LTX-2、Qwen-Image、Cosmos3、MiniMax H3、Mamoda 2.5、MAGI-2）转引自 InfraInsight 架构报告库<sup class="ref"><a href="#r13">[13]</a></sup>。如需深入某条线索（如 V-MoE、视频扩散 MoE、专家合并算法实现），可继续扩展。</p>
+  <p>调研日期 2026-08-14 · 覆盖 1991–2026 · 由 ZCode 协助整理</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pai's Blog · LLM / VLM / DiT 效率技术综述</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e8eaed; --ink-dim:#aeb4bd;
+    --brand:#6ea8ff; --brand2:#9d7bff; --accent:#41d1a7; --warn:#ffb454;
+    --line:#2a2f3a; --code-bg:#11141a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:linear-gradient(180deg,#0c0e12 0%,#0f1115 100%); color:var(--ink);
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei",-apple-system,sans-serif;
+    line-height:1.75; font-size:16px; min-height:100vh; display:flex; flex-direction:column;
+  }
+  header.hero{
+    padding:88px 24px 56px; text-align:center; position:relative; overflow:hidden;
+    background:
+      radial-gradient(900px 380px at 20% -10%, rgba(110,168,255,.18), transparent 70%),
+      radial-gradient(700px 360px at 90% 0%, rgba(157,123,255,.18), transparent 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .hero .kicker{color:var(--accent); letter-spacing:.22em; font-size:13px; text-transform:uppercase; font-weight:700}
+  .hero h1{
+    font-size:clamp(30px,5vw,50px); line-height:1.2; margin:14px 0 6px; font-weight:800;
+    background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff); -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.sub{color:var(--ink-dim); max-width:720px; margin:10px auto 0; font-size:16px}
+  .hero .meta{margin-top:24px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  .chip{font-size:12.5px; color:var(--ink-dim); border:1px solid var(--line); background:var(--panel);
+    padding:5px 12px; border-radius:999px}
+  .chip b{color:var(--brand); font-weight:600}
+  main{flex:1; width:100%; max-width:1080px; margin:0 auto; padding:48px 24px 80px}
+  .section-label{color:var(--ink-dim); font-size:13px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; margin:0 0 22px}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr} }
+  a.card{
+    display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:26px 26px 22px;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; position:relative; overflow:hidden;
+  }
+  a.card::before{
+    content:""; position:absolute; inset:0 0 auto 0; height:3px;
+    background:linear-gradient(90deg,var(--brand),var(--brand2)); opacity:0; transition:opacity .18s ease;
+  }
+  a.card:hover{transform:translateY(-3px); border-color:#3a4256; box-shadow:0 14px 34px rgba(0,0,0,.4)}
+  a.card:hover::before{opacity:1}
+  .card .tags{display:flex; gap:8px; flex-wrap:wrap}
+  .card .tag{font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--brand);
+    background:rgba(110,168,255,.1); border:1px solid rgba(110,168,255,.25); border-radius:999px; padding:3px 11px}
+  .card h2{margin:2px 0 0; font-size:20px; line-height:1.45; font-weight:700}
+  .card p{margin:0; color:var(--ink-dim); font-size:14.5px}
+  .card .foot{margin-top:auto; padding-top:14px; display:flex; justify-content:space-between; align-items:center; color:var(--ink-dim); font-size:13px}
+  .card .foot .arrow{color:var(--brand); font-weight:700}
+  a.card:hover .foot .arrow{color:var(--brand2)}
+  footer{
+    border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--ink-dim); font-size:13.5px;
+  }
+  footer a{color:var(--brand); text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="kicker">Pai's Blog · Tech Surveys</div>
+  <h1>LLM / VLM / DiT 效率技术综述</h1>
+  <p class="sub">围绕大语言模型、视觉-语言模型与扩散 Transformer 的推理效率，
+    从混合专家、模型量化、投机解码到视觉 Token 稀疏化的系统性梳理。</p>
+  <div class="meta">
+    <span class="chip"><b>4</b> 篇综述</span>
+    <span class="chip">MoE</span>
+    <span class="chip">Quantization</span>
+    <span class="chip">Speculative Decoding</span>
+    <span class="chip">Token Sparsification</span>
+    <span class="chip">2020 – 2026</span>
+  </div>
+</header>
+
+<main>
+  <p class="section-label">最新文章 / Posts</p>
+  <div class="grid">
+
+    <a class="card" href="posts/moe-survey.html">
+      <div class="tags"><span class="tag">混合专家</span><span class="tag">LLM · VLM · DiT</span></div>
+      <h2>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</h2>
+      <p>从稀疏门控与负载均衡的经典原理出发，系统梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进、训练技巧与未来方向。</p>
+      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    </a>
+
+    <a class="card" href="posts/quantization-survey.html">
+      <div class="tags"><span class="tag">模型量化</span><span class="tag">PTQ · QAT</span></div>
+      <h2>模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展</h2>
+      <p>从浮点与定点表示、训练后量化与量化感知训练讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。</p>
+      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    </a>
+
+    <a class="card" href="posts/speculative-decoding.html">
+      <div class="tags"><span class="tag">推理加速</span><span class="tag">投机采样 · MTP</span></div>
+      <h2>投机解码全景：从经典投机采样，到 MTP / DFlash / DSpark</h2>
+      <p>面向入门者的讲义：从经典投机采样"起草—验证"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。</p>
+      <div class="foot"><span>2026-08 · 讲义</span><span class="arrow">阅读全文 →</span></div>
+    </a>
+
+    <a class="card" href="posts/vit-sparsification.html">
+      <div class="tags"><span class="tag">视觉效率</span><span class="tag">Token 压缩 · 缓存复用</span></div>
+      <h2>ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</h2>
+      <p>2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p>
+      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    </a>
+
+  </div>
+</main>
+
+<footer>
+  © 2026 PiratePai · Shanghai Jiao Tong University ·
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a>
+</footer>
+</body>
+</html>
