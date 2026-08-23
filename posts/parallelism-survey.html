@@ -186,8 +186,8 @@
 
 <figure>
 <svg viewBox="0 0 760 240" width="100%" style="max-width:760px">
-  <style>.lbl{font:11.5px system-ui;fill:#475569}</style>
-  <text x="10" y="18" style="font:13px system-ui;fill:#1a2233">模型参数量(十亿)随时间的增长</text>
+  <style>.lbl{font:11.5px system-ui;fill:#aeb4bd}</style>
+  <text x="10" y="18" style="font:13px system-ui;fill:#e8eaed">模型参数量(十亿)随时间的增长</text>
   <g>
     <text class="lbl" x="14" y="52">BERT-Large (2018-10)</text><rect x="185" y="42" width="4" height="12" fill="#aeb4bd"/><text class="lbl" x="194" y="52">0.34B</text>
     <text class="lbl" x="14" y="82">GPT-2 (2019-02)</text><rect x="120" y="72" width="14" height="12" fill="#aeb4bd"/><text class="lbl" x="140" y="82">1.5B</text>
@@ -197,7 +197,7 @@
     <text class="lbl" x="14" y="202">Kimi K2 (2025-07)</text><rect x="120" y="192" width="410" height="12" fill="#6ea8ff"/><text class="lbl" x="535" y="202">1280B(1.28T)</text>
   </g>
   <line x1="120" y1="30" x2="120" y2="215" stroke="#1c2126"/>
-  <text class="lbl" x="120" y="232">0</text><text class="lbl" x="490" y="232">300B</text><text class="lbl" x="510" y="18" style="fill:#1d2025">条形长度 ∝ 参数量</text>
+  <text class="lbl" x="120" y="232">0</text><text class="lbl" x="490" y="232">300B</text><text class="lbl" x="510" y="18" style="fill:#e8eaed">条形长度 ∝ 参数量</text>
 </svg>
 <figcaption>图 1-1:模型参数量在 7 年间从 0.34B 涨到 1.28T,约 3700 倍;同期单卡显存只从 32GB(V100)涨到 192GB(B200),约 6 倍。</figcaption>
 </figure>
@@ -236,7 +236,7 @@
 <p>现代 LLM 几乎都是"解码器堆叠"。对并行最重要的结构事实是:<b>层与层之间是串行的</b>(第 i+1 层的输入是第 i 层的输出)——这决定了流水线并行按层切分;而<b>每一层内部有两个大矩阵乘法簇</b>(注意力的 QKV/输出投影,MLP 的升维/降维)——这决定了张量并行按矩阵维度切分。</p>
 <figure>
 <svg viewBox="0 0 720 300" width="100%" style="max-width:720px">
-  <style>.bx{fill:#15202d;stroke:#23548b}.tx{font:12.5px system-ui;fill:#1a2233}.sm{font:11px system-ui;fill:#64748b}</style>
+  <style>.bx{fill:#15202d;stroke:#23548b}.tx{font:12.5px system-ui;fill:#e8eaed}.sm{font:11px system-ui;fill:#aeb4bd}</style>
   <rect x="270" y="10" width="180" height="30" fill="#321f11" stroke="#ffb454"/><text class="tx" x="290" y="30">输入 x [s, b, h]</text>
   <rect x="250" y="60" width="220" height="30" class="bx"/><text class="tx" x="262" y="80">LayerNorm(序列内逐 token,无跨卡)</text>
   <rect x="230" y="110" width="260" height="46" class="bx"/><text class="tx" x="240" y="128">自注意力:QKV 投影(h→3h)</text><text class="sm" x="240" y="146">多头:head_i = softmax(Q_iK_i^T/√d)·V_i,可按头切分</text>
@@ -254,7 +254,7 @@
 <p>所有并行策略的通信最终都由少数几个集合通信(collective)原语组成。以 4 张卡、每卡持有向量 [a<sub>i</sub>] 为例:</p>
 <figure>
 <svg viewBox="0 0 740 330" width="100%" style="max-width:740px">
-  <style>.g0{fill:#0b62c4}.g1{fill:#1d1132}.g2{fill:#0891b2}.g3{fill:#d97706}.cl{font:11px system-ui;fill:#171a21}.tt{font:12.5px system-ui;fill:#1a2233;font-weight:600}.ds{font:10.5px system-ui;fill:#64748b}</style>
+  <style>.g0{fill:#173045}.g1{fill:#1d1132}.g2{fill:#133239}.g3{fill:#3d2a14}.cl{font:11px system-ui;fill:#e8eaed}.tt{font:12.5px system-ui;fill:#e8eaed;font-weight:600}.ds{font:10.5px system-ui;fill:#aeb4bd}</style>
   <text class="tt" x="10" y="20">All-Reduce(规约求和,人人得到同一份结果)</text>
   <rect x="20" y="30" width="60" height="18" class="g0"/><text class="cl" x="35" y="43">a0</text>
   <rect x="20" y="54" width="60" height="18" class="g1"/><text class="cl" x="35" y="67">a1</text>
@@ -293,12 +293,12 @@
 <h3 id="ch2-3">2.3 硬件带宽金字塔:并行策略被拓扑牵着走</h3>
 <figure>
 <svg viewBox="0 0 720 260" width="100%" style="max-width:720px">
-  <style>.t1{fill:#0b62c4}.t2{fill:#2f7fd0}.t3{fill:#14222e}.t4{fill:#15202d}.bw{font:11px system-ui;fill:#171a21}</style>
+  <style>.t1{fill:#173045}.t2{fill:#132639}.t3{fill:#14222e}.t4{fill:#15202d}.bw{font:11px system-ui;fill:#171a21}</style>
   <rect x="60" y="10" width="600" height="46" class="t1"/><text class="bw" x="80" y="30">GPU HBM 显存:3.35 TB/s(H100)~ 8 TB/s(B200)</text><text class="bw" x="80" y="46">只有本卡可见</text>
   <rect x="100" y="64" width="520" height="46" class="t2"/><text class="bw" x="120" y="84">节点内 NVLink/NVSwitch:900 GB/s(H100 NVL8)</text><text class="bw" x="120" y="100">8~72 卡共享(NVL72 = 1.8TB/s,GB200 时代)</text>
-  <rect x="140" y="118" width="440" height="46" class="t3"/><text class="bw" x="160" y="138" style="fill:#1e3a5f">跨节点 InfiniBand/RoCE:400~800 Gb/s(50~100 GB/s)</text><text class="bw" x="160" y="154" style="fill:#1e3a5f">多机集群,靠交换机/多轨组网</text>
-  <rect x="180" y="172" width="360" height="40" class="t4"/><text x="200" y="190" style="font:11px system-ui;fill:#1e3a5f">数据中心间/广域:1~10 GB/s</text><text x="200" y="204" style="font:11px system-ui;fill:#1e3a5f">DiLoCo 等低通信训练的目标场景</text>
-  <text x="60" y="238" style="font:11.5px system-ui;fill:#475569">→ 越往下带宽越低 1~2 个数量级。设计原则:大通信放塔尖(NVLink 域),小通信或可掩盖通信放塔基。</text>
+  <rect x="140" y="118" width="440" height="46" class="t3"/><text class="bw" x="160" y="138" style="fill:#bcd4ff">跨节点 InfiniBand/RoCE:400~800 Gb/s(50~100 GB/s)</text><text class="bw" x="160" y="154" style="fill:#bcd4ff">多机集群,靠交换机/多轨组网</text>
+  <rect x="180" y="172" width="360" height="40" class="t4"/><text x="200" y="190" style="font:11px system-ui;fill:#bcd4ff">数据中心间/广域:1~10 GB/s</text><text x="200" y="204" style="font:11px system-ui;fill:#bcd4ff">DiLoCo 等低通信训练的目标场景</text>
+  <text x="60" y="238" style="font:11.5px system-ui;fill:#aeb4bd">→ 越往下带宽越低 1~2 个数量级。设计原则:大通信放塔尖(NVLink 域),小通信或可掩盖通信放塔基。</text>
 </svg>
 <figcaption>图 2-3:通信带宽金字塔(数量级示意,具体数值随代际变化)。</figcaption>
 </figure>
@@ -316,18 +316,18 @@
 <p>ZeRO(Zero Redundancy Optimizer)的核心洞察非常简单:<b>数据并行中除了"参数本身",其他状态(优化器状态、梯度)在卡间是重复且不需要同时完整的</b>。既然显存装不下,那就把它们像切参数一样切到各卡上,用时再临时聚合。</p>
 <figure>
 <svg viewBox="0 0 740 240" width="100%" style="max-width:740px">
-  <style>.p{fill:#0b62c4}.g{fill:#0891b2}.o{fill:#d97706}.cap{font:11.5px system-ui;fill:#475569}</style>
-  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">DP(全冗余)</text>
+  <style>.p{fill:#173045}.g{fill:#133239}.o{fill:#3d2a14}.cap{font:11.5px system-ui;fill:#aeb4bd}</style>
+  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">DP(全冗余)</text>
   <g><rect x="10" y="24" width="60" height="16" class="p"/><rect x="72" y="24" width="60" height="16" class="g"/><rect x="134" y="24" width="120" height="16" class="o"/></g>
   <g><rect x="10" y="44" width="60" height="16" class="p"/><rect x="72" y="44" width="60" height="16" class="g"/><rect x="134" y="44" width="120" height="16" class="o"/></g>
   <g><rect x="10" y="64" width="60" height="16" class="p"/><rect x="72" y="64" width="60" height="16" class="g"/><rect x="134" y="64" width="120" height="16" class="o"/></g>
   <text class="cap" x="10" y="94">每卡:参数+梯度+优化器(16N/卡)</text>
-  <text x="330" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">ZeRO-1:切优化器状态</text>
+  <text x="330" y="16" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">ZeRO-1:切优化器状态</text>
   <g><rect x="330" y="24" width="60" height="16" class="p"/><rect x="392" y="24" width="60" height="16" class="g"/><rect x="454" y="24" width="40" height="16" class="o"/></g>
   <g><rect x="330" y="44" width="60" height="16" class="p"/><rect x="392" y="44" width="60" height="16" class="g"/><rect x="496" y="44" width="40" height="16" class="o"/></g>
   <g><rect x="330" y="64" width="60" height="16" class="p"/><rect x="392" y="64" width="60" height="16" class="g"/><rect x="538" y="64" width="40" height="16" class="o"/></g>
   <text class="cap" x="20" y="94">每卡:4N + 12N/p(≈4N)</text>
-  <text x="640" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">ZeRO-3:全切</text>
+  <text x="640" y="16" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">ZeRO-3:全切</text>
   <g><rect x="640" y="24" width="20" height="16" class="p"/><rect x="662" y="24" width="20" height="16" class="g"/><rect x="684" y="24" width="40" height="16" class="o"/></g>
   <g><rect x="640" y="44" width="20" height="16" class="p"/><rect x="662" y="44" width="20" height="16" class="g"/><rect x="684" y="44" width="40" height="16" class="o"/></g>
   <g><rect x="640" y="64" width="20" height="16" class="p"/><rect x="662" y="64" width="20" height="16" class="g"/><rect x="684" y="64" width="40" height="16" class="o"/></g>
@@ -379,7 +379,7 @@ self.reduce_and_partitions_stream = (
 <p>每张卡独立算出自己的"部分和",最后把两个部分和<b>相加</b>就是完整结果——这个相加正好就是一次 all-reduce。注意巧妙之处:GeLU 这类非线性激活逐元素作用在切分维度上,切开后各自算 GeLU 完全等价,不需要任何通信。</p>
 <figure>
 <svg viewBox="0 0 760 230" width="100%" style="max-width:760px">
-  <style>.op{font:12.5px system-ui;fill:#1a2233}.small{font:11px system-ui;fill:#64748b}.fbox{fill:#15202d;stroke:#23548b}.gbox{fill:#322211;stroke:#8b5a23}</style>
+  <style>.op{font:12.5px system-ui;fill:#e8eaed}.small{font:11px system-ui;fill:#aeb4bd}.fbox{fill:#15202d;stroke:#23548b}.gbox{fill:#322211;stroke:#8b5a23}</style>
   <rect x="120" y="30" width="70" height="26" class="fbox"/><text class="op" x="138" y="47">f</text>
   <text class="small" x="100" y="20">前向:恒等 / 反向:all-reduce</text>
   <rect x="60" y="60" width="120" height="40" fill="#111f32"/><text class="op" x="72" y="78">卡0: X·W1₁→GeLU</text><text class="op" x="80" y="94">→ ·W2₁(部分和)</text>
@@ -451,8 +451,8 @@ self.num_attention_heads_per_partition = divide(
 <p>例如 p=8、m=16 时,约 30% 的时间在空转;要压到 5% 需要上百个微批——而微批越多,单批越小,GPU 算力利用率和优化器统计又会变差。GPipe 的另一个代价是显存:反向开始前,它要保存<b>所有 m 个</b>微批的激活。</p>
 <figure>
 <svg viewBox="0 0 760 300" width="100%" style="max-width:760px">
-  <style>.fb{fill:#0b62c4}.bb{fill:#1d1132}.bu{fill:#321f11}.lg{font:11px system-ui;fill:#475569}</style>
-  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">GPipe(p=4 段, m=6 微批):先全部前向,再全部反向 —— 两端大气泡</text>
+  <style>.fb{fill:#173045}.bb{fill:#1d1132}.bu{fill:#321f11}.lg{font:11px system-ui;fill:#aeb4bd}</style>
+  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">GPipe(p=4 段, m=6 微批):先全部前向,再全部反向 —— 两端大气泡</text>
   <g>
     <text class="lg" x="10" y="40">S0</text>
     <rect x="40" y="30" width="30" height="16" class="fb"/><rect x="72" y="30" width="30" height="16" class="fb"/><rect x="104" y="30" width="30" height="16" class="fb"/><rect x="136" y="30" width="30" height="16" class="fb"/><rect x="168" y="30" width="30" height="16" class="fb"/><rect x="200" y="30" width="30" height="16" class="fb"/>
@@ -469,7 +469,7 @@ self.num_attention_heads_per_partition = divide(
     <rect x="408" y="138" width="30" height="16" class="bb"/><rect x="440" y="138" width="30" height="16" class="bb"/><rect x="472" y="138" width="30" height="16" class="bb"/><rect x="504" y="138" width="30" height="16" class="bb"/><rect x="536" y="138" width="30" height="16" class="bb"/><rect x="568" y="138" width="30" height="16" class="bb"/>
   </g>
   <text class="lg" x="40" y="180">■ 前向 F　■ 反向 B　■ 气泡(空转)。微批从 S0 流向 S3 再流回,首尾各有 p−1 格空窗。</text>
-  <text x="10" y="216" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">1F1B:每段"跟得上就马上反向" —— 在途微批最多 p 个,稳态严格 1F1B 交替</text>
+  <text x="10" y="216" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">1F1B:每段"跟得上就马上反向" —— 在途微批最多 p 个,稳态严格 1F1B 交替</text>
   <g>
     <text class="lg" x="10" y="240">S3</text>
     <rect x="120" y="230" width="30" height="16" class="fb"/><rect x="152" y="230" width="30" height="16" class="bb"/><rect x="184" y="230" width="30" height="16" class="fb"/><rect x="216" y="230" width="30" height="16" class="bb"/><rect x="248" y="230" width="30" height="16" class="fb"/><rect x="280" y="230" width="30" height="16" class="bb"/><rect x="312" y="230" width="30" height="16" class="fb"/><rect x="344" y="230" width="30" height="16" class="bb"/><rect x="376" y="230" width="30" height="16" class="fb"/><rect x="408" y="230" width="30" height="16" class="bb"/><rect x="440" y="230" width="30" height="16" class="fb"/><rect x="472" y="230" width="30" height="16" class="bb"/>
@@ -543,18 +543,18 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
 <p>专家并行(EP)是 MoE 的自然切法:<b>N 个专家均匀分布在 E 张卡上,每卡 N/E 个</b>;token 留在原卡,专家权重不动,让 token"飞"过去算完再"飞"回来。一个 MoE 层的前向因此是教科书级的两次 all-to-all:</p>
 <figure>
 <svg viewBox="0 0 760 250" width="100%" style="max-width:760px">
-  <style>.tk{fill:#0891b2}.ex{fill:#d97706}.sm2{font:11px system-ui;fill:#475569}</style>
-  <text x="10" y="18" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">卡0(token 流视角):路由 → dispatch A2A → 专家计算 → combine A2A → 加权合并</text>
-  <rect x="20" y="40" width="90" height="34" class="tk"/><text x="34" y="60" style="font:11.5px system-ui;fill:#171a21">本地 token</text>
-  <rect x="130" y="40" width="90" height="34" fill="#e2e8f0"/><text x="144" y="54" style="font:11.5px system-ui;fill:#1a2233">Router</text><text x="138" y="68" style="font:10px system-ui;fill:#475569">top-k 打分(不通信)</text>
+  <style>.tk{fill:#133239}.ex{fill:#3d2a14}.sm2{font:11px system-ui;fill:#aeb4bd}</style>
+  <text x="10" y="18" style="font:12.5px system-ui;font-weight:600;fill:#e8eaed">卡0(token 流视角):路由 → dispatch A2A → 专家计算 → combine A2A → 加权合并</text>
+  <rect x="20" y="40" width="90" height="34" class="tk"/><text x="34" y="60" style="font:11.5px system-ui;fill:#e8eaed">本地 token</text>
+  <rect x="130" y="40" width="90" height="34" fill="#e2e8f0"/><text x="144" y="54" style="font:11.5px system-ui;fill:#e8eaed">Router</text><text x="138" y="68" style="font:10px system-ui;fill:#aeb4bd">top-k 打分(不通信)</text>
   <path d="M110 57 L130 57" stroke="#aeb4bd"/>
-  <rect x="250" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="262" y="48" style="font:12px system-ui;fill:#92400e">①dispatch</text><text x="258" y="64" style="font:11px system-ui;fill:#92400e">all-to-all:</text><text x="252" y="78" style="font:11px system-ui;fill:#92400e">token 按专家重排发送</text>
+  <rect x="250" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="262" y="48" style="font:12px system-ui;fill:#ffb454">①dispatch</text><text x="258" y="64" style="font:11px system-ui;fill:#ffb454">all-to-all:</text><text x="252" y="78" style="font:11px system-ui;fill:#ffb454">token 按专家重排发送</text>
   <path d="M220 57 L250 57" stroke="#aeb4bd"/>
-  <rect x="385" y="26" width="120" height="60" class="ex"/><text x="397" y="48" style="font:11.5px system-ui;fill:#171a21">本地专家 E0…Ek</text><text x="392" y="66" style="font:10.5px system-ui;fill:#171a21">GroupedGEMM 一次算完</text>
+  <rect x="385" y="26" width="120" height="60" class="ex"/><text x="397" y="48" style="font:11.5px system-ui;fill:#e8eaed">本地专家 E0…Ek</text><text x="392" y="66" style="font:10.5px system-ui;fill:#e8eaed">GroupedGEMM 一次算完</text>
   <path d="M360 57 L385 57" stroke="#aeb4bd"/>
-  <rect x="530" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="545" y="48" style="font:12px system-ui;fill:#92400e">②combine</text><text x="536" y="64" style="font:11px system-ui;fill:#92400e">all-to-all:结果送回</text><text x="540" y="78" style="font:11px system-ui;fill:#92400e">原卡,按概率加权</text>
+  <rect x="530" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="545" y="48" style="font:12px system-ui;fill:#ffb454">②combine</text><text x="536" y="64" style="font:11px system-ui;fill:#ffb454">all-to-all:结果送回</text><text x="540" y="78" style="font:11px system-ui;fill:#ffb454">原卡,按概率加权</text>
   <path d="M505 57 L530 57" stroke="#aeb4bd"/>
-  <rect x="660" y="40" width="90" height="34" class="tk"/><text x="668" y="60" style="font:11.5px system-ui;fill:#171a21">输出 token</text>
+  <rect x="660" y="40" width="90" height="34" class="tk"/><text x="668" y="60" style="font:11.5px system-ui;fill:#e8eaed">输出 token</text>
   <path d="M640 57 L660 57" stroke="#aeb4bd"/>
   <text class="sm2" x="20" y="120">关键定量:每个 token 在 dispatch 发送 k 份(hidden×2B),combine 收回 k 份 —— 通信量 ∝ token 数 × k × hidden,与专家总数 N 无关;</text>
   <text class="sm2" x="20" y="138">但 all-to-all 的每个"格子"(rank对)数据量 = 该源-目的专家对的 token 数,负载不均 → 慢的格子拖垮整个集合通信(straggler 问题)。</text>
@@ -612,7 +612,7 @@ global_probs = all_to_all(self.ep_group, permuted_probs, ...)</code></pre>
 <div class="quote"><span class="en">"We present a novel approach, Ring Attention with Blockwise Transformers (Ring Attention), which leverages blockwise computation of self-attention and feedforward to distribute long sequences across multiple devices while fully overlapping the communication of key-value blocks with the computation of blockwise attention. Our approach enables training and inference of sequences that are up to device count times longer than those achievable by prior memory-efficient Transformers, without resorting to approximations or incurring additional communication and computation overheads."</span><br><b>译文:</b>"我们提出 Ring Attention with Blockwise Transformers:利用自注意力与前馈的分块计算,把长序列分布到多个设备上,同时让 KV 块的通信与分块注意力的计算完全重叠。该方法使可训练/推理的序列长度达到此前显存高效 Transformer 的'设备数量倍',且不做任何近似,也不引入额外的通信与计算开销。"(Ring Attention 摘要,2023-10)</div>
 <figure>
 <svg viewBox="0 0 740 210" width="100%" style="max-width:740px">
-  <style>.gpu{fill:#15202d;stroke:#23548b}.kv{fill:#0891b2}.lg2{font:11px system-ui;fill:#475569}</style>
+  <style>.gpu{fill:#15202d;stroke:#23548b}.kv{fill:#133239}.lg2{font:11px system-ui;fill:#aeb4bd}</style>
   <rect x="60"  y="30" width="140" height="52" class="gpu"/><text x="76" y="50" style="font:12px system-ui">GPU0: Q[0:1/4]</text><rect x="76" y="58" width="40" height="14" class="kv"/><rect x="120" y="58" width="40" height="14" fill="#e2e8f0"/>
   <rect x="480" y="30" width="140" height="52" class="gpu"/><text x="496" y="50" style="font:12px system-ui">GPU3: Q[3/4:1]</text><rect x="496" y="58" width="40" height="14" fill="#e2e8f0"/><rect x="540" y="58" width="40" height="14" class="kv"/>
   <rect x="60"  y="120" width="140" height="52" class="gpu"/><text x="76" y="140" style="font:12px system-ui">GPU1: Q[1/4:2/4]</text><rect x="76" y="148" width="40" height="14" fill="#e2e8f0"/><rect x="120" y="148" width="40" height="14" class="kv"/>
@@ -770,7 +770,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <p>给想动手的本科同学一条路径:(1)在单机上读懂本文 4.2/5.3/6.3 的三段源码,再翻本目录下克隆的 Megatron-LM 仓库对应文件;(2)用 2 张卡跑通 PyTorch DDP,观察 bucket 与通信重叠;(3)用 torchtitan 在 8 卡上分别开 TP/PP/CP/FSDP 各一次,对比吞吐与显存;(4)读 DeepSeek-V3 技术报告第 3 章与 Kimi K2 技术报告 §2.4,画出两套系统的通信时序图——做完这四步,你已经超过大多数面谈者了。</p>
 <figure>
 <svg viewBox="0 0 760 190" width="100%" style="max-width:760px">
-  <style>.dd{fill:#15202d;stroke:#23548b}.cc{fill:#321f11;stroke:#8b5a23}.oo{fill:#113122;stroke:#238b6a}.tx3{font:12px system-ui;fill:#1a2233}.sm3{font:10.5px system-ui;fill:#64748b}</style>
+  <style>.dd{fill:#15202d;stroke:#23548b}.cc{fill:#321f11;stroke:#8b5a23}.oo{fill:#113122;stroke:#238b6a}.tx3{font:12px system-ui;fill:#e8eaed}.sm3{font:10.5px system-ui;fill:#aeb4bd}</style>
   <rect x="10" y="20" width="225" height="150" class="dd"/><text class="tx3" x="20" y="42"><tspan style="font-weight:600">五个切分维度</tspan></text>
   <text class="sm3" x="20" y="62">DP:数据 / ZeRO:优化器状态</text>
   <text class="sm3" x="20" y="80">TP:层内矩阵(列/行切)</text>
