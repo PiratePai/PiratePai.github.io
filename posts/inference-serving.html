@@ -68,13 +68,51 @@
   @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
 </style>
 <style id="mobile-patch">@media (max-width:768px){img,svg{max-width:100%;height:auto}pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}code{overflow-wrap:anywhere}*{min-width:0}html,body{overflow-x:hidden}}</style>
+<style id="unify-style">
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",-apple-system,sans-serif!important;
+    background:linear-gradient(180deg,#0c0e12 0%,#0f1115 100%)!important;color:#e8eaed!important;
+    line-height:1.75;font-size:16px}
+  header.hero{padding:64px 24px 48px!important;text-align:center!important;position:relative;overflow:hidden;
+    background:radial-gradient(900px 380px at 20% -10%,rgba(110,168,255,.18),transparent 70%),
+               radial-gradient(700px 360px at 90% 0%,rgba(157,123,255,.18),transparent 70%)!important;
+    border-bottom:1px solid #2a2f3a!important}
+  header.hero .inner,header.hero .wrap{max-width:none;margin:0;padding:0!important}
+  header.hero .kicker{color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px}
+  header.hero h1{font-size:clamp(28px,5vw,46px)!important;line-height:1.2;margin:14px 0 6px;font-weight:800;
+    background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff)!important;-webkit-background-clip:text;background-clip:text;
+    color:transparent!important;letter-spacing:normal}
+  header.hero .sub,header.hero .subtitle{color:#aeb4bd!important;max-width:780px;margin:10px auto 0!important;font-size:16px}
+  header.hero .meta,header.hero .chips,header.hero .meta-chips{margin-top:22px!important;display:flex;gap:10px;flex-wrap:wrap;justify-content:center!important}
+  header.hero .chip,header.hero .tag{font-size:12.5px!important;color:#aeb4bd!important;border:1px solid #2a2f3a!important;
+    background:#171a21!important;padding:5px 12px!important;border-radius:999px!important;display:inline-block;margin:0!important}
+  header.hero .chip b{color:#6ea8ff}
+  h2{font-size:27px;margin:64px 0 6px;padding:18px 0 0!important;border-top:1px solid #2a2f3a!important;
+    border-bottom:none!important;border-left:none!important;font-weight:800;color:#e8eaed!important;
+    display:flex;align-items:center;gap:12px;scroll-margin-top:70px}
+  h2 .num{font-size:14px;color:#0f1115;background:linear-gradient(135deg,#6ea8ff,#9d7bff);width:34px;height:34px;
+    border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+  h3{font-size:20px;margin:34px 0 8px;color:#dfe5f0!important;font-weight:700}
+  h4{font-size:16.5px;margin:22px 0 6px;color:#6ea8ff!important;font-weight:700}
+  a{color:#6ea8ff}
+  code{font-family:"JetBrains Mono","Fira Code",Consolas,monospace!important;font-size:13.5px;background:#20242f!important;
+    padding:2px 6px!important;border-radius:5px!important;color:#ffd9a8!important}
+  pre{background:#11141a!important;border:1px solid #2a2f3a!important;border-radius:12px!important;padding:16px!important;
+    overflow-x:auto;font-size:13px;line-height:1.6;margin:14px 0;font-family:"JetBrains Mono","Fira Code",Consolas,monospace!important;
+    color:#cdd6e3!important}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border:1px solid #2a2f3a!important;padding:9px 12px!important;text-align:left;vertical-align:top}
+  th{background:#1d212b!important;color:#cfd6e4!important;font-weight:700}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+</style>
+
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
 <header class="hero"><div class="inner">
-  <h1>大模型推理服务优化：技术发展史、原理与前沿展望</h1>
+  <div class="kicker">推理服务系统调研 · 2026</div>
+<h1>大模型推理服务优化：技术发展史、原理与前沿展望</h1>
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译——系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
-  <p class="meta">撰写日期：2026-08-23 · 源码基于当日各仓库 main 分支（vLLM、SGLang、XGrammar）· 引用均在正文标注出处与发表时间，并以小字附原文/译文</p>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div></header>
 <div class="wrap">
 

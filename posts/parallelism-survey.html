@@ -77,6 +77,43 @@
   }
 </style>
 <style id="mobile-patch">@media (max-width:768px){img,svg{max-width:100%;height:auto}pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}code{overflow-wrap:anywhere}*{min-width:0}html,body{overflow-x:hidden}}</style>
+<style id="unify-style">
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",-apple-system,sans-serif!important;
+    background:linear-gradient(180deg,#0c0e12 0%,#0f1115 100%)!important;color:#e8eaed!important;
+    line-height:1.75;font-size:16px}
+  header.hero{padding:64px 24px 48px!important;text-align:center!important;position:relative;overflow:hidden;
+    background:radial-gradient(900px 380px at 20% -10%,rgba(110,168,255,.18),transparent 70%),
+               radial-gradient(700px 360px at 90% 0%,rgba(157,123,255,.18),transparent 70%)!important;
+    border-bottom:1px solid #2a2f3a!important}
+  header.hero .inner,header.hero .wrap{max-width:none;margin:0;padding:0!important}
+  header.hero .kicker{color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px}
+  header.hero h1{font-size:clamp(28px,5vw,46px)!important;line-height:1.2;margin:14px 0 6px;font-weight:800;
+    background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff)!important;-webkit-background-clip:text;background-clip:text;
+    color:transparent!important;letter-spacing:normal}
+  header.hero .sub,header.hero .subtitle{color:#aeb4bd!important;max-width:780px;margin:10px auto 0!important;font-size:16px}
+  header.hero .meta,header.hero .chips,header.hero .meta-chips{margin-top:22px!important;display:flex;gap:10px;flex-wrap:wrap;justify-content:center!important}
+  header.hero .chip,header.hero .tag{font-size:12.5px!important;color:#aeb4bd!important;border:1px solid #2a2f3a!important;
+    background:#171a21!important;padding:5px 12px!important;border-radius:999px!important;display:inline-block;margin:0!important}
+  header.hero .chip b{color:#6ea8ff}
+  h2{font-size:27px;margin:64px 0 6px;padding:18px 0 0!important;border-top:1px solid #2a2f3a!important;
+    border-bottom:none!important;border-left:none!important;font-weight:800;color:#e8eaed!important;
+    display:flex;align-items:center;gap:12px;scroll-margin-top:70px}
+  h2 .num{font-size:14px;color:#0f1115;background:linear-gradient(135deg,#6ea8ff,#9d7bff);width:34px;height:34px;
+    border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+  h3{font-size:20px;margin:34px 0 8px;color:#dfe5f0!important;font-weight:700}
+  h4{font-size:16.5px;margin:22px 0 6px;color:#6ea8ff!important;font-weight:700}
+  a{color:#6ea8ff}
+  code{font-family:"JetBrains Mono","Fira Code",Consolas,monospace!important;font-size:13.5px;background:#20242f!important;
+    padding:2px 6px!important;border-radius:5px!important;color:#ffd9a8!important}
+  pre{background:#11141a!important;border:1px solid #2a2f3a!important;border-radius:12px!important;padding:16px!important;
+    overflow-x:auto;font-size:13px;line-height:1.6;margin:14px 0;font-family:"JetBrains Mono","Fira Code",Consolas,monospace!important;
+    color:#cdd6e3!important}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+  th,td{border:1px solid #2a2f3a!important;padding:9px 12px!important;text-align:left;vertical-align:top}
+  th{background:#1d212b!important;color:#cfd6e4!important;font-weight:700}
+  tr:nth-child(even) td{background:rgba(255,255,255,.015)}
+</style>
+
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -118,13 +155,14 @@
 </nav>
 <main>
 <header class="hero">
-  <h1>大模型并行策略与通信优化<br><span style="font-size:20px;color:#e8eaed;">发展历程 · 原理图解 · 源码实证 · 前沿与未来</span></h1>
-  <div class="meta">整理日期:2026-08-23 &nbsp;|&nbsp; 代码基于:Megatron-LM(v0.15)、DeepSpeed、DeepEP 开源仓库 &nbsp;|&nbsp; 面向:本科可读的入门+进阶综述</div>
+  <div class="kicker">训练系统调研 · 2026</div>
+<h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
   <p class="lead">这篇文章沿时间线讲清楚大模型训练里的五种主流并行——数据并行(DP)、张量并行(TP)、流水线并行(PP)、专家并行(EP)、上下文并行(CP)——以及围绕它们的通信优化技术(通算掩盖、通信原语优化、拓扑感知等)。每个概念都从"为什么需要它"讲起,配上图示、代码和可以动手验证的公式;所有关键论断都标注了出处与发表时间,并在附近用小字给出原文摘录或译文。</p>
 </header>
 
 <section id="ch0">
-<h2>0. 导读与术语表</h2>
+<h2><span class="num">0</span>导读与术语表</h2>
 <p><b>怎么读这篇文章:</b>第 1–2 章是地基(显存账本、通信原语),请务必先读;第 3–7 章按历史顺序分别讲五类并行,每章末尾有"源码走读",对应本目录下克隆的 Megatron-LM / DeepSpeed / DeepEP 仓库,可以直接跳转文件看;第 8–9 章把它们拼成完整系统;第 10–11 章是 2024–2026 的最新进展与未来展望。<b>引用标注形如 <sup class="cite">[Megatron-LM, NVIDIA, 2019-09]</sup>,附近的小字框内是该文献的原文(英文斜体)与中文译文。</b></p>
 <table>
 <tr><th>缩写</th><th>全称</th><th>一句话解释</th></tr>
@@ -141,7 +179,7 @@
 </table>
 </section>
 <section id="ch1">
-<h2>1. 为什么需要并行:显存墙、算力墙与通信墙</h2>
+<h2><span class="num">1</span>为什么需要并行:显存墙、算力墙与通信墙</h2>
 
 <h3>1.1 模型大了多少?</h3>
 <p>2018 年的 BERT-Large 有 3.4 亿参数,当时 4×V100 就能微调;而今天的主流大模型参数量以"千亿"起步:DeepSeek-V3 有 671B(激活 37B)<sup class="cite">[<a href="#refs">DeepSeek-V3, 2024-12</a>]</sup>,Kimi K2 达 1.28T<sup class="cite">[<a href="#refs">Kimi K2, 2025-07</a>]</sup>。单张 GPU 的显存却远远没有跟上——H100 只有 80GB。先来算一笔账,你就能明白为什么"并行"不是可选项,而是生存问题。</p>
@@ -192,7 +230,7 @@
 </section>
 
 <section id="ch2">
-<h2>2. 预备知识:Transformer 结构、集合通信原语与硬件金字塔</h2>
+<h2><span class="num">2</span>预备知识:Transformer 结构、集合通信原语与硬件金字塔</h2>
 
 <h3 id="ch2-1">2.1 Transformer 结构速览(只保留对并行有用的部分)</h3>
 <p>现代 LLM 几乎都是"解码器堆叠"。对并行最重要的结构事实是:<b>层与层之间是串行的</b>(第 i+1 层的输入是第 i 层的输出)——这决定了流水线并行按层切分;而<b>每一层内部有两个大矩阵乘法簇</b>(注意力的 QKV/输出投影,MLP 的升维/降维)——这决定了张量并行按矩阵维度切分。</p>
@@ -267,7 +305,7 @@
 <div class="note">把 2.2 与 2.3 合起来,就有了贯穿全文的分析框架:评估任何一个并行/通信方案,只需问三个问题——<b>(1) 通信什么原语、数据量多大?(2) 通信发生在金字塔哪一层?(3) 能否与计算重叠、被"藏"起来?</b></div>
 </section>
 <section id="ch3">
-<h2>3. 数据并行:从 DP、DDP 到 ZeRO 与 FSDP</h2>
+<h2><span class="num">3</span>数据并行:从 DP、DDP 到 ZeRO 与 FSDP</h2>
 <p class="tag">时间线:2014 ImageNet 双卡 → 2017 PyTorch DistributedDataParallel / 2018 Horovod(ring all-reduce)→ 2019-10 ZeRO 论文 → 2020 DeepSpeed 开源 → 2021 PyTorch FSDP(实验)→ 2023 FSDP 论文(VLDB)</p>
 
 <h3>3.1 最朴素的数据并行(DP)与它的冗余</h3>
@@ -328,7 +366,7 @@ self.reduce_and_partitions_stream = (
 <div class="note"><b>小结本章:</b>DP/ZeRO/FSDP 这一支的通信模式 = <b>每步每参数 2×(bf16)字节的梯度同步</b>(与卡数无关),可以完全藏在反向传播里。它<b>不减少单步计算量</b>,只靠增加卡数扩大吞吐/装下大模型。当模型大到"梯度 all-reduce 本身成为瓶颈"或"单卡算力太小导致 MFU 上不去"时,就需要切模型本身——下一章的张量并行与流水线并行。</div>
 </section>
 <section id="ch4">
-<h2>4. 张量并行(TP)与序列并行(SP):把一层切开算</h2>
+<h2><span class="num">4</span>张量并行(TP)与序列并行(SP):把一层切开算</h2>
 <p class="tag">时间线:2019-09 Megatron-LM 论文(TP)→ 2021-04 Megatron SC'21(TP×PP 协同调优)→ 2022-05 序列并行(arXiv 2205.05198)→ 2023+ 异步 TP/通算重叠 → 今天 SP+TP 成为默认配方</p>
 
 <h3 id="ch4-1">4.1 原理:一个矩阵乘法怎么分给多张卡?</h3>
@@ -402,7 +440,7 @@ self.num_attention_heads_per_partition = divide(
 <div class="note"><b>本章小结:</b>TP 通信 = 每层 4 次(前向 2 + 反向 2)小 all-reduce,量 ≈ 激活大小,靠 NVLink 高带宽硬扛;SP 用恒等式改写为 all-gather+reduce-scatter,在不增加通信的前提下激活显存 ÷TP;进一步的掩盖交给异步化与内核融合。TP 是"层内并行",它的死穴(层间串行、单卡必须放下 1/TP 的整层)正是下一章流水线并行的起点。</div>
 </section>
 <section id="ch5">
-<h2>5. 流水线并行(PP):把层切成流水段</h2>
+<h2><span class="num">5</span>流水线并行(PP):把层切成流水段</h2>
 <p class="tag">时间线:2018-11 GPipe → 2019-06 PipeDream(1F1B 雏形,arXiv)→ 2019-10 SOSP'19 正式发表 → 2021-04 SC'21 Megatron 交错式 1F1B → 2021-11 Chimera 双向流水线 → 2022-11 广度优先流水线(v1)→ 2023-11 零气泡流水线(ICLR'24)→ 2025-02 DualPipe / DualPipeV</p>
 
 <h3 id="ch5-1">5.1 GPipe:流水线的起点与"气泡"</h3>
@@ -487,7 +525,7 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
 <div class="note"><b>本章小结:</b>PP 通信 = 段间小数据点对点(激活),量小但串行依赖强;优化主旋律是<b>调度(scheduling)</b>:GPipe(简单,显存 O(m))→ 1F1B(显存 O(p))→ 交错式(气泡÷v)→ 零气泡(拆 backward 填气泡)→ 广度优先 / DualPipe(V 形、双向,重排掩盖 EP 通信)。PP 是五类并行中"通信最少"的,因此适合跨节点部署(段间流量小),这使它成为万卡级训练的骨干维度。</div>
 </section>
 <section id="ch6">
-<h2>6. 专家并行(EP)与 MoE:让 token 去找专家</h2>
+<h2><span class="num">6</span>专家并行(EP)与 MoE:让 token 去找专家</h2>
 <p class="tag">时间线:2017-01 稀疏门控 MoE(开山)→ 2020-06 GShard(千亿 MoE + 专家并行)→ 2021-01 Switch Transformer(top-1)→ 2024-01 DeepSeekMoE(细粒度专家)→ 2024-08 无辅助损失负载均衡 → 2024-12 DeepSeek-V3 → 2025-02 DeepEP 开源 → 2025 MoE 通信优化爆发</p>
 
 <h3 id="ch6-1">6.1 MoE 原理:稀疏激活与负载不均</h3>
@@ -563,7 +601,7 @@ global_probs = all_to_all(self.ep_group, permuted_probs, ...)</code></pre>
 <div class="note"><b>本章小结:</b>EP 通信 = 每层两次 all-to-all,量 ∝ token×k×hidden,难点在负载不均与跨节点带宽。优化光谱:(a)模型侧——细粒度专家、节点受限路由、无辅助损失均衡;(b)系统侧——分层 NVLink/RDMA 转发、纯 RDMA 低延迟内核、零 SM hook 重叠;(c)调度侧——与共享专家/另一微批计算配对掩盖(DualPipe 等)。2025 年后"大规模 EP(跨数十节点)"已成为万卡 MoE 训练的标配,EP all-to-all 也取代 TP all-reduce 成为一号通信瓶颈。</div>
 </section>
 <section id="ch7">
-<h2>7. 上下文并行(CP)与长序列训练</h2>
+<h2><span class="num">7</span>上下文并行(CP)与长序列训练</h2>
 <p class="tag">时间线:2023-09 DeepSpeed-Ulysses → 2023-10 Ring Attention → 2024-06 LoongTrain(2D 注意力并行)→ 2024 Megatron CP 生产化(a2a+p2p 层级模式)→ 2025-01 PyTorch torchtitan 1M 上下文 → 2026-01 动态 CP(变长序列)</p>
 
 <h3 id="ch7-1">7.1 为什么序列维也要切?</h3>
@@ -619,7 +657,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <div class="note"><b>本章小结:</b>CP 通信 = 注意力内的 KV 流动,天然"多小笔、可异步",因此掩盖条件最好的 p2p 环传是主流;all-to-all 换头(Ulysses)在 CP 域小时通信量更优;未来"长上下文 + MoE"叠加时,CP 的层级化(a2a+p2p)、动态化,以及模型结构上的稀疏化(第 10 章的 DSA/iRoPE)将共同削减 KV 流量。另注意术语:Megatron 里还有一个"序列并行(SP)"指 LayerNorm 区域沿序列切分(4.3 节),它是 TP 的搭档;本章 CP 才是"一条序列切成多卡"的完整方案,两者可以同时开。</div>
 </section>
 <section id="ch8">
-<h2>8. 多维并行组合与自动并行:真实的万卡训练长什么样</h2>
+<h2><span class="num">8</span>多维并行组合与自动并行:真实的万卡训练长什么样</h2>
 
 <h3>8.1 五个维度怎么拼在一起</h3>
 <p>生产级训练从不只用一种并行,而是把 5 个维度相乘:<code>world_size = TP × PP × DP × CP × EP</code>(MoE 场景下 DP 常再细分出 EP×DP 的关系)。划分的核心依据是第 2 章的金字塔:<b>通信频繁的维度放高带宽域,通信稀疏的维度放低带宽域</b>。下面这张对比表是全文的"总账本",建议反复回看:</p>
@@ -647,7 +685,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </section>
 
 <section id="ch9">
-<h2>9. 通信优化技术体系:通算掩盖只是其中一环</h2>
+<h2><span class="num">9</span>通信优化技术体系:通算掩盖只是其中一环</h2>
 <p>把前文散落的手段收拢成一个统一框架。通信优化的目标函数可以写成:</p>
 <div class="formula">T<sub>step</sub> = T<sub>compute</sub> + max(0, T<sub>comm</sub> − T<sub>可掩盖窗口</sub>) → 优化方向:①减 T<sub>comm</sub> ②增窗口 ③改变时序 ④换更快的路</div>
 <table>
@@ -662,7 +700,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <div class="quote"><span class="en">"For DeepSeek-V3, the communication overhead introduced by cross-node expert parallelism results in an inefficient computation-to-communication ratio of approximately 1:1. To tackle this challenge, we design an innovative pipeline parallelism algorithm called DualPipe ... It employs a bidirectional pipeline scheduling, which feeds micro-batches from both ends of the pipeline simultaneously and a significant portion of communications can be fully overlapped."</span><br><b>译文:</b>"对 DeepSeek-V3 而言,跨节点专家并行带来的通信开销使计算通信比低至约 1:1。为解决该问题,我们设计了创新的流水线并行算法 DualPipe……它采用双向流水线调度,同时从流水线两端注入微批,大部分通信都能被完全重叠。"(DeepSeek-V3 技术报告 §3.2.1,2024-12)</div>
 </section>
 <section id="ch10">
-<h2>10. 2024–2026 最新进展盘点(业界与学界)</h2>
+<h2><span class="num">10</span>2024–2026 最新进展盘点(业界与学界)</h2>
 <p class="lead">本章按"模型实践 → 通信库与框架 → 流水线调度 → 长上下文 → 硬件与网络 → RL 后训练系统"六条线盘点。所有条目都给出时间、来源与可点击链接;引号内为来源原文。需要说明:个别坊间流传的说法(如 NVIDIA "TDT"、DeepSeek-R2、"BFPP 用于 Llama 4")在本轮检索中<b>找不到公开可查的原始文献</b>,本文不予收录。</p>
 
 <h3>10.1 万亿 MoE 的训练配置开始"论文级"公开</h3>
@@ -706,7 +744,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <p>2025 年起,RL 后训练(RLHF/推理强化)成为与预训练同等重要的负载,也带来全新的通信问题:<b>rollout 引擎与训练器之间的权重同步、轨迹回流与参数版本一致性</b>。代表系统:veRL(字节+清华,混合控制器架构,2025 年重点强化"异步多轮 rollout、大规模 MoE 的 EP 集成、off-policy 异步架构")、slime(清华/智谱,Megatron+SGLang,官方称"RL framework behind GLM-5.2 … GLM-4.5")、NeMo-RL(NVIDIA,2025-08,DTensor 与 Megatron 双后端)。异步化研究同样火热:AReaL(2025-05,NeurIPS 2025)完全解耦生成与训练,官方称"up to 2.77x training speedup compared to synchronous systems with the same number of GPUs";APRIL(2025-09)用超发 rollout+主动中断提升 22.5% 吞吐。通信侧还有 UCCL-Zip(2026-04)把<b>无损压缩</b>嵌入 P2P/集合通信,RL 权重同步提速至多 47.5%。训练与推理的物理/逻辑边界正在同时消融。</p>
 </section>
 <section id="ch11">
-<h2>11. 未来发展方向</h2>
+<h2><span class="num">11</span>未来发展方向</h2>
 <p class="lead">综合第 10 章的证据,以下八个方向是未来 2~5 年并行策略与通信优化最可能的主战场。每条都标注了当前的最新锚点。</p>
 <h3>11.1 Scale-up 域膨胀,重画并行版图</h3>
 <p>NVLink 域正从 72 卡(GB200)走向 144(Vera Rubin)→ 576(Kyber)乃至规划中的 1152 die;UALink 要做 1024 加速器的开放域。当"一台机架"就有数百卡、数十 TB/s 的域内带宽,<b>TP/EP 会重新搬回域内</b>(Wide-EP 已实测 1.8×/GPU),跨域流量占比被动下降——并行策略将从"8 卡域 + 以太"两域模型演进为"<b>千卡域内 + 标准以太域间</b>"两级模型。随之而来的新问题:域内一致性协议、超大域的故障域与拓扑感知放置。</p>
@@ -727,7 +765,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </section>
 
 <section id="ch12">
-<h2>12. 结语:一张图带走全文</h2>
+<h2><span class="num">12</span>结语:一张图带走全文</h2>
 <p>把 12 章内容压成一段话:<b>并行的本质是"按五个维度切分状态(数据/层内矩阵/层段/专家/序列),再用四种集合通信原语(all-reduce、all-gather/reduce-scatter、all-to-all、点对点)把它们缝起来";通信优化的本质是"减量(稀疏/压缩/低精度)、走对路(分层放置)、藏起来(通算掩盖)、换引擎(专用内核)";而 2024 年以来最大的变化,是 MoE 让 EP all-to-all 成为瓶颈、scale-up 域膨胀让'域内并行'扩容、RL 让训练与推理边界消融。</b></p>
 <p>给想动手的本科同学一条路径:(1)在单机上读懂本文 4.2/5.3/6.3 的三段源码,再翻本目录下克隆的 Megatron-LM 仓库对应文件;(2)用 2 张卡跑通 PyTorch DDP,观察 bucket 与通信重叠;(3)用 torchtitan 在 8 卡上分别开 TP/PP/CP/FSDP 各一次,对比吞吐与显存;(4)读 DeepSeek-V3 技术报告第 3 章与 Kimi K2 技术报告 §2.4,画出两套系统的通信时序图——做完这四步,你已经超过大多数面谈者了。</p>
 <figure>
