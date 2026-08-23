@@ -132,7 +132,7 @@
 <header class="hero">
   <div class="kicker">深度学习架构调研 · 2026</div>
   <h1>混合专家（MoE）全景</h1>
-  <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的本科生。</p>
+  <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的读者。</p>
   <div class="meta">
     <span class="chip">调研日期：<b>2026-08-14</b></span>
     <span class="chip">覆盖模型：<b>Switch / GShard / Mixtral / DeepSeek-V3·R1 / Kimi K2 / Qwen3 / MoE-LLaVA / DiT-MoE / EC-DiT / Race-DiT / DSMoE / Wan2.2 / HunyuanImage3 / Mamoda2.5 / MAGI-2 / HunyuanVideo / LTX-2</b></span>
@@ -174,7 +174,7 @@
 
 <!-- ===================== 第一章 原理 ===================== -->
 <span class="anchor" id="s1"></span>
-<h2 class="sec"><span class="num">1</span>MoE 原理入门（给本科生）<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
+<h2 class="sec"><span class="num">1</span>MoE 原理入门<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
 
 <h3>1.1 基石一：从「密集」到「稀疏」—— 为什么要 MoE</h3>
 <p>标准 Transformer 里，每个 token 都要走完<b>同一套</b>全连接网络（FFN），所有参数都被激活——这叫 <b>dense（密集）模型</b>。模型越大，计算量与参数量同步增长，又贵又慢。</p>
@@ -468,7 +468,7 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
 <figcaption><b>图 4</b>：专家并行与 all-to-all 通信（GShard, 2020<sup class="ref"><a href="#r2">[2]</a></sup>）。DeepSeek-V3 进一步用「节点受限路由」（每 token 最多送往 4 个节点）压缩跨机通信<sup class="ref"><a href="#r4">[4]</a></sup>。</figcaption>
 </figure>
 
-<div class="note warn"><b>本科生关键认知</b>：MoE 不是「免费午餐」。它用 <b>更高的显存占用</b>（要装下所有专家）和 <b>更复杂的通信</b>（all-to-all 对互联带宽极敏感），换取 <b>更低的单 token 计算量</b>。「总参数 vs 激活参数」是衡量一切 MoE 模型的两把尺子：前者决定显存，后者决定算力。DeepSeek-V3 甚至专门设计了 DualPipe 算法让计算与通信重叠、逼近「零开销」<sup class="ref"><a href="#r4">[4]</a></sup>。</div>
+<div class="note warn"><b>关键认知</b>：MoE 不是「免费午餐」。它用 <b>更高的显存占用</b>（要装下所有专家）和 <b>更复杂的通信</b>（all-to-all 对互联带宽极敏感），换取 <b>更低的单 token 计算量</b>。「总参数 vs 激活参数」是衡量一切 MoE 模型的两把尺子：前者决定显存，后者决定算力。DeepSeek-V3 甚至专门设计了 DualPipe 算法让计算与通信重叠、逼近「零开销」<sup class="ref"><a href="#r4">[4]</a></sup>。</div>
 
 <!-- ===================== 第二章 历史 ===================== -->
 <span class="anchor" id="s2"></span>
@@ -1318,7 +1318,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 </tbody>
 </table>
 
-<div class="note ok"><b>给本科生的展望</b>：MoE 已从「小众技巧」变成「顶级模型的默认骨架」。未来 2–3 年，胜负手不在「要不要用 MoE」，而在 <b>如何让路由更智能（动态化）、训练更稳定（万亿级）、部署更便宜（合并/端侧）、专家更可解释</b>——这四个方向都还有大量本科生能上手的好问题（本报告 §1 的 toy 代码与 collapse 模拟就是很好的起点）。</div>
+<div class="note ok"><b>展望</b>：MoE 已从「小众技巧」变成「顶级模型的默认骨架」。未来 2–3 年，胜负手不在「要不要用 MoE」，而在 <b>如何让路由更智能（动态化）、训练更稳定（万亿级）、部署更便宜（合并/端侧）、专家更可解释</b>——这四个方向都还有大量适合上手的好问题（本报告 §1 的 toy 代码与 collapse 模拟就是很好的起点）。</div>
 
 <!-- ===================== 参考资料 ===================== -->
 <span class="anchor" id="s7"></span>
@@ -1343,7 +1343,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 
 <div class="footer">
   <p>📝 <b>关于本报告</b>：所有引用均标注出处与发表时间，关键论断附近以小字（绿色引用框）附英文原文与中文译文。图 1–12 均为本报告绘制的原创示意图。<b>源码分析</b>基于本目录下 5 个官方仓库的克隆（DeepSeek-V3、mistral-src、MoE-LLaVA、DiT-MoE、HunyuanImage-3，另含原版稠密 DiT 作对照，见 <sup class="ref"><a href="#r15">[15]</a></sup>），所有「真实源码」块均节选自上述仓库并附文件路径；toy_moe / noisy_topk_gate / collapse_sim / switch_balance_loss / aux_free_balance / expert_choice / dit_routing_two_generations 等教学示例为依据对应论文公式撰写的可运行/可复现代码（其中 collapse_sim、switch_balance_loss、toy_moe、expert_choice 已实际运行验证）。§5.6/§5.7 的工业模型结构数据（HunyuanImage3、HunyuanVideo、LTX-2、Qwen-Image、Cosmos3、MiniMax H3、Mamoda 2.5、MAGI-2）转引自 InfraInsight 架构报告库<sup class="ref"><a href="#r13">[13]</a></sup>。如需深入某条线索（如 V-MoE、视频扩散 MoE、专家合并算法实现），可继续扩展。</p>
-  <p>调研日期 2026-08-14 · 覆盖 1991–2026 · 由 ZCode 协助整理</p>
+  <p>调研日期 2026-08-14 · 覆盖 1991–2026</p>
 </div>
 
 </div>

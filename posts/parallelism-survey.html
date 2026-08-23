@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大模型并行策略与通信优化：发展历程、原理与未来方向</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --sub:#aeb4bd; --line:#465268; --bg:#171a21; --soft:#1b2028;
+    --accent:#6ea8ff; --accent2:#9d7bff; --quote:#aeb4bd; --code-bg:#0f172a; --code-ink:#e2e8f0;
+    --tag:#6ea8ff;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; color:var(--ink); background:var(--bg);
+       font-family:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,serif;
+       line-height:1.85; font-size:16.5px;}
+  .layout{display:flex; max-width:1380px; margin:0 auto;}
+  nav#toc{width:300px; flex-shrink:0; position:sticky; top:0; align-self:flex-start;
+          max-height:100vh; overflow-y:auto; padding:24px 14px 40px 20px;
+          font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+          font-size:13.5px; border-right:1px solid var(--line); background:var(--soft);}
+  nav#toc h3{font-size:14.5px; margin:6px 0 10px; color:var(--ink);}
+  nav#toc a{display:block; color:var(--sub); text-decoration:none; padding:3.5px 6px; border-radius:6px;}
+  nav#toc a:hover{background:#19212a; color:var(--accent);}
+  nav#toc a.lv2{padding-left:18px; font-size:12.8px;}
+  main{flex:1; min-width:0; padding:36px 48px 120px;}
+  header.hero{margin-bottom:34px;}
+  header.hero h1{font-size:34px; line-height:1.35; margin:0 0 10px;}
+  header.hero .meta{color:var(--sub); font-size:14px; font-family:system-ui,sans-serif;}
+  h2{font-size:26px; margin:58px 0 16px; padding-bottom:8px; border-bottom:2px solid var(--accent);
+     scroll-margin-top:20px;}
+  h3{font-size:20.5px; margin:34px 0 10px; scroll-margin-top:20px;}
+  h4{font-size:17.5px; margin:24px 0 8px;}
+  p{margin:10px 0; text-align:justify;}
+  section{scroll-margin-top:20px;}
+  .lead{font-size:17.5px;}
+  sup.cite{font-family:system-ui,sans-serif; font-size:11px; color:var(--tag); letter-spacing:0;}
+  sup.cite a{color:var(--tag); text-decoration:none;}
+  .quote{font-size:13px; color:var(--quote); border-left:3px solid #2a2f3a; background:#192129;
+         padding:6px 12px; margin:8px 0 14px; line-height:1.7; border-radius:0 8px 8px 0;
+         font-family:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;}
+  .quote .en{font-style:italic;}
+  .quote b{color:#e8eaed; font-weight:600;}
+  .note{background:#112032; border:1px solid #275186; border-radius:10px; padding:10px 16px; margin:14px 0; font-size:15px;}
+  .warn{background:#322311; border:1px solid #80612d; border-radius:10px; padding:10px 16px; margin:14px 0; font-size:15px;}
+  .formula{font-family:"Cambria Math",Georgia,serif; text-align:center; font-size:17px; margin:12px 0;
+           background:var(--soft); border-radius:8px; padding:8px; overflow-x:auto;}
+  code{font-family:"Cascadia Code",Consolas,"JetBrains Mono",monospace; background:#1b2027;
+       padding:1px 5px; border-radius:4px; font-size:0.88em; color:#6ea8ff;}
+  pre{background:var(--code-bg); color:var(--code-ink); padding:14px 16px; border-radius:10px;
+      overflow-x:auto; line-height:1.55; font-size:13px;}
+  pre code{background:none; color:inherit; padding:0; font-size:13px;}
+  pre .c{color:#83d1f6;} /* comment-ish */
+  pre .k{color:#ffb454;} /* keyword-ish */
+  .codecap{font-family:system-ui,sans-serif; font-size:12.5px; color:var(--sub); margin:-6px 0 4px;}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14.5px;
+        font-family:system-ui,-apple-system,"Segoe UI","PingFang SC",sans-serif;}
+  th,td{border:1px solid var(--line); padding:7px 10px; text-align:left; vertical-align:top;}
+  th{background:var(--soft);}
+  figure{margin:20px auto; text-align:center;}
+  figcaption{font-size:13px; color:var(--sub); margin-top:6px; font-family:system-ui,sans-serif;}
+  .timeline{border-left:3px solid var(--accent); margin:16px 0 16px 8px; padding-left:22px;}
+  .timeline .ev{position:relative; margin-bottom:16px;}
+  .timeline .ev::before{content:""; position:absolute; left:-29px; top:8px; width:11px; height:11px;
+                        border-radius:50%; background:var(--accent); border:2px solid #2a2f3a; box-shadow:0 0 0 1.5px var(--accent);}
+  .timeline .ev .t{font-family:system-ui,sans-serif; font-size:12.5px; color:var(--accent); font-weight:600;}
+  .refs ol{font-size:14px; font-family:system-ui,sans-serif; color:var(--sub); padding-left:22px;}
+  .refs li{margin-bottom:6px;}
+  .refs a{color:var(--accent); word-break:break-all;}
+  .tag{display:inline-block; font-family:system-ui,sans-serif; font-size:11.5px; padding:1px 8px;
+       border-radius:999px; background:#131f2f; color:#6ea8ff; margin-right:6px; vertical-align:2px;}
+  .tag.deep{background:#201132; color:#9d7bff;}
+  .toc-inline{columns:2; font-size:14.5px; font-family:system-ui,sans-serif;}
+  @media (max-width: 1000px){
+    nav#toc{display:none;} main{padding:24px 18px 80px;}
+  }
+</style>
+<style id="mobile-patch">@media (max-width:768px){img{max-width:100%;height:auto}pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}code{overflow-wrap:anywhere}}</style>
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
+<div class="layout">
+<nav id="toc">
+  <h3>目录</h3>
+  <a href="#ch0">0. 导读与术语表</a>
+  <a href="#ch1">1. 为什么需要并行:三堵墙</a>
+  <a href="#ch2">2. 预备知识:结构、通信原语与硬件</a>
+  <a href="#ch2-1">2.1 Transformer 结构速览</a>
+  <a href="#ch2-2">2.2 集合通信原语</a>
+  <a href="#ch2-3">2.3 硬件带宽金字塔</a>
+  <a href="#ch3">3. 数据并行:DP → DDP → ZeRO → FSDP</a>
+  <a href="#ch4">4. 张量并行(TP)与序列并行(SP)</a>
+  <a href="#ch4-1">4.1 Megatron TP 原理</a>
+  <a href="#ch4-2">4.2 源码走读</a>
+  <a href="#ch4-3">4.3 序列并行 SP</a>
+  <a href="#ch4-4">4.4 通算掩盖:异步 TP</a>
+  <a href="#ch5">5. 流水线并行(PP)</a>
+  <a href="#ch5-1">5.1 GPipe 与流水线气泡</a>
+  <a href="#ch5-2">5.2 1F1B 与交错式调度</a>
+  <a href="#ch5-3">5.3 源码走读</a>
+  <a href="#ch5-4">5.4 零气泡与 2025 年新调度</a>
+  <a href="#ch6">6. 专家并行(EP)与 MoE</a>
+  <a href="#ch6-1">6.1 MoE 原理与负载不均</a>
+  <a href="#ch6-2">6.2 all-to-all 通信模式</a>
+  <a href="#ch6-3">6.3 源码走读</a>
+  <a href="#ch6-4">6.4 DeepSeek-V3 与 DeepEP</a>
+  <a href="#ch7">7. 上下文并行(CP)与长序列训练</a>
+  <a href="#ch7-1">7.1 Ring Attention</a>
+  <a href="#ch7-2">7.2 Megatron CP 与 Ulysses</a>
+  <a href="#ch7-3">7.3 动态 CP 等新进展</a>
+  <a href="#ch8">8. 多维并行组合与自动并行</a>
+  <a href="#ch9">9. 通信优化技术体系(通算掩盖总论)</a>
+  <a href="#ch10">10. 2024–2026 最新进展盘点</a>
+  <a href="#ch11">11. 未来发展方向</a>
+  <a href="#ch12">12. 结语</a>
+  <a href="#refs">参考文献</a>
+</nav>
+<main>
+<header class="hero">
+  <h1>大模型并行策略与通信优化<br><span style="font-size:20px;color:#e8eaed;">发展历程 · 原理图解 · 源码实证 · 前沿与未来</span></h1>
+  <div class="meta">整理日期:2026-08-23 &nbsp;|&nbsp; 代码基于:Megatron-LM(v0.15)、DeepSpeed、DeepEP 开源仓库 &nbsp;|&nbsp; 面向:本科可读的入门+进阶综述</div>
+  <p class="lead">这篇文章沿时间线讲清楚大模型训练里的五种主流并行——数据并行(DP)、张量并行(TP)、流水线并行(PP)、专家并行(EP)、上下文并行(CP)——以及围绕它们的通信优化技术(通算掩盖、通信原语优化、拓扑感知等)。每个概念都从"为什么需要它"讲起,配上图示、代码和可以动手验证的公式;所有关键论断都标注了出处与发表时间,并在附近用小字给出原文摘录或译文。</p>
+</header>
+
+<section id="ch0">
+<h2>0. 导读与术语表</h2>
+<p><b>怎么读这篇文章:</b>第 1–2 章是地基(显存账本、通信原语),请务必先读;第 3–7 章按历史顺序分别讲五类并行,每章末尾有"源码走读",对应本目录下克隆的 Megatron-LM / DeepSpeed / DeepEP 仓库,可以直接跳转文件看;第 8–9 章把它们拼成完整系统;第 10–11 章是 2024–2026 的最新进展与未来展望。<b>引用标注形如 <sup class="cite">[Megatron-LM, NVIDIA, 2019-09]</sup>,附近的小字框内是该文献的原文(英文斜体)与中文译文。</b></p>
+<table>
+<tr><th>缩写</th><th>全称</th><th>一句话解释</th></tr>
+<tr><td><b>DP</b></td><td>Data Parallelism(数据并行)</td><td>每张卡放一份完整模型,各自吃不同数据,反向传播后同步梯度</td></tr>
+<tr><td><b>TP</b></td><td>Tensor Parallelism(张量并行)</td><td>把单个矩阵乘法的权重切开,几张卡合力算一个层,层内有通信</td></tr>
+<tr><td><b>PP</b></td><td>Pipeline Parallelism(流水线并行)</td><td>把模型按层切成若干段,每段(每个 stage)放一张卡,数据像流水线一样流过</td></tr>
+<tr><td><b>EP</b></td><td>Expert Parallelism(专家并行)</td><td>MoE 模型把不同专家放到不同卡上,token 通过 all-to-all 通信去找自己的专家</td></tr>
+<tr><td><b>SP</b></td><td>Sequence Parallelism(序列并行)</td><td>把序列(句子)维度切开分到多卡;在 Megatron 中特指 LayerNorm/Dropout 区域沿序列切分、与 TP 配合的方案</td></tr>
+<tr><td><b>CP</b></td><td>Context Parallelism(上下文并行)</td><td>面向长上下文:序列切成块,注意力计算时 KV 在卡间环形传递</td></tr>
+<tr><td><b>ZeRO / FSDP</b></td><td>Zero Redundancy Optimizer / Fully Sharded Data Parallel</td><td>把优化器状态、梯度、参数也切片分到各卡,按需聚合,消除数据并行的显存冗余</td></tr>
+<tr><td><b>通算掩盖</b></td><td>Compute-Communication Overlap</td><td>让通信与计算同时进行,把通信时间"藏"进计算时间里的各种调度技巧</td></tr>
+<tr><td><b>MFU</b></td><td>Model FLOPs Utilization</td><td>实际每秒浮点运算次数 ÷ 硬件理论峰值,衡量训练效率的核心指标</td></tr>
+<tr><td><b>all-reduce / all-gather / reduce-scatter / all-to-all</b></td><td>集合通信原语</td><td>多卡之间的数据搬运"动词",见第 2.2 节图解</td></tr>
+</table>
+</section>
+<section id="ch1">
+<h2>1. 为什么需要并行:显存墙、算力墙与通信墙</h2>
+
+<h3>1.1 模型大了多少?</h3>
+<p>2018 年的 BERT-Large 有 3.4 亿参数,当时 4×V100 就能微调;而今天的主流大模型参数量以"千亿"起步:DeepSeek-V3 有 671B(激活 37B)<sup class="cite">[<a href="#refs">DeepSeek-V3, 2024-12</a>]</sup>,Kimi K2 达 1.28T<sup class="cite">[<a href="#refs">Kimi K2, 2025-07</a>]</sup>。单张 GPU 的显存却远远没有跟上——H100 只有 80GB。先来算一笔账,你就能明白为什么"并行"不是可选项,而是生存问题。</p>
+
+<figure>
+<svg viewBox="0 0 760 240" width="100%" style="max-width:760px">
+  <style>.lbl{font:11.5px system-ui;fill:#475569}</style>
+  <text x="10" y="18" style="font:13px system-ui;fill:#1a2233">模型参数量(十亿)随时间的增长</text>
+  <g>
+    <text class="lbl" x="14" y="52">BERT-Large (2018-10)</text><rect x="185" y="42" width="4" height="12" fill="#aeb4bd"/><text class="lbl" x="194" y="52">0.34B</text>
+    <text class="lbl" x="14" y="82">GPT-2 (2019-02)</text><rect x="120" y="72" width="14" height="12" fill="#aeb4bd"/><text class="lbl" x="140" y="82">1.5B</text>
+    <text class="lbl" x="14" y="112">GPT-3 (2020-05)</text><rect x="120" y="102" width="56" height="12" fill="#9d7bff"/><text class="lbl" x="182" y="112">175B</text>
+    <text class="lbl" x="14" y="142">LLaMA-65B (2023-02)</text><rect x="120" y="132" width="21" height="12" fill="#9d7bff"/><text class="lbl" x="147" y="142">65B</text>
+    <text class="lbl" x="14" y="172">DeepSeek-V3 (2024-12)</text><rect x="120" y="162" width="215" height="12" fill="#6ea8ff"/><text class="lbl" x="340" y="172">671B</text>
+    <text class="lbl" x="14" y="202">Kimi K2 (2025-07)</text><rect x="120" y="192" width="410" height="12" fill="#6ea8ff"/><text class="lbl" x="535" y="202">1280B(1.28T)</text>
+  </g>
+  <line x1="120" y1="30" x2="120" y2="215" stroke="#1c2126"/>
+  <text class="lbl" x="120" y="232">0</text><text class="lbl" x="490" y="232">300B</text><text class="lbl" x="510" y="18" style="fill:#1d2025">条形长度 ∝ 参数量</text>
+</svg>
+<figcaption>图 1-1:模型参数量在 7 年间从 0.34B 涨到 1.28T,约 3700 倍;同期单卡显存只从 32GB(V100)涨到 192GB(B200),约 6 倍。</figcaption>
+</figure>
+
+<h3>1.2 显存墙:训练一个模型到底要多少显存?</h3>
+<p>很多人以为"70B 模型 = 140GB 显存(bf16 存参数)",这只是冰山一角。<b>训练</b>显存由四部分组成(以混合精度 + Adam 优化器为惯例,ZeRO 论文按此推导出著名的 16Ψ 字节账本<sup class="cite">[<a href="#refs">Rajbhandari et al., ZeRO, arXiv 1910.02054, 2019-10</a>]</sup>):</p>
+<table>
+<tr><th>项目</th><th>大小(每参数字节)</th><th>说明</th></tr>
+<tr><td>参数(bf16)</td><td>2</td><td>前向/反向计算用</td></tr>
+<tr><td>梯度(bf16)</td><td>2</td><td>反向传播产生</td></tr>
+<tr><td>优化器状态</td><td><b>12</b></td><td>Adam 的一阶矩 m、二阶矩 v 各一份 fp32(4+4),再加一份 fp32 主参数(4)</td></tr>
+<tr><td>激活值(activations)</td><td>随序列长度/层数增长</td><td>反向传播要用的中间结果,见下</td></tr>
+</table>
+<div class="formula">静态显存 ≈ 16 × N 字节(N 为参数量)</div>
+<p>代入几个数字:70B 模型 → 16 × 70G = <b>1.12TB</b>,不含激活;175B → 2.8TB;671B → 10.7TB。而一张 H100 只有 80GB。结论:<b>单纯靠"一张卡装一个模型"在千亿规模下彻底破产</b>,必须把参数、梯度、优化器状态、激活切分到成百上千张卡上——这就是各种并行策略的第一个使命。</p>
+<p>激活值同样可观,而且有自己的公式。Megatron 团队推导出:不并行时每层激活约 <code>sbh(34 + 5as/h)</code> 字节(其中 a 为注意力头数,s 序列长,h 隐藏维,系数 34 来自 MLP/归一化区,5as/h 来自注意力的 softmax/中间结果);只用 TP 时降为 <code>sbh(10 + 24/t + 5as/ht)</code>;TP+序列并行时为 <code>sbh(34/t + 5as/ht)</code>——对 GPT-3 级配置(a=96, s=2048, h=12288),5as/h ≈ 80,可见注意力部分占大头。<sup class="cite">[<a href="#refs">Korthikanti et al., arXiv 2205.05198, 2022-05</a>]</sup></p>
+<div class="quote"><span class="en">"In this paper, we show how to significantly accelerate training of large transformer models by reducing activation recomputation. ... We present two novel yet very simple techniques: sequence parallelism and selective activation recomputation. ... our method reduces activation memory by 5×, while reducing execution time overhead from activation recomputation by over 90%. For example, when training a 530B parameter GPT-3 style model on 2240 NVIDIA A100 GPUs, we achieve a Model Flops Utilization of 54.2%, which is 29% faster than the 42.1% we achieve using recomputation."</span><br><b>译文:</b>"本文展示如何通过减少激活重计算来显著加速大 Transformer 训练……我们提出两个新颖而极简的技术:序列并行与选择性激活重计算……我们的方法把激活显存降低 5 倍,同时把激活重计算带来的执行时间开销降低 90% 以上。例如在 2240 张 A100 上训练 530B GPT-3 风格模型时,我们达到 54.2% 的 MFU,比使用(全量)重计算的 42.1% 快 29%。"(摘要,arXiv 2205.05198,2022-05 首发)</div>
+
+<h3>1.3 通信墙:并行不是免费的</h3>
+<p>把模型切开,各部分之间就必须"说话"。通信时间可以用一个简单模型估算:</p>
+<div class="formula">T<sub>comm</sub> ≈ α + V / B &nbsp;&nbsp;(α:启动延迟,V:通信字节数,B:链路带宽)</div>
+<p>关键在于带宽的巨大落差。H100 GPU 本身每秒能做 ~10<sup>15</sup> 次 bf16 运算,显存带宽 3.35TB/s;而节点间网络(InfiniBand 400/800G)每方向只有 50~100GB/s,慢了 30~60 倍。如果不做任何优化,把 70B 模型的梯度(bf16,140GB)在 64 个节点间做一次 all-reduce,需要数秒——而每步计算本身可能只有一秒。所以并行策略设计的第二使命,就是<b>让通信量尽量小、让通信尽量与计算重叠(通算掩盖)</b>,并让大数据量通信发生在高带宽的域内(NVLink 域),把慢速跨节点链路留给小数据或可掩盖的通信。</p>
+
+<div class="note"><b>一张图总结五个"墙"背后的五类并行:</b>
+<b>显存装不下模型本体 → 张量并行 TP / 流水线并行 PP</b>(切参数);
+<b>显存装不下优化器 → ZeRO/FSDP</b>(切优化器状态,本质是数据并行的变体);
+<b>MoE 专家太多 → 专家并行 EP</b>(切专家);
+<b>序列太长激活爆炸 → 序列/上下文并行 SP/CP</b>(切序列);
+<b>还想再快 → 数据并行 DP</b>(复制整个训练状态,吃不同数据)。</div>
+</section>
+
+<section id="ch2">
+<h2>2. 预备知识:Transformer 结构、集合通信原语与硬件金字塔</h2>
+
+<h3 id="ch2-1">2.1 Transformer 结构速览(只保留对并行有用的部分)</h3>
+<p>现代 LLM 几乎都是"解码器堆叠"。对并行最重要的结构事实是:<b>层与层之间是串行的</b>(第 i+1 层的输入是第 i 层的输出)——这决定了流水线并行按层切分;而<b>每一层内部有两个大矩阵乘法簇</b>(注意力的 QKV/输出投影,MLP 的升维/降维)——这决定了张量并行按矩阵维度切分。</p>
+<figure>
+<svg viewBox="0 0 720 300" width="100%" style="max-width:720px">
+  <style>.bx{fill:#15202d;stroke:#23548b}.tx{font:12.5px system-ui;fill:#1a2233}.sm{font:11px system-ui;fill:#64748b}</style>
+  <rect x="270" y="10" width="180" height="30" fill="#321f11" stroke="#ffb454"/><text class="tx" x="290" y="30">输入 x [s, b, h]</text>
+  <rect x="250" y="60" width="220" height="30" class="bx"/><text class="tx" x="262" y="80">LayerNorm(序列内逐 token,无跨卡)</text>
+  <rect x="230" y="110" width="260" height="46" class="bx"/><text class="tx" x="240" y="128">自注意力:QKV 投影(h→3h)</text><text class="sm" x="240" y="146">多头:head_i = softmax(Q_iK_i^T/√d)·V_i,可按头切分</text>
+  <rect x="230" y="176" width="260" height="30" class="bx"/><text class="tx" x="268" y="196">输出投影 O(h→h)</text>
+  <rect x="230" y="222" width="260" height="30" class="bx"/><text class="tx" x="240" y="242">MLP:fc1(h→4h) → GELU → fc2(4h→h)</text>
+  <text class="sm" x="510" y="130">← TP 按注意力头切</text>
+  <text class="sm" x="510" y="240">← TP 按隐藏维切</text>
+  <path d="M360 40 L360 60 M360 90 L360 110 M360 156 L360 176 M360 206 L360 222" stroke="#aeb4bd"/>
+  <text class="sm" x="380" y="285">…重复 L 层(L=32~200+),层间串行 → PP 按层切</text>
+</svg>
+<figcaption>图 2-1:一层 Transformer 的计算图。注意力按"头"天然可分,MLP 按隐藏维天然可分——这两点是 Megatron 张量并行的立足点。</figcaption>
+</figure>
+
+<h3 id="ch2-2">2.2 集合通信原语:并行的"动词表"</h3>
+<p>所有并行策略的通信最终都由少数几个集合通信(collective)原语组成。以 4 张卡、每卡持有向量 [a<sub>i</sub>] 为例:</p>
+<figure>
+<svg viewBox="0 0 740 330" width="100%" style="max-width:740px">
+  <style>.g0{fill:#0b62c4}.g1{fill:#1d1132}.g2{fill:#0891b2}.g3{fill:#d97706}.cl{font:11px system-ui;fill:#171a21}.tt{font:12.5px system-ui;fill:#1a2233;font-weight:600}.ds{font:10.5px system-ui;fill:#64748b}</style>
+  <text class="tt" x="10" y="20">All-Reduce(规约求和,人人得到同一份结果)</text>
+  <rect x="20" y="30" width="60" height="18" class="g0"/><text class="cl" x="35" y="43">a0</text>
+  <rect x="20" y="54" width="60" height="18" class="g1"/><text class="cl" x="35" y="67">a1</text>
+  <rect x="20" y="78" width="60" height="18" class="g2"/><text class="cl" x="35" y="91">a2</text>
+  <rect x="20" y="102" width="60" height="18" class="g3"/><text class="cl" x="35" y="115">a3</text>
+  <rect x="120" y="66" width="90" height="18" fill="#e8eaed"/><text class="cl" x="128" y="79">Σ=a0+a1+a2+a3</text>
+  <path d="M80 39 C110 39 110 75 120 75 M80 63 L120 75 M80 87 C110 87 110 75 120 75 M80 111 C110 111 110 75 120 75" stroke="#aeb4bd" fill="none"/>
+  <path d="M210 75 C240 75 240 39 252 39 M210 75 L252 63 M210 75 C240 75 240 87 252 87 M210 75 C240 75 240 111 252 111" stroke="#aeb4bd" fill="none"/>
+  <rect x="252" y="30" width="60" height="18" fill="#e8eaed"/><text class="cl" x="262" y="43">Σ</text>
+  <rect x="252" y="54" width="60" height="18" fill="#e8eaed"/><text class="cl" x="262" y="67">Σ</text>
+  <rect x="252" y="78" width="60" height="18" fill="#e8eaed"/><text class="cl" x="262" y="91">Σ</text>
+  <rect x="252" y="102" width="60" height="18" fill="#e8eaed"/><text class="cl" x="262" y="115">Σ</text>
+  <text class="ds" x="20" y="140">DP 同步梯度、TP 层内同步,都用它。环形实现总流量 ≈ 2·(p−1)/p·V</text>
+  <text class="tt" x="10" y="180">All-Gather(各自出碎片,人人拿到完整拼接)</text>
+  <rect x="20" y="190" width="60" height="18" class="g0"/><rect x="80" y="190" width="10" height="18" fill="#e2e8f0"/><rect x="90" y="190" width="10" height="18" fill="#e2e8f0"/><rect x="100" y="190" width="10" height="18" fill="#e2e8f0"/>
+  <rect x="20" y="212" width="10" height="18" fill="#e2e8f0"/><rect x="30" y="212" width="60" height="18" class="g1"/><rect x="90" y="212" width="10" height="18" fill="#e2e8f0"/><rect x="100" y="212" width="10" height="18" fill="#e2e8f0"/>
+  <rect x="20" y="234" width="10" height="18" fill="#e2e8f0"/><rect x="30" y="234" width="10" height="18" fill="#e2e8f0"/><rect x="40" y="234" width="60" height="18" class="g2"/><rect x="100" y="234" width="10" height="18" fill="#e2e8f0"/>
+  <rect x="20" y="256" width="10" height="18" fill="#e2e8f0"/><rect x="30" y="256" width="10" height="18" fill="#e2e8f0"/><rect x="40" y="256" width="10" height="18" fill="#e2e8f0"/><rect x="50" y="256" width="60" height="18" class="g3"/>
+  <path d="M150 199 C170 199 170 190 190 190 M150 199 C170 199 170 212 190 212 M150 199 C170 199 170 234 190 234 M150 199 C170 199 170 256 190 256" stroke="#1c2126" fill="none" stroke-dasharray="3 2"/>
+  <text class="ds" x="20" y="290">All-gather = 拼接;Reduce-scatter = 先求和再切片(每人拿走属于自己的 1/p)。</text>
+  <text class="ds" x="20" y="306">重要恒等式:All-Reduce = Reduce-Scatter + All-Gather —— ZeRO/SP 把一次 all-reduce 拆成这两半分别隐藏。</text>
+  <text class="tt" x="470" y="180">All-to-All(两两交换,各取所需)</text>
+  <g>
+    <rect x="480" y="190" width="50" height="16" class="g0"/><rect x="530" y="190" width="14" height="16" class="g1" opacity=".75"/><rect x="544" y="190" width="14" height="16" class="g2" opacity=".75"/><rect x="558" y="190" width="14" height="16" class="g3" opacity=".75"/>
+    <rect x="480" y="210" width="14" height="16" class="g0" opacity=".75"/><rect x="494" y="210" width="50" height="16" class="g1"/><rect x="544" y="210" width="14" height="16" class="g2" opacity=".75"/><rect x="558" y="210" width="14" height="16" class="g3" opacity=".75"/>
+    <rect x="480" y="230" width="14" height="16" class="g0" opacity=".75"/><rect x="494" y="230" width="14" height="16" class="g1" opacity=".75"/><rect x="508" y="230" width="50" height="16" class="g2"/><rect x="558" y="230" width="14" height="16" class="g3" opacity=".75"/>
+    <rect x="480" y="250" width="14" height="16" class="g0" opacity=".75"/><rect x="494" y="250" width="14" height="16" class="g1" opacity=".75"/><rect x="508" y="250" width="14" height="16" class="g2" opacity=".75"/><rect x="522" y="250" width="50" height="16" class="g3"/>
+  </g>
+  <path d="M560 198 C600 198 600 260 620 260 M560 218 C600 218 600 240 620 240 M560 238 C600 238 600 220 620 220 M560 258 C600 258 600 200 620 200" stroke="#aeb4bd" fill="none" stroke-dasharray="4 2"/>
+  <text class="ds" x="480" y="290">EP 的 dispatch/combine 就是 all-to-all:token 从"来源卡"飞到"专家所在卡"。</text>
+</svg>
+<figcaption>图 2-2:四大集合通信原语。颜色代表数据归属的卡。记住恒等式"All-Reduce = Reduce-Scatter + All-Gather",后文会反复用到。</figcaption>
+</figure>
+<p>代价模型:对 p 张卡、每卡 V 字节的数据,环形 all-reduce 的时间约为 <code>2(p−1)/p · V/B + 2(p−1)α</code>;all-gather / reduce-scatter 各占一半。这个"通信量与卡数基本无关、只与数据量有关"的性质,是后面比较各种并行通信量的标尺。</p>
+
+<h3 id="ch2-3">2.3 硬件带宽金字塔:并行策略被拓扑牵着走</h3>
+<figure>
+<svg viewBox="0 0 720 260" width="100%" style="max-width:720px">
+  <style>.t1{fill:#0b62c4}.t2{fill:#2f7fd0}.t3{fill:#14222e}.t4{fill:#15202d}.bw{font:11px system-ui;fill:#171a21}</style>
+  <rect x="60" y="10" width="600" height="46" class="t1"/><text class="bw" x="80" y="30">GPU HBM 显存:3.35 TB/s(H100)~ 8 TB/s(B200)</text><text class="bw" x="80" y="46">只有本卡可见</text>
+  <rect x="100" y="64" width="520" height="46" class="t2"/><text class="bw" x="120" y="84">节点内 NVLink/NVSwitch:900 GB/s(H100 NVL8)</text><text class="bw" x="120" y="100">8~72 卡共享(NVL72 = 1.8TB/s,GB200 时代)</text>
+  <rect x="140" y="118" width="440" height="46" class="t3"/><text class="bw" x="160" y="138" style="fill:#1e3a5f">跨节点 InfiniBand/RoCE:400~800 Gb/s(50~100 GB/s)</text><text class="bw" x="160" y="154" style="fill:#1e3a5f">多机集群,靠交换机/多轨组网</text>
+  <rect x="180" y="172" width="360" height="40" class="t4"/><text x="200" y="190" style="font:11px system-ui;fill:#1e3a5f">数据中心间/广域:1~10 GB/s</text><text x="200" y="204" style="font:11px system-ui;fill:#1e3a5f">DiLoCo 等低通信训练的目标场景</text>
+  <text x="60" y="238" style="font:11.5px system-ui;fill:#475569">→ 越往下带宽越低 1~2 个数量级。设计原则:大通信放塔尖(NVLink 域),小通信或可掩盖通信放塔基。</text>
+</svg>
+<figcaption>图 2-3:通信带宽金字塔(数量级示意,具体数值随代际变化)。</figcaption>
+</figure>
+<div class="note">把 2.2 与 2.3 合起来,就有了贯穿全文的分析框架:评估任何一个并行/通信方案,只需问三个问题——<b>(1) 通信什么原语、数据量多大?(2) 通信发生在金字塔哪一层?(3) 能否与计算重叠、被"藏"起来?</b></div>
+</section>
+<section id="ch3">
+<h2>3. 数据并行:从 DP、DDP 到 ZeRO 与 FSDP</h2>
+<p class="tag">时间线:2014 ImageNet 双卡 → 2017 PyTorch DistributedDataParallel / 2018 Horovod(ring all-reduce)→ 2019-10 ZeRO 论文 → 2020 DeepSpeed 开源 → 2021 PyTorch FSDP(实验)→ 2023 FSDP 论文(VLDB)</p>
+
+<h3>3.1 最朴素的数据并行(DP)与它的冗余</h3>
+<p>数据并行是最容易理解的并行:每张卡都持有<b>完整</b>的模型副本,各自喂不同的 mini-batch,各自前向、反向算出梯度,然后把所有卡的梯度<b>加起来(all-reduce)</b>,各卡再用同样的平均梯度更新参数。它对模型结构零侵入,通信也只有一种原语(梯度 all-reduce),而且天然可以与反向传播<b>重叠</b>——某几层梯度算好了就可以先发出去,不必等整张卡算完。PyTorch 的 DDP 和 2018 年 Uber 开源的 Horovod 都把梯度切进 bucket(默认 25MB)用环形 all-reduce 发送<sup class="cite">[<a href="#refs">Horovod, 2018-02</a>]</sup>。</p>
+<div class="warn"><b>但 DP 有一个致命缺陷:显存冗余。</b>每张卡都存着完整的参数、梯度和优化器状态——100 张卡就是 100 份冗余。回到 1.2 节的账本:70B 模型每卡需要 1.12TB,数据并行一张卡都装不下,根本无从谈起。这就是 2019 年 ZeRO 登场的背景。</div>
+
+<h3>3.2 ZeRO:把冗余切片(2019-10)</h3>
+<p>ZeRO(Zero Redundancy Optimizer)的核心洞察非常简单:<b>数据并行中除了"参数本身",其他状态(优化器状态、梯度)在卡间是重复且不需要同时完整的</b>。既然显存装不下,那就把它们像切参数一样切到各卡上,用时再临时聚合。</p>
+<figure>
+<svg viewBox="0 0 740 240" width="100%" style="max-width:740px">
+  <style>.p{fill:#0b62c4}.g{fill:#0891b2}.o{fill:#d97706}.cap{font:11.5px system-ui;fill:#475569}</style>
+  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">DP(全冗余)</text>
+  <g><rect x="10" y="24" width="60" height="16" class="p"/><rect x="72" y="24" width="60" height="16" class="g"/><rect x="134" y="24" width="120" height="16" class="o"/></g>
+  <g><rect x="10" y="44" width="60" height="16" class="p"/><rect x="72" y="44" width="60" height="16" class="g"/><rect x="134" y="44" width="120" height="16" class="o"/></g>
+  <g><rect x="10" y="64" width="60" height="16" class="p"/><rect x="72" y="64" width="60" height="16" class="g"/><rect x="134" y="64" width="120" height="16" class="o"/></g>
+  <text class="cap" x="10" y="94">每卡:参数+梯度+优化器(16N/卡)</text>
+  <text x="330" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">ZeRO-1:切优化器状态</text>
+  <g><rect x="330" y="24" width="60" height="16" class="p"/><rect x="392" y="24" width="60" height="16" class="g"/><rect x="454" y="24" width="40" height="16" class="o"/></g>
+  <g><rect x="330" y="44" width="60" height="16" class="p"/><rect x="392" y="44" width="60" height="16" class="g"/><rect x="496" y="44" width="40" height="16" class="o"/></g>
+  <g><rect x="330" y="64" width="60" height="16" class="p"/><rect x="392" y="64" width="60" height="16" class="g"/><rect x="538" y="64" width="40" height="16" class="o"/></g>
+  <text class="cap" x="20" y="94">每卡:4N + 12N/p(≈4N)</text>
+  <text x="640" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">ZeRO-3:全切</text>
+  <g><rect x="640" y="24" width="20" height="16" class="p"/><rect x="662" y="24" width="20" height="16" class="g"/><rect x="684" y="24" width="40" height="16" class="o"/></g>
+  <g><rect x="640" y="44" width="20" height="16" class="p"/><rect x="662" y="44" width="20" height="16" class="g"/><rect x="684" y="44" width="40" height="16" class="o"/></g>
+  <g><rect x="640" y="64" width="20" height="16" class="p"/><rect x="662" y="64" width="20" height="16" class="g"/><rect x="684" y="64" width="40" height="16" class="o"/></g>
+  <text class="cap" x="580" y="94">16N/p /卡</text>
+  <text class="cap" x="10" y="130">■ 参数(2N) ■ 梯度(2N) ■ 优化器状态(12N,fp32)　p=卡数。ZeRO-2 再多切梯度(2N+14N/p),ZeRO-3 参数也切(16N/p)。</text>
+  <text class="cap" x="10" y="152">注意右侧渐变色越浅表示"属于该卡的那一份"。切得越碎,通信越多:ZeRO-3 前向要 all-gather 参数、反向用完立刻释放,通信量约为 DP 的 1.5 倍。</text>
+  <text class="cap" x="10" y="174">出处:ZeRO 论文(Rajbhandari et al., SC 2020;arXiv 1910.02054,2019-10 首发上图思想)</text>
+</svg>
+<figcaption>图 3-1:DP 与 ZeRO 三级切片的显存对比(蓝=参数,青=梯度,橙=优化器状态)。</figcaption>
+</figure>
+
+<p>ZeRO 论文给出的一组经典数字:基准数据并行在 32GB V100 上最多训 1.4B 就会爆显存;ZeRO-100B(优化器+梯度分片)在 400 张 V100 上高效训练 170B 模型、持续 15 PetaFLOPS,比当时最优方案<b>模型大 8 倍、快 10 倍</b>;理论上三级全开可在 1024 张 GPU 上放下 1 万亿参数。通信量的关键结论:前两级(P<sub>os</sub>、P<sub>os+g</sub>)与普通 DP <b>通信量完全相同</b>,第三级(P<sub>os+g+p</sub>)也只增加 50%。后续 DeepSpeed 又推出 ZeRO-Offload(2021-01,把优化器卸载到 CPU 内存)和 ZeRO-Infinity(2021-04,卸载到 CPU+NVMe,突破"显存有多少"的限制)<sup class="cite">[<a href="#refs">ZeRO-Infinity, 2021-04</a>]</sup>。</p>
+<div class="quote"><span class="en">"ZeRO eliminates memory redundancies in data- and model-parallel training while retaining low communication volume and high computational granularity, allowing us to scale the model size proportional to the number of devices with sustained high efficiency. ... it trains large models of over 100B parameter with super-linear speedup on 400 GPUs, achieving throughput of 15 Petaflops."</span><br><b>译文:</b>"ZeRO 消除数据/模型并行训练中的显存冗余,同时保持低通信量与高计算粒度,使模型规模可随设备数成比例扩展且持续高效……它在 400 张 GPU 上以超线性加速训练超过 1000 亿参数的模型,达到 15 Petaflops 吞吐。"(ZeRO 摘要,2019-10)</div>
+
+<h3>3.3 源码走读:ZeRO 的通信发生在哪?</h3>
+<p class="codecap">DeepSpeed(deepspeed/runtime/zero/stage_1_and_2.py):反向传播的参数钩子里把梯度攒进桶,桶满即通信——这就是"通信与反向计算重叠"的实现位。</p>
+<pre><code># stage_1_and_2.py:1177-1202(节选)
+self._grad_acc_hooks.append(register_grad_hook(param, grad_handling_hook))
+...
+if bucket.elements + param.numel() &gt; self.reduce_bucket_size:
+    ...  # 当前桶放不下,先把这个桶的梯度发出去
+    self.reduce_ipg_grads(comm_dtype=comm_dtype)
+...
+# stage_1_and_2.py:1271(逐字):梯度规约就是一次 all-reduce
+dist.all_reduce(tensor_to_allreduce, group=self.dp_process_group)</code></pre>
+<p class="codecap">stage3.py:参数按需 all-gather(fetch_sub_module → __all_gather_params,跑在独立的 __allgather_stream 上);梯度则直接 reduce-scatter 成各 rank 的分区(reduce_scatter_coalesced),通信全程与计算不同流并行。</p>
+<pre><code># stage3.py:333-336(逐字注释)
+### streams used for overlapping computation with communication
+self.reduce_and_partitions_stream = (
+    ... get_accelerator().Stream() if overlap_comm else ...)</code></pre>
+<p>两个细节值得注意:(1)<b>桶(bucket)</b>是通算掩盖的第一个经典技巧——把"每层一小笔通信"合并成"一大笔",摊薄每次通信的固定延迟 α;(2)ZeRO-3 用的是"参数在要用前一刻才 all-gather、用完立即丢弃"的<strong>按需物化</strong>思想,这与后面所有"切分+临时聚合"的方案(EP 的 token、CP 的 KV)一脉相承。</p>
+
+<h3>3.4 FSDP:ZeRO-3 思想的官方化(2023-04 论文)</h3>
+<p>PyTorch 2.x 把 ZeRO-3 的思想吸收为官方 API——FSDP(Fully Sharded Data Parallel):把参数、梯度、优化器状态全部按 DP 组切片,前向/反向到某个子模块时先 all-gather 参数,算完立即释放。其论文(VLDB 2023)报告了 1T 参数模型的训练,并总结了混合分片、CPU 卸载等生产经验<sup class="cite">[<a href="#refs">Zhao et al., arXiv 2304.11277, 2023-04</a>]</sup>。今天 HuggingFace Trainer、torchtitan 等默认路径都是 FSDP;DeepSpeed 与 FSDP 的取舍本质上是"功能丰富度 vs 框架耦合度"的取舍。</p>
+
+<div class="note"><b>小结本章:</b>DP/ZeRO/FSDP 这一支的通信模式 = <b>每步每参数 2×(bf16)字节的梯度同步</b>(与卡数无关),可以完全藏在反向传播里。它<b>不减少单步计算量</b>,只靠增加卡数扩大吞吐/装下大模型。当模型大到"梯度 all-reduce 本身成为瓶颈"或"单卡算力太小导致 MFU 上不去"时,就需要切模型本身——下一章的张量并行与流水线并行。</div>
+</section>
+<section id="ch4">
+<h2>4. 张量并行(TP)与序列并行(SP):把一层切开算</h2>
+<p class="tag">时间线:2019-09 Megatron-LM 论文(TP)→ 2021-04 Megatron SC'21(TP×PP 协同调优)→ 2022-05 序列并行(arXiv 2205.05198)→ 2023+ 异步 TP/通算重叠 → 今天 SP+TP 成为默认配方</p>
+
+<h3 id="ch4-1">4.1 原理:一个矩阵乘法怎么分给多张卡?</h3>
+<p>数据并行切的是数据,张量并行切的是<b>权重矩阵本身</b>。Megatron-LM(2019)的出发点是:Transformer 层里的两个大矩阵乘,恰好都有"切开后中间结果可以部分求和"的数学性质<sup class="cite">[<a href="#refs">Shoeybi et al., NVIDIA, arXiv 1909.08053, 2019-09</a>]</sup>。</p>
+<div class="quote"><span class="en">"In this work, we present our techniques for training very large transformer models and implement a simple, efficient intra-layer model parallel approach that enables training transformer models with billions of parameters. Our approach does not require a new compiler or library changes, is orthogonal and complimentary to pipeline model parallelism, and can be fully implemented with the insertion of a few communication operations in native PyTorch. We illustrate this approach by converging transformer based models up to 8.3 billion parameters using 512 GPUs. We sustain 15.1 PetaFLOPs across the entire application with 76% scaling efficiency…"</span><br><b>译文:</b>"本文提出训练超大 Transformer 模型的技术,实现了一种简单高效的层内模型并行方法……该方法不需要新的编译器或库改动,与流水线模型并行正交互补,只需在原生 PyTorch 中插入少量通信操作即可完全实现。我们用 512 张 GPU 训练了最大 83 亿参数的模型,全应用持续达到 15.1 PetaFLOPS,相比单卡强基线有 76% 的扩展效率。"(Megatron-LM 摘要,2019-09)</div>
+
+<h4>MLP 层:列切 + 行切,只花一次 all-reduce</h4>
+<p>MLP 前向是 <code>Y = GeLU(X·W1)·W2</code>,其中 W1 把 h 升到 4h,W2 再降回 h。把 W1 <b>按列</b>切成 [W1<sub>1</sub>, W1<sub>2</sub>](两张卡各拿一半输出维度),把 W2 <b>按行</b>切成堆叠的 [W2<sub>1</sub>; W2<sub>2</sub>],则:</p>
+<div class="formula">Y = GeLU(X·W1)·W2 = GeLU(X·[W1<sub>1</sub>,W1<sub>2</sub>])·[W2<sub>1</sub>;W2<sub>2</sub>] = <u>GeLU(XW1<sub>1</sub>)W2<sub>1</sub></u> + <u>GeLU(XW1<sub>2</sub>)W2<sub>2</sub></u></div>
+<p>每张卡独立算出自己的"部分和",最后把两个部分和<b>相加</b>就是完整结果——这个相加正好就是一次 all-reduce。注意巧妙之处:GeLU 这类非线性激活逐元素作用在切分维度上,切开后各自算 GeLU 完全等价,不需要任何通信。</p>
+<figure>
+<svg viewBox="0 0 760 230" width="100%" style="max-width:760px">
+  <style>.op{font:12.5px system-ui;fill:#1a2233}.small{font:11px system-ui;fill:#64748b}.fbox{fill:#15202d;stroke:#23548b}.gbox{fill:#322211;stroke:#8b5a23}</style>
+  <rect x="120" y="30" width="70" height="26" class="fbox"/><text class="op" x="138" y="47">f</text>
+  <text class="small" x="100" y="20">前向:恒等 / 反向:all-reduce</text>
+  <rect x="60" y="60" width="120" height="40" fill="#111f32"/><text class="op" x="72" y="78">卡0: X·W1₁→GeLU</text><text class="op" x="80" y="94">→ ·W2₁(部分和)</text>
+  <rect x="220" y="60" width="120" height="40" fill="#171132"/><text class="op" x="232" y="78">卡1: X·W1₂→GeLU</text><text class="op" x="240" y="94">→ ·W2₂(部分和)</text>
+  <rect x="400" y="60" width="70" height="40" class="gbox"/><text class="op" x="418" y="78">g</text><text class="small" x="480" y="72">前向:all-reduce</text><text class="small" x="480" y="86">反向:恒等</text>
+  <path d="M190 43 C230 43 230 65 220 70" stroke="#aeb4bd" fill="none"/><path d="M190 43 C250 43 210 50 180 65" stroke="#aeb4bd" fill="none"/>
+  <path d="M180 80 L400 80" stroke="#aeb4bd"/><path d="M340 80 L400 80" stroke="#aeb4bd"/>
+  <text class="op" x="20" y="125">Attention 路同理:</text><text class="op" x="140" y="125">QKV 投影按"注意力头"列切 → 每卡算自己那几个头的 softmax(QKᵀV)</text>
+  <text class="op" x="140" y="145">(softmax 天然逐头独立,零通信)→ 输出投影 O 按行切 → all-reduce 部分和</text>
+  <text class="small" x="20" y="175">一个 Transformer 层前向共 2 次 all-reduce(注意力后 1 次 + MLP 后 1 次),反向同样 2 次;每次通信量 ≈ 2·s·b·h 字节(bf16)。</text>
+  <text class="small" x="20" y="195">f/g 是 Megatron 论文对两个共轭通信算子的命名:TP 打开 SP 后,f 变 all-gather、g 变 reduce-scatter(见 4.3)。</text>
+</svg>
+<figcaption>图 4-1:Megatron MLP 的张量并行。f/g 是论文定义的两个通信算子:前向计算到层入口时数据在卡间是复制的(f 前向恒等),反向梯度需要 all-reduce;出口处各卡只有部分和(g 前向 all-reduce),反向梯度恒等。</figcaption>
+</figure>
+
+<h4>TP 的两个黄金法则</h4>
+<p><b>(1) 切分维度要"通信最少":</b>列切 W1 使每卡都收完整的 X(前向零通信),行切 W2 才需要一次求和——把两次切分首尾相接,通信从"每层 4 次"降到"每层 2 次"。<b>(2) TP 只在 NVLink 域内用:</b>TP 的 all-reduce 发生在<b>每一层的前向和反向</b>,频度极高,放到跨节点链路上会彻底拖垮训练。SC'21 论文的措辞是:张量并行"works well within a single node where the inter-GPU communication bandwidth is high, but the efficiency degrades quickly beyond a single node"(在节点内高带宽互连下工作良好,但超出单节点后效率迅速退化)<sup class="cite">[<a href="#refs">ZeRO 论文 §1, 2019-10</a>]</sup>,所以工业界几乎总是 TP≤8(一台 8 卡机),更大的并行度交给 PP/DP/EP。</p>
+
+<h3 id="ch4-2">4.2 源码走读:NVIDIA Megatron-Core</h3>
+<p class="codecap">通信原语的底层实现:megatron/core/tensor_parallel/mappings.py:22-37 —— 一行 <code>torch.distributed.all_reduce</code> 加上连续性保证,就是 TP 的全部"魔法":</p>
+<pre><code>def _reduce(input_, group):
+    """All-reduce the input tensor across model parallel group."""
+    ...
+    # Note: If input_ is contiguous, it is mutated in-place.
+    input_ = input_.contiguous()
+    torch.distributed.all_reduce(input_, group=group)
+    return input_</code></pre>
+<p class="codecap">f 算子:前向恒等、反向 all-reduce(mappings.py:201-218)。Megatron 用 PyTorch 的 <code>autograd.Function</code> 把"反向时的通信"写成自动求导的一部分——这正是"并行对用户透明"的实现手法:</p>
+<pre><code>class _CopyToModelParallelRegion(torch.autograd.Function):
+    """Pass the input to the model parallel region."""
+    @staticmethod
+    def forward(ctx, input_, group):
+        return input_                      # 前向:什么都不做
+    @staticmethod
+    def backward(ctx, grad_output):
+        return _reduce(grad_output, ctx.group), None   # 反向:all-reduce 梯度</code></pre>
+<p class="codecap">g 算子藏在 RowParallelLinear.forward 里(layers.py:1557-1566):矩阵乘完立刻把各卡部分和加起来;若开启 SP,则改为 reduce-scatter(每卡只拿序列上属于自己的那一段):</p>
+<pre><code># All-reduce across all the partitions.
+if self.explicit_expert_comm:
+    output_ = output_parallel
+elif self.sequence_parallel:
+    output_ = reduce_scatter_to_sequence_parallel_region(
+        output_parallel, group=self.tp_group)      # SP:reduce-scatter 代替 all-reduce
+else:
+    output_ = reduce_from_tensor_model_parallel_region(
+        output_parallel, group=self.tp_group)      # 普通 TP:all-reduce</code></pre>
+<p class="codecap">注意力按头切分(attention.py:358-367):每卡只持有 total_heads/tp 个头——多头注意力"每个头独立"的结构性质使切分零成本:</p>
+<pre><code>self.num_query_groups_per_partition = divide(self.config.num_query_groups, world_size)
+self.num_attention_heads_per_partition = divide(
+    self.config.num_attention_heads, world_size)</code></pre>
+
+<h3 id="ch4-3">4.3 序列并行 SP(2022):给 TP 的"痛点"动手术</h3>
+<p>TP 有个不显眼的浪费:LayerNorm 和 Dropout 不被切分,每张卡仍要保存<b>完整序列</b>的激活,而且 dropout 还要求各卡同步随机数。2022 年 NVIDIA 提出序列并行:把 LayerNorm/Dropout 区域沿<b>序列维度</b>切给 TP 组内的各卡,与 TP 无缝咬合<sup class="cite">[<a href="#refs">Korthikanti et al., arXiv 2205.05198, 2022-05</a>]</sup>。关键观察:Transformer 层入口处数据沿序列切开(LayerNorm 逐 token 独立,切了照样算),进入注意力/MLP 前用 <b>all-gather</b> 把序列拼回完整(f 算子前向从"恒等"变成"all-gather"),离开时用 <b>reduce-scatter</b> 把部分和边加边切(g 算子前向从"all-reduce"变成"reduce-scatter")。由 2.2 节的恒等式,两者通信量之和 = 一次 all-reduce,<b>通信量不变,激活显存却降到 1/TP</b>。</p>
+<div class="quote"><span class="en">"our technique, which mixes both tensor and sequence parallelism, reduces the activation memory significantly without any additional compute, communication, or memory overhead."</span><br><b>译文:</b>"我们的技术混合了张量并行与序列并行,在不增加任何计算、通信或显存开销的前提下显著降低了激活显存。"(arXiv 2205.05198 正文 §2,2022-05)</div>
+
+<h3 id="ch4-4">4.4 TP 的通算掩盖:从"同步 all-reduce"到"异步 TP"</h3>
+<p>TP 的 all-reduce 在关键路径上:下一层计算必须等它完成。近年两个方向的改进:(1)<b>算子融合掩盖</b>——把 all-reduce 拆成 reduce-scatter + all-gather,前半截与前一层 GEMM 反向的 epilogue 融合执行(Megatron 的 <code>--tp-comm-overlap</code> 即此类技术,本次克隆仓库 README 的性能配置中 TP 通信重叠默认打开);(2)<b>异步张量并行</b>——把前向 g 算子改造成异步,计算下一块不依赖通信结果的部分(如 LayerNorm),通信流与计算流并行;Megatron 在 ColumnParallelLinear 中提供了 <code>allreduce_dgrad</code> 路径(layers.py:1217-1225),把输入端的同步 copy 通信省掉,让梯度 all-reduce 融合进反向 GEMM 内核执行。</p>
+<div class="note"><b>本章小结:</b>TP 通信 = 每层 4 次(前向 2 + 反向 2)小 all-reduce,量 ≈ 激活大小,靠 NVLink 高带宽硬扛;SP 用恒等式改写为 all-gather+reduce-scatter,在不增加通信的前提下激活显存 ÷TP;进一步的掩盖交给异步化与内核融合。TP 是"层内并行",它的死穴(层间串行、单卡必须放下 1/TP 的整层)正是下一章流水线并行的起点。</div>
+</section>
+<section id="ch5">
+<h2>5. 流水线并行(PP):把层切成流水段</h2>
+<p class="tag">时间线:2018-11 GPipe → 2019-06 PipeDream(1F1B 雏形,arXiv)→ 2019-10 SOSP'19 正式发表 → 2021-04 SC'21 Megatron 交错式 1F1B → 2021-11 Chimera 双向流水线 → 2022-11 广度优先流水线(v1)→ 2023-11 零气泡流水线(ICLR'24)→ 2025-02 DualPipe / DualPipeV</p>
+
+<h3 id="ch5-1">5.1 GPipe:流水线的起点与"气泡"</h3>
+<p>流水线并行的想法直白得像工厂流水线:把 L 层模型按顺序切成 p 段(stage),每段放一张卡;第 1 段算完一个数据,把激活(中间结果)发给第 2 段,自己马上算下一个数据。GPipe(2018)进一步提出<b>微批(microbatch)</b>:把一个 mini-batch 切成 m 份,逐份灌进流水线,让各段同时忙碌<sup class="cite">[<a href="#refs">Huang et al., Google, arXiv 1811.06965, 2018-11</a>]</sup>。</p>
+<div class="quote"><span class="en">"To address the need for efficient and task-independent model parallelism, we introduce GPipe, a pipeline parallelism library that allows scaling any network that can be expressed as a sequence of layers. ... Moreover, GPipe utilizes a novel batch-splitting pipelining algorithm, resulting in almost linear speedup when a model is partitioned across multiple accelerators."</span><br><b>译文:</b>"为满足高效且与任务无关的模型并行需求,我们提出 GPipe——一个可将任意'可表达为层序列'的网络进行扩展的流水线并行库……此外,GPipe 采用了一种新颖的批切分流水线算法,当模型被切分到多个加速器上时获得接近线性的加速。"(GPipe 摘要,2018-11;文中还报告:"当微批数 M 至少是分段数 K 的 4 倍时,气泡开销几乎可忽略")</div>
+<p>但流水线天生有"启动"和"排空"两个空窗:第一个微批要从第 1 段流到最后一段,最后一个微批要从最后一段流回第 1 段(反向),这段时间叫<b>流水线气泡(bubble)</b>。设每段前向时间 t<sub>f</sub>、反向时间 t<sub>b</sub>(≈2t<sub>f</sub>),则:</p>
+<div class="formula">气泡占比 bubble fraction = (p−1)·(t<sub>f</sub>+t<sub>b</sub>) / [m·(t<sub>f</sub>+t<sub>b</sub>)] = <b>(p−1)/(m+p−1)</b> ≈ p/m(m 足够大时)</div>
+<p>例如 p=8、m=16 时,约 30% 的时间在空转;要压到 5% 需要上百个微批——而微批越多,单批越小,GPU 算力利用率和优化器统计又会变差。GPipe 的另一个代价是显存:反向开始前,它要保存<b>所有 m 个</b>微批的激活。</p>
+<figure>
+<svg viewBox="0 0 760 300" width="100%" style="max-width:760px">
+  <style>.fb{fill:#0b62c4}.bb{fill:#1d1132}.bu{fill:#321f11}.lg{font:11px system-ui;fill:#475569}</style>
+  <text x="10" y="16" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">GPipe(p=4 段, m=6 微批):先全部前向,再全部反向 —— 两端大气泡</text>
+  <g>
+    <text class="lg" x="10" y="40">S0</text>
+    <rect x="40" y="30" width="30" height="16" class="fb"/><rect x="72" y="30" width="30" height="16" class="fb"/><rect x="104" y="30" width="30" height="16" class="fb"/><rect x="136" y="30" width="30" height="16" class="fb"/><rect x="168" y="30" width="30" height="16" class="fb"/><rect x="200" y="30" width="30" height="16" class="fb"/>
+    <rect x="232" y="30" width="30" height="16" class="bu"/><rect x="264" y="30" width="30" height="16" class="bu"/>
+    <rect x="296" y="30" width="30" height="16" class="bb"/><rect x="328" y="30" width="30" height="16" class="bb"/><rect x="360" y="30" width="30" height="16" class="bb"/><rect x="392" y="30" width="30" height="16" class="bb"/><rect x="424" y="30" width="30" height="16" class="bb"/><rect x="456" y="30" width="30" height="16" class="bb"/>
+    <text class="lg" x="10" y="76">S1</text>
+    <rect x="40" y="66" width="30" height="16" class="bu"/><rect x="72" y="66" width="30" height="16" class="fb"/><rect x="104" y="66" width="30" height="16" class="fb"/><rect x="136" y="66" width="30" height="16" class="fb"/><rect x="168" y="66" width="30" height="16" class="fb"/><rect x="200" y="66" width="30" height="16" class="fb"/><rect x="232" y="66" width="30" height="16" class="fb"/>
+    <rect x="264" y="66" width="30" height="16" class="bu"/><rect x="296" y="66" width="30" height="16" class="bb"/><rect x="328" y="66" width="30" height="16" class="bb"/><rect x="360" y="66" width="30" height="16" class="bb"/><rect x="392" y="66" width="30" height="16" class="bb"/><rect x="424" y="66" width="30" height="16" class="bb"/><rect x="456" y="66" width="30" height="16" class="bu"/><rect x="488" y="66" width="30" height="16" class="bb"/>
+    <text class="lg" x="10" y="112">S2</text>
+    <rect x="40" y="102" width="104" height="16" class="bu"/><rect x="144" y="102" width="30" height="16" class="fb"/><rect x="176" y="102" width="30" height="16" class="fb"/><rect x="208" y="102" width="30" height="16" class="fb"/><rect x="240" y="102" width="30" height="16" class="fb"/><rect x="272" y="102" width="30" height="16" class="fb"/><rect x="304" y="102" width="30" height="16" class="fb"/>
+    <rect x="336" y="102" width="30" height="16" class="bu"/><rect x="368" y="102" width="30" height="16" class="bb"/><rect x="400" y="102" width="30" height="16" class="bb"/><rect x="432" y="102" width="30" height="16" class="bb"/><rect x="464" y="102" width="30" height="16" class="bb"/><rect x="496" y="102" width="30" height="16" class="bb"/><rect x="528" y="102" width="30" height="16" class="bb"/>
+    <text class="lg" x="10" y="148">S3</text>
+    <rect x="40" y="138" width="174" height="16" class="bu"/><rect x="216" y="138" width="30" height="16" class="fb"/><rect x="248" y="138" width="30" height="16" class="fb"/><rect x="280" y="138" width="30" height="16" class="fb"/><rect x="312" y="138" width="30" height="16" class="fb"/><rect x="344" y="138" width="30" height="16" class="fb"/><rect x="376" y="138" width="30" height="16" class="fb"/>
+    <rect x="408" y="138" width="30" height="16" class="bb"/><rect x="440" y="138" width="30" height="16" class="bb"/><rect x="472" y="138" width="30" height="16" class="bb"/><rect x="504" y="138" width="30" height="16" class="bb"/><rect x="536" y="138" width="30" height="16" class="bb"/><rect x="568" y="138" width="30" height="16" class="bb"/>
+  </g>
+  <text class="lg" x="40" y="180">■ 前向 F　■ 反向 B　■ 气泡(空转)。微批从 S0 流向 S3 再流回,首尾各有 p−1 格空窗。</text>
+  <text x="10" y="216" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">1F1B:每段"跟得上就马上反向" —— 在途微批最多 p 个,稳态严格 1F1B 交替</text>
+  <g>
+    <text class="lg" x="10" y="240">S3</text>
+    <rect x="120" y="230" width="30" height="16" class="fb"/><rect x="152" y="230" width="30" height="16" class="bb"/><rect x="184" y="230" width="30" height="16" class="fb"/><rect x="216" y="230" width="30" height="16" class="bb"/><rect x="248" y="230" width="30" height="16" class="fb"/><rect x="280" y="230" width="30" height="16" class="bb"/><rect x="312" y="230" width="30" height="16" class="fb"/><rect x="344" y="230" width="30" height="16" class="bb"/><rect x="376" y="230" width="30" height="16" class="fb"/><rect x="408" y="230" width="30" height="16" class="bb"/><rect x="440" y="230" width="30" height="16" class="fb"/><rect x="472" y="230" width="30" height="16" class="bb"/>
+  </g>
+  <text class="lg" x="40" y="274">气泡没消失(首尾仍有 p−1 格空窗),但每段同时在手的激活从 m 个降到 p 个 —— 显存省了,才敢把 m 开大把气泡摊薄。</text>
+</svg>
+<figcaption>图 5-1:GPipe 与 1F1B 的时间线对比(示意,p=4、m=6)。</figcaption>
+</figure>
+
+<h3 id="ch5-2">5.2 PipeDream 与 1F1B:用"轮换"换显存</h3>
+<p>2019 年的 PipeDream 系统指出了另一条路:<b>不等所有微批前向完再反向,而是"前向 1 个、马上反向 1 个"(1F1B)</b>,每个 stage 在手激活数稳定在 stage 数级别<sup class="cite">[<a href="#refs">Harlap et al.(MSR/CMU/Stanford), arXiv 1806.03377, 2018-06;SOSP 2019 正式版</a>]</sup>。NVIDIA 把这个调度(PipeDream-Flush 变体)吸收进 Megatron-LM,并保持与梯度同步语义兼容(所有微批梯度凑齐再更新)。1F1B 的气泡占比与 GPipe 相同((p−1)/(m+p−1)),但激活显存从 O(m) 降到 O(p),于是可以用更大的 m 换更小的气泡。</p>
+<div class="quote"><span class="en">"Once in steady state, each stage alternates between performing the forward and backward pass for a minibatch. We call this mechanism one-forward-one-backward (1F1B). In a balanced pipeline, 1F1B ensures that no GPU is idle in steady state and that we make forward progress in learning from each minibatch."</span><br><b>译文:</b>"一旦进入稳态,每个 stage 在某个 minibatch 的前向与反向之间交替执行。我们把这一机制称为 one-forward-one-backward(1F1B)。在均衡的流水线中,1F1B 保证稳态下没有 GPU 空闲,且每个 minibatch 都能在学习上取得正向进展。"(PipeDream 论文 §3.3,2018/2019)</div>
+<h4>交错式 1F1B(Interleaved, 2021):给流水线"再切细"</h4>
+<p>SC'21 的 Megatron 论文把每张卡上的连续层段再切成 <b>v 个虚拟段(virtual pipeline stage / model chunk)</b>:例如 16 层模型、p=4,每卡 4 层,若 v=2,则每卡持有 [层1-2, 层9-10] 两个不连续小块。调度时微批在"块 0 流水线"和"块 1 流水线"间交错,相当于把流水线拉长为 p×v 段,气泡缩小约 v 倍:</p>
+<div class="formula">bubble fraction ≈ (p−1)/(m·v + p−1),代价:p2p 通信次数 × v(激活包更小更频繁)</div>
+<p><sup class="cite">[<a href="#refs">Narayanan et al., SC 2021 / arXiv 2104.04473, 2021-04</a>]</sup>论文报告了 175B 模型在 3072 张 A100 上 52% MFU、1T 模型 16384 卡的结果。</p>
+<div class="quote"><span class="en">"In this paper, we show how tensor, pipeline, and data parallelism can be composed to scale to thousands of GPUs. We propose a novel interleaved pipelining schedule that can improve throughput by 10+% with memory footprint comparable to existing approaches. Our approach allows us to perform training iterations on a model with 1 trillion parameters at 502 petaFLOP/s on 3072 GPUs (per-GPU throughput of 52% of theoretical peak)."</span><br><b>译文:</b>"本文展示如何组合张量、流水线与数据并行以扩展到数千张 GPU。我们提出新颖的交错式流水线调度,在显存占用与现有方案相当的前提下提升 10% 以上的吞吐。该方法可在 3072 张 GPU 上以 502 petaFLOP/s 训练 1 万亿参数模型(单卡吞吐为理论峰值的 52%)。"(SC'21 摘要,2021-04)</div>
+
+<h3 id="ch5-3">5.3 源码走读:schedules.py 里的 1F1B</h3>
+<p class="codecap">调度入口按是否启用虚拟流水线自动分发(megatron/core/pipeline_parallel/schedules.py:157-168):</p>
+<pre><code>if pp_size &gt; 1:
+    if vp_size is not None:
+        forward_backward_func = forward_backward_pipelining_with_interleaving  # 交错式 1F1B
+    else:
+        forward_backward_func = forward_backward_pipelining_without_interleaving  # 普通 1F1B
+else:
+    forward_backward_func = forward_backward_no_pipelining</code></pre>
+<p class="codecap">warmup 微批数公式(schedules.py:2276-2279)——注意越靠后的 stage warmup 越少,最后一个 stage 一上来就能 1F1B:</p>
+<pre><code># Compute number of warmup microbatches.
+num_warmup_microbatches = p2p_communicator.total_stages - p2p_communicator.current_stage - 1
+num_warmup_microbatches = min(num_warmup_microbatches, num_microbatches)
+num_microbatches_remaining = num_microbatches - num_warmup_microbatches</code></pre>
+<p class="codecap">稳态循环:一次迭代 = 收上一个微批的梯度 + 发下一个微批的激活(通信合并成一次 <code>send_forward_recv_backward</code>)+ 1 次 forward + 1 次 backward;FIFO 队列保证反向顺序与前向一致(schedules.py:2409-2448 节选):</p>
+<pre><code>output_tensor_grad = p2p_communicator.send_forward_recv_backward(
+    output_tensor, send_tensor_shapes, p2p_communicator.is_pp_last_stage)
+input_tensors.append(input_tensor); output_tensors.append(output_tensor)
+input_tensor = input_tensors.pop(0)      # 取最早 forward 的微批做 backward
+output_tensor = output_tensors.pop(0)
+input_tensor_grad = backward_func(input_tensor, output_tensor, output_tensor_grad, config)
+input_tensor = p2p_communicator.send_backward_recv_forward(
+    input_tensor_grad, recv_tensor_shapes, p2p_communicator.is_pp_first_stage)</code></pre>
+<p class="codecap">交错式的关键约定(schedules.py:1041-1048,逐字):微批 × 模型块 = "virtual microbatch";反向时块序号取逆(<code>num_model_chunks - id - 1</code>),因为反向传播天然从后往前:</p>
+<pre><code># Convention used in this function:
+# num_microbatches for number of microbatches per pipeline stage;
+# num_model_chunks for virtual pipeline size;
+# then total_num_microbatches = num_microbatches * num_model_chunks.</code></pre>
+<p>一个对"通算掩盖"很有价值的细节:PP 的<b>梯度 all-reduce 被刻意塞进气泡期</b>。schedules.py 的原话(逐字):"Note: If grad sync function is provided, only enable async grad reduction in first pipeline stage. <b>Other pipeline stages do grad reduction during pipeline bubble.</b>"(其余 stage 在流水线气泡期间做梯度规约)。此外段间点对点通信(激活传递)本身数据量很小(≈ sbh 字节),通常紧跟计算即可隐藏;SC'21 还提出 scatter/gather 优化——相邻 stage 间 TP 各 rank 发送的是重复张量,改为每 rank 只发 1/t 片再在接收端 NVLink all-gather 拼回,把跨节点流量降为 bsh/t。</p>
+
+<h3 id="ch5-4">5.4 零气泡流水线(2023-11)与 2025 年的新调度</h3>
+<p><b>零气泡流水线(Sea AI Lab,ICLR 2024)</b>的洞察:反向传播其实由两半组成——先算"对上一层激活的梯度"(记 B,必须尽快发给上游 stage,是紧依赖),再算"对本层权重的梯度"(记 W,只影响优化器更新,不阻塞任何 stage)。把 W 从 B 里拆出来、延后到气泡里执行,再精心编排启动顺序,理论上气泡可以压到 <b>0</b><sup class="cite">[<a href="#refs">Qi, Wan, Huang &amp; Lin, Sea AI Lab, arXiv 2401.10241, v1 2023-11 / ICLR 2024</a>]</sup>。论文给出三档:ZB-H1(显存与 1F1B 相同,气泡降到约 1/3)、ZB-H2(显存约 2pM<sub>B</sub>,气泡趋零)、ZB-V(V 形切块,显存回到 1F1B 水平同时趋零气泡),并配了一个把 T<sub>F</sub>/T<sub>B</sub>/T<sub>W</sub>/T<sub>comm</sub> 都纳入的自动调度搜索(整数规划)。</p>
+<div class="quote"><span class="en">"In this work, we introduce a scheduling strategy that, to our knowledge, is the first to successfully achieve zero pipeline bubbles under synchronous training semantics. The key idea behind this improvement is to split the backward computation into two parts, one that computes gradient for the input and another that computes for the parameters. ... our method outperforms the 1F1B schedule up to 23% in throughput under a similar memory limit. This number can be further pushed to 31% when the memory constraint is relaxed."</span><br><b>译文:</b>"我们提出一种(据我们所知)首个在同步训练语义下成功实现零流水线气泡的调度策略。其关键思想是把反向计算拆成两部分:一部分计算对输入的梯度,另一部分计算对参数的梯度……在相近显存限制下,我们的方法吞吐比 1F1B 高至多 23%;放宽显存约束后可进一步提升到 31%。"(arXiv 2401.10241 摘要)</div>
+<p><b>2025 年的两个后续:</b>① <b>DualPipe / DualPipeV</b>(DeepSeek 开源周 Day 4,2025-02-27;V 形变体由 Sea AI Lab 博客提出并被官方仓库采纳):把流水线做成<b>双向</b>——微批同时从流水线两端灌入,"前向+反向成对块"内部把注意力、all-to-all dispatch、MLP、all-to-all combine 四类组件重排,让 EP 通信与计算完全互相掩盖(详见 6.4 与 9 章);Sea AI Lab 随后指出"双向"导致参数显存翻倍并非必需,用 cut-in-half 把调度切成 V 形即可在几乎保留全部通信掩盖的同时省回一半参数显存,代价是 PP 点对点通信量翻倍(但 PP 通信远小于 EP all-to-all,划算)<sup class="cite">[<a href="#refs">Sea AI Lab 博客, 2025-02</a>]</sup>。② 广度优先流水线(Breadth-First PP,MLSys 2023):让每个 GPU 持有多个细粒度 stage 首尾相连成环,微批"广度优先"地更快走完全程,以小 per-GPU batch 同时拿到高利用率与低显存,52B 模型吞吐较 Megatron-LM 提升最高 43%<sup class="cite">[<a href="#refs">Lamy-Poirier, ServiceNow, MLSys 2023 / arXiv 2211.05953</a>]</sup>;2025 年 Kimi K2 的技术报告将其与虚拟段 1F1B 一同列为流水线设计参考(见第 10 章)。</p>
+<div class="note"><b>本章小结:</b>PP 通信 = 段间小数据点对点(激活),量小但串行依赖强;优化主旋律是<b>调度(scheduling)</b>:GPipe(简单,显存 O(m))→ 1F1B(显存 O(p))→ 交错式(气泡÷v)→ 零气泡(拆 backward 填气泡)→ 广度优先 / DualPipe(V 形、双向,重排掩盖 EP 通信)。PP 是五类并行中"通信最少"的,因此适合跨节点部署(段间流量小),这使它成为万卡级训练的骨干维度。</div>
+</section>
+<section id="ch6">
+<h2>6. 专家并行(EP)与 MoE:让 token 去找专家</h2>
+<p class="tag">时间线:2017-01 稀疏门控 MoE(开山)→ 2020-06 GShard(千亿 MoE + 专家并行)→ 2021-01 Switch Transformer(top-1)→ 2024-01 DeepSeekMoE(细粒度专家)→ 2024-08 无辅助损失负载均衡 → 2024-12 DeepSeek-V3 → 2025-02 DeepEP 开源 → 2025 MoE 通信优化爆发</p>
+
+<h3 id="ch6-1">6.1 MoE 原理:稀疏激活与负载不均</h3>
+<p>MoE(Mixture of Experts)的思想:把 Transformer 每层(或隔层)的 MLP 换成 <b>N 个并列的"专家" MLP</b>,再加一个<b>路由器(router)</b>——一个很小的线性层,给每个 token 打分,选出分数最高的 k 个专家(通常 k=1~8),token 只经过这几个专家的计算,输出按路由分数加权求和。这样<b>总参数可以巨大,而每个 token 的实际计算量(激活参数)很小</b>:DeepSeek-V3(671B 总参/37B 激活)、Kimi K2(1.28T/32B 激活)都靠 MoE。Google 的 GShard 首次把 MoE 推到 600B 并用于翻译<sup class="cite">[<a href="#refs">Lepikhin et al., 2020-06</a>]</sup>;Switch Transformer 把 k 简化为 1 并证明可稳定训练万亿参数<sup class="cite">[<a href="#refs">Fedus, Zoph &amp; Shazeer, Google, arXiv 2101.03961, 2021-01</a>]</sup>。</p>
+<div class="quote"><span class="en">"In deep learning, models typically reuse the same parameters for all inputs. Mixture of Experts (MoE) models defy this and instead select different parameters for each incoming example. The result is a sparsely-activated model—with an outrageous number of parameters—but a constant computational cost."</span><br><b>译文:</b>"深度学习中,模型通常对所有输入复用同一组参数。MoE 模型反其道而行,为每个输入选择不同的参数。其结果是一个稀疏激活的模型——参数量惊人,但计算成本恒定。"(Switch Transformer 摘要,2021-01;该文报告同算力下预训练最高 7× 提速、T5-XXL 4× 提速)</div>
+<p>MoE 的通信之痛来自<b>负载不均</b>:router 是学出来的,训练早期某些"明星专家"会吸走远超平均的 token。两张经典的应对牌:(1)<b>辅助损失(aux loss)</b>——在损失函数里惩罚不均衡的分配(GShard/Switch 均采用);(2)<b>容量因子(capacity factor)与丢 token</b>——给每个专家设接收上限,超出的 token 直接丢弃(训练损失轻微受损)。Megatron 源码中 aux loss 的公式与实现:</p>
+<pre><code># megatron/core/transformer/moe/moe_utils.py:79-87(逐字)
+# The formula for the auxiliary loss is:
+#     loss = E * Σ_{i=1}^{E} (f_i * P_i)
+# where:
+#   f_i = 1 / (T * topk) * Σ_{x∈B} routing_map(x, i)   # 实际分给专家 i 的 token 比例
+#   P_i = 1 / T * Σ_{x∈B} probs(x, i)                   # 路由器分给专家 i 的平均概率</code></pre>
+
+<h3 id="ch6-2">6.2 专家并行:两次 all-to-all 的一生</h3>
+<p>专家并行(EP)是 MoE 的自然切法:<b>N 个专家均匀分布在 E 张卡上,每卡 N/E 个</b>;token 留在原卡,专家权重不动,让 token"飞"过去算完再"飞"回来。一个 MoE 层的前向因此是教科书级的两次 all-to-all:</p>
+<figure>
+<svg viewBox="0 0 760 250" width="100%" style="max-width:760px">
+  <style>.tk{fill:#0891b2}.ex{fill:#d97706}.sm2{font:11px system-ui;fill:#475569}</style>
+  <text x="10" y="18" style="font:12.5px system-ui;font-weight:600;fill:#1a2233">卡0(token 流视角):路由 → dispatch A2A → 专家计算 → combine A2A → 加权合并</text>
+  <rect x="20" y="40" width="90" height="34" class="tk"/><text x="34" y="60" style="font:11.5px system-ui;fill:#171a21">本地 token</text>
+  <rect x="130" y="40" width="90" height="34" fill="#e2e8f0"/><text x="144" y="54" style="font:11.5px system-ui;fill:#1a2233">Router</text><text x="138" y="68" style="font:10px system-ui;fill:#475569">top-k 打分(不通信)</text>
+  <path d="M110 57 L130 57" stroke="#aeb4bd"/>
+  <rect x="250" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="262" y="48" style="font:12px system-ui;fill:#92400e">①dispatch</text><text x="258" y="64" style="font:11px system-ui;fill:#92400e">all-to-all:</text><text x="252" y="78" style="font:11px system-ui;fill:#92400e">token 按专家重排发送</text>
+  <path d="M220 57 L250 57" stroke="#aeb4bd"/>
+  <rect x="385" y="26" width="120" height="60" class="ex"/><text x="397" y="48" style="font:11.5px system-ui;fill:#171a21">本地专家 E0…Ek</text><text x="392" y="66" style="font:10.5px system-ui;fill:#171a21">GroupedGEMM 一次算完</text>
+  <path d="M360 57 L385 57" stroke="#aeb4bd"/>
+  <rect x="530" y="26" width="110" height="60" fill="#321f11" stroke="#ffb454"/><text x="545" y="48" style="font:12px system-ui;fill:#92400e">②combine</text><text x="536" y="64" style="font:11px system-ui;fill:#92400e">all-to-all:结果送回</text><text x="540" y="78" style="font:11px system-ui;fill:#92400e">原卡,按概率加权</text>
+  <path d="M505 57 L530 57" stroke="#aeb4bd"/>
+  <rect x="660" y="40" width="90" height="34" class="tk"/><text x="668" y="60" style="font:11.5px system-ui;fill:#171a21">输出 token</text>
+  <path d="M640 57 L660 57" stroke="#aeb4bd"/>
+  <text class="sm2" x="20" y="120">关键定量:每个 token 在 dispatch 发送 k 份(hidden×2B),combine 收回 k 份 —— 通信量 ∝ token 数 × k × hidden,与专家总数 N 无关;</text>
+  <text class="sm2" x="20" y="138">但 all-to-all 的每个"格子"(rank对)数据量 = 该源-目的专家对的 token 数,负载不均 → 慢的格子拖垮整个集合通信(straggler 问题)。</text>
+  <text class="sm2" x="20" y="168">负载均衡策略(源码 transformer_config.py:743-758 逐字):</text>
+  <text class="sm2" x="30" y="186">- "aux_loss": GShard/Switch 的微批级均衡损失;  - "seq_aux_loss": DeepSeekV2/V3 按序列计算;</text>
+  <text class="sm2" x="30" y="204">- "global_aux_loss": 全局 batch 级;  - "sinkhorn": S-BASE 双随机归一化;  - "quantile_balancing": 按 expert bias 对偶更新;</text>
+  <text class="sm2" x="30" y="222">- 容量控制: moe_expert_capacity_factor + drop-and-pad(把每 rank 接收量截断/补齐到静态形状,利于 CUDA Graph 与 FP8 分组 GEMM)。</text>
+</svg>
+<figcaption>图 6-1:MoE 层的两次 all-to-all。EP 的所有通信复杂度都浓缩在"格子数据量不均"这件事上。</figcaption>
+</figure>
+
+<h3 id="ch6-3">6.3 源码走读:七步工作流</h3>
+<p class="codecap">Megatron Core 对 AlltoAll 调度器的官方描述(megatron/core/transformer/moe/token_dispatcher.py:375-388,逐字)——注意它在 EP 的 all-to-all 外还夹着 TP 维的 all-gather/reduce-scatter:</p>
+<pre><code>class MoEAlltoAllTokenDispatcher(MoETokenDispatcher):
+    """
+    AlltoAll-based token dispatcher.
+
+    The workflow of AlltoAll token dispatcher is as follows:
+    (1) preprocess: calculate necessary metadata for communication and permute
+    (2) dispatch process: permute tokens
+    (3) token dispatch: A2A(EP)
+    (4) dispatch postprocess: AG(TP)-&gt;sort_chunk(if num_local_experts&gt;1)
+    (5) combine preprocess: sort_chunk(if num_local_experts&gt;1)-&gt;RS(TP)
+    (6) token combine: A2A(EP)
+    (7) combine postprocess: unpermute tokens
+    """</code></pre>
+<p class="codecap">token 与路由概率各做一次 all-to-all,且与共享专家计算重叠(token_dispatcher.py:705-724,逐字注释保留):</p>
+<pre><code>global_input_tokens = all_to_all(self.ep_group, permutated_local_input_tokens,
+                                  self.output_splits, self.input_splits, ...)
+# Forward launch order: tokens A2A -&gt; shared experts fc1 -&gt; probs A2A
+# Backward launch order: probs A2A -&gt; tokens A2A -&gt; shared experts fc1
+if self.shared_experts is not None:
+    self.shared_experts.linear_fc1_forward_and_act(global_input_tokens)
+global_probs = all_to_all(self.ep_group, permuted_probs, ...)</code></pre>
+<p>这段代码是"通算掩盖"的微观样本:把共享专家(总是被激活的稠密 MLP)的 fc1 计算插在两次 all-to-all 之间,让网络在飞 token 的同时 GPU 不空转。专家本身的切分则非常直白(moe_layer.py:186-195):<code>num_local_experts = num_moe_experts // ep_size</code>,第 ep_rank 张卡持有连续一段专家;GroupedMLP 把这些专家的 fc1/fc2 堆成 <code>[num_local_experts, out, in]</code> 大张量,交给 grouped GEMM 内核一次算完(experts.py:1276-1281)。</p>
+
+<h3 id="ch6-4">6.4 DeepSeek-V3 与 DeepEP:把 EP 通信做到极致</h3>
+<p>2024-12 的 DeepSeek-V3 把 MoE 训练基础设施推到了新高度:256 个路由专家(每个 token 激活 8 个)+ 1 个共享专家,共 671B 参数;训练用 2048 张 H800,<b>16 路流水线 + 跨 8 个节点的 64 路专家并行 + ZeRO-1 数据并行,完全不用张量并行</b>;配合<b>节点受限路由</b>——每个 token 的 8 个专家最多落在 4 个节点上;再加上<b>无辅助损失的负载均衡</b>(用每专家一个可学习 bias 调节路由,全程不丢 token)与 <b>DualPipe 流水线</b>把 dispatch/combine 与计算成对重叠,总训练成本仅 2.788M H800 GPU 小时<sup class="cite">[<a href="#refs">DeepSeek-AI, arXiv 2412.19437, 2024-12</a>]</sup>。</p>
+<div class="quote"><span class="en">"On the whole, DeepSeek-V3 applies 16-way Pipeline Parallelism (PP), 64-way Expert Parallelism (EP) spanning 8 nodes, and ZeRO-1 Data Parallelism (DP). ... The key idea of DualPipe is to overlap the computation and communication within a pair of individual forward and backward chunks. To be specific, we divide each chunk into four components: attention, all-to-all dispatch, MLP, and all-to-all combine. ... we can ensure that both all-to-all and PP communication can be fully hidden during execution."</span><br><b>译文:</b>"总体上,DeepSeek-V3 采用 16 路流水线并行、跨 8 个节点的 64 路专家并行,以及 ZeRO-1 数据并行……DualPipe 的关键思想是在一对相互独立的正向与反向块内部重叠计算与通信。具体地,我们把每块拆成四个组件:注意力、all-to-all 派发、MLP、all-to-all 汇合……我们能确保 all-to-all 与 PP 通信在执行期间被完全隐藏。"(DeepSeek-V3 技术报告 §3.2,2024-12)</div>
+<div class="quote"><span class="en">"To effectively leverage the different bandwidths of IB and NVLink, we limit each token to be dispatched to at most 4 nodes, thereby reducing IB traffic. For each token, ... it will first be transmitted via IB to the GPUs with the same in-node index on its target nodes. Once it reaches the target nodes, we will endeavor to ensure that it is instantaneously forwarded via NVLink to specific GPUs that host their target experts. ... under such a communication strategy, only 20 SMs are sufficient to fully utilize the bandwidths of IB and NVLink."</span><br><b>译文:</b>"为了有效利用 IB 与 NVLink 的不同带宽,我们把每个 token 最多派发到 4 个节点,以削减 IB 流量。每个 token 先经 IB 传到目标节点上同编号的 GPU,到达后再立刻经 NVLink 转发到持有目标专家的 GPU……在这样的通信策略下,仅需 20 个 SM 就足以打满 IB 与 NVLink 的带宽。"(DeepSeek-V3 技术报告 §3.2.2;论文实测 NVLink 160GB/s ≈ 3.2× IB 50GB/s)</div>
+<p>配套开源的 <b>DeepEP</b>(2025-02-25,DeepSeek "开源周"第 2 天)是专为 MoE 设计的 all-to-all 通信库,把 EP 通信从 NCCL 手里接了过来<sup class="cite">[<a href="#refs">deepseek-ai/DeepEP, GitHub, 2025-02</a>]</sup>。其文档原文(本仓库 docs/legacy.md,逐字):</p>
+<div class="quote"><span class="en">"To align with the group-limited gating algorithm proposed in the DeepSeek-V3 paper, DeepEP V1 offers a set of kernels optimized for asymmetric-domain bandwidth forwarding, such as forwarding data from NVLink domain to RDMA domain. ... For latency-sensitive inference decoding, DeepEP V1 includes a set of low-latency kernels with pure RDMA to minimize delays. The library also introduces a hook-based communication-computation overlapping method that does not occupy any SM resource."</span><br><b>译文:</b>"为配合 DeepSeek-V3 论文提出的组受限门控算法,DeepEP V1 提供了一套针对非对称域带宽转发优化的内核,例如把数据从 NVLink 域转发到 RDMA 域。……对于延迟敏感的推理解码,DeepEP V1 提供纯 RDMA 的低延迟内核以压缩延迟。该库还引入了基于 hook 的通信-计算重叠方法,不占用任何 SM 资源。"</div>
+<p>两个设计要点值得展开:(1)<b>分层转发</b>——节点内 8 卡先用 NVLink 把发给同一节点的 token 聚合"带货",再由每卡的 RDMA 网卡跨节点发出,让慢速链路上只跑已经聚合的流量;(2)<b>零 SM 占用的重叠</b>——传统 all-to-all 要占用 CUDA 流上的计算单元(SM),DeepEP 用网卡侧(RDMA)直接写显存,再通过 <code>return_recv_hook=True</code> 返回一个"钩子",只有真正调用钩子时才等待数据到达,期间 GPU 可以继续算另一个 micro-batch 的注意力(双批重叠)。源码接口(deep_ep/buffers/legacy.py):<code>dispatch/combine</code>(统一入口)、<code>internode_dispatch/internode_combine</code>(NVLink+RDMA 分层,训练/prefill)、<code>low_latency_dispatch/low_latency_combine</code>(纯 RDMA,解码)。2025 年内,DeepEP 被迅速吸收进主流框架:Megatron Core v0.12(2025-05)加入 DeepEP dispatcher,v0.14(2025-09)加入批级 all-to-all 重叠开关,v0.15(2025-11)增加面向 GB200/B200/H100 的 HybridEP 后端;DeepEP 仓库自己也演进到 V2,统一为 <code>ElasticBuffer</code> 接口并从 NVSHMEM 换成更轻的 NCCL Gin 后端(官方称峰值性能至多 1.3×、SM 占用节省至多 4×)。</p>
+<div class="note"><b>本章小结:</b>EP 通信 = 每层两次 all-to-all,量 ∝ token×k×hidden,难点在负载不均与跨节点带宽。优化光谱:(a)模型侧——细粒度专家、节点受限路由、无辅助损失均衡;(b)系统侧——分层 NVLink/RDMA 转发、纯 RDMA 低延迟内核、零 SM hook 重叠;(c)调度侧——与共享专家/另一微批计算配对掩盖(DualPipe 等)。2025 年后"大规模 EP(跨数十节点)"已成为万卡 MoE 训练的标配,EP all-to-all 也取代 TP all-reduce 成为一号通信瓶颈。</div>
+</section>
+<section id="ch7">
+<h2>7. 上下文并行(CP)与长序列训练</h2>
+<p class="tag">时间线:2023-09 DeepSpeed-Ulysses → 2023-10 Ring Attention → 2024-06 LoongTrain(2D 注意力并行)→ 2024 Megatron CP 生产化(a2a+p2p 层级模式)→ 2025-01 PyTorch torchtitan 1M 上下文 → 2026-01 动态 CP(变长序列)</p>
+
+<h3 id="ch7-1">7.1 为什么序列维也要切?</h3>
+<p>长上下文(128K~1M token)是 2024 年以来 LLM 的军备竞赛主线,但对训练是灾难:注意力的计算量和<b>激活显存</b>都随序列长度 s 增长(标准注意力计算量 O(s²d),KV 缓存/激活 O(s))。把 s=128K 的序列直接喂给一张卡,即使模型本身放得下,激活也会爆。上下文/序列并行(CP,Context Parallelism)的回答:<b>把序列切成 p 段,每卡只持有 1/p 的 token</b>。难点只有一个——注意力要求每个 Q 看到全部 K、V,而 K、V 分布在各卡上。业界给出三条路线,恰好对应三种通信原语:<b>点对点环传(Ring Attention / Megatron p2p 模式)</b>、<b>all-to-all 换头(Ulysses)</b>、<b>all-gather 整段 KV</b>。</p>
+
+<h3 id="ch7-2">7.2 Ring Attention:让 KV 沿着环跑圈(2023-10)</h3>
+<p>UC Berkeley 的 Ring Attention 观察:注意力可以分块计算(Softmax 可用在线归一化逐块累加),于是把 KV 分块沿"卡环"逐站传递:第 t 步,每卡计算"本地 Q × 手上这块 KV",同时把这块 KV 异步发给下一卡。p 步之后每卡都见过全部 KV,注意力也恰好算完<sup class="cite">[<a href="#refs">Liu, Zaharia &amp; Abbeel, UC Berkeley, arXiv 2310.01889, 2023-10</a>]</sup>。因为发送是异步的、计算与搬运同时进行,理想情况下通信完全被掩盖,上下文长度只受"卡数 × 单卡显存"限制——论文演示了超过 1 亿 token 的上下文。</p>
+<div class="quote"><span class="en">"We present a novel approach, Ring Attention with Blockwise Transformers (Ring Attention), which leverages blockwise computation of self-attention and feedforward to distribute long sequences across multiple devices while fully overlapping the communication of key-value blocks with the computation of blockwise attention. Our approach enables training and inference of sequences that are up to device count times longer than those achievable by prior memory-efficient Transformers, without resorting to approximations or incurring additional communication and computation overheads."</span><br><b>译文:</b>"我们提出 Ring Attention with Blockwise Transformers:利用自注意力与前馈的分块计算,把长序列分布到多个设备上,同时让 KV 块的通信与分块注意力的计算完全重叠。该方法使可训练/推理的序列长度达到此前显存高效 Transformer 的'设备数量倍',且不做任何近似,也不引入额外的通信与计算开销。"(Ring Attention 摘要,2023-10)</div>
+<figure>
+<svg viewBox="0 0 740 210" width="100%" style="max-width:740px">
+  <style>.gpu{fill:#15202d;stroke:#23548b}.kv{fill:#0891b2}.lg2{font:11px system-ui;fill:#475569}</style>
+  <rect x="60"  y="30" width="140" height="52" class="gpu"/><text x="76" y="50" style="font:12px system-ui">GPU0: Q[0:1/4]</text><rect x="76" y="58" width="40" height="14" class="kv"/><rect x="120" y="58" width="40" height="14" fill="#e2e8f0"/>
+  <rect x="480" y="30" width="140" height="52" class="gpu"/><text x="496" y="50" style="font:12px system-ui">GPU3: Q[3/4:1]</text><rect x="496" y="58" width="40" height="14" fill="#e2e8f0"/><rect x="540" y="58" width="40" height="14" class="kv"/>
+  <rect x="60"  y="120" width="140" height="52" class="gpu"/><text x="76" y="140" style="font:12px system-ui">GPU1: Q[1/4:2/4]</text><rect x="76" y="148" width="40" height="14" fill="#e2e8f0"/><rect x="120" y="148" width="40" height="14" class="kv"/>
+  <rect x="480" y="120" width="140" height="52" class="gpu"/><text x="496" y="140" style="font:12px system-ui">GPU2: Q[2/4:3/4]</text><rect x="496" y="148" width="40" height="14" class="kv"/><rect x="540" y="148" width="40" height="14" fill="#e2e8f0"/>
+  <path d="M210 56 C330 30 350 30 470 56" stroke="#6ad6f1" fill="none"/>
+  <path d="M470 146 C350 172 330 172 210 146" stroke="#6ad6f1" fill="none"/>
+  <path d="M130 120 L130 82" stroke="#6ad6f1" fill="none"/>
+  <path d="M550 82 L550 120" stroke="#6ad6f1" fill="none"/>
+  <text class="lg2" x="235" y="24">KV 块沿环单向流动(青色=正在持有)</text>
+  <text class="lg2" x="20" y="192">每一步:本地 Q × 当前 KV 块(在线 softmax 累加) ∥ 同时把 KV 块发给下一卡 → 4 步后所有 GPU 看完整个序列,通信全程与计算重叠。</text>
+</svg>
+<figcaption>图 7-1:Ring Attention(因果掩码下还会按块位置做负载均衡,见正文)。</figcaption>
+</figure>
+<p><b>因果掩码的坑:</b>语言模型只允许每个 token 看它前面的 token,如果朴素地把 Q 块与所有 KV 块配对,环上"前部的卡"大部分计算是浪费。Megatron 的 CP 实现对此专门做了分块负载均衡——官方文档原话(docs/user-guide/features/context_parallel.md,逐字):"CP is similar to Ring Attention but targets higher performance by (1) using current open-source and cuDNN flash attention kernels, and (2) <b>avoiding extra work from lower-triangle causal masking while keeping load balanced across GPUs</b>."(CP 与 Ring Attention 类似,但通过两点追求更高性能:(1)使用现有开源与 cuDNN flash attention 内核;(2)避免下三角因果掩码的多余计算,同时保持 GPU 间负载均衡。)</p>
+
+<h3 id="ch7-3">7.3 三种通信模式与源码证据</h3>
+<p class="codecap">Megatron 对 CP 通信模式的官方定义(megatron/core/transformer/transformer_config.py:1033-1047,逐字):</p>
+<pre><code>cp_comm_type: Optional[Union[str, List[str]]] = None
+"""Inter-gpu communication type for context parallelism.
+str: all layers share same communication type.
+List[str]: each layer has its separate communication type.
+cp_comm_type of each layer can be "p2p" or "all_gather" or "a2a" or "a2a+p2p".
+"p2p": Exchange KV chunks with P2P communications in ring topology. P2P is async and can be
+overlapped with attention compute.
+"all_gather": All-gather to get full sequence of KV before attention. The all-gather is not
+async, and cannot be overlapped.
+"a2a": Like DeepSpeed Ulysses, scatter attention heads across the CP group, and gather to get
+full sequence of QKV.
+"a2a+p2p": A hierarchical implementation of context parallelism to attention.
+It uses A2A communications in low-level CP groups (e.g., via NVLink),
+and P2P communications in high-level CP groups (e.g., via IBLink).
+"""</code></pre>
+<p>四点解读:(1)<b>p2p 环传</b>是默认(可重叠、最通用);(2)<b>all_gather</b> 简单但不能重叠,适合 KV 小的场景;(3)<b>a2a</b> 即 Ulysses 路线;(4)<b>a2a+p2p 层级 CP</b> 是 2024-2025 的新形态——NVLink 域内用 all-to-all、跨节点用环传,把两种带宽都用满,这正是 DeepSeek 式"域分层"思想在 CP 上的翻版。通信类型还能<b>逐层混配</b>(arguments.py:3223-3228 支持 <code>--cp-comm-type p2p p2p a2a a2a a2a+p2p</code> 这种逐层列表),典型用法是浅层 a2a、深层 p2p。此外注意:mcore 自带的 <code>DotProductAttention</code> 明确断言 <code>context_parallel_size == 1</code>(dot_product_attention.py:58-60)——CP 的环形/层级通信由 NVIDIA Transformer Engine(TE)在独立的 <code>cp_stream</code> 上完成,这也是"通信放独立 CUDA 流与计算重叠"的又一实例。</p>
+<p class="codecap">Ulysses 侧的实现(DeepSpeed/deepspeed/sequence/layer.py:426-435,节选)——q/k/v 按注意力头 all-to-all 换成"全序列×本地头",算完再换回去:</p>
+<pre><code>query_layer   = _SeqAllToAll.apply(self.spg, query,   self.scatter_idx, self.gather_idx, ...)
+key_layer     = _SeqAllToAll.apply(self.spg, key,     self.scatter_idx, self.gather_idx, ...)
+value_layer   = _SeqAllToAll.apply(self.spg, value,   self.scatter_idx, self.gather_idx, ...)
+context_layer = self.local_attn(query_layer, key_layer, value_layer, *args, **kwargs)
+output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, self.scatter_idx, ...)</code></pre>
+<div class="quote"><span class="en">"DeepSpeed-Ulysses at its core partitions input data along the sequence dimension and employs an efficient all-to-all collective communication for attention computation. Theoretical communication analysis shows that whereas other methods incur communication overhead as sequence length increases, DeepSpeed-Ulysses maintains constant communication volume when sequence length and compute devices are increased proportionally. Furthermore, experimental evaluations show that DeepSpeed-Ulysses trains 2.5x faster with 4x longer sequence length than the existing method SOTA baseline."</span><br><b>译文:</b>"DeepSpeed-Ulysses 的核心是把输入沿序列维度切分,并用高效的 all-to-all 集合通信完成注意力计算。理论通信分析表明:其他方法的通信开销随序列长度增长,而 DeepSpeed-Ulysses 在序列长度与设备数同比例增加时保持通信量恒定(每链路 4Nh/P)。实验显示它比当时 SOTA 基线快 2.5 倍、可训序列长 4 倍。"(Ulysses 摘要,arXiv 2309.14509,2023-09)</div>
+<p><b>Ulysses vs Ring 怎么选?</b>Ulysses 通信量 O(N/P)(每卡 q/k/v 各 s/p×h),注意力部分每卡只算本地头的完整序列,且与任意注意力内核(FlashAttention 等)兼容;Ring 每步传 KV 块,总通信量与 Megatron-SP 同为 O(N),但可以完全异步。工程经验:CP 规模小(≤8,节点内 NVLink)时 Ulysses 简单高效;CP 规模大(跨节点、上百卡分一条序列)时 Ring/层级 CP 占优——两者通信量相差 P 倍,但 Ring 的"计算/通信算术强度"要求序列足够长才能掩盖。学界还出现两者混合的 <b>USP(Unified Sequence Parallelism)</b> 与 <b>LoongTrain</b>(2024-06,把注意力并行做成 2D 网格:一维 Ulysses 换头、一维 Ring 传 KV,按头数与序列长自动选配)<sup class="cite">[<a href="#refs">LoongTrain, arXiv 2406.18485, 2024-06</a>]</sup>。2025-01,PyTorch 官方的 torchtitan 用 pass-KV Ring Attention 实现 CP 并跑通 1M 上下文(Llama3-8B,32×H100)<sup class="cite">[<a href="#refs">PyTorch 论坛, 2025-01</a>]</sup>;2026-01,NVIDIA 又发布<b>动态上下文并行(Dynamic CP)</b>,按 batch 内实际序列长度自适应调整 CP 划分,变长训练最高提速 1.48×<sup class="cite">[<a href="#refs">NVIDIA 开发者博客, 2026-01</a>]</sup>。</p>
+<div class="note"><b>本章小结:</b>CP 通信 = 注意力内的 KV 流动,天然"多小笔、可异步",因此掩盖条件最好的 p2p 环传是主流;all-to-all 换头(Ulysses)在 CP 域小时通信量更优;未来"长上下文 + MoE"叠加时,CP 的层级化(a2a+p2p)、动态化,以及模型结构上的稀疏化(第 10 章的 DSA/iRoPE)将共同削减 KV 流量。另注意术语:Megatron 里还有一个"序列并行(SP)"指 LayerNorm 区域沿序列切分(4.3 节),它是 TP 的搭档;本章 CP 才是"一条序列切成多卡"的完整方案,两者可以同时开。</div>
+</section>
+<section id="ch8">
+<h2>8. 多维并行组合与自动并行:真实的万卡训练长什么样</h2>
+
+<h3>8.1 五个维度怎么拼在一起</h3>
+<p>生产级训练从不只用一种并行,而是把 5 个维度相乘:<code>world_size = TP × PP × DP × CP × EP</code>(MoE 场景下 DP 常再细分出 EP×DP 的关系)。划分的核心依据是第 2 章的金字塔:<b>通信频繁的维度放高带宽域,通信稀疏的维度放低带宽域</b>。下面这张对比表是全文的"总账本",建议反复回看:</p>
+<table>
+<tr><th>维度</th><th>切什么</th><th>通信原语与单次数据量</th><th>频度</th><th>放哪</th><th>主要掩盖手段</th></tr>
+<tr><td><b>DP/ZeRO/FSDP</b></td><td>数据(以及 ZeRO 下的优化器/梯度/参数)</td><td>梯度 all-reduce(或 RS+AG),2N/步</td><td>每步 1 轮(按桶)</td><td>任意;跨节点可接受</td><td>分桶+独立流,与反向重叠(3.3)</td></tr>
+<tr><td><b>TP(+SP)</b></td><td>层内权重矩阵</td><td>all-reduce(或 AG+RS),≈2sbh/次</td><td>每层前向2+反向2</td><td>必须 NVLink 域(≤8)</td><td>TP 通信与 GEMM 融合、异步 TP(4.4)</td></tr>
+<tr><td><b>PP</b></td><td>层(按深度)</td><td>点对点,≈sbh/次(优化后 bsh/t)</td><td>每微批每段 2 次</td><td>跨节点友好(流量小)</td><td>通信本身小;调度消气泡,梯度同步塞进气泡(5.3)</td></tr>
+<tr><td><b>EP</b></td><td>MoE 专家</td><td>all-to-all ×2,∝token×k×h</td><td>每 MoE 层前反各 2</td><td>跨节点(需大规模)</td><td>分层转发、零SM hook、DualPipe 成对掩盖(6.4)</td></tr>
+<tr><td><b>CP</b></td><td>序列</td><td>KV 环 p2p 或 a2a,O(N) 或 O(N/P)</td><td>每注意力块</td><td>节点内 a2a,跨节点 p2p</td><td>环传天然异步(7.2-7.3)</td></tr>
+</table>
+<p><b>三个真实的顶层配置</b>(都有论文级出处):DeepSeek-V3(2048×H800):PP=16 + EP=64(跨 8 节点)+ ZeRO-1,<b>TP=1</b>;Kimi K2(2025-07,1.28T MoE):PP=16(虚拟段)+ EP=16 + ZeRO-1,节点间用 8×400Gbps RoCE;NVIDIA 2026-03 的 Megatron Core MoE 技术报告(GB200/GB300)则给出 TP/PP/EP = 1/4/64 的机架级配置,单 GPU 达 1048/1233 TFLOPS<sup class="cite">[<a href="#refs">NVIDIA, arXiv 2603.07685, 2026-03</a>]</sup>。可以看到 2024 年后的共同趋势:<b>TP 在淡出(甚至为 1),EP+PP 成为主轴</b>——因为 MoE 专家天然可以拆到很多卡上,而 TP 的密集 all-reduce 在 MoE 的"小激活"下得不偿失。rank 排布上,Megatron 默认 TP 最内层(连续 rank=同机)、PP 其次、DP/CP 最外层;MoE 的 EP 组用独立的 rank 生成器构建,与 TP/PP 解耦;网络侧还有"轨优化(rail-optimized)"组网:每台机同号网卡接同一台交换机,跨节点流量不拥挤。</p>
+<p><b>Megatron-LM 官方 README(本仓库)的性能页</b>写道:2B~462B 模型跨数千卡训练,6144 张 H100 上 462B 达最高 <b>47% MFU</b>,并默认开启 <code>--overlap-grad-reduce</code>(DP 梯度重叠)、<code>--overlap-param-gather</code>(参数聚合重叠)、<code>--tp-comm-overlap</code>(TP 通信重叠),PP 重叠默认打开——<b>每个维度都要开自己的通算掩盖</b>,这是当下训练框架的常态<sup class="cite">[<a href="#refs">Megatron-LM README(本仓库), 2026-08 版本</a>]</sup>。</p>
+
+<h3>8.2 自动并行:让算法替你选配置</h3>
+<p>五维组合的设计空间是组合爆炸的,人工调参成本极高,于是学界发展出自动并行:</p>
+<ul>
+<li><b>FlexFlow(2018/ICML'19)</b>:把并行建模成"算子内+算子间"的图切割问题,用模拟器评估吞吐后搜索,提出 4D(TP/PP/DP/复制)组合。</li>
+<li><b>Alpa(OSDI'22,arXiv 2201.12023,2022-01)</b>:形式化"inter-operator(流水线)+ intra-operator(张量/切片)"两层优化,上层整数规划、下层编译器自动切分,重新编译执行。</li>
+<li><b>Galvatron(SIGMOD'23,arXiv 2210.02993,2022-10)</b>:面向 Transformer 给出 4D 并行的搜索空间与代价模型,用动态规划/决策树自动给出"每层用哪种并行"的混合策略。</li>
+<li><b>Colossal-AI(2021-10)</b>:把 TP 泛化到 1D/2D/2.5D/3D 多种模式并统一到框架里,配套异构内存策略。</li>
+<li><b>2025-2026 的新形态</b>:研究重心从"生成切分策略"转向"精确性能模拟与调优"——Charon(2026-05,统一细粒度模拟器,预测并行策略+系统优化的组合性能);Megatron Core 的 Parallel Folding 把异构并行映射框架化;NVIDIA 的 Megatron MoE 报告也把"Parallel Folding + FP8/NVFP4 + 长上下文"打包为可组合能力。完全 Alpa 式的通用自动并行在 2025 年没有新的代表作,如实说明:模型结构迭代快、代价模型对内核实现细节敏感,仍是拦路虎。</li>
+</ul>
+<p>自动并行的本质是<b>代价建模 + 搜索</b>:把每层在每种切法下的显存、通信量、气泡建成解析式(本文 2.2/5.1/6.2 的公式就是这些模型的原材料),在约束(显存)下最大化吞吐。它至今没有完全取代人工经验——这也正是"通用自动并行"仍是开放问题的原因。</p>
+</section>
+
+<section id="ch9">
+<h2>9. 通信优化技术体系:通算掩盖只是其中一环</h2>
+<p>把前文散落的手段收拢成一个统一框架。通信优化的目标函数可以写成:</p>
+<div class="formula">T<sub>step</sub> = T<sub>compute</sub> + max(0, T<sub>comm</sub> − T<sub>可掩盖窗口</sub>) → 优化方向:①减 T<sub>comm</sub> ②增窗口 ③改变时序 ④换更快的路</div>
+<table>
+<tr><th>层次</th><th>思想</th><th>代表技术(前文章节)</th></tr>
+<tr><td><b>① 减通信量</b></td><td>少发字节</td><td>MoE 稀疏激活(6.1)、节点受限路由(6.4);梯度压缩:PowerSGD 低秩分解<sup class="cite">[<a href="#refs">PowerSGD, 2019-05</a>]</sup>、DGC 深度梯度压缩<sup class="cite">[<a href="#refs">DGC, 2017-12</a>]</sup>;FP8/低精度 all-to-all 与梯度规约(DeepEP/DeepSeek-V3);MLA 等结构级 KV 压缩;重计算换激活存储</td></tr>
+<tr><td><b>② 分层放置</b></td><td>让流量走快路</td><td>TP/CP 内层走 NVLink;EP 分层转发 NVLink→RDMA(6.4);CP 的 a2a+p2p 层级模式(7.3);轨优化组网;ZeRO 分桶对齐拓扑;PP scatter/gather 优化(5.3)</td></tr>
+<tr><td><b>③ 时序掩盖</b></td><td>通算重叠(本文主角)</td><td>分桶 all-reduce+独立流(3.3);TP 异步化/内核融合(4.4);PP 梯度同步塞进气泡、1F1B/交错式/零气泡调度(5 章);EP 与共享专家/双微批配对(6.3、DualPipe);CP 环形异步 KV(7.2);DeepEP 零 SM hook(6.4)</td></tr>
+<tr><td><b>④ 协议与内核</b></td><td>换执行引擎</td><td>NCCL→专用内核(MSCCL/DeepEP);网内计算(NVSwitch SHARP/NVLS)由交换机代做规约;GPUDirect RDMA(IBGDA)绕过 CPU;permute+all-to-all+量化融合内核;无损压缩嵌入通信(UCCL-Zip,2026-04)</td></tr>
+<tr><td><b>⑤ 算法协同</b></td><td>改模型换通信</td><td>组受限路由、无辅助损失均衡(不丢 token);容量因子→动态 padding;细粒度专家使 all-to-all 更均匀;同步 SGD→本地多步+低频同步(DiLoCo 等,见第 11 章);注意力稀疏化直接砍 KV 流量(DSA,第 10 章)</td></tr>
+</table>
+<p>对这个框架最好的注脚是 <b>DeepSeek-V3 的训练系统</b>:它同时使用了①(细粒度专家+受限路由+FP8 通信)、②(EP 通信先经 IB 到目标节点、再经 NVLink 精确转发到专家所在卡,20 个 SM 打满两种链路)、③(DualPipe 把"注意力/dispatch/MLP/combine"四类组件在一对正反向块内重排,all-to-all 与 PP 通信全部隐藏)、④(定制 all-to-all 内核、warp 特化、PTX 级调优)、⑤(无辅助损失的负载均衡、不丢 token),最终在 2048 张 H800 上把 671B MoE 训到 2.788M GPU 小时(约 557 万美元)——五层不是并列菜单,而是同一道菜的五种佐料。DualPipe 论文给出的气泡账本也与第 5 章衔接:1F1B 为 (PP−1)(F+B),零气泡 ZB1P 为 (PP−1)(F+B−2W),DualPipe 为 (PP/2−1)(F&amp;B+B−3W) 且不随微批数增长。</p>
+<div class="quote"><span class="en">"For DeepSeek-V3, the communication overhead introduced by cross-node expert parallelism results in an inefficient computation-to-communication ratio of approximately 1:1. To tackle this challenge, we design an innovative pipeline parallelism algorithm called DualPipe ... It employs a bidirectional pipeline scheduling, which feeds micro-batches from both ends of the pipeline simultaneously and a significant portion of communications can be fully overlapped."</span><br><b>译文:</b>"对 DeepSeek-V3 而言,跨节点专家并行带来的通信开销使计算通信比低至约 1:1。为解决该问题,我们设计了创新的流水线并行算法 DualPipe……它采用双向流水线调度,同时从流水线两端注入微批,大部分通信都能被完全重叠。"(DeepSeek-V3 技术报告 §3.2.1,2024-12)</div>
+</section>
+<section id="ch10">
+<h2>10. 2024–2026 最新进展盘点(业界与学界)</h2>
+<p class="lead">本章按"模型实践 → 通信库与框架 → 流水线调度 → 长上下文 → 硬件与网络 → RL 后训练系统"六条线盘点。所有条目都给出时间、来源与可点击链接;引号内为来源原文。需要说明:个别坊间流传的说法(如 NVIDIA "TDT"、DeepSeek-R2、"BFPP 用于 Llama 4")在本轮检索中<b>找不到公开可查的原始文献</b>,本文不予收录。</p>
+
+<h3>10.1 万亿 MoE 的训练配置开始"论文级"公开</h3>
+<p>2025 年最重要的变化,是头部实验室开始把并行配置写成论文——这让"并行策略"第一次可以跨机构比较:</p>
+<table>
+<tr><th>模型(时间)</th><th>规模(总参/激活)</th><th>并行/通信配置</th></tr>
+<tr><td>DeepSeek-V3(2024-12)</td><td>671B / 37B,256+1 专家</td><td>PP=16 + EP=64(跨 8 节点)+ ZeRO-1,<b>无 TP</b>;FP8 计算+通信;DualPipe;节点受限路由 M=4;InfiniBand 跨节点</td></tr>
+<tr><td>Kimi K2(2025-07)</td><td>1.28T / 32B,384 专家</td><td>PP=16(虚拟段)+ EP=16 + ZeRO-1;节点间 8×400Gbps <b>RoCE</b>(非 IB);<b>刻意选最小可行 EP=16</b> 以便 1F1B 稳态完全掩盖 EP 通信;解耦权重梯度(W)与 PP 通信并行;FP8 只存不算</td></tr>
+<tr><td>gpt-oss-120b(2025-08)</td><td>117B / 5.1B,128 专家选 4</td><td>权重<b>原生 MXFP4</b> 量化(120B 装进 80GB);训练侧并行配置未披露</td></tr>
+<tr><td>Llama 4 Maverick(2025-04)</td><td>400B / 17B,128 专家</td><td>256K 预训练;iRoPE(交错无位置编码+RoPE)与 chunked attention 从架构侧削长上下文开销;并行配置未披露</td></tr>
+<tr><td>GLM-4.5(2025-08)/ Qwen3(2025-04)</td><td>355B/32B;235B/22B</td><td>均为细粒度 MoE(Qwen3 去掉共享专家);并行配置未披露</td></tr>
+</table>
+<p>Kimi K2 的取舍与 DeepSeek 恰成对照组,值得整段引用(其技术报告 §2.4,arXiv 2507.20534,2025-07):</p>
+<div class="quote"><span class="en">"Our strategy leverages a combination of 16-way Pipeline Parallelism (PP) with virtual stages, 16-way Expert Parallelism (EP), and ZeRO-1 Data Parallelism. ... This is achieved by adopting the smallest feasible EP parallelization strategy, specifically EP = 16. ... In comparison, DualPipe doubles the memory required for parameters and gradients, necessitating an increase in parallelism to compensate."</span><br><b>译文:</b>"我们的策略组合了带虚拟段的 16 路流水线并行、16 路专家并行与 ZeRO-1 数据并行……通过采用最小可行的 EP(即 EP=16)实现(通信全掩盖)……相比之下,DualPipe 使参数与梯度显存翻倍,需要加大并行度来补偿。"</div>
+<p>两条路线的分歧本质是第 5、9 章"调度掩盖"的两端:DeepSeek 用<b>重排流水线</b>掩盖重 EP 通信,Kimi 用<b>减轻通信</b>(小 EP + 解耦 W 梯度)让常规交错式 1F1B 就足够。Sea AI Lab 的 DualPipeV 博客(2025-02)则证明 DualPipe 的"双向"并非必需——用"cut-in-half"切成 V 形,参数显存回到 1×,代价是 PP 点对点通信量翻倍("PP 通信相对 EP 通信是小事"),原文:"we show that the Dual part of the DualPipe is actually bad for its 2×parameter redundancy, it is unnecessary and can be removed almost for free."<sup class="cite">[<a href="#refs">Sea AI Lab, 2025-02</a>]</sup></p>
+
+<h3>10.2 通信库与框架:EP 通信的"专门化、产品化"</h3>
+<ul>
+<li><b>DeepEP 生态化(2025-02→2026)</b>:开源一周内成为事实标准;随后 Megatron Core v0.12(2025-05)集成 DeepEP dispatcher,v0.14(2025-09)加批级 A2A 重叠开关,v0.15(2025-11)加 HybridEP(GB200/B200/H100)——文档原话:"Batch-level overlapping to hide EP-A2A communication (–overlap-moe-expert-parallel-comm –delay-wgrad-compute)"。DeepEP 本体 2025 年内演进到 V2:"High-throughput and low-latency APIs unified into a single <code>ElasticBuffer</code> interface",后端从 NVSHMEM 换成 NCCL Gin,官方称"up to 1.3x peak performance, while saving up to 4x SM count"。</li>
+<li><b>学术侧的 MoE 通信优化</b>:SwiftMoE(2025-04,自适应专家复制,把专家参数与其优化器状态解耦放置)、HeterMoE(2025-04,注意力/专家解耦到不同设备组)、X-MoE(2025-08,消除 dispatch/combine 激活重复)、UniEP(2026-04,统一 EP MegaKernel,SM 级细粒度调度掩盖)、DisagMoE(2026-05,注意力与 FFN 跨设备组解耦+自适应配比)。</li>
+<li><b>训练栈整体</b>:NVIDIA《Scalable Training of MoE Models with Megatron Core》(2026-03)给出 GB200/GB300 上的完整配方:TP/PP/EP=1/4/64、Parallel Folding、FP8/NVFP4、长上下文,单 GPU 1048/1233 TFLOPS——TP=1 再次印证"TP 淡出、EP/PP 主轴"的趋势;动态 CP(2026-01)按变长序列自适应调整 CP 划分,最高 1.48× 提速。</li>
+</ul>
+
+<h3>10.3 流水线调度:从"零气泡"到"通信全掩盖"</h3>
+<p>2023-11 的零气泡论文(第 5 章)确立了"拆 B/W 填气泡"范式后,2024-2026 的主旋律是把<b>通信</b>也纳入填充对象:DualPipe(2025-02,EP A2A 与 PP 通信全隐藏)、DualPipeV(2025-02,V 形减半参数显存)、Kimi K2 的"解耦 W 梯度 + 最小 EP"(2025-07),以及学界的内存-调度联合优化(OptPipe、Pipeline Parallelism with Controllable Memory,NeurIPS 2024)。评估工具方面,Charon(2026-05)这类细粒度模拟器让"先模拟再上机"成为调度的标准流程。</p>
+
+<h3>10.4 长上下文:系统与架构双线并进</h3>
+<ul>
+<li><b>系统线</b>:PyTorch torchtitan 用 pass-KV Ring Attention 实现 CP,32×H100 上把 Llama3-8B 训到 1M 序列(2025-01,官方帖:"Sequence length scaling to 1M on Llama3-8B model using 32 H100 GPUs");Megatron 的 a2a+p2p 层级 CP 与动态 CP 分别解决"跨节点 CP"与"变长序列";TokenRing(2024-12)用双向通信缓解 Ring Attention 计算-通信重叠难题。</li>
+<li><b>架构线(直接砍 KV/注意力流量)</b>:Llama 4 的 iRoPE + chunked attention(2025-04);DeepSeek V3.2-Exp 首发DSA 稀疏注意力(2025-09-29,官方:"DSA achieves fine-grained sparse attention with minimal impact on output quality — boosting long-context performance &amp; reducing compute cost",API 降价 50%+);MiniMax-M1 的 Lightning Attention 混合架构支撑 1M 上下文(2025-06)。这条线等于把第 9 章的"⑤算法协同"推到了注意力本身。</li>
+</ul>
+
+<h3>10.5 硬件与网络:scale-up 域爆炸 + 开放互连 + 光互联</h3>
+<ul>
+<li><b>NVLink 域一年三级跳</b>:GB200 NVL72(2024-2025,72 GPU、130TB/s 一致域)→ Vera Rubin NVL144(2026 下半年)→ Kyber 机架 Rubin Ultra <b>NVL576</b>(2027,官方:"a new two-layer all-to-all NVLink topology that will enable developers to scale-up to 576 GPUs")。域变大直接改变并行策略:NVIDIA Wide-EP 博客实测在 NVL72 域内做大 EP,"up to 1.8x higher per-GPU throughput compared to smaller EP configurations"——<b>把 EP 搬进 NVLink 域</b>成为新默认。</li>
+<li><b>开放标准</b>:Ultra Ethernet 1.0 规范(2025-06-11,覆盖软件 API/语义层/RDMA/拥塞控制的完整以太网栈);UALink 200G 1.0(2025-04,单域最多 <b>1024 个加速器</b>的开放 scale-up 互连)。若普及,TP/EP 的"域内"规模不再绑定单一厂商,并行设计从"8 卡 NVLink + N 卡 RDMA"走向"千卡域内 + 标准以太域间"两级模型。</li>
+<li><b>共封装光学(CPO)</b>:NVIDIA 2025-03-18 宣布 Quantum-X(InfiniBand,2025 年底/2026 年初上市)与 Spectrum-X(Ethernet,2026 下半年)Photonics 交换机,把光引擎封装进交换 ASIC,官方称可连接"millions of GPUs across sites"并大幅降能耗——scale-out 侧为超大 EP/CP 通信供给带宽。</li>
+</ul>
+
+<h3>10.6 RL 后训练系统:并行与通信的新前线</h3>
+<p>2025 年起,RL 后训练(RLHF/推理强化)成为与预训练同等重要的负载,也带来全新的通信问题:<b>rollout 引擎与训练器之间的权重同步、轨迹回流与参数版本一致性</b>。代表系统:veRL(字节+清华,混合控制器架构,2025 年重点强化"异步多轮 rollout、大规模 MoE 的 EP 集成、off-policy 异步架构")、slime(清华/智谱,Megatron+SGLang,官方称"RL framework behind GLM-5.2 … GLM-4.5")、NeMo-RL(NVIDIA,2025-08,DTensor 与 Megatron 双后端)。异步化研究同样火热:AReaL(2025-05,NeurIPS 2025)完全解耦生成与训练,官方称"up to 2.77x training speedup compared to synchronous systems with the same number of GPUs";APRIL(2025-09)用超发 rollout+主动中断提升 22.5% 吞吐。通信侧还有 UCCL-Zip(2026-04)把<b>无损压缩</b>嵌入 P2P/集合通信,RL 权重同步提速至多 47.5%。训练与推理的物理/逻辑边界正在同时消融。</p>
+</section>
+<section id="ch11">
+<h2>11. 未来发展方向</h2>
+<p class="lead">综合第 10 章的证据,以下八个方向是未来 2~5 年并行策略与通信优化最可能的主战场。每条都标注了当前的最新锚点。</p>
+<h3>11.1 Scale-up 域膨胀,重画并行版图</h3>
+<p>NVLink 域正从 72 卡(GB200)走向 144(Vera Rubin)→ 576(Kyber)乃至规划中的 1152 die;UALink 要做 1024 加速器的开放域。当"一台机架"就有数百卡、数十 TB/s 的域内带宽,<b>TP/EP 会重新搬回域内</b>(Wide-EP 已实测 1.8×/GPU),跨域流量占比被动下降——并行策略将从"8 卡域 + 以太"两域模型演进为"<b>千卡域内 + 标准以太域间</b>"两级模型。随之而来的新问题:域内一致性协议、超大域的故障域与拓扑感知放置。</p>
+<h3>11.2 EP all-to-all 是通信主战场,专用内核 + 框架化 + 可移植后端</h3>
+<p>MoE 一统天下后,EP 的 dispatch/combine 取代 TP all-reduce 成为头号通信开销。路线已清晰:专用内核(DeepEP 系、UniEP MegaKernel)→ 框架一等公民(MCore 的 overlap 开关、HybridEP)→ 可移植后端(DeepEP V2 弃 NVSHMEM 转 NCCL Gin)。下一个里程碑是<b>跨厂商、跨网络后端的统一 EP 通信抽象</b>,以及把路由算法、内核与网络拓扑联合优化的"通信-路由协同设计"。</p>
+<h3>11.3 精度下沉到通信与存储</h3>
+<p>FP8 计算/通信已生产化(DeepSeek-V3、DeepEP),下一步是 <b>NVFP4 训练</b>(Quartet II,2026-01;MCore 已支持)、原生低精度权重(gpt-oss 的 MXFP4)、乃至<b>无损压缩进通信原语</b>(UCCL-Zip:RL 权重同步 +47.5%、KV 传输 -30.1% 延迟)。算术换带宽(量化通信)与表达换带宽(压缩)将并列成为标配。</p>
+<h3>11.4 长上下文:系统(CP)与架构(稀疏注意力)双线合流</h3>
+<p>系统线:CP 的层级化(a2a+p2p)、动态化(Dynamic CP)、混合化(USP/LoongTrain 的 2D 注意力并行),以及 torchtitan 式产品化;架构线:DSA、iRoPE、Lightning Attention 直接削减 KV 流量与注意力 FLOPs。1M+ 上下文成为标配时,<b>"架构稀疏化 × CP 并行"的联合最优</b>(哪些层稀疏、哪些层环传、每层 CP 用什么通信模式)是一个尚无标准答案的开放问题——Megatron 已支持逐层 cp_comm_type 混配,正是为它准备的接口。</p>
+<h3>11.5 训练-推理边界消融,解耦式训练萌芽</h3>
+<p>RL 后训练把"生成"与"训练"解耦成两类集群(veRL/slime/NeMo-RL 的权重流式同步、delta sync;AReaL/APRIL 的异步+staleness 容忍)。同一思想正回流预训练:HeterMoE/DisagMoE 把注意力与专家块放到不同设备组、按负载自适应配比。当万卡集群内部也"按模块解耦",并行策略将从静态划分走向<b>动态、按负载调度的数据流</b>。</p>
+<h3>11.6 自动并行换发:从"搜策略"到"高保真模拟 + 调优"</h3>
+<p>通用自动并行(Alpa 一系)在 2025 年没有续作,但 Charon(2026-05)式的高保真模拟器 + MCore Parallel Folding 式的框架化折叠正在成为务实路线:先在模拟器里扫千万级并行/通信配置,再小规模实测校准。可以预期<b>"LLM 辅助的并行策略设计"</b>(用大模型读拓扑与 profile、生成并验证配置)成为下一阶段热点。</p>
+<h3>11.7 低通信/松散一致性训练:走出数据中心</h3>
+<p>同步 SGD 并非物理定律。DiLoCo(2023-11,本地多步+低频同步)证明了跨数据中心训练的可行性;异步 RL 的 staleness 容忍(AReaL η=4~8)证明一定松散度不伤收敛。带宽金字塔最底层(广域 1~10GB/s)一旦可用,"多中心联合训练/弱网训练"将把并行策略研究从"机房内"推向"行星规模"。</p>
+<h3>11.8 绿色与可靠:并行策略的 ESG 与弹性维度</h3>
+<p>Kyber 机架 600kW/800VDC、CPO 交换机、光互连都在把"每比特功耗"变成与"每比特带宽"同等级的设计约束;故障域随 scale-up 域变大而变大,<b>弹性并行(elastic parallelism,节点增减时重新划分而不重启)</b>、checkpoint 快速恢复将从事后补救变成并行策略的一等设计目标——这也是 Megatron 2026 路线图的明确条目。</p>
+</section>
+
+<section id="ch12">
+<h2>12. 结语:一张图带走全文</h2>
+<p>把 12 章内容压成一段话:<b>并行的本质是"按五个维度切分状态(数据/层内矩阵/层段/专家/序列),再用四种集合通信原语(all-reduce、all-gather/reduce-scatter、all-to-all、点对点)把它们缝起来";通信优化的本质是"减量(稀疏/压缩/低精度)、走对路(分层放置)、藏起来(通算掩盖)、换引擎(专用内核)";而 2024 年以来最大的变化,是 MoE 让 EP all-to-all 成为瓶颈、scale-up 域膨胀让'域内并行'扩容、RL 让训练与推理边界消融。</b></p>
+<p>给想动手的本科同学一条路径:(1)在单机上读懂本文 4.2/5.3/6.3 的三段源码,再翻本目录下克隆的 Megatron-LM 仓库对应文件;(2)用 2 张卡跑通 PyTorch DDP,观察 bucket 与通信重叠;(3)用 torchtitan 在 8 卡上分别开 TP/PP/CP/FSDP 各一次,对比吞吐与显存;(4)读 DeepSeek-V3 技术报告第 3 章与 Kimi K2 技术报告 §2.4,画出两套系统的通信时序图——做完这四步,你已经超过大多数面谈者了。</p>
+<figure>
+<svg viewBox="0 0 760 190" width="100%" style="max-width:760px">
+  <style>.dd{fill:#15202d;stroke:#23548b}.cc{fill:#321f11;stroke:#8b5a23}.oo{fill:#113122;stroke:#238b6a}.tx3{font:12px system-ui;fill:#1a2233}.sm3{font:10.5px system-ui;fill:#64748b}</style>
+  <rect x="10" y="20" width="225" height="150" class="dd"/><text class="tx3" x="20" y="42"><tspan style="font-weight:600">五个切分维度</tspan></text>
+  <text class="sm3" x="20" y="62">DP:数据 / ZeRO:优化器状态</text>
+  <text class="sm3" x="20" y="80">TP:层内矩阵(列/行切)</text>
+  <text class="sm3" x="20" y="98">PP:层段(微批流水)</text>
+  <text class="sm3" x="20" y="116">EP:专家(token 路由)</text>
+  <text class="sm3" x="20" y="134">CP/SP:序列(KV 环传)</text>
+  <rect x="265" y="20" width="225" height="150" class="cc"/><text class="tx3" x="275" y="42"><tspan style="font-weight:600">四种通信原语</tspan></text>
+  <text class="sm3" x="275" y="62">All-Reduce = RS + AG</text>
+  <text class="sm3" x="275" y="80">All-Gather / Reduce-Scatter</text>
+  <text class="sm3" x="275" y="98">All-to-All(EP 的 dispatch/combine)</text>
+  <text class="sm3" x="275" y="116">点对点(PP 段间 / CP 环)</text>
+  <text class="sm3" x="275" y="138">代价:α + V/B;分层走 NVLink/IB</text>
+  <rect x="520" y="20" width="225" height="150" class="oo"/><text class="tx3" x="530" y="42"><tspan style="font-weight:600">通信优化五层</tspan></text>
+  <text class="sm3" x="530" y="62">①减量:稀疏/压缩/FP8</text>
+  <text class="sm3" x="530" y="80">②放置:分层、轨优化</text>
+  <text class="sm3" x="530" y="98">③掩盖:调度/异步/独立流</text>
+  <text class="sm3" x="530" y="116">④内核:专用 A2A、网内计算</text>
+  <text class="sm3" x="530" y="134">⑤协同:路由/注意力协同设计</text>
+  <text class="sm3" x="530" y="156">→ 目标:T_comm 全部藏进 T_compute</text>
+</svg>
+<figcaption>图 12-1:全文一图流——切分维度 × 通信原语 × 优化层次。</figcaption>
+</figure>
+</section>
+
+<section id="refs" class="refs">
+<h2>参考文献(按主题分组;日期为 arXiv v1/首发时间)</h2>
+<h3>并行策略经典论文</h3>
+<ol>
+<li>Shoeybi et al., <i>Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</i>, NVIDIA, arXiv:1909.08053, 2019-09.<br><a href="https://arxiv.org/abs/1909.08053">https://arxiv.org/abs/1909.08053</a></li>
+<li>Huang et al., <i>GPipe: Efficient Training of Giant Neural Networks using Pipeline Parallelism</i>, Google, arXiv:1811.06965, 2018-11(NeurIPS 2019).<br><a href="https://arxiv.org/abs/1811.06965">https://arxiv.org/abs/1811.06965</a></li>
+<li>Harlap et al., <i>PipeDream: Fast and Efficient Pipeline Parallel DNN Training</i>, MSR/CMU/Stanford, arXiv:1806.03377, 2018-06(SOSP 2019 为 Narayanan et al. 正式版)。<br><a href="https://arxiv.org/abs/1806.03377">https://arxiv.org/abs/1806.03377</a></li>
+<li>Narayanan et al., <i>Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM</i>, arXiv:2104.04473, 2021-04(SC 2021)。<br><a href="https://arxiv.org/abs/2104.04473">https://arxiv.org/abs/2104.04473</a></li>
+<li>Korthikanti et al., <i>Reducing Activation Recomputation in Large Transformer Models</i>(序列并行), NVIDIA, arXiv:2205.05198, 2022-05(MLSys 2023)。<br><a href="https://arxiv.org/abs/2205.05198">https://arxiv.org/abs/2205.05198</a></li>
+<li>Qi, Wan, Huang &amp; Lin, <i>Zero Bubble Pipeline Parallelism</i>, Sea AI Lab, arXiv:2401.10241, v1 2023-11(ICLR 2024)。<br><a href="https://arxiv.org/abs/2401.10241">https://arxiv.org/abs/2401.10241</a></li>
+<li>Lamy-Poirier, <i>Breadth-First Pipeline Parallelism</i>, ServiceNow, arXiv:2211.05953, 2022-11(MLSys 2023)。<br><a href="https://arxiv.org/abs/2211.05953">https://arxiv.org/abs/2211.05953</a></li>
+<li>Li &amp; Hoefler, <i>Chimera: Efficiently Training Large Neural Networks using Bidirectional Pipelines</i>, SC 2021(2021-11)。</li>
+<li>Liu, Zaharia &amp; Abbeel, <i>Ring Attention with Blockwise Transformers for Near-Infinite Context</i>, UC Berkeley, arXiv:2310.01889, 2023-10。<br><a href="https://arxiv.org/abs/2310.01889">https://arxiv.org/abs/2310.01889</a></li>
+<li>Jacobs et al., <i>DeepSpeed-Ulysses</i>, Microsoft, arXiv:2309.14509, 2023-09。<br><a href="https://arxiv.org/abs/2309.14509">https://arxiv.org/abs/2309.14509</a></li>
+<li><i>LoongTrain: Efficient Training of Long-Sequence LLMs</i>, arXiv:2406.18485, 2024-06。<br><a href="https://arxiv.org/abs/2406.18485">https://arxiv.org/abs/2406.18485</a></li>
+</ol>
+<h3>MoE 与专家并行</h3>
+<ol start="12">
+<li>Lepikhin et al., <i>GShard</i>, Google, arXiv:2006.16668, 2020-06。<br><a href="https://arxiv.org/abs/2006.16668">https://arxiv.org/abs/2006.16668</a></li>
+<li>Fedus, Zoph &amp; Shazeer, <i>Switch Transformers</i>, Google, arXiv:2101.03961, 2021-01(JMLR 2022)。<br><a href="https://arxiv.org/abs/2101.03961">https://arxiv.org/abs/2101.03961</a></li>
+<li><i>DeepSeekMoE</i>, arXiv:2401.06066, 2024-01;<i>Auxiliary-Loss-Free Load Balancing</i>, arXiv:2408.15664, 2024-08。<br><a href="https://arxiv.org/abs/2401.06066">2401.06066</a> / <a href="https://arxiv.org/abs/2408.15664">2408.15664</a></li>
+<li>DeepSeek-AI, <i>DeepSeek-V3 Technical Report</i>, arXiv:2412.19437, 2024-12。<br><a href="https://arxiv.org/abs/2412.19437">https://arxiv.org/abs/2412.19437</a></li>
+<li>DeepSeek-AI, <i>DeepEP</i>(开源仓库,2025-02-25)及 <i>DualPipe</i>(2025-02-27)。<br><a href="https://github.com/deepseek-ai/DeepEP">github.com/deepseek-ai/DeepEP</a> / <a href="https://github.com/deepseek-ai/DualPipe">github.com/deepseek-ai/DualPipe</a></li>
+<li>Sea AI Lab, <i>DualPipeV 博客</i>, 2025-02。<a href="https://sail.sea.com/blog/articles/63">sail.sea.com/blog/articles/63</a></li>
+<li>Kimi Team, <i>Kimi K2 Technical Report</i>, arXiv:2507.20534, 2025-07。<a href="https://arxiv.org/abs/2507.20534">arxiv.org/abs/2507.20534</a></li>
+<li>MoE 通信学术新作:SwiftMoE(2504.19925, 2025-04)、HeterMoE(2504.03871, 2025-04)、X-MoE(2508.13337, 2025-08)、UniEP(2604.19241, 2026-04)、DisagMoE(2605.11005, 2026-05)。</li>
+</ol>
+<h3>数据并行 / ZeRO / FSDP</h3>
+<ol start="20">
+<li>Rajbhandari et al., <i>ZeRO</i>, Microsoft, arXiv:1910.02054, 2019-10(SC 2020);ZeRO-Offload(2101.06840, 2021-01);ZeRO-Infinity(2104.07857, 2021-04)。<a href="https://arxiv.org/abs/1910.02054">arxiv.org/abs/1910.02054</a></li>
+<li>Zhao et al., <i>PyTorch FSDP</i>, arXiv:2304.11277, 2023-04(VLDB 2023)。<a href="https://arxiv.org/abs/2304.11277">arxiv.org/abs/2304.11277</a></li>
+<li>Sergeev &amp; Del Balle, <i>Horovod</i>, Uber, arXiv:1802.05799, 2018-02。<a href="https://arxiv.org/abs/1802.05799">arxiv.org/abs/1802.05799</a></li>
+<li>梯度压缩:Vogels et al., PowerSGD, arXiv:1905.13727, 2019-05;Lin et al., DGC, arXiv:1712.01887, 2017-12。</li>
+</ol>
+<h3>自动并行与框架</h3>
+<ol start="24">
+<li>FlexFlow(ICML 2019);Alpa, arXiv:2201.12023, 2022-01(OSDI 2022);Galvatron, arXiv:2210.02993, 2022-10(SIGMOD 2023);Colossal-AI, arXiv:2110.14883, 2021-10。</li>
+<li>NVIDIA, <i>Scalable Training of Mixture-of-Experts Models with Megatron Core</i>, arXiv:2603.07685, 2026-03;<i>Megatron-LM README</i>(本仓库,2026-08 检视);<i>Megatron Core MoE 文档</i>(v0.12/0.14/0.15, 2025-05/09/11);<i>Dynamic Context Parallelism 博客</i>, 2026-01。</li>
+<li>Charon(并行模拟器), arXiv:2605.17164, 2026-05。</li>
+</ol>
+<h3>硬件、网络与系统(2025–2026)</h3>
+<ol start="27">
+<li>NVIDIA Wide-EP on NVL72 博客(2025);Kyber/Rubin 机架路线(2025-03);Spectrum-X/Quantum-X Photonics 新闻稿(2025-03-18)。<a href="https://developer.nvidia.com/blog/scaling-large-moe-models-with-wide-expert-parallelism-on-nvl72-rack-scale-systems">Wide-EP</a></li>
+<li>Ultra Ethernet Consortium, <i>UEC Specification 1.0</i>, 2025-06-11;UALink Consortium, <i>UALink 200G 1.0</i>, 2025-04。</li>
+<li>RL 系统:veRL(arXiv:2409.19256);slime(THUDM,2025);NeMo-RL(NVIDIA,2025-08);AReaL(arXiv:2505.24298, 2025-05, NeurIPS 2025);APRIL(arXiv:2509.18521, 2025-09)。</li>
+<li>UCCL-Zip(通信内无损压缩), arXiv:2604.17172, 2026-04;TokenRing, arXiv:2412.20501, 2024-12;MiniMax-M1, arXiv:2506.13585, 2025-06;Quartet II(NVFP4 训练), arXiv:2601.22813, 2026-01。</li>
+<li>模型发布:Llama 4(Meta 博客,2025-04-05);gpt-oss(OpenAI 博客,2025-08-05);Qwen3(arXiv:2505.09388);GLM-4.5(arXiv:2508.06471, 2025-08);DeepSeek V3.2-Exp(官方新闻,2025-09-29)/V3.2(arXiv:2512.02556, 2025-12);PyTorch torchtitan 1M CP(2025-01)。</li>
+<li>DiLoCo, arXiv:2311.08105, 2023-11;Mooncake(KVCache 中心化架构,推理侧), arXiv:2407.00079, 2024-06。</li>
+</ol>
+<p style="font-size:12.5px;color:#aeb4bd">注:文中"未查到/未证实"的事项(NVIDIA TDT、DeepSeek-R2、"BFPP 用于 Llama 4"、DeepEP 独立论文等)均经检索后不收录或明确标注;所有逐字引文均出自上述来源原文,译文为本整理者所译。</p>
+</section>
+</main>
+</div>
+</body>
+</html>

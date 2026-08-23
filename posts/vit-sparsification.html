@@ -101,7 +101,7 @@
 <header class="hero" id="top">
   <div class="inner">
     <h1>ViT 稀疏化技术梳理<br><span style="font-size:20px; font-weight:400; color:#bcd0f7;">从 Attention 结构稀疏、Token 压缩到步间缓存 —— 在 VLM 与 DiT 两大架构中的应用（2017–2026）</span></h1>
-    <p class="sub">本报告面向具备基础深度学习知识（了解 CNN / Transformer 基本概念）的本科生，结合 6 个开源仓库的一手代码讲解原理，梳理 ViT 稀疏化的完整发展脉络，并综述 2025–2026 年学界与业界的最新进展和未来方向。</p>
+    <p class="sub">本报告面向具备基础深度学习知识（了解 CNN / Transformer 基本概念）的读者，结合 6 个开源仓库的一手代码讲解原理，梳理 ViT 稀疏化的完整发展脉络，并综述 2025–2026 年学界与业界的最新进展和未来方向。</p>
     <div class="meta-chips">
       <span class="chip">撰写日期：2026-08-17</span>
       <span class="chip">代码仓库：ToMe · DiT · FastV · VisionZip · Sparse-VideoGen · TeaCache（本地克隆分析）</span>
@@ -428,7 +428,7 @@
                 position_ids   = keep_indexs.unsqueeze(0)
                 pruned_attention_mask = self._update_causal_mask(None, hidden_states, 0)
                 cache_position = cache_position[:new_seq_length]</pre>
-  <p class="code-caption">逐行拆解（本科生版）：</p>
+  <p class="code-caption">逐行拆解：</p>
   <ul>
     <li><b>为什么用"最后一个 token"的注意力？</b> 自回归解码时，即将生成的词就是序列末端的 token；它"回头看"的注意力分布，就是模型<b>当前真正依赖</b>哪些输入 token 的直接证据。被它几乎不看图像 token，就可以扔。</li>
     <li><b>为什么对头取平均？</b> 不同头关注不同子空间，平均后的分数是"全体头的共识"，比单头更稳。</li>
@@ -536,7 +536,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <span class="kw">for</span> index_block, block <span class="kw">in</span> enumerate(self.transformer_blocks):
         ...                                          <span class="cm">#    正常计算全部 transformer 块</span>
     self.previous_residual = hidden_states - ori_hidden_states   <span class="cm"># ⑥ 缓存本次的残差供后续复用</span></pre>
-  <p class="code-caption">本科生版解读：把 DiT 的 50 个去噪步想象成 50 个"几乎连续"的帧。<b>调制输入</b>（时间步嵌入调制后的噪声隐状态）是模型对"现在噪声水平下该做什么"的摘要——两步之间它变得少，输出也变得少。TeaCache 用相对 L1 差量化这个"变了多少"，多项式只是校准量纲（输入差和输出差不是同一尺度）。累积到阈值才真正算一步，并把该步所有块的<b>输出残差</b>（输出 − 输入）存起来，未达阈值的步直接"复用上次的更新量"。</p>
+  <p class="code-caption">直观解读：把 DiT 的 50 个去噪步想象成 50 个"几乎连续"的帧。<b>调制输入</b>（时间步嵌入调制后的噪声隐状态）是模型对"现在噪声水平下该做什么"的摘要——两步之间它变得少，输出也变得少。TeaCache 用相对 L1 差量化这个"变了多少"，多项式只是校准量纲（输入差和输出差不是同一尺度）。累积到阈值才真正算一步，并把该步所有块的<b>输出残差</b>（输出 − 输入）存起来，未达阈值的步直接"复用上次的更新量"。</p>
   <div class="box green"><b>工程要点</b>：缓存的是<b>残差</b>而非输出（数值上更稳，且下一步输入变化时仍近似成立）；首末步强制计算；每个模型需离线拟合一次多项式系数（论文用 70 个提示词）。这一"指示器 + 阈值 + 残差缓存"三件套已成为后续所有缓存方法（FasterCache、Learning-to-Cache 的后续）的标准组件。FasterCache（arXiv:2410.19355 · 2024-10 · CVPR 2025）进一步发掘了 <b>CFG 双分支冗余</b>（条件/无条件分支输出高度相似，可交叉复用）。</div>
 
   <h3>5.4 稀疏注意力：Sparse VideoGen（本地仓库 <code class="inline">Sparse-VideoGen/</code>）</h3>

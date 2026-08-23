@@ -1,2 +1,22 @@
-# PiratePai.github.io
-Pai's tech blog — surveys on LLM/VLM/DiT efficiency techniques (MoE, Quantization, Speculative Decoding, ViT Sparsification)
+# PiratePai's Blog
+
+大模型效率技术知识全景 —— 9 篇技术综述，在线阅读：**https://piratepai.github.io**
+
+## 知识地图 · 推理效率栈
+
+| 层面 | 文章 |
+|---|---|
+| L1 算法层 | 投机解码全景：从经典投机采样到 MTP / DFlash / DSpark |
+| L2 结构层 | 注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构 |
+| L3 显存层 | KV Cache 技术全景：从原理到前沿 |
+| L4 压缩层 | 模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展 |
+| L5 系统层 | 大模型推理服务优化：技术发展史、原理与前沿展望 |
+
+## 延伸 · 训练与架构
+
+- 混合专家（MoE）全景
+- 大模型并行策略与通信优化
+- Agent 与强化学习技术全景
+- ViT 稀疏化技术梳理
+
+文章源文件在 `posts/` 目录，均为自包含 HTML（暗色主题、移动端适配）。

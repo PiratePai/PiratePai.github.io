@@ -117,7 +117,7 @@
 <header class="hero">
   <div class="inner">
     <h1>模型量化（Quantization）在 LLM / VLM / DiT 中的<br>原理、代码实现与前沿进展</h1>
-    <p class="sub">从权重量化、激活量化到 KV Cache 量化：沿着 2015 → 2026 年的发展历程，把每一步的"为什么"与"怎么做"讲到本科生能听懂的程度；结合 8 个开源仓库的真实代码走读，并梳理业界与学界的最新方向。</p>
+    <p class="sub">从权重量化、激活量化到 KV Cache 量化：沿着 2015 → 2026 年的发展历程，把每一步的"为什么"与"怎么做"讲到直观易懂的程度；结合 8 个开源仓库的真实代码走读，并梳理业界与学界的最新方向。</p>
     <div class="chips">
       <span class="chip">权重量化 W4 / W8</span><span class="chip">激活量化 A8 / A4</span>
       <span class="chip">KV Cache 量化 2-bit</span><span class="chip">FP8 / FP4 / MX</span>
@@ -310,7 +310,7 @@
 <p><strong>要解决的问题</strong>：round-to-nearest（四舍五入）逐个权重独立量化，误差会累积。GPTQ 的核心想法来自 1992 年的<strong>最优脑损伤（OBS）</strong>理论：如果量化完某一列权重后产生误差，可以<strong>顺手微调还没量化的那些列来抵消它</strong>，使整层输出误差最小。它用输入激活的二阶统计（Hessian 矩阵 H = 2XX<sup>T</sup>）来衡量"哪一列权重更重要、该如何补偿"。</p>
 
 <div class="box key">
-  <div class="t">📌 本科生版直觉</div>
+  <div class="t">📌 直觉理解</div>
   想象你在搬家具进电梯（把权重塞进 4-bit 格子）。每搬错一件（量化误差），GPTQ 不懊恼，而是立刻调整后面还没搬的家具位置（利用 H<sup>−1</sup> 把误差"推"给未量化的列），保证最终电梯里的整体布局（层输出）几乎不变。按列依次处理，处理顺序本身还提供误差传播路径。
 </div>
 
@@ -879,7 +879,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 
 
 <footer>
-  本报告由 ZCode 于 2026-08-18 整理生成；所有引用均标注出处与发表时间，灰色小字为原文摘录或译文。<br>
+  所有引用均标注出处与发表时间，灰色小字为原文摘录或译文。<br>
   代码仓库已克隆至本地 <code>repos/</code> 目录：gptq · AutoAWQ · smoothquant · KIVI · KVQuant · ViDiT-Q · BitNet · nunchaku。
 </footer>
 </div>

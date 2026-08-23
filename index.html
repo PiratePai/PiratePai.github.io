@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pai's Blog · LLM / VLM / DiT 效率技术综述</title>
+<title>Pai's Blog · 大模型效率技术知识全景</title>
 <style>
   :root{
     --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e8eaed; --ink-dim:#aeb4bd;
@@ -17,7 +17,7 @@
     line-height:1.75; font-size:16px; min-height:100vh; display:flex; flex-direction:column;
   }
   header.hero{
-    padding:88px 24px 56px; text-align:center; position:relative; overflow:hidden;
+    padding:84px 24px 52px; text-align:center; position:relative; overflow:hidden;
     background:
       radial-gradient(900px 380px at 20% -10%, rgba(110,168,255,.18), transparent 70%),
       radial-gradient(700px 360px at 90% 0%, rgba(157,123,255,.18), transparent 70%);
@@ -28,13 +28,48 @@
     font-size:clamp(30px,5vw,50px); line-height:1.2; margin:14px 0 6px; font-weight:800;
     background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff); -webkit-background-clip:text; background-clip:text; color:transparent;
   }
-  .hero p.sub{color:var(--ink-dim); max-width:720px; margin:10px auto 0; font-size:16px}
+  .hero p.sub{color:var(--ink-dim); max-width:780px; margin:10px auto 0; font-size:16px}
   .hero .meta{margin-top:24px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
   .chip{font-size:12.5px; color:var(--ink-dim); border:1px solid var(--line); background:var(--panel);
     padding:5px 12px; border-radius:999px}
   .chip b{color:var(--brand); font-weight:600}
-  main{flex:1; width:100%; max-width:1080px; margin:0 auto; padding:48px 24px 80px}
-  .section-label{color:var(--ink-dim); font-size:13px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; margin:0 0 22px}
+  main{flex:1; width:100%; max-width:1080px; margin:0 auto; padding:52px 24px 80px}
+  .section-label{color:var(--ink-dim); font-size:13px; letter-spacing:.18em; text-transform:uppercase; font-weight:700; margin:0 0 6px}
+  .section-note{color:var(--ink-dim); font-size:14px; margin:0 0 22px; max-width:720px}
+
+  /* ---- 知识地图：推理效率栈 ---- */
+  .stack{display:flex; flex-direction:column; gap:10px; margin-bottom:64px}
+  a.layer{
+    display:flex; align-items:center; gap:18px; text-decoration:none; color:inherit;
+    background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--layer-c,var(--brand));
+    border-radius:12px; padding:18px 22px;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  a.layer:hover{transform:translateX(4px); border-color:#3a4256; box-shadow:0 10px 26px rgba(0,0,0,.35)}
+  .layer .no{
+    flex:none; width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:17px; color:var(--layer-c,var(--brand));
+    background:color-mix(in srgb, var(--layer-c,var(--brand)) 12%, transparent);
+    border:1px solid color-mix(in srgb, var(--layer-c,var(--brand)) 35%, transparent);
+  }
+  .layer .info{flex:1; min-width:0}
+  .layer .lt{font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--layer-c,var(--brand))}
+  .layer h2{margin:2px 0 2px; font-size:18.5px; line-height:1.4; font-weight:700}
+  .layer p{margin:0; color:var(--ink-dim); font-size:13.5px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical}
+  .layer .arrow{flex:none; color:var(--ink-dim); font-size:13px; font-weight:700}
+  a.layer:hover .arrow{color:var(--layer-c,var(--brand))}
+  .stack-axis{
+    display:flex; align-items:center; gap:14px; margin:0 0 12px; color:var(--ink-dim); font-size:12.5px; letter-spacing:.12em;
+  }
+  .stack-axis::before,.stack-axis::after{content:""; flex:1; height:1px; background:var(--line)}
+  @media (max-width:640px){
+    a.layer{gap:12px; padding:14px 16px}
+    .layer .no{width:36px; height:36px; font-size:14px; border-radius:8px}
+    .layer h2{font-size:16px}
+  }
+
+  /* ---- 卡片组 ---- */
+  .group{margin-bottom:56px}
   .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:22px}
   @media (max-width:760px){ .grid{grid-template-columns:1fr} }
   a.card{
@@ -56,6 +91,7 @@
   .card .foot{margin-top:auto; padding-top:14px; display:flex; justify-content:space-between; align-items:center; color:var(--ink-dim); font-size:13px}
   .card .foot .arrow{color:var(--brand); font-weight:700}
   a.card:hover .foot .arrow{color:var(--brand2)}
+
   footer{
     border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--ink-dim); font-size:13.5px;
   }
@@ -66,51 +102,109 @@
 <body>
 <header class="hero">
   <div class="kicker">Pai's Blog · Tech Surveys</div>
-  <h1>LLM / VLM / DiT 效率技术综述</h1>
-  <p class="sub">围绕大语言模型、视觉-语言模型与扩散 Transformer 的推理效率，
-    从混合专家、模型量化、投机解码到视觉 Token 稀疏化的系统性梳理。</p>
+  <h1>大模型效率技术知识全景</h1>
+  <p class="sub">以「一次推理」为线索，自上而下穿过算法、结构、显存、压缩与系统五个层面；
+    再向训练与架构延伸——每篇综述都沿「范式脉络 · 原理 · 代码 · 前沿」展开。</p>
   <div class="meta">
-    <span class="chip"><b>4</b> 篇综述</span>
-    <span class="chip">MoE</span>
-    <span class="chip">Quantization</span>
-    <span class="chip">Speculative Decoding</span>
-    <span class="chip">Token Sparsification</span>
-    <span class="chip">2020 – 2026</span>
+    <span class="chip"><b>9</b> 篇综述</span>
+    <span class="chip">覆盖 2014 – 2026</span>
+    <span class="chip">LLM · VLM · DiT</span>
+    <span class="chip">范式 · 历史 · 原理 · 前沿</span>
   </div>
 </header>
 
 <main>
-  <p class="section-label">最新文章 / Posts</p>
-  <div class="grid">
+  <p class="section-label">知识地图 · 推理效率栈</p>
+  <p class="section-note">五个层面自上而下构成推理优化的完整视图：算法层改变解码方式，结构层改变模型本身，
+    显存层管理 KV Cache，压缩层降低数值精度，系统层负责调度与服务。</p>
+  <div class="stack-axis">从算法到系统 · 五个层面</div>
+  <div class="stack">
 
-    <a class="card" href="posts/moe-survey.html">
-      <div class="tags"><span class="tag">混合专家</span><span class="tag">LLM · VLM · DiT</span></div>
-      <h2>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</h2>
-      <p>从稀疏门控与负载均衡的经典原理出发，系统梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进、训练技巧与未来方向。</p>
-      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    <a class="layer" href="posts/speculative-decoding.html" style="--layer-c:#41d1a7">
+      <div class="no">L1</div>
+      <div class="info">
+        <div class="lt">算法层 · 改变解码方式</div>
+        <h2>投机解码全景：从经典投机采样，到 MTP / DFlash / DSpark</h2>
+        <p>从经典投机采样"起草—验证"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
     </a>
 
-    <a class="card" href="posts/quantization-survey.html">
-      <div class="tags"><span class="tag">模型量化</span><span class="tag">PTQ · QAT</span></div>
-      <h2>模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展</h2>
-      <p>从浮点与定点表示、训练后量化与量化感知训练讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。</p>
-      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    <a class="layer" href="posts/attention-evolution.html" style="--layer-c:#6ad6f1">
+      <div class="no">L2</div>
+      <div class="info">
+        <div class="lt">结构层 · 改变模型本身</div>
+        <h2>注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）</h2>
+        <p>沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
     </a>
 
-    <a class="card" href="posts/speculative-decoding.html">
-      <div class="tags"><span class="tag">推理加速</span><span class="tag">投机采样 · MTP</span></div>
-      <h2>投机解码全景：从经典投机采样，到 MTP / DFlash / DSpark</h2>
-      <p>面向入门者的讲义：从经典投机采样"起草—验证"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。</p>
-      <div class="foot"><span>2026-08 · 讲义</span><span class="arrow">阅读全文 →</span></div>
+    <a class="layer" href="posts/kv-cache-survey.html" style="--layer-c:#6ea8ff">
+      <div class="no">L3</div>
+      <div class="info">
+        <div class="lt">显存层 · 管理 KV Cache</div>
+        <h2>KV Cache 技术全景：从原理到前沿（2017–2026）</h2>
+        <p>结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构——七条战线梳理二十余项代表性工作与 2025–2026 最新动态。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
     </a>
 
-    <a class="card" href="posts/vit-sparsification.html">
-      <div class="tags"><span class="tag">视觉效率</span><span class="tag">Token 压缩 · 缓存复用</span></div>
-      <h2>ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</h2>
-      <p>2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p>
-      <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+    <a class="layer" href="posts/quantization-survey.html" style="--layer-c:#9d7bff">
+      <div class="no">L4</div>
+      <div class="info">
+        <div class="lt">压缩层 · 降低数值精度</div>
+        <h2>模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展</h2>
+        <p>从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
     </a>
 
+    <a class="layer" href="posts/inference-serving.html" style="--layer-c:#ffb454">
+      <div class="no">L5</div>
+      <div class="info">
+        <div class="lt">系统层 · 调度与服务</div>
+        <h2>大模型推理服务优化：技术发展史、原理与前沿展望</h2>
+        <p>从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
+    </a>
+
+  </div>
+
+  <div class="group">
+    <p class="section-label">延伸 · 训练与架构</p>
+    <div class="grid">
+
+      <a class="card" href="posts/moe-survey.html">
+        <div class="tags"><span class="tag">模型架构</span><span class="tag">稀疏专家</span></div>
+        <h2>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</h2>
+        <p>从稀疏门控与负载均衡的经典原理出发，系统梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p>
+        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+      </a>
+
+      <a class="card" href="posts/parallelism-survey.html">
+        <div class="tags"><span class="tag">训练系统</span><span class="tag">TP · PP · EP · CP</span></div>
+        <h2>大模型并行策略与通信优化：发展历程、原理与未来方向</h2>
+        <p>从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。</p>
+        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+      </a>
+
+      <a class="card" href="posts/agent-rl-survey.html">
+        <div class="tags"><span class="tag">强化学习</span><span class="tag">RLHF → RLVR → Agent RL</span></div>
+        <h2>Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</h2>
+        <p>沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。</p>
+        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+      </a>
+
+      <a class="card" href="posts/vit-sparsification.html">
+        <div class="tags"><span class="tag">视觉效率</span><span class="tag">Token 压缩 · 缓存复用</span></div>
+        <h2>ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</h2>
+        <p>2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p>
+        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+      </a>
+
+    </div>
   </div>
 </main>
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>投机解码全景：从经典投机采样到 DFlash / DSpark · 本科生入门讲义</title>
+<title>投机解码全景：从经典投机采样到 DFlash / DSpark</title>
 <style>
   :root{
     --ink:#1d1f24; --sub:#5b6470; --bg:#fbfaf7; --card:#ffffff;
@@ -150,7 +150,7 @@
     <span class="tag">LLM 推理加速</span>
     <span class="tag">无损 · 草稿-验证范式</span>
     <h1>投机解码全景<br><span style="font-size:1.2rem;font-weight:400;color:#cdd3df">从经典投机采样，到 MTP / DFlash / DSpark</span></h1>
-    <div class="sub">一篇让本科生也能看懂的推理加速发展史 · 含代码与原始引用</div>
+    <div class="sub">一篇通俗易懂的推理加速发展史 · 含代码与原始引用</div>
     <div class="meta">整理日期：2026-08-13 ｜ 文献范围 2022–2026 ｜ 结合 DeepSpec / dflash / EAGLE 源码</div>
   </div>
 </header>
@@ -313,7 +313,7 @@ token&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 目标分布 p&nbsp;&nbsp;&nbsp; 投�
 有&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.0492&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; −0.0008</div>
 <p>所有偏差都在 ±0.0013 以内（纯粹的随机涨落，N 再大 10 倍还会缩小 √10 倍）——<b>投机采样的输出分布确实与目标模型一致</b>。同时 α 的实测值也会收敛到 0.900：接受率的解析式 <code class="inl">α = Σ min(p,q)</code> 同样得到验证。<span class="cite" title="Leviathan et al. 2022, Corollary 3.6">[2]</span></p>
 
-<h3>2.4 · 四个常见误区（本科生最容易踩的坑）</h3>
+<h3>2.4 · 四个常见误区（最容易踩的坑）</h3>
 <div class="grid2">
 <div class="card" style="margin:0"><b>❌ 误区一："投机解码会降低输出质量。"</b><p style="margin:6px 0">不会。改进拒绝采样在数学上保证每个 token 的边缘分布与目标模型完全相同（贪心解码时输出甚至逐 token 一致）。"投机"投的是<b>时间</b>，不是<b>质量</b>。</p></div>
 <div class="card" style="margin:0"><b>❌ 误区二："草稿被拒就白干了。"</b><p style="margin:6px 0">即使第一个草稿就被拒，目标模型也会在拒绝位重采样出 1 个"修正 token"——<b>最坏情况也只是退回基线速度</b>，额外代价只是草稿那点时间。每轮保底 1 个、上限 γ+1 个。</p></div>
@@ -869,7 +869,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </tbody>
 </table>
 
-<div class="note"><b>给本科生的总结性心智模型：</b>
+<div class="note"><b>总结性心智模型：</b>
 <ul style="margin:6px 0">
 <li>🧱 <b>所有投机解码 = 草稿（快）+ 验证（准）+ 无损接受规则（妙）</b>。</li>
 <li>📈 <b>演化主线</b>：独立小模型 → 大模型自带的头/特征 → 并行块草稿 → 并行块 + 系统级智能验证。</li>
