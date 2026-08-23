@@ -48,12 +48,12 @@
   .cite{font-size:.7em; vertical-align:super; color:var(--accent); font-weight:700; cursor:help; white-space:nowrap}
   .cite:hover{text-decoration:underline}
   blockquote.q{
-    margin:10px 0 6px; padding:9px 14px 9px 16px; background:#f4f1ea; border-left:4px solid var(--gold);
-    font-size:.84rem; color:#3a3a3a; border-radius:0 6px 6px 0;
+    margin:10px 0 6px; padding:9px 14px 9px 16px; background:#27241b; border-left:4px solid var(--gold);
+    font-size:.84rem; color:#dfe5f0; border-radius:0 6px 6px 0;
   }
   blockquote.q .src{display:block; color:var(--sub); font-size:.82rem; margin-top:4px; font-style:italic}
   blockquote.q .en{font-family:"Georgia",serif; font-style:italic}
-  blockquote.q .zh{display:block; margin-top:3px; color:#2a2a2a}
+  blockquote.q .zh{display:block; margin-top:3px; color:#dfe5f0}
   blockquote.q .zh::before{content:"译文："; color:var(--gold); font-weight:700}
 
   /* ---- 卡片 ---- */
@@ -61,8 +61,8 @@
     background:var(--card); border:1px solid var(--line); border-radius:12px;
     padding:20px 24px; margin:18px 0; box-shadow:0 1px 3px rgba(0,0,0,.04);
   }
-  .note{background:#f7f5ef; border:1px solid #e7e0cd; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:.95rem}
-  .note.warn{background:#fdf3f0; border-color:#ecc4b8}
+  .note{background:#28241b; border:1px solid #e7e0cd; border-radius:10px; padding:14px 18px; margin:16px 0; font-size:.95rem}
+  .note.warn{background:#301912; border-color:#ecc4b8}
   .note b{color:var(--accent)}
 
   /* ---- 代码 ---- */
@@ -76,7 +76,7 @@
   pre .s{color:#98c379} /* string */
   pre .fn{color:#61afef} /* func */
   pre .n{color:#e5c07b} /* num */
-  code.inl{background:#efece4; padding:1px 6px; border-radius:4px; font-size:.88em; font-family:"Consolas",monospace}
+  code.inl{background:#26231c; padding:1px 6px; border-radius:4px; font-size:.88em; font-family:"Consolas",monospace}
   .codecap{font-size:.8rem; color:var(--sub); margin:-6px 0 8px; font-family:"Consolas",monospace}
 
   /* ---- 时间线 ---- */
@@ -97,32 +97,32 @@
   .flow .arr{align-self:center; font-size:1.5rem; color:var(--sub)}
   .draft{border-color:#b9c8d8 !important}
   .verify{border-color:#cbb08a !important}
-  .accepted{background:#eef6f0 !important; border-color:#9ecdb1 !important}
-  .rejected{background:#fbeeea !important; border-color:#e0a999 !important; text-decoration:line-through; color:#955}
+  .accepted{background:#1b271e !important; border-color:#9ecdb1 !important}
+  .rejected{background:#2f1a14 !important; border-color:#e0a999 !important; text-decoration:line-through; color:#955}
 
   .chip{display:inline-block; padding:2px 9px; border-radius:14px; font-size:.76rem; font-weight:600; margin-right:5px; vertical-align:middle}
-  .c-red{background:#f7e6e0;color:#a8421b}
-  .c-blue{background:#e3edf6;color:#1f527a}
-  .c-green{background:#e2f0e7;color:#256b41}
-  .c-gold{background:#f4ecd6;color:#8a6a14}
-  .c-purple{background:#ece3f4;color:#5e3a8e}
+  .c-red{background:#2d1c15;color:#e6a389}
+  .c-blue{background:#17222b;color:#6ea8ff}
+  .c-green{background:#1b271f;color:#41d1a7}
+  .c-gold{background:#2d2716;color:#ffb454}
+  .c-purple{background:#22182a;color:#9d7bff}
 
   table{border-collapse:collapse; width:100%; margin:18px 0; font-size:.9rem; background:#fff}
   th,td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
-  th{background:#f3efe5; font-weight:700}
-  tr:nth-child(even) td{background:#fcfbf7}
+  th{background:#28241a; font-weight:700}
+  tr:nth-child(even) td{background:#2a2718}
 
   .toc{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 26px; margin:24px 0}
   .toc ol{margin:6px 0; padding-left:22px}
   .toc li{margin:4px 0}
-  .formula{background:#f4f1ea; border:1px dashed #d8d2c2; padding:12px 16px; border-radius:8px; margin:14px 0; font-family:"Cambria Math","Georgia",serif; font-size:1.05rem; text-align:center}
+  .formula{background:#27241b; border:1px dashed #d8d2c2; padding:12px 16px; border-radius:8px; margin:14px 0; font-family:"Cambria Math","Georgia",serif; font-size:1.05rem; text-align:center}
   .kbd{background:#eee; border:1px solid #ccc; border-bottom-width:2px; border-radius:4px; padding:1px 6px; font-size:.85em; font-family:monospace}
 
   footer.foot{margin-top:80px; padding-top:24px; border-top:2px solid var(--line); color:var(--sub); font-size:.88rem}
   .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
   @media(max-width:720px){.grid2{grid-template-columns:1fr} header.hero h1{font-size:1.8rem}}
   .pillrow{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 0}
-  .ascii{font-family:"Consolas",monospace; white-space:pre; font-size:.8rem; background:#f4f1ea; border:1px solid #e0dac9; padding:12px; border-radius:8px; overflow-x:auto; line-height:1.45}
+  .ascii{font-family:"Consolas",monospace; white-space:pre; font-size:.8rem; background:#27241b; border:1px solid #e0dac9; padding:12px; border-radius:8px; overflow-x:auto; line-height:1.45}
   details summary{cursor:pointer; font-weight:700; color:var(--accent2); margin:8px 0}
 
   /* ---- 柱状图 ---- */
@@ -131,13 +131,13 @@
   .barchart .cap{font-size:.8rem; color:var(--sub); margin-bottom:12px}
   .bar-row{display:flex; align-items:center; margin:8px 0; font-size:.86rem}
   .bar-row .bl{width:215px; flex-shrink:0; text-align:right; padding-right:10px; color:#333}
-  .bar-row .bt{flex:1; background:#f0ede5; border-radius:5px; height:20px; position:relative}
+  .bar-row .bt{flex:1; background:#26241c; border-radius:5px; height:20px; position:relative}
   .bar-row .bf{height:100%; border-radius:5px; background:linear-gradient(90deg,#162b3b,#4a86b8); min-width:3px; position:relative}
   .bar-row .bf.hot{background:linear-gradient(90deg,#3d1e14,#d97b5a)}
   .bar-row .bf.mid{background:linear-gradient(90deg,#3d3314,#c2a34a)}
   .bar-row .bv{position:absolute; left:calc(100% + 8px); top:50%; transform:translateY(-50%); font-weight:700; white-space:nowrap; color:#333}
   .demo-out{background:#101418; color:#cfe3d0; font-family:"Consolas",monospace; font-size:.82rem; padding:12px 16px; border-radius:8px; margin:10px 0; line-height:1.6; overflow-x:auto}
-  .demo-out .dim{color:#7d8a99}
+  .demo-out .dim{color:#dfe5f0}
 </style>
 <style id="mobile-patch">@media (max-width:768px){img,svg{max-width:100%;height:auto}pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}code{overflow-wrap:anywhere}*{min-width:0}html,body{overflow-x:hidden}}</style>
 <style id="unify-style">
@@ -151,7 +151,7 @@
   header.hero .inner,header.hero .wrap{max-width:none;margin:0;padding:0!important}
   header.hero .kicker{color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px}
   header.hero h1{font-size:clamp(28px,5vw,46px)!important;line-height:1.2;margin:14px 0 6px;font-weight:800;
-    background:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff)!important;-webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(90deg,#fff,#bcd4ff 60%,#c9b6ff)!important;-webkit-background-clip:text!important;background-clip:text!important;
     color:transparent!important;letter-spacing:normal}
   header.hero .sub,header.hero .subtitle{color:#aeb4bd!important;max-width:780px;margin:10px auto 0!important;font-size:16px}
   header.hero .meta,header.hero .chips,header.hero .meta-chips{margin-top:22px!important;display:flex;gap:10px;flex-wrap:wrap;justify-content:center!important}
@@ -901,8 +901,8 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <tr><td><b>EAGLE / 2 / 3</b> 2024–25<span class="cite">[8]</span></td><td>大模型倒数第二层特征</td><td>特征级自回归 + 树</td><td>"目标最懂未来"；用移位 token 消解采样不确定性；接受率~0.8</td><td>2.7–3.5×</td></tr>
 <tr><td><b>MTP（Meta）</b> 2024<span class="cite">[6]</span></td><td>共享主干 + n 个并行头</td><td>并行（训练目标）</td><td>既是更强训练目标，又能自投机解码</td><td>3×（推理）</td></tr>
 <tr><td><b>DeepSeek-V3 MTP</b> 2024<span class="cite">[4]</span></td><td>顺序 MTP 模块（D=1）</td><td>顺序、保因果链</td><td>主为提升主模型质量；第二 token 接受率 85–90%</td><td>1.8× TPS</td></tr>
-<tr style="background:#fff6e6"><td><b>DFlash</b> 2026.02<span class="cite">[11]</span></td><td>轻量块扩散模型</td><td><b>并行</b>（一次前向出整块）</td><td>KV 注入条件化（"目标最懂未来"）；告别自回归串行草稿</td><td><b>6×+</b>（比 EAGLE-3 快 2.5×）</td></tr>
-<tr style="background:#eef6f0"><td><b>DSpark</b> 2026.07<span class="cite">[12]</span></td><td>并行骨干(DFlash) + 串行头</td><td><b>半自回归</b></td><td>串行头治后缀衰减；置信度头+硬件感知调度器动态裁剪验证</td><td><b>DeepSeek-V4 提速 60–85%</b></td></tr>
+<tr style="background:#322611"><td><b>DFlash</b> 2026.02<span class="cite">[11]</span></td><td>轻量块扩散模型</td><td><b>并行</b>（一次前向出整块）</td><td>KV 注入条件化（"目标最懂未来"）；告别自回归串行草稿</td><td><b>6×+</b>（比 EAGLE-3 快 2.5×）</td></tr>
+<tr style="background:#1b271e"><td><b>DSpark</b> 2026.07<span class="cite">[12]</span></td><td>并行骨干(DFlash) + 串行头</td><td><b>半自回归</b></td><td>串行头治后缀衰减；置信度头+硬件感知调度器动态裁剪验证</td><td><b>DeepSeek-V4 提速 60–85%</b></td></tr>
 </tbody>
 </table>
 
