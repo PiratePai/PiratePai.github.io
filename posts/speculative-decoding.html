@@ -936,6 +936,9 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
     <li>Teng et al. <i>SW-SpeedDLM</i>. MDPI Mathematics 14(12):2137, 2026.（长上下文）其它最新：AngelSpec arXiv:2607.25852、SpecSpec arXiv:2603.03251、Lever arXiv:2605.16786、Spiffy (OpenReview) 等。</li>
   </ol>
   <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
+  <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">
+    🔗 <b>姊妹篇（2026-09 更新）</b>：训练如何让"草稿-验证"越跑越快——草稿蒸馏（DistillSpec）、解码头训练（Medusa / EAGLE）、目标自投机（LayerSkip）、训练时测试（EAGLE-3）、在策蒸馏与 RL 协同训练（Draft-OPD / DSpark / NVIDIA），结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码，见<a href="spec-decoding-post-training.html">《投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）》</a>。
+  </p>
 </footer>
 
 </div>
