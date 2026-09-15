@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</title>
+<style>
+  :root{
+    --ink:#e8eaed; --sub:#aeb4bd; --bg:#0f1115; --card:#171a21; --card2:#1d212b;
+    --line:#2a2f3a; --accent:#b9a2ff; --accent2:#6ea8ff; --gold:#ffb454; --rose:#ff8f7a; --mint:#4dd6a8;
+    --code-bg:#11141a; --code-ink:#e9edf7;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+    color:var(--ink); background:var(--bg); margin:0; line-height:1.82; font-size:16.5px;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:0 28px 120px}
+  header.hero{
+    background:linear-gradient(135deg,#2a2340 0%, #33305c 55%, #27405c 100%);
+    color:#f4f2ff; padding:62px 0 52px; border-bottom:6px solid var(--accent);
+  }
+  header.hero .wrap{padding-bottom:0}
+  header.hero .kicker{letter-spacing:.24em; font-size:.82rem; color:#d4c6ff; font-weight:700; text-transform:uppercase}
+  header.hero h1{font-size:2.3rem; margin:12px 0 10px; line-height:1.3; letter-spacing:.5px}
+  header.hero .sub{font-size:1.1rem; color:#d6cff0; margin-bottom:6px}
+  header.hero .meta{font-size:.9rem; color:#aab4d4}
+  header.hero .tag{
+    display:inline-block; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+    padding:3px 12px; border-radius:20px; font-size:.8rem; margin:8px 6px 0 0;
+  }
+  h2{
+    font-size:1.62rem; margin:62px 0 10px; padding-bottom:8px; border-bottom:3px solid var(--accent);
+    display:inline-block; color:#f4f2ff;
+  }
+  h3{font-size:1.24rem; margin:40px 0 6px; color:#e2dcf4; font-weight:700}
+  h4{font-size:1.04rem; margin:26px 0 2px; color:var(--accent2)}
+  p{margin:10px 0}
+  .lead{font-size:1.08rem; color:#d5d3e6; margin-top:14px}
+  a{color:var(--accent2); text-decoration:none; border-bottom:1px dotted var(--accent2)}
+  a:hover{border-bottom-style:solid}
+  .muted{color:var(--sub)}
+  .big{font-size:1.15rem}
+  b, strong{color:#f4f2ff}
+
+  /* ---- 引用组件：编号 + 小字原文/译文 ---- */
+  .cite{font-size:.72em; vertical-align:super; color:var(--accent); font-weight:700; cursor:help; white-space:nowrap}
+  .cite:hover{text-decoration:underline}
+  blockquote.q{
+    margin:10px 0 14px; padding:10px 14px 10px 16px; background:#221c31; border-left:4px solid var(--gold);
+    font-size:.84rem; color:#dfe0f0; border-radius:0 8px 8px 0;
+  }
+  blockquote.q .en{font-family:Georgia,"Times New Roman",serif; font-style:italic; color:#e9e4d6}
+  blockquote.q .zh{display:block; margin-top:4px}
+  blockquote.q .zh::before{content:"译文："; color:var(--gold); font-weight:700}
+  blockquote.q .src{display:block; color:var(--sub); font-size:.82rem; margin-top:5px}
+
+  /* ---- 目录 ---- */
+  nav.toc{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 24px; margin:34px 0 8px;
+  }
+  nav.toc b{color:#e2dcf4}
+  nav.toc ol{margin:8px 0 4px; padding-left:22px}
+  nav.toc li{margin:4px 0; font-size:.95rem}
+
+  /* ---- 代码 ---- */
+  pre{
+    background:var(--code-bg); color:var(--code-ink); border:1px solid var(--line); border-radius:10px;
+    padding:16px 18px; overflow-x:auto; font-size:.84rem; line-height:1.6; margin:12px 0;
+  }
+  code{font-family:"Cascadia Code",Consolas,"JetBrains Mono",monospace}
+  p code, li code, td code{background:#1c2135; color:#b9c8ff; padding:1px 6px; border-radius:5px; font-size:.88em}
+  .codecap{font-size:.85rem; color:var(--sub); margin:14px 0 -6px}
+  .codecap b{color:var(--accent)}
+
+  /* ---- 表格 ---- */
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:.9rem}
+  th, td{border:1px solid var(--line); padding:8px 12px; text-align:left; vertical-align:top}
+  th{background:var(--card2); color:#e2dcf4}
+  tr:nth-child(even) td{background:#141821}
+  .tablecap{font-size:.85rem; color:var(--sub); margin:10px 0 -8px}
+
+  /* ---- 时间线 ---- */
+  .timeline{list-style:none; padding:0; margin:20px 0; border-left:3px solid var(--line)}
+  .timeline li{position:relative; padding:4px 0 18px 26px}
+  .timeline li::before{
+    content:""; position:absolute; left:-8.5px; top:12px; width:14px; height:14px; border-radius:50%;
+    background:var(--accent); border:3px solid var(--bg);
+  }
+  .timeline .t{color:var(--accent); font-weight:700; font-size:.86rem; letter-spacing:.05em}
+  .timeline b{color:#f2eefc}
+
+  .callout{
+    background:#20203a; border:1px solid #36355c; border-left:4px solid var(--accent2);
+    border-radius:0 10px 10px 0; padding:12px 18px; margin:16px 0; font-size:.95rem;
+  }
+  .callout b{color:var(--accent2)}
+  .warn{
+    background:#2b2118; border:1px solid #4d3a26; border-left:4px solid var(--gold);
+    border-radius:0 10px 10px 0; padding:12px 18px; margin:16px 0; font-size:.95rem;
+  }
+  .warn b{color:var(--gold)}
+
+  figure{margin:18px 0; text-align:center}
+  figure svg{max-width:100%; height:auto}
+  figcaption{font-size:.85rem; color:var(--sub); margin-top:6px}
+
+  .pill{display:inline-block; font-size:.78rem; font-weight:700; padding:2px 10px; border-radius:999px; margin-right:6px}
+  .pill.g{background:rgba(77,214,168,.14); color:#7fe6c2; border:1px solid rgba(77,214,168,.4)}
+  .pill.b{background:rgba(110,168,255,.14); color:#9cc4ff; border:1px solid rgba(110,168,255,.4)}
+  .pill.o{background:rgba(255,180,84,.13); color:#ffcf8d; border:1px solid rgba(255,180,84,.4)}
+  .pill.p{background:rgba(185,162,255,.14); color:#cdbaff; border:1px solid rgba(185,162,255,.4)}
+
+  .grid2{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin:16px 0}
+  @media (max-width:760px){ .grid2{grid-template-columns:1fr} }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:.93rem;
+  }
+  .card h5{margin:0 0 8px; color:#e2dcf4; font-size:1rem}
+  .card .pill{margin-bottom:6px}
+
+  .formula{
+    background:#191527; border:1px solid #342b52; border-radius:10px; padding:14px 18px; margin:14px 0;
+    font-size:1.02rem; text-align:center; font-family:Georgia,serif;
+  }
+  .formula .note{display:block; font-size:.78rem; color:var(--sub); margin-top:6px; font-family:inherit; text-align:left}
+
+  footer{border-top:1px solid var(--line); margin-top:70px; padding-top:24px; color:var(--sub); font-size:.9rem}
+  footer a{color:var(--accent2)}
+  .back{display:inline-block; margin-top:18px}
+
+  /* 参考文献列表 */
+  ol.refs{font-size:.88rem; padding-left:26px}
+  ol.refs li{margin:7px 0}
+  ol.refs .src-date{color:var(--sub)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Loop Models · Recurrent Depth · Latent Reasoning</div>
+    <h1>Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</h1>
+    <div class="sub">同一组权重反复使用，让模型"想得深"而不是"说得长"：从 Universal Transformer 到 COCONUT、Huginn、Ouro，再到 2026 年的 Astra 传闻与循环缩放定律</div>
+    <div class="meta">Pai · 2026-09 · 结合 seal-rg/recurrent-pretraining（Huginn）与 facebookresearch/coconut 源码 · 全部引用附原文与译文</div>
+    <div>
+      <span class="tag">循环深度</span><span class="tag">潜空间推理</span><span class="tag">测试时算力</span><span class="tag">自适应计算</span><span class="tag">2026 产业化</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <b>目录</b>
+  <ol>
+    <li><a href="#why">引子：三个让人困惑的现象，指向同一个答案</a></li>
+    <li><a href="#prereq">预备知识：本科生也能懂的"循环深度"原理</a></li>
+    <li><a href="#timeline">发展时间线一览（2016–2026）</a></li>
+    <li><a href="#phase1">阶段一（2016–2022）：思想萌芽 —— 从 ACT 到平衡点</a></li>
+    <li><a href="#phase2">阶段二（2023–2024）：理论与可编程性 —— 循环 Transformer 能"算"什么</a></li>
+    <li><a href="#phase3">阶段三（2024-12 – 2025）：潜空间推理爆发 —— COCONUT / Huginn / HRM / TRM</a></li>
+    <li><a href="#phase4">阶段四（2025-10 – 2026）：产业化与规模化 —— Ouro / PLT / 缩放定律 / Astra 传闻</a></li>
+    <li><a href="#code-huginn">代码深潜一：Huginn 是怎么把"循环"写进 PyTorch 的</a></li>
+    <li><a href="#code-coconut">代码深潜二：COCONUT 的"连续思维"只有 60 行</a></li>
+    <li><a href="#ledger">为什么这么设计：一份收益与代价的完整账本</a></li>
+    <li><a href="#latest">业界与学界最新进展盘点（2025 下半年 – 2026-09）</a></li>
+    <li><a href="#future">未来发展方向</a></li>
+    <li><a href="#refs">参考与引用出处</a></li>
+  </ol>
+</nav>
+
+<h2 id="why">1 · 引子：三个让人困惑的现象，指向同一个答案</h2>
+
+<p class="lead">先看三个乍看毫无关系、实则同根同源的现象。</p>
+
+<p><b>现象一：思考模型"话多"。</b>2024 年 9 月 OpenAI o1 发布后，"用更多测试时算力换更高准确率"成为大模型领域的主旋律：模型先写一大段思维链（Chain-of-Thought, CoT），再给出答案。但代价立等可见——<b>延迟和费用随思考长度线性增长</b>，而且要在语言空间里做 RL 后训练（如 RLVR）才能学会"怎么想"。更微妙的是：自然语言真的是思考的最佳载体吗？写 CoT 时，大量 token 花在"维持文本连贯"上（"我们首先……接下来……因此"），真正承载推理的关键 token 只占少数。</p>
+
+<p><b>现象二：小参数量打赢大模型。</b>2025 年 2 月，马里兰大学 Tom Goldstein 组发布了 3.5B 参数的 <b>Huginn</b> 语言模型：它只预训练了 800B token（约等于同期主流模型的一个零头），但在数学等推理基准上，推理时把内部一个 4 层的核心块循环几十次，性能一路上涨，作者称其效果"有时相当于把计算负载加到 50B 参数的量级"<span class="cite">[12]</span>。2025 年 6 月的 HRM 用 <b>27M 参数</b>在数独、迷宫和 ARC 上做出接近满分的表现<span class="cite">[14]</span>；10 月三星的 TRM 用 <b>7M 参数</b>在 ARC-AGI-1 拿到 44.6%<span class="cite">[15]</span>。参数量和推理能力之间，显然隔着一层可以撬动的东西。</p>
+
+<p><b>现象三：闭源实验室悄悄"闭嘴"。</b>2026 年，The Information 报道 OpenAI 新模型 Astra 使用了一种"以某种方式掩盖部分或全部 AI 推理过程"的新技术<span class="cite">[21][22]</span>；社区分析指向<b>循环深度（recurrent depth）</b>——模型在潜空间里反复迭代内部状态，而不是把思考过程写成文字。几乎同时，爱好者发现国产模型 Nanbeige4.2-3B 的技术报告写着它"用 28T token 从零预训练了一个循环 Transformer"<span class="cite">[21]</span>。循环结构第一次有了公开的工业级落地证据。</p>
+
+<div class="callout"><b>这三个现象的共同答案</b>：神经网络的"参数量"和"计算量"可以解耦。传统 Transformer 每一层都有独立权重，深度 = 参数量；但如果<b>把同一组权重循环使用</b>，参数不变、计算深度却可以任意拉长——模型在"想得深"与"说得长"之外，获得了第三种扩展推理算力的方式。这条技术线今天被称为 <b>Loop Transformer / 循环语言模型（Looped LM）/ 循环深度（Recurrent Depth）/ 潜空间推理（Latent Reasoning）</b>，2024 年底以来已长成一片森林——截至 2026 年 9 月，专门追踪它的 Awesome-Loop-Models 清单已收录 200 余篇论文<span class="cite">[36]</span>。</div>
+
+<blockquote class="q">
+  <span class="en">"By 'loop model,' we mean that, within a single forward pass of a model, a shared learned internal layer, block, module, or operator is reused."</span>
+  <span class="zh">所谓"循环模型"，指的是在模型的一次前向传播内部，重复使用一个共享的、可学习的层、块、模块或算子。</span>
+  <span class="src">— Awesome-Loop-Models 仓库对"循环模型"的范围界定，Huang et al., GitHub, 2026-04-24 发布 [36]</span>
+</blockquote>
+
+<p>本文沿着这条线走完全程：先给本科生补齐原理（第 2 节），再按四个阶段梳理 2016–2026 的发展史（第 3–7 节），然后用两份开源代码把 Huginn 和 COCONUT 拆开看（第 8–9 节），最后盘点收益代价、2026 年最新进展与未来方向（第 10–12 节）。</p>
+
+<h2 id="prereq">2 · 预备知识：本科生也能懂的"循环深度"原理</h2>
+
+<h3>2.1 Transformer 的"深度"到底买到了什么</h3>
+<p>一个标准 Transformer 语言模型 = 词嵌入层 + <code>N</code> 个结构相同但<b>权重各自独立</b>的层（每层 = 自注意力 + 前馈网络）+ 输出头。数据流是：<code>x₀ = Embed(词)</code>，然后 <code>xₗ = Blockₗ(xₗ₋₁)</code>，一层层堆上去。<b>深度 N 是"顺序计算步数"</b>：第 3 层能利用的任何信息，都必须已经被前 2 层写进表示里。</p>
+<p>为什么顺序步数重要？考虑一个多跳问题："A 的母亲的哥哥的女儿是谁？"。每做一次"查关系"（图谱一跳），网络需要若干层来：定位要查的实体 → 检索关系 → 把结果写到新位置。三跳问题需要的深度约是三倍。深度不够怎么办？有两个办法：</p>
+<div class="grid2">
+  <div class="card"><h5>办法 A：把中间结果写成文字（CoT）</h5>每生成一个 token，整个网络就重新前向一遍——相当于把"深度"外包给"序列长度"。问题：中间结果必须压缩成离散词表上的一个 token，信息瓶颈大；推理延迟与 token 数成正比；还要专门训练。</div>
+  <div class="card"><h5>办法 B：把深度堆得更高</h5>直接加深网络。问题：参数量、显存、训练和推理成本同步膨胀；而且大部分日常输入根本用不着那么深，浪费。</div>
+</div>
+<p><b>Loop Transformer 的主张</b>：顺序计算步数（深度）和独立参数量本来就没有必然绑定关系——<b>让一层网络重复使用自己的权重</b>，就能在不加参数的前提下把深度拉到任意长。计算发生在连续的潜空间（hidden states）里，不占用 token 序列，也不需要离散化。</p>
+
+<h3>2.2 RNN 的时间维 vs Transformer 的深度维：一个对偶</h3>
+<p>这件事其实在神经网络的历史里发生过一次。RNN 的循环是沿着<b>时间</b>的：<code>hₜ = f(hₜ₋₁, xₜ)</code>，同一个 <code>f</code> 在每个时间步重复使用——参数极少，但训练必须沿时间逐步展开（BPTT），无法并行，这是 RNN 在 2017 年被 Transformer 取代的核心原因。Transformer 用 <code>N</code> 个独立层把"顺序计算"从时间维挪到了<b>深度维</b>：同一句里所有 token 的计算图一次性并行建好，训练吞吐暴增——代价是每层独立参数。</p>
+<div class="formula">
+  标准 Transformer：x<sub>ℓ</sub> = Block<sub>ℓ</sub>(x<sub>ℓ−1</sub>)，ℓ = 1…N &nbsp;&nbsp;（N 组权重，深度 N）<br>
+  Loop Transformer：x<sup>(k+1)</sup> = f<sub>θ</sub>(x<sup>(k)</sup>)，k = 1…L &nbsp;&nbsp;（1 组权重，深度 L，L 可在推理时任选）
+  <span class="note">两种"顺序计算"：前者把循环放在序列时间维（参数共享但训练慢），后者放在深度维（参数独立但训练可并行）。Loop Transformer 在深度维上重新引入参数共享，兼得两者一半好处。</span>
+</div>
+<p><b>关键洞察（也是本科读者最容易忽略的一点）</b>：循环放在深度维，训练仍然可以并行！因为循环的每一步对序列中<b>所有 token 同时</b>发生——句子第 1 个词循环 32 次和第 2048 个词循环 32 次，是在同一批矩阵乘里完成的。这与 RNN 沿时间的循环（必须先算完 t-1 时刻才能算 t 时刻）本质不同。所以 Loop Transformer 训练时像 Transformer 一样高效并行，推理时像 RNN 一样可以选择"想多少步"。</p>
+
+<h3>2.3 三个必须解决的设计问题</h3>
+<p>把 <code>x ← f(x)</code> 写出来只要一行，但直接这么循环会立刻撞上三个问题——它们恰好定义了这个领域十年的技术演进：</p>
+<div class="grid2">
+  <div class="card"><h5>问题一：状态会"忘题"</h5>循环几轮后，初始输入的信息在反复变换中逐渐丢失，模型忘了题目本身。解法是<b>输入注入（input injection）</b>：每一轮都把输入嵌入重新加回状态——Huginn 的 <code>x = x + input_embeds</code>（第 8 节代码）。</div>
+  <div class="card"><h5>问题二：循环会"发散"</h5>同一个非线性映射反复复合，状态范数可能指数爆炸或塌缩到平凡不动点。解法包括残差缩放（按循环数 1/N 调整<span class="cite">[33]</span>）、谱范数约束<span class="cite">[23]</span>、LayerNorm 增益控制<span class="cite">[27]</span>、噪声注入<span class="cite">[12]</span>。</div>
+  <div class="card"><h5>问题三：梯度传不回来</h5>循环 L=32 次就要存 32 份中间激活做反向传播，显存爆炸。解法是<b>截断反传</b>：前 L−k 步 <code>no_grad</code>，只对最后 k 步回传梯度（Huginn 的做法，第 8.3 节），或者干脆求不动点后用隐函数定理只存一份状态（DEQ 路线<span class="cite">[3]</span>）。</div>
+  <div class="card"><h5>（附带问题：何时停）</h5>难题多想、易题少想，才有性价比。这就是<b>自适应计算</b>问题——从 ACT<span class="cite">[1]</span> 的 halting 机制，到 2026 年按 token 路由循环深度<span class="cite">[16]</span>、按难度置信度退出<span class="cite">[37]</span>，是贯穿十年的暗线。</div>
+</div>
+
+<h3>2.4 一个 40 行的最小可跑示例</h3>
+<p class="codecap"><b>实验 1</b> · 用不到 40 行 PyTorch 搭一个最小的循环语言模型。跑起来之后你可以把 <code>L</code> 从 1 改到 64——参数一个没变，计算深度变了 64 倍：</p>
+<pre><code>import torch, torch.nn as nn
+
+class LoopBlock(nn.Module):                       # 一个可循环的标准 Transformer 块
+    def __init__(self, d=64, h=4):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(d, h, batch_first=True)
+        self.ffn  = nn.Sequential(nn.Linear(d, 4*d), nn.GELU(), nn.Linear(4*d, d))
+        self.n1, self.n2 = nn.LayerNorm(d), nn.LayerNorm(d)
+    def forward(self, x):                         # x: (B, T, d)
+        a, _ = self.attn(self.n1(x), self.n1(x), self.n1(x),
+                          is_causal=True, need_weights=False)
+        return x + self.ffn(self.n2(x + a))       # 两个残差分支
+
+class LoopLM(nn.Module):
+    def __init__(self, vocab=1000, d=64):
+        super().__init__()
+        self.embed  = nn.Embedding(vocab, d)
+        self.prelude = LoopBlock(d)               # 锚层：token → 初始潜状态
+        self.core    = LoopBlock(d)               # 核心块：唯一被循环的部分
+        self.coda    = LoopBlock(d)               # 锚层：潜状态 → 预测
+        self.head    = nn.Linear(d, vocab)
+    def forward(self, ids, L=4):                  # L = 循环次数，推理时随便改
+        e = self.prelude(self.embed(ids))         # e 同时充当"题面备忘录"
+        x = e
+        for _ in range(L):                        # —— 整个范式就这一行 ——
+            x = self.core(x + e)                  # 输入注入：每轮重新看题
+        return self.head(self.coda(x))
+
+lm, ids = LoopLM(), torch.randint(0, 1000, (2, 32))
+logits1 = lm(ids, L=1)                            # "快思考"：1 次循环
+logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，参数相同</code></pre>
+<p class="muted">这就是 Huginn 三明治结构的微缩版：<code>prelude（锚）→ core×L（循环）→ coda（锚）</code>。真正的 Huginn-3.5B 用 1+4+1 = 6 个块、平均循环 32 次（第 8 节）；本文所有"循环深度"变体——HRM 的双尺度循环、Ouro 的深度分配、PLT 的跨循环并行——都是在这 40 行的骨架上做文章。</p>
+
+<figure>
+<svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#8a93a8"/>
+    </marker>
+    <marker id="arp" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#b9a2ff"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="330" fill="#12141c" rx="12"/>
+  <text x="450" y="30" fill="#e8eaed" font-size="15" font-weight="700" text-anchor="middle">循环深度语言模型：三明治结构（以 Huginn 为例）</text>
+  <text x="70" y="72" fill="#aeb4bd" font-size="12">输入 token</text>
+  <rect x="60" y="80" width="70" height="34" rx="7" fill="#1d212b" stroke="#6ea8ff"/>
+  <text x="95" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">Embed</text>
+  <line x1="130" y1="97" x2="165" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="168" y="80" width="92" height="34" rx="7" fill="#1a2733" stroke="#6ea8ff"/>
+  <text x="214" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">prelude ×1</text>
+  <line x1="260" y1="97" x2="298" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <!-- core loop -->
+  <rect x="300" y="46" width="150" height="102" rx="10" fill="#241d3d" stroke="#b9a2ff" stroke-dasharray="5 3"/>
+  <rect x="316" y="62" width="118" height="30" rx="6" fill="#2c2450" stroke="#b9a2ff"/>
+  <text x="375" y="82" fill="#cdbaff" font-size="12" text-anchor="middle">core_block ×4</text>
+  <text x="375" y="128" fill="#cdbaff" font-size="11.5" text-anchor="middle">同一组权重</text>
+  <path d="M 434 77 L 462 77 Q 472 77 472 92 L 472 103 Q 472 118 458 118 L 340 118 Q 326 118 326 103 L 326 92 Q 326 77 336 77" fill="none" stroke="#b9a2ff" stroke-width="1.8" marker-end="url(#arp)"/>
+  <text x="478" y="100" fill="#b9a2ff" font-size="12">循环 L 次</text>
+  <text x="478" y="116" fill="#8f86b8" font-size="11">训练≈32 · 推理任意</text>
+  <!-- injection arrow -->
+  <path d="M 95 114 L 95 210 L 330 210" fill="none" stroke="#ffb454" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <path d="M 330 210 L 352 210" fill="none" stroke="#ffb454" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="100" y="205" fill="#ffb454" font-size="11.5">输入注入：每轮把 e 重新加回 x</text>
+  <line x1="450" y1="97" x2="492" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="495" y="80" width="86" height="34" rx="7" fill="#1a2733" stroke="#6ea8ff"/>
+  <text x="538" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">coda ×1</text>
+  <line x1="581" y1="97" x2="618" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="620" y="80" width="96" height="34" rx="7" fill="#1d212b" stroke="#4dd6a8"/>
+  <text x="668" y="102" fill="#7fe6c2" font-size="12" text-anchor="middle">lm_head</text>
+  <text x="726" y="102" fill="#aeb4bd" font-size="12">logits</text>
+  <!-- bottom annotations -->
+  <rect x="60" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
+  <text x="76" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">参数量：6 个块（1+4+1）</text>
+  <text x="76" y="288" fill="#aeb4bd" font-size="11.5">权重只存一份，循环 32 次 ⇒ 有效深度 ≈ 36 层</text>
+  <rect x="470" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
+  <text x="486" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">推理时：L 是免费旋钮</text>
+  <text x="486" y="288" fill="#aeb4bd" font-size="11.5">同一权重，难题循环 64 次、易题循环 4 次，互不影响</text>
+</svg>
+<figcaption>图 1 · 三明治结构：锚层负责"进入/读出"，核心块负责"思考"；KV 缓存可跨循环复用（第 8.5 节）。结构依据 seal-rg/recurrent-pretraining 默认配置绘制<span class="cite">[12][45]</span>。</figcaption>
+</figure>
+
+<h2 id="timeline">3 · 发展时间线一览（2016–2026）</h2>
+
+<ul class="timeline">
+  <li><span class="t">2016-03</span> · <b>ACT</b>（Graves, Google DeepMind）<span class="cite">[1]</span> —— 首次让 RNN 自己学习"想多久"：halting 概率 + ponder 惩罚，自适应计算的源头。</li>
+  <li><span class="t">2018-07</span> · <b>Universal Transformer</b>（Dehghani 等, Google Brain）<span class="cite">[2]</span> —— 第一个权重共享的循环 Transformer：沿深度循环同一层 + 每位置动态停止；理论上证在一定假设下图灵完备。ICLR 2019。</li>
+  <li><span class="t">2019-09</span> · <b>DEQ 深度平衡模型</b>（Bai 等, CMU/FAIR）<span class="cite">[3]</span> —— 把"循环多少次"推到极限：直接求不动点 z* = f(z*)，隐函数定理让反向传播只需常数显存。NeurIPS 2019。</li>
+  <li><span class="t">2021-06</span> · <b>Can You Learn an Algorithm?</b>（Schwarzschild 等, UMD）<span class="cite">[6]</span> —— 共享残差块在简单谜题上训练，测试时多迭代几步即可解出更难的实例——"测试时算力外推"的最早清晰证据。NeurIPS 2021。</li>
+  <li><span class="t">2021-07</span> · <b>PonderNet</b>（Banino 等, DeepMind）<span class="cite">[5]</span> —— 把"何时停止"变成可学习的概率分布，ACT 思想现代化的里程碑。NeurIPS 2021 口头报告。</li>
+  <li><span class="t">2022-11</span> · <b>路径无关平衡模型</b>（Anil 等）<span class="cite">[4]</span> —— 发现平衡模型要"路径无关"才能从更多推理迭代中获益，为后来的训练目标设计埋下伏笔。NeurIPS 2022。</li>
+  <li><span class="t">2023-01</span> · <b>循环 Transformer = 可编程计算机</b>（Giannou 等, UW-Madison）<span class="cite">[7]</span> —— 手工构造 13 层循环 Transformer 执行指令集：程序计数器、条件分支、函数调用、甚至上下文 SGD。ICML 2023。</li>
+  <li><span class="t">2023-11</span> · <b>循环 Transformer 更擅长学习"学习算法"</b>（Yang 等）<span class="cite">[8]</span> —— 在上下文回归任务上，循环结构用 &lt;10% 参数打平标准 Transformer；提出教师强制课程训练法。ICLR 2024。</li>
+  <li><span class="t">2024-05</span> · <b>MoEUT</b>（Csordás 等）<span class="cite">[9]</span> —— 用 MoE 弥补权重共享的容量损失，循环 Transformer 首次在语言建模上与非循环模型参数匹配地掰手腕。NeurIPS 2024。</li>
+  <li><span class="t">2024-10</span> · <b>Relaxed Recursive Transformers</b>（Bae 等, Google）<span class="cite">[10]</span> —— 把预训练好的 LLM 改造成层共享递归模型（+ 每深度 LoRA），证明存量模型可以"事后循环化"。ICLR 2025。</li>
+  <li><span class="t">2024-12</span> · <b>COCONUT</b>（Hao 等, Meta）<span class="cite">[11]</span> —— "连续思维"：把最后隐藏状态直接回填为下一输入嵌入，不解码成词；潜空间推理范式的引爆点。COLM 2025。</li>
+  <li><span class="t">2025-02</span> · <b>Huginn / 循环深度</b>（Geiping 等, UMD）<span class="cite">[12]</span> —— 3.5B、800B token 从零预训练的循环深度语言模型；推理时任意加深，KV 跨循环复用 + 零样本自适应算力。NeurIPS 2025。<b>同月</b>：<b>Reasoning with Latent Thoughts</b>（Saunshi 等, Google）证明 k 层×L 循环 ≈ kL 层、"循环即潜思维"<span class="cite">[13]</span>。ICLR 2025。</li>
+  <li><span class="t">2025-06</span> · <b>HRM 层级推理模型</b>（Wang 等）<span class="cite">[14]</span> —— 仿脑双时间尺度循环（慢规划 + 快执行），27M 参数在 ARC/数独/迷宫上出圈。</li>
+  <li><span class="t">2025-07</span> · <b>Mixture-of-Recursions</b>（Bae 等）<span class="cite">[16]</span> —— token 级循环深度路由 + 深度受限 KV 缓存，把"自适应算力"做进循环模型。NeurIPS 2025。</li>
+  <li><span class="t">2025-10</span> · <b>Ouro</b>（Zhu 等, 字节联动学界）<span class="cite">[17]</span> —— 首批"把推理内置进预训练"的循环语言模型：7.7T token、1.4B/2.6B，对标最高 12B 模型；<b>同月</b>：<b>PLT 并行循环 Transformer</b><span class="cite">[18]</span> 跨循环并行 + KV 共享，循环几乎零额外延迟；<b>TRM</b><span class="cite">[15]</span> 7M 参数 ARC-AGI-1 44.6%；<b>并行采样器</b><span class="cite">[19]</span> 免训练加速 Huginn 5×。</li>
+  <li><span class="t">2025-11</span> · <b>循环化改造</b>（McLeish 等）<span class="cite">[20]</span> —— 给现成前馈 LM 加装循环深度，比同预算继续后训练更划算。</li>
+  <li><span class="t">2026 上半年</span> · <b>定律与稳定性之战</b> —— Parcae 缩放定律<span class="cite">[23]</span>、等深度缩放定律<span class="cite">[24]</span>、残差缩放理论<span class="cite">[33]</span>、机制分析（循环不动点）<span class="cite">[25]</span>、CoT 与压缩循环的内存分离定理<span class="cite">[34]</span>；系统侧 MELT（KV 固定内存）<span class="cite">[30]</span>、LT2 线性时间<span class="cite">[28]</span>；<b>业界</b>：Astra 传闻<span class="cite">[21][22]</span>、Nanbeige4.2-3B 公开采用循环预训练<span class="cite">[21]</span>。</li>
+  <li><span class="t">2026 下半年</span> · <b>全面扩散</b> —— 循环结构进入视觉生成（ELT<span class="cite">[38]</span>）、VAE（LoopVAE<span class="cite">[39]</span>）、推荐（RecRec）、世界模型、扩散语言模型（Thinking with Looped Flows<span class="cite">[35]</span>）；理论工具进入动力系统深处（分形收敛盆<span class="cite">[35]</span>、Jacobian 视角）；SMELT 把 MoE×循环缩放定律合流<span class="cite">[32]</span>。专用论文清单突破 200 篇<span class="cite">[36]</span>。</li>
+</ul>
+
+<div class="callout"><b>一句话概括四个阶段</b>：① 2016–2022 想清楚"能不能循环"（ACT/UT/DEQ/PonderNet）；② 2023–2024 想清楚"循环有什么用"（可编程性、参数效率、学习算法）；③ 2024 末–2025 想清楚"循环能推理"（潜空间思考、从零预训练、小模型打大模型）；④ 2025 末–2026 想清楚"循环能落地"（工业预训练、并行化、缩放定律、全模态扩散）。</div>
+<h2 id="phase1">4 · 阶段一（2016–2022）：思想萌芽 —— 从 ACT 到平衡点</h2>
+
+<h3>4.1 ACT（2016）：让网络学会"想多久"</h3>
+<p>循环结构的第一个现代问题不是"怎么循环"，而是"<b>何时停</b>"。Graves 在 2016 年的 ACT（Adaptive Computation Time）<span class="cite">[1]</span> 里给 RNN 加了一个 halting 单元：每个时间步输出一个"继续思考"的概率，累计超过阈值就停，训练时用"思考时长惩罚"（ponder cost）防止网络无限磨蹭。这个朴素机制种下了整个领域的两个母题：<b>计算应当按需分配</b>、<b>停止本身可以被学习</b>。此后几乎所有循环深度模型的自适应算力设计——UT 的逐位置停止、PonderNet 的概率分布、2026 年的深度路由与学习停止<span class="cite">[16][37]</span>——都能溯回到这里。</p>
+
+<h3>4.2 Universal Transformer（2018）：第一次把"循环"装进 Transformer</h3>
+<p>Transformer 靠并行训练赢了 RNN，但 Dehghani 等人注意到一个反向事实：Transformer "在许多循环模型轻松胜任的简单任务上无法泛化"，比如复制一个比训练时更长的字符串<span class="cite">[2]</span>。原因正是 2.1 节讲的：固定深度 = 固定顺序计算预算。他们的 Universal Transformer（UT）把 RNN 的参数共享重新装回 Transformer：</p>
+<ul>
+  <li>沿<b>深度</b>循环同一组权重（self-attention + transition 函数），步数可变；</li>
+  <li>每个<b>位置</b>独立决定何时停止（ACT 的逐 token 版本）——简单 token 早停，难 token 多想；</li>
+  <li>加坐标编码与每步位置信息，让网络知道"这是第几轮思考"。</li>
+</ul>
+<p>结果：算法类任务（复制、排序、图问题）泛化显著超过标准 Transformer，机器翻译上小胜。更重要的是理论地位——在一定假设下 <b>UT 可被证明是图灵完备的</b>，而固定深度的 Transformer 不是。</p>
+<blockquote class="q">
+  <span class="en">"We introduce the Universal Transformer (UT), a parallel-in-time self-attentive recurrent sequence model which can be cast as a generalization of the Transformer… under certain assumptions, UTs can be shown to be Turing-complete."</span>
+  <span class="zh">我们提出 Universal Transformer（UT），一种"时间上并行"的自注意力循环序列模型，可以看作 Transformer 的泛化……在一定假设下，可以证明 UT 是图灵完备的。</span>
+  <span class="src">— Dehghani, Gouws, Vinyals, Uszkoreit, Kaiser,《Universal Transformers》, arXiv:1807.03819, 2018-07-10 首发（v3 2019-03-05）, ICLR 2019 [2]</span>
+</blockquote>
+<p class="muted">为什么它当时没有火？三个字：<b>太贵了</b>。逐位置动态停止导致批次内计算图参差不齐，2018 年的算力和训练基建撑不起这种模型；而 GPT/BERT 路线的"堆层数"简单粗暴有效。UT 成了一个"预言书"——它对"深度与参数解耦"的全部论证，要等七年后被循环深度模型逐字兑现。</p>
+
+<h3>4.3 DEQ（2019）：把循环推到"无穷深"</h3>
+<p>如果循环次数 L 可以是 32，为什么不是 ∞？Bai 等人的深度平衡模型（DEQ）<span class="cite">[3]</span> 换了个视角：与其展开 L 层，不如直接求<b>不动点</b> <code>z* = f(z*, x)</code>——这相当于一个"无限深"的权重共享网络。妙处在于反传：在不动点处用隐函数定理，梯度可以一步算出，不需要沿无限层展开，显存占用与深度无关。DEQ 把循环网络和动力系统（不动点迭代、收敛性）正式连通，后来的"平衡推理器""临界 DEQ"乃至 2026 年大量关于循环收敛性的理论工作（第 11.3 节）都在它的框架里说话。2022 年 Anil 等人进一步发现：平衡模型要真正从"推理时多迭代几步"中获益，其解必须<b>路径无关</b>——即无论从哪条路径迭代，收敛到同一个答案——这直接启发了后来的训练目标设计<span class="cite">[4]</span>。</p>
+
+<h3>4.4 PonderNet（2021）与"easy-to-hard"（2021）：两个方向的小露锋芒</h3>
+<p>DeepMind 的 PonderNet<span class="cite">[5]</span> 把 ACT 的 halting 改造成干净的概率混合："继续想"与"直接答"两个分布的可学习加权，用类似变分推断的目标端到端训练，解决了 ACT 长期训练不稳的老毛病。同年 Schwarzschild 等<span class="cite">[6]</span> 做了一个对后来影响深远的实验：训练一个共享权重的<b>循环残差网络</b>去解简单版的前缀和 / 迷宫 / 国际象棋残局，然后<b>在测试时让它多迭代几步</b>——它就能解出训练时从没见过的更难实例。这是"测试时通过增加循环次数扩展算力"的最早清晰证据之一，Huginn 论文标题里的 "Test-Time Compute" 说的就是这件事。</p>
+
+<div class="callout"><b>阶段一的遗产</b>：概念全部就位——参数共享（UT）、不动点（DEQ）、可学习停止（ACT/PonderNet）、测试时外推（easy-to-hard）。缺的是一个<b>让这些想法长出规模的理由</b>。这个理由在 2023 年由两条线同时给出：一条来自理论（循环 = 可编程），一条来自参数效率（MoE 补容量）。</div>
+
+<h2 id="phase2">5 · 阶段二（2023–2024）：理论与可编程性 —— 循环 Transformer 能"算"什么</h2>
+
+<h3>5.1 循环 Transformer = 可编程计算机（2023）</h3>
+<p>Giannou 等（UW-Madison / Stanford 一众循环结构研究的核心人物）问了一个工程师式的问题：一个循环 Transformer 到底能执行多复杂的程序？他们手工构造（不是训练）了一个 13 层的循环 Transformer，证明了它可以当一台<b>通用计算机</b>跑：把输入当作打孔卡（指令 + 内存），循环一次执行一条指令，网络内部维护程序计数器，实现了条件分支、函数调用，甚至<b>上下文内的 SGD 和反向传播</b><span class="cite">[7]</span>。这篇工作的直接价值不是实用，而是<b>能力标定</b>：循环次数 = 程序步数，循环结构把 Transformer 从"有限深函数"升级成"通用机"。</p>
+<blockquote class="q">
+  <span class="en">"We provide a framework for using transformer networks as universal computers… This small instruction-set computer is implemented by a looped, 13-layer transformer."</span>
+  <span class="zh">我们提供了一个把 Transformer 网络用作通用计算机的框架……这台小型指令集计算机由一个循环的 13 层 Transformer 实现。</span>
+  <span class="src">— Giannou, Rajput, Sohn, Lee, Lee, Papailiopoulos,《Looped Transformers as Programmable Computers》, arXiv:2301.13196, 2023-01-30, ICML 2023 [7]</span>
+</blockquote>
+
+<h3>5.2 循环 Transformer 更擅长学习"学习算法"（2023-11）</h3>
+<p>Yang 等（与上一批作者高度重叠）把上面的构造问题反过来：<b>不用手工设计，训练出来的循环 Transformer 自己能学会迭代算法吗？</b>他们在 Garg 等提出的"上下文回归"任务上（给一堆 (x, y) 样本，让模型隐式地做梯度下降式拟合再预测新点）对比标准 Transformer 与循环 Transformer：循环模型在多类潜在线性模型的数据拟合任务上，用<b>不到 10% 的参数</b>达到与标准 Transformer 相当的表现<span class="cite">[8]</span>。方法上的关键贡献是<b>教师强制课程（teacher-forcing curriculum）</b>：训练时给每个循环步都直接施加"正确中间状态"的监督，像教小孩做长除法一样，先把每一步教对，再让循环自己跑。这个技巧后来成为所有循环语言模型训练配方的标配（Huginn、Ouro 均有变体）。</p>
+<blockquote class="q">
+  <span class="en">"…the looped transformer achieves performance comparable to the standard transformer across various data-fitting problems while using less than 10% of the parameter count."</span>
+  <span class="zh">……循环 Transformer 在各类数据拟合问题上取得了与标准 Transformer 相当的性能，而参数量不到后者的 10%。</span>
+  <span class="src">— Yang, Lee, Nowak, Papailiopoulos,《Looped Transformers are Better at Learning Learning Algorithms》, arXiv:2311.12424, 2023-11-21（v3 2024-03-16）, ICLR 2024 [8]</span>
+</blockquote>
+<p>同期理论工作迅速跟上：Gatmiry 等（Google）证明线性循环 Transformer 能精确实现<b>多步（预条件）梯度下降</b><span class="cite">[50]</span>；Chen 等进一步证明其样本复杂度<b>无需随循环数指数增长</b><span class="cite">[49]</span>；Xu &amp; Sato 严格分析了循环 Transformer 的近似速率与表达力短板，并提出给每个循环步注入<b>时间步编码</b>（TMLT）缓解"所有步骤看起来一样"的问题<span class="cite">[48]</span>；图算法模拟、长度泛化等方向也各有构造性结果（如 Fan 等<b>《Looped Transformers for Length Generalization》</b><span class="cite">[40]</span>的前身工作）。一个清晰的共识在形成：<b>很多"推理"本质上就是迭代算法，而循环结构是迭代算法的天然宿主</b>。</p>
+
+<h3>5.3 MoEUT（2024）：补上"容量"短板</h3>
+<p>循环结构的阿喀琉斯之踵是<b>容量</b>：所有循环步共享权重，等于强制每一步做"同一种运算"，模型总容量受限于那一小块参数。Csordás 等（IDSIA/Schmidhuber 组 × Stanford）的 MoEUT 给出了漂亮的解法：循环块内部用<b>细粒度混合专家（MoE）</b>——权重共享的是"块结构"，但每次循环内部可以按 token 路由到不同的专家组合，容量回来了。结果：MoEUT 在参数匹配的语言建模上打平标准 Transformer，训练算力（MACs）更少<span class="cite">[9]</span>。"循环 × MoE"自此成为一条固定配方（2026 年的 LoopMoE<span class="cite">[31]</span>、SMELT<span class="cite">[32]</span>、CHERRY 等持续精化）。</p>
+
+<h3>5.4 Relaxed Recursive Transformers（2024-10）：存量模型也能循环化</h3>
+<p>Google 的 Bae 等展示了另一条路线：拿<b>已经预训练好的</b> LLM，把它的一半层数砍掉、剩下的层循环使用，再给每个"虚拟深度"配一个极小的 LoRA 增量来保留各深度所需的差异化行为——参数立刻省下一半，性能接近保留；他们还模拟了"按深度连续批处理"的调度，理论上限吞吐可提升 2–3×<span class="cite">[10]</span>。这条路线的意义在于：<b>循环化不必从零开始</b>，它是模型压缩 / 部署效率问题的一个新答案（2025 年 11 月 McLeish 等的"循环化改造"把它推到更强：改造后的模型在数学上甚至优于同预算继续训练的原模型<span class="cite">[20]</span>）。</p>
+
+<div class="callout"><b>阶段二的遗产</b>：循环结构的能力边界被标定（可编程、能学迭代算法、容量可用 MoE 补），训练方法成型（教师强制课程、逐步监督），并且证明了两件"实用的事"：省参数、能改造存量模型。但所有实验都还停留在中小规模或合成任务——<b>循环结构能不能撑起一个真正的大语言模型？</b>这个问题交给 2025 年。</div>
+
+<h2 id="phase3">6 · 阶段三（2024-12 – 2025）：潜空间推理爆发 —— COCONUT / Huginn / HRM / TRM</h2>
+
+<h3>6.1 时代背景：o1 之后，"思考"的成本问题浮出水面</h3>
+<p>2024 年 9 月 OpenAI o1 把"测试时算力扩展"变成行业共识，但 CoT 路线的三个结构性成本也随之显形：</p>
+<div class="grid2">
+  <div class="card"><h5>成本一：延迟与费用</h5>思考 10000 token 才回答的模型，对交互式应用和 agent 长回路都是灾难；且每个思考 token 都要走一遍完整前向。</div>
+  <div class="card"><h5>成本二：数据与训练依赖</h5>会"想"需要 RLVR / 蒸馏思维链数据；推理能力与预训练脱节，变成昂贵的后处理。</div>
+  <div class="card"><h5>成本三：语言模态的束缚</h5>空间推理、连续控制、密码学运算……很多思考过程<b>没有对应的自然语言词</b>；离散 token 每步只有几十比特带宽，而 hidden state 是几千维连续向量。</div>
+  <div class="card"><h5>（隐藏成本：CoT 不忠实）</h5>写出来的推理和内部计算可以不一致——既然如此，为什么要强制模型"用写的"来"想"？</div>
+</div>
+<p>2024 年 12 月起，三篇/批工作几乎同时给出了同一个方向的不同实现：<b>把推理搬进潜空间</b>。</p>
+
+<h3>6.2 COCONUT（2024-12，Meta）：连续思维</h3>
+<p>Hao 等（Meta，田渊栋组）的 COCONUT（Chain of Continuous Thought）改动小得惊人：在输入序列里插入若干 <code>&lt;latent&gt;</code> 占位 token，模型跑到这个位置时，<b>不解码、不采样</b>，而是把前一个位置的<b>最后隐藏状态直接回填</b>为这个位置的输入嵌入，继续前向（代码见第 9 节）。也就是说：<b>思考在隐藏状态的连续空间里进行，每步"潜思维"的宽度是整个隐藏维度（GPT-2 下是数 千维浮点），而不是一个词表上的离散选择</b>。</p>
+<p>两个设计值得注意：</p>
+<ul>
+  <li><b>课程训练</b>：先用完整 CoT 训练；然后逐步把 CoT 的前 k 步"替换"成 k 个 latent 位置重训，k 从 1 慢慢加大。模型从"用语言想"平滑过渡到"用潜空间想"，而不是硬切换。</li>
+  <li><b>BFS 直觉</b>：语言 CoT 每生成一个词就是一次硬承诺（DFS），走错一步无法回头；而一个连续向量可以<b>同时编码多个候选下一步的叠加</b>，作者用 ProntoQA 等逻辑推理任务上的实验支持这一点：COCONUT 在需要大量搜索的规划任务上超过 CoT，且思考 token 数少于 CoT<span class="cite">[11]</span>。</li>
+</ul>
+<blockquote class="q">
+  <span class="en">"…rather than decoding it into words, the model feeds it back as the next input embedding directly in the continuous space… enabling a breadth-first search (BFS) instead of prematurely committing to a deterministic path."</span>
+  <span class="zh">……模型不把它解码成词，而是直接在连续空间中把它作为下一个输入嵌入回填……这使得（模型能进行）一种广度优先搜索，而不是过早地锁定一条确定性路径。</span>
+  <span class="src">— Hao, Sukhbaatar, Su, Li, Hu, Weston, Tian,《Training Large Language Models to Reason in a Continuous Latent Space》, arXiv:2412.06769, 2024-12-09（v4 2026-08-23）, COLM 2025 [11]</span>
+</blockquote>
+
+<h3>6.3 Huginn（2025-02，UMD）：第一个"原生循环"的大语言模型</h3>
+<p>Geiping 等（马里兰大学 Goldstein 组，在美国超算 Frontier 的 4096 块 AMD GPU 上训练）发布的 Huginn-3.5B 是这个领域的<b>成人礼</b>：第一次有循环深度模型从零预训练到数十亿参数规模，并且像正常 LLM 一样可用。架构即图 1 的三明治（1 锚 + 4 核 + 1 锚，参数上它是 6 个块的"小"模型），核心发现：</p>
+<ul>
+  <li><b>推理时任意加深</b>：训练时平均循环 32 次，推理时可以循环 8 次、64 次，正确率随循环数平滑上升，<b>无需任何微调</b>（他们展示过 zero-shot 推到训练从未见过的深度区间）。</li>
+  <li><b>零样本自适应算力</b>：循环状态之间的变化率可以当作"收敛信号"——简单句子状态很快稳定（少循环），难句状态持续变化（多循环）。模型自己"知道"难不难。</li>
+  <li><b>KV 缓存跨循环复用</b>：新 token 的第 k 轮循环可以直接复用旧 token 在先前轮次留下的 KV（第 8.5 节），这让"加深"的边际成本远低于朴素想象。</li>
+  <li><b>3.5B 的模型、800B token</b>，多项推理基准上"相当于 50B 参数的计算负载"的效果——虽然说法夸张成分存疑（见 10.2 节的批评），但趋势明确。</li>
+</ul>
+<blockquote class="q">
+  <span class="en">"…a new language model architecture that scales test-time computation by implicitly reasoning in latent space… by iterating a recurrent block, thereby unrolling to arbitrary depth at test-time."</span>
+  <span class="zh">……一种新的语言模型架构，通过在潜空间中隐式推理来扩展测试时计算……通过迭代一个循环块，在测试时展开到任意深度。</span>
+  <span class="src">— Geiping, McLeish, Jain, Kirchenbauer, Singh, Bartoldson, Kailkhura, Bhatele, Goldstein,《Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach》, arXiv:2502.05171, 2025-02-07（v2 2025-02-17）, NeurIPS 2025 [12]</span>
+</blockquote>
+<p class="muted">配套开源非常完整：模型权重（HuggingFace tomg-group-umd/huginn-0125）、训练代码（seal-rg/recurrent-pretraining）、800B token 训练集全量（tomg-group-umd/huginn-dataset）<span class="cite">[45]</span>——本文第 8 节的代码解析即基于此仓库。</p>
+
+<h3>6.4 Reasoning with Latent Thoughts（2025-02，Google）：给"循环即思考"补上理论</h3>
+<p>几乎同日，Saunshi 等（Google Research）发表了对该范式的理论定调之作。核心结论有三：</p>
+<ol>
+  <li><b>有效深度缩放</b>：k 层循环 L 次的模型 ≈ kL 层非循环模型（在加法、多跳归纳、数学等任务上系统验证），且明确超过 k 层模型——"循环换深度"在缩放意义上成立；</li>
+  <li><b>潜思维定理</b>：循环模型隐式生成"潜思维"（latent thoughts），L 次循环可以模拟 T 步 CoT；循环深度缩放与 CoT 的推理时缩放同构；</li>
+  <li><b>推理 vs 记忆的二分</b>：需要顺序组合的任务吃深度，需要查表的任务吃容量——循环天然偏向前者，因此循环本身可作为<b>正则化器</b>抑制死记硬背。</li>
+</ol>
+<blockquote class="q">
+  <span class="en">"We make the stronger claim that many reasoning problems require a large depth but not necessarily many parameters."</span>
+  <span class="zh">我们提出一个更强的论断：许多推理问题需要的是很大的深度，而不一定是很多的参数。</span>
+  <span class="src">— Saunshi, Dikkala, Li, Kumar, Reddi,《Reasoning with Latent Thoughts: On the Power of Looped Transformers》, arXiv:2502.17416, 2025-02-24, ICLR 2025 [13]</span>
+</blockquote>
+
+<h3>6.5 HRM 与 TRM（2025-06 / 2025-10）：极小参数的"分级思考"</h3>
+<p>2025 年 6 月，Wang 等的层级推理模型 HRM 刷屏：受大脑"多时间尺度"组织启发，用<b>两个互相耦合的小循环模块</b>——高层模块负责慢速抽象规划、低层模块负责快速细节执行——交替迭代，外部输入只在高层每 N 步注入一次。27M 参数、不用 CoT 数据、不用预训练，在 1000 个样本上训练，即可在困难数独、大迷宫上"接近完美"，并在 ARC 上超过更大模型<span class="cite">[14]</span>。</p>
+<blockquote class="q">
+  <span class="en">"…a high-level module responsible for slow, abstract planning and a low-level module for detailed computations… With only 27 million parameters, HRM… achieves nearly perfect performance on complex Sudoku puzzles and optimal path finding in large mazes."</span>
+  <span class="zh">……一个负责缓慢、抽象规划的高层模块，和一个负责细节计算的低层模块……仅用 2700 万参数，HRM……在复杂数独谜题和大型迷宫最优寻路上取得接近完美的表现。</span>
+  <span class="src">— Wang, Li, Sun, Chen, Liu, Wu, Lu, Song, Abbasi Yadkori,《Hierarchical Reasoning Model》, arXiv:2506.21734, 2025-06-26（v3 2025-08-04）[14]</span>
+</blockquote>
+<p>HRM 当时的媒体解读颇为夸张（"击败 o3"之类），学界后续复现揭示了更多细节（例如实际总计算量并不小、对超参敏感）；但它的两个模块化思想——<b>时间尺度分层</b>与<b>把输入注入降频</b>——被后续大量工作吸收。10 月，三星 SAIL 蒙特利尔的 Jolicoeur-Martineau 用"毒舌 + 开源"的风格发布 <b>TRM（Tiny Recursive Model）</b>：一个 7M 参数的两层共享网络先反复更新潜状态（update 阶段），再反复精炼答案（refine 阶段），在 ARC-AGI-1 上做到 44.6%、ARC-AGI-2 7.8%，训练代码全开源<span class="cite">[15]</span>。"小网络 + 大循环"作为一条独立路线自此站稳。</p>
+
+<h3>6.6 Mixture-of-Recursions 与并行采样（2025-07 / 2025-10）：效率补课</h3>
+<p>循环结构的两大工程软肋在这一年双双得到回应：</p>
+<ul>
+  <li><b>软肋一：所有 token 循环次数相同</b>（简单 token 被迫陪跑）。Bae 等的 MoR 给每个 token 路由一个<b>学习到的循环深度</b>，注意力和 KV 缓存只在该深度内维护，简单题 1–2 次循环就出结果<span class="cite">[16]</span>。NeurIPS 2025。它也是 2026 年 Raschka 博士分析 Astra 时重点引用的工程参考<span class="cite">[21]</span>。</li>
+  <li><b>软肋二：循环必须串行</b>（第 t+1 轮依赖第 t 轮结果，解码时延迟随 L 线性涨）。Geiping 组的并行采样器用"扩散强制"式调度：<b>生成新 token 的同时并行精炼已有 token 的各轮潜状态</b>，对现成 Huginn-3.5B 免重训直接最高 5× 加速<span class="cite">[19]</span>；一个月后 PLT（第 7.2 节）从架构层面给出更彻底的方案。</li>
+</ul>
+
+<div class="callout"><b>阶段三小结</b>：不到一年，循环深度路线完成了从"玩具验证"到"三线开花"的跃迁——Meta 的连续思维（COCONUT）证明潜空间可思考，UMD 的 Huginn 证明可以从零预训练，HRM/TRM 证明极小模型 + 分层循环可以非常能打。2023 年 Google 理论家们写下的"k 层 × L 循环 ≈ kL 层"，现在有了工业尺寸的对照实验。剩下的悬念只有一个：<b>它能不能上生产？</b></div>
+
+<h2 id="phase4">7 · 阶段四（2025-10 – 2026）：产业化与规模化 —— Ouro / PLT / 缩放定律 / Astra 传闻</h2>
+
+<h3>7.1 Ouro（2025-10）：把推理写进预训练</h3>
+<p>2025 年 10 月 29 日，Zhu 等（字节跳动 Seed 联动 Bengio、Eshraghian 等一批学界作者）发布 <b>Ouro</b>——第一批"把推理内置进预训练阶段"的循环语言模型（LoopLM）家族。此前所有循环模型（包括 Huginn）都是"先按普通 LM 训练、推理时再加深"；Ouro 直接在 7.7T token 的预训练中做三件事：</p>
+<ol>
+  <li><b>潜空间迭代计算</b>：预训练目标本身就鼓励多轮循环；</li>
+  <li><b>熵正则的深度分配</b>：模型学会"这个 token / 这段输入值得循环几次"，训练时把循环深度当作可学习的分配问题；</li>
+  <li><b>规模验证</b>：1.4B 与 2.6B 两个尺寸，全开源。</li>
+</ol>
+<p>结果：1.4B 与 2.6B 在广泛基准上"匹敌最高 12B 的 SOTA LLM"；作者的分析进一步指出优势"并非来自更大的知识容量，而是更强的知识操纵能力"，且循环模型产生的推理轨迹与最终答案的对齐度<b>高于显式 CoT</b><span class="cite">[17]</span>。</p>
+<blockquote class="q">
+  <span class="en">"Ouro 1.4B and 2.6B models enjoy superior performance that match the results of up to 12B SOTA LLMs… this advantage stems not from increased knowledge capacity, but from superior knowledge manipulation capabilities."</span>
+  <span class="zh">Ouro 的 1.4B 与 2.6B 模型取得了卓越性能，匹敌最高 12B 的 SOTA 大模型……这一优势并非源于知识容量的增长，而是来自更强大的知识操纵能力。</span>
+  <span class="src">— Zhu, Wang, Hua, Zhang, …, Bengio, Eshraghian,《Scaling Latent Reasoning via Looped Language Models》, arXiv:2510.25741, 2025-10-29（v5 2026-07-01）[17]</span>
+</blockquote>
+<p class="muted">配套的深度阅读清单（Reza Bayat reading list）与专门网站 ouro-llm.github.io 同步出现，社区把"loop depth"正式称作<b>继参数量、数据量之后的第三条缩放轴</b>。</p>
+
+<h3>7.2 PLT（2025-10）：让循环不再串行</h3>
+<p>PLT（Parallel Loop Transformer）瞄准循环结构的最后一个死穴——<b>串行延迟</b>。两个动作：① <b>跨循环并行（Cross-Loop Parallelism）</b>：不同 token 被分配到不同的循环轮次，一次前向同时算完——比如前 1/4 token 跑第 3 轮、后 3/4 token 跑第 1 轮，反正各轮权重相同；② <b>KV 复用 + 门控滑窗注意力（G-SWA）</b>：第一轮算出的 KV 缓存给所有后续轮共享，配合滑窗局部注意力把精度找回来。结果：拿到循环模型的精度、只付标准 Transformer 的延迟与显存<span class="cite">[18]</span>。</p>
+<blockquote class="q">
+  <span class="en">"Cross-Loop Parallelism… computing different loops for different tokens at the same time, all within a single pass."</span>
+  <span class="zh">跨循环并行……在同一次前向中，同时为不同 token 计算不同的循环（轮次）。</span>
+  <span class="src">— Wu, Chen, Luo, Yan, Yu, Xia, Zhang, Zhan, Zhong, Zhou, Qiao, Bin,《Parallel Loop Transformer for Efficient Test-Time Computation Scaling》, arXiv:2510.24824, 2025-10-28 [18]</span>
+</blockquote>
+<p>加上同期 McLeish 等的"循环化改造"（给现成前馈 LM 加循环深度，数学性能反超同预算继续预训练<span class="cite">[20]</span>），循环路线的部署故事完整了：<b>新模型可以原生循环（Ouro），旧模型可以改造加装（Retrofit），推理可以并行加速（PLT / 并行采样器）</b>。</p>
+
+<h3>7.3 2026 上半年：缩放定律与稳定性之战</h3>
+<p>工业界入场后，学术界的注意力转向两个更硬的问题：<b>怎么缩放</b>与<b>怎么稳定</b>。</p>
+<ul>
+  <li><b>缩放定律</b>：Prairie 等的 <b>Parcae</b>（ICLR 2026 LIT Workshop）用注入层谱范数约束驯服训练不稳定性，并系统测定了"固定参数预算下，训练算力与测试循环深度的 isoFLOPs 型缩放定律"<span class="cite">[23]</span>；Schwethelm 等<b>《等深度缩放定律》</b>直接量化"一次循环值多少参数"（循环与独享深度、训练算力之间的兑换率）<span class="cite">[24]</span>；Wang 等证明共享块的相关更新需要按循环数加强 1/N 的残差缩放，且该超参可从小模型迁移到大循环数<span class="cite">[33]</span>。2026 年 4 月起，这些定律开始在 8B/0.8B-active MoE 等工业尺寸上复验（IFM Research 的系列消融<span class="cite">[36]</span>）。</li>
+  <li><b>稳定性与动力学</b>：朴素的"同一块反复乘"会出现范数爆炸 / 塌缩不动点 / 训练发散。2026 年上半年的对策百花齐放：<b>Fully Looped Transformer</b> 的全循环稳定化训练<span class="cite">[27]</span>、<b>Fixed-Point Reasoners</b> 把推理器显式设计成吸引子动力系统<span class="cite">[35]</span>、LayerNorm 即"隐式增益控制"的理论解释<span class="cite">[27]</span>、学习型随机停止防止外推发散等。<b>Think Shallow, Solve Deep</b>（Viakhirev 等）把循环算子分成"收敛型 / 边缘型 / 发散型"三类，给出"深度安全"判据，并证明终端不动点目标能带来稳定的测试时深度外推<span class="cite">[37]</span>。</li>
+</ul>
+
+<h3>7.4 2026：传闻、实证与"闭嘴思考"之争</h3>
+<p>2026 年最出圈的行业事件，是<b>闭源实验室是否已经秘密采用循环深度</b>：</p>
+<ul>
+  <li><b>Astra 传闻</b>：The Information 报道 OpenAI 的新模型 Astra 用一种新技术"以某种方式掩盖部分或全部的推理过程（即所谓思维链）"<span class="cite">[21]</span>。Raschka 的技术分析认为这与循环深度高度吻合——思考发生在潜激活里，本就不产出可读文本；他同时给出冷静的技术注脚：递归深度文献里的收益（尤其 Nanbeige 的数据）需要放大解读，"75% 的 token 效率意味着同样质量需要多花约 33% 的训练 token"<span class="cite">[21]</span>。</li>
+  <li><b>Claude "Mythos" 猜测</b>：Hayduk 的 X 长文从基准模式与服务算力约束出发，论证 Anthropic 的某些收益模式与"确定性权重共享循环"兼容，但作者明确标注这是推测而非证实<span class="cite">[44]</span>；Ouro 作者 Zhu 的后续分析也从"深度缩放轴"角度讨论了这类传闻的技术合理性<span class="cite">[36]</span>。</li>
+  <li><b>公开实证</b>：无论传闻真假，<b>Nanbeige4.2-3B</b>（开源权重、28T token 从零预训练的循环 Transformer）给出了第一个可以审计的工业证据：两次循环（two passes）是质量—效率的最佳折中，保留了约 75% 的 token 效率<span class="cite">[21]</span>——即用参数换来了数据效率的实打实损失，但换来了推理侧的自由度。</li>
+</ul>
+<div class="warn"><b>安全视角</b>：循环推理把思考搬进了不可读的潜空间，监控思维链的既有安全方案失效——这正是 LessWrong 社区对 Astra 传闻的主要担忧（若属实）<span class="cite">[22]</span>。与之呼应，可解释性研究开始反向发力：从潜思维解码（Lu 等发现解码证据有限<span class="cite">[26]</span>）到读出反馈转向（steering readout feedback）、潜思维轨迹奖励等（第 11.3 节）。<b>"想得深"与"看得见"的张力，会是这个范式长期的伴生问题。</b></div>
+<h2 id="code-huginn">8 · 代码深潜一：Huginn 是怎么把"循环"写进 PyTorch 的</h2>
+<p class="lead">本节与下一节的所有代码都来自官方开源仓库（本地 clone 路径注明），为可读性做了适度删节与注释改写；行号为仓库当前版本的真实位置。</p>
+
+<h3>8.1 仓库与结构</h3>
+<p>Huginn 的训练代码在 <code>seal-rg/recurrent-pretraining</code><span class="cite">[45]</span>。关键文件三个：</p>
+<table>
+  <tr><th>文件</th><th>内容</th><th>本文关注点</th></tr>
+  <tr><td><code>recpre/model_dynamic.py</code></td><td>训练侧模型定义（<code>RecurrentGPT</code> 类）</td><td>三明治结构、循环、输入注入、截断反传</td></tr>
+  <tr><td><code>recpre/config_dynamic.py</code></td><td>配置（<code>RecurrentConfig</code>）</td><td>默认：prelude=1、core=4、coda=1、mean_recurrence=32</td></tr>
+  <tr><td><code>recpre/raven_modeling_minimal.py</code></td><td>HuggingFace 兼容的推理实现</td><td>KV 缓存跨循环复用（<code>HuginnDynamicCache</code>）</td></tr>
+</table>
+<p class="tablecap">表 1 · recurrent-pretraining 仓库导览。Huginn-3.5B 在注册表中的型号名为 <code>nebel-raven-3.5b</code>，评测时用 <code>mean_recurrence=32</code> 复现论文数字<span class="cite">[45]</span>。</p>
+
+<h3>8.2 三明治结构与循环本体（model_dynamic.py:962-1247）</h3>
+<p class="codecap"><b>代码 1</b> · 模型的骨架：三个部件各司其职，核心块被反复调用。为本科生注释版：</p>
+<pre><code>class RecurrentGPT(torch.nn.Module):
+    def __init__(self, config, objective, ...):
+        # ① prelude：进入锚层 —— 把 token 嵌入变成"值得思考的初始状态"
+        prelude = ModuleList(config.Block(config, layer_id=i)
+                             for i in range(config.n_layers_in_prelude))        # 默认 1 层
+        # ② core_block：思考核 —— 唯一被循环的部分
+        core_block = ModuleList(config.Block(config, layer_id=i + config.n_layers_in_prelude)
+                                for i in range(config.n_layers_in_recurrent_block))  # 默认 4 层
+        # ③ coda：读出锚层 —— 把深思后的状态翻译成下一个词的分布
+        o = config.n_layers_in_prelude + config.n_layers_in_recurrent_block * config.mean_recurrence
+        coda = ModuleList(config.Block(config, layer_id=i + o)
+                          for i in range(config.n_layers_in_coda))             # 默认 1 层
+        self.transformer = ModuleDict(dict(
+            wte=Embedding(vocab, d), prelude=prelude, adapter=adapter,
+            core_block=core_block, coda=coda, ln_f=Norm(d)))</code></pre>
+<p class="muted">注意 <code>layer_id</code> 的分配方式：prelude 用 0..n-1，core 接着编号，coda 的编号直接按"展开了 32 次"的虚拟深度计算——这暗示了整个实现的中心思想：<b>把循环模型当作一个虚拟的 36 层网络来初始化和缩放，只是其中 32 组层共享同一份权重</b>。</p>
+
+<p class="codecap"><b>代码 2</b> · 循环本体与截断反传（<code>iterate_forward</code>，model_dynamic.py:1164-1197 简化）：</p>
+<pre><code>def iterate_forward(self, input_embeds, freqs_cis, mask, num_steps_pair=None):
+    x = self.initialize_state(input_embeds)
+    # 每个训练样本随机采样循环总次数 n 与"带梯度"的步数 k
+    num_steps_no_grad, num_steps_with_grad = self.randomized_iteration_sampler()
+
+    with torch.no_grad():                          # ← 前面 n 步：不建计算图
+        for step in range(num_steps_no_grad):
+            xk = x
+            x = self.core_block_forward(xk, input_embeds, freqs_cis, mask, step)
+
+    for step in range(num_steps_with_grad):        # ← 只对最后 k 步回传梯度
+        xk = x
+        x = self.core_block_forward(xk, input_embeds, freqs_cis, mask,
+                                    num_steps_no_grad + step)
+    return self.transformer.ln_f(x), num_steps_no_grad, num_steps_with_grad, xk.detach()</code></pre>
+<p>这就是 2.3 节"问题三"的工程答案：<b>截断反传（truncated BPTT）</b>。循环 32 次如果全程记梯度，激活内存是普通模型的 32 倍；Huginn 的做法是前 32−k 步纯前向（<code>no_grad</code>），只在最后 k 步（论文默认 k 很小）回传。副作用是梯度估计有偏——模型"看不到"自己前 28 步对最终结果的影响，因此必须配合下面的输入注入与逐步噪声来保证前段循环有意义。<b>怎么让截断之后的训练信号依然对齐</b>，是所有后续循环 LM 论文（Ouro、Parcae、SMELT）改进的主要战场之一。</p>
+
+<p class="codecap"><b>代码 3</b> · 输入注入与噪声（<code>core_block_forward</code>，model_dynamic.py:1199-1247 简化）：</p>
+<pre><code>def core_block_forward(self, x, input_embeds, freqs_cis, mask, step):
+    # ① 输入注入：每一轮都把"题面"重新加回思考状态 —— 防止忘题
+    if self.config.injection_type == "add":
+        x = x + input_embeds                        # ← 全部秘密就在这一行
+    elif self.config.injection_type == "gate":
+        x = x * input_embeds                        #   门控注入变体
+    elif self.config.injection_type in ["linear", "ffn"]:
+        x = self.transformer.adapter(cat([x, input_embeds], dim=-1))
+
+    # ② 中间噪声注入：把部分维度替换为高斯噪声（多种衰减日程可选）
+    if self.config.intermediate_noise_injection > 0:
+        n = self.config.intermediate_noise_injection
+        x = x * (1 - n / (step + 1)) + torch.randn_like(x) * n / (step + 1)
+
+    # ③ 真正的"思考"：4 个共享权重的层
+    for block in self.transformer.core_block:
+        x = block(x, freqs_cis, mask)
+    return x</code></pre>
+<p>两个细节值得咀嚼：</p>
+<ul>
+  <li><b>为什么必须输入注入？</b>数学上，<code>x ← f(x)</code> 的迭代只有一个输入（初始 x），信息每轮只会被压缩不会增加——循环几十轮后模型只剩"自己想法的回声"。加法注入 <code>x + e</code> 等于每轮重新校准到题面，让循环变成"<b>在输入约束下的反复细化</b>"而不是自由漂移。2026 年 Benhao Huang 的系列消融进一步发现，注入写回的<b>精确形式</b>（Euler 增益 vs 精确零阶保持）对稳定循环 LM 的验证损失有可测影响<span class="cite">[36]</span>。</li>
+  <li><b>为什么要噪声？</b>训练时把部分状态替换成噪声，模拟"循环早期信息不完整"的情形，强迫模型学会<b>在脏状态下仍然稳定收敛</b>——这是推理时能"任意加深 + 早停自适应"的隐含前提（状态要可预测地稳定下来，变化率才能当收敛信号用）。</li>
+</ul>
+
+<h3>8.3 推理侧：KV 缓存如何跨循环复用（raven_modeling_minimal.py:148-273）</h3>
+<p>朴素实现里，新 token 的第 k 轮循环要重算所有旧 token 的第 k 轮 KV——显存与带宽随循环数线性膨胀，这是循环模型的"隐性账单"。Huginn 的答案藏在推理缓存的索引结构里：</p>
+<pre><code>class HuginnDynamicCache(DynamicCache):
+    def __init__(self, lookup_strategy="full"):
+        # 缓存按 [循环步编号][序列位置] 双层字典组织
+        self.key_cache: dict[int, dict[int, Tensor]] = {}
+        self.value_cache: dict[int, dict[int, Tensor]] = {}
+
+    def update(self, key_states, value_states, step_idx, ...):
+        # ...写入当前步的 KV...
+        if len(self.key_cache[step_idx]) == self._seen_tokens or self.lookup_strategy == "full":
+            return materialize(self.key_cache[step_idx])       # 正常路径：同轮次齐活
+        else:  # 某些位置没算过这一轮 → 查找策略登场
+            # "latest-m4"：取同余数轮次里最新的可用 KV
+            # "available-m4"：该位置有哪轮用哪轮
+            # "compress-sN"：把多轮 KV 压缩到 N 个槽位
+            ...</code></pre>
+<p class="muted">简化自 <code>raven_modeling_minimal.py:148-273</code>。注释中的 m4 指 core 内 4 个块的轮次对齐。</p>
+<p>这套双层索引支撑起三个把"加深"变便宜的特性：</p>
+<div class="grid2">
+  <div class="card"><h5>跨轮复用</h5>新 token 第 k 轮注意力需要的旧 token KV，若本轮缺失，可用<b>上一轮同位置的 KV 近似</b>（"latest-m4" 等策略）——论文发现质量损失很小，吞吐大增。</div>
+  <div class="card"><h5>按 token 自适应深度</h5>既然缓存放宽到"各位置轮次可不同"，自然允许简单 token 循环 2 次、难 token 循环 64 次共存于同一批次——这是 Huginn 零样本自适应算力的物质基础，也被 MoR 发展成显式学习路由<span class="cite">[16]</span>。</div>
+</div>
+
+<h2 id="code-coconut">9 · 代码深潜二：COCONUT 的"连续思维"只有 60 行</h2>
+<p>Meta 的 <code>facebookresearch/coconut</code><span class="cite">[46]</span> 全部核心逻辑在 <code>coconut.py</code> 的 <code>forward</code> 里（约 150 行含注释）。它展示了潜空间推理的另一极：<b>不改架构、不加循环，只是把"解码再输入"改成"隐藏状态直通"</b>。</p>
+
+<h3>9.1 反馈机制：核心 20 行</h3>
+<p class="codecap"><b>代码 4</b> · 连续思维的生产与回填（coconut.py:39-158 简化）：</p>
+<pre><code>def forward(self, input_ids, attention_mask, labels, position_ids):
+    # 找出序列里所有 <latent> 占位 token 的位置
+    latent_indices = (input_ids == self.latent_token_id).nonzero()
+    inputs_embeds = self.embedding(input_ids)
+    kv_cache = None
+
+    for pass_idx in range(max_n_latents):          # 每个潜思维一段
+        # 分段前向：只算 [上一段末尾, 下一个 latent 之前] 的新 token
+        #（前缀 KV 直接复用 past_key_values —— 潜思维只花一个位置的算力）
+        outputs = self.base_causallm(inputs_embeds=inputs_embeds[:, a:b, :],
+                                     past_key_values=..., output_hidden_states=True)
+        hidden_states = outputs.hidden_states[-1]  # 最后一层隐藏状态
+
+        # ★ 连续思维：把 latent 位置的输入嵌入，替换成它前一个位置的最后隐藏状态
+        for batch_idx, token_idx in filling_indices:
+            tensor_list[batch_idx][token_idx] = hidden_states[batch_idx, token_idx - 1, :]
+
+        inputs_embeds = reassemble(tensor_list)    # 回填后进入下一段
+    ...</code></pre>
+<p>三个本科读者应该注意到的设计：</p>
+<ul>
+  <li><b>"思考"的物理载体就是隐藏状态</b>：正常解码流程是 <code>hidden → argmax/采样 → token → embedding → 下一位置</code>，中间要经过离散词表的窄门；COCONUT 直接把 <code>hidden</code> 接回输入端，绕开词表——信息带宽从 log|V| 比特跳到整个向量。</li>
+  <li><b>KV 前缀复用让潜思维几乎免费</b>：一个 latent 位置只新增一步前向的算力（而且这段还不产出可读 token），对比 CoT 每个 token 全模型一遍。</li>
+  <li><b>循环的"次数"由 latent token 个数决定</b>：这本质上是 2.2 节"深度外包给序列长度"与"深度内生循环"的杂交——思考发生在序列维度，但内容是连续的。后来的工作（如 DiscoLoop、RecurTrace）把两者进一步融合：既在序列里放潜 token，又对潜状态做循环精炼<span class="cite">[36]</span>；Fan 等则系统研究了如何在潜推理与显式推理之间架桥<span class="cite">[42]</span>。</li>
+</ul>
+
+<h3>9.2 课程训练：从"用语言想"过渡到"用向量想"</h3>
+<p class="codecap"><b>代码 5</b> · 阶段化课程（run.py:244-245 与 dataset.py:201-207）：</p>
+<pre><code># run.py —— 训练调度：第几个 epoch 对应替换几步 CoT
+scheduled_stage = 0 if (configs.cot or configs.no_cot) else epoch // configs.epochs_per_stage
+
+# dataset.py —— 数据侧：本阶段最多替换 k 步（k = 阶段号）
+max_latent_stage = min(configs.max_latent_stage, len(sample["steps_tokenized"]))
+k = min(max_latent_stage, scheduled_stage)</code></pre>
+<p>训练从"完整文字 CoT"（stage 0）开始，每个阶段把 CoT 的<b>前 k 步</b>替换成 k 个 latent 位置，用上一阶段的权重继续训练。模型于是先学会"怎么想"，再逐步学会"不出声地想"。这个从易到难的脚手架与 Huginn 的逐步噪声、Yang 等的教师强制一脉相承：<b>循环/潜空间推理的训练，本质都是"让模型逐步接管自己的中间状态"</b>。</p>
+
+<figure>
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#8a93a8"/>
+    </marker>
+    <marker id="arg" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <polygon points="0 0, 8 3.5, 0 7" fill="#ffb454"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="300" fill="#12141c" rx="12"/>
+  <text x="450" y="30" fill="#e8eaed" font-size="15" font-weight="700" text-anchor="middle">两条"潜空间思考"路线对比</text>
+  <!-- COCONUT -->
+  <text x="80" y="70" fill="#ffb454" font-size="13" font-weight="700">COCONUT（2024-12）：序列维潜思维</text>
+  <rect x="60" y="86" width="70" height="30" rx="6" fill="#1d212b" stroke="#6ea8ff"/>
+  <text x="95" y="106" fill="#9cc4ff" font-size="11.5" text-anchor="middle">问题</text>
+  <rect x="146" y="86" width="52" height="30" rx="6" fill="#33251a" stroke="#ffb454"/>
+  <text x="172" y="106" fill="#ffcf8d" font-size="11.5" text-anchor="middle">latent</text>
+  <rect x="214" y="86" width="52" height="30" rx="6" fill="#33251a" stroke="#ffb454"/>
+  <text x="240" y="106" fill="#ffcf8d" font-size="11.5" text-anchor="middle">latent</text>
+  <rect x="282" y="86" width="70" height="30" rx="6" fill="#1d212b" stroke="#4dd6a8"/>
+  <text x="317" y="106" fill="#7fe6c2" font-size="11.5" text-anchor="middle">答案</text>
+  <path d="M 172 120 L 172 146 Q 172 156 182 156 L 226 156 Q 236 156 236 146 L 236 122" fill="none" stroke="#ffb454" stroke-width="1.8" marker-end="url(#arg)"/>
+  <text x="252" y="152" fill="#ffb454" font-size="11">隐藏状态 hᵢ 回填为下一个 latent 的输入嵌入</text>
+  <text x="60" y="182" fill="#aeb4bd" font-size="11.5">不改架构 · KV 前缀复用 · 课程训练 · 每步潜思维 ≈ 1 个位置的算力</text>
+  <!-- Loop -->
+  <text x="540" y="70" fill="#b9a2ff" font-size="13" font-weight="700">Loop Transformer（Huginn 路线）：深度维循环</text>
+  <rect x="520" y="86" width="80" height="30" rx="6" fill="#1d212b" stroke="#6ea8ff"/>
+  <text x="560" y="106" fill="#9cc4ff" font-size="11.5" text-anchor="middle">全部 token</text>
+  <rect x="622" y="78" width="120" height="46" rx="9" fill="#241d3d" stroke="#b9a2ff" stroke-dasharray="5 3"/>
+  <rect x="636" y="86" width="92" height="30" rx="6" fill="#2c2450" stroke="#b9a2ff"/>
+  <text x="682" y="106" fill="#cdbaff" font-size="11.5" text-anchor="middle">core ×4 权重</text>
+  <path d="M 742 84 L 766 84 Q 776 84 776 98 L 776 106 Q 776 122 760 122 L 630 122 Q 614 122 614 106 L 614 98 Q 614 84 624 84" fill="none" stroke="#b9a2ff" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="782" y="108" fill="#b9a2ff" font-size="11">×L</text>
+  <text x="520" y="182" fill="#aeb4bd" font-size="11.5">改架构 · 输入注入 · 截断反传 · KV 跨轮复用 · 深度 L 推理时任选</text>
+  <!-- bottom -->
+  <rect x="60" y="212" width="780" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
+  <text x="80" y="238" fill="#e8eaed" font-size="12.5" font-weight="700">殊途同归：让"计算"不再需要变成"文字"</text>
+  <text x="80" y="262" fill="#aeb4bd" font-size="11.5">COCONUT 把思考放进序列里的连续占位符（时间维潜空间）；Loop 把思考放进层间循环（深度维潜空间）。2026 年的混合方案（DiscoLoop、RecurTrace、LoopMTP 等）两者兼用。</text>
+</svg>
+<figcaption>图 2 · 潜空间推理的两条实现路线与 2026 年的合流趋势。依据 COCONUT<span class="cite">[11]</span> 与 Huginn<span class="cite">[12]</span> 论文及源码绘制。</figcaption>
+</figure>
+
+<h2 id="ledger">10 · 为什么这么设计：一份收益与代价的完整账本</h2>
+
+<h3>10.1 五大收益（为什么值得做）</h3>
+<table>
+  <tr><th style="width:18%">收益</th><th>机理</th><th>代表证据</th></tr>
+  <tr>
+    <td><b>参数效率</b></td>
+    <td>深度（顺序计算步数）与参数解耦：1 组权重 × L 次循环 ⇒ 有效深度 ≈ L 层。同等"思考能力"下权重、显存、部署成本都小一号。</td>
+    <td>Yang 等：&lt;10% 参数打平标准 Transformer<span class="cite">[8]</span>；MoEUT 参数匹配打平且 MACs 更少<span class="cite">[9]</span>；HRM 27M / TRM 7M 的极端案例<span class="cite">[14][15]</span>。</td>
+  </tr>
+  <tr>
+    <td><b>测试时算力的第三条轴</b></td>
+    <td>参数量、数据量之外，循环深度 L 成为推理时旋钮：同一权重，难题多循环、易题少循环；与"生成更多 token"的 CoT 缩放同构但不用付 token 成本。</td>
+    <td>Huginn 零样本加深持续涨点<span class="cite">[12]</span>；Saunshi 等证明 k 层×L 循环 ≈ kL 层<span class="cite">[13]</span>；Ouro 把它做成预训练内的学习量<span class="cite">[17]</span>。</td>
+  </tr>
+  <tr>
+    <td><b>免 CoT 数据 / 免后训练依赖</b></td>
+    <td>推理能力来自结构（循环）而非 RLVR 数据；预训练语料本身即训练信号——"把推理写进预训练"。</td>
+    <td>Huginn 不用任何 CoT 数据<span class="cite">[12]</span>；Ouro 7.7T token 原生循环预训练<span class="cite">[17]</span>；HRM 1000 样本<span class="cite">[14]</span>。</td>
+  </tr>
+  <tr>
+    <td><b>超越语言模态的思考带宽</b></td>
+    <td>隐藏状态是数千维连续向量，可叠加多假设（BFS 式搜索）、可表达无词可依的过程（密码学、空间、连续控制）。</td>
+    <td>COCONUT 的 BFS 证据与更高准确率—效率前沿<span class="cite">[11]</span>；Huginn："不易用语言表示的推理类型"<span class="cite">[12]</span>；潜思维与答案对齐度高于显式 CoT<span class="cite">[17]</span>。</td>
+  </tr>
+  <tr>
+    <td><b>自适应算力 + 缓存友好</b></td>
+    <td>循环状态变化率可当收敛信号（早停）；KV 可跨轮复用、按 token 分深度；与 MoE/早退等既有效率技术正交可叠加。</td>
+    <td>Huginn 的 KV lookup 策略与零样本自适应<span class="cite">[12]</span>；MoR 的 token 级深度路由<span class="cite">[16]</span>；PLT 的 KV 共享零开销循环<span class="cite">[18]</span>。</td>
+  </tr>
+</table>
+<p class="tablecap">表 2 · 循环深度设计的五大收益及代表证据。</p>
+
+<h3>10.2 代价与争议（为什么还没有一统天下）</h3>
+<div class="grid2">
+  <div class="card"><h5>代价一：不可读、难监督</h5>思考在潜空间，人类与监控管线都看不见。CoT 监督、过程奖励、思维链审计全部失效；解码潜思维的初步尝试证据有限<span class="cite">[26]</span>。安全社区已把"潜推理 + 不可审计"列为结构性行为风险<span class="cite">[22]</span>。</div>
+  <div class="card"><h5>代价二：循环退化与外推失败</h5>朴素循环模型常在训练循环数之外退化。LessWrong 引述的复现工作（Fu 等, 2026）报告 318M 的朴素循环 Transformer 在 3–6 次循环后性能开始退化、9 次时崩溃<span class="cite">[22]</span>；深度安全判据与稳定化训练成为 2026 年的显学<span class="cite">[23][27][37]</span>。</div>
+  <div class="card"><h5>代价三：串行延迟（原生形态）</h5>循环在深度维天然串行。并行采样器<span class="cite">[19]</span>与 PLT<span class="cite">[18]</span>已给出 5×/近似零开销的方案，但都引入近似（KV 复用、跨轮并行）或调度复杂度；连续深度批调度仍在成熟中<span class="cite">[36]</span>。</div>
+  <div class="card"><h5>代价四：token 效率损失</h5>权重共享不是免费的：Nanbeige 的公开数据显示两次循环保留约 75% token 效率——同等质量需要约 1/3 更多训练 token<span class="cite">[21]</span>。等深度缩放定律正在量化这笔"参数换数据"的汇率<span class="cite">[24]</span>。</div>
+  <div class="card"><h5>代价五：容量天花板</h5>所有循环步共享权重 ⇒ 单步多样性受限，"查表型"知识任务吃亏（Saunshi 的推理/记忆二分<span class="cite">[13]</span>）。MoE 化（MoEUT / LoopMoE / SMELT）是当前主解<span class="cite">[9][31][32]</span>。</div>
+  <div class="card"><h5>争议：评测口径</h5>"3.5B 顶 50B"式的对比常混用"参数等价"与"算力等价"；压缩循环模型与全序列状态模型的记忆预算并不在一个 regime（Zhang 的分离定理）<span class="cite">[34]</span>。读这个领域的 benchmark 数字，务必先看"比的是参数还是 FLOPs"。</div>
+</div>
+
+<blockquote class="q">
+  <span class="en">"…compressed looped Transformers remain bounded by their persistent recurrent-state budget even with more loop steps, while full sequence-state loops occupy a memory-richer regime closer to chain-of-thought scratchpads."</span>
+  <span class="zh">……压缩态的循环 Transformer 即使增加循环步数，仍受其持久循环状态预算的约束；而全序列状态的循环则处于更接近思维链草稿纸的、记忆更丰富的区间。</span>
+  <span class="src">— Haozhou Zhang,《Chain-of-Thought and Compressed Looped Transformers: A Memory-Budget Separation》, arXiv:2605.30757, 2026-05-29 [34]</span>
+</blockquote>
+
+<h2 id="latest">11 · 业界与学界最新进展盘点（2025 下半年 – 2026-09）</h2>
+<p class="lead">以下按五个子领域整理；论文条目后括号为 arXiv 编号与发布时间，均可回溯到 Awesome-Loop-Models 的条目页<span class="cite">[36]</span>。</p>
+
+<h3>11.1 架构与规模化</h3>
+<table>
+  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><td><b>Ouro</b> 1.4B/2.6B<span class="cite">[17]</span></td><td>2025-10</td><td>首批把推理内置进预训练的循环 LM：7.7T token，深度分配熵正则，对标最高 12B 模型。</td></tr>
+  <tr><td><b>Parcae</b><span class="cite">[23]</span></td><td>2026-04</td><td>注入谱范数约束的稳定循环 LM + isoFLOPs 型训练/测试缩放定律（ICLR 2026 LIT Workshop）。</td></tr>
+  <tr><td><b>等深度缩放定律</b><span class="cite">[24]</span></td><td>2026-04</td><td>直接测量"一次循环值多少参数 / 多少训练算力"的兑换率。</td></tr>
+  <tr><td><b>残差缩放理论</b><span class="cite">[33]</span></td><td>2026-06</td><td>共享块相关更新 ⇒ 需按循环数 1/N 缩放残差；超参可小→大迁移。</td></tr>
+  <tr><td><b>LoopMoE / SMELT / CHERRY</b><span class="cite">[31][32]</span></td><td>2026-06 ~ 09</td><td>循环 × MoE 的合流：虚拟宽度变换、计算匹配缩放定律、压缩层级专家。</td></tr>
+  <tr><td><b>DeepLoop / LoopMTP</b><span class="cite">[41]</span></td><td>2026-07 ~ 08</td><td>循环深度扩展到更大模型；用潜空间多 token 预测引导循环（与投机解码合流）。</td></tr>
+  <tr><td><b>Fully Looped Transformer / Fixed-Point Reasoners</b><span class="cite">[27][35]</span></td><td>2026-05 ~ 06</td><td>全循环（含嵌入/读出）稳定性设计；把推理器做成显式吸引子动力系统。</td></tr>
+</table>
+
+<h3>11.2 推理系统与效率</h3>
+<table>
+  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><td><b>并行采样器</b><span class="cite">[19]</span></td><td>2025-10</td><td>扩散强制式调度：生成新 token 同时并行精炼旧 token 的潜状态，对 Huginn-3.5B 免训练最高 5× 加速（ICML 2026）。</td></tr>
+  <tr><td><b>PLT</b><span class="cite">[18]</span></td><td>2025-10</td><td>跨循环并行 + KV 共享 + 门控滑窗注意力：循环模型精度、标准 Transformer 延迟。</td></tr>
+  <tr><td><b>MELT</b><span class="cite">[30]</span></td><td>2026-05</td><td>每层固定尺寸 KV 缓存跨循环共享（门控更新），循环深度不再吃显存；改造 Ouro 验证。</td></tr>
+  <tr><td><b>LT2</b><span class="cite">[28]</span></td><td>2026-05</td><td>循环 × 亚二次注意力（线性时间循环 Transformer）。</td></tr>
+  <tr><td><b>连续深度批调度</b><span class="cite">[36]</span></td><td>2026-08</td><td>不同 token 不同循环深度的解码批处理（Depth-adaptive inference of looped LMs）。</td></tr>
+  <tr><td><b>边端与压缩</b><span class="cite">[36]</span></td><td>2026-06</td><td>循环推理器的 INT4/剪枝/蒸馏实证：朴素压缩塌缩、逐通道校准 INT4 可恢复（What survives…）；LoopQ 专用量化。</td></tr>
+  <tr><td><b>Free Pause Tokens</b><span class="cite">[36]</span></td><td>2026-09</td><td>共享全部骨干权重的并行预测流，读取各层 KV 状态——1B 模型损失下降而解码延迟几乎不变。</td></tr>
+</table>
+
+<h3>11.3 理解、可解释与训练算法</h3>
+<table>
+  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><td><b>机制分析</b><span class="cite">[25]</span></td><td>2026-04</td><td>多个循环 LM 逼近"逐层特定的循环不动点"，循环块复现前馈式推理阶段——循环不是黑魔法，是可解剖的动力系统。</td></tr>
+  <tr><td><b>潜思维解码</b><span class="cite">[26]</span></td><td>2025-07</td><td>对深度循环模型探测"潜思维链"结构：证据有限、可解释性随深度变化（COLM 2025 Workshop）——给热潮泼冷水的健康声音。</td></tr>
+  <tr><td><b>分形收敛盆</b><span class="cite">[35]</span></td><td>2026-09</td><td>把循环推理器当动力系统研究：难题产生分形结构的收敛时间盆，鞍点介导的瞬态混沌。</td></tr>
+  <tr><td><b>深度安全判据</b><span class="cite">[37]</span></td><td>2026-08</td><td>循环算子三分（收敛/边缘/发散）+ 不动点目标 ⇒ 稳定的测试时深度外推。</td></tr>
+  <tr><td><b>停止门诊断</b><span class="cite">[47]</span></td><td>2026-07</td><td>固定先验的深度监督比联合学习的 halting 门产生更有用的停止信号（在 Ouro-1.4B/2.6B 上验证）。</td></tr>
+  <tr><td><b>LoopRPT / 潜轨迹奖励</b><span class="cite">[29][36]</span></td><td>2026-02 ~ 03</td><td>把 RL 信号分配到潜迭代（强化预训练）；奖励潜思维轨迹本身而非只奖励结果。</td></tr>
+  <tr><td><b>UT 记忆研究</b><span class="cite">[43]</span></td><td>2026-04</td><td>单块 UT + ACT 在难题上需要显式记忆 token，ACT 初始化可能困在浅计算——为何锚层与外部状态重要。</td></tr>
+</table>
+
+<h3>11.4 应用扩散（不止语言）</h3>
+<table>
+  <tr><th>领域</th><th>代表工作</th><th>时间</th></tr>
+  <tr><td>视觉生成 / 分割</td><td><b>ELT</b> 弹性循环视觉生成（EDGE 2026）<span class="cite">[38]</span>；<b>RD-ViT</b> 循环深度 ViT 语义分割；<b>ProgResViT</b> 分辨率×宽度渐进循环（ImageNet 平均省 31% 算力）</td><td>2026-04 ~ 09</td></tr>
+  <tr><td>视觉 token 化</td><td><b>LoopVAE</b>：编码器/解码器核心在尺度内外复用，28 次共享块调用省参数</td><td>2026-09<span class="cite">[39]</span></td></tr>
+  <tr><td>世界模型 / 扩散 LM</td><td><b>Looped World Models</b>；<b>Looped Diffusion Language Models</b>；<b>Thinking with Looped Flows</b>（循环网络 + 概率流积分）</td><td>2026-06 ~ 09<span class="cite">[35]</span></td></tr>
+  <tr><td>多模态 / 嵌入</td><td><b>ReLoop-UME</b>（可学习检索寄存器的循环深度通用多模态嵌入）；<b>Reason Through the Latent</b>（循环视觉推理）；<b>Looping Back to Move Forward</b>（循环改造多模态大模型）</td><td>2026-02 ~ 09<span class="cite">[36]</span></td></tr>
+  <tr><td>推荐 / 图 / 表格 / SSM</td><td><b>RecRec</b>×2（循环兴趣精炼推荐）；循环图消息传递的停止 vs 收敛理论；表格基础模型单层循环省 80% 参数；<b>循环状态空间 LM</b>（Mamba 块循环 + 出口选择）</td><td>2026-04 ~ 07<span class="cite">[36]</span></td></tr>
+  <tr><td>RL / 决策</td><td><b>On the Role of Computation in RL</b>（ICML 2026）：极小变量算力架构在 31 个 RL 任务上提升长视野泛化</td><td>2026-02<span class="cite">[36]</span></td></tr>
+</table>
+
+<h3>11.5 业界动向小结</h3>
+<ul>
+  <li><b>开源工业模型</b>：Ouro（字节联动，2025-10）与 Nanbeige4.2-3B（28T token 循环预训练，2026 公开技术报告）是两个可审计的锚点<span class="cite">[17][21]</span>；Huginn 权重/数据/代码三件套开源<span class="cite">[45]</span>。</li>
+  <li><b>闭源传闻</b>：OpenAI Astra（"以某种方式掩盖部分或全部推理过程"）与 Anthropic "Mythos" 的社区推测均指向循环深度，但均未获官方证实——引用时请保持"传闻"定语<span class="cite">[21][22][44]</span>。</li>
+  <li><b>推断信号</b>：2026 年服务于循环模型的系统工作（MELT、连续深度批调度、PLT 部署化、LoopQ）密集出现——系统生态通常跟随真实部署需求生长，这是比传闻更硬的旁证<span class="cite">[18][30]</span>。</li>
+  <li><b>社区基建</b>：Awesome-Loop-Models（2026-04 发布，200+ 篇）+ Reza Bayat 阅读清单 + 各模型网站，构成了这个领域快速扩张的文献底座<span class="cite">[36]</span>。</li>
+</ul>
+
+<h2 id="future">12 · 未来发展方向</h2>
+<p class="lead">综合论文脉络与 2026 年的动态，六个方向最值得关注（★ = 未来 1–2 年最可能出成果）。</p>
+
+<h3>方向一 ★：循环缩放定律的最终形态——"第三轴"的确立</h3>
+<p>参数、数据之后，<b>循环深度能否构成一条平滑、可预测、可跨尺寸迁移的缩放轴</b>？Parcae 的 isoFLOPs 曲面、等深度定律、SMELT 的 MoE×循环计算匹配定律已经拼出草图<span class="cite">[23][24][32]</span>，但关键空白仍在：<b>最优循环数与模型尺寸/数据量的联合定标</b>、<b>循环外推的失效边界预测</b>（何时该加参数而不是加循环）、<b>多轮循环的信息瓶颈理论</b>（压缩态 vs 全序列态的内存分离已给出第一定理<span class="cite">[34]</span>）。谁先给出"Chinchilla for Loops"，谁就定义下一代模型的训练预算表。</p>
+
+<h3>方向二 ★：训练算法——绕开截断反传</h3>
+<p>截断反传是有偏梯度 + 前段循环"无监督漂移"的妥协。候选出路：① <b>隐式微分 / 平衡解</b>（DEQ 现代化：把循环训练重写成不动点求解，一次反传<span class="cite">[3][35]</span>）；② <b>逐步自举</b>（把第 k 步输出当第 k+1 步的伪标签，教师强制的自监督版）；③ <b>RL 到迭代</b>（LoopRPT 与潜轨迹奖励已开头<span class="cite">[29]</span>——把"每轮循环"当作动作，奖励信号直接对齐推理质量）；④ <b>可并行的时间维展开</b>（把 32 次循环摊到 32 个序列位置并行算——与 COCONUT 式潜 token 的杂交，DiscoLoop 等已试水<span class="cite">[36]</span>）。</p>
+
+<h3>方向三 ★：系统与硬件协同——让循环免费</h3>
+<p>2026 年的趋势已经明确：<b>循环的全部理论收益，最终要以"零额外延迟、零额外显存"交付</b>。路线图：跨循环并行（PLT）+ 并行采样（扩散强制）→ 连续深度批调度 → KV 跨轮压缩（MELT / Looped Latent Attention）→ 专用内核与编译器支持（循环友好的 CUDA graph / paged cache 变体）→ 与投机解码的合流（LoopMTP：循环深度生产多 token 草稿<span class="cite">[36]</span>）。更远处是硬件侧：循环模型的算术强度（小权重、高复用）天然适配存算一体与片上大 SRAM——这是一个"架构定义芯片"的候选场景。</p>
+
+<h3>方向四：可解释与对齐——看见潜思维</h3>
+<p>如果思考不可读，过程监督、安全审计、法规合规都会变成硬约束。研究前沿：<b>潜思维的可解码性</b>（目前证据有限<span class="cite">[26]</span>）、<b>读出转向</b>（用读出头反馈操控循环动力系统）、<b>潜轨迹奖励</b>（奖励可解释的中间状态而非只看结果）、<b>探针实时监控</b>（对循环状态做在线安全分类）。Astra 争议的本质是：<b>范式收益与可审计性存在结构性交换</b>，这个交换率本身值得作为一个科学问题来研究<span class="cite">[21][22]</span>。</p>
+
+<h3>方向五：与生成式范式深度融合</h3>
+<p>循环结构与扩散语言模型、世界模型的合流是 2026 年最新鲜的方向：Thinking with Looped Flows 把循环去噪器耦合进概率流积分<span class="cite">[35]</span>；Looped Diffusion LM 把"去噪步"与"循环步"统一；Looped World Models 把循环深度引入交互式环境模型。统一视角呼之欲出：<b>迭代精炼（refine）本身就是一种通用计算原语</b>——去噪、思考、规划、控制都在"反复把状态变得更好"，循环 Transformer 给了这个原语一个可学习的载体。</p>
+
+<h3>方向六：神经科学的回环</h3>
+<p>HRM 的双时间尺度直接对标前额叶-基底节的快慢回路<span class="cite">[14]</span>；DEQ 与预测编码假说同构；ACT 的"思考时长"与心理物理学反应时数据可对照。反向的启发刚刚开始：<b>大脑用 ~20W 实现"深度思考"，靠的正是循环回路而非更厚的皮层</b>——循环网络的动力学分析工具（吸引子、分形盆、临界性<span class="cite">[35]</span>）可能成为计算神经科学与 AI 的共同语言。</p>
+
+<div class="callout"><b>给入门者的路线图</b>：① 先跑通第 2.4 节的 40 行 LoopLM；② 读 Huginn 论文 + 对照第 8 节代码；③ 读 COCONUT 论文 + 第 9 节代码；④ 按Awesome-Loop-Models<span class="cite">[36]</span> 的 "Theoretical and Mechanical Analysis" 分支跟进理论；⑤ 想做系统就从 PLT / MELT 的开源实现入手。这个领域 2023 年才真正起步，本科背景完全来得及在 frontier 上找到自己的位置。</div>
+
+<h2 id="refs">13 · 参考与引用出处</h2>
+<ol class="refs">
+  <li>Graves, A. <i>Adaptive Computation Time for Recurrent Neural Networks.</i> arXiv:1603.08983 <span class="src-date">2016-03-29</span>. <a href="https://arxiv.org/abs/1603.08983">link</a></li>
+  <li>Dehghani, M., Gouws, S., Vinyals, O., Uszkoreit, J., Kaiser, Ł. <i>Universal Transformers.</i> arXiv:1807.03819 <span class="src-date">2018-07-10</span> · ICLR 2019. <a href="https://arxiv.org/abs/1807.03819">link</a></li>
+  <li>Bai, S., Kolter, J.Z., Koltun, V. <i>Deep Equilibrium Models.</i> arXiv:1909.01377 <span class="src-date">2019-09-03</span> · NeurIPS 2019. <a href="https://arxiv.org/abs/1909.01377">link</a></li>
+  <li>Anil, C., Pokle, A., Liang, K., Treutlein, J., Wu, Y., Bai, S., Kolter, J.Z., Grosse, R. <i>Path Independent Equilibrium Models Can Better Exploit Test-Time Computation.</i> arXiv:2211.09961 <span class="src-date">2022-11-18</span> · NeurIPS 2022. <a href="https://arxiv.org/abs/2211.09961">link</a></li>
+  <li>Banino, A., Balaguer, J., Blundell, C. 等. <i>PonderNet: Learning to Ponder.</i> arXiv:2107.05407 <span class="src-date">2021-07-12</span> · NeurIPS 2021 (Oral). <a href="https://arxiv.org/abs/2107.05407">link</a></li>
+  <li>Schwarzschild, A., Borgnia, E., Gupta, A., Huang, F., Vishkin, U., Goldblum, M., Goldstein, T. <i>Can You Learn an Algorithm? Generalizing from Easy to Hard Problems with Recurrent Networks.</i> arXiv:2106.04537 <span class="src-date">2021-06-08</span> · NeurIPS 2021. <a href="https://arxiv.org/abs/2106.04537">link</a></li>
+  <li>Giannou, A., Rajput, S., Sohn, J.-y., Lee, K., Lee, J.D., Papailiopoulos, D. <i>Looped Transformers as Programmable Computers.</i> arXiv:2301.13196 <span class="src-date">2023-01-30</span> · ICML 2023. <a href="https://arxiv.org/abs/2301.13196">link</a></li>
+  <li>Yang, L., Lee, K., Nowak, R., Papailiopoulos, D. <i>Looped Transformers are Better at Learning Learning Algorithms.</i> arXiv:2311.12424 <span class="src-date">2023-11-21</span> · ICLR 2024. <a href="https://arxiv.org/abs/2311.12424">link</a></li>
+  <li>Csordás, R., Irie, K., Schmidhuber, J., Potts, C., Manning, C.D. <i>MoEUT: Mixture-of-Experts Universal Transformers.</i> arXiv:2405.16039 <span class="src-date">2024-05-25</span> · NeurIPS 2024. <a href="https://arxiv.org/abs/2405.16039">link</a></li>
+  <li>Bae, S., Fisch, A., Harutyunyan, H., Ji, Z., Kim, S., Schuster, T. <i>Relaxed Recursive Transformers: Effective Parameter Sharing with Layer-wise LoRA.</i> arXiv:2410.20672 <span class="src-date">2024-10-28</span> · ICLR 2025. <a href="https://arxiv.org/abs/2410.20672">link</a></li>
+  <li>Hao, S., Sukhbaatar, S., Su, D., Li, X., Hu, Z., Weston, J., Tian, Y. <i>Training Large Language Models to Reason in a Continuous Latent Space.</i> arXiv:2412.06769 <span class="src-date">2024-12-09</span> · COLM 2025 · 代码 facebookresearch/coconut. <a href="https://arxiv.org/abs/2412.06769">link</a></li>
+  <li>Geiping, J., McLeish, S., Jain, N., Kirchenbauer, J., Singh, S., Bartoldson, B.R., Kailkhura, B., Bhatele, A., Goldstein, T. <i>Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach.</i> arXiv:2502.05171 <span class="src-date">2025-02-07</span> · NeurIPS 2025 · 代码 seal-rg/recurrent-pretraining. <a href="https://arxiv.org/abs/2502.05171">link</a></li>
+  <li>Saunshi, N., Dikkala, N., Li, Z., Kumar, S., Reddi, S.J. <i>Reasoning with Latent Thoughts: On the Power of Looped Transformers.</i> arXiv:2502.17416 <span class="src-date">2025-02-24</span> · ICLR 2025. <a href="https://arxiv.org/abs/2502.17416">link</a></li>
+  <li>Wang, G., Li, J., Sun, Y., Chen, X., Liu, C., Wu, Y., Lu, M., Song, S., Abbasi Yadkori, Y. <i>Hierarchical Reasoning Model.</i> arXiv:2506.21734 <span class="src-date">2025-06-26</span>. <a href="https://arxiv.org/abs/2506.21734">link</a></li>
+  <li>Jolicoeur-Martineau, A. <i>Less is More: Recursive Reasoning with Tiny Networks.</i> arXiv:2510.04871 <span class="src-date">2025-10-06</span> · 代码 SamsungSAILMontreal/TinyRecursiveModels. <a href="https://arxiv.org/abs/2510.04871">link</a></li>
+  <li>Bae, S., Kim, Y., Bayat, R., Kim, S., Ha, J., Schuster, T., Fisch, A., Harutyunyan, H., Ji, Z., Courville, A., Yun, S.-Y. <i>Mixture-of-Recursions: Learning Dynamic Recursive Depths for Adaptive Token-Level Computation.</i> arXiv:2507.10524 <span class="src-date">2025-07-14</span> · NeurIPS 2025. <a href="https://arxiv.org/abs/2507.10524">link</a></li>
+  <li>Zhu, R.-J., Wang, Z., Hua, K., Zhang, T., …, Bengio, Y., Eshraghian, J. <i>Scaling Latent Reasoning via Looped Language Models.</i> arXiv:2510.25741 <span class="src-date">2025-10-29</span> · 模型 ByteDance/Ouro-1.4B, 2.6B. <a href="https://arxiv.org/abs/2510.25741">link</a></li>
+  <li>Wu, B., Chen, M., Luo, X., Yan, S., Yu, Q., Xia, F., Zhang, T., Zhan, H., Zhong, Z., Zhou, X., Qiao, S., Bin, X. <i>Parallel Loop Transformer for Efficient Test-Time Computation Scaling.</i> arXiv:2510.24824 <span class="src-date">2025-10-28</span>. <a href="https://arxiv.org/abs/2510.24824">link</a></li>
+  <li>Geiping, J., Yang, X., Su, G. <i>Efficient Parallel Samplers for Recurrent-Depth Models.</i> arXiv:2510.14961 <span class="src-date">2025-10-16</span> · ICML 2026. <a href="https://arxiv.org/abs/2510.14961">link</a></li>
+  <li>McLeish, S., Li, A., Kirchenbauer, J., Kalra, D.S., Bartoldson, B.R., Kailkhura, B., Schwarzschild, A., Geiping, J., Goldstein, T., Goldblum, M. <i>Teaching Pretrained Language Models to Think Deeper with Retrofitted Recurrence.</i> arXiv:2511.07384 <span class="src-date">2025-11-10</span>. <a href="https://arxiv.org/abs/2511.07384">link</a></li>
+  <li>Raschka, S. <i>OpenAI Astra and Looped Transformers.</i> sebastianraschka.com 博客 <span class="src-date">2026</span>（引 The Information 报道与 Nanbeige4.2-3B 技术报告）. <a href="https://sebastianraschka.com/blog/2026/openai-astra-looped-transformers.html">link</a></li>
+  <li>LessWrong 社区讨论. <i>How concerned should we be about Astra's recurrent depth?</i> <span class="src-date">2026</span>（引述 Fu 等 2026 关于朴素循环 Transformer 在 3–6 次循环后退化的复现）. <a href="https://www.lesswrong.com/posts/PLisnSFir8y5AHkmP/how-concerned-should-we-be-about-astra-s-recurrent">link</a></li>
+  <li>Prairie, H., Novack, Z., Berg-Kirkpatrick, T., Fu, D.Y. <i>Parcae: Scaling Laws For Stable Looped Language Models.</i> arXiv:2604.12946 <span class="src-date">2026-04-14</span> · ICLR 2026 LIT Workshop. <a href="https://arxiv.org/abs/2604.12946">link</a></li>
+  <li>Schwethelm, K., Rueckert, D., Kaissis, G. <i>How Much Is One Recurrence Worth? Iso-Depth Scaling Laws for Looped Language Models.</i> arXiv:2604.21106 <span class="src-date">2026-04-22</span>. <a href="https://arxiv.org/abs/2604.21106">link</a></li>
+  <li>Blayney, H., Arroyo, Á., Obando-Ceron, J., Castro, P.S., Courville, A., Bronstein, M.M., Dong, X. <i>A Mechanistic Analysis of Looped Reasoning Language Models.</i> arXiv:2604.11791 <span class="src-date">2026-04-13</span>. <a href="https://arxiv.org/abs/2604.11791">link</a></li>
+  <li>Lu, W., Yang, Y., Lee, K., Li, Y., Liu, E. <i>Latent Chain-of-Thought? Decoding the Depth-Recurrent Transformer.</i> arXiv:2507.02199 <span class="src-date">2025-07-02</span> · COLM 2025 Workshop. <a href="https://arxiv.org/abs/2507.02199">link</a></li>
+  <li><i>Simply Stabilizing the Loop via Fully Looped Transformer.</i> arXiv:2605.18797 <span class="src-date">2026-05-11</span>；另见 LayerNorm 增益控制分析 arXiv:2607.10681 <span class="src-date">2026-07-12</span>. <a href="https://arxiv.org/abs/2605.18797">link</a></li>
+  <li><i>LT2: Linear-Time Looped Transformers.</i> arXiv:2605.20670 <span class="src-date">2026-05-20</span>. <a href="https://arxiv.org/abs/2605.20670">link</a></li>
+  <li><i>LoopRPT: Reinforcement Pre-Training for Looped Language Models.</i> arXiv:2603.19714 <span class="src-date">2026-03-20</span>. <a href="https://arxiv.org/abs/2603.19714">link</a></li>
+  <li>Conchello Vendrell, V. 等. <i>MELT: Memory-Efficient Looped Transformer: Decoupling Compute from Memory in Looped Language Models.</i> arXiv:2605.07721 <span class="src-date">2026-05-08</span>. <a href="https://arxiv.org/abs/2605.07721">link</a></li>
+  <li><i>LoopMoE: Unifying Iterative Computation with Mixture-of-Experts for Language Modeling.</i> arXiv:2606.04438 <span class="src-date">2026-06-03</span>. <a href="https://arxiv.org/abs/2606.04438">link</a></li>
+  <li>Wang, S., Zhang, G., Luo, K., Wu, Y., Liu, S., Liu, J., Huang, W., Yan, S., Li, J. <i>SMELT: Scaling Laws for Compute-Matched MoE Looped Transformers.</i> arXiv:2609.01343 <span class="src-date">2026-09-01</span>. <a href="https://arxiv.org/abs/2609.01343">link</a></li>
+  <li>Wang, S., Li, B., Zhang, G., Huang, W., Yan, S., Li, J. <i>On the Residual Scaling of Looped Transformers: Stability and Transferability.</i> arXiv:2606.18524 <span class="src-date">2026-06-16</span>. <a href="https://arxiv.org/abs/2606.18524">link</a></li>
+  <li>Zhang, H. <i>Chain-of-Thought and Compressed Looped Transformers: A Memory-Budget Separation.</i> arXiv:2605.30757 <span class="src-date">2026-05-29</span>. <a href="https://arxiv.org/abs/2605.30757">link</a></li>
+  <li>Lai, J., Bao, A., Quinn, J., Gilpin, W. <i>Fractal basins trap latent reasoning.</i> arXiv:2609.04963 <span class="src-date">2026-09-04</span>；Suleymanzade 等 <i>Thinking with Looped Flows</i> arXiv:2609.11801 <span class="src-date">2026-09-10</span>；<i>Fixed-Point Reasoners: Stable and Adaptive Deep Looped Transformers</i> arXiv:2606.18206 <span class="src-date">2026-06-16</span>. <a href="https://arxiv.org/abs/2609.04963">link</a></li>
+  <li>Huang, B. 等. <i>Awesome-Loop-Models</i>（论文清单 + 交互浏览器 + Benhao 系列消融博客）. GitHub <span class="src-date">2026-04-24 发布，2026-09 仍更新</span>. <a href="https://github.com/huskydoge/Awesome-Loop-Models">link</a></li>
+  <li>Viakhirev, I., Borodin, K., Almutairi, A., Barannikov, S., Abramov, M., Mkrtchian, G. <i>Think Shallow, Solve Deep: Controlling Recurrent Dynamics for Reliable Test-Time Depth.</i> arXiv:2608.18222 <span class="src-date">2026-08-18</span>. <a href="https://arxiv.org/abs/2608.18222">link</a></li>
+  <li>Goyal, S., Agrawal, S., Anil, G.G., Jain, P., Paul, S., Kusupati, A. <i>ELT: Elastic Looped Transformers for Visual Generation.</i> arXiv:2604.09168 <span class="src-date">2026-04-10</span> · EDGE 2026. <a href="https://arxiv.org/abs/2604.09168">link</a></li>
+  <li>Lu, Z. <i>LoopVAE: Recurrent Depth Across Scales for Visual Tokenization.</i> arXiv:2609.11516 <span class="src-date">2026-09-10</span>. <a href="https://arxiv.org/abs/2609.11516">link</a></li>
+  <li>Fan, Y., Du, Y., Ramchandran, K., Lee, K. <i>Looped Transformers for Length Generalization.</i> arXiv:2409.15647 <span class="src-date">2024-09-24</span> · ICLR 2025. <a href="https://arxiv.org/abs/2409.15647">link</a></li>
+  <li><i>DeepLoop: Depth Scaling for Looped Transformers.</i> arXiv:2607.13491 <span class="src-date">2026-07-15</span>. <a href="https://arxiv.org/abs/2607.13491">link</a></li>
+  <li>Fan, T. 等. <i>Bridging the Gap Between Latent and Explicit Reasoning with Looped Transformers.</i> arXiv:2606.31779 <span class="src-date">2026-06-30</span>. <a href="https://arxiv.org/abs/2606.31779">link</a></li>
+  <li>Sapunov, G. <i>Universal Transformers Need Memory: Depth-State Trade-offs in Adaptive Recursive Reasoning.</i> arXiv:2604.21999 <span class="src-date">2026-04-23</span>. <a href="https://arxiv.org/abs/2604.21999">link</a></li>
+  <li>Hayduk, C. <i>On the Looped Transformers Controversy.</i> X 长文 <span class="src-date">2026-04-19</span>. <a href="https://x.com/ChrisHayduk/status/2045947623572688943">link</a></li>
+  <li>Geiping, J. 等. <i>recurrent-pretraining</i>（Huginn 训练 / 推理代码）. GitHub: seal-rg/recurrent-pretraining <span class="src-date">2025-02 起</span>. <a href="https://github.com/seal-rg/recurrent-pretraining">link</a></li>
+  <li>Hao, S. 等. <i>coconut</i>（COCONUT 官方实现）. GitHub: facebookresearch/coconut <span class="src-date">2024-12 起</span>. <a href="https://github.com/facebookresearch/coconut">link</a></li>
+  <li>Popescu, A.C., Sáez de Ocáriz Borde, H., Liò, P. <i>Adaptive Depth in Looped Transformers: Diagnosing Learned Halting Gates and Trajectory Readouts.</i> arXiv:2607.20519 <span class="src-date">2026-07-08</span>. <a href="https://arxiv.org/abs/2607.20519">link</a></li>
+  <li>Xu, K., Sato, I. <i>On Expressive Power of Looped Transformers: Theoretical Analysis and Enhancement via Timestep Encoding.</i> arXiv:2410.01405 <span class="src-date">2024-10-02</span> · ICML 2025. <a href="https://arxiv.org/abs/2410.01405">link</a></li>
+  <li>Chen, B., Li, X., Liang, Y., Shi, Z., Song, Z. <i>Bypassing the Exponential Dependency: Looped Transformers Efficiently Learn In-context by Multi-step Gradient Descent.</i> arXiv:2410.11268 <span class="src-date">2024-10-15</span> · AISTATS 2025. <a href="https://arxiv.org/abs/2410.11268">link</a></li>
+  <li>Gatmiry, K., Saunshi, N., Reddi, S.J., Jegelka, S., Kumar, S. <i>Can Looped Transformers Learn to Implement Multi-step Gradient Descent for In-context Learning?</i> arXiv:2410.08292 <span class="src-date">2024-10-11</span>. <a href="https://arxiv.org/abs/2410.08292">link</a></li>
+</ol>
+
+<div class="callout"><b>关于"传闻类"引用的说明</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>），OpenAI 与 Anthropic 从未官方确认其模型使用循环深度架构。请以"未经证实的传闻 + 技术合理性分析"的口径理解与转述。</div>
+
+<footer>
+  <p><b>系列阅读</b>：本文是本站架构系列的续篇，姊妹篇：<a href="attention-evolution.html">《注意力结构演进：MHA → MLA 与混合架构》</a> · <a href="moe-survey.html">《MoE 全景》</a> · <a href="spec-decoding-post-training.html">《投机解码的后训练》</a>。代码解析所涉仓库已 clone 至本地（<code>spec/recurrent-pretraining</code>、<code>spec/coconut</code>、<code>spec/Awesome-Loop-Models</code>）。</p>
+  <p>© 2026 PiratePai · <a href="../index.html">← 返回首页</a></p>
+</footer>
+
+</div>
+</body>
+</html>
