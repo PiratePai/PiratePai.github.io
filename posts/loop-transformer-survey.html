@@ -324,7 +324,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
   <li><span class="t">2025-10</span> · <b>Ouro</b>（Zhu 等, 字节联动学界）<span class="cite">[17]</span> —— 首批"把推理内置进预训练"的循环语言模型：7.7T token、1.4B/2.6B，对标最高 12B 模型；<b>同月</b>：<b>PLT 并行循环 Transformer</b><span class="cite">[18]</span> 跨循环并行 + KV 共享，循环几乎零额外延迟；<b>TRM</b><span class="cite">[15]</span> 7M 参数 ARC-AGI-1 44.6%；<b>并行采样器</b><span class="cite">[19]</span> 免训练加速 Huginn 5×。</li>
   <li><span class="t">2025-11</span> · <b>循环化改造</b>（McLeish 等）<span class="cite">[20]</span> —— 给现成前馈 LM 加装循环深度，比同预算继续后训练更划算。</li>
   <li><span class="t">2026 上半年</span> · <b>定律与稳定性之战</b> —— Parcae 缩放定律<span class="cite">[23]</span>、等深度缩放定律<span class="cite">[24]</span>、残差缩放理论<span class="cite">[33]</span>、机制分析（循环不动点）<span class="cite">[25]</span>、CoT 与压缩循环的内存分离定理<span class="cite">[34]</span>；系统侧 MELT（KV 固定内存）<span class="cite">[30]</span>、LT2 线性时间<span class="cite">[28]</span>；<b>业界</b>：Astra 传闻<span class="cite">[21][22]</span>、Nanbeige4.2-3B 公开采用循环预训练<span class="cite">[21]</span>。</li>
-  <li><span class="t">2026 下半年</span> · <b>全面扩散</b> —— 循环结构进入视觉生成（ELT<span class="cite">[38]</span>）、VAE（LoopVAE<span class="cite">[39]</span>）、推荐（RecRec）、世界模型、扩散语言模型（Thinking with Looped Flows<span class="cite">[35]</span>）；理论工具进入动力系统深处（分形收敛盆<span class="cite">[35]</span>、Jacobian 视角）；SMELT 把 MoE×循环缩放定律合流<span class="cite">[32]</span>。专用论文清单突破 200 篇<span class="cite">[36]</span>。</li>
+  <li><span class="t">2026 下半年</span> · <b>全面扩散</b> —— 循环结构进入视觉生成（ELT<span class="cite">[38]</span>）、VAE（LoopVAE<span class="cite">[39]</span>）、推荐（RecRec）、世界模型（Looped World Models<span class="cite">[59]</span>）、扩散语言模型（Thinking with Looped Flows<span class="cite">[35]</span>）、图像恢复与解混（i-DEQ<span class="cite">[55]</span>、DEQ 解混<span class="cite">[58]</span>，见 11.5 专题）；理论工具进入动力系统深处（分形收敛盆<span class="cite">[35]</span>、Jacobian 视角）；SMELT 把 MoE×循环缩放定律合流<span class="cite">[32]</span>。专用论文清单突破 200 篇<span class="cite">[36]</span>。</li>
 </ul>
 
 <div class="callout"><b>一句话概括四个阶段</b>：① 2016–2022 想清楚"能不能循环"（ACT/UT/DEQ/PonderNet）；② 2023–2024 想清楚"循环有什么用"（可编程性、参数效率、学习算法）；③ 2024 末–2025 想清楚"循环能推理"（潜空间思考、从零预训练、小模型打大模型）；④ 2025 末–2026 想清楚"循环能落地"（工业预训练、并行化、缩放定律、全模态扩散）。</div>
@@ -769,15 +769,52 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <h3>11.4 应用扩散（不止语言）</h3>
 <table>
   <tr><th>领域</th><th>代表工作</th><th>时间</th></tr>
-  <tr><td>视觉生成 / 分割</td><td><b>ELT</b> 弹性循环视觉生成（EDGE 2026）<span class="cite">[38]</span>；<b>RD-ViT</b> 循环深度 ViT 语义分割；<b>ProgResViT</b> 分辨率×宽度渐进循环（ImageNet 平均省 31% 算力）</td><td>2026-04 ~ 09</td></tr>
+  <tr><td>视觉生成 / 分割</td><td><b>ELT</b> 弹性循环视觉生成（EDGE 2026）<span class="cite">[38]</span>；<b>Fixed-Point MGM</b> 不动点 masked 生成<span class="cite">[56]</span>；<b>VIAR</b> 平衡层视觉自回归<span class="cite">[57]</span>；<b>RD-ViT</b> 循环深度 ViT 语义分割；<b>ProgResViT</b> 分辨率×宽度渐进循环（ImageNet 平均省 31% 算力）</td><td>2026-04 ~ 09</td></tr>
   <tr><td>视觉 token 化</td><td><b>LoopVAE</b>：编码器/解码器核心在尺度内外复用，28 次共享块调用省参数</td><td>2026-09<span class="cite">[39]</span></td></tr>
+  <tr><td>图像恢复 / 融合</td><td>低层视觉由 DEQ 隐式深度一脉承接：<b>i-DEQ</b> 惯性平衡模型修复<span class="cite">[55]</span>、DEQ 光流<span class="cite">[52]</span>、DEQ 高光谱解混<span class="cite">[58]</span>；图像融合仍近乎空白（详见 11.5 专题）</td><td>2015 · 2022 ~ 2026</td></tr>
   <tr><td>世界模型 / 扩散 LM</td><td><b>Looped World Models</b>；<b>Looped Diffusion Language Models</b>；<b>Thinking with Looped Flows</b>（循环网络 + 概率流积分）</td><td>2026-06 ~ 09<span class="cite">[35]</span></td></tr>
   <tr><td>多模态 / 嵌入</td><td><b>ReLoop-UME</b>（可学习检索寄存器的循环深度通用多模态嵌入）；<b>Reason Through the Latent</b>（循环视觉推理）；<b>Looping Back to Move Forward</b>（循环改造多模态大模型）</td><td>2026-02 ~ 09<span class="cite">[36]</span></td></tr>
   <tr><td>推荐 / 图 / 表格 / SSM</td><td><b>RecRec</b>×2（循环兴趣精炼推荐）；循环图消息传递的停止 vs 收敛理论；表格基础模型单层循环省 80% 参数；<b>循环状态空间 LM</b>（Mamba 块循环 + 出口选择）</td><td>2026-04 ~ 07<span class="cite">[36]</span></td></tr>
   <tr><td>RL / 决策</td><td><b>On the Role of Computation in RL</b>（ICML 2026）：极小变量算力架构在 31 个 RL 任务上提升长视野泛化</td><td>2026-02<span class="cite">[36]</span></td></tr>
 </table>
 
-<h3>11.5 业界动向小结</h3>
+<h3>11.5 图像处理专题：循环深度进入视觉的三条战线与一个空白点</h3>
+<p class="lead">循环结构在图像任务里用起来了吗？答案分三层：<b>生成侧已经是热点，去噪/超分等恢复侧由 DEQ 隐式深度一脉承接，图像融合侧基本空白</b>。还有一个容易被忽略的历史事实——图像领域其实是"权重共享循环"思想最早的家。</p>
+
+<h4>战线零（历史）：循环思想 2015 年就诞生在超分任务里</h4>
+<p><b>DRCN</b>（Deeply-Recursive Convolutional Network）把一个卷积层递归使用最多 16 次做图像超分辨率，用递归监督 + 跳连训练"深而不胖"的超分网络<span class="cite">[51]</span>——比 NLP 侧的 Universal Transformer（2018）早了整整三年。低层视觉当年的动机与今天的 Loop Transformer 完全同构：<b>深度带来感受野与恢复精度，参数却不允许随深度线性增长</b>。2020 年的多尺度 DEQ（MDEQ）把同一思想推进到 ImageNet 分类与语义分割<span class="cite">[60]</span>，2022 年 DEQ 光流估计（CVPR 2022）再把"求不动点"用于光流<span class="cite">[52]</span>——视觉任务的 DEQ 支线从未中断，只是常被语言侧的热闹盖住。</p>
+
+<h4>战线一（生成）：ELT / 不动点 masked 生成 / 平衡层自回归</h4>
+<p>2026 年循环 Transformer 正式进入图像与视频生成主战场，三种范式各有代表：</p>
+<ul>
+  <li><b>ELT</b>（EDGE 2026）：把类条件生成中层堆叠换成权重共享循环块，配 <b>Intra-Loop 自蒸馏（ILSD）</b>——同一次训练里，少循环的"学生配置"持续向满循环的"教师配置"对齐，使同一组权重可在推理时任选循环数。同等推理算力下参数省 4×，ImageNet 256 FID 2.0、UCF-101 FVD 72.8<span class="cite">[38]</span>。</li>
+  <li><b>Fixed-Point Masked Generative Modeling</b>（EPFL）：把 masked 生成模型去噪器的中段替换为"共享注意力层的不动点求解"，一致性训练 + 求解器状态复用，深度按需自适应<span class="cite">[56]</span>。</li>
+  <li><b>VIAR</b>（ICML 2026）：视觉自回归生成器的中层堆叠换成隐式平衡层，Jacobian-Free 反传训练，按生成尺度分配迭代预算<span class="cite">[57]</span>。</li>
+  <li><b>Looped World Models</b>：共享块迭代精炼潜在环境状态、按预测步自适应潜深度，报告最高 100× 参数效率<span class="cite">[59]</span>——视觉世界模型（下一帧预测）是循环深度天然的视觉主场。</li>
+</ul>
+<p>更早的两座"理论桥"值得单独记：<b>Deep Equilibrium Approaches to Diffusion Models</b>（2022-10）把扩散采样链重写为联合不动点系统、训练网络直接跳到平衡点，是 consistency 蒸馏的思想前身<span class="cite">[53]</span>；<b>Deep Equilibrium Diffusion Restoration with Parallel Sampling</b>（2023-11）把 DEQ 式表述用于扩散图像修复并实现并行采样<span class="cite">[54]</span>。</p>
+
+<blockquote class="q">
+  <span class="en">"…a highly parameter-efficient class of visual generative models based on a recurrent transformer architecture… [with] any-time inference capability with dynamic trade-offs between computational cost and generation quality."</span>
+  <span class="zh">……一类基于循环 Transformer 架构、参数高度高效的视觉生成模型……[具备]随时推理能力，可在计算成本与生成质量之间动态权衡。</span>
+  <span class="src">— Goyal, Agrawal, Anil, Jain, Paul, Kusupati,《ELT: Elastic Looped Transformers for Visual Generation》, arXiv:2604.09168, 2026-04-10 · EDGE 2026 [38]</span>
+</blockquote>
+
+<h4>战线二（恢复）：去噪 / 超分等逆问题由 DEQ 一脉承接</h4>
+<p>单幅图像去噪、超分、去模糊这类逆问题，目前几乎没有"显式有限循环 Transformer"的专门论文——循环思想在这里主要以 <b>DEQ（隐式深度 / 不动点）</b>的形态落地：把重建图像定义为学到的非线性算子的不动点，按需迭代求解。最新代表 <b>i-DEQ</b>（2026-05，Bordeaux/Papadakis 组）为不动点迭代引入<b>动量（惯性）项</b>，学到的非凸正则更稳定、对退化类型更鲁棒，并把 DEQ 推理时间约减一半<span class="cite">[55]</span>。</p>
+<blockquote class="q">
+  <span class="en">"Deep Equilibrium Models (DEQs) are an established framework for image restoration that learn a problem-adapted regularization by solving a fixed-point problem."</span>
+  <span class="zh">深度平衡模型（DEQ）是图像修复领域一个成熟的框架：它通过求解一个不动点问题，来学习与问题相适应的正则化。</span>
+  <span class="src">— Clerc, Renaud, De Seneville, Papadakis,《i-DEQ: A stable inertial deep equilibrium model for image restoration》, arXiv:2605.19705, 2026-05-19 [55]</span>
+</blockquote>
+<p>视频侧另有层次化循环 Transformer 做视频超分（Engineering Applications of AI, 2025/2026）、光流引导循环 Transformer 同时做视频去噪+超分（ICTACT IJIVP, 2025）等期刊工作——但注意它们属于<b>帧间时间维循环</b>而非深度维循环（区分见下方说明）。</p>
+
+<h4>战线三（融合）：近乎空白，是机会点</h4>
+<p>红外-可见光融合、多聚焦/多曝光融合、pansharpening 等融合任务中，直接以"循环深度"为主打的工作目前几乎没有可核实的（IEEE 有一篇标题含 "Deep…" 的 DICFusion 红外-可见光融合，付费墙内无法核实机制，此处不作定论）。最接近的先例是 <b>DEQ 高光谱解混</b>（2026-04）：把解混的重建-梯度算子换成可学习卷积更新、求隐式不动点、常数显存反传<span class="cite">[58]</span>——而解混正是融合家族的逆问题姊妹。2025–2026 年 pansharpening 的主流是扩散模型（CVPR 2025 三篇），"循环深度作为第三算力轴"的故事在这里还没人讲。<b>融合的"多源迭代精炼"天然适合循环 / 不动点表述，DEQ 解混的框架基本可以平移</b>——这是本综述判断未来 1–2 年最可能冒出新工作的图像子领域。</p>
+
+<div class="callout"><b>一个必须分清的概念：时间维迭代 ≠ 深度维循环</b>。扩散模型本身的 T 步去噪（整个 UNet/DiT 跨时间步共享权重）、RAFT 式光流迭代、视频帧间递归，都是沿任务自带时间轴的<b>整网络级</b>迭代；而 ELT / LoopVAE / VIAR / Huginn 式循环发生在<b>单次前向内部</b>的层之间。Awesome-Loop-Models 的收录标准也正是只收后者、把扩散时间步迭代列为"邻域工作"<span class="cite">[36]</span>。2026 年的最新趋势恰是两者交汇：把不动点求解 / 共享层循环塞进生成器或修复算子的<b>内部</b>（Fixed-Point MGM、i-DEQ、VIAR），而不是只在时间轴上迭代。</div>
+
+<h3>11.6 业界动向小结</h3>
 <ul>
   <li><b>开源工业模型</b>：Ouro（字节联动，2025-10）与 Nanbeige4.2-3B（28T token 循环预训练，2026 公开技术报告）是两个可审计的锚点<span class="cite">[17][21]</span>；Huginn 权重/数据/代码三件套开源<span class="cite">[45]</span>。</li>
   <li><b>闭源传闻</b>：OpenAI Astra（"以某种方式掩盖部分或全部推理过程"）与 Anthropic "Mythos" 的社区推测均指向循环深度，但均未获官方证实——引用时请保持"传闻"定语<span class="cite">[21][22][44]</span>。</li>
@@ -860,6 +897,16 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li>Xu, K., Sato, I. <i>On Expressive Power of Looped Transformers: Theoretical Analysis and Enhancement via Timestep Encoding.</i> arXiv:2410.01405 <span class="src-date">2024-10-02</span> · ICML 2025. <a href="https://arxiv.org/abs/2410.01405">link</a></li>
   <li>Chen, B., Li, X., Liang, Y., Shi, Z., Song, Z. <i>Bypassing the Exponential Dependency: Looped Transformers Efficiently Learn In-context by Multi-step Gradient Descent.</i> arXiv:2410.11268 <span class="src-date">2024-10-15</span> · AISTATS 2025. <a href="https://arxiv.org/abs/2410.11268">link</a></li>
   <li>Gatmiry, K., Saunshi, N., Reddi, S.J., Jegelka, S., Kumar, S. <i>Can Looped Transformers Learn to Implement Multi-step Gradient Descent for In-context Learning?</i> arXiv:2410.08292 <span class="src-date">2024-10-11</span>. <a href="https://arxiv.org/abs/2410.08292">link</a></li>
+  <li>Kim, J., Lee, J.K., Lee, K.M. <i>Deeply-Recursive Convolutional Network for Image Super-Resolution.</i> arXiv:1511.04491 <span class="src-date">2015-11-14</span> · CVPR 2016. <a href="https://arxiv.org/abs/1511.04491">link</a></li>
+  <li>Bai, S., Geng, Z., Savani, Y., Kolter, J.Z. <i>Deep Equilibrium Optical Flow Estimation.</i> arXiv:2204.08442 <span class="src-date">2022-04-18</span> · CVPR 2022. <a href="https://arxiv.org/abs/2204.08442">link</a></li>
+  <li>Pokle, A. 等. <i>Deep Equilibrium Approaches to Diffusion Models.</i> arXiv:2210.12867 <span class="src-date">2022-10</span>. <a href="https://arxiv.org/abs/2210.12867">link</a></li>
+  <li><i>Deep Equilibrium Diffusion Restoration with Parallel Sampling.</i> arXiv:2311.11600 <span class="src-date">2023-11</span>. <a href="https://arxiv.org/abs/2311.11600">link</a></li>
+  <li>Clerc, A., Renaud, M., De Seneville, B.D., Papadakis, N. <i>i-DEQ: A stable inertial deep equilibrium model for image restoration.</i> arXiv:2605.19705 <span class="src-date">2026-05-19</span>. <a href="https://arxiv.org/abs/2605.19705">link</a></li>
+  <li>Miele, A., Qin, Y., Carballo-Castro, A., Deschenaux, J., Frossard, P. <i>Fixed-Point Masked Generative Modeling.</i> arXiv:2605.31215 <span class="src-date">2026-05-29</span>. <a href="https://arxiv.org/abs/2605.31215">link</a></li>
+  <li>Jiang, P., Luo, J., Lin, L., Huang, Z., Li, X. <i>Visual Implicit Autoregressive Modeling.</i> arXiv:2605.01220 <span class="src-date">2026-05-02</span> · ICML 2026. <a href="https://arxiv.org/abs/2605.01220">link</a></li>
+  <li>Wang, C., Gao, J., Zhu, F., Chen, J. <i>A Deep Equilibrium Network for Hyperspectral Unmixing.</i> arXiv:2604.11279 <span class="src-date">2026-04-13</span>. <a href="https://arxiv.org/abs/2604.11279">link</a></li>
+  <li>Lu, H.A., Wei, Z.V., Zhang, Q., 等, Lam, W. <i>Looped World Models.</i> arXiv:2606.18208 <span class="src-date">2026-06-16</span>. <a href="https://arxiv.org/abs/2606.18208">link</a></li>
+  <li>Bai, S., Wang, Z., Kolter, J.Z. <i>Multiscale Deep Equilibrium Models.</i> arXiv:2006.08656 <span class="src-date">2020-06-15</span> · NeurIPS 2020. <a href="https://arxiv.org/abs/2006.08656">link</a></li>
 </ol>
 
 <div class="callout"><b>关于"传闻类"引用的说明</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>），OpenAI 与 Anthropic 从未官方确认其模型使用循环深度架构。请以"未经证实的传闻 + 技术合理性分析"的口径理解与转述。</div>
