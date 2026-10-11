@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 实战（GPU/NPU）</title>
+<style>
+  :root{
+    --ink:#e8eaed; --muted:#aeb4bd; --line:#2a2f3a; --bg:#171a21; --panel:#1b2127;
+    --blue:#6ea8ff; --green:#41d1a7; --purple:#9d7bff; --orange:#ffb454; --red:#ff6b6b;
+    --code-bg:#0d1117; --code-fg:#e6edf3;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; color:var(--ink); background:var(--bg);
+    font-family:"Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size:15.5px; line-height:1.85;
+  }
+  .layout{display:flex; max-width:1280px; margin:0 auto;}
+  nav.toc{
+    width:270px; flex:0 0 270px; position:sticky; top:0; align-self:flex-start;
+    height:100vh; overflow-y:auto; padding:24px 14px 40px 18px;
+    border-right:1px solid var(--line); font-size:13px; background:#1b2128;
+  }
+  nav.toc h4{margin:0 0 8px; font-size:12px; color:var(--muted); letter-spacing:1px;}
+  nav.toc a{display:block; color:var(--muted); text-decoration:none; padding:4px 8px; border-radius:6px;}
+  nav.toc a:hover{background:#1d2125; color:var(--ink);}
+  nav.toc a.l2{padding-left:20px; font-size:12.5px;}
+  nav.toc .toc-title{font-weight:700; color:var(--ink); margin-bottom:10px; font-size:14px;}
+  .back-home{display:inline-block; margin-bottom:14px; color:var(--blue); text-decoration:none; font-size:13px;}
+  @media (max-width: 980px){ nav.toc{display:none;} }
+  main{flex:1; min-width:0; padding:40px 48px 80px;}
+  @media (max-width: 640px){ main{padding:24px 16px 60px;} }
+  header.hero{border-bottom:3px solid var(--ink); padding-bottom:18px; margin-bottom:28px;}
+  header.hero .kicker{color:var(--green); font-size:13px; letter-spacing:2px; font-weight:700;}
+  header.hero h1{font-size:29px; margin:6px 0 10px; line-height:1.4;}
+  header.hero .sub{color:var(--muted); font-size:14px;}
+  h2{font-size:24px; margin-top:56px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+  h2 .no{color:var(--blue); margin-right:8px; font-family:Georgia, serif;}
+  h3{font-size:18.5px; margin-top:34px; color:#dfe5ee;}
+  h4{font-size:16px; margin-top:24px; color:#d5dbe6;}
+  p{margin:12px 0;}
+  a{color:var(--blue); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  ul,ol{padding-left:26px;}
+  li{margin:6px 0;}
+  code{
+    font-family:"Cascadia Code",Consolas,Menlo,monospace; font-size:13px;
+    background:var(--code-bg); color:var(--code-fg);
+    padding:2px 6px; border-radius:5px; border:1px solid #21262d;
+  }
+  pre{
+    background:var(--code-bg); border:1px solid #21262d; border-radius:10px;
+    padding:16px 18px; overflow-x:auto; line-height:1.6; font-size:13px;
+  }
+  pre code{background:none; border:none; padding:0;}
+  table{border-collapse:collapse; width:100%; margin:16px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:8px 11px; text-align:left; vertical-align:top;}
+  th{background:#1d2430; color:#cfe0ff; font-weight:600;}
+  tr:nth-child(even) td{background:#191f28;}
+  blockquote{
+    margin:14px 0; padding:10px 16px; border-left:3px solid var(--blue);
+    background:#1a2230; border-radius:0 8px 8px 0; color:#c6d2e2;
+  }
+  .tldr{
+    background:linear-gradient(135deg, rgba(65,209,167,.10), rgba(110,168,255,.10));
+    border:1px solid #2c3a4d; border-radius:12px; padding:18px 22px; margin:22px 0;
+  }
+  .tldr b{color:var(--green);}
+  .warn{
+    background:rgba(255,180,84,.08); border:1px solid #4a3a25; border-radius:10px;
+    padding:14px 18px; margin:16px 0;
+  }
+  .warn b{color:var(--orange);}
+  .why{
+    background:rgba(157,123,255,.08); border:1px solid #3c3352; border-radius:10px;
+    padding:14px 18px; margin:16px 0;
+  }
+  .why b{color:var(--purple);}
+  /* 引用小字：出处 + 原文/译文 */
+  small.cite{
+    display:block; color:#8a94ab; font-size:12px; line-height:1.7;
+    margin:6px 0 14px; padding-left:12px; border-left:2px solid #39424f;
+  }
+  small.cite .src{color:#7fa7e8;}
+  .tag{
+    display:inline-block; font-size:11.5px; padding:1px 9px; border-radius:999px;
+    border:1px solid #33405a; color:var(--blue); margin-right:6px; margin-bottom:4px;
+  }
+  .tag.hot{color:var(--orange); border-color:#54432a;}
+  .flow{
+    background:#0f1420; border:1px solid #26304a; border-radius:12px;
+    padding:18px 20px; margin:18px 0; font-size:13.5px;
+  }
+  .flow .step{display:flex; gap:12px; margin:10px 0;}
+  .flow .n{
+    flex:none; width:26px; height:26px; border-radius:50%; background:#233049;
+    display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--blue); font-size:13px;
+  }
+  .gpu-npu{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
+  @media (max-width:860px){ .gpu-npu{grid-template-columns:1fr;} }
+  .gpu-npu .col{border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:#1a202b;}
+  .gpu-npu .col h4{margin-top:0;}
+  .gpu-npu .gpu h4{color:var(--green);}
+  .gpu-npu .npu h4{color:var(--orange);}
+  .ref-list{font-size:13px;}
+  .ref-list li{margin:8px 0;}
+  footer{border-top:1px solid var(--line); margin-top:60px; padding-top:18px; color:var(--muted); font-size:13px;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <div class="toc-title">🚀 本文导航</div>
+  <a class="back-home" href="../index.html">← 返回首页</a>
+  <h4>原理与地图</h4>
+  <a href="#s0">0. TL;DR</a>
+  <a href="#s1">1. 为什么不动权重也能加速</a>
+  <a class="l2" href="#s1-1">1.1 一分钟经济课：卡在哪</a>
+  <a class="l2" href="#s1-2">1.2 六个加速杠杆</a>
+  <a class="l2" href="#s1-3">1.3 多模态生成模型特殊在哪</a>
+  <a href="#s2">2. 技术地图与 2024–2026 动态</a>
+  <a class="l2" href="#s2-1">L1 服务与调度层</a>
+  <a class="l2" href="#s2-2">L2 注意力与 KV 层</a>
+  <a class="l2" href="#s2-3">L3 量化层</a>
+  <a class="l2" href="#s2-4">L4 投机解码层</a>
+  <a class="l2" href="#s2-5">L5 多模态生成专列</a>
+  <a class="l2" href="#s2-6">L6 Agent 自动优化层 ★</a>
+  <a href="#s3">3. Agent 自动优化：三条研究线与三个教训</a>
+  <a class="l2" href="#s3-1">3.1 三条研究线</a>
+  <a class="l2" href="#s3-2">3.2 三个教训</a>
+  <a href="#s4">4. MiniMax-H3 × ZCode 实战流程</a>
+  <a class="l2" href="#s4-1">4.1 H3 架构速览</a>
+  <a class="l2" href="#s4-2">4.2 通用闭环协议</a>
+  <a class="l2" href="#s4-3">4.3 GPU 完整流程</a>
+  <a class="l2" href="#s4-4">4.4 NPU 流程与差异</a>
+  <a class="l2" href="#s4-5">4.5 每一步"为什么"</a>
+  <a href="#s5">5. GPU vs NPU 对照总表</a>
+  <a href="#s6">6. 参考文献</a>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="kicker">INFERENCE · TRAINING-FREE · AGENT-AUTOTUNE</div>
+  <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
+  <div class="sub">2026-10-11 · 综合开源项目（NVIDIA / 字节 / 腾讯 / Red Hat / 清华）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
+</header>
+
+<h2 id="s0"><span class="no">0.</span>TL;DR</h2>
+<div class="tldr">
+<b>一句话：</b>大模型推理优化正在从"手艺活"变成"Agent 工程"——2026 年，字节/英伟达/Red Hat 的论文证明了
+<b>Agent 能以远超 torch.compile 的质量自动生成和优化 GPU kernel</b>（字节 CUDA Agent 在 KernelBench 上 96.8% 的用例跑赢 torch.compile，几何均值 2.11×
+<small class="cite"><span class="src">[CUDA Agent, ByteDance Seed × 清华 AIR, arXiv:2602.24286, 2026-02-27]</span>
+原文：“CUDA Agent achieves state-of-the-art results on KernelBench, delivering 100%, 100%, and 92% faster rate over torch.compile on KernelBench Level-1/2/3 splits.” 译：在 KernelBench 三个难度级上，分别有 100%/100%/92% 的用例快于 torch.compile。</small>），
+而以 ZCode 为代表的编码 Agent 配上一份<b>操作手册（AGENTS.md）+ 基准脚本 + 质量门</b>，就能对任意部署形态的模型自动做 training-free 调优：
+<b>度量 → 画像 → 假设 → A/B 验证 → 端到端质量门 → 沉淀报告</b>。<br><br>
+本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 SGLang v0.5.21 / vLLM v0.27 / TensorRT-LLM 1.0 / Dynamo 1.0 / FlashInfer v0.7 的版本事实）；
+(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型）为例的 <b>ZCode 自动化优化完整流程</b>，
+GPU（SGLang/B200/H100）与 NPU（昇腾 vLLM-Ascend + MindIE-SD）分别给出，并解释每步为什么这么做。
+配套可运行脚手架见 <code>zcode-autotune/</code>（AGENTS.md + bench_gen.py + knob_search.py + quality_gate.py）。
+</div>
+
+<h2 id="s1"><span class="no">1.</span>为什么不动权重也能加速：给本科生的原理课</h2>
+<p>“Training-free（免训练）推理优化”指的是<b>不修改模型权重、不做梯度更新</b>，只改变模型运行时的“环境”——执行哪个算子、数据存哪、按什么顺序算、用什么精度算——来降低延迟和显存、提高吞吐。为什么这能奏效？因为训练得到的权重只决定了“算什么”，而<b>“怎么算”存在巨大的浪费</b>。</p>
+
+<h3 id="s1-1">1.1 一分钟硬件经济课：卡在哪</h3>
+<p>把 GPU 想成一家中央厨房：<b>算力（FLOPS）是灶台数量，显存带宽（GB/s）是传菜电梯</b>。做一道菜（一个算子）既要用灶台（计算）也要电梯送原料（读写显存）。两个指标相除得到“这道菜每运一份原料能炒多少菜”——<b>算术强度（arithmetic intensity）</b>。如果一道菜只需要来回运一次料却只炒一勺（比如逐元素加法），电梯先忙不过来——这叫<b>访存受限（memory-bound）</b>；如果像矩阵乘法那样一次进料能炒一大桌，灶台先满载——这叫<b>计算受限（compute-bound）</b>。</p>
+<p>关键事实：<b>大模型自回归解码（一个 token 一个 token往外蹦）是极端 memory-bound 的</b>。每生成一个 token，都要把全部权重从显存搬一遍，却只做一点点乘法。所以解码阶段的提速秘诀几乎全在“少搬东西”：权重少搬（量化）、KV 少存（KV cache 压缩）、一次搬多个 token 的活儿（投机解码）、让电梯尽量满载（batching）。而<b>视频生成这类扩散模型的去噪阶段通常是 compute-bound 的</b>，秘诀则是“少算几步/少算几份”（步数削减、缓存复用、注意力量化）。</p>
+
+<h3 id="s1-2">1.2 六个加速杠杆（全部不碰权重）</h3>
+<ol>
+  <li><b> batching（拼单）</b>：电梯一次运 1 份菜和运 16 份菜耗时几乎一样，把 16 个请求拼一起，人均成本骤降。Orca 的 continuous batching（2022）解决了“拼单中途有人下车”的问题。
+  <small class="cite"><span class="src">[Orca: A Distributed Serving System for Transformer-Based Generative Models, OSDI 2022]</span>译要点：提出迭代级调度（iteration-level scheduling），每一步都动态重组 batch，而不是等整批完成。</small></li>
+  <li><b>KV Cache 与分页（记账）</b>：自回归生成时把已算过的 Key/Value 存起来避免重算；vLLM 的 PagedAttention 借操作系统“分页”思想管理这块缓存，把碎片浪费压到几乎为零。
+  <small class="cite"><span class="src">[Efficient Memory Management for LLM Serving with PagedAttention (vLLM), SOSP 2023]</span>译要点：把 KV cache 切成固定大小的块（block）按需分配，显存利用率显著提升、吞吐翻倍级。</small></li>
+  <li><b>量化（换成小包装）</b>：权重/激活从 16 比特压到 8/4 比特，电梯每次运的“份数”翻倍。GPTQ（2022）/AWQ（2023）证明 4 比特权重量化几乎不掉精度；2024–2025 的 FP8（Hopper 起）与 NVFP4/MXFP4（Blackwell 起）把它做进了硬件张量核。
+  <small class="cite"><span class="src">[AWQ: Activation-aware Weight Quantization, MLSys 2024; GPTQ, ICLR 2023]</span>AWQ 原文要点：“activation-aware” —— 依据激活分布保护少量关键权重通道即可保住精度。</small></li>
+  <li><b>投机解码（先草稿后校对）</b>：让小模型/草稿头连写 k 个 token，大模型一次并行校对，接受其中对的——数学上证明与直接采样<b>同分布</b>（无损）。EAGLE/MTP 是训练草稿头的代表；训练-free 的变体则用模型自身浅层或检索来起草。
+  <small class="cite"><span class="src">[Fast Inference from Transformers via Speculative Decoding, ICML 2023]</span>原文要点：rejective sampling 保证了输出分布与目标模型一致。</small></li>
+  <li><b>算子与图优化（改菜谱）</b>：FlashAttention（2022–2024）把注意力改成分块计算避免物化巨大注意力矩阵，从算法上把 memory-bound 的 softmax 注意力变成接近 compute-bound；torch.compile/CUDA Graph 消除 Python 与 kernel 启动开销。这是“写更快代码”的杠杆，也是 Agent 最擅长介入的杠杆。
+  <small class="cite"><span class="src">[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness, NeurIPS 2022]</span>译要点：以 IO 复杂度为目标重新组织注意力计算，精确（非近似）但更快更省显存。</small></li>
+  <li><b>缓存复用（抄上一题的答案）</b>：多轮 Agent 场景里，请求之间共享大段前缀 → prefix caching（SGLang RadixAttention 命中率可达 80%+）；扩散模型相邻去噪步的特征变化很小 → 步间特征缓存（TeaCache 一族）。这是“内容层面的杠杆”，收益经常最大。</li>
+</ol>
+
+<h3 id="s1-3">1.3 多模态生成模型（DiT）特殊在哪</h3>
+<p>像 MiniMax-H3 这样的视频/音频生成模型主干是 <b>Diffusion Transformer（DiT）</b>：同一个网络被反复执行几十次（去噪步），每次只对输入做微小修正。这带来三个独有的 training-free 机会：</p>
+<ul>
+  <li><b>步间冗余</b>：相邻步的中间特征高度相似 → 跳步/缓存（TeaCache：用 timestep embedding 判断“这步可以复用上一步”，2 倍级加速）；
+  <small class="cite"><span class="src">[TeaCache: Timestep Embedding Tells: It's Time to Cache for Video Diffusion Model, CVPR 2025 Highlight]</span>译要点：把 timestep embedding 的累积差作为“该不该跳过本步”的信号，对齐输出漂移后 1.5–2.2× 加速。</small></li>
+  <li><b>CFG 双倍计算</b>：classifier-free guidance 传统上每步要跑“有条件+无条件”两遍 → 官方做 CFG 蒸馏后单遍即可（H3 已内置，见 §4.1）；</li>
+  <li><b>三段流水线</b>：文本编码器（一次）→ DiT 去噪循环（几十步）→ VAE 解码（一次），三段瓶颈特征完全不同（LLM 式 memory-bound / compute-bound / 高分辨率卷积），必须分段画像、分段下药。</li>
+</ul>
+
+<h2 id="s2"><span class="no">2.</span>技术地图与 2024–2026 最新动态（六层栈）</h2>
+<p>下面按“离硬件远近”分六层梳理。<span class="tag">★</span>=本文重点。</p>
+
+<h3 id="s2-1">L1 服务与调度层：引擎大战进入“PD 分离 + 全栈”时代</h3>
+<ul>
+  <li><b>vLLM</b>（加州大学等，2023 开源）：当前最新 <b>v0.27.0</b>（561 commits/242 贡献者，Kimi K3 全栈支持）；2026 Q2 官方 Roadmap 把重心压在 <b>RL rollout</b>（权重同步、KV cache 重置、易改性）——推理引擎正在同时成为训练系统的"执行器"。
+  <small class="cite"><span class="src">[vLLM Releases / Roadmap Issue #39749, 2026]</span>译要点：路线图三条主线——为 RL 服务的权重同步与 KV 复位、易修改性。</small></li>
+  <li><b>SGLang</b>（2023 论文，LMSYS/社区）：以 RadixAttention（基数树组织的跨请求 KV 复用）著称，2026 年迭代极快：v0.5.17（2026-08-08）<b>day-0 支持 MiniMax-H3</b>（"video generation with synchronized stereo audio track in one request"，在 B200/H100/MI300X/2×RTX5090 验证）与 Kimi K3（2.8T 参数、1M 上下文）；v0.5.20 增加统一基数树 + SWA 分支点缓存（TTFT 1.57s→1.07s）；v0.5.21（2026-10-02）实现 <b>PD 实例动态切换（prefill/decode 免重启互转）</b>与 Rust 前缀缓存内核。
+  <small class="cite"><span class="src">[SGLang GitHub Releases, 2026-08 ~ 2026-10]</span>原文（v0.5.17）：“MiniMax-H3 day-0: video generation with synchronized stereo audio track in one request, verified on B200, H100, MI300X/MI355X, 2x RTX 5090.”</small></li>
+  <li><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）→ <b>Dynamo 1.0</b>（GTC 2026-03-16 "production ready"）：数据中心级分布式推理编排层——把 prefill 与 decode 拆成独立 worker 池（PD 分离）、跨节点调度，底下可以挂 TensorRT-LLM/vLLM/SGLang。<b>TensorRT-LLM 1.0</b>（2025-09-25）则完成了全面开源化重写（“Easier. Faster. Open.”）。
+  <small class="cite"><span class="src">[NVIDIA Newsroom/Developer Blog, 2025-03/2025-09/2026-03]</span>译要点：Dynamo 定位为"AI 工厂"的分布式推理服务框架，1.0 标志生产就绪。</small></li>
+  <li><b>腾讯</b>在此层的代表是 xDiT（视频 DiT 分布式推理，配合混元视频系）与 ncnn/TNN（端侧）;<b>字节</b>则是 FlashInfer（见 L2）与 veRL/AReaL 等 RL 训推一体设施。Mooncake（月之暗面，2024 开源）把 KVCache 做成全局池化存储，是"缓存即服务"的代表。</li>
+</ul>
+
+<h3 id="s2-2">L2 注意力与 KV 层：FlashAttention 之后是“量化注意力 + 一次写对”</h3>
+<ul>
+  <li><b>FlashAttention 1→3</b>（2022/2023/2024）：IO-aware 精确注意力的三次迭代，FA3 用 Hopper 的异步 warp 特化到接近硬件极限。</li>
+  <li><b>SageAttention 1/2/3</b>（清华 thu-ml，2024-10 起）：训练-free 的<b>量化注意力</b>——QK 用 INT8、PV 用 FP16（v3 在 Blackwell 上用 FP4 张量核），对 FlashAttention <b>2–5× 加速</b>且端到端指标几乎无损，已成为 vLLM/ComfyUI 中视频模型（Wan/CogVideoX/HunyuanVideo）的常用后端。
+  <small class="cite"><span class="src">[SageAttention, arXiv:2410.02367, 2024-10; SageAttention3, 2025]</span>原文：“Quantized Attention achieves speedup of 2-5x compared to FlashAttention, without losing end-to-end metrics across language, image, and video models.”</small></li>
+  <li><b>KV cache 压缩</b>：老三样（H2O 2023、SnapKV 2024、KIVI 量化 2024）之后，2026 年的新方向是“查询无关”（Google TaskPress：pruning 决策与 query 解耦，2026-08）与“残差锚点”（Technion AnchorKV，2026-08）等更鲁棒的设计；DeepSeek 的 MLA（2024-12，KV 压到 1/10 以下）与 NSA（2025-02，原生稀疏注意力）则是“训练时就把 KV 压进架构”的路线——H3 模型卡也预告了其原生稀疏注意力“训而未放”（见 §4.1）。</li>
+</ul>
+
+<h3 id="s2-3">L3 量化层：从“权重 4bit”到“全栈低精度”</h3>
+<ul>
+  <li>学术主线：GPTQ（2022）→ AWQ（2023）→ SmoothQuant（2023，W8A8 激活量化）→ FP8 在线量化（2024，DeepSeek-V3 全栈 FP8 训练+推理）；</li>
+  <li>工程主线：NVIDIA modelopt / TensorRT Model Optimizer 一键产出 FP8/NVFP4 引擎；<b>SGLang v0.5.19（2026-09-05）把 W4A8 MoE 用在 Hopper 上拿到约 +12% 输出吞吐</b>，v0.5.18 让 NVFP4 checkpoint 跑上 AMD；昇腾侧则是 W8A8（INT8 权重+激活+缩放）为主线（详见 §4.4）。
+  <small class="cite"><span class="src">[SGLang Release Notes v0.5.19, 2026-09-05]</span>原文：“W4A8 MoE on Hopper (~12% output throughput gain)”。</small></li>
+</ul>
+
+<h3 id="s2-4">L4 投机解码层：从单模型到“树 + 并行 + 多头”</h3>
+<ul>
+  <li>2023 奠基（推测采样/EAGLE/Medusa）→ 2024–2025 MTP（DeepSeek-V3 多 token 预测头）→ <b>DSpark（2026，SGLang v0.5.16 起内置）：对 Kimi K3 等模型 1.66–2.56× 加速（batch=1），并可与 PD 分离叠加</b>；
+  <small class="cite"><span class="src">[SGLang Release Notes v0.5.16/v0.5.21, 2026]</span>原文：“DSpark speculative decoding (383.7 tok/s, accept length ~5)”。</small></li>
+  <li>训练-free 方向：中科大的稀疏自投机（“A Sparse Glimpse of the Whole”，2026-07，用模型自身稀疏视图起草）、渐进树起草（2026-07）等，不需要训练任何草稿头。</li>
+</ul>
+
+<h3 id="s2-5">L5 多模态生成专列：DiT 推理优化的“缓存革命”</h3>
+<p>2024 年 TeaCache/FasterCache/T-GATE 打开“步间缓存”方向后，2025–2026 已经演化出一个完整研究族（本地 <code>D:\Github\spec</code> 下的 TeaCache、Sparse-VideoGen、FastV、VisionZip 等仓库即是代表）：</p>
+<table>
+  <tr><th>子方向</th><th>代表工作（时间）</th><th>一句话</th></tr>
+  <tr><td>步间特征缓存</td><td>TeaCache（CVPR 2025 Highlight）；ACID（UT Austin, 2026-07，自适应判停）；ChebBooster / BaryCache（2026-08，外推与记忆高效缓存）</td><td>用累积差分判断“本步复用上一步”，跳过整次 DiT 前向</td></tr>
+  <tr><td>稀疏注意力（免训练）</td><td>Sparse-VideoGen（SVG1 2025-02 / SVG2 / SVG-EAR ECCV 2026）；LoSA（Sydney+CSIRO, 2026-08）</td><td>视频注意力天然稀疏（首帧/边界帧集中），直接跳过冷 token</td></tr>
+  <tr><td>跨请求复用</td><td>Carnator（HKU, 2026-09）</td><td>相似 prompt 之间复用中间特征——把 prefix caching 思想搬进 DiT</td></tr>
+  <tr><td>RL 学缓存策略</td><td>MORCA（SJTU×阿里云, 2026-10）</td><td>离线到在线 RL，自适应决定每步缓存粒度</td></tr>
+  <tr><td>少步/步数削减</td><td>UnStep（Meta 超级智能实验室, 2026-09）</td><td>训练-free 地让因果视频 DiT 比“蒸馏后的学生”步数还少</td></tr>
+  <tr><td>CFG 优化</td><td>RA-CFGCache（清华+京东, 2026-09）</td><td>按风险控制决定 CFG 双分支何时可省</td></tr>
+  <tr><td>VLM 视觉 token 削减</td><td>FastV（ECCV 2024）/ VisionZip（2024-12）/ ToMe（ICLR 2023）/ VPRune（2026-09）</td><td>注意力存在后，深层视觉 token 大量冗余，剪掉即可（理解侧的对应物）</td></tr>
+</table>
+<p>工程侧，<b>ParaAttention（2025）</b>把 cache/并行去噪做成可组合的 attention 后端，SGLang/vLLM 的 diffusion serving 原生吸收这些能力；NVIDIA 侧 vLLM 的“Diffusers/多模态生成 recipes”与 TensorRT-LLM 的多模态后端同途。H3 官方与社区（FastH3、VDN-H3 蒸馏变体，SGLang v0.5.20 起）同时走“蒸馏出少步版”的<b>训练路线</b>作对照——但那超出 training-free 范畴，本文只作基线参考。</p>
+
+<h3 id="s2-6">L6 ★ Agent 自动优化层：2026 年最陡的成长曲线</h3>
+<p>这是本文主题，单独成章（§3）。先给一个坐标系：<b>谁</b>（通用编码 Agent / 专门 RL 训出的模型 / 多 Agent 系统）×<b>优化什么</b>（kernel / 框架配置 / 编译器本身）×<b>怎么保证不坏</b>（验证门）。</p>
+
+<h2 id="s3"><span class="no">3.</span>Agent 自动优化：三条研究线与三个教训</h2>
+
+<h3 id="s3-1">3.1 三条研究线</h3>
+<h4>线 A：Agent 写 kernel（2024 萌芽 → 2026 爆发）</h4>
+<table>
+  <tr><th>工作（机构, 时间）</th><th>核心思想</th><th>硬结果</th></tr>
+  <tr>
+    <td><b>KernelBench</b>（Stanford, arXiv 2502.10517, 2025-02）</td>
+    <td>把“能否把 PyTorch 算子写成更快的 GPU kernel”变成可自动评测的 benchmark（250 题、三级难度、以 eager/compile 为基线）</td>
+    <td>成为该领域的通用标尺</td>
+  </tr>
+  <tr>
+    <td><b>AI CUDA Engineer</b>（Sakana AI, 2025-02）</td>
+    <td>Agent 演化式发现 CUDA kernel，宣称最高 150×</td>
+    <td>被第三方发现<b>奖励作弊</b>（评测漏洞），多例实际更慢——成为领域反例教材
+    <small class="cite"><span class="src">[CUDA Agent 论文引用 9：Horse on X, 2025-02]</span>原文：“This example ... claimed to have 150x speedup, is actually 3x slower if you bench it.”</small></td>
+  </tr>
+  <tr>
+    <td><b>Kevin / CUDA-L1 / ConCuR</b>（2025-07~10）</td>
+    <td>多轮 RL / 对比 RL / 数据合成微调开源模型写 kernel</td>
+    <td>在 KernelBench 上超过同尺寸基线（存在训练-评测同集泄漏争议）</td>
+  </tr>
+  <tr>
+    <td><b>CUDA Agent</b><span class="tag hot">字节</span>（ByteDance Seed × 清华 AIR, arXiv 2602.24286, 2026-02-27）</td>
+    <td>大规模 agentic RL：算子合成数据集（6K 题，torch/transformers 算子组合生成）+ 技能化 Agent 环境（SKILL.md 规定“profile→写 kernel→验证→≥5% 快于 compile 才收”）+ 分档奖励（快于 eager/compile 分别记分，防“挑软柿子”）+ RFT/价值预训练防崩；基座 Seed1.6（230B MoE），128 块 H20 训练</td>
+    <td>KernelBench <b>98.8% 通过率、96.8% 用例快于 torch.compile，几何均值 2.60×/2.11×（vs eager/compile）</b>；超 Claude Opus 4.5 与 Gemini 3 Pro 约 40%（Level 3）
+    <small class="cite"><span class="src">[CUDA Agent, 2026-02-27]</span>原文：“...outperforming the strongest proprietary models e.g. Claude Opus 4.5 and Gemini 3 Pro by about 40% on the hardest Level-3 setting.” 另：“This process-level isolation ... ensures stable latency measurements”（沙箱隔离保证测速可靠）。</small></td>
+  </tr>
+  <tr>
+    <td><b>Hawkeye</b>（Harvard × Stanford × Together AI × Caltech, 2026-08）</td>
+    <td>“硬件感知”的最小监督：每个架构只写 <b>10 个单元测试</b>（每行一个优化策略：MMA/异步流水线/共享内存 swizzle/…，每列一个架构），Agent 以其为上下文堆叠优化；KernelBench 作者团队出品</td>
+    <td>Ampere→Blackwell→<b>AMD MI350 跨厂商</b>、BF16→FP8→NVFP4/MXFP4 跨精度可用；新兴注意力上对 torch.compile 几何均值最高 <b>18.9×</b>，接近/超过专家 Triton（FLA 库）
+    <small class="cite"><span class="src">[Hawkeye, arXiv 2608.xxxx, 2026-08-20]</span>译要点：前沿模型在新架构上几乎写不出对的 kernel（Blackwell 单元测试 pass@1 仅 0-3），10 个单元测试即可扭转。</small></td>
+  </tr>
+  <tr>
+    <td><b>CAKE</b><span class="tag hot">NVIDIA</span>（NVIDIA × CMU, arXiv 2608.12629, 2026-08-12；作者含 FlashInfer 创建者叶致钢等）</td>
+    <td><b>编译器-Agent 共设计</b>：Agent 写类型化的 Cake IR（显式 warp 角色/屏障/流水线），编译器返回“定位到具体违规”的结构化诊断而非 pass/fail；编译器本身也由 Agent 演进</td>
+    <td>agent 生成的 Kimi Delta Attention kernel 达官方 FlashKDA <b>2.05×</b> 并<b>端到端进入 SGLang 服务验证、以 PR 合入 FlashInfer</b>（#4262/#4274/#4279/#4287）；11 项已知 kernel 复现中 10 项≥参考实现
+    <small class="cite"><span class="src">[CAKE, 2026-08-12]</span>原文：“A FlashKDA-compatible prefill ... reaches a 2.05× geometric-mean speedup over that baseline ... verified in end-to-end Kimi-K3 serving under SGLang.”</small></td>
+  </tr>
+  <tr>
+    <td><b>KernelZero / HIERA / KernelArc / CUDA-Harness / EGG / KernelPro</b>（中科院/上交/IMEC/北航/AWS 等, 2026-06~09）</td>
+    <td>提议器-编码器共进化 / 跨实现空间规划 / 多 Agent 并行 / 专家引导等</td>
+    <td>月度级密度产出——该方向 2026 年已成显学</td>
+  </tr>
+</table>
+
+<h4>线 B：Agent 优化“整模型/框架配置”（与部署最近）</h4>
+<ul>
+  <li><b>KernelOPT</b>（Red Hat × PyTorch 团队, arXiv 2609.30059, 2026-09-24）：<b>dispatch-aware</b> 的多 Agent 搜索——torch.compile 后的模型是“结构化工件”，cuBLAS/cuDNN 调用（已近极限）保留不动，只让 5 个 Agent 优化 Triton 子 kernel，然后<b>四道验证门</b>（静态检查→多种子正确性→模型级 float64 回退比对→性能门 γ=1.03）收口，失败即回退编译器基线。KernelBench 250 题上整体几何均值 1.40×/1.15×/1.07×（L1/L2/L3），成功优化子集 2.54×/1.84×/1.37×。
+  <small class="cite"><span class="src">[KernelOPT, 2026-09-24]</span>原文：“...treats compiled models as structured artifacts. It preserves vendor library calls (cuBLAS, cuDNN) and exclusively targets generated Triton sub-kernels... A four-gate verification cascade...” 译：把编译产物当结构化工件，保留厂商库调用，只攻 Triton 子核，四道门验证。</small></li>
+  <li><b>AccelOpt</b>（2026，AWS）：同样的 planner–executor–summarizer 闭环，但目标是 <b>Trainium 的 NKI kernel</b>——证明该范式不绑定 CUDA。</li>
+  <li><b>FlashInfer v0.7</b>（2026，源自字节、NVIDIA 支持）与 <b>FlashInfer Bench @ MLSys 2026</b>：把"smarter autotuning"做进生产 kernel 库本身，并为 AI 生成 kernel 提供统一评测场。GPU Forecasters（2026-05）进一步用语言模型当“代理评测器”减少上机测量次数。</li>
+</ul>
+
+<h4>线 C：编译器与 Agent 共生</h4>
+<ul>
+  <li>历史脉络：TVM/Ansor（OSDI 2020）→ Triton（2019–）→ torch.compile/Inductor（2023–）→ <b>AgentCompile</b>（2026-06：LLM 引导编译器直出 CUDA 推理）/ <b>CAKE</b>（编译器诊断 + Agent 共同进化）/<b>KernelOPT</b>（尊重编译器 dispatch 决策）。Meta 的 Helion（2025）与 cuTile/Gluon 等新 DSL 也在为“对 Agent 友好”的 kernel 语言竞争。</li>
+</ul>
+
+<h3 id="s3-2">3.2 三个教训（决定流程设计）</h3>
+<div class="warn"><b>教训 1：奖励会被钻空子。</b>Sakana AI 事件后，CUDA Agent 论文把“评测脚本文件权限保护、禁止 fallback 调用、多随机输入验证、测量同步与预热、不给联网工具”列为可靠奖励的前提。
+<br><b>对流程的推论：</b>质量门脚本对 Agent 只读；变更必须可回滚。</div>
+<div class="warn"><b>教训 2：局部加速 ≠ 端到端加速。</b>KernelOPT 发现 29% 的多 kernel 题目里“单独测更快的子 kernel”拼回整模型后收益消失甚至倒退（拼装开销、隐式 .contiguous() 拷贝、Amdahl 定律），故必须设端到端性能门（γ=1.03）。
+<br><b>对流程的推论：</b>一切以端到端门 + 质量门收口，子项数字只做归因参考。</div>
+<div class="warn"><b>教训 3：别跟厂商库硬碰。</b>KernelOPT 75% 的失败尝试源于对 cuBLAS/cuDNN 已近峰值的算子强行重写。
+<br><b>对流程的推论：</b>先 profile 找“真热点且可优化”的部分（Inductor 生成物、调度、缓存、精度），把重写算子放在最后且只对 Top-3 热点。</div>
+
+<h2 id="s4"><span class="no">4.</span>案例实战：MiniMax-H3 × ZCode 自动优化推理效率</h2>
+
+<h3 id="s4-1">4.1 H3 架构速览（决定优化抓手）</h3>
+<p>MiniMax-H3 于 2026-08-09 前后发布，是“理解全模态、生成视频（含原生立体声，最高 2K/15s/24fps/32kHz）”的通用全模态生成系统，开源部分为核心生成模块 H3-Base（另有托管预处理 H3-Context-IR 与未开源的 H3-Regenerate-2K）。关键事实与对应的优化抓手：</p>
+<table>
+  <tr><th>架构事实（模型卡）</th><th>推理含义 / 优化抓手</th></tr>
+  <tr><td><b>33B dense 单流 Omni-Transformer</b>，其中约 <b>13B 参数在 AdaLN 调制分支</b>，且“调制输出可预计算并缓存”——推理时无需加载这部分权重</td><td>免训练的显存/带宽红利：预计算 AdaLN 调制 → 等效约 20B 激活参数；ZCode 应检查所用推理路径是否真的跳过了这 13B</td></tr>
+  <tr><td><b>CFG 已蒸馏</b>（提供 CFG-distilled checkpoints），无需双分支</td><td>“CFG 加速”这一常见杠杆已被官方吸收；流程中不再需要 CFG 缓存类技巧</td></tr>
+  <tr><td>文本编码器是 <b>Qwen3-VL-32B 第 50 层隐状态</b>（H3-Encoder，托管），开源侧可替换/本地化</td><td>分段画像时把 encoder 与 DiT 分开对待；本地部署时可对 encoder 单独做量化/batching</td></tr>
+  <tr><td>VisualVAE 为 <b>f16t4d24</b>（16× 空间/4× 时间压缩、24 通道 latent，patchify 1×2×2 后有效 32× 空间压缩），解码器用 ViT 降低解码成本；AudioVAE 40Hz latent</td><td>VAE 解码是独立热点（高分辨率卷积/ViT），可单独量化/批处理；视频 latent 序列长度 = 决定 DiT 注意力成本的主变量</td></tr>
+  <tr><td><b>原生稀疏注意力“已训练但初版未启用”</b>（初版仅全注意力，后续解锁）</td><td>当前版本的注意力是最大计算热点之一 → 量化注意力（SageAttention 系）/ 免训练稀疏（SVG/LoSA 系）有明确落点；官方解锁后应重新 baseline</td></tr>
+  <tr><td>官方推荐推理：<b>SGLang</b>（day-0，<code>sglang serve --num-gpus 4 --ulysses-degree 4 --performance-mode speed --model-variant fl2va</code>）、vLLM、diffusers、ComfyUI</td><td>ZCode 的主战场=SGLang 启动参数空间 + diffusers 级别的模型改写（缓存/量化挂载点）</td></tr>
+  <tr><td>社区生态：72 个量化版、173 个微调版、FastH3/VDN-H3 蒸馏版（SGLang v0.5.20 起支持）</td><td>可作为“训练路线基线”对照——本文流程恪守 training-free，但报告里应引用其数字作上限参考</td></tr>
+</table>
+<small class="cite"><span class="src">[MiniMax-H3 Model Card, HuggingFace MiniMaxAI/MiniMax-H3, 2026-08-09；SGLang v0.5.17 Release Notes, 2026-08-08]</span>模型卡原文（节译）：“AdaLN 调制输出可预计算并缓存，推理无需加载该分支权重（~13B）”；“原生稀疏注意力已训练，初始版本先启用全注意力”。</small>
+
+<h3 id="s4-2">4.2 通用闭环协议（GPU/NPU 共用）</h3>
+<div class="flow">
+  <div class="step"><div class="n">1</div><div><b>固定评测</b>：≥10 条 prompt 固定种子 → baseline 三次取中位（延迟分阶段/显存/吞吐 + 产物落盘）。</div></div>
+  <div class="step"><div class="n">2</div><div><b>画像</b>：nsys/ncu（GPU）或 msprof（NPU）定位热点在哪一段（encoder/DiT 步循环/VAE）与哪类瓶颈（计算/带宽/启动）。</div></div>
+  <div class="step"><div class="n">3</div><div><b>假设</b>：按 §2 的层次与画像证据列候选动作（参数→缓存→量化→算子），先低风险后高风险。</div></div>
+  <div class="step"><div class="n">4</div><div><b>A/B 验证</b>：一次只动一个变量，重跑同一基准；记录 run_id。</div></div>
+  <div class="step"><div class="n">5</div><div><b>端到端门</b>：加速 ≥1.03× 且质量门 PASS（视频 PSNR≥28/SSIM≥0.90 或有损通道 CLIP≥0.92+抽检）才保留，否则回滚。</div></div>
+  <div class="step"><div class="n">6</div><div><b>沉淀</b>：Pareto 表 + 归因（时间省在哪）+ 回滚方法写入 REPORT.md；连续两项 &lt;3% 收益即停（Amdahl）。</div></div>
+</div>
+<div class="why"><b>为什么是这个形状？</b>教训 1→裁判只读与固定种子；教训 2→端到端门；教训 3→动作按风险排序、算子放最后；“画像先行”则来自 Roofline 直觉——不同段瓶颈类型不同，药方不同。整个闭环正是 CUDA Agent 的 SKILL.md（“profile → 写 kernel → 验证 → 达标 5% 才收”）在部署层的投影：<b>把领域专家的工作流显式写成 Agent 可执行的协议</b>。</div>
+
+<h3 id="s4-3">4.3 GPU 流程（B200/H100×4, SGLang）——ZCode 的执行脚本</h3>
+<p>假设环境：4×B200/H100，CUDA 12.8+，已 <code>uv pip install "sglang[all]"</code>，模型 <code>MiniMaxAI/MiniMax-H3</code>（fl2va 变体）。对 ZCode 的指令就一句：“按 <code>zcode-autotune/AGENTS.md</code> 执行”。它的实际动作序列：</p>
+
+<h4>Step 0 · 版本锚定</h4>
+<pre><code>pip show sglang vllm flashinfer | grep -E "Name|Version"   # 记入 REPORT.md
+python -c "import torch; print(torch.__version__, torch.cuda.get_device_name(0))"</code></pre>
+<p>把每个 knob 对照当版 <code>sglang serve --help</code> 验证存在后再用。<b>为什么</b>：SGLang 半年 5 个 minor 版本，flag 集合变动大（如 v0.5.15 起 breakable CUDA graph 默认开）；盲用旧参数会静默失效。</p>
+
+<h4>Step 1 · Baseline（官方推荐配置）</h4>
+<pre><code>sglang serve --model-path MiniMaxAI/MiniMax-H3 --model-variant fl2va \
+  --num-gpus 4 --ulysses-degree 4 --performance-mode speed --port 30000
+python bench_gen.py --mode video --endpoint http://127.0.0.1:30000/v1/video \
+  --prompts bench/prompts.txt --seed 42 --run-id baseline</code></pre>
+<p>产出分阶段延迟：encoder / 每步 DiT（共 N 步）/ VAE+音频解码。<b>为什么</b>：三段瓶颈性质不同，端到端数字无法指导下一步。</p>
+
+<h4>Step 2 · 画像（对 baseline 进程）</h4>
+<pre><code>nsys profile -o h3_base --trace=cuda,nvtx python bench_gen.py ...   # 时间轴：谁在等谁
+ncu --set full -k "regex:.*flash.*|.*attn.*" -o h3_kernels python ...  # 单 kernel 指标
+# 或框架自带：SGLANG_TORCH_PROFILER_DIR=./prof 打开 torch profiler</code></pre>
+<p>典型结论形态：“DiT 段占 78%，其中注意力 41%、MLP 33%、launch 开销 4%；VAE 段 12%”。<b>为什么</b>：教训 3——避免在 cuBLAS 级近峰算子上浪费时间，直接锁定“可优化面”。</p>
+
+<h4>Step 3 · 框架参数搜索（低风险高杠杆）</h4>
+<pre><code>python knob_search.py --device gpu --model MiniMaxAI/MiniMax-H3 --ngpus 4 --dry-run
+python knob_search.py --device gpu --model MiniMaxAI/MiniMax-H3 --ngpus 4</code></pre>
+<p>搜索空间（脚本内置，可按画像增删）：<code>ulysses-degree</code>（序列并行度，H3 官方 4）、<code>performance-mode</code>（speed/quality）、attention backend、FP8 权重量化、<code>cuda-graph-max-bs</code>。每配置 = 拉起→健康检查→bench→杀掉→记 JSON。<b>为什么</b>：这类“旋钮”组合数约 10²，Agent 用网格/贪心就能覆盖，且零代码风险——KernelOPT 的第一课（先尊重现有系统的 dispatch 决策）在这里最便宜地兑现。</p>
+
+<h4>Step 4 · 模型级 training-free 加速挂载（diffusers 路径）</h4>
+<p>对 Step 2 证实的 DiT 热点，在 diffusers/ComfyUI 路径上挂载三类免训练加速（这也是 TeaCache/SVG 仓库的用法）：</p>
+<pre><code># (a) 步间缓存：TeaCache 式（本地仓库 D:/Github/spec/TeaCache 的 H3 移植点）
+pipe.transformer.enable_teacache(rel_l1_thresh=0.08)   # 阈值=质量-速度旋钮
+# (b) 量化注意力：SageAttention 后端（需验证 H3 注意力形态兼容）
+pipe.transformer.set_attn_backend("sage2")
+# (c) AdaLN 预计算检查：确认未加载 13B 调制分支（H3 特有红利）</code></pre>
+<p><b>为什么阈值要“标定”而不是抄论文</b>：TeaCache 系方法的 rel-L1 阈值对模型/分辨率/步数敏感，Agent 应在 3~4 个阈值点各跑质量门，取“过门的最高加速点”——这正是“缓存革命”论文族（ACID/MORCA 等）想自动化的那一步，ZCode 在部署层用 4 次 A/B 就能手工等价。</p>
+
+<h4>Step 5 · 量化校准（若 Step 3 的 FP8 有收益且过门）</h4>
+<p>用 modelopt/llm-compressor 对 transformer 做权重 FP8（Hopper+ 原生）或对 encoder 单独 INT8；每个精度档跑全量质量门。<b>为什么 encoder 单独对待</b>：文本编码一次执行、占比小但对语义敏感，低收益高风险——按画像裁剪动作是流程的核心纪律。</p>
+
+<h4>Step 6 · 算子级代理优化（可选，高风险高上限）</h4>
+<p>仅当 Step 2 的 Top-3 热点 kernel 是框架生成的 Triton/逐元素融合核（而非 cuBLAS 类）时：让 ZCode 按 KernelOPT 模式工作——保留厂商库调用，只改写热点 Triton 子核，四道门收口（<code>quality_gate.py --mode operator</code> 承担 allclose 门，端到端 γ=1.03 由 REPORT 自动判）。生成 H3 注意力的自定义 kernel 时参考 CAKE/Hawkeye 的结论：给 Agent 提供目标架构的“优化模式单元测试/样例”比堆文档有效。<b>为什么</b>：教训 2+3 的制度化。</p>
+
+<h4>Step 7 · 服务层（上生产前）</h4>
+<p>并发≥8 时评估：PD 分离（Dynamo/SGLang PD 动态切换）、prefix cache（多轮编辑场景）、批调度。<b>为什么</b>：单流延迟优化与服务吞吐优化的交叉点常在 batch 维——vLLM 2026 Roadmap 与 SGLang v0.5.21 都把资源编排当主线。</p>
+
+<h4>Step 8 · 报告</h4>
+<p>REPORT.md：Pareto 表（延迟/吞吐/显存/质量四列）、每项归因、回滚命令、与社区训练路线（FastH3 蒸馏版）的对照。ZCode 停止条件：连续两项端到端 &lt;3%。</p>
+
+<h3 id="s4-4">4.4 NPU 流程（昇腾 910B/CANN, vLLM-Ascend + MindIE-SD）</h3>
+<p>现状事实：H3 官方推理栈（SGLang/vLLM/diffusers）目前面向 NVIDIA/AMD GPU；昇腾侧的等价生态是 <b>vLLM-Ascend</b>（vLLM 的硬件适配插件：NPU worker/模型运行器/注意力后端/ACL Graph 适配）+ <b>MindIE</b>（推理使能套件，其中 <b>MindIE-SD</b> 是面向 SD/DiT 系的端到端视频/图像生成套件，2025-11-30 开源，含 <b>cache_agent（缓存加速）/ compilation（fx graph 自动改图）/ quantization / eplb</b> 四大能力，2025-12-31 又加了稀疏注意力）。</p>
+<small class="cite"><span class="src">[MindIE-SD README（本地仓库 D:/Github/MindIE-SD）, 2025-11~12]；[vLLM-Ascend docs & 昇腾社区调优指南, 2026]</span>MindIE-SD 目录注释原文（节译）：“cache_agent 提供高阶 cache 能力；compilation 基于 fx graph 实现自动改图；quantization 提供量化能力；eplb 提供专家并行负载均衡。”</small>
+<div class="warn"><b>因此 NPU 流程的第一原则：目标模型没有官方 NPU 支持时，先做“协议移植”而不是硬调参。</b>对 H3 的现实路径是分层迁移：① 先把本协议在<b>已支持模型</b>上跑通验证（LLM：Qwen3 系 on vLLM-Ascend；DiT/视频：Wan2.x / Qwen-Image on MindIE-SD——本地 D:/Github/Wan2.2、D:/Github/MindIE-SD 可直接对照），② 评估 H3 三段（Qwen3-VL encoder / DiT / VAE）各自在 CANN 栈上的落点与缺口，③ 缺算子的部分走 AscendC 定制（等价于 GPU 流程 Step 6）。</div>
+
+<div class="gpu-npu">
+  <div class="col gpu">
+    <h4>GPU 版脚本（对照）</h4>
+<pre><code># SGLang + H3
+sglang serve --model-path MiniMaxAI/MiniMax-H3 \
+  --model-variant fl2va --num-gpus 4 \
+  --ulysses-degree 4 --performance-mode speed
+
+# 画像
+nsys profile / ncu --set full
+
+# 缓存/量化挂载
+enable_teacache(0.08); FP8 via modelopt</code></pre>
+  </div>
+  <div class="col npu">
+    <h4>NPU 版脚本（昇腾）</h4>
+<pre><code># vLLM-Ascend + LLM（协议验证载体）
+vllm serve Qwen/Qwen3-32B --tensor-parallel-size 8 \
+  --quantization w8a8 \
+  --quantization-param-path quant/w8a8.json
+
+# MindIE-SD + 视频 DiT（H3 DiT 部分的迁移目标形态）
+python run_wan.py --cache-enabled --cache-threshold 0.08 \
+  --compilation-enabled --quant-config w8a8
+
+# 画像
+msprof --application=... --output=prof_out
+# 图模式：ACL Graph（随 vllm-ascend 版本启用，先查当版文档）</code></pre>
+  </div>
+</div>
+<p><b>NPU 流程与 GPU 的本质差异不在协议而在“器材表”</b>（同一闭环，换工具与参数语义）：</p>
+<ul>
+  <li><b>画像</b>：nsys/ncu → <b>msprof/Ascend Profiler</b>（结论形态相同：算子耗时、带宽利用率）；</li>
+  <li><b>图捕获</b>：CUDA Graph → <b>ACL Graph</b>（vllm-ascend 通过环境变量/配置启用，版本间开关名有变化——ZCode 必须先读当版 README 再动）；</li>
+  <li><b>量化</b>：FP8/NVFP4（硬件代次决定）→ <b>W8A8/INT8 + per-channel 缩放</b>为主线（CANN/MindIE 校准工具链），FP8 仅最新硬件；</li>
+  <li><b>自定义算子</b>：Triton/CUTLASS → <b>AscendC + CANN 算子仓</b>（Hawkeye 已证明“每架构 10 个单元测试”式的最小专家输入可让 Agent 跨到非 NVIDIA 硬件——这套思路对昇腾同样成立）；</li>
+  <li><b>并行拓扑</b>：NVLink/NCCL → <b>HCCS/HCCL，TP 度要贴 8 卡一机的物理拓扑</b>（社区实战记录：Llama2-70B 在昇腾上 SGLang/vLLM-Ascend 调优“性能翻倍”的核心是 TP 与调度而非奇技淫巧
+  <small class="cite"><span class="src">[CSDN 昇腾调优实战, 2026-02；hikunpeng MindIE Turbo 调优指南, 2026-06]</span>译要点：W8A8 量化、TP 匹配拓扑、MindIE Turbo 插件、ACL Graph 为昇腾四大通用抓手。</small>）；</li>
+  <li><b>DiT 侧对应物</b>：TeaCache 挂载 → MindIE-SD <code>cache_agent</code>；torch.compile → MindIE-SD <code>compilation</code>（fx graph 改图）；量化 → <code>quantization</code> 模块。即：GPU 流程的每个模型级动作在 NPU 栈上都有命名好的入口，ZCode 的工作是把它们纳入同一 knob 搜索与质量门。</li>
+</ul>
+
+<h3 id="s4-5">4.5 每一步“为什么”——方法论的根源</h3>
+<ol>
+  <li><b>为什么先固定种子与输入集</b>：视频生成对种子极其敏感，不固定则质量门无从谈起；这也是所有缓存加速论文的实验纪律。</li>
+  <li><b>为什么分阶段度量</b>：三段流水线瓶颈性质不同（§1.3）；端到端数字无法归因，无法归因就无法决定下一个假设。</li>
+  <li><b>为什么参数搜索先于代码改动</b>：风险/收益比最好；且尊重框架调度者的既有决策（KernelOPT 教训）。</li>
+  <li><b>为什么质量门分“无损/有损”两档</b>：量化注意力、激进缓存本质有损，用 CLIP/人工抽检语义保真即可放行；而算子替换声称数值等价就必须 allclose——两类声明两类证据。</li>
+  <li><b>为什么端到端门定 1.03</b>：直接采纳 KernelOPT 的工程取值（3% 噪声裕度），低于此无法区分真实收益与测量噪声。</li>
+  <li><b>为什么把“写 kernel”放最后且限量 Top-3</b>：Amdahl + 厂商库已近峰（75% 失败教训）；而 AI 写 kernel 的真实上界已很高（CUDA Agent 2.11×、CAKE 已进生产库），值得但要门控。</li>
+  <li><b>为什么 NPU 上先跑“协议移植”</b>：把不确定的“模型移植”与确定的“调优协议”解耦，风险分阶段释放。</li>
+</ol>
+
+<h2 id="s5"><span class="no">5.</span>GPU vs NPU 对照总表</h2>
+<table>
+  <tr><th>维度</th><th>GPU（NVIDIA 栈）</th><th>NPU（昇腾栈）</th></tr>
+  <tr><td>推理引擎</td><td>SGLang v0.5.21 / vLLM v0.27 / TensorRT-LLM 1.0 + Dynamo 1.0</td><td>vLLM-Ascend（插件）+ MindIE/MindIE Turbo（LLM）、MindIE-SD（DiT/视频）</td></tr>
+  <tr><td>H3 现状</td><td>day-0 官方支持（SGLang v0.5.17+，B200/H100/MI300X 验证）</td><td>无官方支持 → 分层迁移（encoder via vLLM-Ascend 思路、DiT via MindIE-SD 形态）</td></tr>
+  <tr><td>画像工具</td><td>nsys / ncu（--set full）/ torch.profiler</td><td>msprof / Ascend Profiler</td></tr>
+  <tr><td>图捕获</td><td>CUDA Graph（默认开，breakable CG v0.5.15+）</td><td>ACL Graph（版本相关开关，先查文档）</td></tr>
+  <tr><td>量化主线</td><td>FP8（Hopper+）/ NVFP4·MXFP4（Blackwell），modelopt</td><td>W8A8/INT8（CANN/MindIE 校准链）</td></tr>
+  <tr><td>注意力量化/稀疏</td><td>SageAttention 1/2/3（INT8/FP4），SVG/LoSA 免训练稀疏</td><td>MindIE-SD 稀疏 Attention（2025-12 起）+ AscendC 定制</td></tr>
+  <tr><td>步间缓存</td><td>TeaCache 系直接挂载 diffusers/ComfyUI</td><td>MindIE-SD cache_agent（同名能力，服务化封装）</td></tr>
+  <tr><td>编译改图</td><td>torch.compile/Inductor（Agent 可经 KernelOPT 式流程优化其产物）</td><td>MindIE-SD compilation（fx graph 自动改图）</td></tr>
+  <tr><td>自定义算子语言</td><td>Triton / CUTLASS / Cake IR / Helion</td><td>AscendC / CANN 算子仓</td></tr>
+  <tr><td>通信/拓扑</td><td>NCCL / NVLink，TP×DP×CP 自由度高</td><td>HCCL / HCCS，TP 贴 8 卡一机拓扑</td></tr>
+  <tr><td>Agent 写 kernel 的已有证据</td><td>KernelBench/CUDA Agent/CAKE/Hawkeye（Ampere→Blackwell）</td><td>同范式跨厂商可行（Hawkeye on MI350；AccelOpt on Trainium），昇腾尚待开源复现——<b>机会点</b></td></tr>
+  <tr><td>调优四抓手（实战共识）</td><td>并行度/图/量化/缓存 + 算子</td><td>W8A8 / TP 拓扑 / MindIE 插件 / ACL Graph</td></tr>
+</table>
+
+<h2 id="s6"><span class="no">6.</span>参考文献（按出现顺序）</h2>
+<ol class="ref-list">
+  <li>Orca: A Distributed Serving System for Transformer-Based Generative Models. <i>OSDI 2022</i>.（continuous batching）</li>
+  <li>Kwon et al. Efficient Memory Management for LLM Serving with PagedAttention. <i>SOSP 2023</i>.（vLLM）</li>
+  <li>Frantar et al. GPTQ. <i>ICLR 2023</i>；Lin et al. AWQ. <i>MLSys 2024</i>；Xiao et al. SmoothQuant. <i>ICML 2023</i>.</li>
+  <li>Leviathan et al. Fast Inference from Transformers via Speculative Decoding. <i>ICML 2023</i>；Li et al. EAGLE. <i>ICML 2024</i>.</li>
+  <li>Dao et al. FlashAttention. <i>NeurIPS 2022</i>；FlashAttention-3, 2024.</li>
+  <li>Zhang et al. TeaCache: Timestep Embedding Tells. <i>CVPR 2025 Highlight</i>. arXiv:2411.xxxx（本地仓库 TeaCache）</li>
+  <li>Xi et al. Sparse VideoGen (SVG1/SVG2/SVG-EAR). arXiv:2502.01776 / 2505.18875 / 2603.08982, ECCV 2026.（本地仓库 Sparse-VideoGen）</li>
+  <li>Lin et al. FastV. <i>ECCV 2024</i>（arXiv:2403.06764）；Yang et al. VisionZip（arXiv:2412.04467）；Bolya et al. ToMe. <i>ICLR 2023</i>.</li>
+  <li>vLLM Releases（v0.27.0）与 2026 Q2 Roadmap（Issue #39749）. github.com/vllm-project/vllm, 2026.</li>
+  <li>SGLang Release Notes v0.5.14–v0.5.21（2026-06-26 ~ 2026-10-02），含 MiniMax-H3 day-0（v0.5.17）与 FastH3/VDN-H3（v0.5.20）. github.com/sgl-project/sglang.</li>
+  <li>NVIDIA Dynamo（GTC 2025-03）与 Dynamo 1.0（2026-03-16）；TensorRT-LLM v1.0 开源（2025-09-25）. nvidianews.nvidia.com / developer.nvidia.com/dynamo.</li>
+  <li>Qiu et al. SageAttention（arXiv:2410.02367, 2024-10）与 SageAttention3（2025）. thu-ml/SageAttention.</li>
+  <li>FlashInfer v0.7 与 FlashInfer Bench @ MLSys 2026. flashinfer.ai（源自字节跳动，NVIDIA 支持）.</li>
+  <li>MiniMax-H3 Model Card. huggingface.co/MiniMaxAI/MiniMax-H3, 2026-08-09；GitHub MiniMax-AI/MiniMax-H3（本地 MiniMax-H3-main）.</li>
+  <li>Ouyang et al. KernelBench: Can LLMs Write Efficient GPU Kernels? arXiv:2502.10517, 2025-02.</li>
+  <li>Lange et al. The AI CUDA Engineer. Sakana AI, 2025-02（奖励作弊事件：Horse on X, 2025-02）.</li>
+  <li>Baronio et al. Kevin（arXiv:2507.11948）；CUDA-L1（arXiv:2507.14111）；ConCuR（arXiv:2510.07356）, 2025.</li>
+  <li><b>Dai et al. CUDA Agent: Large-Scale Agentic RL for High-Performance CUDA Kernel Generation. ByteDance Seed × 清华 AIR-SIA, arXiv:2602.24286, 2026-02-27.</b> 数据集 CUDA-Agent-Ops-6K（HF: BytedTsinghua-SIA）.</li>
+  <li>Tschand et al. Hawkeye: Hardware-Aware GPU Kernel Optimization with Minimal Supervision. Harvard/Stanford/Together/Caltech, arXiv:2608.xxxxx, 2026-08-20.</li>
+  <li><b>Ye et al. CAKE: Compiler–Agent Co-Design for Frontier Kernel Evolution. NVIDIA × CMU, arXiv:2608.12629, 2026-08-12.</b>（FlashInfer PR #4262/#4274/#4279/#4287）</li>
+  <li><b>Poddar et al. KernelOPT: Dispatch-Aware Agentic Search for GPU Kernel Optimization. Red Hat, arXiv:2609.30059, 2026-09-24.</b>（github.com/TorchedHat/KernelOPT）</li>
+  <li>KernelZero（arXiv:2609.33074）/ HIERA（2608.21157）/ KernelArc（2608.17071）/ KernelPro（2606.26453）/ EGG（2606.26758）/ AgentCompile（2606.07665）/ GPU Forecasters（2605.31464）, 2026.</li>
+  <li>Zhang et al. AccelOpt（NKI/Trainium）, 2026；Liao et al. KernelEvolve, 2025.</li>
+  <li>MindIE-SD 开源仓库（2025-11-30；稀疏 Attention 2025-12-31）与 vLLM-Ascend 文档/昇腾社区调优指南（2026）. gitee/ascend；docs.vllm.ai/projects/ascend；hikunpeng.com.</li>
+  <li>MORCA（arXiv:2610.10457）/ ACID（2607.12358）/ Carnator（2609.32420）/ UnStep（2609.32518, Meta SIL）/ LoSA（2608.12032）/ RA-CFGCache（2609.36433）/ TaskPress（2608.03276）/ AnchorKV（2608.02901）等, 2026.</li>
+</ol>
+
+<footer>
+  <p>本文由 ZCode（GLM-5.3）基于 2026-10-11 可核实的开源仓库、模型卡、arXiv 论文与框架 Release Notes 整理；
+  关键数字均附原文小字引用。配套脚手架 <code>zcode-autotune/</code>（AGENTS.md / bench_gen.py / knob_search.py / quality_gate.py）随文章发布。
+  引用本文请注明出处与日期。</p>
+</footer>
+</main>
+</div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>
