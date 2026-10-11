@@ -274,7 +274,7 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 <p>此后算法侧的改进集中在"长序列 + 稀疏奖励"的稳定性上:<b>DAPO</b><span class="cite">[8]</span>(字节 Seed,2025-03)提出 clip-higher、动态采样、token 级损失等四项修补;<b>GSPO</b><span class="cite">[9]</span>(Qwen,2025-07)把序列级重要性比率引入目标函数,解决长序列训练不稳定。这些算法层面的演进与系统演进(§3–§4)互为因果:序列越长、组越大,rollout 越贵,越需要高效引擎与异步化。</p>
 <div class="srcnote"><small><b>[8] Yu et al. (ByteDance Seed &amp; Tsinghua), "DAPO: An Open-Source LLM Reinforcement Learning System at Scale", arXiv:2503.14476, 2025-03。</b><br>
 <b>[9] Agarwal et al. (Qwen), "GSPO: Group Sequence Policy Optimization", arXiv:2507.18071, 2025-07。</b><br>
-<span class="zh">两条均为系统级开源报告:DAPO 公开了 AIME 上从 50 分提到 70 分的完整 RL 配方;GSPO 是 Qwen3 使用的序列级策略优化目标,后被 verl 等框架实现。</span></small></div>
+<span class="zh">两条均为系统级开源报告:DAPO 在 Qwen2.5-32B 上把 AIME 2024 提到 50 分并公开完整 RL 配方;GSPO 是 Qwen3 使用的序列级策略优化目标,后被 verl 等框架实现。</span></small></div>
 
 <h4>第三幕 · Agent RL(2025 下半年至今):让模型学会"做事"</h4>
 <p>把 RLVR 从"解一道题"搬到"完成一个任务":给模型一个目标(修复这个 bug、调研这个课题),让它<b>多轮</b>地思考 → 调用工具(搜索、终端、浏览器)→ 观察结果 → 继续,直到交付。奖励通常是<b>终局可验证的</b>:测试通过了吗?答对了吗?页面状态对吗?这带来三个新麻烦:<b>(1) 轨迹极长</b>(数千至上万 token、几十轮交互);<b>(2) 环境慢且不可控</b>(一个网页请求几秒,一次 docker 构建几分钟);<b>(3) 功劳分配更难</b>(几十步里只有一两步是关键决策)。</p>
@@ -384,7 +384,7 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 <span class="zh">译:"AgentGym-RL 为智能体 LLM 研究奠定了扎实的基础,使跨异构环境的可复现大规模 RL 实验成为可能……ScalingInter-RL 是一种为平衡探索与利用而设计的训练方法。"</span><br>
 <span class="zh">→ ScalingInter-RL 的核心是<b>渐进式交互扩展</b>:训练中逐步拉长交互轮数(horizon),让模型先学会短程决策再学长程任务——环境/难度课程化的又一实例。</span></small></div>
 <p>到 2026 年,这条线进化为"<b>自进化环境</b>":环境本身会诊断模型弱点、自动生成针对性任务。字节 AgentTars 团队的 <b>Agent-World</b><span class="cite">[14]</span> 提出"多环境 RL + 自进化竞技场"的闭环;Prime Intellect 的开源环境 <b>General Agent</b> 则展示了典型飞轮曲线<span class="cite">[15]</span>。</p>
-<div class="srcnote"><small><b>[14] ByteDance AgentTars 团队, "Agent-World: Scaling Real-World Environment Synthesis for Evolving General Agent Intelligence", arXiv:2604.18292, 2026-07。</b><br>
+<div class="srcnote"><small><b>[14] ByteDance AgentTars 团队, "Agent-World: Scaling Real-World Environment Synthesis for Evolving General Agent Intelligence", arXiv:2604.18292, 2026-04。</b><br>
 <span class="en">"…integrates multi-environment agentic RL with a self-evolving arena to automatically diagnose agent weaknesses and drive targeted learning in a closed training loop."</span><br>
 <span class="zh">译:"(该工作)将多环境智能体 RL 与自进化竞技场相结合,自动诊断智能体弱点并在闭环训练中驱动针对性学习。"</span><br><br>
 <b>[15] Prime Intellect, "General Agent: A Self-Evolving, Synthetic Agent Environment", 官方博客, 2026-05-18。</b><br>
@@ -393,7 +393,7 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 
 <h3>2.4 环节三/四:轨迹采集与筛选——代码里的飞轮</h3>
 <p>轨迹采集就是 §3 要展开的 rollout;筛选与课程则在训练框架里有直接对应。以本地 clone 的 <b>slime</b> 仓库为例,它的核心抽象就是一条"训练 ↔ rollout ↔ <b>数据缓冲(Data Buffer)</b>"通路,数据缓冲支持自定义采样与<b>过滤器(filter_hub)</b>——训练失败/作弊的样本可以在这里被丢弃或回炉:</p>
-<pre><code><span class="c"># 仓库:slime(THUDM, 2025-08 开源)— 目录结构节选</span>
+<pre><code><span class="c"># 仓库:slime(THUDM, 2025-07 开源)— 目录结构节选</span>
 slime/
 ├── rollout/
 │   ├── sglang_rollout.py          <span class="c"># 常规(同步/步调灵活的)rollout 入口</span>
@@ -403,7 +403,7 @@ slime/
 ├── rm_hub/                        <span class="c"># 奖励函数插件(可验证奖励就在这里接)</span>
 └── utils/data.py                  <span class="c"># Data Buffer:prompt 管理与全局数据集支持</span></code></pre>
 <p>slime 的 README 把这个设计意图说得很清楚——所有环节流经同一条通路,避免"训练器、rollout 服务、Agent 框架各自为政的沉重技术栈":</p>
-<div class="srcnote"><small><b>slime 仓库 README(THUDM / 智谱,2025-08,本地 clone 之原文)。</b><br>
+<div class="srcnote"><small><b>slime 仓库 README(THUDM / 智谱,2025-07,本地 clone 之原文)。</b><br>
 <span class="en">"slime's design goal is to make these two capabilities reinforce each other without turning the system into a heavy stack of disconnected trainers, rollout services, and agent frameworks. Megatron training, SGLang rollout, custom data generation, reward computation, verifier feedback, and environment interaction all flow through the same training / rollout / Data Buffer path."</span><br>
 <span class="zh">译:"slime 的设计目标是让这两种能力相互促进,同时不把系统变成一堆互不相通的训练器、rollout 服务和 Agent 框架。Megatron 训练、SGLang rollout、自定义数据生成、奖励计算、验证器反馈与环境交互,全部流经同一条'训练 / rollout / 数据缓冲'通路。"</span></small></div>
 
@@ -527,7 +527,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 </div>
 
 <h3>3.5 rollout 加速的奇招:投机解码与部分 rollout</h3>
-<p>除了架构,还有两个单点加速技术值得知道:<b>面向 RL 的投机解码</b>(在 rollout 阶段用分布感知的草稿模型加速采样,Together AI 报告最高 50% 提速且不改变输出分布)<span class="cite">[23]</span>;以及 <b>APRIL(主动部分 rollout)</b>——对"长尾未完成"的样本不抛弃,而是把已生成部分作为部分轨迹回收利用,专为推理模型的长尾生局长设计<span class="cite">[24]</span>。</p>
+<p>除了架构,还有两个单点加速技术值得知道:<b>面向 RL 的投机解码</b>(在 rollout 阶段用分布感知的草稿模型加速采样,Together AI 报告最高 50% 提速且不改变输出分布)<span class="cite">[23]</span>;以及 <b>APRIL(主动部分 rollout)</b>——对"长尾未完成"的样本不抛弃,而是把已生成部分作为部分轨迹回收利用,专为推理模型的长尾生成设计<span class="cite">[24]</span>。</p>
 <div class="srcnote"><small><b>[23] Together AI, "Accelerate RL rollouts by up to 50% with distribution-aware speculative decoding", 官方博客, 2026(月份未核实)。</b><br>
 <b>[24] "APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-Tail Generation", arXiv:2509.18521, 2025-09。</b><br>
 <span class="zh">两者分别从"单位时间 token 数"与"样本利用率"两个正交维度压榨 rollout 阶段——这是 2026 年 rollout 引擎竞争的白热化标志。</span></small></div>
@@ -656,7 +656,7 @@ in-flight sample to finish."""</span>
   <tr><td><b>OpenRLHF 异步数据流</b></td><td>EMNLP Demo · 2025-11<span class="cite">[27]</span></td><td>rollout / actor / 远程引擎消息传递、到数据即算;DAPO 长上下文优化</td><td>长上下文 7B 配置 1.56×;对比 TRL 约 3.1×</td></tr>
   <tr><td><b>StreamRL</b></td><td>Microsoft · 2025-04<span class="cite">[29]</span></td><td>从"批间屏障"改为<b>流式生成</b>(完成一条送一条)+ <b>偏斜感知调度</b>(用长度排序模型把长尾样本提前派发)+ 跨机房异构解耦</td><td>吞吐 1.30–2.66×;解耦架构对 colocate 最高 2.75×;成本效益 1.33×</td></tr>
   <tr><td><b>AReaL</b></td><td>清华/蚂蚁 · 2025-05<span class="cite">[25]</span></td><td>全异步 + staleness 容量阀门(上文源码)+ staleness 增强 PPO + 中断式生成 + 奖励/传输流水线化</td><td><b>2.77×</b> 加速;后续版本转向"Agent RL 桥梁"(ASearcher, 2025-08)</td></tr>
-  <tr><td><b>slime(async 模式)</b></td><td>智谱/清华 · 2025-08<span class="cite">[30]</span></td><td>Megatron 训练 + SGLang rollout,一框架内支持 colo/解耦/全异步三模式;Data Buffer 全局数据集</td><td>支撑 GLM-4.5/4.6/4.7 千亿级 agentic RL(官方口径)</td></tr>
+  <tr><td><b>slime(async 模式)</b></td><td>智谱/清华 · 2025-07<span class="cite">[30]</span></td><td>Megatron 训练 + SGLang rollout,一框架内支持 colo/解耦/全异步三模式;Data Buffer 全局数据集</td><td>支撑 GLM-4.5/4.6/4.7 千亿级 agentic RL(官方口径)</td></tr>
   <tr><td><b>Agent Lightning v1.0(collocated async)</b></td><td>Microsoft · 2025-08 / 2026-08<span class="cite">[22][31]</span></td><td>任意 Agent 零改造接入;网关收集轨迹;同卡池上"够一批就暂停新请求→更新→恢复"的协同异步</td><td>约 <b>2×</b> 于同步 RL,且比 AReaL 式分池更省卡</td></tr>
 </table>
 <div class="srcnote"><small><b>[29] Zhong et al. (Microsoft), "StreamRL: Scalable, Heterogeneous, and Elastic RL for LLMs with Disaggregated Stream Generation", arXiv:2504.15930, 2025-04。</b><br>
@@ -694,7 +694,7 @@ in-flight sample to finish."""</span>
 <h3>5.1 理解侧:VLM 的 RLVR 与 GUI Agent</h3>
 <h4>"3 美元的顿悟":RLVR 配方直接搬到 VLM</h4>
 <p>DeepSeek-R1 之后一个月内,开源社区就验证了:Qwen2.5-VL 3B + GRPO + 约 1700 条 CLEVR 计数样本(数值匹配即奖励),总花费不到 3 美元,VLM 的计数与推理能力大幅跃升并泛化到其他基准——这就是 R1-V<span class="cite">[36]</span>。随后 Vision-R1<span class="cite">[37]</span>、VLM-R1<span class="cite">[38]</span> 等把配方系统化。这一波确立的结论与文本侧一致:<b>在足够强的基座上,极少量可验证数据 + GRPO 就能激发推理,且比 SFT 泛化更好</b>。</p>
-<div class="srcnote"><small><b>[36] R1-V(开源项目, Chengyou Jia 等), GitHub, 2025-02。</b><br>
+<div class="srcnote"><small><b>[36] R1-V(开源项目, Liang Chen 等), GitHub, 2025-02。</b><br>
 <span class="en">项目口号:"Witness the aha moment of VLM with less than $3."</span><br>
 <span class="zh">译:"用不到 3 美元,见证 VLM 的'顿悟时刻'。"</span><br>
 <b>[37] Huang et al., "Vision-R1: Incentivizing Reasoning Capability in Multimodal Large Language Models", arXiv:2503.06749, 2025-03。</b><br>
@@ -807,10 +807,21 @@ in-flight sample to finish."""</span>
   <div class="card"><h5>② 算法线:off-policy 从"必要之恶"变"可调资源"</h5>
     <p><b>已发生:</b>经验回放的系统研究(2026-04)推翻"必须 on-policy"信条,可省 40% 算力;异步比例成为可调超参(ROLL Flash);GSPO/DAPO 等稳定长序列;过程奖励模型进入多模态。<b>信号:</b>staleness 开始被当作与学习率同级的训练超参数来管理。</p></div>
   <div class="card"><h5>③ 数据/环境线:环境即数据,自进化闭环成形</h5>
-    <p><b>已发生:</b>EnvScaling(2025-09)给出环境规模化定律;Agent-World(2026-07)闭环"诊断弱点→造环境→针对性训练";Prime Intellect General Agent(2026-05)开源自进化合成环境;Tongyi DeepResearch(2025-10)公开 CPT↔后训练飞轮全配方。<b>信号:</b>"环境工程师"正在成为 Agent 团队的一等岗位。</p></div>
+    <p><b>已发生:</b>EnvScaling(2025-09)给出环境规模化定律;Agent-World(2026-04)闭环"诊断弱点→造环境→针对性训练";Prime Intellect General Agent(2026-05)开源自进化合成环境;Tongyi DeepResearch(2025-10)公开 CPT↔后训练飞轮全配方。<b>信号:</b>"环境工程师"正在成为 Agent 团队的一等岗位。</p></div>
   <div class="card"><h5>④ 多模态线:从刷分到物理可验证,从图像到视频</h5>
     <p><b>已发生:</b>Flow-GRPO/DanceGRPO(2025-05)统一生成 RL 算法栈;World-R1(2026-04)3D 约束可验证奖励;Qwen-Image-2.0-RL(2026-06)RL 进入旗舰图像产品;RL 与蒸馏一体化(RL-Native Distillation, 2026-08);同时 2026 年出现对 RLVR 鲁棒性的系统性质疑(2608.08802)。<b>信号:</b>生成侧 RL 正重走理解侧"爆发→反思"的周期,但快得多。</p></div>
 </div>
+
+<h3>6.1.5 2026 年秋(9–10 月):环境基础设施与权重同步成为主战场</h3>
+<p>9–10 月单月出现 10+ 篇 Agent RL 系统论文,"系统军备竞赛"的判断被强烈验证。最值得记住的六件:</p>
+<ul>
+<li><b>DSec:DeepSeek 弹性算力环境</b>(2026-09-19,arXiv:2609.22978):Agent RL 的沙箱环境(仓库、工具、任务服务)以突发方式大规模创建、需长期保持状态——环境基础设施本身成了与训练框架同等级的系统问题。DSec 把<b>沙箱生命周期</b>做成独立基础设施层(agent sandbox + worker container),GPU 作业被抢占后可重连续跑;<b>DeepSeek-V4.1 起生产 rollout 全部跑在其上:日服务约 300 万个沙箱、峰值 38 万+ 并发</b>——"环境即数据、环境规模化"论断的最强工业证据。</li>
+<li><b>FlashREINFORCE:单 Rollout 免 Critic 异步 RL</b>(NVIDIA,2026-09):GRPO 的"组采样"要求同一 prompt 反复 rollout 并等齐,与异步长程 Agent 天性冲突——改成<b>每 prompt 只采 1 条 rollout</b>:批内新鲜奖励中心化 + 序列级信任域 + token 重要性采样加权。数学任务五基准均分 38.0(GRPO 36.3,且只用一半 rollout);同预算超 GRPO +6.8 分(Qwen3-30B-A3B,lag≈8 下稳定)。</li>
+<li><b>NeMo-DCR:万亿参数的位精确增量权重同步</b>(NVIDIA+Aalto,2026-10-06,arXiv:2610.08430):解耦 RL 每步都要把新权重送到 rollout 集群——1T checkpoint 跨两个 AWS 区域要 87.5 分钟。利用"每步仅约 1% BF16 权重改变存储值"做位精确增量压缩 + 中继树分发:1T 模型 @3% 变更率从 87.5 分钟降到 <b>150 秒</b>(12–40×)。</li>
+<li><b>staleness 在管线中的位置被精确刻画</b>(字节+TAMU+UVA,2026-09-29,arXiv:2609.36830):对轨迹生命周期建模 policy lag 的累积过程,提出"池感知的有效 staleness 控制"——同等墙钟预算下验证准确率比不过滤的异步 RL <b>+18.7%</b>,以少 <b>47.1%</b> 的 GPU 时间打平同步 RL。§4.3 的"容量阀门"与 §6.2"staleness 形式化为可调资源"预判的正解。</li>
+<li><b>RollArt:按硬件适配彻底解耦多任务 Agent RL</b>(阿里+HKUST,OSDI 2026):prefill 吃算力、decode 吃带宽、环境交互吃 CPU——按负载把三类计算解耦到三类硬件;轨迹级解耦使慢环境不阻塞他人。对比各类 RL 系统<b>训练时间降 1.31–2.05×</b>,已在阿里 3000+ GPU 集群生产验证(Qoder)。</li>
+<li><b>框架生态</b>:AReaL 2.0(2026-07-01)重构为微服务架构(训练/推理/agent/权重更新四类独立服务)+ Hermes 在线 RL 环境,黑盒 agent 改个 base_url 即可接入;slime 的官方后继 <b>Miles v0.1</b>(2026-09-08)成为 GLM-5.2 全异步 agentic RL 的载体(64×GB300,中位步时 263s)。另有 VenusRL(优先级调度 + 环境内存管理,最高 4.24×)、ThunderSyncRL("无损"加速 agentic RL)等一批新作。</li>
+</ul>
 
 <h3>6.2 未来发展方向研判(附依据)</h3>
 <ol style="font-size:15px;line-height:2">
@@ -861,12 +872,12 @@ in-flight sample to finish."""</span>
   <li>OpenRLHF Team. <i>An Easy-to-use, Scalable and High-performance RLHF System</i>. EMNLP 2025 Demo, 2025-11.</li>
   <li><i>Efficient RL Training for LLMs with Experience Replay</i>. arXiv:2604.08706, 2026-04.</li>
   <li>Zhong et al. <i>StreamRL: Scalable, Heterogeneous, and Elastic RL for LLMs with Disaggregated Stream Generation</i>. arXiv:2504.15930, 2025-04.</li>
-  <li>THUDM / Z.ai. <i>slime: An SGLang-Native Post-Training Framework for RL Scaling</i>. GitHub + 官方博客, 2025-08.</li>
+  <li>THUDM / Z.ai. <i>slime: An SGLang-Native Post-Training Framework for RL Scaling</i>. GitHub + 官方博客(2025-07-09), 2025-07.</li>
   <li>阿里 ROLL 团队. <i>ROLL Flash: Accelerating RLVR and Agentic RL Training</i>. arXiv:2510.11345, 2025-10.</li>
   <li>Prime Intellect. <i>INTELLECT-2 / PRIME-RL(去中心化 RL:TOPLOC、SHARDCAST)</i>. 官方博客与技术报告, 2025-05.</li>
   <li>BiDiRL(异步解耦 RL 时空复用, 2026);AReaL-Hex(异构 GPU 异步 RL, 2025-11)。</li>
   <li>vLLM Team. <i>Native RL APIs in vLLM</i>. 官方博客, 2026-05-28;另见 <i>Announcing vime</i>, 2026-06-09.</li>
-  <li>R1-V(Chengyou Jia 等,开源项目). GitHub, 2025-02.</li>
+  <li>R1-V(Liang Chen 等,开源项目). GitHub, 2025-02.</li>
   <li>Huang et al. <i>Vision-R1</i>. arXiv:2503.06749, 2025-03.</li>
   <li>Chen et al. <i>VLM-R1</i>. arXiv:2504.07615, 2025-04;另:SimpleRL-Zoo, arXiv:2503.18892, 2025-03.</li>
   <li>ByteDance Seed. <i>UI-TARS</i>. arXiv:2501.12326, 2025-01.</li>
@@ -883,6 +894,13 @@ in-flight sample to finish."""</span>
   <li>Qwen-Image-2.0-RL arXiv:2606.27608(2026-06);SpectraReward arXiv:2607.11886(2026-07);RubricRL arXiv:2511.20651(2025-11);GLM-4.1V-Thinking arXiv:2507.01006(2025-07);BAGEL arXiv:2505.14683(2025-05)。</li>
   <li>OpenAI. <i>Sora 2 System Card</i>, 2025-09-30;Sequoia × Sora 2 团队访谈, 2025-10。</li>
   <li>2026 年多模态 RLVR 反思:Token Reweighting arXiv:2603.25077;Visually-Guided PO arXiv:2604.09349;感知中心 PRM arXiv:2604.24583;CORA arXiv:2606.14691;鲁棒性质疑 arXiv:2608.08802。</li>
+  <li>Huang et al.(DeepSeek,131 位作者). <i>DSec: DeepSeek Elastic Compute</i>(弹性沙箱基础设施). arXiv:2609.22978, 2026-09-19.</li>
+  <li>Hu, Zhang et al.(NVIDIA). <i>FlashREINFORCE</i>(单 rollout 免 critic 异步 RL;理论前作 SAO, arXiv:2607.07508). 项目页 yifanzhang-pro.github.io/FlashREINFORCE, 2026-09.</li>
+  <li>NeMo-DCR(万亿参数位精确增量权重同步, 1T refit 87.5min→150s). arXiv:2610.08430, 2026-10-06;代码并入 NVIDIA-NeMo/RL PR #2444.</li>
+  <li>字节+TAMU+UVA. <i>Where Does Staleness Accumulate?</i>(池感知 staleness 控制). arXiv:2609.36830, 2026-09-29.</li>
+  <li>Gao et al.(阿里+HKUST). <i>RollArt: Multi-task Agentic RL on Disaggregated Infrastructure</i>. OSDI 2026(arXiv:2512.22560);基于开源 ROLL(github.com/alibaba/ROLL).</li>
+  <li>中科院计算所等. <i>VenusRL</i>(优先级动作调度 + 环境资源管理,最高 4.24×). arXiv:2610.03286, 2026-10-02.</li>
+  <li>AReaL 2.0(微服务架构 + Hermes 在线 RL 环境). inclusionAI, 2026-07-01, github.com/areal-project/AReaL;RadixArk. <i>Miles v0.1</i>(slime 后继,全栈后训练系统). arXiv:2609.08368, 2026-09-08.</li>
   <li>本文化用的源码(本地 clone,经由镜像站获取,2026-08-23):verl(volcengine)、AReaL(inclusionAI)、slime(THUDM)。</li>
 </ol>
 </div>
@@ -895,5 +913,11 @@ in-flight sample to finish."""</span>
 </footer>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

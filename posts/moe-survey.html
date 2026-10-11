@@ -134,7 +134,7 @@
   <h1>混合专家（MoE）全景</h1>
   <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的读者。</p>
   <div class="meta">
-    <span class="chip">调研日期：<b>2026-08-14</b></span>
+    <span class="chip">调研日期：<b>2026-08-14</b> · 增补：<b>2026-10-11</b></span>
     <span class="chip">覆盖模型：<b>Switch / GShard / Mixtral / DeepSeek-V3·R1 / Kimi K2 / Qwen3 / MoE-LLaVA / DiT-MoE / EC-DiT / Race-DiT / DSMoE / Wan2.2 / HunyuanImage3 / Mamoda2.5 / MAGI-2 / HunyuanVideo / LTX-2</b></span>
     <span class="chip">工业数据来源：<b>InfraInsight 架构分析报告库</b></span>
     <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
@@ -401,7 +401,7 @@ scores = np.zeros(n_experts)              <span class="c"># 初始时所有专�
 <div class="math">
 loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub></span> · <span class="i">P<sub>i</sub></span>，　<span class="i">f<sub>i</sub></span> = 分到专家 i 的 token 比例（不可导），　<span class="i">P<sub>i</sub></span> = 路由器给专家 i 的平均概率（可导）
 </div>
-<p>负载完全均匀时该损失取最小值 1/n；α 通常取 0.01 量级<sup class="ref"><a href="#r2">[2]</a></sup>。<b>但辅助损失有副作用</b>——它把「均匀」这个与主任务无关的目标混入梯度，会损害模型性能。这正是 2024 年 DeepSeek-V3 提出「无辅助损失负载均衡」的动机（§3.2 ③，一条完整的「问题→方案→验证」逻辑线）。</p>
+<p>负载完全均匀时内层求和 Σf<sub>i</sub>·P<sub>i</sub> 取最小值 1/n（乘上系数 α·n 后整项最小值为 α，即 0.01 量级）<sup class="ref"><a href="#r2">[2]</a></sup>。<b>但辅助损失有副作用</b>——它把「均匀」这个与主任务无关的目标混入梯度，会损害模型性能。这正是 2024 年 DeepSeek-V3 提出「无辅助损失负载均衡」的动机（§3.2 ③，一条完整的「问题→方案→验证」逻辑线）。</p>
 
 <h4>Switch 辅助负载损失的 PyTorch 实现</h4>
 <pre class="title">switch_balance_loss.py —— Switch Transformer 论文公式 (4)(5)(6)，10 行核心逻辑</pre>
@@ -501,7 +501,7 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
     <div class="t">V-MoE 与 Expert-Choice：MoE 进入视觉与「反向路由」时代</div>
     <div class="d">Riquelme 等（NeurIPS 2021）把 MoE 引入 ViT（V-MoE）；Zhou 等（NeurIPS 2022）提出 <b>Expert-Choice 路由</b>——让<b>专家反过来挑 token</b>，天然负载均衡，这为后来 Apple 的 EC-DiT（§5）铺路。</div>
   </div>
-  <div class="e"><span class="yr">2023.03–12</span>
+  <div class="e"><span class="yr">2023.12–2024.03</span>
     <div class="t">Grok-1 与 Mixtral 8x7B：开源 MoE 浪潮引爆<sup class="ref"><a href="#r3">[3]</a></sup></div>
     <div class="d">xAI 开源 314B 的 Grok-1（8 选 2）；Mistral 发布 Mixtral 8x7B，47B 总参/13B 激活，以 5 倍更少激活参数击败 Llama 2 70B，「稀疏 MoE」从此成为开源社区主流选项。（业界亦普遍推测 GPT-4 采用 MoE，但未经官方证实。）</div>
   </div>
@@ -563,7 +563,7 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
 <thead><tr><th>模型（时间）</th><th>路由设置</th><th>总参数</th><th>激活参数</th><th>标志性贡献</th></tr></thead>
 <tbody>
 <tr><td>Switch-C（2021）</td><td>top-1，2048 专家</td><td>1.6T</td><td>—</td><td>首个万亿级稀疏模型<sup class="ref"><a href="#r2">[2]</a></sup></td></tr>
-<tr><td>Grok-1（2024.03）</td><td>top-2，8 专家</td><td>314B</td><td>~79B</td><td>首个开源百亿级 MoE 权重</td></tr>
+<tr><td>Grok-1（2024.03）</td><td>top-2，8 专家</td><td>314B</td><td>~86B</td><td>首个开源百亿级 MoE 权重（官方口径"25% 权重激活"）</td></tr>
 <tr><td>Mixtral 8x7B（2023.12）</td><td>top-2，8 专家</td><td>~47B</td><td>13B</td><td>击败 Llama2-70B<sup class="ref"><a href="#r3">[3]</a></sup></td></tr>
 <tr><td>Mixtral 8x22B（2024.04）</td><td>top-2，8 专家</td><td>~141B</td><td>39B</td><td>开源性能新标杆</td></tr>
 <tr><td>DeepSeek-V2（2024.05）</td><td>top-6，160 路由 + 2 共享</td><td>236B</td><td>21B</td><td>MLA + 细粒度/共享专家<sup class="ref"><a href="#r4">[4]</a></sup></td></tr>
@@ -1286,9 +1286,24 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 
 <!-- ===================== 第六章 最新与未来 ===================== -->
 <span class="anchor" id="s6"></span>
-<h2 class="sec"><span class="num">6</span>最新进展与未来发展方向<span class="roadmap">正在发生的6大趋势 → 7个值得投入的研究方向</span><span class="pill fund">前沿</span></h2>
+<h2 class="sec"><span class="num">6</span>最新进展与未来发展方向<span class="roadmap">2026 秋万亿俱乐部换代 → 6大趋势 → 7个值得投入的研究方向</span><span class="pill fund">前沿</span></h2>
 
-<h3>6.1 正在发生的几大趋势（2024–2026）</h3>
+<h3>6.1 2026 年 6–10 月：万亿俱乐部全面换代，均衡理论收敛</h3>
+<p>本文初稿调研于 2026-08，但 2026 年内开源万亿级 MoE 已完成一轮整体换代——四家新旗舰全部带有值得单独讲的 MoE 设计：</p>
+<ul>
+<li><b>Kimi K3</b>（月之暗面，2026-07-27，arXiv:2607.24653）：迄今最大开源权重模型，<b>2.78T 总参 / 104.2B 激活</b>。三项新设计：① KDA 线性注意力 + 周期性 Gated MLA（约 3:1）撑起 1M 上下文；② Attention Residuals（AttnRes）让每层可选择性回看之前所有层；③ <b>Stable LatentMoE</b>：896 路由专家选 16 + 2 共享，配 RMSNorm + 软上限激活 SiTU-GLU（防低精度数值爆炸）与 <b>Quantile Balancing</b>——把每专家偏置直接设为"恰好达成目标负载的分位数"，一步到位、无需调步长，是 DeepSeek 偏置法之后均衡谱系的最新一代<sup class="ref"><a href="#r16">[16]</sup>。训练全程 MXFP4 权重 / MXFP8 激活的量化感知训练（QAT）——MoE 量化已从 PTQ 走向原生 QAT。</li>
+<li><b>DeepSeek-V4 / V4.1-Flash</b>（2026-04-26 预览，arXiv:2606.19348；V4.1-Flash 2026-09-10）：V4-Pro（1.6T/49B）+ V4-Flash（284B/13B）双型号；V4.1-Flash 更进一步做成<b>因果编码器-解码器</b>：552B 骨干，输入侧激活 8B、输出侧激活 16B——<b>同一个 MoE 在编码/解码两侧用不同激活预算</b>，为 MoE 设计空间打开"不对称激活"新维度；全局 KV 890 字节/token<sup class="ref"><a href="#r17">[17]</sup>。</li>
+<li><b>GLM-5 / GLM-5.3-Flash</b>（智谱，2026-02-11，arXiv:2602.15763；5.3-Flash 2026-08-26 MIT 开源）：GLM-5 为 744B/40B、256 专家选 8+1 共享、MLA+DSA；GLM-5.3-Flash（320B/18B）首次在开源前沿模型上采用 34 层 KDA + 11 层稀疏 MLA 混合，注意力计算 −3.01×、KV 缓存 −4.44×（1M 上下文）<sup class="ref"><a href="#r18">[18]</sup>。</li>
+<li><b>Qwen3.8-Flash-Next</b>（阿里，2026-08-26，Qwen4 架构预览）：125B-A6B，每 MoE 层 <b>512 个专家选 10 + 1 共享</b>——至今最细粒度的量产配置之一；另有 51B 参数 n-gram 嵌入表放主机内存，"专家 FFN 之外的第二种稀疏容量容器"，官方称训练成本约为 Qwen3.7-Plus 的 1/9<sup class="ref"><a href="#r19">[19]</sup>。此外 <b>Kimi K2.5</b>（2026-01-27）证明成熟 LLM MoE 骨干可<b>不改路由结构、直接持续预训练成原生多模态模型</b>（15T 图文 token，K2 结构不动）<sup class="ref"><a href="#r20">[20]</sup>——与 §4 的 MoE-LLaVA"先密后疏三阶段"旧范式形成路线对照。</li>
+</ul>
+<p>学术侧两条精炼主线：</p>
+<ul>
+<li><b>路由器本身成为瓶颈</b>：<b>MoRE</b>（UPenn，2026-09-28）指出细粒度专家让线性路由器每 token 代价 Θ(Mh) 在 M 大时超过专家计算本身；把路由矩阵分解到秩 r（代价 O((h+M)r)），并<b>证明 r = O(log M) 对路由表达力足够</b>，同等激活 FLOPs 下可容纳更多专家<sup class="ref"><a href="#r21">[21]</sup>。</li>
+<li><b>负载均衡统一进控制论</b>：阿里 <b>ID Balancing</b>（2026-09-30）证明 DeepSeek 偏置法 = 积分（I）控制器、K3 Quantile Balancing = 比例（P）控制器，并提出积分+微分（ID）控制器：大误差强修正、近平衡温和修正。Top-10-of-768 下最差情形失衡降 50%+，扩展到 69.9B 时比辅助损失基线低约 89.6%<sup class="ref"><a href="#r22">[22]</sup>——"辅助损失→偏置→分位数→PID"谱系就此闭环。</li>
+</ul>
+<p>推理侧，显存受限部署成为新热点：<b>MoE-CORE</b>（2026-10-02）用 prefill 交替缓冲 + 路由历史感知替换做专家卸载，DeepSeek-V4-Flash-W4A8 上每 token 38–45 ms（对照 vLLM Prefetch 配置 1268.9 ms）；<b>SSD-LLaMA</b>（HKUST，2026-09-16）让消费级 PC 从 SSD 原生推理万亿 MoE 达 1+ token/s；华为"Trillion-Parameter MoE in a Box"（2026-09-14）用高带宽 Flash 解耦内存供给——回应 §6.3"端侧/边缘 MoE"方向<sup class="ref"><a href="#r23">[23]</sup>。</p>
+
+<h3>6.2 正在发生的几大趋势（2024–2026）</h3>
 <div class="grid two">
   <div class="card"><h4>① 无辅助损失 / 无损负载均衡成新标准</h4>
     <p>DeepSeek-V3 的偏置项方案<sup class="ref"><a href="#r4">[4]</a></sup>、GLM-4.5 的 loss-free loading<sup class="ref"><a href="#r7">[7]</a></sup>、Qwen3 同款设计，正快速取代 2017 年以来的辅助损失传统。</p></div>
@@ -1304,7 +1319,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
     <p>2025–2026 从学术论文走向产品级：HunyuanImage 3.0（80B/13B，最大开源图像 MoE）、Mamoda 2.5（25B/3B）、MAGI-2（114B/6B，超细粒度+Head Parallel）<sup class="ref"><a href="#r13">[13]</a></sup>；但稠密阵营以高压缩 VAE 对抗（LTX-2 快约 18×）——路线之争未定，按瓶颈位置取舍。DICE（ICCV 2025）等开始研究扩散 MoE 的并行推理系统。</p></div>
 </div>
 
-<h3>6.2 未来发展方向</h3>
+<h3>6.3 未来发展方向</h3>
 <table>
 <thead><tr><th>方向</th><th>核心问题与思路</th></tr></thead>
 <tbody>
@@ -1339,6 +1354,14 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li id="r13">InfraInsight 模型架构分析报告库（blian6）. <a href="https://blian6.github.io/InfraInsight/" target="_blank">blian6.github.io/InfraInsight</a>（访问于 2026-08-14）.（§5.6/§5.7 工业模型结构数据的来源，基于开源权重逐层分析：HunyuanImage3（80B/13B，64+1 专家 top-8，AR+DiT 统一骨干，MoE≈69% 层算力）；HunyuanVideo（13B 稠密，注意力≈83%）；Qwen-Image（20B 稠密 MMDiT，FFN≈52%）；LTX-2（19B 稠密不对称双流，8×32×32 VAE）；MiniMax H3（33B 稠密）；Cosmos3（MoT 双塔，注意力≈66%）；Mamoda 2.5（25B/3B，E128A8+共享，sigmoid+无损偏置，稠密上采样初始化）；MAGI-2（114B/6B，MagiMoE 超细粒度 12 头×256 专家、Head Parallel、MagiMuon））</li>
 <li id="r14">Wan 2.2 技术报告（阿里巴巴, 2025.07，High-Noise/Low-Noise 双专家按噪声步切换）；CogVideoX 的 Expert Transformer（arXiv:2408.06072, 2024.08，空间/时间专家块交替）；Multi-Head MoE（arXiv:2404.15045, 2024.04）；LatentMoE + Head Parallel（arXiv:2602.04870, 2026.02，MAGI-2 所引）；MiM-DiT（arXiv:2603.02710, 2026.03，MoE-in-MoE 图像复原）；DICE（ICCV 2025，扩散 MoE 并行推理的 staleness 优化）.</li>
 <li id="r15">本报告源码分析的官方仓库（均已 <code>git clone</code> 至本目录）：DeepSeek-V3（<a href="https://github.com/deepseek-ai/DeepSeek-V3" target="_blank">deepseek-ai/DeepSeek-V3</a>，§3.2，inference/model.py）；Mixtral（<a href="https://github.com/mistralai/mistral-src" target="_blank">mistralai/mistral-src</a>，§3.1，src/mistral_inference/moe.py）；MoE-LLaVA（<a href="https://github.com/PKU-YuanGroup/MoE-LLaVA" target="_blank">PKU-YuanGroup/MoE-LLaVA</a>，§4.2，moellava/model/language_model/llava_llama_moe.py，其 MoE 层本体来自 DeepSpeed）；DiT-MoE（<a href="https://github.com/feizc/DiT-MoE" target="_blank">feizc/DiT-MoE</a>，§5.3，models.py）；HunyuanImage-3（Tencent-Hunyuan，§5.6，hunyuan_image_3/modeling_hunyuan_image_3.py）；以及原版稠密 DiT（facebookresearch/DiT，§5.1 对照）.</li>
+<li id="r16">Moonshot AI. <i>Kimi K3 Technical Report</i>. 2026-07-27. arXiv:<a href="https://arxiv.org/abs/2607.24653" target="_blank">2607.24653</a>.（2.78T/104.2B；KDA+AttnRes+Stable LatentMoE+Quantile Balancing；MXFP4 QAT；权重开源）</li>
+<li id="r17">DeepSeek-AI. <i>DeepSeek-V4 Technical Report</i>. 2026-04-26. arXiv:<a href="https://arxiv.org/abs/2606.19348" target="_blank">2606.19348</a>；<i>DeepSeek-V4.1-Flash 技术报告</i>. 2026-09-17. arXiv:<a href="https://arxiv.org/abs/2609.19969" target="_blank">2609.19969</a>.（V4：1.6T/49B + 284B/13B，CSA/HCA；V4.1：因果编码器-解码器、编码 8B/解码 16B 不对称激活）</li>
+<li id="r18">Z.ai. <i>GLM-5: From Vibe Coding to Agentic Engineering</i>. 2026-02-17. arXiv:<a href="https://arxiv.org/abs/2602.15763" target="_blank">2602.15763</a>；<i>GLM-5.3-Flash</i>. 2026-08-26. docs.z.ai/guides/vlm/glm-5.3-flash.（744B/40B MLA+DSA；5.3-Flash 320B/18B KDA 混合）</li>
+<li id="r19">Qwen Team. <i>Qwen3.8-Flash-Next</i>（Qwen4 架构预览）. 2026-08-26. huggingface.co/Qwen/Qwen3.8-Flash-Next.（125B-A6B；512 专家选 10+1；51B n-gram 嵌入表；训练成本约 Qwen3.7-Plus 的 1/9）</li>
+<li id="r20">Moonshot AI. <i>Kimi K2.5</i>. 2026-01-27. github.com/MoonshotAI/Kimi-K2.5.（K2 骨干 + 15T 图文持续预训练成原生多模态；原生 INT4）</li>
+<li id="r21">UPenn. <i>MoRE: Low-Rank Routing for Mixture-of-Experts</i>. 2026-09-28. arXiv:<a href="https://arxiv.org/abs/2609.36301" target="_blank">2609.36301</a>. github.com/Matheart/MoRE_code.（路由秩 O(log M) 理论）</li>
+<li id="r22">阿里巴巴（Qwen 团队）. <i>ID Balancing: Load Balancing for Extremely Sparse MoE Training via PID Control</i>. 2026-09-30. arXiv:<a href="https://arxiv.org/abs/2609.39137" target="_blank">2609.39137</a>.（I/P/D 控制器统一均衡谱系）</li>
+<li id="r23"><i>MoE-CORE</i>（专家卸载与驻留）. 2026-10-02. arXiv:<a href="https://arxiv.org/abs/2610.01950" target="_blank">2610.01950</a>；HKUST <i>SSD-LLaMA</i>. 2026-09-16. arXiv:<a href="https://arxiv.org/abs/2609.18110" target="_blank">2609.18110</a>；华为 <i>Trillion-Parameter MoE in a Box</i>. 2026-09-14. arXiv:<a href="https://arxiv.org/abs/2609.15636" target="_blank">2609.15636</a>.</li>
 </ol>
 
 <div class="footer">
@@ -1347,5 +1370,11 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 </div>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

@@ -330,7 +330,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 <h3>5.3 EAGLE-1/2（2024）：在特征空间做自回归</h3>
 <p><span class="pill g">训练对象：特征级草稿头</span><span class="pill b">优化目标：token CE + 特征回归</span></p>
 
-<p>Medusa 的头只看"当前这一个隐状态"，看不见自己已经猜了什么——第 3 个头猜的词与第 1 个头可能互相矛盾。EAGLE<span class="cite">[8]</span>（北大 + 滑铁卢等，ICML 2024）换了个更本质的做法：<b>让草稿头对目标模型的倒数第二层特征做自回归</b>。草稿头（仅一层 Transformer decoder）每步输入"上一位置的目标特征 + 已采样 token 的 embedding（低秩融合后）"，预测下一位置的特征；预测出的特征接上目标模型的 lm_head 得到草稿 token 分布。因为特征比 logits 信息量大得多，草稿"站在目标模型的肩膀上"猜，接受率大幅超越 Medusa。EAGLE-2<span class="cite">[9]</span> 再叠加按草稿置信度动态扩展的草稿树（训练不变、纯推理侧改进），把加速推到 4–5×。</p>
+<p>Medusa 的头只看"当前这一个隐状态"，看不见自己已经猜了什么——第 3 个头猜的词与第 1 个头可能互相矛盾。EAGLE<span class="cite">[8]</span>（北大 + 滑铁卢等，ICML 2024）换了个更本质的做法：<b>让草稿头对目标模型的倒数第二层特征做自回归</b>。草稿头（仅一层 Transformer decoder）每步输入"上一位置的目标特征 + 已采样 token 的 embedding（低秩融合后）"，预测下一位置的特征；预测出的特征接上目标模型的 lm_head 得到草稿 token 分布。因为特征比 logits 信息量大得多，草稿"站在目标模型的肩膀上"猜，接受率大幅超越 Medusa。EAGLE-2<span class="cite">[9]</span> 再叠加按草稿置信度动态扩展的草稿树（训练不变、纯推理侧改进），把加速推到 3.05–4.26×（论文自报）。</p>
 
 <p>EAGLE 训练的两个设计在论文里低调、却影响了后续所有工作：<b>① 数据用目标模型自采样生成</b>（而非原始 ShareGPT 答案）；<b>② 训练时按草稿自己的采样分布构造树形输入路径</b>（多路径交叉熵加权求和），让草稿适应"自己猜错后继续猜"的状态——这其实就是 EAGLE-3 "训练时测试"思想的雏形。EAGLE 证明了"特征级草稿 + 训练"路线的统治力，也埋下一个自我限制：它的损失里有一项要求草稿输出<b>精确回归目标的下一特征</b>——这个约束后来被 EAGLE-3 证明是规模化的瓶颈（第 6 节）。</p>
 
@@ -408,7 +408,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Li, Wei, Zhang &amp; Zhang,《EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test》, NeurIPS 2025 · arXiv:2503.01840（2025-03-03）[15]</span>
 </blockquote>
 
-<p>最重要的发现是<b>草稿训练也存在规模定律</b>：用约 8 倍于 EAGLE-1 的数据（ShareGPT + UltraChat-200K ≈ 53 万条，答案由目标模型重新生成），加速随数据持续上升。这把"草稿后训练"从"炼丹"变成了"工程"——数据和算力可以稳定换来接受率。工程影响同样大：SGLang 团队实测 EAGLE-3 在 batch=64 时仍有 1.38× 吞吐提升（EAGLE-1 已几乎无收益），vLLM / SGLang / TensorRT-LLM 相继合并官方实现，社区很快训出了 Qwen3 全系、gpt-oss-120B、GLM-4.7-Flash 等数十个 EAGLE-3 草稿权重。同年，MagicDec<span class="cite">[14]</span> 从系统角度补充了一个重要事实：<b>长上下文（KV 缓存读取成为瓶颈）场景下，即使大 batch，投机解码依然净赚</b>——这为 2026 年生产系统全面拥抱草稿扫清了最后疑虑。</p>
+<p>最重要的发现是<b>草稿训练也存在规模定律</b>：用约 8 倍于 EAGLE-1 的数据（ShareGPT + UltraChat-200K ≈ 53 万条，答案由目标模型重新生成），加速随数据持续上升。这把"草稿后训练"从"炼丹"变成了"工程"——数据和算力可以稳定换来接受率。工程影响同样大：SGLang 团队实测 EAGLE-3 在 batch=64 时仍有 1.38× 吞吐提升（EAGLE-1 已几乎无收益），vLLM / SGLang / TensorRT-LLM 相继合并官方实现，社区很快训出了 Qwen3 全系、gpt-oss-120B、GLM-4.7-Flash 等数十个 EAGLE-3 草稿权重。更早的 MagicDec（2024-08）<span class="cite">[14]</span> 从系统角度补充了一个重要事实：<b>长上下文（KV 缓存读取成为瓶颈）场景下，即使大 batch，投机解码依然净赚</b>——这为 2026 年生产系统全面拥抱草稿扫清了最后疑虑。</p>
 
 <h2 id="phase4">7 · 阶段四（2026）：并行草稿 + 在策后训练 + 生产化</h2>
 
@@ -615,7 +615,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p>Draft-OPD<span class="cite">[20]</span> 证明了离线 SFT 的平台期之后，AdaFlash<span class="cite">[29]</span> 把"在策蒸馏 + 自适应步数"带给扩散草稿；ReTrace 用"被拒轨迹"做条件训练。系统侧的 SpecForge<span class="cite">[32]</span>（2026-03）给出了开源的"目标-草稿解耦 + 混合并行 TTT 训练"框架，NVIDIA<span class="cite">[21]</span> 则把协同训练推进到 122B / 256K 上下文 / GB200 规模。可以概括为一个趋势：<b>草稿训练正在从"一次性离线工序"变成"部署后持续进行的在线过程"</b>。</p>
 
 <h3>9.3 草稿架构：并行起草成为主线</h3>
-<p>DFlash<span class="cite">[17]</span> 之后，并行/块级草稿爆发式涌现：DSpark<span class="cite">[18]</span>（半自回归 + 置信度调度）、Domino（并行建模与因果依赖解耦）、P-EAGLE<span class="cite">[33]</span>（EAGLE 的并行化：一次前向产全部 K 个草稿 token，亚马逊 + NVIDIA，gpt-oss-20b 上比 EAGLE-3 再快 1.69×，已并入 vLLM）、PARD/PARD-2（并行草稿适配）、xPress / DARTree / DFlow（扩散草稿的迭代精细化与树化）、DeLS-Spec（长短期上下文解耦）。理论侧也开始解释并行的边界——"并行盲区"（块内缺乏路径信息）与"接受天花板"分析为这条线划定了战场。</p>
+<p>DFlash<span class="cite">[17]</span> 之后，并行/块级草稿爆发式涌现：DSpark<span class="cite">[18]</span>（半自回归 + 置信度调度）、Domino（并行建模与因果依赖解耦）、P-EAGLE<span class="cite">[33]</span>（EAGLE 的并行化：一次前向产全部 K 个草稿 token，UC Santa Cruz + 亚马逊，gpt-oss-20b 上比 EAGLE-3 再快 1.69×，已并入 vLLM）、PARD/PARD-2（并行草稿适配）、xPress / DDTree / DFlow（扩散草稿的迭代精细化与树化）、DeLS-Spec（长短期上下文解耦）。理论侧也开始解释并行的边界——"并行盲区"（块内缺乏路径信息）与"接受天花板"分析为这条线划定了战场。</p>
 
 <h3>9.4 系统、调度与新架构适配</h3>
 <p>腾讯 AngelSpec<span class="cite">[30]</span> 观察到"没有一种草稿结构在所有真实负载下最优"，为生产服务做异构草稿编排；D-cut 研究 batch 场景下自适应验证深度剪枝；MoESD、SpecLA 分别把投机解码带进稀疏 MoE 与线性注意力。生产框架侧：vLLM 已有原生 MTP 文档与 P-EAGLE 实现，Red Hat 实测 gpt-oss + 投机解码在 vLLM 上吞吐提升约 19%；SGLang 的 spec-v2 重叠调度器让"起草与验证流水线化"，gpt-oss 上默认开启；Snowflake 的 Arctic Speculator 草稿（gpt-oss-20b/120b，1.7–1.8×）可作为 vLLM 插件直接使用。DeepSeek-V4 线上以 MTP-1 为基线、DSpark 为升级路径，是"草稿后训练进入旗舰服务"的标志性事件<span class="cite">[18]</span>。</p>
@@ -626,11 +626,41 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <h3>9.6 外溢与基准</h3>
 <p>草稿的"前视表示"开始服务其他任务：OUTLETS<span class="cite">[35]</span> 在 EAGLE-3 骨干上加一个回归头预测<b>输出长度</b>，反哺服务调度（短请求 P99 时延降 34.8%）。多模态投机解码有了系统综述<span class="cite">[37]</span>；Speed-Bench<span class="cite">[36]</span> 等统一基准补齐了"accept length ≠ 实际加速"的评测缺口。另有 Fuzzy Speculative Decoding<span class="cite">[34]</span> 等工作探索"可控有损"的中间地带：接受准则放宽为分布差异阈值，换取速度-质量可调。</p>
 
+<h3>9.7 2026 秋追踪：训练目标直指"期望轮数"，起草-验证边界重划</h3>
+<p class="lead">2026 年 9–10 月，草稿训练研究出现两个清晰信号：<b>训练目标从"单步接受率"进化到"全局期望解码轮数"</b>；<b>起草与验证的边界被重新划分</b>（验证前多轮起草、草稿自我修复）。</p>
+
+<h4>① EDR：把训练目标写成"期望解码轮数"（2026.10）</h4>
+<p><b>动机</b>：并行/半自回归草稿有个被忽视的难点——某位置的草稿分布取决于<b>本轮解码从哪开始</b>，而轮次起点又取决于上一轮接受了多少。CE/KL/L1（包括 LK Losses 类）都是"块内局部代理"，没人直接优化全局解码效率。<span class="cite">[38]</span></p>
+<p><b>贡献</b>：密歇根大学把投机解码建模为<b>马尔可夫奖励过程</b>，导出"期望解码轮数（EDR）"目标——用状态占用度加权局部拒绝代价，<b>精确等于</b>期望解码轮数、零辅助超参；并给出精确的时序差分梯度，支持从目标 rollout 做无偏随机优化；附赠一个离线"成对草稿评测器"（不跑投机解码即可对比两个草稿）。用 EDR 微调 DSpark、DFly 两个 SOTA 草稿，九个基准平均接受长度全面超过现有训练目标。</p>
+<blockquote class="q">
+  <span class="en">"This formulation yields the Expected Decoding Rounds (EDR) objective, which weights local rejection costs by state occupancies and exactly equals the expected number of decoding rounds."</span>
+  <span class="src">— Zhao &amp; Cai, University of Michigan, arXiv:2610.10411, 2026-10-07 [38]</span>
+  <span class="zh">该建模给出"期望解码轮数"（EDR）目标——它用状态占用度加权局部拒绝代价，且精确等于期望解码轮数。</span>
+</blockquote>
+
+<h4>② Acceptance-Aware：贪心用 EAL、采样用 WTV（2026.09）</h4>
+<p>NYU+滑铁卢为两种验证模式分别设计了可直接优化的损失：贪心验证下的<b>期望接受长度（EAL）损失</b>、采样验证下的<b>窗口总变差（WTV）损失</b>，外加可选 GRPO 阶段（奖励 = 模拟接受长度）。跨任务稳定超过 KL 训练。<span class="cite">[39]</span></p>
+
+<h4>③ DLoop：验证前多轮起草 + 循环感知训练（2026.10）</h4>
+<p><b>动机</b>：草稿变强后目标经常"一口气全接受"，但每个起草阶段后仍要跟一次目标验证——目标前向被浪费；已有自适应草稿长度方法只适用于自回归草稿。<span class="cite">[40]</span></p>
+<p><b>贡献</b>：NAVER AI Lab 提出<b>验证前执行多个起草阶段</b>：置信度高就继续起草、把 token 攒起来一次性验证；配套"循环感知训练"——训练时让草稿接触"未验证 token 上自己的隐状态"，保持可靠。<b>收益</b>：叠加在 EAGLE-3 / DFlash / DSpark / MTP 之上，墙钟加速再提升 <b>5%–41%</b>，保持无损。</p>
+<blockquote class="q">
+  <span class="en">"We introduce DLoop, which executes multiple drafting stages before each verification step."</span>
+  <span class="src">— Gu et al., NAVER AI Lab &amp; Korea University, arXiv:2610.07659, 2026-10-06 [40]</span>
+  <span class="zh">我们提出 DLoop：在每次验证步骤之前执行多个起草阶段。</span>
+</blockquote>
+
+<h4>④ DEdit：让后面的 token 回头修前面的错（2026.09）</h4>
+<p>扩散草稿各位置独立预测，前面一个错误连累整块报废（DSpark 治"后缀衰减"用的是向右看的串行头；DEdit 换一条路）。UCR+AWS+NYU 让草稿先并行 unmask、再做 <b>token 到 token 的迭代"编辑"</b>——后面的 token 作为双向上下文<b>回头修复</b>前面的错误；训练用 ProposalMix（按首轮置信度混合"草稿自己的预测"与"真值 token"），专门教"修错"同时保住对的。<b>收益</b>：Qwen3-4B/8B 贪心解码宏平均加速 <b>5.72×/5.97×</b>；消融显示编辑若改用因果注意力会掉点——收益确实来自未来上下文。<span class="cite">[41]</span></p>
+
+<h4>⑤ 机理与规模化补充</h4>
+<p><b>Attention Drift</b>（2026.05）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解——为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>——再次印证 §5.3 的"草稿训练规模定律"。
+
 <table>
   <tr><th>主线</th><th>代表工作（年份）</th><th>一句话概括</th></tr>
   <tr><td>训练目标</td><td>LK Losses、Variational SD、Verification-Aware、Bebop（2026）</td><td>直接优化"序列接受"而非 token 概率</td></tr>
   <tr><td>训练范式</td><td>Draft-OPD、AdaFlash、SpecForge、NVIDIA 协同训练（2026）</td><td>离线 SFT → 在策蒸馏 → RL 循环内在线训练</td></tr>
-  <tr><td>草稿架构</td><td>DFlash、DSpark、P-EAGLE、Domino、xPress/DARTree/DFlow（2026）</td><td>并行起草 + 块内依赖建模 + 置信度调度</td></tr>
+  <tr><td>草稿架构</td><td>DFlash、DSpark、P-EAGLE、Domino、xPress/DDTree/DFlow（2026）</td><td>并行起草 + 块内依赖建模 + 置信度调度</td></tr>
   <tr><td>系统调度</td><td>AngelSpec、D-cut、spec-v2、MoESD、SpecLA（2026）</td><td>负载感知的异构草稿编排与验证预算控制</td></tr>
   <tr><td>工业落地</td><td>DeepSeek-V4、gpt-oss、Qwen3.5、vLLM/SGLang、Arctic Speculator（2025–2026）</td><td>MTP/草稿成为旗舰模型与推理框架的出厂标配</td></tr>
   <tr><td>外溢与基准</td><td>OUTLETS、Speed-Bench、多模态综述（2026）</td><td>草稿特征服务调度；评测从接受率走向实际加速</td></tr>
@@ -643,7 +673,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <ol>
   <li><b>训练目标与真实目标的彻底对齐。</b>加速比的真实目标是 <code>τ / (T<sub>draft</sub> + T<sub>verify</sub>)</code>，而现有损失仍是它的各种代理（CE、KL、L1）。LK Losses<span class="cite">[24]</span>、Variational SD<span class="cite">[25]</span>、Verification-Aware<span class="cite">[26]</span> 刚刚破题：可微地建模"验证与拒绝"、把位置衰减与接受概率显式写进损失，仍有大量理论空间——特别是把"验证算力成本"作为损失项（训练时就学会在会拒的位置提前停笔）。</li>
   <li><b>草稿的终身学习：与策略共进化。</b>RL 后训练协同训练<span class="cite">[21][22][23]</span>证明草稿可以在线跟随策略而不破坏学习轨迹。下一步是把这套机制从"训练期"扩展到"部署期"：线上流量持续回流、草稿夜里增量更新，接受率不再是一次性考试的分数，而是一条维护曲线。</li>
-  <li><b>并行起草的依赖建模与理论边界。</b>并行草稿的"多模态碰撞"与后置衰减是当前最清晰的矛盾<span class="cite">[18]</span>。半自回归（Markov/RNN 头）、扩散迭代精细化（xPress/DFlow）、树化（DARTree）是三种补依赖的方式；"信息下界 / 并行盲区"理论工作有望给出"并行能到哪、哪必须串行"的可计算判据。</li>
+  <li><b>并行起草的依赖建模与理论边界。</b>并行草稿的"多模态碰撞"与后置衰减是当前最清晰的矛盾<span class="cite">[18]</span>。半自回归（Markov/RNN 头）、扩散迭代精细化（xPress/DFlow）、树化（DDTree）是三种补依赖的方式；"信息下界 / 并行盲区"理论工作有望给出"并行能到哪、哪必须串行"的可计算判据。</li>
   <li><b>系统感知的草稿训练（co-design）。</b>DSpark 的置信度头 + 硬件感知调度器开了先例：训练产物不再只是一个模型，而是"模型 + 调度策略"的组合。未来草稿训练会显式感知 batch、SLO、引擎吞吐画像（AngelSpec、D-cut 方向），"为我的集群与负载定制草稿"可能成为推理云的增值服务。</li>
   <li><b>预训练-后训练一体化：为可投机性设计目标。</b>MTP 的成功说明"预测未来 token"既是训练正则也是推理草稿<span class="cite">[13]</span>。往后看，模型出厂即带草稿接口（gpt-oss/Qwen3.5 已是现实），后训练（SFT/RL）阶段保持 MTP 模块同步更新（MTP-RL、OCC、Bebop）将成为标准流程——"可投机性"正在变成与"对齐性"并列的训练要求。</li>
   <li><b>跨架构、跨模态的推广。</b>线性/混合注意力（SpecLA）、MoE（MoESD）、超长上下文（LongSpec）、多模态 VLM/DiT<span class="cite">[37]</span>各自提出了新的草稿设计问题——例如线性注意力的验证更便宜、投机收益天然更小，需要不同的话事术。这一方向目前论文密度仍低，是明显的洼地。</li>
@@ -695,6 +725,14 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr><td>[35]</td><td>Wen 等. OUTLETS: Output-Length Prediction from Speculative Decoding Backbones. <a href="https://arxiv.org/abs/2609.01068">arXiv:2609.01068</a></td><td>2026-09-01</td></tr>
   <tr><td>[36]</td><td>Abramovich 等. Speed-Bench: A Unified and Diverse Benchmark for Speculative Decoding. <a href="https://arxiv.org/abs/2604.09557">arXiv:2604.09557</a></td><td>2026-04</td></tr>
   <tr><td>[37]</td><td>Is Multimodal Speculative Decoding Ready for Diffusion-Based Parallel Drafting? A Survey and Empirical Diagnosis. <a href="https://arxiv.org/abs/2608.20743">arXiv:2608.20743</a></td><td>2026-08-21</td></tr>
+  <tr><td>[38]</td><td>Zhao &amp; Cai (Univ. of Michigan). Training Parallel Speculative Draft Models by Directly Minimizing Expected Decoding Rounds. <a href="https://arxiv.org/abs/2610.10411">arXiv:2610.10411</a></td><td>2026-10-07</td></tr>
+  <tr><td>[39]</td><td>Xia et al. (NYU &amp; Univ. of Waterloo). Acceptance-Aware Draft Model Training for Speculative Decoding. <a href="https://arxiv.org/abs/2609.24150">arXiv:2609.24150</a></td><td>2026-09-21</td></tr>
+  <tr><td>[40]</td><td>Gu et al. (NAVER AI Lab &amp; Korea Univ.). DLoop: Looped Speculative Decoding. <a href="https://arxiv.org/abs/2610.07659">arXiv:2610.07659</a>；代码 github.com/naver-ai/dloop</td><td>2026-10-06</td></tr>
+  <tr><td>[41]</td><td>Yu et al. (UC Riverside &amp; AWS &amp; NYU). DEdit: Iterative Draft Editing for Speculative Decoding. <a href="https://arxiv.org/abs/2609.38510">arXiv:2609.38510</a></td><td>2026-09-29</td></tr>
+  <tr><td>[42]</td><td>Eldenk et al. Attention Drift: What Autoregressive Speculative Decoding Models Learn. <a href="https://arxiv.org/abs/2605.09992">arXiv:2605.09992</a></td><td>2026-05-11</td></tr>
+  <tr><td>[43]</td><td>Sandler et al. (Lehigh Univ.). SpecDiff-2: Scaling Diffusion Drafter Alignment for Faster Speculative Decoding. MLSys 2026 Oral. <a href="https://mlsys.org/virtual/2026/oral/3755">mlsys.org</a></td><td>2026-05</td></tr>
+  <tr><td>[44]</td><td>Google. Multi-Token Prediction in Gemma 4. 官方博客（权重 Apache 2.0）. <a href="https://blog.google/technology/developers/multi-token-prediction-gemma-4">blog.google</a></td><td>2026-05-05</td></tr>
+  <tr><td>[45]</td><td>北京大学 &amp; 腾讯. DFlare: Scaling Up Draft Capacity for Block Diffusion Speculative Decoding. <a href="https://arxiv.org/abs/2606.02091">arXiv:2606.02091</a>；代码 github.com/Tencent/AngelSlim</td><td>2026-06-01</td></tr>
 </table>
 
 <p class="muted">其他文中提到的工业动态来源：vLLM MTP 文档（docs/features/speculative_decoding/mtp.md）、SGLang MTP 博客（lmsys.org，2025-07-17）与 GPT-OSS 博客（2025-08-27）、Red Hat 开发者博客（2026-04-16）、Snowflake Arctic Inference 博客；代码引用自本地克隆的 SafeAILab/EAGLE、FasterDecoding/Medusa、facebookresearch/LayerSkip、deepseek-ai/DeepSpec、z-lab/dflash 仓库（2026-09 快照）。</p>
@@ -706,5 +744,11 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 </footer>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

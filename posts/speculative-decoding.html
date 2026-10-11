@@ -188,7 +188,7 @@
     <span class="tag">无损 · 草稿-验证范式</span>
     <h1>投机解码全景</h1><p class="sub">从经典投机采样，到 MTP / DFlash / DSpark</p>
     <div class="sub">一篇通俗易懂的推理加速发展史 · 含代码与原始引用</div>
-    <div class="meta"><span class="chip">调研日期：<b>2026-08-13</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
+    <div class="meta"><span class="chip">调研日期：<b>2026-08-13</b> · 增补：<b>2026-10-11</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
   </div>
 </header>
 
@@ -254,7 +254,7 @@
 </ul>
 
 <h4>📐 手算一个例子：接受规则到底在算什么？</h4>
-<p>假设词表只有 5 个 token。某个解码位置上，草稿和目标模型给出如下两个分布（这就是本页 <a href="#lab">§2.4 可运行实验</a>里用的同一组数字）：</p>
+<p>假设词表只有 5 个 token。某个解码位置上，草稿和目标模型给出如下两个分布（这就是本页 <a href="#lab">§2.3 可运行实验</a>里用的同一组数字）：</p>
 <table>
 <thead><tr><th>token</th><th>草稿概率 q</th><th>目标概率 p</th><th>接受概率 min(1, p/q)</th><th>残差 max(0, p−q)</th></tr></thead>
 <tbody>
@@ -847,7 +847,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </div>
 <div class="card">
 <h4>📚 多篇综述厘清版图</h4>
-<p>2025 年出现了系统综述，如阿里/清华等的《并行文本生成综述：从并行解码到扩散语言模型》<span class="cite">[14]</span>，以及华为云等的《高效 LLM 推理服务综述》<span class="cite">[15]</span>，把"自回归 → 自投机 → 并行/块/扩散草稿"的脉络梳理清楚。</p>
+<p>2025 年出现了系统综述，如阿里/清华等的《并行文本生成综述：从并行解码到扩散语言模型》<span class="cite">[14]</span>，以及苏州大学+蚂蚁集团的《高效 LLM 推理服务综述》<span class="cite">[15]</span>，把"自回归 → 自投机 → 并行/块/扩散草稿"的脉络梳理清楚。</p>
 </div>
 <div class="card">
 <h4>🧪 面向真实负载的"系统感知"</h4>
@@ -863,7 +863,59 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <p>Cohere 等的工程实践指出：<b>混合专家（MoE）模型从投机解码中获益更大</b>。原因是 MoE 在单 token 解码时只激活少数专家，带宽受限更严重，正好处于投机解码的"带宽受限甜区"；且草稿与目标的专家路由往往高度相关，验证时复用成本低。</p>
 
 <h3>7.2 把"草稿"本身再投机一次</h3>
-<p>Stanford/Princeton/Together AI 的《Speculative Speculative Decoding》（2026.03，213 票）把投机思想递归——<b>连草稿生成本身也再加速一层</b>，进一步压缩草稿延迟。</p>
+<p>Stanford/Princeton/Together AI 的《Speculative Speculative Decoding》（2026.03）把投机思想递归——<b>连草稿生成本身也再加速一层</b>，进一步压缩草稿延迟。</p>
+
+<h3>7.3 2026 秋追踪：并行树起草成为新范式，MTP 成"出厂标配"</h3>
+<p class="lead">2026 年 6–10 月，本领域出现三件值得单独记录的事：<b>并行起草从"块"进化到"树"（JetSpec）</b>、<b>DFlash 谱系完成第一次官方扩容（DFlare）</b>、<b>Google 让 Gemma 4 全家族出厂自带 MTP 起草器</b>。</p>
+
+<h4>① JetSpec（2026.06）：一次前向，直接长出一棵草稿树</h4>
+<p><b>动机</b>：EAGLE 式自回归草稿按路径一步步猜，树越深草稿成本越高；DFlash 式块扩散草稿虽然一次前向出整块，但每个位置"各自打分"，拼出来的树可能"单看每条边都合理、合起来互相矛盾"——这正是 §8⑥ 说的"扩展天花板"（大 batch 下并行验证收益饱和）的根源之一。<span class="cite">[17]</span></p>
+<p><b>贡献</b>：UCSD Hao AI Lab 训练了一个<b>因果并行草稿头</b>：读入冻结目标模型的融合隐状态，单次前向直接产出一棵<b>草稿树</b>，且树上每条路径的打分都与目标模型的自回归分解对齐——既保住"一次前向"的起草效率，又恢复了路径之间的条件依赖。目标模型用树注意力一次前向验证整棵树，构造上无损。</p>
+<p><b>收益</b>：Qwen3 dense/MoE 全系、H100 上数学任务（MATH-500）最高 <b>9.64×</b>，开放对话 4.58×；平均接受长度最高 10.7 token；vLLM fork 已开源。</p>
+<blockquote class="q">
+  <span class="en">"JetSpec trains a causal parallel draft head over fused hidden states from the frozen target model, producing candidate trees whose scores align with the target model's autoregressive factorization."</span>
+  <span class="src">— JetSpec, Hu et al., UCSD Hao AI Lab, arXiv:2606.18394, 2026-06-16 [17]</span>
+  <span class="zh">JetSpec 在冻结目标模型的融合隐状态之上训练一个因果并行草稿头，产生的候选树打分与目标模型的自回归分解对齐。</span>
+</blockquote>
+
+<h4>② DFlare（2026.06）：给 DFlash 的"窄条件瓶颈"扩容</h4>
+<p><b>动机</b>：DFlash 把所有草稿层都限制为共享<b>单一融合表示</b>（只从少数目标层抽取），表达力受限——想加深草稿、加数据时遇到瓶颈。<span class="cite">[18]</span></p>
+<p><b>贡献</b>：北大+腾讯（代码进 Tencent/AngelSlim 仓库）提出<b>逐层融合</b>：每个草稿层学自己的目标层组合（可学习加权），把窄瓶颈"张开"；同时草稿训练数据扩容 3 倍（80 万 → 240 万条）。</p>
+<p><b>收益</b>：六个基准平均墙钟加速 <b>5.52×</b>（Qwen3-4B）/ <b>5.46×</b>（Qwen3-8B）/ <b>3.91×</b>（gpt-oss-20B），比 DFlash 提升约 11%/8%/5%；SGLang 并发 32 时吞吐接近 DFlash 的 1.7 倍。</p>
+<blockquote class="q">
+  <span class="en">"On six benchmarks spanning mathematical reasoning, code generation, and conversation, DFlare attains average wall-clock speedups of 5.52× on Qwen3-4B, 5.46× on Qwen3-8B, and 3.91× on GPT-OSS-20B, improving over DFlash by roughly 11%, 8%, and 5%."</span>
+  <span class="src">— DFlare, Peking University & Tencent, arXiv:2606.02091, 2026-06-01 [18]</span>
+  <span class="zh">在覆盖数学推理、代码生成与对话的六个基准上，DFlare 在 Qwen3-4B/8B 与 GPT-OSS-20B 上分别取得 5.52×/5.46×/3.91× 的平均墙钟加速，比 DFlash 提升约 11%、8% 与 5%。</span>
+</blockquote>
+
+<h4>③ Gemma 4 出厂自带 MTP（2026.05）：Google 补上最后一块拼图</h4>
+<p><b>动机</b>：此前"出厂即带草稿头"的阵营有 DeepSeek（V3 MTP）、OpenAI（gpt-oss）等，Google 缺席——而端侧模型恰恰是最缺算力、最需要投机解码的。<span class="cite">[19]</span></p>
+<p><b>贡献</b>：Google 为 Gemma 4 全家族（E2B/E4B 边缘模型、26B MoE、31B Dense）发布专用 MTP 起草器：复用目标模型激活、<b>共享 KV 缓存</b>（起草不用重算上下文）；端侧型号用嵌入聚类加速最后一步 logits 计算。LiteRT-LM / MLX / vLLM / SGLang / Ollama 全部支持。</p>
+<p><b>收益</b>：最高 <b>3×</b> 无损加速（26B MoE 在 Apple Silicon、batch 4–8 下约 2.2×）。</p>
+<blockquote class="q">
+  <span class="en">"By using a specialized speculative decoding architecture, these drafters deliver up to a 3x speedup without any degradation in output quality or reasoning logic."</span>
+  <span class="src">— Google, Multi-Token Prediction in Gemma 4, Official Blog, 2026-05-05 [19]</span>
+  <span class="zh">通过使用专门的投机解码架构，这些起草器在不损害输出质量或推理逻辑的前提下带来最高 3 倍加速。</span>
+</blockquote>
+
+<div class="grid2">
+<div class="card">
+<h4>🧠 Orthrus：两套视图共享一份 KV</h4>
+<p>Adobe/Notre Dame 等给冻结 AR 模型外挂轻量"扩散视图"，AR 头与扩散头<b>共享同一份 KV 缓存</b>，免掉并行草稿自建缓存的显存开销：最高 <b>7.8×</b> 加速、额外缓存仅 <b>O(1)</b>。<span class="cite">[20]</span></p>
+</div>
+<div class="card">
+<h4>📏 LongSpark：草稿成本与前缀长度无关</h4>
+<p>洞察：草稿只负责"提议"，错误反正会被目标纠正——所以草稿成本<b>不必</b>随上下文变长而增长。从目标验证前向中提取固定尺寸多尺度视图做块扩散起草，长上下文下 TPOT 最优、草稿状态缩小数个数量级，直接补 DFlash 在长上下文的短板。<span class="cite">[21]</span></p>
+</div>
+<div class="card">
+<h4>🪆 BitNest：位嵌套草稿（2026.10）</h4>
+<p>反向思路：先造强低精度基座、再用残差细化恢复高精度目标——低精度草稿"嵌套"在高精度目标里，<b>共享同一套物理权重</b>；同样的渐进精度思想用于 KV。7B–8B 端侧模型平均接受率 95.2%，比 FP16 自回归快 1.48–1.61×。<span class="cite">[22]</span></p>
+</div>
+<div class="card">
+<h4>⚙️ 工程侧动态</h4>
+<p>DFlash 进入 SGLang 主线（Spec V2 重叠调度，2026.06）<span class="cite">[23]</span>；TensorRT-LLM 的 decoding_type 扩至 MTP/Eagle3/NGram/PARD/DFlash 并为 EAGLE-3 加动态树；NVIDIA 发"模型-系统协同设计"官方博客（2026.09）<span class="cite">[24]</span>。ACL/ICML 2026 亦有多篇：METASD 多草稿对齐、Speculative Verification 信息增益验证、Mine-Draft 批并行起草等。</p>
+</div>
+</div>
 
 <!-- ===================== 8. FUTURE ===================== -->
 <h2 id="future"><span class="num">8</span>未来发展方向</h2>
@@ -927,13 +979,21 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
     <li>Cai et al. <i>Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads</i>. ICML 2024 / arXiv:2401.10774, 2024-01.</li>
     <li>Li et al. <i>EAGLE: Speculative Sampling Requires Rethinking Feature Uncertainty</i>. ICML 2024 / arXiv:2401.15077, 2024-01.（EAGLE-2/3 为后续工作）</li>
     <li>EAGLE 系列代码：github.com/SafeAILab/EAGLE（已 clone 至 <code class="inl">eagle/</code>）。</li>
-    <li>Fu et al. <i>Breaking the Sequential Dependency of LLM Inference Using Lookahead Decoding</i>. LMSYS Blog, 2023-11.</li>
+    <li>Fu et al. <i>Break the Sequential Dependency of LLM Inference Using Lookahead Decoding</i>. LMSYS Blog, 2023-11.</li>
     <li>Chen et al. <i>DFlash: Block Diffusion for Flash Speculative Decoding</i>. ICML 2026 / arXiv:2602.06036, 2026-02. 代码：github.com/z-lab/dflash（已 clone 至 <code class="inl">dflash/</code>）。</li>
     <li>Cheng, Yu, Shao et al. (PKU & DeepSeek). <i>DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation</i>. arXiv:2607.05147, 2026-07. 代码：github.com/deepseek-ai/DeepSpec（已 clone 至 <code class="inl">deepspec/</code>，含 Eagle3/DFlash/DSpark）。</li>
     <li>NVIDIA. <i>Boost Inference Performance up to 15x on Blackwell using DFlash Speculative Decoding</i>. developer.nvidia.com, 2026.</li>
     <li>阿里/清华等. <i>A Survey on Parallel Text Generation: From Parallel Decoding to Diffusion Language Models</i>. arXiv:2508.08712, 2025-08.</li>
-    <li>苏大/华为云. <i>Taming the Titans: A Survey of Efficient LLM Inference Serving</i>. arXiv:2504.19720, 2025-04.</li>
+    <li>Zhen et al.（苏州大学+蚂蚁集团）. <i>Taming the Titans: A Survey of Efficient LLM Inference Serving</i>. arXiv:2504.19720, 2025-04.</li>
     <li>Teng et al. <i>SW-SpeedDLM</i>. MDPI Mathematics 14(12):2137, 2026.（长上下文）其它最新：AngelSpec arXiv:2607.25852、SpecSpec arXiv:2603.03251、Lever arXiv:2605.16786、Spiffy (OpenReview) 等。</li>
+    <li>Hu et al. (UCSD Hao AI Lab). <i>JetSpec: Breaking the Scaling Ceiling of Speculative Decoding with Parallel Tree Drafting</i>. arXiv:2606.18394, 2026-06-16. 代码：github.com/hao-ai-lab/JetSpec（vLLM fork）。</li>
+    <li>北京大学 & 腾讯. <i>DFlare: Scaling Up Draft Capacity for Block Diffusion Speculative Decoding</i>. arXiv:2606.02091, 2026-06-01. 代码：github.com/Tencent/AngelSlim。</li>
+    <li>Google. <i>Multi-Token Prediction in Gemma 4</i>. Official Blog, 2026-05-05. blog.google/technology/developers/multi-token-prediction-gemma-4（权重 Apache 2.0）。</li>
+    <li>Nguyen et al. (Adobe Research / Univ. of Notre Dame). <i>Orthrus: Memory-Efficient Parallel Token Generation via Dual-View Diffusion</i>. arXiv:2605.12825, 2026-05-12.</li>
+    <li>He et al. <i>LongSpark: Efficient Speculative Decoding with a Fixed-Cost Parallel Drafter</i>. arXiv:2609.37029, 2026-09-29.</li>
+    <li>Yang et al. <i>BitNest: Bit-Nested Speculative Decoding for Memory-Efficient LLM Inference Acceleration</i>. arXiv:2610.02800, 2026-10-02.</li>
+    <li>LMSYS & Z Lab & Modal. <i>The Next Generation of Speculative Decoding: DFlash and Spec V2</i>. lmsys.org Blog, 2026-06-15.</li>
+    <li>NVIDIA (Ashkenazi et al.). <i>Co-Designing AI Models Using Speculative Decoding for Faster LLM Inference</i>. developer.nvidia.com Blog, 2026-09-02.</li>
   </ol>
   <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
   <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">
@@ -942,5 +1002,11 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </footer>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

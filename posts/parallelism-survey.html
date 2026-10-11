@@ -142,7 +142,7 @@
 <header class="hero">
   <div class="kicker">训练系统调研 · 2026</div>
 <h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-11</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
 </header>
 
 <nav class="toc">
@@ -172,7 +172,7 @@
 <div class="stat">
   <div class="s"><div class="v">5</div><div class="l">切分维度<br>DP · TP · PP · EP · CP</div></div>
   <div class="s"><div class="v">4</div><div class="l">集合通信原语<br>AR / AG / RS / A2A</div></div>
-  <div class="s"><div class="v">1.28T</div><div class="l">Kimi K2 总参(激活 32B)<br>2025-07</div></div>
+  <div class="s"><div class="v">1.04T</div><div class="l">Kimi K2 总参(激活 32.6B)<br>2025-07</div></div>
   <div class="s"><div class="v">47%</div><div class="l">462B @ 6144×H100<br>Megatron 最高 MFU</div></div>
 </div>
 <h2 class="sec"><span class="num">0</span>导读与术语表<span class="roadmap">五种切分维度 → 四类通信原语 → 通信优化五层 → 一张图带走全文</span></h2>
@@ -195,7 +195,7 @@
 <h2 class="sec"><span class="num">1</span>为什么需要并行:显存墙、算力墙与通信墙<span class="roadmap">显存墙 16N 账本 → 算力墙 MFU → 通信墙 α+V/B → 并行是生存问题</span><span class="pill fund">基础</span></h2>
 
 <h3>1.1 模型大了多少?</h3>
-<p>2018 年的 BERT-Large 有 3.4 亿参数,当时 4×V100 就能微调;而今天的主流大模型参数量以"千亿"起步:DeepSeek-V3 有 671B(激活 37B)<sup class="ref">[<a href="#refs">DeepSeek-V3, 2024-12</a>]</sup>,Kimi K2 达 1.28T<sup class="ref">[<a href="#refs">Kimi K2, 2025-07</a>]</sup>。单张 GPU 的显存却远远没有跟上——H100 只有 80GB。先来算一笔账,你就能明白为什么"并行"不是可选项,而是生存问题。</p>
+<p>2018 年的 BERT-Large 有 3.4 亿参数,当时 4×V100 就能微调;而今天的主流大模型参数量以"千亿"起步:DeepSeek-V3 有 671B(激活 37B)<sup class="ref">[<a href="#refs">DeepSeek-V3, 2024-12</a>]</sup>,Kimi K2 达 1.04T<sup class="ref">[<a href="#refs">Kimi K2, 2025-07</a>]</sup>。单张 GPU 的显存却远远没有跟上——H100 只有 80GB。先来算一笔账,你就能明白为什么"并行"不是可选项,而是生存问题。</p>
 
 <figure>
 <svg viewBox="0 0 760 240" width="100%" style="max-width:760px">
@@ -207,12 +207,12 @@
     <text class="lbl" x="14" y="112">GPT-3 (2020-05)</text><rect x="120" y="102" width="56" height="12" fill="#9d7bff"/><text class="lbl" x="182" y="112">175B</text>
     <text class="lbl" x="14" y="142">LLaMA-65B (2023-02)</text><rect x="120" y="132" width="21" height="12" fill="#9d7bff"/><text class="lbl" x="147" y="142">65B</text>
     <text class="lbl" x="14" y="172">DeepSeek-V3 (2024-12)</text><rect x="120" y="162" width="215" height="12" fill="#6ea8ff"/><text class="lbl" x="340" y="172">671B</text>
-    <text class="lbl" x="14" y="202">Kimi K2 (2025-07)</text><rect x="120" y="192" width="410" height="12" fill="#6ea8ff"/><text class="lbl" x="535" y="202">1280B(1.28T)</text>
+    <text class="lbl" x="14" y="202">Kimi K2 (2025-07)</text><rect x="120" y="192" width="333" height="12" fill="#6ea8ff"/><text class="lbl" x="458" y="202">1040B(1.04T)</text>
   </g>
   <line x1="120" y1="30" x2="120" y2="215" stroke="#1c2126"/>
   <text class="lbl" x="120" y="232">0</text><text class="lbl" x="490" y="232">300B</text><text class="lbl" x="510" y="18" style="fill:#e8eaed">条形长度 ∝ 参数量</text>
 </svg>
-<figcaption><b>图 1-1:</b>模型参数量在 7 年间从 0.34B 涨到 1.28T,约 3700 倍;同期单卡显存只从 32GB(V100)涨到 192GB(B200),约 6 倍。</figcaption>
+<figcaption><b>图 1-1:</b>模型参数量在 7 年间从 0.34B 涨到 1.04T,约 3000 倍;同期单卡显存只从 32GB(V100)涨到 192GB(B200),约 6 倍。</figcaption>
 </figure>
 
 <h3>1.2 显存墙:训练一个模型到底要多少显存?</h3>
@@ -334,7 +334,7 @@
 </div>
 
 <h3>3.1 最朴素的数据并行(DP)与它的冗余</h3>
-<p>数据并行是最容易理解的并行:每张卡都持有<b>完整</b>的模型副本,各自喂不同的 mini-batch,各自前向、反向算出梯度,然后把所有卡的梯度<b>加起来(all-reduce)</b>,各卡再用同样的平均梯度更新参数。它对模型结构零侵入,通信也只有一种原语(梯度 all-reduce),而且天然可以与反向传播<b>重叠</b>——某几层梯度算好了就可以先发出去,不必等整张卡算完。PyTorch 的 DDP 和 2018 年 Uber 开源的 Horovod 都把梯度切进 bucket(默认 25MB)用环形 all-reduce 发送<sup class="ref">[<a href="#refs">Horovod, 2018-02</a>]</sup>。</p>
+<p>数据并行是最容易理解的并行:每张卡都持有<b>完整</b>的模型副本,各自喂不同的 mini-batch,各自前向、反向算出梯度,然后把所有卡的梯度<b>加起来(all-reduce)</b>,各卡再用同样的平均梯度更新参数。它对模型结构零侵入,通信也只有一种原语(梯度 all-reduce),而且天然可以与反向传播<b>重叠</b>——某几层梯度算好了就可以先发出去,不必等整张卡算完。PyTorch 的 DDP 和 2018 年 Uber 开源的 Horovod 都把梯度切进 bucket(DDP 默认 bucket 25MB、Horovod 默认融合缓冲 64MB)用环形 all-reduce 发送<sup class="ref">[<a href="#refs">Horovod, 2018-02</a>]</sup>。</p>
 <div class="note warn"><b>但 DP 有一个致命缺陷:显存冗余。</b>每张卡都存着完整的参数、梯度和优化器状态——100 张卡就是 100 份冗余。回到 1.2 节的账本:70B 模型每卡需要 1.12TB,数据并行一张卡都装不下,根本无从谈起。这就是 2019 年 ZeRO 登场的背景。</div>
 
 <h3>3.2 ZeRO:把冗余切片(2019-10)</h3>
@@ -435,7 +435,7 @@ self.reduce_and_partitions_stream = (
 </figure>
 
 <h4>TP 的两个黄金法则</h4>
-<p><b>(1) 切分维度要"通信最少":</b>列切 W1 使每卡都收完整的 X(前向零通信),行切 W2 才需要一次求和——把两次切分首尾相接,通信从"每层 4 次"降到"每层 2 次"。<b>(2) TP 只在 NVLink 域内用:</b>TP 的 all-reduce 发生在<b>每一层的前向和反向</b>,频度极高,放到跨节点链路上会彻底拖垮训练。SC'21 论文的措辞是:张量并行"works well within a single node where the inter-GPU communication bandwidth is high, but the efficiency degrades quickly beyond a single node"(在节点内高带宽互连下工作良好,但超出单节点后效率迅速退化)<sup class="ref">[<a href="#refs">ZeRO 论文 §1, 2019-10</a>]</sup>,所以工业界几乎总是 TP≤8(一台 8 卡机),更大的并行度交给 PP/DP/EP。</p>
+<p><b>(1) 切分维度要"通信最少":</b>列切 W1 使每卡都收完整的 X(前向零通信),行切 W2 才需要一次求和——把两次切分首尾相接,通信从"每层 4 次"降到"每层 2 次"。<b>(2) TP 只在 NVLink 域内用:</b>TP 的 all-reduce 发生在<b>每一层的前向和反向</b>,频度极高,放到跨节点链路上会彻底拖垮训练。ZeRO 论文 §1 的措辞是:张量并行"works well within a single node where the inter-GPU communication bandwidth is high, but the efficiency degrades quickly beyond a single node"(在节点内高带宽互连下工作良好,但超出单节点后效率迅速退化)<sup class="ref">[<a href="#refs">ZeRO 论文 §1, 2019-10</a>]</sup>,所以工业界几乎总是 TP≤8(一台 8 卡机),更大的并行度交给 PP/DP/EP。</p>
 
 <h3 id="ch4-2">4.2 源码走读:NVIDIA Megatron-Core</h3>
 <pre class="title">通信原语的底层实现:megatron/core/tensor_parallel/mappings.py:22-37 —— 一行 torch.distributed.all_reduce 加上连续性保证,就是 TP 的全部"魔法":</pre>
@@ -545,7 +545,7 @@ self.num_attention_heads_per_partition = divide(
 <h4>交错式 1F1B(Interleaved, 2021):给流水线"再切细"</h4>
 <p>SC'21 的 Megatron 论文把每张卡上的连续层段再切成 <b>v 个虚拟段(virtual pipeline stage / model chunk)</b>:例如 16 层模型、p=4,每卡 4 层,若 v=2,则每卡持有 [层1-2, 层9-10] 两个不连续小块。调度时微批在"块 0 流水线"和"块 1 流水线"间交错,相当于把流水线拉长为 p×v 段,气泡缩小约 v 倍:</p>
 <div class="math">bubble fraction ≈ (p−1)/(m·v + p−1),代价:p2p 通信次数 × v(激活包更小更频繁)</div>
-<p><sup class="ref">[<a href="#refs">Narayanan et al., SC 2021 / arXiv 2104.04473, 2021-04</a>]</sup>论文报告了 175B 模型在 3072 张 A100 上 52% MFU、1T 模型 16384 卡的结果。</p>
+<p><sup class="ref">[<a href="#refs">Narayanan et al., SC 2021 / arXiv 2104.04473, 2021-04</a>]</sup>论文报告:1T 模型在 <b>3072 张 A100</b> 上达 52% 峰值算力(502 PFLOP/s,摘要原文);175B 级(174.6B)实验用 384–1536 卡(Table 2),训练时长估算按 1024 卡 140 TFLOP/s 计。</p>
 <div class="q">
   <div class="en">"In this paper, we show how tensor, pipeline, and data parallelism can be composed to scale to thousands of GPUs. We propose a novel interleaved pipelining schedule that can improve throughput by 10+% with memory footprint comparable to existing approaches. Our approach allows us to perform training iterations on a model with 1 trillion parameters at 502 petaFLOP/s on 3072 GPUs (per-GPU throughput of 52% of theoretical peak)."</div>
   <div class="zh">「本文展示如何组合张量、流水线与数据并行以扩展到数千张 GPU。我们提出新颖的交错式流水线调度,在显存占用与现有方案相当的前提下提升 10% 以上的吞吐。该方法可在 3072 张 GPU 上以 502 petaFLOP/s 训练 1 万亿参数模型(单卡吞吐为理论峰值的 52%)。」</div>
@@ -606,7 +606,7 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
 </div>
 
 <h3 id="ch6-1">6.1 MoE 原理:稀疏激活与负载不均</h3>
-<p>MoE(Mixture of Experts)的思想:把 Transformer 每层(或隔层)的 MLP 换成 <b>N 个并列的"专家" MLP</b>,再加一个<b>路由器(router)</b>——一个很小的线性层,给每个 token 打分,选出分数最高的 k 个专家(通常 k=1~8),token 只经过这几个专家的计算,输出按路由分数加权求和。这样<b>总参数可以巨大,而每个 token 的实际计算量(激活参数)很小</b>:DeepSeek-V3(671B 总参/37B 激活)、Kimi K2(1.28T/32B 激活)都靠 MoE。Google 的 GShard 首次把 MoE 推到 600B 并用于翻译<sup class="ref">[<a href="#refs">Lepikhin et al., 2020-06</a>]</sup>;Switch Transformer 把 k 简化为 1 并证明可稳定训练万亿参数<sup class="ref">[<a href="#refs">Fedus, Zoph &amp; Shazeer, Google, arXiv 2101.03961, 2021-01</a>]</sup>。</p>
+<p>MoE(Mixture of Experts)的思想:把 Transformer 每层(或隔层)的 MLP 换成 <b>N 个并列的"专家" MLP</b>,再加一个<b>路由器(router)</b>——一个很小的线性层,给每个 token 打分,选出分数最高的 k 个专家(通常 k=1~8),token 只经过这几个专家的计算,输出按路由分数加权求和。这样<b>总参数可以巨大,而每个 token 的实际计算量(激活参数)很小</b>:DeepSeek-V3(671B 总参/37B 激活)、Kimi K2(1.04T/32.6B 激活)都靠 MoE。Google 的 GShard 首次把 MoE 推到 600B 并用于翻译<sup class="ref">[<a href="#refs">Lepikhin et al., 2020-06</a>]</sup>;Switch Transformer 把 k 简化为 1 并证明可稳定训练万亿参数<sup class="ref">[<a href="#refs">Fedus, Zoph &amp; Shazeer, Google, arXiv 2101.03961, 2021-01</a>]</sup>。</p>
 <div class="q">
   <div class="en">"In deep learning, models typically reuse the same parameters for all inputs. Mixture of Experts (MoE) models defy this and instead select different parameters for each incoming example. The result is a sparsely-activated model—with an outrageous number of parameters—but a constant computational cost."</div>
   <div class="zh">「深度学习中,模型通常对所有输入复用同一组参数。MoE 模型反其道而行,为每个输入选择不同的参数。其结果是一个稀疏激活的模型——参数量惊人,但计算成本恒定。」</div>
@@ -776,7 +776,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <tr><td><b>EP</b></td><td>MoE 专家</td><td>all-to-all ×2,∝token×k×h</td><td>每 MoE 层前反各 2</td><td>跨节点(需大规模)</td><td>分层转发、零SM hook、DualPipe 成对掩盖(6.4)</td></tr>
 <tr><td><b>CP</b></td><td>序列</td><td>KV 环 p2p 或 a2a,O(N) 或 O(N/P)</td><td>每注意力块</td><td>节点内 a2a,跨节点 p2p</td><td>环传天然异步(7.2-7.3)</td></tr>
 </table>
-<p><b>三个真实的顶层配置</b>(都有论文级出处):DeepSeek-V3(2048×H800):PP=16 + EP=64(跨 8 节点)+ ZeRO-1,<b>TP=1</b>;Kimi K2(2025-07,1.28T MoE):PP=16(虚拟段)+ EP=16 + ZeRO-1,节点间用 8×400Gbps RoCE;NVIDIA 2026-03 的 Megatron Core MoE 技术报告(GB200/GB300)则给出 TP/PP/EP = 1/4/64 的机架级配置,单 GPU 达 1048/1233 TFLOPS<sup class="ref">[<a href="#refs">NVIDIA, arXiv 2603.07685, 2026-03</a>]</sup>。可以看到 2024 年后的共同趋势:<b>TP 在淡出(甚至为 1),EP+PP 成为主轴</b>——因为 MoE 专家天然可以拆到很多卡上,而 TP 的密集 all-reduce 在 MoE 的"小激活"下得不偿失。rank 排布上,Megatron 默认 TP 最内层(连续 rank=同机)、PP 其次、DP/CP 最外层;MoE 的 EP 组用独立的 rank 生成器构建,与 TP/PP 解耦;网络侧还有"轨优化(rail-optimized)"组网:每台机同号网卡接同一台交换机,跨节点流量不拥挤。</p>
+<p><b>三个真实的顶层配置</b>(都有论文级出处):DeepSeek-V3(2048×H800):PP=16 + EP=64(跨 8 节点)+ ZeRO-1,<b>TP=1</b>;Kimi K2(2025-07,1.04T MoE):PP=16(虚拟段)+ EP=16 + ZeRO-1,节点间用 8×400Gbps RoCE;NVIDIA 2026-03 的 Megatron Core MoE 技术报告(GB200/GB300)则给出 TP/PP/EP = 1/4/64 的机架级配置,单 GPU 达 1048/1233 TFLOPS<sup class="ref">[<a href="#refs">NVIDIA, arXiv 2603.07685, 2026-03</a>]</sup>。可以看到 2024 年后的共同趋势:<b>TP 在淡出(甚至为 1),EP+PP 成为主轴</b>——因为 MoE 专家天然可以拆到很多卡上,而 TP 的密集 all-reduce 在 MoE 的"小激活"下得不偿失。rank 排布上,Megatron 默认 TP 最内层(连续 rank=同机)、PP 其次、DP/CP 最外层;MoE 的 EP 组用独立的 rank 生成器构建,与 TP/PP 解耦;网络侧还有"轨优化(rail-optimized)"组网:每台机同号网卡接同一台交换机,跨节点流量不拥挤。</p>
 <p><b>Megatron-LM 官方 README(本仓库)的性能页</b>写道:2B~462B 模型跨数千卡训练,6144 张 H100 上 462B 达最高 <b>47% MFU</b>,并默认开启 <code>--overlap-grad-reduce</code>(DP 梯度重叠)、<code>--overlap-param-gather</code>(参数聚合重叠)、<code>--tp-comm-overlap</code>(TP 通信重叠),PP 重叠默认打开——<b>每个维度都要开自己的通算掩盖</b>,这是当下训练框架的常态<sup class="ref">[<a href="#refs">Megatron-LM README(本仓库), 2026-08 版本</a>]</sup>。</p>
 
 <h3>8.2 自动并行:让算法替你选配置</h3>
@@ -819,10 +819,10 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <table>
 <tr><th>模型(时间)</th><th>规模(总参/激活)</th><th>并行/通信配置</th></tr>
 <tr><td>DeepSeek-V3(2024-12)</td><td>671B / 37B,256+1 专家</td><td>PP=16 + EP=64(跨 8 节点)+ ZeRO-1,<b>无 TP</b>;FP8 计算+通信;DualPipe;节点受限路由 M=4;InfiniBand 跨节点</td></tr>
-<tr><td>Kimi K2(2025-07)</td><td>1.28T / 32B,384 专家</td><td>PP=16(虚拟段)+ EP=16 + ZeRO-1;节点间 8×400Gbps <b>RoCE</b>(非 IB);<b>刻意选最小可行 EP=16</b> 以便 1F1B 稳态完全掩盖 EP 通信;解耦权重梯度(W)与 PP 通信并行;FP8 只存不算</td></tr>
+<tr><td>Kimi K2(2025-07)</td><td>1.04T / 32.6B,384 专家</td><td>PP=16(虚拟段)+ EP=16 + ZeRO-1;节点间 8×400Gbps <b>RoCE</b>(非 IB);<b>刻意选最小可行 EP=16</b> 以便 1F1B 稳态完全掩盖 EP 通信;解耦权重梯度(W)与 PP 通信并行;FP8 只存不算</td></tr>
 <tr><td>gpt-oss-120b(2025-08)</td><td>117B / 5.1B,128 专家选 4</td><td>权重<b>原生 MXFP4</b> 量化(120B 装进 80GB);训练侧并行配置未披露</td></tr>
 <tr><td>Llama 4 Maverick(2025-04)</td><td>400B / 17B,128 专家</td><td>256K 预训练;iRoPE(交错无位置编码+RoPE)与 chunked attention 从架构侧削长上下文开销;并行配置未披露</td></tr>
-<tr><td>GLM-4.5(2025-08)/ Qwen3(2025-04)</td><td>355B/32B;235B/22B</td><td>均为细粒度 MoE(Qwen3 去掉共享专家);并行配置未披露</td></tr>
+<tr><td>GLM-4.5(2025-07)/ Qwen3(2025-04)</td><td>355B/32B;235B/22B</td><td>均为细粒度 MoE(Qwen3 去掉共享专家);并行配置未披露</td></tr>
 </table>
 <p>Kimi K2 的取舍与 DeepSeek 恰成对照组,值得整段引用(其技术报告 §2.4,arXiv 2507.20534,2025-07):</p>
 <div class="q">
@@ -856,6 +856,18 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 
 <h3>10.6 RL 后训练系统:并行与通信的新前线</h3>
 <p>2025 年起,RL 后训练(RLHF/推理强化)成为与预训练同等重要的负载,也带来全新的通信问题:<b>rollout 引擎与训练器之间的权重同步、轨迹回流与参数版本一致性</b>。代表系统:veRL(字节+清华,混合控制器架构,2025 年重点强化"异步多轮 rollout、大规模 MoE 的 EP 集成、off-policy 异步架构")、slime(清华/智谱,Megatron+SGLang,官方称"RL framework behind GLM-5.2 … GLM-4.5")、NeMo-RL(NVIDIA,2025-08,DTensor 与 Megatron 双后端)。异步化研究同样火热:AReaL(2025-05,NeurIPS 2025)完全解耦生成与训练,官方称"up to 2.77x training speedup compared to synchronous systems with the same number of GPUs";APRIL(2025-09)用超发 rollout+主动中断提升 22.5% 吞吐。通信侧还有 UCCL-Zip(2026-04)把<b>无损压缩</b>嵌入 P2P/集合通信,RL 权重同步提速至多 47.5%。训练与推理的物理/逻辑边界正在同时消融。</p>
+
+<h3>10.7 2026 年 6–10 月:EP 通信库跨厂商、RL 后训练生产化、微秒级时延</h3>
+<ul>
+<li><b>DeepEP V2.5 与 DeepEP-Ascend(2026-09-29)</b>:V2 的单一 ElasticBuffer 拆分为 <b>EPBuffer / EngramBuffer / PPBuffer / BucketBuffer</b> 四类缓冲 + 共享 BufferAllocator;桶式 CP/DP 集合通信与 PP、Engram(RDMA 远程内存)原语进库;冗余专家的权重预取与 NVLink 梯度规约;彻底移除 V1 与 NVSHMEM 依赖,全部内核经 DeepJIT 运行时编译。更重要的是 <b>DeepEP-Ascend:同一 API 在华为昇腾 950 NPU 上满性能运行</b>——首个跨厂商 EP 通信库移植,且 PR 协作者包含 NVIDIA NCCL 核心工程师(Sylvain Jeaugey 等)。</li>
+<li><b>Mooncake TransferEngine 生态化(2026)</b>:这个 FAST'25 最佳论文系统已演化为通用 LLM 传输层——加入 PyTorch Ecosystem(2026-02)、SGLang RDMA P2P 权重传输(2026-04)、vLLM 官方收录 Mooncake Store(2026-05)。代表作:SGLang + TransferEngine 的分布式 RL 权重同步,<b>1T 参数 Kimi-K2 权重更新 53s → 7.2s(7×)</b>,零拷贝 RDMA 跨数千 GPU。</li>
+<li><b>Miles v0.1(2026-09-08,RadixArk——slime 的后继者)</b>:面向前沿后训练的全栈生产级系统(SGLang rollout + Megatron/FSDP 双训练后端 + Ray 编排),全异步解耦部署 + TITO(token 级数值保真)+ 低精度训练契约;官方口径:万亿模型超长程科学 RL 下 rollout 吞吐 3×、权重同步 10×、权重转换 30×;已在 Kimi K3 / DeepSeek V4 / GLM-5.2 上实战(GLM-5.2 744B-A40B 在 64×GB300 上做全异步 agentic RL,前 30 步中位步时 263s)。</li>
+<li><b>逼近光速时延的集合通信(2026-07)</b>:NVIDIA 等合作的《Every Microsecond Matters》(arXiv:2607.16100,作者含 NCCL 核心开发者)指出长上下文 decode 的大量<b>小集合通信落在 token 生成关键路径上,微秒都伤性能</b>;给出免 barrier、对称内存、NVLS 多播的设计原则,小/中消息时延达到 scale-up 网络 Speed-of-Light 下界 7% 以内——与 NCCL 2.27 引入的 symmetric memory API 一脉相承。</li>
+<li><b>QUADS(2026-07,含 Qwen 团队作者)</b>:NVFP4 直接用于 MoE RL rollout 会约 150 步崩溃;通过训练-推理误差分解定位<b>激活误差(而非权重误差)</b>为主因(E2M1 网格粗 32×),双侧重对齐(训练侧非对称 QAT + rollout 侧残差激活补偿)后 MoE RL 达 BF16 级精度,rollout 吞吐比 FP8 再高约 16%——第 11 章"精度下沉"方向的首个 MoE RL 稳定方案。</li>
+<li><b>Megatron-LM v0.16(2026-02)与 2026 Q3 MoE 路线图</b>:Partial CUDA Graph for EP Overlap(降 EP A2A 重叠的 CPU 压力)、<b>Hybrid DP×CP</b>(DP 与 CP 组合的新并行)、<b>Seq1F1B</b>(长上下文训练的流水线高效扩展);路线图上的"1F1B EP A2A Overlap——用 1F1B 流水线调度隐藏 EP 通信"是 DeepSeek(重排)与 Kimi(减通信)之外的第三条框架级路线。</li>
+<li><b>TopoEP(USTC,2026-09-28)</b>:GPU 原生、拓扑感知的 EP 负载均衡——每个 MoE 层把路由结果转为"热专家复制 + token 重路由"决策,确定性 GPU 求解器在所有 rank 产出比特级一致的计划、无需 host 侧同步;32×H800 + Megatron-LM 上三个 MoE 模型端到端训练吞吐 +6.2%–11.4%。</li>
+<li><b>MSCCL++ 被 ASPLOS 2026 录用</b>(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
+</ul>
 </section>
 <section id="ch11">
 <h2 class="sec"><span class="num">11</span>未来发展方向<span class="roadmap">scale-up 域膨胀 → EP 主战场 → 精度下沉 → 边界消融</span><span class="pill fut">未来</span></h2>
@@ -958,6 +970,18 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li>模型发布:Llama 4(Meta 博客,2025-04-05);gpt-oss(OpenAI 博客,2025-08-05);Qwen3(arXiv:2505.09388);GLM-4.5(arXiv:2508.06471, 2025-08);DeepSeek V3.2-Exp(官方新闻,2025-09-29)/V3.2(arXiv:2512.02556, 2025-12);PyTorch torchtitan 1M CP(2025-01)。</li>
 <li>DiLoCo, arXiv:2311.08105, 2023-11;Mooncake(KVCache 中心化架构,推理侧), arXiv:2407.00079, 2024-06。</li>
 </ol>
+
+<h3>2026 年 6–10 月最新工作(§10.7)</h3>
+<ol start="33" class="ref-list">
+<li>DeepEP V2.5(四缓冲拆分 + 桶式集合通信 + DeepJIT,合并 commit def8651)与 DeepEP-Ascend(昇腾 950 移植), github.com/deepseek-ai/DeepEP, 2026-09-29。</li>
+<li>RadixArk, <i>Miles v0.1: A Full-Stack Production-Ready System for Frontier Post-Training</i>, arXiv:2609.08368, 2026-09-08; github.com/radixark/miles。</li>
+<li>Mooncake TransferEngine 生态:PyTorch Ecosystem(2026-02-12)、SGLang P2P 权重传输(2026-04-29)、vLLM Mooncake Store(2026-05-07);K2 权重更新 53s→7.2s 见 Mooncake 更新日志。github.com/kvcache-ai/Mooncake</li>
+<li><i>Every Microsecond Matters: Pushing GPU Collective Communication Closer to Speed-of-Light Latency</i>(含 NCCL 核心开发者), arXiv:2607.16100, 2026-07-17。</li>
+<li><i>QUADS: Stable NVFP4 MoE RL</i>(含 Qwen 团队作者), arXiv:2607.15810, 2026-07-17。</li>
+<li>NVIDIA, <i>Megatron-LM v0.16 Highlights</i>(GitHub Issue #4003, 2026-02)与 <i>2026 Q3 Megatron Core MoE Roadmap</i>(Issue #6757):Partial CUDA Graph for EP Overlap、Hybrid DP×CP、Seq1F1B、1F1B EP A2A Overlap。</li>
+<li>USTC, <i>TopoEP: Topology-Aware Expert-Parallel Load Balancing</i>, arXiv:2609.35481, 2026-09-28。</li>
+<li>MSCCL++, ASPLOS 2026(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
+</ol>
 <p style="font-size:12.5px;color:#aeb4bd">注:文中"未查到/未证实"的事项(NVIDIA TDT、DeepSeek-R2、"BFPP 用于 Llama 4"、DeepEP 独立论文等)均经检索后不收录或明确标注;所有逐字引文均出自上述来源原文,译文为本整理者所译。</p>
 </section>
 
@@ -968,5 +992,11 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </div>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

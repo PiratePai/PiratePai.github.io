@@ -92,6 +92,23 @@
   .card .foot .arrow{color:var(--brand); font-weight:700}
   a.card:hover .foot .arrow{color:var(--brand2)}
 
+  /* ---- 浏览量曲线 ---- */
+  .views{margin-bottom:56px}
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px 26px 18px;
+  }
+  .views-head{display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:10px; margin-bottom:6px}
+  .views-now{display:flex; gap:26px; align-items:baseline; flex-wrap:wrap}
+  .views-now .k{color:var(--ink-dim); font-size:12.5px; margin-right:6px}
+  .views-now .v{color:var(--ink); font-size:26px; font-weight:800; font-variant-numeric:tabular-nums}
+  .views-now .v small{font-size:12.5px; color:var(--ink-dim); font-weight:400; margin-left:2px}
+  .views-note{color:var(--ink-dim); font-size:12px}
+  .views-note a{color:var(--brand)}
+  #views-chart svg{width:100%; height:auto; display:block}
+  .chart-empty{color:var(--ink-dim); font-size:13.5px; text-align:center; padding:34px 0 22px}
+  .legend{display:flex; gap:16px; margin:2px 0 6px; color:var(--ink-dim); font-size:12.5px}
+  .legend i{display:inline-block; width:18px; height:3px; border-radius:2px; vertical-align:middle; margin-right:6px}
+
   footer{
     border-top:1px solid var(--line); padding:28px 24px; text-align:center; color:var(--ink-dim); font-size:13.5px;
   }
@@ -110,6 +127,7 @@
     <span class="chip">覆盖 2014 – 2026</span>
     <span class="chip">LLM · VLM · DiT</span>
     <span class="chip">范式 · 历史 · 原理 · 前沿</span>
+    <span class="chip">2026-10 · 增补秋最新动态</span>
   </div>
 </header>
 
@@ -180,51 +198,121 @@
         <div class="tags"><span class="tag">推理加速</span><span class="tag">草稿训练 · 蒸馏 · MTP</span></div>
         <h2>投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）</h2>
         <p>沿"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标、损失设计与 2026 最新进展。</p>
-        <div class="foot"><span>2026-09 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-09 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/moe-survey.html">
         <div class="tags"><span class="tag">模型架构</span><span class="tag">稀疏专家</span></div>
         <h2>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</h2>
         <p>从稀疏门控与负载均衡的经典原理出发，系统梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p>
-        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-08 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/parallelism-survey.html">
         <div class="tags"><span class="tag">训练系统</span><span class="tag">TP · PP · EP · CP</span></div>
         <h2>大模型并行策略与通信优化：发展历程、原理与未来方向</h2>
         <p>从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。</p>
-        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-08 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/agent-rl-survey.html">
         <div class="tags"><span class="tag">强化学习</span><span class="tag">RLHF → RLVR → Agent RL</span></div>
         <h2>Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</h2>
         <p>沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。</p>
-        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-08 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/loop-transformer-survey.html">
         <div class="tags"><span class="tag">模型架构</span><span class="tag">循环深度 · 潜空间推理</span></div>
         <h2>Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</h2>
         <p>沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。</p>
-        <div class="foot"><span>2026-09 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-09 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/vit-sparsification.html">
         <div class="tags"><span class="tag">视觉效率</span><span class="tag">Token 压缩 · 缓存复用</span></div>
         <h2>ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</h2>
         <p>2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p>
-        <div class="foot"><span>2026-08 · 综述</span><span class="arrow">阅读全文 →</span></div>
+        <div class="foot"><span>2026-08 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
+    </div>
+  </div>
+
+  <div class="group views">
+    <p class="section-label">站点数据 · 浏览量曲线</p>
+    <div class="panel">
+      <div class="views-head">
+        <div class="views-now">
+          <span><span class="k">总访问量</span><span class="v"><span id="busuanzi_value_site_pv">–</span><small>次</small></span></span>
+          <span><span class="k">访客数</span><span class="v"><span id="busuanzi_value_site_uv">–</span><small>位</small></span></span>
+        </div>
+        <span class="views-note">曲线自 2026-10 起累积 · 每日 04:30（北京时间）自动快照 · 计数服务：<a href="https://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a></span>
+      </div>
+      <div class="legend">
+        <span><i style="background:#6ea8ff"></i>总浏览量 PV（累计）</span>
+        <span><i style="background:#41d1a7"></i>访客数 UV（累计）</span>
+      </div>
+      <div id="views-chart"><div class="chart-empty">浏览量曲线数据积累中——部署后每日自动记录一次，次日即可看到第一段曲线。</div></div>
     </div>
   </div>
 </main>
 
 <footer>
   © 2026 PiratePai · Shanghai Jiao Tong University ·
-  <a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a>
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a> ·
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span>
 </footer>
+
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){
+  var el = document.getElementById('views-chart');
+  if (!el) return;
+  fetch('views.json?t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    var s = (d.series || []).slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+    if (s.length < 2) return; // 少于两个点时保留占位文案
+    var W = 900, H = 300, L = 58, R = 18, T = 18, B = 36;
+    var iw = W - L - R, ih = H - T - B;
+    var pvs = s.map(function(p){ return p.pv; }), uvs = s.map(function(p){ return p.uv; });
+    var maxV = Math.max.apply(null, pvs.concat(uvs)) || 1;
+    var step = Math.pow(10, Math.floor(Math.log(maxV) / Math.LN10));
+    var top = [1,2,5,10].map(function(k){ return k*step; }).filter(function(v){ return v >= maxV; })[0] || step*10;
+    var x = function(i){ return L + (s.length === 1 ? 0 : i * iw / (s.length - 1)); };
+    var y = function(v){ return T + ih - ih * (v / top); };
+    var fmt = function(v){ return v >= 10000 ? (v/10000).toFixed(1).replace(/\.0$/,'') + 'w' : v >= 1000 ? (v/1000).toFixed(1).replace(/\.0$/,'') + 'k' : String(v); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="站点浏览量曲线">';
+    for (var g = 0; g <= 4; g++){
+      var gv = top * g / 4, gy = y(gv);
+      svg += '<line x1="' + L + '" y1="' + gy + '" x2="' + (W-R) + '" y2="' + gy + '" stroke="#2a2f3a" stroke-width="1"' + (g===0 ? '' : ' stroke-dasharray="3 4"') + '/>';
+      svg += '<text x="' + (L-8) + '" y="' + (gy+4) + '" fill="#aeb4bd" font-size="11" text-anchor="end">' + fmt(gv) + '</text>';
+    }
+    var area = '', line = '', dots = '';
+    for (var i = 0; i < s.length; i++){
+      var px = x(i), py = y(pvs[i]);
+      line += (i ? ' L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1);
+      dots += '<circle cx="' + px.toFixed(1) + '" cy="' + py.toFixed(1) + '" r="2.4" fill="#6ea8ff"/>';
+    }
+    area = line + ' L' + x(s.length-1).toFixed(1) + ' ' + (T+ih) + ' L' + L + ' ' + (T+ih) + ' Z';
+    svg += '<path d="' + area + '" fill="rgba(110,168,255,.10)"/>';
+    svg += '<path d="' + line + '" fill="none" stroke="#6ea8ff" stroke-width="2.2" stroke-linejoin="round"/>';
+    var uline = '';
+    for (var j = 0; j < s.length; j++) uline += (j ? ' L' : 'M') + x(j).toFixed(1) + ' ' + y(uvs[j]).toFixed(1);
+    svg += '<path d="' + uline + '" fill="none" stroke="#41d1a7" stroke-width="2" stroke-linejoin="round" stroke-dasharray="1 0"/>';
+    svg += dots;
+    var lx = x(s.length-1), lpv = pvs[s.length-1], luv = uvs[s.length-1];
+    svg += '<text x="' + Math.min(lx+8, W-R-70) + '" y="' + Math.max(y(lpv)-8, 14) + '" fill="#6ea8ff" font-size="12" font-weight="700">PV ' + fmt(lpv) + '</text>';
+    svg += '<text x="' + Math.min(lx+8, W-R-70) + '" y="' + Math.min(y(luv)+16, T+ih-4) + '" fill="#41d1a7" font-size="12" font-weight="700">UV ' + fmt(luv) + '</text>';
+    var nl = Math.min(5, s.length);
+    for (var k = 0; k < nl; k++){
+      var idx = nl === 1 ? 0 : Math.round(k * (s.length-1) / (nl-1));
+      var t = s[idx].date.slice(5).replace('-', '/');
+      svg += '<text x="' + x(idx).toFixed(1) + '" y="' + (H-12) + '" fill="#aeb4bd" font-size="11" text-anchor="middle">' + t + '</text>';
+    }
+    svg += '</svg>';
+    el.innerHTML = svg;
+  }).catch(function(){ /* 计数服务不可用，保留占位 */ });
+})();
+</script>
 </body>
 </html>

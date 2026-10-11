@@ -1,0 +1,31 @@
+name: snapshot-views
+
+on:
+  schedule:
+    - cron: '30 20 * * *' # 20:30 UTC = 04:30 Beijing, daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Snapshot busuanzi counters
+        run: node scripts/snapshot-views.mjs
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add views.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(views): daily pv/uv snapshot"
+            git push
+          else
+            echo "no change"
+          fi

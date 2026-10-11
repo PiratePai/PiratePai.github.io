@@ -221,7 +221,6 @@
 
 <header class="hero">
   <div class="kicker">推理显存优化调研 · 2017–2026</div>
-__KICKER__
   <h1>KV Cache 技术全景：从原理到前沿</h1>
   <div class="sub">结构压缩 · 分页管理 · 前缀复用 · 量化 · 稀疏驱逐 · 分层卸载 · 混合架构</div>
 </header>
@@ -250,7 +249,7 @@ __KICKER__
 <b class="t">一张"记账卡"帮助理解全文</b>
 每个 token 每层需要缓存的字节数 ≈ <code>2 × n_kv_heads × head_dim × dtype_bytes</code>（因子 2 是 K 和 V）。
 <ul>
-<li><b>Llama-2-70B</b>（80 层，MHA 64 头 × 128 维，FP16）：≈ 5.2 MB/token → 一条 128K 请求就要 <b>约 680 GB</b>，单卡 80GB 根本放不下；</li>
+<li><b>Llama-1-65B 若不用 GQA</b>（80 层 MHA 64 头 × 128 维，FP16）：≈ 5.2 MB/token → 一条 128K 请求就要 <b>约 680 GB</b>，单卡 80GB 根本放不下（注：Llama-2-70B 实际已用 GQA，见下一行）；</li>
 <li><b>Llama-3-70B</b>（GQA 8 个 KV 头）：≈ 320 KB/token → 128K 约 <b>40 GB</b>，勉强一两并发；</li>
 <li><b>DeepSeek-V3</b>（MLA，每层每 token 只缓存 512 维 latent + 64 维 RoPE 键）：≈ 70 KB/token → 128K 仅 <b>约 8.7 GB</b>。</li>
 </ul>
@@ -320,7 +319,8 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
 <li><span class="yr">2024-10</span> <b>OpenAI 自动 Prompt Caching</b>（≥1024 token 自动命中，5 折）。<span class="tag t-prefix">前缀复用</span> <sup class="c"><a href="#ref-24">[24]</a></sup>　<b>CacheGen</b>（SIGCOMM'24，2023-10 预印）：KV 压缩成码流存储/传输。<span class="tag t-offload">分层卸载</span> <sup class="c"><a href="#ref-19">[19]</a></sup></li>
 <li><span class="yr">2024-12</span> <b>Gated DeltaNet</b>：delta 规则 + 通道门控的线性注意力，成为 2025 混合模型的标配积木；KV cache 管理首篇系统综述（TMLR 2025）出现。<span class="tag t-hybrid">混合架构</span> <sup class="c"><a href="#ref-52">[52]</a></sup><sup class="c"><a href="#ref-62">[62]</a></sup></li>
 <li><span class="yr">2025-01</span> ★ <b>vLLM V1</b> 发布：前缀缓存默认开启且近零开销，1.7× 加速；随后 V0 代码移除、宣布冲刺 1.0。<span class="tag t-paging">分页管理</span> <span class="tag t-prefix">前缀复用</span> <sup class="c"><a href="#ref-13">[13]</a></sup></li>
-<li><span class="yr">2025-02</span> <b>NSA</b>（DeepSeek）与 <b>MoBA</b>（Moonshot）：把稀疏做进训练的原生稀疏注意力；<b>Mooncake 获 FAST'25 最佳论文</b>并开源 Store/传输引擎；<b>Gemma 3</b>（Google）采用 5:1 局部滑窗:全局注意力。<span class="tag t-sparse">训练时稀疏</span> <span class="tag t-struct">结构压缩</span> <sup class="c"><a href="#ref-37">[37]</a></sup><sup class="c"><a href="#ref-38">[38]</a></sup><sup class="c"><a href="#ref-11">[11]</a></sup></li>
+<li><span class="yr">2025-02</span> <b>NSA</b>（DeepSeek）与 <b>MoBA</b>（Moonshot）：把稀疏做进训练的原生稀疏注意力；<b>Mooncake 获 FAST'25 最佳论文</b>并开源 Store/传输引擎。<span class="tag t-sparse">训练时稀疏</span> <sup class="c"><a href="#ref-37">[37]</a></sup><sup class="c"><a href="#ref-38">[38]</a></sup></li>
+<li><span class="yr">2025-03</span> <b>Gemma 3</b>（Google）采用 5:1 局部滑窗:全局注意力，全局层 KV 占用最多再减 37.5%。<span class="tag t-struct">结构压缩</span> <sup class="c"><a href="#ref-11">[11]</a></sup></li>
 <li><span class="yr">2025-03</span> <b>NVIDIA Dynamo</b>（GTC 2025）：开源数据中心级推理编排层，内置跨引擎 KV cache 管理器（KVBM）。<span class="tag t-offload">分层卸载</span> <sup class="c"><a href="#ref-47">[47]</a></sup></li>
 <li><span class="yr">2025-04</span> <b>Llama 4</b> 采用 iRoPE（间隔 NoPE/RoPE 层）；<b>LMCache</b> 成为 vLLM V1 首个官方 KV 缓存层（NIXL P/D 分离）；EuroSys'25 <b>HCache</b>、OSDI'25 <b>Strata</b> 等分层缓存系统发表。<span class="tag t-offload">分层卸载</span> <sup class="c"><a href="#ref-56">[56]</a></sup><sup class="c"><a href="#ref-46">[46]</a></sup><sup class="c"><a href="#ref-43">[43]</a></sup><sup class="c"><a href="#ref-44">[44]</a></sup></li>
 <li><span class="yr">2025-08</span> <b>gpt-oss</b>（OpenAI 开源 120B/20B）：滑窗/全局交替 + 可学习 attention sink 偏置，宣告主流前沿模型正式采用混合局部注意力。<span class="tag t-struct">结构压缩</span> <sup class="c"><a href="#ref-55">[55]</a></sup></li>
@@ -528,7 +528,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
 <tr><td><b>AttentionStore</b> / <b>HCache</b> / <b>Strata</b></td><td>arXiv 2024-12 / EuroSys 2025 / OSDI 2025<sup class="c"><a href="#ref-42">[42]</a></sup><sup class="c"><a href="#ref-43">[43]</a></sup><sup class="c"><a href="#ref-44">[44]</a></sup></td><td>多级存储（CPU/SSD）上的全局 KV 仓库与恢复策略（详见 8.1）</td></tr>
 <tr><td><b>Mooncake</b></td><td>FAST 2025 最佳论文（arXiv 2024-06）<sup class="c"><a href="#ref-45">[45]</a></sup></td><td>生产级全局 KVCache 池 + 以缓存为中心的调度器（详见 8.2）</td></tr>
 </table>
-<p>值得注意的是 Mooncake 论文披露的真实数据：<strong>线上负载的理论前缀复用率上限约 50%，但在特定场景（如 Kimi 的论文问答服务）可高达 90%</strong>——复用率高度依赖业务形态，多轮 Agent 类负载是天然的高命中场景<sup class="c"><a href="#ref-45">[45]</a></sup>。2026 年的学术前沿正把"复用"推进到 Agent 生命周期内部：例如 CommitKV（arXiv:2608.07855，2026-08）为多轮 ReAct Agent 设计"事务级"的 KV 提交/回滚语义，让失败的推理分支不污染缓存<sup class="c"><a href="#ref-67">[67]</a></sup>。</p>
+<p>值得注意的是 Mooncake 论文披露的真实数据：<strong>线上负载的理论前缀复用率上限约 55%（"up to only 55%"），但在特定场景（如 Kimi 的论文问答服务）可高达 90%</strong>——复用率高度依赖业务形态，多轮 Agent 类负载是天然的高命中场景<sup class="c"><a href="#ref-45">[45]</a></sup>。2026 年的学术前沿正把"复用"推进到 Agent 生命周期内部：例如 CommitKV（arXiv:2608.07855，2026-08）为多轮 ReAct Agent 设计"事务级"的 KV 提交/回滚语义，让失败的推理分支不污染缓存<sup class="c"><a href="#ref-67">[67]</a></sup>。</p>
 
 <h3 id="s5-3">5.3 商业 API 的缓存定价：前缀复用"货币化"</h3>
 <p>当"你的前缀我上次算过"变成一种可计费的商品，说明这条路线已经彻底成熟。主要厂商的时间线与定价语义：</p>
@@ -739,7 +739,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 </div>
 
 <!-- ================================================================ -->
-<h2 id="s10"><span class="no">10</span>最新进展盘点（2025 H2 – 2026 H1）</h2>
+<h2 id="s10"><span class="no">10</span>最新进展盘点（2025 H2 – 2026 H2）</h2>
 
 <h3>10.1 学界：从"压缩缓存"到"重识缓存"</h3>
 <ul>
@@ -763,7 +763,34 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <tr><td>2025-10/11</td><td>Kimi Linear 发布并开源内核/vLLM 实现；MiniMax-M2 公开解释回归全注意力</td><td>混合 vs 全注意力之争公开化<sup class="c"><a href="#ref-58">[58]</a></sup><sup class="c"><a href="#ref-57">[57]</a></sup></td></tr>
 <tr><td>2026-03</td><td>NVIDIA Dynamo 1.0 生产就绪，与 LMCache 深度整合</td><td>跨引擎 KV 池 + 缓存钉扎进入生产<sup class="c"><a href="#ref-47">[47]</a></sup></td></tr>
 <tr><td>2026 上半年</td><td>vLLM v0.26/0.27（Kimi K3 全栈支持）、Qwen3.5 延续混合、DeepSeek-V4 据报采用高压缩注意力+稀疏索引</td><td>混合/稀疏注意力成为旗舰模型标配；推理栈围绕"少而稀的 KV + 全局缓存池"重构<sup class="c"><a href="#ref-61">[61]</a></sup></td></tr>
+<tr><td>2026-06 / 09</td><td>MiniMax-M3 采用 MSA 稀疏注意力（KV 选块按 GQA 组进行）<sup class="c"><a href="#ref-76">[76]</a></sup>；DeepSeek-V4.1-Flash 把全局 KV 压到 <b>890 字节/token</b>（MXFP4 QAT + 跨层共享）<sup class="c"><a href="#ref-77">[77]</a></sup></td><td>模型侧"KV 产量"再降一个数量级；KV 压缩与注意力结构彻底合流</td></tr>
 </table>
+
+<h3>10.3 2026 年秋（9–10 月）：负结果、统一理论与新交互范式</h3>
+<p class="lead">这一波新工作的共同气质是<b>反思与收敛</b>：有人证明"随机驱逐就能打平 SOTA"，有人用 roofline 模型统一了全部五个技术家族，也有人让模型自己"声明"要读哪段缓存。</p>
+
+<h4>① Random Attention：一场"负结果"冲击（Salesforce+UIUC，2026.09）</h4>
+<p><b>动机</b>：所有驱逐方法共享同一范式——给每个缓存 token 估计"将来重要性"再保 top。但推理负载下这个信号可能根本没用。</p>
+<p><b>做法与结论</b>：完全不打分——保留 prompt、对每头已生成部分做<b>均匀随机驱逐</b>。结果：4 个模型 × 6 项推理任务上与最强已有驱逐器打平，vLLM 部署吞吐反而高 <b>32–43%</b>（因为省掉了打分开销）。更重要的发现：<b>prompt 才是脆弱部分</b>，选择器之间的差距大多来自 prompt 处理而非历史 token 选择——对整个"重要性度量军备竞赛"（§7）构成方法论挑战。</p>
+<div class="quote">
+  <span class="en">"Existing KV cache compression methods share one paradigm: score each cached token by some estimate of how much it will matter later, and keep the top-scoring ones."</span>
+  <span class="zh">现有 KV 缓存压缩方法共享同一范式：用某种对"将来重要性"的估计给每个缓存 token 打分，然后保留得分最高的一批。</span>
+  <span class="src">—— Wang et al., Salesforce AI Research &amp; UIUC, "Random Attention" · arXiv:2609.03430 · 2026-09-03<sup class="c"><a href="#ref-79">[79]</a></sup></span>
+</div>
+
+<h4>② The KV Cache Is the New Memory Wall：统一理论（2026.09）</h4>
+<p>这篇 28 页立场文用 <b>roofline 模型</b>统一量化五大家族（量化、驱逐、分页、前缀共享、分层卸载），给出可检验的结论：低于特定上下文长度时压缩 KV 几乎没有端到端收益；分页/前缀共享<b>无损但只解决"容量"</b>，量化/驱逐才真正降<b>带宽</b>；并提出统一 KV 表示（单一分页布局同时携带 per-block 精度与保留掩码）与拓扑感知放置（B200 上最高 2×、MI300X 上 8× 的恢复空间）——把本文 §11"量化与驱逐的联合理论"方向形式化了<sup class="c"><a href="#ref-78">[78]</a></sup>。</p>
+
+<h4>③ xKV：跨层共享低秩子空间（ICML 2026）</h4>
+<p>各层 KV 的主奇异向量高度对齐（CKA 验证）→ prefill 时对分组层做联合 SVD，共享一套 token 基 + 每层小重构矩阵；免训练、兼容 MLA。<b>收益</b>：最高 <b>8×</b> KV 压缩；叠加 4-bit 量化达 <b>25.6×</b>；端到端最高 4.23× 加速<sup class="c"><a href="#ref-80">[80]</a></sup>。与 CLA（§3.3"层间共享"）同一思想的后训练版本。同期 <b>OSCAR</b>（2026.05）用离线谱协方差旋转让 <b>INT2</b> KV 在长上下文可用<sup class="c"><a href="#ref-81">[81]</a></sup>；<b>QuantMLA</b>（2026.09）沿 SnapMLA 指出的"MLA×低位量化不兼容"问题做函数对齐的双路量化<sup class="c"><a href="#ref-84">[84]</a></sup>。</p>
+
+<h4>④ PulseInfer：I/O 中心的稀疏 KV 卸载（2026.09）</h4>
+<p>稀疏 KV 卸载把瓶颈从"GPU 显存容量"转移到"CPU–GPU 召回 I/O"：头级稀疏把召回打碎成大量小 PCIe 传输，同步系统 GPU 利用率仅 ~35%。PulseInfer（华中科大等）按召回量的层间/请求间波动动态组织传输、聚合碎片化召回，让"按需取块"（Quest 式）与"分层卸载"（§8）真正吃到容量收益<sup class="c"><a href="#ref-82">[82]</a></sup>。</p>
+
+<h4>⑤ Declarative Attention：让模型自己声明读哪段 KV（2026.09）</h4>
+<p>零训练、纯提示协议：模型在思维链里用 <code class="inl">&lt;global&gt;/&lt;focus&gt;/&lt;local&gt;</code> 标签<b>声明</b>自己的注意力范围，推理引擎（vLLM）像解析工具调用一样解析标签、重写 KV 块表，让 FlashAttention 内核直接跳过被掩块——"KV 是数据库，模型来发查询"的具象化；由此提出<b>可逆上下文压缩</b>（只掩不删、可恢复）。<b>收益</b>：Gemma-4-31B 平均注意 token <b>−52.0%</b>，精度仅降 1.27 点；roofline 估计 B200 解码墙钟降到 0.71×<sup class="c"><a href="#ref-83">[83]</a></sup>。</p>
+
+<div class="box tip"><b class="t">2026 秋的三个信号</b>① <b>重要性打分可能被高估</b>（Random Attention）——驱逐研究的评测方法需要重新设计；② <b>KV 研究从"各自为战"走向统一理论</b>（Memory Wall 的 roofline 框架 + 联合优化目标）；③ <b>模型与缓存的交互成为新界面</b>（Declarative Attention、CommitKV 的事务语义）——"面向 Agent 的缓存语义"正在成型。</div>
 
 <div class="box tip"><b class="t">2026 年的一条主线判断</b>如果 2023 年的关键词是"分页"，2024 年是"复用与压缩"，2025 年是"分层与混合"，那么 2026 年的关键词是<b>"以 KV 为中心的算力经济学"</b>：模型结构（MLA/稀疏/混合）决定 KV 的"产量"，缓存系统（Mooncake/LMCache/Dynamo）决定 KV 的"周转率"，而 API 计费（写贵读廉）把这一切翻译成价格信号反馈给应用开发者。学界与业界的努力正在这三层之间打通接口。</div>
 
@@ -876,6 +903,15 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <li id="ref-73">"Learning Agent Execution for KV-Cache Management in Agentic Serving." <a href="https://arxiv.org/abs/2608.14624">arXiv:2608.14624</a> · 2026-07.</li>
 <li id="ref-74">NVIDIA Research. "KV Cache Compression and Its Infra Problems." <a href="https://research.nvidia.com/labs/eai/blogs/kv-cache-compression-and-its-infra-problems/">research.nvidia.com</a> · 2025.</li>
 <li id="ref-75">Kimi Team. "Kimi K2: Open Agentic Intelligence." <a href="https://arxiv.org/abs/2507.20534">arXiv:2507.20534</a> · 2025-07（MLA 在 1T MoE 上的大规模应用）.</li>
+<li id="ref-76">MiniMax 等. "MiniMax Sparse Attention (MSA)." <a href="https://arxiv.org/abs/2606.13392">arXiv:2606.13392</a> · 2026-06（GQA 组级选块 + SM100 内核，1M 上下文注意力 FLOPs −28.4×）.</li>
+<li id="ref-77">DeepSeek-AI. "DeepSeek-V4.1-Flash 技术报告." <a href="https://arxiv.org/abs/2609.19969">arXiv:2609.19969</a> · 2026-09（CSA2/CED/MXFP4-KV，全局 KV 890 B/token）.</li>
+<li id="ref-78">T. Singh. "The KV Cache Is the New Memory Wall." <a href="https://arxiv.org/abs/2609.30854">arXiv:2609.30854</a> · 2026-09（roofline 统一五大家族的立场文）.</li>
+<li id="ref-79">Wang et al. "Random Attention." <a href="https://arxiv.org/abs/2609.03430">arXiv:2609.03430</a> · 2026-09 · github.com/SalesforceAIResearch/Random-Attention.</li>
+<li id="ref-80">Cornell/UW 等. "xKV: Cross-Layer KV-Cache Compression via Aligned Singular Vector Extraction." ICML 2026. <a href="https://arxiv.org/abs/2503.18893">arXiv:2503.18893</a> · github.com/abdelfattah-lab/xKV.</li>
+<li id="ref-81">"OSCAR: Spectral Covariance-Aware Rotation for INT2 KV Cache." <a href="https://arxiv.org/abs/2605.17757">arXiv:2605.17757</a> · 2026-05.</li>
+<li id="ref-82">华中科大等. "PulseInfer: I/O-Centric Sparse KV-Cache Offloading." <a href="https://arxiv.org/abs/2609.34555">arXiv:2609.34555</a> · 2026-09.</li>
+<li id="ref-83">Ho et al. "Declarative Attention." <a href="https://arxiv.org/abs/2609.02737">arXiv:2609.02737</a> · 2026-09（模型声明注意力范围，可逆上下文压缩）.</li>
+<li id="ref-84">"QuantMLA: Function-Aligned Low-Bit Quantization for MLA." <a href="https://arxiv.org/abs/2609.36760">arXiv:2609.36760</a> · 2026-09.</li>
 </ol>
 
 <div class="footer">
@@ -884,5 +920,11 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 
 </main>
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

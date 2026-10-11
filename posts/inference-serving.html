@@ -112,7 +112,7 @@
   <div class="kicker">推理服务系统调研 · 2026</div>
 <h1>大模型推理服务优化：技术发展史、原理与前沿展望</h1>
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译——系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-11</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div></header>
 <div class="wrap">
 
@@ -453,11 +453,11 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <h3>5.2 三篇奠基工作（2024 年）</h3>
 <table>
 <tr><th style="width:14%">工作</th><th style="width:15%">发表</th><th>关键贡献</th></tr>
-<tr><td><b>DistServe</b></td><td>OSDI 2024（arXiv 2024-01）</td><td>提出以 <b>goodput</b> 为目标的分离架构，并给出"搜索最优并行度/副本配比"的自动规划器；KV 传输开销实测 &lt;0.1%。效果：比 vLLM 多服务 <b>4.48×</b> 请求，或守住 <b>10.2×</b> 更严的 SLO<sup class="cite">[DISTSERVE24]</sup></td></tr>
+<tr><td><b>DistServe</b></td><td>OSDI 2024（arXiv 2024-01）</td><td>提出以 <b>goodput</b> 为目标的分离架构，并给出"搜索最优并行度/副本配比"的自动规划器；KV 传输开销实测 &lt;0.1%。效果：比 vLLM 多服务 <b>7.4×</b> 请求，或守住 <b>12.6×</b> 更严的 SLO（OSDI 2024 正式版数字；2024-01 的 arXiv v1 曾报 4.48×/10.2×）<sup class="cite">[DISTSERVE24]</sup></td></tr>
 <tr><td><b>Splitwise</b></td><td>ISCA 2024（微软，arXiv 2023-11）</td><td>强调<b>异构硬件</b>：prefill 用高 TDP 大算力节点，decode 可用低 TDP/上代卡；引入基于 prompt 长度与负载的集群级路由，提升整体机房效率<sup class="cite">[SPLITWISE24]</sup></td></tr>
 <tr><td><b>Mooncake</b></td><td>arXiv 2024-06 / FAST 2025（月之暗面 + 清华）</td><td>把分离架构升级为 <b>KVCache 为中心</b>：全局分布式 KV 池（CPU DRAM + SSD），提前调度让"长前缀复用 + 分离"共存；生产服务 Kimi：真实负载下同等 SLO 可多承接 <b>75%</b> 请求，模拟长上下文场景吞吐最高 +525%<sup class="cite">[MOONCAKE25]</sup></td></tr>
 </table>
-<div class="note"><b>[DISTSERVE24]</b> Zhong et al. <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>. OSDI 2024。摘要原文："DistServe improves the performance of LLM serving by <b>disaggregating the prefill and decoding computation</b>……We find that this [colocated] strategy not only leads to strong prefill-decoding interferences but also couples the resource allocation and parallelism plans for both phases."（译文：混部不仅造成强烈的 prefill/解码干扰，还把两阶段的资源分配与并行策略捆绑在一起。）"can serve <b>4.48x more requests or 10.2x tighter SLO</b>"。链接：<a href="https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin">usenix.org/…/zhong-yinmin</a></div>
+<div class="note"><b>[DISTSERVE24]</b> Zhong et al. <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>. OSDI 2024。摘要原文："DistServe improves the performance of LLM serving by <b>disaggregating the prefill and decoding computation</b>……We find that this [colocated] strategy not only leads to strong prefill-decoding interferences but also couples the resource allocation and parallelism plans for both phases."（译文：混部不仅造成强烈的 prefill/解码干扰，还把两阶段的资源分配与并行策略捆绑在一起。）"can serve <b>7.4x more requests or 12.6x tighter SLO</b>"（OSDI 2024 / arXiv v3 摘要；v1 为 4.48x/10.2x）。链接：<a href="https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin">usenix.org/…/zhong-yinmin</a></div>
 <div class="note"><b>[SPLITWISE24]</b> Choukse et al. (Microsoft Research). <i>Splitwise: Efficient Generative LLM Inference Using Phase Splitting</i>. ISCA 2024。微软研究院博客标题即主旨："Splitwise improves GPU usage by <b>splitting LLM inference phases</b>"（译文：通过拆分 LLM 推理阶段提升 GPU 利用率）；原文："Splitwise divides the two phases of LLM inference onto separate machines."（译文：把 LLM 推理的两个阶段分到不同机器。）链接：<a href="https://www.microsoft.com/en-us/research/blog/splitwise-improves-gpu-usage-by-splitting-llm-inference-phases/">microsoft.com/…/splitwise-improves-gpu-usage…</a></div>
 <div class="note"><b>[MOONCAKE25]</b> Qin et al. (Moonshot AI / 清华). <i>Mooncake: Trading More Storage for Less Computation — A KVCache-centric Disaggregated Architecture for LLM Serving</i>. USENIX FAST 2025（arXiv 2024-06-29）。原文："The core of Mooncake is its <b>KVCache-centric scheduler</b>, which balances maximizing overall effective throughput while meeting latency-related SLOs."（译文：Mooncake 的核心是其以 KVCache 为中心的调度器，在最大化有效吞吐与满足延迟 SLO 之间取得平衡。）副标题即设计哲学："以更多存储换取更少计算"。链接：<a href="https://arxiv.org/abs/2407.00079">arxiv.org/abs/2407.00079</a></div>
 
@@ -491,7 +491,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>把 E 与 P 混在一起时，视觉编码的大计算量会像超长 prefill 一样造成尖刺，且推理引擎主循环被"等图"阻塞。</p>
 
 <h3>6.2 EPD 框架（ICML 2025）与工业界落地</h3>
-<p>UCSD 团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；对计算繁重的视觉负载报告吞吐最高 <b>2.4×</b>、时延最高降 <b>69%</b>（以 CPU 承载视觉编码器的混部系统为基线）<sup class="cite">[EPD25]</sup>。工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
+<p>华为（加拿大）+ 西蒙弗雷泽大学团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；对计算繁重的视觉负载报告吞吐最高 <b>2.4×</b>、时延最高降 <b>69%</b>（以 CPU 承载视觉编码器的混部系统为基线）<sup class="cite">[EPD25]</sup>。工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
 <div class="fig">
 <div class="flowrow">
   <div class="fbox">图像/视频</div><div class="arr">→</div>
@@ -502,7 +502,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 </div>
 <div class="cap">图 6-1 E-P-D 三段分离。llm-d 的路由术语将"编码分离"细分为 E/PD（P 与 D 同机）与 E/P/D（全分离）两种部署粒度。</div>
 </div>
-<div class="note"><b>[EPD25]</b> Singh et al. (UCSD). <i>Efficiently Serving Large Multimodal Models Using EPD Disaggregation</i>. ICML 2025（arXiv 2501.05460，2025-01-10）。原文："We introduce <b>Encode-Prefill-Decode (EPD) Disaggregation</b>, a novel framework that separates the encoding, prefill, and decode stages onto dedicated resources"（译文：我们提出 EPD 分离——把编码、预填充与解码三个阶段放到专用资源上的新框架）；报告"up to <b>2.4×</b> higher throughput and <b>69%</b> lower latency"。链接：<a href="https://arxiv.org/abs/2501.05460">arxiv.org/abs/2501.05460</a> · 代码 <a href="https://github.com/vbdi/epdserve">github.com/vbdi/epdserve</a></div>
+<div class="note"><b>[EPD25]</b> Singh et al. (Huawei Canada & Simon Fraser University). <i>Efficiently Serving Large Multimodal Models Using EPD Disaggregation</i>. ICML 2025（arXiv 2501.05460，2025-01-10）。原文："We introduce <b>Encode-Prefill-Decode (EPD) Disaggregation</b>, a novel framework that separates the encoding, prefill, and decode stages onto dedicated resources"（译文：我们提出 EPD 分离——把编码、预填充与解码三个阶段放到专用资源上的新框架）；报告"up to <b>2.4×</b> higher throughput and <b>69%</b> lower latency"。链接：<a href="https://arxiv.org/abs/2501.05460">arxiv.org/abs/2501.05460</a> · 代码 <a href="https://github.com/vbdi/epdserve">github.com/vbdi/epdserve</a></div>
 <div class="note"><b>[VLLMEPD]</b> vLLM Team. <i>Encoder Disaggregation for Scalable Multimodal Model Serving</i>. vLLM 博客，2025-12-15（功能于 2025-11 合入，v0.11.1 可用）。博客对 EPD 的动机表述："How vLLM EPD <b>separates visual encoders from text prefill and decode</b>, covering LMM serving, GPU resource scaling, multimodal interference, and pipelined execution."（译文：vLLM EPD 如何把视觉编码器从文本 prefill/decode 中分离，涵盖多模态服务、GPU 资源伸缩、多模态干扰与流水线执行。）链接：<a href="https://vllm.ai/blog/2025-12-15-vllm-epd">vllm.ai/blog/2025-12-15-vllm-epd</a></div>
 <div class="note"><b>[LLMD]</b> Zhang, Yao et al. (Intel / llm-d). <i>Scaling Vision-Heavy Kimi-VL with Heterogeneous E/PD on llm-d and SGLang</i>. llm-d 博客，2026。原文："We place vision encoding stage in 4 Intel Arc Pro B60 GPUs while keeping prefill and decode stage on 1 NVIDIA H200 GPU……achieved <b>2.4x-2.8x higher throughput</b> and reduced mean Time To First Token (TTFT) by roughly <b>69%-80%</b> under load."（译文：把视觉编码放在 4 张 Intel B60、语言 P/D 放在 1 张 H200，负载下吞吐提升 2.4–2.8×，平均 TTFT 降低约 69–80%。）链接：<a href="https://llm-d.ai/blog">llm-d.ai/blog</a></div>
 
@@ -523,7 +523,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <tr><td><b>min-p</b>（ICLR 2025）<sup class="cite">[MINP25]</sup></td><td>候选 = 概率 ≥ p·(最大概率) 的 token</td><td>对高置信分布比 top-p 更稳，推理/代码任务常用</td></tr>
 </table>
 <p>直觉理解 top-p 与 min-p 的区别：top-p 的门槛是<b>绝对概率质量</b>（累计到 p 为止），min-p 的门槛是<b>相对冠军的比例</b>（至少是第一名的 p 倍）。当模型非常确定（第一名 0.95）时，top-p 仍可能放进一堆 0.001 的杂音，min-p 则会果断砍掉——所以 2024 年后讲究的推理服务默认参数常是 <code>temperature=0.6, top_p=0.95</code>（DeepSeek-R1 风格）或直接 min-p。</p>
-<div class="note"><b>[FAN18]</b> Fan, Li, Du, Dai et al. <i>Hierarchical Neural Story Generation and Hierarchical Writing Evaluation</i>. ACL 2018（arXiv 2018-05）。提出 top-k 采样："sampling from the <b>k most likely next words</b> at each step"（译文：每步仅从最可能的 k 个词中采样），以在开放域生成中替代束搜索。</div>
+<div class="note"><b>[FAN18]</b> Fan, Lewis, Dauphin. <i>Hierarchical Neural Story Generation and Hierarchical Writing Evaluation</i>. ACL 2018（arXiv 2018-05）。提出 top-k 采样："sampling from the <b>k most likely next words</b> at each step"（译文：每步仅从最可能的 k 个词中采样），以在开放域生成中替代束搜索。</div>
 <div class="note"><b>[HOLTZMAN20]</b> Holtzman, Buys, Du, Forbes, Choi. <i>The Curious Case of Neural Text Degeneration</i>. ICLR 2020（arXiv 1904.09751，2019-04）。提出 nucleus sampling："we propose sampling from the <b>nucleus</b> — the smallest set of tokens whose cumulative probability exceeds a threshold p"（译文：我们提出从"核"中采样——累计概率超过阈值 p 的最小 token 集合）。链接：<a href="https://arxiv.org/abs/1904.09751">arxiv.org/abs/1904.09751</a></div>
 <div class="note"><b>[MINP25]</b> Nguyen et al. <i>Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs</i>. ICLR 2025（arXiv 2407.01082，2024-07）。核心思想（译文大意）：min-p 依据<b>当前最高概率 token</b> 动态设定截断线，在高置信时收窄候选集、低置信时放宽，从而兼顾连贯与创造性。</div>
 
@@ -672,6 +672,17 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 </ul>
 <div class="note"><b>[AMPD26]</b> <i>Efficient Multi-round LLM Inference over Disaggregated Serving</i>. arXiv 2602.14516，2026-02。原文（结论，译文大意）："AMPD 按实时负载自适应决定 prefill 在何处执行与如何调度，以最大化 SLO 达成率；未来将把 chunked prefill 引入本地执行以减少解码阻塞。"链接：<a href="https://arxiv.org/html/2602.14516v2">arxiv.org/html/2602.14516v2</a></div>
 
+<h3>9.5 2026 年秋（9–10 月）：分离架构的"弹性"与"跨界"</h3>
+<p>这一波的三条线索：<b>P/D 配比从"静态规划"走向"就地弹性"</b>；<b>KV 传输本身成为优化对象</b>（量化、跨数据中心）；<b>同一 GPU 内的第三形态</b>（复用而非分离）登上顶会。</p>
+<ul>
+<li><b>FluidPD</b>（arXiv:2610.06917，2026-10-02）：固定 P/D worker 配比无法应对短时突发与负载漂移，autoscaling 反应又慢——让同一批 GPU <b>就地</b>在 prefill/decode 角色间切换（in-place elasticity），SLO 感知、无需备用 GPU，直接回应"快速重配置"这一开放难题<sup class="cite">[FLUIDPD26]</sup>。</li>
+<li><b>Prefill-as-a-Service</b>（月之暗面 Mooncake 团队，arXiv:2604.15039，2026-04）：PD 分离的部署边界由 KV 传输决定——密集注意力模型的 KV 太大，只能锁在单数据中心 RDMA 域内；<b>混合注意力架构把 KV 缩小后，"prefill 在 A 机房、decode 在 B 机房"的跨数据中心部署首次变得可行</b>，并给出应对突发、长度偏斜、前缀缓存不均的负载调度<sup class="cite">[PAAS26]</sup>。</li>
+<li><b>SpectrumKV</b>（arXiv:2606.08635，2026-06）：把量化引入 <b>KV 传输面</b>——按重要性给每个 token 分配精度档（attention sink 与高重要度 token 保 FP16、中等 INT8、低等 INT4），显著降低跨机 KV 传输体积而保留近似信息<sup class="cite">[SPECTRUMKV26]</sup>。</li>
+<li><b>MuxWise</b>（ASPLOS 2026，上海交大等，基于 SGLang）：介于混部与分离之间的<b>第三形态——GPU 内 P/D 复用</b>：分区 SM 让 prefill 与 decode 在同一 GPU 上并发执行（无气泡复用引擎 + 容忍争用的耗时估计器 + SLO 感知分发器）。SLO 约束下 goodput 相对 SOTA 平均 <b>2.20×</b>、最高 3.06×<sup class="cite">[MUXWISE26]</sup>。</li>
+<li><b>SUN</b>（arXiv:2603.02599，2026-03）：把 decoder-only LLM 解构为"产 KV 的 prefill 模块 + 从 KV 生成 token 的 decode 模块"，每个下游任务只微调 prefill 模块、<b>冻结共享 decode 模块</b>——多模型部署中解码按模型隔离导致的 GPU 闲置问题有了跨模型组批的新解<sup class="cite">[SUN26]</sup>。</li>
+</ul>
+<div class="note"><b>[NVIDIA26TOKEN]</b> NVIDIA（Amr Elmeleegy）. <i>How NVIDIA's Inference Software Stack Powers the Lowest Token Cost</i>. 官方博客，2026-06-30。原文："the software stack has already reduced token costs by <b>up to 5x on the DeepSeek V4 model in just one month</b>."（译文：该软件栈在短短一个月内已将 DeepSeek V4 模型的 token 成本最多降低 5 倍。）——Blackwell 上"分离式服务 + 大规模专家并行 + NVFP4 + MTP"的叠加红利；堆叠优化吞吐最高 20×。链接：<a href="https://blogs.nvidia.com/blog/inference-software-lowest-token-cost">blogs.nvidia.com/…/inference-software-lowest-token-cost</a></div>
+
 <!-- ============================================================ -->
 <h2 id="s10"><span class="no">10</span>未来发展方向</h2>
 <p>综合上述脉络，给出六个可判断的方向（带依据，非占卜）：</p>
@@ -731,7 +742,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <li id="CHEN23">Chen et al. (DeepMind). <i>Accelerating Large Language Model Decoding with Speculative Sampling</i>. arXiv, <b>2023-02-16</b>. <a href="https://arxiv.org/abs/2302.01318">arXiv:2302.01318</a></li>
 <li id="MEDUSA24">Cai et al. <i>Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads</i>. <b>ICML 2024</b>（arXiv 2024-01）. <a href="https://arxiv.org/abs/2401.10774">arXiv:2401.10774</a></li>
 <li id="EAGLE">Li et al. <i>EAGLE / EAGLE-2 / EAGLE-3</i>. ICML 2024 / arXiv 2406.16858 / arXiv 2503.01840（<b>2024-01 / 2024-06 / 2025-03</b>）. <a href="https://arxiv.org/abs/2503.01840">EAGLE-3</a></li>
-<li id="FAN18">Fan, Li, Du, Dai et al. <i>Hierarchical Neural Story Generation…</i>. <b>ACL 2018</b>. <a href="https://arxiv.org/abs/1805.04833">arXiv:1805.04833</a></li>
+<li id="FAN18">Fan, Lewis, Dauphin. <i>Hierarchical Neural Story Generation…</i>. <b>ACL 2018</b>. <a href="https://arxiv.org/abs/1805.04833">arXiv:1805.04833</a></li>
 <li id="HOLTZMAN20">Holtzman et al. <i>The Curious Case of Neural Text Degeneration</i>. <b>ICLR 2020</b>（arXiv 2019-04）. <a href="https://arxiv.org/abs/1904.09751">arXiv:1904.09751</a></li>
 <li id="MINP25">Nguyen et al. <i>Turning Up the Heat: Min-p Sampling…</i>. <b>ICLR 2025</b>（arXiv 2024-07）. <a href="https://arxiv.org/abs/2407.01082">arXiv:2407.01082</a></li>
 <li id="DAO22">Dao, Fu, Ermon, Rudra, Ré. <i>FlashAttention</i>. <b>NeurIPS 2022</b>（arXiv 2022-05）. <a href="https://arxiv.org/abs/2205.14135">arXiv:2205.14135</a></li>
@@ -739,6 +750,12 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <li id="AMPD26"><i>Efficient Multi-round LLM Inference over Disaggregated Serving (AMPD)</i>. arXiv, <b>2026-02</b>. <a href="https://arxiv.org/abs/2602.14516">arXiv:2602.14516</a></li>
 <li id="LINKEDIN26">LinkedIn Engineering. <i>Accelerating LLM Inference with Speculative Decoding for AI Agent Applications</i>（n-gram 投机生产案例）, <b>2026</b>. <a href="https://www.zenml.io/llmops-database/accelerating-llm-inference-with-speculative-decoding-for-ai-agent-applications">链接</a></li>
 <li id="DISAGGLECTURE">面向研究生的 Disaggregated LLM Inference 公开课（讨论 fast reconfiguration 等开放问题）, <b>2025–2026</b>. <a href="https://www.youtube.com/watch?v=tIPDwUepXcA">YouTube</a></li>
+<li id="FLUIDPD26"><i>FluidPD: In-Place Elasticity for SLO-Aware Prefill-Decode Disaggregated LLM Serving</i>. arXiv, <b>2026-10-02</b>. <a href="https://arxiv.org/abs/2610.06917">arXiv:2610.06917</a></li>
+<li id="PAAS26">Qin, He, Zhang et al.（Moonshot AI & 清华，Mooncake 团队）. <i>Prefill-as-a-Service: KVCache of Next-Generation Models Could Go Cross-Datacenter</i>. arXiv, <b>2026-04-16</b>. <a href="https://arxiv.org/abs/2604.15039">arXiv:2604.15039</a></li>
+<li id="SPECTRUMKV26">P. Yang. <i>SpectrumKV: Per-Token Mixed-Precision KV Cache Transfer for P/D Disaggregated LLM Serving</i>. arXiv, <b>2026-06</b>. <a href="https://arxiv.org/abs/2606.08635">arXiv:2606.08635</a></li>
+<li id="MUXWISE26"><i>Towards High-Goodput LLM Serving with Prefill-decode Multiplexing (MuxWise)</i>. <b>ASPLOS 2026</b>（arXiv 2504.14489）. <a href="https://dl.acm.org/doi/10.1145/3779212.3790236">DOI</a></li>
+<li id="SUN26">Park et al. <i>SUN: Shared Use of Next-token Prediction for Efficient Multi-LLM Disaggregated Serving</i>. arXiv, <b>2026-03-03</b>. <a href="https://arxiv.org/abs/2603.02599">arXiv:2603.02599</a></li>
+<li id="NVIDIA26TOKEN">NVIDIA. <i>How NVIDIA's Inference Software Stack Powers the Lowest Token Cost</i>. 官方博客, <b>2026-06-30</b>. <a href="https://blogs.nvidia.com/blog/inference-software-lowest-token-cost">链接</a></li>
 </ol>
 <p style="font-size:13px;color:var(--muted)">注：源码引用基于 2026-08-23 克隆的 <code>vllm-project/vllm</code>、<code>sgl-project/sglang</code>、<code>mlc-ai/xgrammar</code> 三个仓库的 main 分支（位于本目录 <code>repos/</code> 下），行号可能随后续提交漂移。经典论文中未逐字核对原句的引文标注为"译文大意"。</p>
 
@@ -746,5 +763,11 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
   <p>大模型推理服务优化技术梳理 · 2026-08-23 · 源码引用：vLLM / SGLang / XGrammar（main 分支，2026-08-23）</p>
 </footer>
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>

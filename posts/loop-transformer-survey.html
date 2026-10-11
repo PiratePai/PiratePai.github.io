@@ -163,7 +163,7 @@
     <li><a href="#phase3">阶段三（2024-12 – 2025）：潜空间推理爆发 —— COCONUT / Huginn / HRM / TRM</a></li>
     <li><a href="#phase4">阶段四（2025-10 – 2026）：产业化与规模化 —— Ouro / PLT / 缩放定律 / Astra 传闻</a></li>
     <li><a href="#code-huginn">代码深潜一：Huginn 是怎么把"循环"写进 PyTorch 的</a></li>
-    <li><a href="#code-coconut">代码深潜二：COCONUT 的"连续思维"只有 60 行</a></li>
+    <li><a href="#code-coconut">代码深潜二：COCONUT 的"连续思维"核心只在一个 forward 里</a></li>
     <li><a href="#ledger">为什么这么设计：一份收益与代价的完整账本</a></li>
     <li><a href="#latest">业界与学界最新进展盘点（2025 下半年 – 2026-09）</a></li>
     <li><a href="#future">未来发展方向</a></li>
@@ -253,7 +253,7 @@ class LoopLM(nn.Module):
 lm, ids = LoopLM(), torch.randint(0, 1000, (2, 32))
 logits1 = lm(ids, L=1)                            # "快思考"：1 次循环
 logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，参数相同</code></pre>
-<p class="muted">这就是 Huginn 三明治结构的微缩版：<code>prelude（锚）→ core×L（循环）→ coda（锚）</code>。真正的 Huginn-3.5B 用 1+4+1 = 6 个块、平均循环 32 次（第 8 节）；本文所有"循环深度"变体——HRM 的双尺度循环、Ouro 的深度分配、PLT 的跨循环并行——都是在这 40 行的骨架上做文章。</p>
+<p class="muted">这就是 Huginn 三明治结构的微缩版：<code>prelude（锚）→ core×L（循环）→ coda（锚）</code>。真正的 Huginn-3.5B 用 2+4+2 = 8 个块、平均循环 32 次（第 8 节；1+4+1 只是仓库小模型/代码默认配置）；本文所有"循环深度"变体——HRM 的双尺度循环、Ouro 的深度分配、PLT 的跨循环并行——都是在这 40 行的骨架上做文章。</p>
 
 <figure>
 <svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
@@ -295,8 +295,8 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
   <text x="726" y="102" fill="#aeb4bd" font-size="12">logits</text>
   <!-- bottom annotations -->
   <rect x="60" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
-  <text x="76" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">参数量：6 个块（1+4+1）</text>
-  <text x="76" y="288" fill="#aeb4bd" font-size="11.5">权重只存一份，循环 32 次 ⇒ 有效深度 ≈ 36 层</text>
+  <text x="76" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">参数量：8 个块（2+4+2）</text>
+  <text x="76" y="288" fill="#aeb4bd" font-size="11.5">权重只存一份，循环 32 次 ⇒ 有效深度 = 2+4×32+2 = 132 层</text>
   <rect x="470" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
   <text x="486" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">推理时：L 是免费旋钮</text>
   <text x="486" y="288" fill="#aeb4bd" font-size="11.5">同一权重，难题循环 64 次、易题循环 4 次，互不影响</text>
@@ -525,7 +525,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
         self.transformer = ModuleDict(dict(
             wte=Embedding(vocab, d), prelude=prelude, adapter=adapter,
             core_block=core_block, coda=coda, ln_f=Norm(d)))</code></pre>
-<p class="muted">注意 <code>layer_id</code> 的分配方式：prelude 用 0..n-1，core 接着编号，coda 的编号直接按"展开了 32 次"的虚拟深度计算——这暗示了整个实现的中心思想：<b>把循环模型当作一个虚拟的 36 层网络来初始化和缩放，只是其中 32 组层共享同一份权重</b>。</p>
+<p class="muted">注意 <code>layer_id</code> 的分配方式：prelude 用 0..n-1，core 接着编号，coda 的编号直接按"展开了 32 次"的虚拟深度计算——这暗示了整个实现的中心思想：<b>把循环模型当作一个虚拟的 132 层网络来初始化和缩放，只是其中 32 组核心层共享同一份权重</b>。</p>
 
 <p class="codecap"><b>代码 2</b> · 循环本体与截断反传（<code>iterate_forward</code>，model_dynamic.py:1164-1197 简化）：</p>
 <pre><code>def iterate_forward(self, input_embeds, freqs_cis, mask, num_steps_pair=None):
@@ -594,8 +594,8 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
   <div class="card"><h5>按 token 自适应深度</h5>既然缓存放宽到"各位置轮次可不同"，自然允许简单 token 循环 2 次、难 token 循环 64 次共存于同一批次——这是 Huginn 零样本自适应算力的物质基础，也被 MoR 发展成显式学习路由<span class="cite">[16]</span>。</div>
 </div>
 
-<h2 id="code-coconut">9 · 代码深潜二：COCONUT 的"连续思维"只有 60 行</h2>
-<p>Meta 的 <code>facebookresearch/coconut</code><span class="cite">[46]</span> 全部核心逻辑在 <code>coconut.py</code> 的 <code>forward</code> 里（约 150 行含注释）。它展示了潜空间推理的另一极：<b>不改架构、不加循环，只是把"解码再输入"改成"隐藏状态直通"</b>。</p>
+<h2 id="code-coconut">9 · 代码深潜二：COCONUT 的"连续思维"核心只在一个 forward 里</h2>
+<p>Meta 的 <code>facebookresearch/coconut</code><span class="cite">[46]</span> 全部核心逻辑在 <code>coconut.py</code> 的 <code>forward</code> 里（全文件约 150 行含注释，循环切换的核心分支仅约 60 行）。它展示了潜空间推理的另一极：<b>不改架构、不加循环，只是把"解码再输入"改成"隐藏状态直通"</b>。</p>
 
 <h3>9.1 反馈机制：核心 20 行</h3>
 <p class="codecap"><b>代码 4</b> · 连续思维的生产与回填（coconut.py:39-158 简化）：</p>
@@ -814,10 +814,21 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <div class="callout"><b>一个必须分清的概念：时间维迭代 ≠ 深度维循环</b>。扩散模型本身的 T 步去噪（整个 UNet/DiT 跨时间步共享权重）、RAFT 式光流迭代、视频帧间递归，都是沿任务自带时间轴的<b>整网络级</b>迭代；而 ELT / LoopVAE / VIAR / Huginn 式循环发生在<b>单次前向内部</b>的层之间。Awesome-Loop-Models 的收录标准也正是只收后者、把扩散时间步迭代列为"邻域工作"<span class="cite">[36]</span>。2026 年的最新趋势恰是两者交汇：把不动点求解 / 共享层循环塞进生成器或修复算子的<b>内部</b>（Fixed-Point MGM、i-DEQ、VIAR），而不是只在时间轴上迭代。</div>
 
-<h3>11.6 业界动向小结</h3>
+<h3>11.6 2026 年 9–10 月：解码侧零成本改进、非自回归潜推理与循环 VLM</h3>
+<p class="lead">两个月内五件值得单独立传的工作——其中 Apple 的一篇免训练解码改进几乎"白捡" 11 个点：</p>
+<ul>
+<li><b>LoopCD：更好地解码循环 Transformer，几乎零成本</b>（Apple，arXiv:2610.02185，2026-10-01，alphaXiv 133 票）。<b>动机</b>：循环模型每圈都产出对同一个 next token 的"可解码中间表示"，标准解码只丢弃前面所有圈、只用最后一圈——已花掉的算力被浪费。<b>贡献</b>：把各圈 logits/隐状态用几乎为零的成本组合或自洽蒸馏成更好的最终预测；对 Huginn、Ouro 即插即用、不需重训。<b>收益</b>：Ouro-2.6B-Thinking AIME 2024 pass@1 <b>61.88% → 73.33%</b>；Huginn HumanEval 22.56% → 31.71%；"减圈数 + 多圈补偿"再省 22.5–48.2% 前向 FLOPs<span class="cite">[62]</span>。</li>
+<li><b>从 CoT 到循环：非自回归潜推理</b>（Qualcomm AI Research + MIT 等，arXiv:2610.11472，2026-10-08）。显式 CoT 把额外计算表达成一串自回归生成的 token——串行且要为"维持语言连贯"付税；该工作把潜推理做成<b>非自回归</b>：所有位置的潜状态经共享块循环精炼。HumanEval/MBPP 上为评测方法最高分，<b>首 token 延迟较 Reasoning SFT 降约 36×、推理延迟降约 42×</b><span class="cite">[63]</span>。</li>
+<li><b>RLT：并行编码器 + 循环解码器</b>（Princeton+UPenn，arXiv:2610.07591，2026-10-06）。状态跟踪要求每来一个输入就更新，但标准 Transformer 给每个 token 的深度固定——把层拆成"并行因果编码器 + 沿序列循环的解码器"，循环深度随序列长度自然伸缩：Parity 训练 ≤40 bit、测 256 bit <b>100% 准确</b>（基线纯猜）；S₅ 置换跟踪 8× 长度 97% vs &lt;1%<span class="cite">[64]</span>。</li>
+<li><b>LoopVL：循环视觉智能</b>（人大+百度+上交等，arXiv:2609.38426，2026-09-29）。第一篇系统回答"循环 Transformer 能否扩展到 VLM"：Module-Loop（模块内循环）+ Model-Loop（模型级循环）迭代更新统一的视觉-语言状态，优于同尺寸及更大的非循环模型<span class="cite">[65]</span>。</li>
+<li><b>MeSH：记忆即状态高速通路</b>（阿里，arXiv:2510.07739，2025-10-09，ICLR 2026——补录）。为递归 Transformer 加显式记忆缓冲 + 轻量路由器，让不同循环圈走不同的"状态高速通路"：1.4B 尺度平均下游准确率 +1.06% 超过更大的非递归对照、非嵌入参数少 33%——与 MELT（显存轴）正交的能力轴<span class="cite">[66]</span>。</li>
+</ul>
+<p>同期一句话动态：上万圈外推的 Loop-Native Attention Residuals（2610.11570）、循环模型 CoT 可监控性研究（2610.02741，直接回应第 12.4 节）、vLLM 分页 KV 实现按深度缓存复用（2610.09013，循环模型推理系统化）、Looped Actor（2609.37432，循环深度进 RL）。GPT-6 Astra 发布后的架构归因仍无官方口径——循环深度假说等待下一个可审计的锚点。</p>
+
+<h3>11.7 业界动向小结</h3>
 <ul>
   <li><b>开源工业模型</b>：Ouro（字节联动，2025-10）与 Nanbeige4.2-3B（28T token 循环预训练，2026 公开技术报告）是两个可审计的锚点<span class="cite">[17][21]</span>；Huginn 权重/数据/代码三件套开源<span class="cite">[45]</span>。</li>
-  <li><b>闭源传闻</b>：OpenAI Astra（"以某种方式掩盖部分或全部推理过程"）与 Anthropic "Mythos" 的社区推测均指向循环深度，但均未获官方证实——引用时请保持"传闻"定语<span class="cite">[21][22][44]</span>。</li>
+  <li><b>闭源动态（2026-10 更新）</b>：GPT-6 Astra 已于 2026-09-03 正式发布，The Information 报道其使用循环深度、系统卡确认 CoT 可监控性下降，但 OpenAI 未官方确认架构；Anthropic "Mythos" 的社区推测仍属传闻——引用时请保持相应定语<span class="cite">[21][22][44][61]</span>。</li>
   <li><b>推断信号</b>：2026 年服务于循环模型的系统工作（MELT、连续深度批调度、PLT 部署化、LoopQ）密集出现——系统生态通常跟随真实部署需求生长，这是比传闻更硬的旁证<span class="cite">[18][30]</span>。</li>
   <li><b>社区基建</b>：Awesome-Loop-Models（2026-04 发布，200+ 篇）+ Reza Bayat 阅读清单 + 各模型网站，构成了这个领域快速扩张的文献底座<span class="cite">[36]</span>。</li>
 </ul>
@@ -907,9 +918,15 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li>Wang, C., Gao, J., Zhu, F., Chen, J. <i>A Deep Equilibrium Network for Hyperspectral Unmixing.</i> arXiv:2604.11279 <span class="src-date">2026-04-13</span>. <a href="https://arxiv.org/abs/2604.11279">link</a></li>
   <li>Lu, H.A., Wei, Z.V., Zhang, Q., 等, Lam, W. <i>Looped World Models.</i> arXiv:2606.18208 <span class="src-date">2026-06-16</span>. <a href="https://arxiv.org/abs/2606.18208">link</a></li>
   <li>Bai, S., Wang, Z., Kolter, J.Z. <i>Multiscale Deep Equilibrium Models.</i> arXiv:2006.08656 <span class="src-date">2020-06-15</span> · NeurIPS 2020. <a href="https://arxiv.org/abs/2006.08656">link</a></li>
+  <li>OpenAI. <i>GPT-6 Astra 系统卡与发布公告</i>. <span class="src-date">2026-09-03</span>；The Information 架构报道 <span class="src-date">2026-09-01</span>；Raschka 分析《GPT-6 Astra, Looped Transformers and…》<span class="src-date">2026-09</span>. <a href="https://openai.com">link</a></li>
+  <li>Liu, W., Zheng, H., Chen, T. et al. (Apple). <i>Decoding Looped Transformers Better for (Almost) Free.</i> arXiv:2610.02185 <span class="src-date">2026-10-01</span>. <a href="https://arxiv.org/abs/2610.02185">link</a></li>
+  <li>Grau García, G. et al. (Qualcomm AI Research / MIT / Cambridge / Harvard). <i>From Chain-of-Thought to Loops: Non-Autoregressive Latent Reasoning via Looped Transformers.</i> arXiv:2610.11472 <span class="src-date">2026-10-08</span>. <a href="https://arxiv.org/abs/2610.11472">link</a></li>
+  <li>Zhang, Y., Feng, J., Qin, S. (Princeton / UPenn). <i>Recurrent Looped Transformer (RLT).</i> arXiv:2610.07591 <span class="src-date">2026-10-06</span>. <a href="https://arxiv.org/abs/2610.07591">link</a> · github.com/yifanzhang-pro/recurrent-looped-tranformer</li>
+  <li>人大/百度/上交等. <i>LoopVL: Recurrent Visual Intelligence.</i> arXiv:2609.38426 <span class="src-date">2026-09-29</span>. <a href="https://arxiv.org/abs/2609.38426">link</a></li>
+  <li>Yu, C., Su, W., Zheng, B. et al. (阿里巴巴). <i>MeSH: Memory-as-State-Highways for Recursive Transformers.</i> arXiv:2510.07739 <span class="src-date">2025-10-09</span> · ICLR 2026. <a href="https://arxiv.org/abs/2510.07739">link</a> · github.com/LivingFutureLab/MeSH</li>
 </ol>
 
-<div class="callout"><b>关于"传闻类"引用的说明</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>），OpenAI 与 Anthropic 从未官方确认其模型使用循环深度架构。请以"未经证实的传闻 + 技术合理性分析"的口径理解与转述。</div>
+<div class="callout"><b>关于"传闻类"引用的说明（2026-10-11 更新）</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>）。<b>事实更新：OpenAI 已于 2026-09-03 正式发布 GPT-6 Astra</b>；The Information 于发布前两日报道其使用 recurrent depth / looped transformers，Jakub Pachocki 回应称 Astra 的计算图深度在 GPT-4 的 2× 以内，但 <b>OpenAI 至今未官方确认架构</b>。Astra 系统卡确认了安全性影响：其 CoT 可监控性低于此前模型（更短、更少文字化的推理轨迹），UK AISI 实测其无 CoT 数学任务时域 30.9 分钟——但 OpenAI 声明"分析未将可控性变化归因于架构"。结论：模型已发布、架构仍未证实，"循环深度假说"保持假说身份<span class="cite">[21][22][44][61]</span>。</div>
 
 <footer>
   <p><b>系列阅读</b>：本文是本站架构系列的续篇，姊妹篇：<a href="attention-evolution.html">《注意力结构演进：MHA → MLA 与混合架构》</a> · <a href="moe-survey.html">《MoE 全景》</a> · <a href="spec-decoding-post-training.html">《投机解码的后训练》</a>。代码解析所涉仓库已 clone 至本地（<code>spec/recurrent-pretraining</code>、<code>spec/coconut</code>、<code>spec/Awesome-Loop-Models</code>）。</p>
@@ -917,5 +934,11 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 </footer>
 
 </div>
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
+  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+</div>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </body>
 </html>
