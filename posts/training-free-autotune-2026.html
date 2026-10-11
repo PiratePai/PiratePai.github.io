@@ -133,8 +133,8 @@
   <a class="l2" href="#s3-2">3.2 三个教训</a>
   <a href="#s4">4. MiniMax-H3 × ZCode 实战流程</a>
   <a class="l2" href="#s4-1">4.1 H3 与 vLLM-Omni（含官方结构优化范本）</a>
-  <a class="l2" href="#s4-2">4.2 八层框架×六技能闭环=七阶段</a>
-  <a class="l2" href="#s4-3">4.3 GPU 实战（vLLM-Omni）</a>
+  <a class="l2" href="#s4-2">4.2 流程怎么长出来：四站式闭环</a>
+  <a class="l2" href="#s4-3">4.3 GPU 实战：四站走一遍</a>
   <a class="l2" href="#s4-4">4.4 NPU 实战（昇腾双路径）</a>
   <a class="l2" href="#s4-5">4.5 双模式：ZCode 自动 ↔ 人在回路</a>
   <a class="l2" href="#s4-6">4.6 每一步"为什么"</a>
@@ -146,7 +146,7 @@
 <header class="hero">
   <div class="kicker">INFERENCE · TRAINING-FREE · AGENT-AUTOTUNE</div>
   <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
-  <div class="sub">2026-10-12 · v2（修正 H3 运行框架为 vLLM-Omni；流程升级为七阶段 + 人在回路 RUNBOOK）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
+  <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
 </header>
 
 <h2 id="s0"><span class="no">0.</span>TL;DR</h2>
@@ -158,10 +158,10 @@
 而以 ZCode 为代表的编码 Agent 配上一份<b>操作手册（AGENTS.md）+ 基准脚本 + 质量门</b>，就能对任意部署形态的模型自动做 training-free 调优：
 <b>度量 → 画像 → 假设 → A/B 验证 → 端到端质量门 → 沉淀报告</b>。<br><br>
 本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 vLLM-Omni 0.28 / SGLang v0.5.21 / TensorRT-LLM 1.0 / Dynamo 1.0 / FlashInfer v0.7 的版本事实）；
-(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>七阶段自动优化流程</b>：
-方法论 = 八层推理优化决策框架 × MindIE-SD <code>.agents</code> 六技能闭环；以官方生产博客的系统级优化（无损 1.445×、DLO/FP8/SageAttention 各 lane 数字）为校准点；
+(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>——目标与基线 → 三层诊断 → 处方循环 → 收口，
+每一步都有动机、可直接复制的命令、示例输出与判读规则、明确的反馈信号与阈值，并以官方生产博客的系统级优化（无损 1.445×、DLO/FP8/SageAttention 各 lane 数字）为量级锚点；
 GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路径）分别落地。
-配套脚手架 <code>zcode-autotune/</code>（AGENTS.md 自动模式 + RUNBOOK.md 人在回路勾选清单 + bench/搜索/质量门脚本）——<b>同一份规程，ZCode 能自动跑，人也能照着一步步走</b>。
+配套脚手架 <code>zcode-autotune/</code>（AGENTS.md 自动模式 + RUNBOOK.md 人在回路手册 + bench/搜索/质量门脚本）——<b>同一份规程，ZCode 能自动跑，人也能照着一步步走</b>。
 </div>
 
 <h2 id="s1"><span class="no">1.</span>为什么不动权重也能加速：给本科生的原理课</h2>
@@ -354,54 +354,46 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   --diffusion-attention-backend TRTLLM_ATTN</code></pre>
 <small class="cite"><span class="src">[vLLM Blog: MiniMax H3 on vLLM-Omni, 2026-09-01]</span>原文：“lowers complete-response latency by 30.8% compared to Diffusers, a 1.445x speedup”（无损）；“DLO lowers reported HBM by 37.5% for a 5.1% latency cost”；“online FP8: 5.3% lower stage time, 38.9% lower peak HBM”。</small>
 
-<h3 id="s4-2">4.2 方法论：八层决策框架 × 六技能闭环 → 七阶段流水线</h3>
-<p>本版流程由两份材料合成：其一是<b>八层推理优化决策框架</b>（场景画像 → 框架适配 → 算法/投机 → Attention/KV → 并行策略 → 量化 → Host/图/调度 → Kernel/通信；核心纪律："自上而下定方向，自下而上抠细节，至少走两遍；跳过上层直接抠 kernel 是头号反模式"）；其二是华为 <b>MindIE-SD 仓库的 <code>.agents</code> 十二技能体系</b>——它把"采集→分析→选方案→复验"做成了可直接执行的 skill 链（profiling-collection → performance-analysis → performance-optimization → auto-optimization），并给出了全部阈值与产物规范。
-<small class="cite"><span class="src">[MindIE-SD .agents README 与 skills/*, gitcode.com/Ascend/MindIE-SD/tree/master/.agents, 2025-11 开源]</span>README 原文（节译）："performance-analysis：5 层递进分析（Warmup 验证 → DiT/VAE 分离 → FA/MatMul/Vector/Comm 分类占比 → Host Bound/通信/融合检测 → 方向级优化建议）；auto-optimization：端到端优化闭环 采集→分析→方案→复验。"</small></p>
+<h3 id="s4-2">4.2 流程是怎么长出来的：四站式闭环</h3>
+<p>先想清楚三个物理事实，流程的形状就自然浮现了。<b>事实一</b>：H3 服务是系统问题——encoder、DiT 步循环、VAE、传输封装各有各的病，端到端数字根本没法指导下一步，所以第一件事必须是"分段看清基线"。<b>事实二</b>：不同病要用不同的药，吃错药不只是无效，还会浪费数周（官方纯结构改动就拿到 30.8%，而抠 kernel 单点通常只有 5–15%），所以诊断必须产出一纸"按预期收益除以风险排序"的处方清单，纯参数的排前面、有损的排在无损后、自写 kernel 永远垫底。<b>事实三</b>：视频生成的耗时测量噪声在 3% 量级，而 Agent/人都天然想"看见自己想看的提升"（Sakana 事件的教训），所以每副药必须走一个很小的六拍循环——预期→只改一个变量→复测→对比→过门→判决（接受/回滚/噪声），并记入台账。</p>
 <div class="flow">
-  <div class="step"><div class="n">P0</div><div><b>场景画像</b>：分辨率×时长×并发、SLO（RTF/P99/显存）、精度红线（无损 or 有损 lane）——决定一切优先级。</div></div>
-  <div class="step"><div class="n">P1</div><div><b>框架适配</b>：版本锚定 + 能力矩阵（每个 flag 先在 <code>--help</code> 验存在）；NPU 侧含 Dummy Run 架构验证。</div></div>
-  <div class="step"><div class="n">P2</div><div><b>验证与基线</b>：正确性冒烟（1 prompt/1 step）→ 固定种子基线，分阶段计时（encoder/DiT 每步/VAE/封装传输），产物落盘。</div></div>
-  <div class="step"><div class="n">P3</div><div><b>Profile 采集</b>：GPU nsys/torch-profiler/ncu(Top-3)；NPU MindIE-SD collect_profile.py（warmup≥10、capture≥5）。</div></div>
-  <div class="step"><div class="n">P4</div><div><b>五层递进分析</b>：阶段分离 → 算子分类（FA/MatMul/Vector/Comm）→ Host-Bound/通信暴露/融合机会 → Top 算子 → 方向级建议（见下表）。</div></div>
-  <div class="step"><div class="n">P5</div><div><b>方案实施</b>：按 P0（框架开关）→ P1（结构级）→ P2（自研 kernel）分级，绝不跳级；一次一个变量。</div></div>
-  <div class="step"><div class="n">P6</div><div><b>复验归档</b>：compare_traces 对比 + 质量门 + ≥1.03× 端到端门 → 保留/回滚；REPORT + runs/ 归档；回环到 P3。</div></div>
+  <div class="step"><div class="n">1</div><div><b>目标与基线</b>：把"更快"翻译成三个数字（RTF 目标、显存上限、精度红线——红线决定有损处方是否入列）；冒烟→钉版本→三次分阶段基线→台账开张。</div></div>
+  <div class="step"><div class="n">2</div><div><b>三层诊断</b>：时间轴（设备 busy 覆盖率 / underfeed / 空隙位置）→ 算子四桶（注意力/矩阵乘/逐元素/通信，DiT 与 VAE 分开看）→ 通信暴露比。产出处方清单。</div></div>
+  <div class="step"><div class="n">3</div><div><b>处方循环</b>：七张处方笺（并行形态 / 注意力逐级加深 / 在线 FP8 / DLO 卸载 / 缓存标定 / host 侧 / 自写 kernel），每副走六拍循环；每并入两三副药回诊断站快扫一次——时间分布变了，处方要重排。</div></div>
+  <div class="step"><div class="n">4</div><div><b>收口</b>：四个停机信号（目标达成 / 连续两副&lt;3% / 病根在驱动或硬件 / 触显存带宽顶）任一命中→终验（全量+双门）→归因报告→归档。</div></div>
 </div>
-<p><b>五层分析的阈值触发表</b>（MindIE-SD performance-analysis 同款，GPU/NPU 通用）——它把"慢"翻译成"方向"，避免凭感觉下药：</p>
+<p>诊断的判读规则直接内建在流程里，不靠经验直觉：</p>
 <table>
-  <tr><th>Profile 发现</th><th>阈值</th><th>优化方向（对应八层框架的层）</th></tr>
-  <tr><td>设备 busy 占比低 / underfeed_ratio 高</td><td>&gt;30%</td><td>Host/调度层（第6层）：查同步点、入图，<b>别抠 kernel</b></td></tr>
-  <tr><td>DiT 阶段 MatMul 占比高</td><td>&gt;50%</td><td>量化层（第5层）：FP8 / W8A8</td></tr>
-  <tr><td>DiT 阶段 FA 占比高</td><td>&gt;30%</td><td>注意力层（第3层）：量化注意力 / 稀疏</td></tr>
-  <tr><td>DiT 阶段 Vector 占比高</td><td>&gt;20%</td><td>编译融合（第6层）：RMSNorm/RoPE/AdaLN/GELU Pattern</td></tr>
-  <tr><td>通信 Exposed Ratio 高</td><td>&gt;30%</td><td>并行层（第4层）：usp×ring 重切 / 通信流水掩盖</td></tr>
-  <tr><td>VAE 阶段占比高</td><td>&gt;25%</td><td>系统层（第1层）：tile 并行 + 图模式 + 输出通路</td></tr>
+  <tr><th>看到什么（诊断信号）</th><th>阈值</th><th>开哪张处方</th></tr>
+  <tr><td>通信暴露比（未被计算盖住的通信占比）</td><td>&gt;30%</td><td>并行形态重切（usp×ring×a2a）</td></tr>
+  <tr><td>DiT 注意力桶占比</td><td>&gt;30%</td><td>注意力：TRTLLM_ATTN（无损）→ SAGE FP8 / Skip-Softmax（有损，需红线允许）</td></tr>
+  <tr><td>DiT 矩阵乘桶占比</td><td>&gt;50%</td><td>在线 FP8（官方参照 -5.3% 时间 / -38.9% HBM）</td></tr>
+  <tr><td>逐元素/归一化桶占比（碎小 kernel 串）</td><td>&gt;20%</td><td>融合开关（RMSNorm/RoPE/AdaLN/GELU Pattern）</td></tr>
+  <tr><td>VAE 段占比</td><td>&gt;20%</td><td>VAE tile 并行 + 输出通路（GPU 上 uint8 直转 -75% 载荷）</td></tr>
+  <tr><td>underfeed（设备空转比）</td><td>&gt;15%</td><td>host 侧：同步点→图模式→输出路径；<b>此时抠 kernel 无意义</b></td></tr>
+  <tr><td>峰值 HBM 逼近红线</td><td>—</td><td>DLO 卸载（r=35 参照：-37.5% HBM / +5.1% 延迟）</td></tr>
+  <tr><td>单步均匀且步数多、允许有损</td><td>—</td><td>步间缓存三点标定（0.05/0.08/0.12，取过门最高加速点）</td></tr>
+  <tr><td>以上都吃完仍有单个非厂商库算子 &gt;15%</td><td>—</td><td>自写 kernel（最后；端到端 ≥1.03× 门收口）</td></tr>
 </table>
-<p><b>方案分级</b>：P0 = 框架既有开关（vLLM-Omni flags / MindIE-SD Pattern，零代码）；P1 = 结构级（并行重切、通信掩盖、在线 FP8、DLO、编码器分解、缓存标定、W8A8——一次一个变量）；P2 = 自研 kernel/融合（仅 Top-3 热点且非厂商库近峰算子，KernelOPT 四道门收口）。<b>停止条件</b>（四条任一即收工）：目标达成 / 连续两项 &lt;3%（噪声线）/ 根因在 CANN·torch_npu·HCCL·驱动（外部瓶颈）/ 逼近显存或带宽物理上限。</p>
-<div class="why"><b>为什么是这个形状？</b>八层框架回答"按什么顺序想"（结构红利 &gt; 精装修：官方无损 lane 一口气拿 30.8%，比任何单算子优化都大）；六技能闭环回答"每一步怎么落地、怎么防止自欺"（warmup 剔除、3% 噪声线、cosine 相似度红线、产物归档）；三个教训（§3.2）回答"为什么必须端到端门与只读裁判"。三者叠起来，才是一份既能让 ZCode 自动执行、也能让工程师照着走的操作规程。</div>
+<p>这套流程不是凭空设计的：分层决策的顺序（先场景与框架、后算法与结构、最后才是 kernel 精装修）承自八层推理优化决策框架；闭环的工程细节（warmup 剔除、3% 噪声线、阈值触发表、唯一支持矩阵、产物归档）借鉴 MindIE-SD 的 <code>.agents</code> 技能体系；处方的量级预期则以 vLLM-Omni 官方博客的实测数字为锚。三者在这里被重新组织成一个东西：<b>一个能同时被 Agent 执行和被人照着走的操作规程</b>（配套 <code>zcode-autotune/</code>：AGENTS.md 给 ZCode，RUNBOOK.md 给人，§4.5 详述双模式）。
+<small class="cite"><span class="src">[Obsidian Vault《Notion/AI Infra/推理优化/推理优化》（八层框架）；MindIE-SD .agents（gitcode.com/Ascend/MindIE-SD/tree/master/.agents, 2025-11）；vLLM Blog: MiniMax H3 on vLLM-Omni, 2026-09-01]</span>八层框架原话（节译）："自上而下定方向，自下而上抠细节，至少走两遍；反模式：跳过上面几层直接抠 kernel。" MindIE-SD 停止条件（节译）："差距 &lt;3% 视为噪声，不宣称有效。"</small></p>
 
-<h3 id="s4-3">4.3 GPU 实战（vLLM-Omni @ 8×B300/H100）——七阶段逐项</h3>
-<p>环境：8×B300（或 H100），<code>uv pip install "vllm-omni"</code>（≥0.26，推荐 0.28+），模型 <code>MiniMaxAI/MiniMax-H3</code>。以下每阶段给出「目的 → 操作 → 期望产出 → 检查点」，完整命令与勾选清单见配套 <code>zcode-autotune/RUNBOOK.md</code>：</p>
-<table>
-  <tr><th>阶段</th><th>目的 / 操作</th><th>期望产出与检查点</th></tr>
-  <tr><td><b>P0 画像</b></td><td>填负载表：1344×768×24fps×10s、并发、RTF≤1.0、显存上限、无损/有损红线</td><td>写下本 lane 选择及理由；无 lane 结论不进 P1</td></tr>
-  <tr><td><b>P1 适配</b></td><td><code>pip show vllm-omni</code>；<code>vllm serve --help | grep -E "omni|usp|vae-parallel|diffusion-attention"</code> 逐 flag 验存在；记录模型 revision</td><td>manifest.txt（版本/SHA/精度）；"当版不可用"清单</td></tr>
-  <tr><td><b>P2 基线</b></td><td>先 1 条 prompt/低步数冒烟；再保守基线（<code>--omni --task-type fl2va</code>，不加并行 flag）跑 bench_gen 三次取中位</td><td>分阶段耗时 + 产物落盘；与官方 56.9s 量级对照；变异系数&lt;5%</td></tr>
-  <tr><td><b>P3 采集</b></td><td>nsys 时间轴（阶段间隙）→ torch profiler 算子表 → 仅 Top-3 kernel 上 <code>ncu --set full</code></td><td>warmup 已剔除；trace 能分清 encoder/DiT/VAE/传输</td></tr>
-  <tr><td><b>P4 分析</b></td><td>按 §4.2 五层管道产出方向建议（阈值触发表）</td><td>方向清单：发现→方向→预期量级→风险；清单外不做</td></tr>
-  <tr><td><b>P5 实施</b></td><td><b>P0 级</b>：加满官方并行/后端 flag（--usp 8 --ring 1 --ulysses-a2a-permute --text-encoder-tp-size 8 --vae-patch-parallel-size 8 --vae-parallel-mode tile --vae-use-tiling --diffusion-attention-backend TRTLLM_ATTN）；<b>P1 级</b>：在线 FP8 / DLO / 编码器分解 / 缓存阈值标定 / 并行重切网格；<b>P2 级</b>：KernelOPT 式改写 Top-3 Triton 子核（四道门）</td><td>每个变量一条记录（config/ΔE2E/ΔHBM/质量门/回滚命令）；校准点：官方无损 lane 30.8%、FP8 lane -38.9% HBM、SAGE 组合 1.237×@LPIPS0.375</td></tr>
-  <tr><td><b>P6 复验</b></td><td>重跑 P3+P4 对比；端到端 ≥1.03× 且质量门 PASS 才保留；REPORT + runs/ 归档</td><td>停止条件四选一即收工；Pareto 表 + 归因 + 与官方 lane 对照</td></tr>
-</table>
-<p>两点提醒：其一，<b>结构红利优先</b>——官方 stage1 的六项结构改动合计 30.8%，任何单算子优化都到不了这个量级，这就是"绝不跳级"的量化依据；其二，FastH3 四步版（RTF&lt;1）是<b>训练路线</b>，本流程只把它作为"训练路线对照"记入报告，且注意它与 DLO/量化/缓存互斥——如果业务允许换权重，那是另一条决策分支（超出 training-free 红线，需单独评审）。</p>
+<h3 id="s4-3">4.3 GPU 实战（vLLM-Omni @ 8×B300/H100）：四站走一遍是什么样</h3>
+<p>环境：8×B300（或 H100），<code>uv pip install "vllm-omni"</code>（≥0.26，推荐 0.28+），模型 <code>MiniMaxAI/MiniMax-H3</code>。这里给每一站的关键动作与判读方式；逐条命令、示例输出与勾选清单在配套 <code>zcode-autotune/RUNBOOK.md</code>（人）与 <code>AGENTS.md</code>（ZCode）。</p>
+<p><b>第一站</b>半天：写三个数字（RTF≤1.0、HBM 上限、精度红线）→ 保守配置冒烟（最低步数、1 条 prompt，只验"没坏"）→ 钉版本与权重 revision → 三次分阶段基线。判读三条：最大段即本轮主战场；各段之和与端到端的差是"看不见的损耗"（喂给第三站 host 处方）；三次极差 &gt;3% 说明环境不稳，先修环境。锚点：官方同规模无优化 lane 为 56.9 s，差数倍先怀疑配置。</p>
+<p><b>第二站</b>两小时，自上而下三层：时间轴回答"设备在忙还是在等"（busy&lt;85% 时空隙成片 = host 病，kernel 处方直接降权）；算子四桶回答"DiT 的时间在哪类操作上"（注意力/矩阵乘/逐元素/通信，按 §4.2 表开出处方）；暴露比回答"通信是否被计算盖住"（&gt;30% 才值得动并行形态）。产出一纸按收益/风险排序的处方清单——清单之外的事，这一轮不做。</p>
+<p><b>第三站</b>是主战场，每副药六拍循环（预期→单变量→复测→对比→过门→判决）。第一副几乎永远是并行形态（零代码零风险）：从保守配置逐组加 <code>--usp 8 --ring 1 --ulysses-a2a-permute</code> → <code>--text-encoder-tp-size 8</code> → <code>--vae-patch-parallel-size 8 --vae-parallel-mode tile --vae-use-tiling</code> → <code>--diffusion-attention-backend TRTLLM_ATTN</code>，四组各自记账，再组合收益最大者。之后按诊断信号走：注意力高→量化注意力逐级加深（每级单独过有损门，损失会叠乘）；矩阵乘高或显存紧→在线 FP8（官方 -5.3%/-38.9%）；显存超线→DLO 换血（用延迟买显存，台账两个数字都记）；步数多且允许有损→缓存三点标定。每并入两三副药回第二站快扫——时间分布变了，处方重排（打地鼠的节奏控制）。</p>
+<p><b>第四站</b>：四个停机信号任一命中即收口——全量终验 + 双质量门 + 诊断复扫（前后两张时间分布表是报告里最有说服力的一页）+ 台账全文 + 每行一句归因（"时间省在了哪"）。两个容易踩的判断：FastH3 四步版（RTF≈0.857）是训练路线且与 DLO/量化/缓存互斥，只作对照；自写 kernel 永远最后，且必须端到端 ≥1.03× 收口——子算子的收益在拼回整模型后消失的比例高得超出直觉（KernelOPT：29%）。</p>
 
 <h3 id="s4-4">4.4 NPU 实战（昇腾）：vLLM-Omni NPU 后端 + MindIE-SD 双路径</h3>
 <p><b>v2 事实修正</b>：vLLM-Omni 0.28.0 已官方宣布 H3 在 <b>GPU 与 NPU</b> 上生产就绪（其支持矩阵覆盖 CUDA/ROCm/XPU/NPU/MUSA）。因此 NPU 流程不再是"从零移植"，而是双路径选择：</p>
 <ul>
-  <li><b>路径① vLLM-Omni NPU 后端</b>：与 GPU 同一套 <code>vllm serve --omni</code> 命令面，底层经 vllm-ascend/torch_npu/CANN 落到昇腾——七阶段流程与 §4.3 完全同构，只是 P3 换 msprof、量化换 W8A8、通信换 HCCL；</li>
+  <li><b>路径① vLLM-Omni NPU 后端</b>：与 GPU 同一套 <code>vllm serve --omni</code> 命令面，底层经 vllm-ascend/torch_npu/CANN 落到昇腾——四站流程与 §4.3 完全同构，只是诊断站的采集与分析换 msprof/MindIE-SD 脚本、量化换 W8A8、通信换 HCCL；</li>
   <li><b>路径② MindIE-SD 原生引擎</b>：当 vLLM-Omni NPU 后端未覆盖某能力（某 Pattern/量化形态/调度特性）时，MindIE-SD 是昇腾原生的 DiT 引擎（cache_agent / compilation / quantization / eplb 四大模块，2025-12-31 起支持稀疏 Attention；2025-12-25 已实现 vLLM Omni × MindIE-SD 在昇腾上原生跑 Qwen-Image-Edit 系）。</li>
 </ul>
 <p><b>NPU 流程的王牌：MindIE-SD 已把整套闭环开源成 <code>.agents</code> 技能</b>，ZCode（或人）直接复用现成脚本而不必重写：</p>
 <table>
-  <tr><th>.agents 技能</th><th>对应七阶段</th><th>现成资产</th></tr>
+  <tr><th>.agents 技能</th><th>对应四站中的位置</th><th>现成资产</th></tr>
   <tr><td>model-verification</td><td>P1/P2</td><td>§A Dummy Run（随机权重+裁层 num_layers=2+latent 输出，跳过 ~70% 耗时先验架构）、§B 部署验证</td></tr>
   <tr><td>ascend-deploy</td><td>P1</td><td>本地编译/SSH 增量部署、环境兼容检查、OOM 排查树</td></tr>
   <tr><td>profiling-collection</td><td>P3</td><td>collect_profile.py（SSH 采集、warmup≥10/capture≥5、回传 profile_l1.tar.gz）</td></tr>
@@ -409,31 +401,29 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <tr><td>performance-optimization</td><td>P5</td><td>mindiesd-features.md 唯一真相源（API/硬件约束映射表）+ refresh_features.py 自动刷新</td></tr>
   <tr><td>auto-optimization</td><td>P3→P6 全链</td><td>端到端闭环 + artifact-layout 产物规范（runs/YYYYMMDD_.../manifest+patches+报告）</td></tr>
 </table>
-<p><b>H3 上昇腾的推荐次序</b>（把"移植"与"调优"解耦，风险分段释放）：① MindIE-SD §A Dummy Run 用随机权重验证 H3 架构（MM-RoPE/AdaLN/双 VAE）在 CANN 栈可跑通——不用先下 51.5GB 权重；② 逐 stage 移植并 §B 验证（encoder 以 LLM 形态先通 → DiT 注册 Pattern → VAE tile 并行）；③ 全链路跑通后进入与 GPU 完全相同的七阶段闭环。差异只剩"器材表"：msprof / ACL Graph（版本相关开关）/ W8A8+per-channel 缩放 / AscendC 算子 / TP 贴 8 卡 HCCS 拓扑——总表见 §5。</p>
+<p><b>H3 上昇腾的推荐次序</b>（把"移植"与"调优"解耦，风险分段释放）：① MindIE-SD §A Dummy Run 用随机权重验证 H3 架构（MM-RoPE/AdaLN/双 VAE）在 CANN 栈可跑通——不用先下 51.5GB 权重；② 逐 stage 移植并 §B 验证（encoder 以 LLM 形态先通 → DiT 注册 Pattern → VAE tile 并行）；③ 全链路跑通后进入与 GPU 完全相同的四站闭环。差异只剩"器材表"：msprof / ACL Graph（版本相关开关）/ W8A8+per-channel 缩放 / AscendC 算子 / TP 贴 8 卡 HCCS 拓扑——总表见 §5。</p>
 
 <h3 id="s4-5">4.5 双模式执行：ZCode 自动 ↔ 人在回路（同一份规程）</h3>
-<p>满足"既能自动跑、也能人照着走"的关键设计是：<b>流程写成一份，角色只改执行者</b>。配套 <code>zcode-autotune/</code> 中，<code>AGENTS.md</code> 是 ZCode 读的操作手册（含硬约束与停止条件），<code>RUNBOOK.md</code> 是人读的同构勾选清单（每步：目的→命令→期望输出→检查点，不满足检查点不进下一阶段），两者一一对应：</p>
+<p>满足"既能自动跑、也能人照着走"的关键设计是：<b>流程写成一份，角色只改执行者</b>。配套 <code>zcode-autotune/</code> 里，<code>AGENTS.md</code> 是给 ZCode 的机器风格规约——状态机（S0 目标→S1 基线→S2 诊断→S3 处方循环→S4 收口）、六拍循环、信号→处方映射表、台账 schema、停机规则、必须停下等人的介入点；<code>RUNBOOK.md</code> 是给人看的自然语言手册——同样的四站，每步先讲为什么现在做这件事、再给可复制的命令、然后教你怎么读输出（含示例格式和判读规则），最后以检查点收束。两份文档面向同一套 <code>bench_gen.py</code>/<code>quality_gate.py</code> 裁判脚本：</p>
 <table>
-  <tr><th>阶段</th><th>ZCode 自动模式（动作）</th><th>人在回路模式（RUNBOOK 摘录）</th></tr>
-  <tr><td>P0</td><td>读业务参数生成 results/profile.md，给出 lane 建议</td><td>☐ 填画像表 ☐ 写下 lane 选择理由</td></tr>
-  <tr><td>P1</td><td>版本探测、flag 存在性校验、写 manifest</td><td>☐ pip show vllm-omni（≥0.26）☐ --help 逐 flag 勾验 ☐ 记录模型 SHA</td></tr>
-  <tr><td>P2</td><td>冒烟+三次基线，落盘 baseline.json</td><td>☐ 1 条 prompt 冒烟 ☐ 跑 bench_gen 三次 ☐ 与官方 56.9s 量级对照</td></tr>
-  <tr><td>P3-P4</td><td>采集+分析，产出方向建议清单</td><td>☐ nsys/torch profiler 采集 ☐ 填五层表（阶段/算子/underfeed/exposed/融合）☐ 触发表定方向</td></tr>
-  <tr><td>P5</td><td>按 P0→P1→P2 逐项实施并 A/B</td><td>☐ 加满官方 flag 复测 ☐ 一次一个结构变量 ☐ 有损动作跑有损门+抽检</td></tr>
-  <tr><td>P6</td><td>复验对比、写 REPORT、归档、判停</td><td>☐ compare 对比 ☐ ≥1.03× 且过门才留 ☐ 停止条件四选一勾选</td></tr>
+  <tr><th>站</th><th>ZCode 在做什么（AGENTS.md 视角）</th><th>人在做什么（RUNBOOK.md 视角）</th></tr>
+  <tr><td>目标与基线</td><td>读/写 goals.md；冒烟、钉版本、三 reps 基线，校验极差&lt;3% 才放行进 S2</td><td>写下三个数字并想清精度红线；跑冒烟和基线，对照官方 56.9s 锚点检查合理性，台账开张</td></tr>
+  <tr><td>诊断</td><td>按信号词典三层透视，机器产出排序处方清单 prescriptions.md</td><td>看时间轴回答"设备忙还是等"；算四桶占比；算暴露比；把发现翻成清单——每条都有触发信号和预期量级</td></tr>
+  <tr><td>处方循环</td><td>逐副药六拍循环自动执行；verdict=accept 后写一句人类可读归因；有损处方停下来等抽检确认</td><td>按清单试药，一次一个变量；有损药亲自看两条视频（戴耳机，验音频）；每副药在台账记一行</td></tr>
+  <tr><td>收口</td><td>停机信号命中→终验→生成 REPORT 与归档</td><td>核对四个停机信号；看前后两张时间分布表；给每行台账补一句"时间省在了哪"</td></tr>
 </table>
-<p>人可以在任何一步接管（例如 P5 的"有损红线"决策点、质量门的人工抽检），也可以把任意阶段交回 ZCode——因为两边读的是同一份规程、跑的是同一个 bench 与质量门脚本，结论可互相复核。这正是 MindIE-SD 把技能写成 SKILL.md（给 Agent）+ README 快速开始（给人）这一设计的延伸：<b>协议即文档，文档即执行体</b>。</p>
+<p>人可以在任何一步接管（精度红线、有损抽检、kernel 方案评审是最典型的三个介入点），也可以把任何一站交回 ZCode——两边跑的是同一套裁判脚本，结论可互相复核。<b>规程即文档，文档即执行体</b>。</p>
 
 <h3 id="s4-6">4.6 每一步"为什么"——方法论的根源</h3>
 <ol>
   <li><b>为什么"系统问题"优先于"DiT 问题"</b>：官方博客的量化答案——无损系统级改动拿 30.8%，而只盯 DiT 单段的天花板低得多（encoder 51.5GB、VAE 与传输通路都是可结构化的延迟源）。</li>
-  <li><b>为什么按 P0→P1→P2 分级、绝不跳级</b>：八层框架的反模式警告（"花两周融算子拿 8%，开个结构开关直接 2×，前功尽弃"）+ KernelOPT 的 75% 失败教训（硬碰近峰算子）。</li>
-  <li><b>为什么五层分析先看 busy/underfeed</b>：busy 低=host/调度病，busy 高吞吐差=算法/KV 病，都健康才轮到 kernel 精装修——用决策信号代替直觉。</li>
+  <li><b>为什么处方按"收益/风险"排序、自写 kernel 永远垫底</b>：八层框架的反模式警告（"花两周融算子拿 8%，开个结构开关直接 2×，前功尽弃"）+ KernelOPT 的 75% 失败教训（硬碰近峰算子）。零代码零风险的并行形态永远第一副。</li>
+  <li><b>为什么诊断第一问是"设备忙还是等"</b>：busy 低=host/调度病，此时任何 kernel 处方都在治不存在的病；busy 高才往下分桶——用信号代替直觉。</li>
   <li><b>为什么 3% 噪声线与只读裁判</b>：MindIE-SD 与 KernelOPT 双重背书（<3% 不宣称有效；评测脚本防篡改防 reward hacking）。</li>
-  <li><b>为什么 features.md 要做"唯一真相源"</b>：框架能力随版本漂移，方案必须锚定到当版 API/硬件支持矩阵（MindIE-SD 还提供了 refresh_features.py 自动刷新）——这是把"教训 3"制度化。</li>
+  <li><b>为什么"支持矩阵"要先于动手</b>：框架能力随版本漂移，任何 flag/量化形态先对当版 <code>--help</code>（NPU 侧对 MindIE-SD 的 features 矩阵）验存在性——把"教训 3"制度化。</li>
   <li><b>为什么 NPU 先 Dummy Run 再下权重</b>：51.5GB 级权重下载昂贵；§A 用 KB 级配置+随机权重即可验证架构兼容（MindIE-SD model-verification 的核心价值）。</li>
-  <li><b>为什么质量门分无损/有损两档、端到端门定 1.03</b>：两类声明两类证据（数值等价→allclose；语义等价→CLIP/LPIPS+抽检）；3% 是区分信号与噪声的工程裕度。</li>
-  <li><b>为什么"走两遍"</b>：第一遍自上而下定结构（并行/量化/lane），第二遍自下而上挤实现水分（kernel/融合/同步点）——一次遍历必然漏层。</li>
+  <li><b>为什么质量门分无损/有损两档、端到端门定 1.03</b>：两类声明两类证据（数值等价→PSNR/allclose；语义等价→CLIP/LPIPS+抽检）；3% 是区分信号与噪声的工程裕度。</li>
+  <li><b>为什么"每并入两三副药要回诊断快扫"</b>：每副药都改变时间分布，注意力压下去后矩阵乘就是新的头号——打地鼠要有节奏控制，否则处方清单会过期。</li>
 </ol>
 
 <h2 id="s5"><span class="no">5.</span>GPU vs NPU 对照总表</h2>
@@ -488,7 +478,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 
 <footer>
   <p>本文由 ZCode（GLM-5.3）基于 2026-10-12 可核实的开源仓库、模型卡、arXiv 论文与框架 Release Notes 整理；
-  关键数字均附原文小字引用。v2（2026-10-12）修正：H3 运行框架为 vLLM-Omni；流程升级为七阶段（八层决策框架 × MindIE-SD .agents 闭环）并增加人在回路 RUNBOOK。
+  关键数字均附原文小字引用。v3（2026-10-12）：H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环（目标与基线→三层诊断→处方循环→收口），RUNBOOK 面向人、AGENTS.md 面向 ZCode，双模式共用同一套裁判脚本。
   配套脚手架 <code>zcode-autotune/</code>（AGENTS.md / RUNBOOK.md / bench_gen.py / knob_search.py / quality_gate.py）随文章发布。
   引用本文请注明出处与日期。</p>
 </footer>
