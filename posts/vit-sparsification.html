@@ -141,7 +141,7 @@
 <h1>ViT 稀疏化技术梳理</h1><p class="sub">从 Attention 结构稀疏、Token 压缩到步间缓存 —— 在 VLM 与 DiT 两大架构中的应用（2017–2026）</p>
     <p class="sub">本报告面向具备基础深度学习知识（了解 CNN / Transformer 基本概念）的读者，结合 6 个开源仓库的一手代码讲解原理，梳理 ViT 稀疏化的完整发展脉络，并综述 2025–2026 年学界与业界的最新进展和未来方向。</p>
     <div class="meta-chips">
-      <span class="chip">调研日期：<b>2026-08-17</b> · 增补：<b>2026-10-11</b></span>
+      <span class="chip">调研日期：<b>2026-08-17</b> · 增补：<b>2026-10-16</b></span>
       <span class="chip">代码仓库：ToMe · DiT · FastV · VisionZip · Sparse-VideoGen · TeaCache（本地克隆分析）</span>
       <span class="chip">引用格式：出处+发表时间标注于引用处，小字附原文/译文</span>
     </div>
@@ -651,7 +651,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <tr><td>① <b>近无损稀疏</b>：从 PSNR≈29 追到接近无损</td><td>LoSA（arXiv:2608.12032 · 2026-08）</td><td>长序列下更精细的稀疏模式选择，训练无关且近无损</td></tr>
     <tr><td>② <b>原生可训练稀疏</b>：不再"事后"加速，训练时就稀疏</td><td>Sparse Forcing（arXiv:2604.21221 · 2026-04）；Veda（arXiv:2605.30325 · 2026-05）</td><td>自回归视频扩散在训练中直接用稀疏注意力（Sparse Forcing：训练-推理一致的原生稀疏）；蒸馏出适配高稀疏度的模型（Veda）</td></tr>
     <tr><td>③ <b>硬件/系统协同</b>：稀疏性成为一级系统公民</td><td>SPADE 输入自适应稀疏引擎（arXiv:2608.03335 · 2026-08）；FVAttn 运行时负载均衡（arXiv:2607.16190 · 2026-07，腾讯/中大）；Token Radius Attention（arXiv:2608.02504 · 2026-08）</td><td>稀疏选择→kernel 调度→负载不均的全栈联合设计；按 token 半径而非全局预算分配注意力</td></tr>
-    <tr><td>④ <b>选择策略精细化</b></td><td>累积能量过滤（arXiv:2606.16317 · 2026-06）；HyperVAttention 时空聚类（arXiv:2607.03012 · 2026-07）；SAFE-DiT 语义快速路径（arXiv:2606.29360 · 2026-06）</td><td>能量/聚类/语义条件驱动的 token 选择取代固定模式</td></tr>
+    <tr><td>④ <b>选择策略精细化</b></td><td>累积能量过滤（arXiv:2606.16317 · 2026-06）；HyperVAttention 时空聚类（arXiv:2607.03012 · 2026-07 · NeurIPS 2026）；SAFE-DiT 语义快速路径（arXiv:2606.29360 · 2026-06）</td><td>能量/聚类/语义条件驱动的 token 选择取代固定模式</td></tr>
     <tr><td>⑤ <b>AR 视频扩散的 KV Cache 压缩</b>（长视频新战场）</td><td>Forcing-KV（arXiv:2605.09681 · 2026-05）；VideoMLA 低秩潜在 KV（arXiv:2605.30351 · 2026-05）；FadeMem 距离感知记忆固化（arXiv:2606.10671 · 2026-06）</td><td>流式自回归生成时历史 KV 无限增长 → 滑窗/低秩/记忆固化的有界缓存（思想直承 LLM KV 压缩）</td></tr>
   </table>
 
@@ -670,6 +670,25 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <li><b>MC-Sparse</b>（复旦 + 腾讯混元等，arXiv:2610.06801，2026-10-05）：系统性"解构"稠密-稀疏差距的来源并逐项修补，把"近无损稀疏"推进到 15% 密度：<b>MiniMax-H3-Base 768p 1.80×、HunyuanVideo-13B 2.00×（均 @15% 密度）、Wan2.1-14B 1.53×（@25%）、3D 生成 2.32×</b>，质量损失可忽略<sup class="cite">[MC-Sparse · arXiv:2610.06801 · 2026-10]</sup>。</li>
     <li><b>HunyuanVideo-1.5 的 SSTA</b>（腾讯混元，2025-11 开源，8.3B）：旗舰开源视频模型首次把<b>原生稀疏架构</b>（Selective and Sliding Tile Attention，参数免费的块稀疏：按"相似度-冗余度"评分剪除冗余时空 KV 块）作为默认配置——10 秒 720p 生成 1.87× 加速、消费级 GPU 可跑<sup class="cite">[HunyuanVideo-1.5 · GitHub · 2025-11]</sup>。与 SVG 一脉相承的 <b>Sparse-vDiT</b>（AAAI 2026，arXiv:2506.03065）则证明 vDiT 的三种稀疏模式（对角/多对角/竖条纹）可离线定制 kernel + 硬件感知搜索：CogVideoX1.5/HunyuanVideo/Wan2.1 实际推理 1.76×/1.85×/1.58×。</li>
     <li><b>VLM 剪枝 9 月新潮</b>：VPRune（arXiv:2609.24485，2026-09-21）指出激进压缩崩塌的三个被忽视原因——文本引导选择偏差、被弃 token 信息损失、位置失真，用"相似度引导回收 + 位置保持恢复"在 FastVLM-1.5B 等边缘模型上占优；同潮还有 ACPruner（复旦，偏置注意力覆盖最大化统一跨模态重要性）、RobustPruner（NeurIPS 2026）、VIP-Router（样本自适应路由）等。另 Song Han 系 <b>DSA</b>（ICLR 2026）把稀疏注意力与序列并行结合做分布式推理——视觉稀疏化正从"单卡 kernel"走向"多卡通信"。</li>
+  </ul>
+
+  <h3>6.5 2026-10 中旬速览：50 FPS 视频生成、"注意力必然稀疏"被挑战、评测方法学警示</h3>
+  <p>五件新事：<b>免训练 wrapper 把因果视频模型推上 50 FPS</b>（UnStep）；<b>MonarchRT 证明视频注意力并非可靠稀疏</b>（NeurIPS 2026，补录）；<b>线性注意力 VLM 让旧剪枝方法集体失效</b>（V-CoLA）；<b>TwinPrune 揭出"prefill 探针测不出 decode 压缩"的评测缺陷</b>；<b>剪枝外溢到 VLA 机器人模型</b>（VLA-ACL）。</p>
+  <ul>
+    <li><b>UnStep</b>（Meta Superintelligence Labs，arXiv:2609.32518，2026-09-26，代码开源）：免训练推理 wrapper——低于蒸馏步数的调度 + sink+滑窗 KV 窗口 + 精修 clean-cache pass + 注意力 V/O 投影截断 SVD + Triton RoPE/FP16 VAE 等运行时优化，<b>速度-质量权衡可在推理时自由选择</b>（不被蒸馏"冻结"在权重里）。Wan2.1-1.3B 的 Self Forcing <b>17 → 49.8 FPS（H100）</b>且 VBench 84.31→84.56（质量反升）；1 步变体 59.6 FPS（H100）/ 77 FPS（GB200）；30s 长视频 51.2 FPS——"免训练 + 运行时栈协同"路线的当前标杆<sup class="cite">[UnStep · arXiv:2609.32518 · 2026-09]</sup>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/unstep-fig3.png" loading="lazy" alt="UnStep 总览：左列为不损质量的 kernel 与运行时优化（融合 RoPE" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 3（arXiv:2609.32518）</b> · <i style="color:#c8cdd6">Overview of UnStep. Kernel/runtime optimizations without quality loss; reduced DiT computation that trades quality for speed; quality-recovery mechanisms that add no runtime. All changes are inference-only, with no retraining.</i><br>
+<b>译</b>：UnStep 总览：左列为不损质量的 kernel 与运行时优化（融合 RoPE、FP16 VAE、conv autotuning 等）；中列为进一步提速但损质量的计算削减（低于蒸馏步数的调度、KV 滑窗、V/O 投影截断 SVD）；右列为零运行时开销的质量恢复（精修 clean-cache pass）——全部改动仅限推理期，无需重训，速度-质量权衡可运行时切换。 <span style="opacity:.7">— 图源：UnStep 论文（Meta Superintelligence Labs）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+    <li><b>MonarchRT</b>（CMU + Morpheus AI，Beidi Chen 组，NeurIPS 2026，arXiv:2602.12271——补录）：对"视频注意力必然稀疏"这一整个领域前提提出反例——视频注意力混合周期结构 + 动态语义对应 + 稠密混合，<b>超出 even-oracle top-k 稀疏的表示容量</b>；改用 Monarch（蝴蝶）矩阵结构化参数化注意力图，配视频维度块对齐与定制 Triton kernel。<b>首次在单张 RTX 5090 上对 Self-Forcing 实现真正实时（16 FPS）视频生成</b>、质量近无损——为 §6.2"免训练稀疏"与 §7"结构性方法"之间补上第三选项：结构化稠密<sup class="cite">[MonarchRT · arXiv:2602.12271 · NeurIPS 2026]</sup>。</li>
+    <li><b>V-CoLA</b>（阿里云，arXiv:2610.11251，2026-10-08，窗口内 alphaXiv 热度第一）：Qwen3.5 等混合线性注意力（Gated DeltaNet）VLM 兴起后，基于 softmax 注意力分数或特征相似度的剪枝方法<b>全部失效</b>——FastV/DART 在 Qwen3.5-9B 上打不过随机基线。V-CoLA 从状态递推中提取"唯一性感知"重要性判据 + 自适应分块合并 + 深层视觉 token 早退：保留 50% token 得 99.5% 平均性能，prefill 加速 1.86–6.15×，剪枝开销仅 ~1.6% 前向——<b>剪枝研究必须跟着注意力架构换代</b><sup class="cite">[V-CoLA · arXiv:2610.11251 · 2026-10]</sup>。</li>
+    <li><b>TwinPrune</b>（上交大 + 华为，NeurIPS 2026，arXiv:2610.17530，2026-10-13）：揭出 VLM 剪枝的评测方法学缺陷——MMBench/POPE/ScienceQA 等"prefill 探针"只打分第一个解码 token，<b>结构上不可能度量 decode 阶段 KV 驱逐的效果</b>；实证"删光全部视觉 KV 时 prefill 探针精度几乎不变、TextVQA 却崩塌 45.6%"。统一空间密度信号同时驱动 prefill 二部合并与 decode KV 驱逐：InternVL-3.5-8B 端到端 prefill 3.24×，12.5% 保留时 decode 侧超 H2O 9.6pp——本文引用的 MMBench/POPE 类"decode 压缩无损"结论都应据此重新审视<sup class="cite">[TwinPrune · arXiv:2610.17530 · NeurIPS 2026]</sup>。</li>
+    <li><b>外溢：VLA 剪枝成 10 月小趋势</b>：VLA-ACL（ETH + 清华黄高组，arXiv:2610.08133）冻结 VLA 底座、只用"动作一致性"监督训练轻量 patch scorer——OpenVLA-OFT 剪 87.5% 视觉 token、FLOPs 降 75%、1.5× 推理加速，LIBERO 成功率仅 −1.4%；同潮还有 When-and-What-to-Prune（2610.05273）、WAM-Cache（2610.11401）。另 HyperVAttention（时空聚类）已中稿 NeurIPS 2026（端到端最高 2.23×）；NVlabs Sana 的 sol-engine 分支新增全优化配置（GB200/GB10/H100/A100/RTX4090/5090，3.55–4.52×）；fal 的 H3 Max（MiniMax-H3 后训练+推理协同）达官方端点约 35× 吞吐——§6.4"系统层红利"继续兑现。</li>
   </ul>
 </section>
 
@@ -758,7 +777,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 </section>
 
 <footer>
-  ViT 稀疏化技术梳理 · 2026-08-17 · 基于 6 个开源仓库代码分析与 40+ 篇文献调研生成
+  ViT 稀疏化技术梳理 · 2026-08-17 · 增补 2026-10-16 · 基于 6 个开源仓库代码分析与 40+ 篇文献调研生成
 </footer>
 
 

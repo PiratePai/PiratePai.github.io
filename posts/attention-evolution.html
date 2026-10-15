@@ -851,15 +851,57 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
   <span class="src">— DeepSeek-AI, DeepSeek-V4.1-Flash 技术报告, arXiv:2609.19969, 2026-09-17</span>
   <span class="zh">长程智能体的普及使模型负载日益偏向输入侧。</span>
 </blockquote>
-<p>同期 <b>Kimi K3 技术报告</b>（arXiv:2607.24653，2026-07-27）公开了 KDA 的工程细节：衰减参数化重写解决 chunkwise 计算瓶颈；<b>FlashKDA</b> 内核（CUTLASS 实现）在 H20 上 prefill 比 flash-linear-attention 基线快 <b>1.72–2.22×</b>，可作为 FLA 的直接替换后端。<b>NVIDIA Nemotron 3 Ultra</b>（2026-06，550B-A55B）则把混合 Mamba-2 MoE 推到 1M 上下文：108 层中注意力层占比仅约 6%，推理吞吐最高约 6×。</p>
+<p>同期 <b>Kimi K3 技术报告</b>（arXiv:2607.24653，2026-07-27）公开了 KDA 的工程细节：衰减参数化重写解决 chunkwise 计算瓶颈；<b>FlashKDA</b> 内核（CUTLASS 实现）在 H20 上 prefill 比 flash-linear-attention 基线快 <b>1.72–2.22×</b>，可作为 FLA 的直接替换后端。<b>NVIDIA Nemotron 3 Ultra</b>（2026-06，550B-A55B）则把混合 Mamba-2 MoE 推到 1M 上下文：108 层中注意力块仅 <b>12 个（占比约 11%：48 Mamba-2 + 48 MoE + 12 attention）</b>，推理吞吐最高约 6×。<span class="cite">[2026-10-16 勘误：此前记为"约 6%"，经核对应为 12/108≈11%]</span></p>
 
 <h4>④ 学术新热点："写侧稀疏"与内容相关路由</h4>
 <p>线性注意力的固定状态容量墙有了两类新解法（与 §8.4"记忆编辑军备竞赛"衔接）：</p>
 <ul>
 <li><b>Raven</b>（CMU/EPFL 等，arXiv:2607.25357，2026-07-28）：把"全状态稠密更新必然互相干扰"的老问题变成<b>写侧稀疏</b>——状态拆成一组记忆槽，稀疏路由器每步只选 top-k 个槽做"衰减+写入"，<b>未被选中的槽完全冻结</b>（零干扰）。已被 FLA 官方收录。</li>
 <li><b>HLA</b>（Monash+浙大，arXiv:2610.05842，2026-10-05）：块级动态混合——每个已完成 chunk 用内容相关的路由门在"历史转移"与"恒等映射"间插值；在 Qwen3.5 0.8B–9B 上替换原生 GDN 混合，LongBench-V2 最高 +5.57 分。</li>
-<li><b>SwiLA</b>（Stanford，COLM 2026，arXiv:2609.39034）：状态扩展为 J 个线性回归器分量、按预测误差动态切换，等效混合数随 O(JD) 指数增长而状态仅 O(JD²)。</li>
+  <li><b>SwiLA</b>（Stanford，COLM 2026，arXiv:2609.39034）：状态扩展为 J 个线性回归器分量、按预测误差动态切换，等效混合数随 O(JD) 指数增长而状态仅 O(JD²)。</li>
 </ul>
+
+<h3>11.3 2026-10 中旬速览：SSM 状态成为新瓶颈，稀疏检索继续降复杂度</h3>
+<p class="lead">四件新事：<b>ReplaySSM 指出混合模型的解码瓶颈已从注意力层转移到 SSM 状态读写</b>；<b>GLM-5.3-Flash 把"线性 + 稀疏"两种注意力混进同一模型</b>（上期遗漏，补录）；<b>块选择的复杂度从 O(N²/C) 降到 O(N log N)</b>（PISA）；<b>快手让 Summary token 一身兼二职</b>（KSA V2）。</p>
+
+<h4>① ReplaySSM（NVIDIA + Princeton，2026-10-09）：别存状态，存输入</h4>
+<p><b>动机</b>：批量服务（~100K 上下文以内）时混合模型的解码瓶颈其实是 SSM/线性注意力层的状态读写，而非注意力层；固定大小状态快照还阻碍投机解码回滚与量化。</p>
+<p><b>贡献</b>：把 SSM 递归状态改表示为<b>"检查点 + 最近输入缓冲区"</b>（每 16 步 flush 一次），解耦输出计算与状态更新——投机解码验证不再需要构建中间状态，还支持 NVFP4 读 + FP32 递归的低误差量化。</p>
+<p><b>收益</b>：内核加速 1.46–1.80×、解码步 1.20–1.47×（B300/H100, batch 256）；投机吞吐 1.85–2.10×（T=4, batch 512, 120B 级模型）；128K 上下文 KL 散度 0.136 → 0.0038。已进入 TensorRT-LLM、vLLM、SGLang、FlashInfer；GLM-5.3-Flash 已生产使用。</p>
+<blockquote class="q">
+  <span class="en">"State-space models (SSMs) maintain a fixed-size recurrent state, but reading and writing it at every decoding step can bottleneck hybrid models."</span>
+  <span class="src">— Liou et al., NVIDIA &amp; Princeton (Dao AI Lab), ReplaySSM, arXiv:2610.13778, 2026-10-09</span>
+  <span class="zh">状态空间模型维持固定大小的递归状态，但每步解码都读写它，反而会让混合模型陷入瓶颈。</span>
+</blockquote>
+
+<h4>② GLM-5.3-Flash（Z.ai，2026-08-26，补录）：线性 × 稀疏的第一次同框</h4>
+<p>320B-A18B 的 MIT 开源模型：45 层中 34 层 KDA（Moonshot 线性注意力）+ <b>11 层 DeepSeek 式稀疏注意力</b>（index_topk 2048），并用 IndexPool（4 个索引器 key 向量加权池化为 1）压索引器开销；mHC 超连接、原生多模态、1M 上下文。发布前以"Ox Alpha"匿名登顶 OpenRouter/OpenCode 榜。官方口径：对比 GLM-5.3 注意力计算量降 <b>3.0×</b>、KV cache 小 <b>4.4×</b>。"线性管成本、稀疏管精确检索"的分工自此有了旗舰级样本。</p>
+
+<h4>③ 复杂度与角色的两条新解法</h4>
+<ul>
+<li><b>PISA</b>（上交大 + 字节 Seed，arXiv:2609.31093，2026-09-25）：块稀疏注意力里"选块"本身仍要给每个 query-块对打分（O(N²/C)）。PISA 用金字塔式 Top-K：池化构造 O(log N) 层级的 key，从最粗层逐层收窄候选，总复杂度 <b>O(N log N)</b>、解码路由 O(log N)；块选择延迟在 64K/128K/256K 上比单级选择快 2.86×/5.31×/9.95×。</li>
+<li><b>KSA V2</b>（快手 OneRec Team，arXiv:2610.18654，2026-10-13）：让 Summary token 兼任"KV 记忆 + 稀疏索引器"双角色——C-KSA 层内池化为 Meta 条目（远距历史压缩 1024×），S-KSA 用 Lightning Indexer 选 top 块读原始 KV。1.9B/4B 模型 128K 上下文 KV cache 较全注意力 <b>−73.7%</b>、prefill 吞吐 2.16×；oracle 分析显示选中 token + 局部窗仅覆盖约 3.9% 的上下文却保留 82.83% 的解码注意力质量。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/hypersparse2-fig2.svg" loading="lazy" alt="HySparse2 的两级 KV 共享：左图为 self-decoder 与 c" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 2（arXiv:2609.26368）</b> · <i style="color:#c8cdd6">Two-level KV sharing in HySparse2. Left: the overall architecture with KV Bridging between the self-decoder and cross-decoder; prefill cache construction can exit after the self-decoder. Right: a HySparse2 block with token-level sparse attention and a forced local window.</i><br>
+<b>译</b>：HySparse2 的两级 KV 共享：左图为 self-decoder 与 cross-decoder 之间的 KV Bridging 总体架构——prefill 构建 KV 可在 self-decoder 之后提前退出（跨解码器全跳过）；右图为块内的 token 级稀疏注意力与强制局部窗，SA 层经 KV Reuse 复用该块 FA 层的缓存与选择索引。 <span style="opacity:.7">— 图源：HySparse2 论文（小米 LLM-Core）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+</ul>
+
+<div class="grid2">
+<div class="card">
+<h4>🧩 HySparse2（小米，2026-09-22）</h4>
+<p>面向"动作短、观察长"的长程 agent：两级 KV 共享——外层只桥接 YOCO 式双解码器中的全注意力层，内层把块级稀疏细化为 token 级选择；prefill 可在 self-decoder 后<b>提前退出</b>。80B-A3B 上 1M token prefill FLOPs 较混合 SWA 降 5.02×，KV 2.69GB vs 12.09GB；已验证至 290B-A8B。窗口期 alphaxiv 热度第一。</p>
+</div>
+<div class="card">
+<h4>⚙️ 系统侧与会议信号</h4>
+<p>FlashMLA 2026.09.30 版本移除 Hopper 支持、仅留 SM100/SM103，并新增华为昇腾 950 NPU 稀疏 prefill/decode 内核——注意力内核的硬件版图在分化。NeurIPS 2026 确认收录 GDN-2（擦/写解耦）、STILL、CSLA 等线性注意力论文；另见 GateSight（上交，GDN 递归记忆做 query 无关 KV 驱逐，arXiv:2610.14754）与 LatentIndex（北大+小红书，稀疏索引器跨层共享，arXiv:2610.04635）。</p>
+</div>
+</div>
 
 <!-- ============================================================ -->
 <h2 id="s12"><span class="no">12</span>未来发展方向</h2>
@@ -1016,6 +1058,16 @@ FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SG
 <li>Afzal, Bick, Xing, Cevher, Gu et al. <i>Raven: High-Recall Sequence Modeling via Sparse Memory Routing</i>. arXiv:2607.25357 (2026-07-28). https://arxiv.org/abs/2607.25357 · github.com/goombalab/raven</li>
 <li>Monash &amp; 浙大. <i>HLA: Expressive Hybrid Linear Attention via Block-Level Dynamic Mixing</i>. arXiv:2610.05842 (2026-10-05). https://arxiv.org/abs/2610.05842</li>
 <li>Stanford. <i>SwiLA: Switching Linear Attention</i>. COLM 2026. arXiv:2609.39034 (2026-09-30). https://arxiv.org/abs/2609.39034</li>
+</ol>
+
+<h4>2026-10 中旬增补（§11.3）</h4>
+<ol>
+<li>Liou et al.（NVIDIA &amp; Princeton Dao AI Lab）. <i>ReplaySSM: Rethinking State Storage for Faster Hybrid Model Decoding</i>. arXiv:2610.13778 (2026-10-09). https://arxiv.org/abs/2610.13778 · 官方博客 developer.nvidia.com/blog/replayssm-rethinking-state-storage-for-faster-hybrid-model-decoding</li>
+<li>Z.ai. <i>GLM-5.3-Flash</i>（34 KDA + 11 稀疏注意力 + IndexPool，320B-A18B，MIT）. 2026-08-26. https://huggingface.co/zai-org/GLM-5.3-Flash</li>
+<li>上交大 &amp; 字节 Seed. <i>PISA: Pyramid Sparse Attention</i>. arXiv:2609.31093 (2026-09-25). https://arxiv.org/abs/2609.31093</li>
+<li>快手 OneRec Team. <i>Kwai Summary Attention V2 (KSA V2)</i>. arXiv:2610.18654 (2026-10-13). https://arxiv.org/abs/2610.18654</li>
+<li>小米 LLM-Core. <i>HySparse2</i>（两级 KV 共享 + prefill 提前退出）. arXiv:2609.26368 (2026-09-22). https://arxiv.org/abs/2609.26368</li>
+<li>DeepSeek. <i>FlashMLA</i> 2026.09.30 版本更新（移除 Hopper、新增昇腾 950 内核）. github.com/deepseek-ai/FlashMLA</li>
 </ol>
 
 <footer>

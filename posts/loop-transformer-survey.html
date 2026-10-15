@@ -817,7 +817,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <h3>11.6 2026 年 9–10 月：解码侧零成本改进、非自回归潜推理与循环 VLM</h3>
 <p class="lead">两个月内五件值得单独立传的工作——其中 Apple 的一篇免训练解码改进几乎"白捡" 11 个点：</p>
 <ul>
-<li><b>LoopCD：更好地解码循环 Transformer，几乎零成本</b>（Apple，arXiv:2610.02185，2026-10-01，alphaXiv 133 票）。<b>动机</b>：循环模型每圈都产出对同一个 next token 的"可解码中间表示"，标准解码只丢弃前面所有圈、只用最后一圈——已花掉的算力被浪费。<b>贡献</b>：把各圈 logits/隐状态用几乎为零的成本组合或自洽蒸馏成更好的最终预测；对 Huginn、Ouro 即插即用、不需重训。<b>收益</b>：Ouro-2.6B-Thinking AIME 2024 pass@1 <b>61.88% → 73.33%</b>；Huginn HumanEval 22.56% → 31.71%；"减圈数 + 多圈补偿"再省 22.5–48.2% 前向 FLOPs<span class="cite">[62]</span>。</li>
+<li><b>更好地解码循环 Transformer，几乎零成本</b>（Apple，arXiv:2610.02185，2026-10-01，alphaXiv 133 票；论文题 <i>Decoding Looped Transformers Better for (Almost) Free</i>）。<b>动机</b>：循环模型每圈都产出对同一个 next token 的"可解码中间表示"，标准解码只丢弃前面所有圈、只用最后一圈——已花掉的算力被浪费。<b>贡献</b>：把各圈 logits/隐状态用几乎为零的成本组合或自洽蒸馏成更好的最终预测；对 Huginn、Ouro 即插即用、不需重训。<b>收益</b>：Ouro-2.6B-Thinking AIME 2024 pass@1 <b>61.88% → 73.33%</b>；Huginn HumanEval 22.56% → 31.71%；"减圈数 + 多圈补偿"再省 22.5–48.2% 前向 FLOPs<span class="cite">[62]</span>。<span style="color:#aeb4bd">（勘误 2026-10-16：本条此前昵称"LoopCD"，与 POSTECH 同期同名工作撞名——真正的 <b>LoopCD</b>（POSTECH，arXiv:2609.24196，2026-09-21）走"环间对比解码"路线：早圈 logits 作 amateur、末圈作 expert，免训练下 Huginn GSM8K +3.41 / HumanEval +6.10、吞吐 0.98×，见下方速览<span class="cite">[67]</span>。）</span></li>
 <li><b>从 CoT 到循环：非自回归潜推理</b>（Qualcomm AI Research + MIT 等，arXiv:2610.11472，2026-10-08）。显式 CoT 把额外计算表达成一串自回归生成的 token——串行且要为"维持语言连贯"付税；该工作把潜推理做成<b>非自回归</b>：所有位置的潜状态经共享块循环精炼。HumanEval/MBPP 上为评测方法最高分，<b>首 token 延迟较 Reasoning SFT 降约 36×、推理延迟降约 42×</b><span class="cite">[63]</span>。</li>
 <li><b>RLT：并行编码器 + 循环解码器</b>（Princeton+UPenn，arXiv:2610.07591，2026-10-06）。状态跟踪要求每来一个输入就更新，但标准 Transformer 给每个 token 的深度固定——把层拆成"并行因果编码器 + 沿序列循环的解码器"，循环深度随序列长度自然伸缩：Parity 训练 ≤40 bit、测 256 bit <b>100% 准确</b>（基线纯猜）；S₅ 置换跟踪 8× 长度 97% vs &lt;1%<span class="cite">[64]</span>。</li>
 <li><b>LoopVL：循环视觉智能</b>（人大+百度+上交等，arXiv:2609.38426，2026-09-29）。第一篇系统回答"循环 Transformer 能否扩展到 VLM"：Module-Loop（模块内循环）+ Model-Loop（模型级循环）迭代更新统一的视觉-语言状态，优于同尺寸及更大的非循环模型<span class="cite">[65]</span>。</li>
@@ -833,11 +833,30 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li><b>社区基建</b>：Awesome-Loop-Models（2026-04 发布，200+ 篇）+ Reza Bayat 阅读清单 + 各模型网站，构成了这个领域快速扩张的文献底座<span class="cite">[36]</span>。</li>
 </ul>
 
+<h3>11.8 2026-10 中旬速览：缩放定律补齐、显存墙被拆、安全争议公开化</h3>
+<p class="lead">四件新事：<b>"Chinchilla for Loops" 的第一版答案出现</b>（Meta Loop Scaling Laws）；<b>循环的显存墙从训练侧拆掉</b>（LPT）且<b>推理侧免训练压缩</b>（FlashLoop）；<b>循坏深度的可审计性争议从学术议题变成公共事件</b>（OpenAI 解雇安全研究员）；外加一个统一比较框架（OperLoop）。</p>
+<ul>
+<li><b>Loop Scaling Laws</b>（Meta AI，arXiv:2609.40316，2026-09-30，alphaXiv 64 票）：首个把<b>循环数 R × 专家数 E × 模型尺寸 × 数据</b>一起建模的缩放定律——核心是"有界、依赖稀疏度的循环映射"（有效参数增益随 R 饱和、随稀疏度抬高渐近上界），dense/MoE/dense-looped 定律全部收为特例。万亿 token 级验证：0.3B 激活/1.3B 总参 LoopMoE 在 R∈{4,5} 上匹配 2 倍大的 MoE；测试时 R 1→5 总分 36.6→46.9。§12 方向一"第三轴的确立"有了第一版硬答案——且循环（≈2× 总参效率）与 MoE 稀疏（≈3× 激活效率）被证明是<b>可叠加的正交轴</b><span class="cite">[68]</span>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/loopscal-fig2.svg" loading="lazy" alt="(a) 线性 / 幂律 / 有界三种循环映射下的有效参数增益示意——只有"有界映" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 2（arXiv:2609.40316）</b> · <i style="color:#c8cdd6">(a) Effective-parameter gain under linear, power-law, and bounded recurrence mappings. (b) Each mapping is fitted on R≤8 and applied to predict held-out R up to 16. (c) Formulas and RMSE on held-out R, N, D.</i><br>
+<b>译</b>：(a) 线性 / 幂律 / 有界三种循环映射下的有效参数增益示意——只有"有界映射"刻画了收益随 R 饱和、渐近上界随稀疏度抬高的形态；(b) 各映射在 R≤8 上拟合、外推预测 R 至 16 的预测损失，有界映射外推显著更准；(c) 三种映射的公式与其在留出 R / N / D 上的 RMSE 对比。 <span style="opacity:.7">— 图源：Scaling Laws for Looped MoE 论文（Meta AI）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<li><b>LPT：循环 Transformer 的共享记忆</b>（Cornell + IBM，arXiv:2610.02383，2026-10-01，alphaXiv 53 票）：循环模型每圈各写一份 KV，上下文显存随深度线性膨胀——参数省下的钱被显存吃回。LPT 从预训练起"记忆与预测分工"：<b>只有第一圈写全量 KV</b>，后续各圈只读共享记忆 + 自留 64 token 滑窗。反直觉发现：<b>共享不仅不减质反而提质</b>（共享 KV 构成通向第一圈的"梯度高速路"）。150M–1B 全尺度：H-LPT（混合线注意力版）5 圈循环 PPL 比同尺寸标准 Transformer 低 1.12–1.82，上下文显存少 <b>76–79%</b>；基线纯最终损失训练的 LT 在 5 圈即崩塌，LPT 稳定改善到 5 圈<span class="cite">[69]</span>——与 MELT（推理侧）正交的训练侧答案。</li>
+<li><b>FlashLoop：跨圈冗余的免训练三层压缩</b>（ELLIS Tübingen / MPI，arXiv:2609.29812，2026-09-24，代码开源）：系统刻画"跨圈冗余"三定律——token 更新随圈数愈发稀疏且嵌套、注意力输出差异集中于可预测的稳定列、相邻圈 KV 残差更耐量化；据此做跨圈 token 稀疏更新 + 环感知稀疏注意力 + KV 残差量化。对 Ouro-1.4B/2.6B、Huginn-3.5B 近无损下端到端最高 <b>1.64×</b> 加速、KV 显存最高 <b>6.06×</b> 缩减（32K 上下文省 82.8%）<span class="cite">[70]</span>。论文的痛点实测同样值得记住：Ouro-2.6B 4 圈 32K prefill 需 27 秒、KV 48 GiB，而同档 LLaMA-3.1-8B 仅 3 秒 / 4 GiB——"参数效率 ≠ 推理效率"的循环版。</li>
+<li><b>安全争议公开化</b>：TechTimes（2026-10-14）报道 OpenAI 于 10-01 解雇三名专职 CoT 监控的研究员（Tomek Korbak、Mikita Balesni、Jasmine Wang）——他们内部及公开主张<b>循环深度把计算搬进不可读潜空间，正在结构性拆除"推理被迫外显"的安全窗口</b>；OpenAI 称解雇因"违反敏感信息处理政策"、否认与安全异议有关。对循环模型恢复监控需要"把部分计算逼回文本通道的架构约束"或"保推理可读性的训练法"，OpenAI 均未对下一代模型作出承诺——§12.4 的"收益 vs 可审计性交换"从学术议题变成公共事件<span class="cite">[71]</span>。</li>
+<li><b>OperLoop：把循环迁移写成优化器更新规则</b>（HKUST(GZ) + StepFun + 上交等，arXiv:2609.37379，2026-09-29）：把循环隐状态视为 fast weight，将 loop 迁移严格写成"投影 + 局部目标 + 优化器更新（权重衰减 λ、步长 η）"的闭式梯度更新；Ouro/Huginn/Parcae/HyperLoop 等全部映射进该框架，指出 Parcae 与 HyperLoop 存在"输入映射错配"、对齐后即提质——"在哪循环、怎么循环"第一次有了统一比较原理<span class="cite">[72]</span>。</li>
+</ul>
+
 <h2 id="future">12 · 未来发展方向</h2>
 <p class="lead">综合论文脉络与 2026 年的动态，六个方向最值得关注（★ = 未来 1–2 年最可能出成果）。</p>
 
 <h3>方向一 ★：循环缩放定律的最终形态——"第三轴"的确立</h3>
-<p>参数、数据之后，<b>循环深度能否构成一条平滑、可预测、可跨尺寸迁移的缩放轴</b>？Parcae 的 isoFLOPs 曲面、等深度定律、SMELT 的 MoE×循环计算匹配定律已经拼出草图<span class="cite">[23][24][32]</span>，但关键空白仍在：<b>最优循环数与模型尺寸/数据量的联合定标</b>、<b>循环外推的失效边界预测</b>（何时该加参数而不是加循环）、<b>多轮循环的信息瓶颈理论</b>（压缩态 vs 全序列态的内存分离已给出第一定理<span class="cite">[34]</span>）。谁先给出"Chinchilla for Loops"，谁就定义下一代模型的训练预算表。</p>
+<p>参数、数据之后，<b>循环深度能否构成一条平滑、可预测、可跨尺寸迁移的缩放轴</b>？Parcae 的 isoFLOPs 曲面、等深度定律、SMELT 的 MoE×循环计算匹配定律已经拼出草图<span class="cite">[23][24][32]</span>，但关键空白仍在：<b>最优循环数与模型尺寸/数据量的联合定标</b>、<b>循环外推的失效边界预测</b>（何时该加参数而不是加循环）、<b>多轮循环的信息瓶颈理论</b>（压缩态 vs 全序列态的内存分离已给出第一定理<span class="cite">[34]</span>）。谁先给出"Chinchilla for Loops"，谁就定义下一代模型的训练预算表。<span style="color:#aeb4bd">（2026-10-16 注：Meta 的 Loop Scaling Laws<span class="cite">[68]</span>已给出第一版——循环映射有界且上界随稀疏度抬高，但"外推失效边界预测"与"多轮信息瓶颈理论"仍空白。）</span></p>
 
 <h3>方向二 ★：训练算法——绕开截断反传</h3>
 <p>截断反传是有偏梯度 + 前段循环"无监督漂移"的妥协。候选出路：① <b>隐式微分 / 平衡解</b>（DEQ 现代化：把循环训练重写成不动点求解，一次反传<span class="cite">[3][35]</span>）；② <b>逐步自举</b>（把第 k 步输出当第 k+1 步的伪标签，教师强制的自监督版）；③ <b>RL 到迭代</b>（LoopRPT 与潜轨迹奖励已开头<span class="cite">[29]</span>——把"每轮循环"当作动作，奖励信号直接对齐推理质量）；④ <b>可并行的时间维展开</b>（把 32 次循环摊到 32 个序列位置并行算——与 COCONUT 式潜 token 的杂交，DiscoLoop 等已试水<span class="cite">[36]</span>）。</p>
@@ -924,6 +943,12 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li>Zhang, Y., Feng, J., Qin, S. (Princeton / UPenn). <i>Recurrent Looped Transformer (RLT).</i> arXiv:2610.07591 <span class="src-date">2026-10-06</span>. <a href="https://arxiv.org/abs/2610.07591">link</a> · github.com/yifanzhang-pro/recurrent-looped-tranformer</li>
   <li>人大/百度/上交等. <i>LoopVL: Recurrent Visual Intelligence.</i> arXiv:2609.38426 <span class="src-date">2026-09-29</span>. <a href="https://arxiv.org/abs/2609.38426">link</a></li>
   <li>Yu, C., Su, W., Zheng, B. et al. (阿里巴巴). <i>MeSH: Memory-as-State-Highways for Recursive Transformers.</i> arXiv:2510.07739 <span class="src-date">2025-10-09</span> · ICLR 2026. <a href="https://arxiv.org/abs/2510.07739">link</a> · github.com/LivingFutureLab/MeSH</li>
+  <li>POSTECH. <i>LoopCD: Loop-wise Contrastive Decoding.</i> arXiv:2609.24196 <span class="src-date">2026-09-21</span>. <a href="https://arxiv.org/abs/2609.24196">link</a></li>
+  <li>Yanbei Chen, Anirudh Goyal, Raghuraman Krishnamoorthi (Meta AI). <i>Scaling Laws for Looped Mixture of Experts.</i> arXiv:2609.40316 <span class="src-date">2026-09-30</span>. <a href="https://arxiv.org/abs/2609.40316">link</a></li>
+  <li>Cornell &amp; IBM Research. <i>LPT: Shared Memory for Looped Transformers.</i> arXiv:2610.02383 <span class="src-date">2026-10-01</span>. <a href="https://arxiv.org/abs/2610.02383">link</a></li>
+  <li>ELLIS Tübingen / MPI-IS. <i>FlashLoop: Training-Free Acceleration of Looped Transformers.</i> arXiv:2609.29812 <span class="src-date">2026-09-24</span>. <a href="https://arxiv.org/abs/2609.29812">link</a> · github.com/Superone77/FlashLoop</li>
+  <li>TechTimes. <i>OpenAI Fired Three Researchers Who Said Loop Transformer Would Blind Safety Monitors.</i> <span class="src-date">2026-10-14</span>. <a href="https://www.techtimes.com/articles/329046/20261014/openai-fired-three-researchers-who-said-loop-transformer-would-blind-safety-monitors.htm">link</a></li>
+  <li>HKUST(GZ) &amp; StepFun &amp; SJTU 等. <i>OperLoop: Loop Transitions as Optimizer Updates.</i> arXiv:2609.37379 <span class="src-date">2026-09-29</span>. <a href="https://arxiv.org/abs/2609.37379">link</a></li>
 </ol>
 
 <div class="callout"><b>关于"传闻类"引用的说明（2026-10-11 更新）</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>）。<b>事实更新：OpenAI 已于 2026-09-03 正式发布 GPT-6 Astra</b>；The Information 于发布前两日报道其使用 recurrent depth / looped transformers，Jakub Pachocki 回应称 Astra 的计算图深度在 GPT-4 的 2× 以内，但 <b>OpenAI 至今未官方确认架构</b>。Astra 系统卡确认了安全性影响：其 CoT 可监控性低于此前模型（更短、更少文字化的推理轨迹），UK AISI 实测其无 CoT 数学任务时域 30.9 分钟——但 OpenAI 声明"分析未将可控性变化归因于架构"。结论：模型已发布、架构仍未证实，"循环深度假说"保持假说身份<span class="cite">[21][22][44][61]</span>。</div>

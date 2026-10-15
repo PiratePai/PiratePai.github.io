@@ -683,6 +683,25 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 </ul>
 <div class="note"><b>[NVIDIA26TOKEN]</b> NVIDIA（Amr Elmeleegy）. <i>How NVIDIA's Inference Software Stack Powers the Lowest Token Cost</i>. 官方博客，2026-06-30。原文："the software stack has already reduced token costs by <b>up to 5x on the DeepSeek V4 model in just one month</b>."（译文：该软件栈在短短一个月内已将 DeepSeek V4 模型的 token 成本最多降低 5 倍。）——Blackwell 上"分离式服务 + 大规模专家并行 + NVFP4 + MTP"的叠加红利；堆叠优化吞吐最高 20×。链接：<a href="https://blogs.nvidia.com/blog/inference-software-lowest-token-cost">blogs.nvidia.com/…/inference-software-lowest-token-cost</a></div>
 
+<h3>9.6 2026-10 中旬速览：KV 双向流动、弹性租约与 Rubin day-0</h3>
+<p>四条新动态：<b>KV 传输从"P→D 单行道"升级为双向 + push</b>（vLLM）；<b>新模型的 day-0 优化成为引擎竞争力</b>（DeepSeek-V4.1-Flash 三周提速 5×）；<b>Meta 把 P/D 弹性做成"可撤销租约"</b>（Crossflow）；<b>Rubin NVL72 上市即有双引擎支持</b>。</p>
+<ul>
+<li><b>vLLM 双向 KV 传输</b>（AWS，2026-10-12）：P/D 分离中 KV 只能 P→D 单向流动，多轮 Agent 每轮都要全量重算已生成部分。NIXL 连接器扩展出 <b>D→P 反向 READ</b>：decode 节点按 TTL 480s 保留 KV 块，路由器按 conversation_id 把块元数据附到下一轮 prefill——GLM-5-FP8 的 20K token 多轮 TTFT <b>2334ms → 702ms（3.3×）</b><sup class="cite">[VLLMBIKV]</sup>。两天后的 <b>NIXL push 连接器</b>（AWS+Mistral，2026-10-14，进 v0.21.0+）再进一步：decode 侧提前注册目标块，prefill 一完成即由后台线程 WRITE，传输建立完全移出关键路径——TTFT 最高再降约 3×、TPOT 改善约 30%<sup class="cite">[VLLMNIXLPUSH]</sup>。</li>
+<li><b>DeepSeek-V4.1-Flash on vLLM</b>（与 Inferact，2026-10-07）：新模型的未知算子/新执行模式倒逼引擎进化——SWA bounded replay（层 21–39 几乎跳过全部 prompt prefill，prefill 计算省 30–40%）、<b>可断 PIECEWISE CUDA Graph</b>（呼应 §10.6"可断图"方向）、MegaAttention/Mega-Gate 融合内核（1.14–1.51×）。发布三周内：AgentX（GB300）低并发 1.9×、150 TPS 约束下吞吐 <b>5.3×</b><sup class="cite">[VLLMDS41]</sup>。</li>
+<li><b>Crossflow</b>（Meta，arXiv:2609.27085，2026-09-22，上期遗漏）：与 FluidPD 同题竞争的工业界方案——不改节点角色，decode 节点发布<b>短时可撤销多资源租约</b>（compute/KV/传输/预期输出），集群调度器原子预留 + 缓存感知准入（SGLang 上 6.7K 行实现）。真实机群中未缓存输入/输出 token 比值的分钟级峰均比达 4.7×，静态 P/D 必然搁置算力。token 吞吐相对静态 P/D 几何平均 <b>+16.2–17.4%</b>、高负载最高 +43.4%，所有测点 TTFT 均下降<sup class="cite">[CROSSFLOW26]</sup>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/crossflow-fig1.svg" loading="lazy" alt="某真实聊天负载六小时内"prefill / decode 需求比值"的逐分钟变化" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 1（arXiv:2609.27085）</b> · <i style="color:#c8cdd6">Demand ratio over a six-hour period for a chat use case. The rate of fine-grained change in prefill vs decode demand does not match the static partitioning nature of P/D disaggregation.</i><br>
+<b>译</b>：某真实聊天负载六小时内"prefill / decode 需求比值"的逐分钟变化（细线，均值 13.79×，附 30 分钟滚动均值与 ±1σ 带）——需求比值在分钟级剧烈波动，与静态 P/D 分离的固定配比天然不匹配：这正是 FluidPD / Crossflow 等"弹性分离"工作的动机图。 <span style="opacity:.7">— 图源：Crossflow 论文（Meta）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<li><b>Vera Rubin NVL72 day-0</b>：vLLM 以 MoE locality domains + FlashInfer 0.7.0 内核实现 day-0（AgentX 每芯片吞吐为 GB200 NVL72 的 <b>7.8×</b>，2026-10-09）<sup class="cite">[VERARUBIN26]</sup>；SGLang × NVIDIA Dynamo 组合随后给出 Qwen3.8 Flash Next 每芯片最高 <b>6.6×</b>、每 token 建模成本最多低 76% 的口径（vs GB300，2026-10-14）。新硬件红利能否兑现，越来越取决于引擎的 day-0 响应速度。</li>
+</ul>
+<div class="note"><b>同窗口值得知道</b> ① NVIDIA Dynamo 的<b>会话感知推理</b>（2026-10-08）：以统一 Session ID 把请求级基础设施升级为"程序感知"系统（会话路由、跨引擎共享 KV 池索引、KvHint 程序化缓存迁移）——KV Cache 综述 §10.4 有详述<sup class="cite">[DYNAMOSESSION]</sup>。② SOSP'26（9.29–10.2，布拉格）serving 方向：腾讯+北大的 <b>Janus</b> 多模型生产服务、MSR 的 <b>LLM-42</b> 确定性投机推理、上交+阿里的 <b>ACDC</b> 离线推理。③ <b>TokenRouter</b>（清华+CMU，arXiv:2610.12242，窗口内 alphaXiv 最热）：token 级路由的多模型服务系统，吞吐 2.01–64.15×——§9.3"语义路由"的学术深化。</div>
+
 <!-- ============================================================ -->
 <h2 id="s10"><span class="no">10</span>未来发展方向</h2>
 <p>综合上述脉络，给出六个可判断的方向（带依据，非占卜）：</p>
@@ -728,6 +747,12 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <li id="VLLMAFD">vLLM Team. <i>Announcing vLLM AFD Plugin: Disaggregating Attention and FFN for Flexible MoE Serving</i>. vLLM 博客, <b>2026-07-23</b>. <a href="https://vllm.ai/blog">链接</a></li>
 <li id="VLLMGLM">vLLM Team. <i>From Day 0 to Production SLAs: Serving GLM-5.2 on 24 NVIDIA B300 GPUs with vLLM</i>. vLLM 博客, <b>2026-07-22</b>. <a href="https://vllm.ai/blog">链接</a></li>
 <li id="VLLMSEM">vLLM Team. <i>Beyond a Single Model: Building Mixture-of-Models Systems with vLLM Semantic Router</i>. vLLM 博客, <b>2026-07-16</b>. <a href="https://vllm.ai/blog">链接</a></li>
+<li id="VLLMBIKV">vLLM Team（Sunita Nadampalli, AWS）. <i>Bidirectional KV Cache Transfer for Multi-Turn Agentic Workloads</i>. vLLM 博客, <b>2026-10-12</b>. <a href="https://vllm.ai/blog/2026-10-12-bidirectional-kvxfer-multiturn-agentic-workload">链接</a></li>
+<li id="VLLMNIXLPUSH">vLLM Team（AWS &amp; Mistral）. <i>NIXL Push Connector: Moving KV Transfer Off the Critical Path</i>. vLLM 博客, <b>2026-10-14</b>. <a href="https://vllm.ai/blog/2026-10-14-nixl-push-connector">链接</a></li>
+<li id="VLLMDS41">vLLM Team &amp; Inferact. <i>DeepSeek-V4.1-Flash on vLLM: 5x Agentic Throughput Since Day 0</i>. vLLM 博客, <b>2026-10-07</b>. <a href="https://vllm.ai/blog/2026-10-07-deepseek-v41-flash">链接</a></li>
+<li id="DYNAMOSESSION">NVIDIA（Ishan Dhanani 等）. <i>Session-Aware Agentic Inference with NVIDIA Dynamo</i>. PyTorch 官方博客, <b>2026-10-08</b>. <a href="https://pytorch.org/blog/session-aware-agentic-inference-with-nvidia-dynamo">链接</a></li>
+<li id="CROSSFLOW26">Meta Platforms（Chunqiang Tang 团队）. <i>Crossflow: Prefill-Decode Elasticity for Agentic LLM Serving</i>. arXiv:2609.27085, <b>2026-09-22</b>. <a href="https://arxiv.org/abs/2609.27085">arXiv:2609.27085</a></li>
+<li id="VERARUBIN26">vLLM Team. <i>vLLM on Vera Rubin NVL72: Day-0 Preview</i>. vLLM 博客, <b>2026-10-09</b>. <a href="https://vllm.ai/blog/2026-10-09-vera-rubin-preview">链接</a></li>
 <li id="VLLMDCP">vLLM Team. <i>Efficient Decode Context Parallelism with vLLM for Long Context Workloads</i>. vLLM 博客, <b>2026-08-06</b>. <a href="https://vllm.ai/blog">链接</a></li>
 <li id="VLLMRFC">vLLM 社区. <i>RFC: Changes in vLLM Model Development</i>（可断 CUDA Graph 讨论）. GitHub Issue #42770, <b>2026</b>. <a href="https://github.com/vllm-project/vllm/issues/42770">链接</a></li>
 <li id="DSV3">DeepSeek-AI. <i>DeepSeek-V3 Technical Report</i>. arXiv, <b>2024-12-26</b>. <a href="https://arxiv.org/abs/2412.19437">arXiv:2412.19437</a></li>

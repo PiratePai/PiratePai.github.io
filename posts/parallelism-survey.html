@@ -142,7 +142,7 @@
 <header class="hero">
   <div class="kicker">训练系统调研 · 2026</div>
 <h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-11</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-16</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
 </header>
 
 <nav class="toc">
@@ -868,6 +868,24 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li><b>TopoEP(USTC,2026-09-28)</b>:GPU 原生、拓扑感知的 EP 负载均衡——每个 MoE 层把路由结果转为"热专家复制 + token 重路由"决策,确定性 GPU 求解器在所有 rank 产出比特级一致的计划、无需 host 侧同步;32×H800 + Megatron-LM 上三个 MoE 模型端到端训练吞吐 +6.2%–11.4%。</li>
 <li><b>MSCCL++ 被 ASPLOS 2026 录用</b>(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
 </ul>
+
+<h3>10.8 2026-10 中旬速览:NCCL 收编 EP 原语,通算掩盖进框架图编译</h3>
+<ul>
+<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统——<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%——"EP 原语进通信库"与 DeepEP 形成正面会师,§11.2 预言的"统一 EP 通信抽象"正在被 NVIDIA 官方兑现。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/ncclep-fig4.svg" loading="lazy" alt="GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Fig. 4（arXiv:2610.07516）</b> · <i style="color:#c8cdd6">Single FFN-MoE layer transfer latency on GB200 NVL72 + NDR. Dashed lines show the analytical SOL model; the broken y-axis separates the AG+bcast values from the lower-latency paths.</i><br>
+<b>译</b>：GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵轴断开）：flat direct sends 最高 77.3ms、传统 all-gather+broadcast 更高（上段），NCCL-M2N 层级路由仅 9.8ms、贴近 SOL 解析模型（虚线）——r=2/4/8 三档生成侧规模下加速最高 7.9×。 <span style="opacity:.7">— 图源：NCCL-Extensions 论文（NVIDIA）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<li><b>Meta EP-Overlap 与 AutoParallel</b>(PyTorchCon NA 2026 预告,官方博客 2026-09-16):EP-Overlap 以 graph passes 在 TorchTitan <b>GraphTrainer</b> 中实现通用 EP 通信隐藏——不绑定 DualPipe 等特定流水线调度,"任意可用计算都能藏",DeepSeek-V3 上隐藏 <b>76–86%</b> EP 通信、吞吐 ~1.3×;同场 AutoParallel 在模型图上自动搜索并行策略(Llama-3 8B 匹配强手工基线且省 12% 显存);另有 TorchComms 新 torch.distributed API(故障后进程组在线重构、单边 RDMA put/get 窗口)——§11.6"自动并行换发"的框架级回应。</li>
+<li><b>MegaFlux</b>(Princeton + NVIDIA,arXiv:2610.00671,2026-09-30):megakernel(UniEP/MegaMoE 线)融合了 EP 通信与计算,但专家放置固定、路由倾斜仍产生 straggler(实测慢 7.3–41%)。MegaFlux 把<b>专家复制变成运行时决策</b>:片上 planner(42.6–72 µs)按路由逐层选复制位置,前/后向 megakernel 内流水化复制权重传输与梯度提前规约。8×B200 EP8、147 配置:对固定放置 geomean 前向 1.45×/后向 1.28×;对 Megatron-Core 2.31×/1.53×;vLLM DeepSeek-V4-Pro prefill 端到端 1.13–1.26×——回应 §11.2"通信-路由协同设计"。</li>
+<li><b>Echo:4-bit 张量并行通信</b>(北大/NUS/AMD 等,arXiv:2610.14277,2026-10-14):TP 的 all-reduce 夹在两个依赖 matmul 之间无法掩盖;Echo 把它重构为"量化 all-to-all → owner 高精度求和 → 量化 all-gather"(任意 GPU 数下每元素每次调用至多量化两次),用双时间尺度补偿器控制舍入误差累积。1GB 消息比 16-bit NCCL all-reduce 快 2.09×;4-bit 预训练 10B token 损失仅比 16-bit 高 <0.9%——§11.3"精度下沉到通信"再添一员。</li>
+<li><b>SC'26 万卡通信压缩评测与优化</b>(浙大/中科院计算所/港中深等,SC 2026 Paper Highlight 场次,报告 2026-11-18):首个万卡级训练上通信压缩的系统评估——"压缩集合通信 × 超大规模网络设计 × 万卡实证"三线合流,细节待 11 月会议公开。</li>
+</ul>
 </section>
 <section id="ch11">
 <h2 class="sec"><span class="num">11</span>未来发展方向<span class="roadmap">scale-up 域膨胀 → EP 主战场 → 精度下沉 → 边界消融</span><span class="pill fut">未来</span></h2>
@@ -981,6 +999,11 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li>NVIDIA, <i>Megatron-LM v0.16 Highlights</i>(GitHub Issue #4003, 2026-02)与 <i>2026 Q3 Megatron Core MoE Roadmap</i>(Issue #6757):Partial CUDA Graph for EP Overlap、Hybrid DP×CP、Seq1F1B、1F1B EP A2A Overlap。</li>
 <li>USTC, <i>TopoEP: Topology-Aware Expert-Parallel Load Balancing</i>, arXiv:2609.35481, 2026-09-28。</li>
 <li>MSCCL++, ASPLOS 2026(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
+<li>NVIDIA, <i>NCCL-Extensions: NCCL-EP &amp; NCCL-M2N</i>, arXiv:2610.07516, 2026-10-05; github.com/NVIDIA/nccl-extensions;PyTorchCon 2026 首发演讲(10-21)。</li>
+<li>Meta(PyTorch), <i>Open Research: Tooling Optimization at PyTorchCon NA 2026</i>(EP-Overlap / AutoParallel / TorchComms), pytorch.org 博客, 2026-09-16。</li>
+<li>Princeton &amp; NVIDIA, <i>MegaFlux: Skew-Resilient MoE Megakernels via Pipelined Expert Replication</i>, arXiv:2610.00671, 2026-09-30。</li>
+<li><i>Echo: Error-Compensated 4-Bit Tensor-Parallel Communication</i>(北大/NUS/AMD 等), arXiv:2610.14277, 2026-10-14。</li>
+<li>浙大/中科院计算所/港中深等, <i>Evaluation and Optimization of Communication Compression for 10K-GPU LLM Training</i>, SC 2026(Paper Highlight)。</li>
 </ol>
 <p style="font-size:12.5px;color:#aeb4bd">注:文中"未查到/未证实"的事项(NVIDIA TDT、DeepSeek-R2、"BFPP 用于 Llama 4"、DeepEP 独立论文等)均经检索后不收录或明确标注;所有逐字引文均出自上述来源原文,译文为本整理者所译。</p>
 </section>

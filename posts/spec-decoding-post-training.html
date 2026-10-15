@@ -654,7 +654,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p>扩散草稿各位置独立预测，前面一个错误连累整块报废（DSpark 治"后缀衰减"用的是向右看的串行头；DEdit 换一条路）。UCR+AWS+NYU 让草稿先并行 unmask、再做 <b>token 到 token 的迭代"编辑"</b>——后面的 token 作为双向上下文<b>回头修复</b>前面的错误；训练用 ProposalMix（按首轮置信度混合"草稿自己的预测"与"真值 token"），专门教"修错"同时保住对的。<b>收益</b>：Qwen3-4B/8B 贪心解码宏平均加速 <b>5.72×/5.97×</b>；消融显示编辑若改用因果注意力会掉点——收益确实来自未来上下文。<span class="cite">[41]</span></p>
 
 <h4>⑤ 机理与规模化补充</h4>
-<p><b>Attention Drift</b>（2026.05）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解——为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>——再次印证 §5.3 的"草稿训练规模定律"。
+<p><b>Attention Drift</b>（2026.05，已被 NeurIPS 2026 接收）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解——为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>——再次印证 §5.3 的"草稿训练规模定律"。
 
 <table>
   <tr><th>主线</th><th>代表工作（年份）</th><th>一句话概括</th></tr>
@@ -665,6 +665,27 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr><td>工业落地</td><td>DeepSeek-V4、gpt-oss、Qwen3.5、vLLM/SGLang、Arctic Speculator（2025–2026）</td><td>MTP/草稿成为旗舰模型与推理框架的出厂标配</td></tr>
   <tr><td>外溢与基准</td><td>OUTLETS、Speed-Bench、多模态综述（2026）</td><td>草稿特征服务调度；评测从接受率走向实际加速</td></tr>
 </table>
+
+<h3>9.8 2026-10 中旬速览：MTP 进入后训练循环，"训练你所验证的"</h3>
+<p class="lead">三件新事直接落在本文的主线上：<b>NVIDIA 把 MTP 头纳入后训练强化（MTP boosting）</b>、<b>TreeSpark 把"部署时的树形展开"搬进训练目标</b>、<b>verl-SpeCo 让草稿在 RL 训练循环内持续对齐</b>。</p>
+
+<h4>① Nemotron 3.5 的 MTP boosting（2026-10-14）：草稿头也要"后训练强化"</h4>
+<p>Super（120B-A12B）/ Lightning（30B-A3B）的递归共享式 MTP 头先做 100B token 热身训练（"隐状态混合"弥合训练用真值、推理吃草稿的条件失配——正是 §6 TTT 思想的低成本替代），再在<b>后训练阶段继续 boosting</b>：贪心接受长度 4.287→4.718（+10.1%）、采样 3.787→4.612（+21.8%）。连同 LiLiCorr 并行草稿器（vLLM PR #57934）一起，"出厂 MTP + 官方草稿器 + 后训练 boosting"成为完整闭环。<span class="cite">[46]</span></p>
+
+<h4>② TreeSpark（2026-10-14）：训练你所验证的树</h4>
+<p>DSpark 的串行头用"真值父 token"训练、部署时却面对自生成的父状态。TreeSpark 在训练时<b>回放部署时的树展开/剪枝/打包策略</b>，并用 survival NLL（按参考路径质量加权）+ capped coverage hinge（提拔目标模型看重的备选）两个新目标直接对准"被验证的候选"——接受长度比 DSpark +23.4%–31.6%。<b>训练分布对齐部署分布</b>这条原则，从 TTT（EAGLE-3）一脉贯穿到树形并行草稿。<span class="cite">[47]</span></p>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/treespark-fig1.jpg" loading="lazy" alt="TreeSpark 框架：(a) 预算约束内的树状起草与验证（树注意力一次前向验" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 1（arXiv:2610.20175）</b> · <i style="color:#c8cdd6">TreeSpark framework. (a) Budgeted drafting and verification. (b) Coverage at expanded parents. (c) Survival on valid packed edges, weighted by reference path mass.</i><br>
+<b>译</b>：TreeSpark 框架：(a) 预算约束内的树状起草与验证（树注意力一次前向验证整棵候选树）；(b) 在被扩展父节点处提拔目标模型看重备选的覆盖目标；(c) 在有效打包边上的存活目标（按参考路径质量加权）——两个训练目标都复用参考链的目标分布、零额外目标前向。 <span style="opacity:.7">— 图源：TreeSpark 论文（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+
+<h4>③ verl-SpeCo：草稿协同训练进 RL 循环</h4>
+<p>verl 项目（字节 Seed 发起的社区）发布 SpeCo 框架：RL 训练与推理共享同一套草稿，<b>训练期保持草稿对齐、部署期直接复用</b>——把"在策蒸馏"（§7）推广为"训练-部署草稿一体化"，与 NVIDIA 模型-系统协同设计博客构成同一趋势的两个落点。<span class="cite">[48]</span></p>
 
 <h2 id="future">10 · 未来发展方向</h2>
 
@@ -733,6 +754,9 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr><td>[43]</td><td>Sandler et al. (Lehigh Univ.). SpecDiff-2: Scaling Diffusion Drafter Alignment for Faster Speculative Decoding. MLSys 2026 Oral. <a href="https://mlsys.org/virtual/2026/oral/3755">mlsys.org</a></td><td>2026-05</td></tr>
   <tr><td>[44]</td><td>Google. Multi-Token Prediction in Gemma 4. 官方博客（权重 Apache 2.0）. <a href="https://blog.google/technology/developers/multi-token-prediction-gemma-4">blog.google</a></td><td>2026-05-05</td></tr>
   <tr><td>[45]</td><td>北京大学 &amp; 腾讯. DFlare: Scaling Up Draft Capacity for Block Diffusion Speculative Decoding. <a href="https://arxiv.org/abs/2606.02091">arXiv:2606.02091</a>；代码 github.com/Tencent/AngelSlim</td><td>2026-06-01</td></tr>
+  <tr><td>[46]</td><td>NVIDIA. Nemotron 3.5 Super and Lightning Technical Report（MTP 热身 + 后训练 boosting）. <a href="https://research.nvidia.com/labs/nemotron/">research.nvidia.com</a></td><td>2026-10-14</td></tr>
+  <tr><td>[47]</td><td>Zhao et al.（RUC &amp; NJU &amp; 华为）. TreeSpark. <a href="https://arxiv.org/abs/2610.20175">arXiv:2610.20175</a>；代码 github.com/Robot2050/TreeSpark</td><td>2026-10-14</td></tr>
+  <tr><td>[48]</td><td>verl 项目（字节 Seed 社区）. verl-SpeCo: Speculative-Decoding Co-training for RL. <a href="https://github.com/verl-project/verl-SpeCo">github.com/verl-project/verl-SpeCo</a></td><td>2026（预发布）</td></tr>
 </table>
 
 <p class="muted">其他文中提到的工业动态来源：vLLM MTP 文档（docs/features/speculative_decoding/mtp.md）、SGLang MTP 博客（lmsys.org，2025-07-17）与 GPT-OSS 博客（2025-08-27）、Red Hat 开发者博客（2026-04-16）、Snowflake Arctic Inference 博客；代码引用自本地克隆的 SafeAILab/EAGLE、FasterDecoding/Medusa、facebookresearch/LayerSkip、deepseek-ai/DeepSpec、z-lab/dflash 仓库（2026-09 快照）。</p>

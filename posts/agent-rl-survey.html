@@ -823,6 +823,25 @@ in-flight sample to finish."""</span>
 <li><b>框架生态</b>:AReaL 2.0(2026-07-01)重构为微服务架构(训练/推理/agent/权重更新四类独立服务)+ Hermes 在线 RL 环境,黑盒 agent 改个 base_url 即可接入;slime 的官方后继 <b>Miles v0.1</b>(2026-09-08)成为 GLM-5.2 全异步 agentic RL 的载体(64×GB300,中位步时 263s)。另有 VenusRL(优先级调度 + 环境内存管理,最高 4.24×)、ThunderSyncRL("无损"加速 agentic RL)等一批新作。</li>
 </ul>
 
+<h3>6.1.6 2026-10 中旬速览:RL 算力经济学、弹性 GPU 与 PD 分离进 rollout</h3>
+<p>五件新事,一件比一件"系统":<b>小米把 RL 算力的账本公开到百万美元级</b>;<b>阿里为超长程任务做"弹性单元"GPU 编排</b>;<b>百度开源 agent 原生全异步框架</b>;<b>PD 分离被系统性地搬进 RL rollout</b>;<b>投机解码思想进入工具观察</b>。</p>
+<ul>
+<li><b>MiMo-V2.6:RL 算力的三轴扩展与一份真实账单</b>(小米,arXiv:2610.11959,2026-10-08,窗口内 alphaXiv 最高热度):全模态 MoE 家族(Pro 1.02T/42B、Flash 310B/15B)沿三轴扩展 RL——批规模与环境多样性、以及"<b>grader 算力</b>"(Groupwise Agentic Grading,组内比较解的质量产出细粒度奖励)。异步 GRPO 每步 1,568 prompts × G16 = 25K 条轨迹、2.7–3.7B token、上下文至 1M;<b>RL 花费 $2.6M(Pro)/$0.9M(Flash),成本拆分 rollout 43.8% / 训练 43.5% / grader 12.7%</b>;DeepSWE v1.1 从 58.4 升至 72.6。训练全程冻结 MoE router + Muown + MXFP4 QAT 保持稳定——"RL 是软硬协同的放大器"的旗舰级实证,且罕见地公开了完整 RL 栈(蒸馏模型、带验证器的环境、端到端框架)。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/mimo-fig3.svg" loading="lazy" alt="左：DeepSWE v1.1 的 average@3 分数随累计 RL 成本（百" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 3（arXiv:2610.11959）</b> · <i style="color:#c8cdd6">Left: average@3 score on DeepSWE v1.1 versus cumulative RL cost. Right: training, rollout, and grader cost shares for MiMo-V2.6-Pro and MiMo-V2.6-Flash.</i><br>
+<b>译</b>：左：DeepSWE v1.1 的 average@3 分数随累计 RL 成本（百万美元）的爬升曲线（Pro 最终 72.6）；右：训练 / rollout / grader 三项成本占比——rollout 与训练各占约 43.5%，grader 约占 12.7%：第一份把"RL 算力到底花在哪"拆开的百万美元级真实账单。 <span style="opacity:.7">— 图源：MiMo-V2.6 论文（小米 LLM-Core）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<li><b>QwenGyre:为 xLong 任务做弹性 RL</b>(阿里,arXiv:2609.33848,2026-09-27):单条轨迹数十万至百万 token、单次执行数小时的超长程 agent 任务里,固定 GPU 编排让训练/rollout 互相空转——GPU 按"弹性单元(elastic cells)"组织、可在 rollout <b>中途切换角色</b>;轨迹处理平面做分支重建、超时部分进度打分、冗余路径去重。旗舰 Qwen 3.8 2.4T 用 192 节点训练,rollout 约 700K token/条;等分下端到端比 Async 快 1.38–1.78×、比 Colocate 快 1.21–1.85×。</li>
+<li><b>LoongSage:百度开源 agent 原生全异步 RL 框架</b>(arXiv:2610.16352,2026-10-12):单控制器 + Ray actors 编排;AgentFlow 统一白盒/黑盒 agent(TITO);滑窗策略约束轨迹 staleness;TransferMesh 拓扑感知权重同步(按 CUDA IPC/NCCL 自动选路);多教师在线蒸馏的 Teacher Manager;训练-推理一致性系统性防御(MoE routing replay、LM head FP32 pinning)。<b>随框架开源"生产验证配方"</b>——附录详列 NaN、cuDNN 非法写、静默权重布局错位等真实故障清单,"超参不足以描述可复现的 RL recipe"。</li>
+<li><b>Prorsa:PD 分离进 RL rollout</b>(北大+小米,arXiv:2610.16592,2026-10-12):agentic RL 的 rollout 中多轮交互不断产生 prefill 请求、prefill 与 decode 全程共存——推理服务的 PD 分离从未被系统性搬进 RL。Prorsa 利用框架对轨迹生命周期(采样、沙箱启动、工具执行、奖励完成)的可见性做短时需求预测,驱动 rollout worker 角色动态切换。同步/异步设置下 rollout 提速 <b>1.11–4.05×</b>,DeepSeek-V3.2 通用 agent 轨迹完成时间最高降 7.33×;colocation 下 GPU 空闲率最高 59.98%。</li>
+<li><b>ObsSpec:对"工具观察"做投机</b>(UCSC + 字节 Seed,arXiv:2610.15246,2026-10-11):工具调用 agent 的延迟近半耗在等工具执行(终端任务 47.1%)。0.6B 世界模型在工具执行期间<b>预测其输出、策略提前开跑</b>;预测与实际观察逐字精确匹配才保留(66.4% 命中、快约 16×),否则丢弃重生成——rollout 不含任何被污染样本。agent 延迟 −9.3%(8B)/−14.2%(32B),异步 rollout 吞吐 +11.5%,奖励与基线持平——投机解码的"起草-验证"思想跨域落地。</li>
+</ul>
+
 <h3>6.2 未来发展方向研判(附依据)</h3>
 <ol style="font-size:15px;line-height:2">
   <li><b>异步/解耦将成为 RL 系统的默认形态,同步模式退居小规模调试用途。</b>依据:AReaL 2.77×、StreamRL 2.66×、Agent Lightning v1.0 2× 的加速证据链,以及 vLLM 把异步支持内置于引擎本身(2026-05)——当推理引擎原生支持 pause/resume,同步模式的"省事"优势不复存在。</li>
@@ -901,6 +920,11 @@ in-flight sample to finish."""</span>
   <li>Gao et al.(阿里+HKUST). <i>RollArt: Multi-task Agentic RL on Disaggregated Infrastructure</i>. OSDI 2026(arXiv:2512.22560);基于开源 ROLL(github.com/alibaba/ROLL).</li>
   <li>中科院计算所等. <i>VenusRL</i>(优先级动作调度 + 环境资源管理,最高 4.24×). arXiv:2610.03286, 2026-10-02.</li>
   <li>AReaL 2.0(微服务架构 + Hermes 在线 RL 环境). inclusionAI, 2026-07-01, github.com/areal-project/AReaL;RadixArk. <i>Miles v0.1</i>(slime 后继,全栈后训练系统). arXiv:2609.08368, 2026-09-08.</li>
+  <li>小米 LLM-Core. <i>MiMo-V2.6</i>(RL 算力三轴扩展 + 成本拆分). arXiv:2610.11959, 2026-10-08;训练日志 mimo.xiaomi.com/rl/mimo-v26.</li>
+  <li>阿里 Qwen. <i>QwenGyre: Elastic RL for xLong-Horizon Agents</i>. arXiv:2609.33848, 2026-09-27.</li>
+  <li>百度. <i>LoongSage: Agent-Native Fully-Asynchronous RL</i>. arXiv:2610.16352, 2026-10-12;github.com/baidu-baige/LoongSage.</li>
+  <li>北大+小米. <i>Prorsa: Prefill-Decode Disaggregation for Agentic RL Rollout</i>. arXiv:2610.16592, 2026-10-12.</li>
+  <li>UCSC + 字节 Seed. <i>ObsSpec: Observation Speculation for Tool-Calling Agents</i>. arXiv:2610.15246, 2026-10-11;代码 github.com/kylemontgomery1/verl-recipe/tree/obsspec。</li>
   <li>本文化用的源码(本地 clone,经由镜像站获取,2026-08-23):verl(volcengine)、AReaL(inclusionAI)、slime(THUDM)。</li>
 </ol>
 </div>

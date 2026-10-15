@@ -805,6 +805,25 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <li><b>SplitQ</b>（KAUST，arXiv:2605.19929）：揭示 VLM 量化的新难点——文本与视觉激活的离群值落在<b>不同通道</b>，旋转类 PTQ 直接搬用会失效；按模态分解通道再做 W4A4/W3A3<sup class="cite"><a href="#ref62">[62]</a></sup>。另有"Why Gated DeltaNet Survives 4-Bit Quantization"（arXiv:2609.04098）首次系统研究混合线性注意力模型的 NVFP4 量化机理。</li>
 </ul>
 
+<h3>9.2 2026-10 中旬速览：推理引擎成为"数值规范"，FP4 走进 RL 训练循环</h3>
+<p>五件新事的共同主题是<b>量化与训练/服务系统的边界继续溶解</b>：训练侧把推理引擎的数值语义当作规范来对齐（QATFactory / TRACE），工具链把 KV cache 纳入自动混精搜索（ModelOpt），极低比特有了统一"坐标系"（CanonQ），视频生成的 KV 量化从分组走向"预测"（TempoKV）。</p>
+<ul>
+<li><b>QATFactory</b>（Together AI + UIUC/UT Austin，arXiv:2609.39223）：现有 QAT 工具链的 fake quantizer 与 vLLM/SGLang/llama.cpp 的数值语义不一致，"训出来的 checkpoint 装不进目标引擎"。QATFactory 把<b>推理引擎当作"数值规范"</b>——在 BF16 中精确模拟 NVFP4/MXFP4/Q4_K 的可表示值集、两级块缩放与舍入行为，训练后无损导出可直接部署的 checkpoint，无需 FP4 硬件即可在 H100 上做 NVFP4 QAT。Qwen3.5-9B NVFP4 平均 68.9% vs 最优 PTQ 65.4%；QARL（量化感知 RL）平均精度再 +2.7 点<sup class="cite"><a href="#ref63">[63]</a></sup>。论文还预告 NVIDIA Rubin 下一代将引入"3-bit 索引 + 共享非均匀码本"的可编程查表 Tensor Core 格式——§10①"焊进硬件"的下一步。</li>
+<li><b>TRACE</b>（阿里 Token Hub + OSU，arXiv:2610.07767，本窗口 alphaXiv 最高热度）：FP4 RL 的已有方法（QaRL/QUADS/Rollout-ResQ）各自降低训练/rollout 两条通路的量化误差，但"每条路都准 ≠ 两条路一致"——FP4 舍入跨界会让 MoE 路由错位、策略发散。TRACE 用 <b>rollout 侧 FP4 量化结果直接引导训练侧舍入方向</b>（rollout-guided QAT），并发现 99% 的不一致仅差一个相邻码字——只需缓存深层一半层数的尾数+scale（每 token 约 7.5KB），通信量降 6×。联合 NVFP4 W/A+KV rollout 下 Qwen3.5-35B-A3B 平均 75.3 分 vs BF16 的 74.9，最大 5.4× rollout 解码加速；验证至 Qwen3.8-2.4T-A95B<sup class="cite"><a href="#ref64">[64]</a></sup>。</li>
+<li><b>ModelOpt AutoQuant KV</b>（NVIDIA，2026-10-08）：把逐层敏感度搜索扩展到 KV cache——在 FP8 K/V、NVFP4 K/V、FP8-K+NVFP4-V 候集中按存储预算自动分配混精，权重与 KV 可各设独立预算联合搜索。Qwen3-8B 上 AQ 5.76 有效 bit 时 KV 负载较 BF16 降 64.0%，RULER-128K 仅 −1.04（全域 NVFP4 为 −6.54）<sup class="cite"><a href="#ref65">[65]</a></sup>——KVTuner（§6）的层间混精思想进入官方工具链。</li>
+<li><b>CanonQ</b>（Meta AI，arXiv:2610.09202）：同时压到 W2A4KV2 时任何单点 PTQ 都崩溃、码本类方法又绑定校准数据。CanonQ"先规范化、再让模型学会用固定编解码器"——固定 Hadamard-对角-置换变换 + 能量归一把 W/A/K/V 映射到同一规范坐标，一套<b>冻结的高斯参考码本</b>跨层跨模型复用，再联合 QAT 适应耦合误差。LLaMA3-8B W2A4KV2：WikiText-2 PPL 9.41 vs ParetoQ 的 134.36（低 14.28×），8 任务均值 59.81% vs 37.87%<sup class="cite"><a href="#ref66">[66]</a></sup>。</li>
+<li><b>TempoKV</b>（上交大 + 华南理工 + 阿里，arXiv:2610.15324，2026-10-11）：把 LLM 的 KV 量化搬到自回归视频模型会失效——它从<b>时间可预测性</b>切入：K 沿潜帧平滑演化（自身历史线性预测余弦 0.877）、V 强烈依赖当前对齐的 K（加入对齐 K 后 0.881）。免训练的"预测 + 低位残差"框架在 Self-Forcing / Causal Forcing / LongCat-Video-13B 上最高 <b>6.71× KV 压缩</b>（超 Quant VideoGen 的 6.61×）且 PSNR 从 18.34 提到 19.85；INT4 档 KV 从 48.18GB 降到 13.2GB，生成延迟开销仅 11.9%<sup class="cite"><a href="#ref67">[67]</a></sup>。同期 <b>PulseQuant</b>（arXiv:2609.33384，视频 DiT 4-bit PTQ）用三联散点证明"局部块重建误差与最终 latent 误差几乎无关（ρ=−0.08）"、误差要到 4 步传播后才相关（ρ=+0.70）——为 §10⑧"困惑度已不足以刻画量化伤害"补上视频版证据；RTX 5080 上 packed NVFP4 使 DiT 峰值显存 7.86→3.63 GiB<sup class="cite"><a href="#ref68">[68]</a></sup>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/tempokv-fig3.svg" loading="lazy" alt="视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 3（arXiv:2610.15324）</b> · <i style="color:#c8cdd6">Asymmetric predictability of video KV cache. (a) Temporal history predicts keys well, while values benefit substantially from the aligned key. (b) This advantage holds across all layers. (c) The gain remains stable over long generation.</i><br>
+<b>译</b>：视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦相似度 0.877），而 V 只有借助当前对齐的 K 才变得可预测（0.637→0.881）——这是 TempoKV"预测 + 残差"设计（K 用自身历史、V 用对齐 K）的直接依据；(b) 优势在所有层成立；(c) 长生成过程中保持稳定。 <span style="opacity:.7">— 图源：TempoKV 论文（上交大 + 华南理工 + 阿里）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+</ul>
+
 <!-- ============================================================ -->
 <h2 id="s10"><span class="no">10</span>未来发展方向</h2>
 <p>综合学界论文与业界动向，以下八条线值得持续关注（序号不代表优先级）：</p>
@@ -927,6 +946,12 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
   <li id="ref60">Together AI（Tri Dao、Xiaoxia Wu 等）. <b>SAW-INT4: System-Aware 4-Bit KV-Cache Quantization for Real-World LLM Serving</b>. arXiv:2604.19157（2026-04-21 提交）. <a href="https://arxiv.org/abs/2604.19157">arxiv.org/abs/2604.19157</a></li>
   <li id="ref61">MIT &amp; UC Berkeley &amp; Together AI. <b>Quant VideoGen: Auto-Regressive Long Video Generation via 2-Bit KV-Cache Quantization</b>. ICML 2026（arXiv:2602.02958，2026-02-03 提交）. <a href="https://arxiv.org/abs/2602.02958">arxiv.org/abs/2602.02958</a></li>
   <li id="ref62">KAUST. <b>Breaking Modality Heterogeneity in Low-Bit Quantization for Large Vision-Language Models (SplitQ)</b>. arXiv:2605.19929（2026-05-19 提交）. <a href="https://arxiv.org/abs/2605.19929">arxiv.org/abs/2605.19929</a></li>
+  <li id="ref63">Together AI &amp; UIUC &amp; UT Austin. <b>QATFactory: Treat the Inference Engine as the Numerical Specification</b>. arXiv:2609.39223（2026-10-01 v2）. <a href="https://arxiv.org/abs/2609.39223">arxiv.org/abs/2609.39223</a> · 代码 github.com/QATFactory/QATFactory</li>
+  <li id="ref64">Alibaba Token Hub &amp; Ohio State University. <b>TRACE: Rollout-Guided QAT for FP4 RL</b>. arXiv:2610.07767（2026-10-06）. <a href="https://arxiv.org/abs/2610.07767">arxiv.org/abs/2610.07767</a></li>
+  <li id="ref65">NVIDIA. <b>ModelOpt AutoQuant KV: Automatic Mixed-Precision KV Cache Quantization</b>. 官方公告（2026-10-08）. <a href="https://nvidia.github.io/Model-Optimizer/announcements/autoquant-kv.html">nvidia.github.io/Model-Optimizer</a></li>
+  <li id="ref66">Meta AI. <b>Few Bits, One Law: Toward W2A4KV2 (CanonQ)</b>. arXiv:2610.09202（2026-10-06）. <a href="https://arxiv.org/abs/2610.09202">arxiv.org/abs/2610.09202</a></li>
+  <li id="ref67">上海交大 &amp; 华南理工 &amp; 阿里巴巴. <b>TempoKV: Temporally Predictable KV Cache Quantization for Autoregressive Video Generation</b>. arXiv:2610.15324（2026-10-11）. <a href="https://arxiv.org/abs/2610.15324">arxiv.org/abs/2610.15324</a></li>
+  <li id="ref68">Sydney &amp; HKUST &amp; 上海 AI 实验室. <b>PulseQuant: 视频扩散 4-bit PTQ 与"局部损失 ≠ 最终伤害"实证</b>. arXiv:2609.33384（2026-09-27）. <a href="https://arxiv.org/abs/2609.33384">arxiv.org/abs/2609.33384</a></li>
 </ol>
 
 <p class="small muted">说明：标注"要点（编译）"的引文为对原始文献/页面的要点转述，非逐字引文；其余英文引文均为原文摘录，中文为本文译文。i-quants（IQ4_XS 等）细节可进一步参考 llama.cpp PR #5590。各克隆仓库的完整代码可在本地 <code>repos/</code> 目录查阅。</p>

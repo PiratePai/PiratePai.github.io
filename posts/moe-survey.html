@@ -1289,11 +1289,11 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <h2 class="sec"><span class="num">6</span>最新进展与未来发展方向<span class="roadmap">2026 秋万亿俱乐部换代 → 6大趋势 → 7个值得投入的研究方向</span><span class="pill fund">前沿</span></h2>
 
 <h3>6.1 2026 年 6–10 月：万亿俱乐部全面换代，均衡理论收敛</h3>
-<p>本文初稿调研于 2026-08，但 2026 年内开源万亿级 MoE 已完成一轮整体换代——四家新旗舰全部带有值得单独讲的 MoE 设计：</p>
+<p>本文初稿调研于 2026-08，但 2026 年内开源万亿级 MoE 已完成一轮整体换代——新旗舰全部带有值得单独讲的 MoE 设计：</p>
 <ul>
 <li><b>Kimi K3</b>（月之暗面，2026-07-27，arXiv:2607.24653）：迄今最大开源权重模型，<b>2.78T 总参 / 104.2B 激活</b>。三项新设计：① KDA 线性注意力 + 周期性 Gated MLA（约 3:1）撑起 1M 上下文；② Attention Residuals（AttnRes）让每层可选择性回看之前所有层；③ <b>Stable LatentMoE</b>：896 路由专家选 16 + 2 共享，配 RMSNorm + 软上限激活 SiTU-GLU（防低精度数值爆炸）与 <b>Quantile Balancing</b>——把每专家偏置直接设为"恰好达成目标负载的分位数"，一步到位、无需调步长，是 DeepSeek 偏置法之后均衡谱系的最新一代<sup class="ref"><a href="#r16">[16]</sup>。训练全程 MXFP4 权重 / MXFP8 激活的量化感知训练（QAT）——MoE 量化已从 PTQ 走向原生 QAT。</li>
 <li><b>DeepSeek-V4 / V4.1-Flash</b>（2026-04-26 预览，arXiv:2606.19348；V4.1-Flash 2026-09-10）：V4-Pro（1.6T/49B）+ V4-Flash（284B/13B）双型号；V4.1-Flash 更进一步做成<b>因果编码器-解码器</b>：552B 骨干，输入侧激活 8B、输出侧激活 16B——<b>同一个 MoE 在编码/解码两侧用不同激活预算</b>，为 MoE 设计空间打开"不对称激活"新维度；全局 KV 890 字节/token<sup class="ref"><a href="#r17">[17]</sup>。</li>
-<li><b>GLM-5 / GLM-5.3-Flash</b>（智谱，2026-02-11，arXiv:2602.15763；5.3-Flash 2026-08-26 MIT 开源）：GLM-5 为 744B/40B、256 专家选 8+1 共享、MLA+DSA；GLM-5.3-Flash（320B/18B）首次在开源前沿模型上采用 34 层 KDA + 11 层稀疏 MLA 混合，注意力计算 −3.01×、KV 缓存 −4.44×（1M 上下文）<sup class="ref"><a href="#r18">[18]</sup>。</li>
+<li><b>GLM-5 / GLM-5.3-Flash</b>（智谱，2026-02-17，arXiv:2602.15763；5.3-Flash 2026-08-26 MIT 开源）：GLM-5 为 744B/40B、256 专家选 8+1 共享、MLA+DSA；GLM-5.3-Flash（320B/18B）首次在开源前沿模型上采用 34 层 KDA + 11 层稀疏 MLA 混合，注意力计算 −3.01×、KV 缓存 −4.44×（1M 上下文）<sup class="ref"><a href="#r18">[18]</sup>。</li>
 <li><b>Qwen3.8-Flash-Next</b>（阿里，2026-08-26，Qwen4 架构预览）：125B-A6B，每 MoE 层 <b>512 个专家选 10 + 1 共享</b>——至今最细粒度的量产配置之一；另有 51B 参数 n-gram 嵌入表放主机内存，"专家 FFN 之外的第二种稀疏容量容器"，官方称训练成本约为 Qwen3.7-Plus 的 1/9<sup class="ref"><a href="#r19">[19]</sup>。此外 <b>Kimi K2.5</b>（2026-01-27）证明成熟 LLM MoE 骨干可<b>不改路由结构、直接持续预训练成原生多模态模型</b>（15T 图文 token，K2 结构不动）<sup class="ref"><a href="#r20">[20]</sup>——与 §4 的 MoE-LLaVA"先密后疏三阶段"旧范式形成路线对照。</li>
 </ul>
 <p>学术侧两条精炼主线：</p>
@@ -1302,6 +1302,25 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li><b>负载均衡统一进控制论</b>：阿里 <b>ID Balancing</b>（2026-09-30）证明 DeepSeek 偏置法 = 积分（I）控制器、K3 Quantile Balancing = 比例（P）控制器，并提出积分+微分（ID）控制器：大误差强修正、近平衡温和修正。Top-10-of-768 下最差情形失衡降 50%+，扩展到 69.9B 时比辅助损失基线低约 89.6%<sup class="ref"><a href="#r22">[22]</sup>——"辅助损失→偏置→分位数→PID"谱系就此闭环。</li>
 </ul>
 <p>推理侧，显存受限部署成为新热点：<b>MoE-CORE</b>（2026-10-02）用 prefill 交替缓冲 + 路由历史感知替换做专家卸载，DeepSeek-V4-Flash-W4A8 上每 token 38–45 ms（对照 vLLM Prefetch 配置 1268.9 ms）；<b>SSD-LLaMA</b>（HKUST，2026-09-16）让消费级 PC 从 SSD 原生推理万亿 MoE 达 1+ token/s；华为"Trillion-Parameter MoE in a Box"（2026-09-14）用高带宽 Flash 解耦内存供给——回应 §6.3"端侧/边缘 MoE"方向<sup class="ref"><a href="#r23">[23]</sup>。</p>
+
+<h4>2026-10 中旬速览：万亿俱乐部再添三家，"循环 × 稀疏"有了缩放定律</h4>
+<p>10 月上中旬，开源前沿 MoE 的阵容继续膨胀，且"激活率军备竞赛"与"第五扩展维度"两条线同时推进：</p>
+<ul>
+<li><b>Mistral Large 4「Le Chonk」</b>（Mistral AI，2026-10-06 公开预览，权重承诺月底开源）：<b>1T 总参 / 52B 激活</b>、原生多模态、hybrid instruct-and-reasoning 一体化，3,800 台 Grace Blackwell 在欧洲自建数据中心训练；Cybench 93%、Coding Agent Index 49.8% 超 DeepSeek V4 Pro 与 Qwen3.8-Max——欧洲主权阵营首次回到万亿俱乐部<sup class="ref"><a href="#r24">[24]</sup>。</li>
+<li><b>Qwen3.8-Max 开源权重</b>（阿里，2026-08-02 API / 08-13 开源，上期遗漏，补录）：<b>2.4T 总参 / 95B 激活</b>，首个开放权重的 Max 级 Qwen（仅次于 K3 的最大开源权重）。92 层混合架构（每 4 层一组：3× Gated DeltaNet→MoE + 1× Gated Attention→MoE），<b>512 专家选 10 + 1 共享</b>（与 Flash-Next 同款粒度上旗舰），262K 原生可扩约 1.01M；发布时 AA Intelligence Index 58 为开源权重最高<sup class="ref"><a href="#r25">[25]</sup>。</li>
+<li><b>Beam</b>（Reflection AI，2026-10-05 宣布，Apache 2.0 权重承诺 10 月内）：<b>501B / 23B（激活率 4.6%）</b>，23.8T token、6,144 台 GB300 NVL72 不足 4 周预训练；RL 阶段 100M+ rollouts、峰值 170K 并发沙箱——自称以 3–4× 更少推理算力达 GLM-5.2 级推理（SWE-bench Verified 80.9），"西方开源权重前沿"以效率而非绝对能力对抗<sup class="ref"><a href="#r26">[26]</sup>。</li>
+<li><b>Loop Scaling Laws</b>（Meta AI，arXiv:2609.40316，2026-09-30，窗口内最热 MoE 论文之一）：首个联合建模"循环数 R × 专家数 E × 规模 × 数据"的缩放定律——稀疏 ≈ 3× 激活参数效率、循环 ≈ 2× 总参数效率；同等训练算力下 looped MoE 匹配约 2× 大的非 looped MoE，且测试时可加循环换算力。MoE 的扩展轴之外正式多了"深度循环"一维（详见 Loop Transformer 综述 §11.7）<sup class="ref"><a href="#r27">[27]</sup>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/loopscal-fig1.png" loading="lazy" alt="(a) 稠密循环 Transformer 每圈复用同一组 FFN，而循环 MoE" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 1（arXiv:2609.40316）</b> · <i style="color:#c8cdd6">(a) Dense looped transformers reuse the same FFNs, whereas looped MoE models can route tokens to different experts across recurrent passes. (b) Increasing recurrence yields diminishing returns, with the dense model saturating earlier than MoE. (c) Loop Scaling Laws model a bounded effective-parameter gain conditioned on R and sparsity.</i><br>
+<b>译</b>：(a) 稠密循环 Transformer 每圈复用同一组 FFN，而循环 MoE 可以在不同循环圈把 token 路由到不同专家——两条扩展轴天然正交；(b) 固定激活参数与训练 token 时，增加循环数收益递减，且稠密模型（E=1）比 MoE 更早饱和；(c) Loop Scaling Laws 用"以循环数 R 与稀疏度为条件的有界有效参数增益"统一建模，替代假设收益无界的线性 / 幂律映射。 <span style="opacity:.7">— 图源：Scaling Laws for Looped MoE 论文（Meta AI）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<li><b>PixelMoE</b>（USTC + 快手 KlingAI Research，arXiv:2610.18857，2026-10-13）：LLM 式 MoE（Token-Choice + 细粒度专家 + 共享专家 + 偏置法均衡）<b>零改动</b>迁入像素空间扩散模型，配 Pixel-Space Hierarchical Flow Matching；同激活参数下全面胜稠密基线（ImageNet-1K FID 1.47@256²）——§5"扩散战场"的最新证据<sup class="ref"><a href="#r28">[28]</sup>。</li>
+</ul>
 
 <h3>6.2 正在发生的几大趋势（2024–2026）</h3>
 <div class="grid two">
@@ -1362,6 +1381,11 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li id="r21">UPenn. <i>MoRE: Low-Rank Routing for Mixture-of-Experts</i>. 2026-09-28. arXiv:<a href="https://arxiv.org/abs/2609.36301" target="_blank">2609.36301</a>. github.com/Matheart/MoRE_code.（路由秩 O(log M) 理论）</li>
 <li id="r22">阿里巴巴（Qwen 团队）. <i>ID Balancing: Load Balancing for Extremely Sparse MoE Training via PID Control</i>. 2026-09-30. arXiv:<a href="https://arxiv.org/abs/2609.39137" target="_blank">2609.39137</a>.（I/P/D 控制器统一均衡谱系）</li>
 <li id="r23"><i>MoE-CORE</i>（专家卸载与驻留）. 2026-10-02. arXiv:<a href="https://arxiv.org/abs/2610.01950" target="_blank">2610.01950</a>；HKUST <i>SSD-LLaMA</i>. 2026-09-16. arXiv:<a href="https://arxiv.org/abs/2609.18110" target="_blank">2609.18110</a>；华为 <i>Trillion-Parameter MoE in a Box</i>. 2026-09-14. arXiv:<a href="https://arxiv.org/abs/2609.15636" target="_blank">2609.15636</a>.</li>
+<li id="r24">Mistral AI. <i>Mistral Large 4（Le Chonk）</i>. 官方公告, 2026-10-06. <a href="https://mistral.ai/news/mistral-large-4" target="_blank">mistral.ai/news/mistral-large-4</a>（1T/52B，权重承诺月底开源）.</li>
+<li id="r25">Qwen Team. <i>Qwen3.8-2.4T-A95B</i>（Qwen3.8-Max 开源权重）. 2026-08-13. <a href="https://huggingface.co/Qwen/Qwen3.8-2.4T-A95B" target="_blank">huggingface.co/Qwen/Qwen3.8-2.4T-A95B</a>.</li>
+<li id="r26">Reflection AI. <i>Introducing Beam</i>. 官方博客, 2026-10-05. <a href="https://reflection.ai/blog/introducing-beam" target="_blank">reflection.ai/blog/introducing-beam</a>（501B/23B）.</li>
+<li id="r27">Yanbei Chen, Anirudh Goyal, Raghuraman Krishnamoorthi（Meta AI）. <i>Scaling Laws for Looped Mixture of Experts</i>. arXiv:2609.40316, 2026-09-30. <a href="https://arxiv.org/abs/2609.40316" target="_blank">arxiv.org/abs/2609.40316</a>.</li>
+<li id="r28">USTC &amp; 快手 KlingAI Research. <i>PixelMoE: Scaling Pixel-Space Diffusion with LLM-Style Mixture of Experts</i>. arXiv:2610.18857, 2026-10-13. <a href="https://arxiv.org/abs/2610.18857" target="_blank">arxiv.org/abs/2610.18857</a>.</li>
 </ol>
 
 <div class="footer">

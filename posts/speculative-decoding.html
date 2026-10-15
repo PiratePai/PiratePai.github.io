@@ -915,6 +915,76 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <h4>⚙️ 工程侧动态</h4>
 <p>DFlash 进入 SGLang 主线（Spec V2 重叠调度，2026.06）<span class="cite">[23]</span>；TensorRT-LLM 的 decoding_type 扩至 MTP/Eagle3/NGram/PARD/DFlash 并为 EAGLE-3 加动态树；NVIDIA 发"模型-系统协同设计"官方博客（2026.09）<span class="cite">[24]</span>。ACL/ICML 2026 亦有多篇：METASD 多草稿对齐、Speculative Verification 信息增益验证、Mine-Draft 批并行起草等。</p>
 </div>
+<h3>7.4 2026-10 中旬速览：NVIDIA 全家桶出厂化，并行草稿进入"树 × 重叠"深水区</h3>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/specdec-loop.svg" loading="lazy" alt="投机解码的"起草-验证-接受"循环（上）与 2026 年草稿形态的三次进化（下）" style="display:block;width:100%;height:auto;background:transparent;padding:0;box-sizing:border-box;max-width:880px;margin:0 auto">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">🖼 本文自绘</b> · <i style="color:#c8cdd6"></i><br>
+<b>译</b>：投机解码的"起草-验证-接受"循环（上）与 2026 年草稿形态的三次进化（下）：串行自回归 → 并行块 → 并行树 → 验证窗口内重叠。 <span style="opacity:.7">— 图源：编者据本篇综述内容以 Excalidraw 重绘的手绘风格示意图（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<p class="lead">10 月中旬的三件事把 §7.3 的三条线索各自向前推了一步：<b>NVIDIA Nemotron 3.5 把"原生 MTP + 后训练 boosting + 官方并行草稿器"打包成出厂三件套</b>、<b>TreeSpark 把 DSpark 骨干长成"训练你所验证的树"</b>、<b>DPara 让并行草稿器与并行投机解码相遇，回退率结构性归零</b>。</p>
+
+<h4>① Nemotron 3.5 Super / Lightning（2026-10-14）：MTP 也能"后训练强化"</h4>
+<p><b>动机</b>：MoE + 混合 Mamba-Transformer 的 agentic 模型同样需要"出厂级"投机解码，但原生 MTP 头在训练与推理条件上存在失配。<span class="cite">[25]</span></p>
+<p><b>贡献</b>：NVIDIA 为递归共享式 MTP 头先做 100B token 热身训练（用"隐状态混合"弥合训练/推理条件失配，比测试时训练便宜），再在后训练阶段做 <b>MTP boosting</b>；随 checkpoint 同步发布三套独立草稿器——LiLiCorr（配 Super 120B-A12B，已并入 vLLM PR #57934）与 DFlash、DSpark（配 Lightning 30B-A3B），全部 NVFP4 量化发布。</p>
+<p><b>收益</b>：MTP boosting 把贪心解码平均接受长度从 4.287 提到 4.718（+10.1%）、采样解码 3.787→4.612（+21.8%）；GB200 单卡最高 4,856 output tok/s/GPU；NVFP4 相对 BF16 精度恢复 99.62%。</p>
+<blockquote class="q">
+  <span class="en">"Post-training MTP boosting improves average speculative-decoding acceptance length from 4.287 to 4.718 under greedy decoding and from 3.787 to 4.612 under probabilistic draft sampling on SPEED-Bench."</span>
+  <span class="src">— NVIDIA, Nemotron 3.5 Super and Lightning Technical Report, 2026-10-14 [25]</span>
+  <span class="zh">后训练 MTP boosting 在 SPEED-Bench 上把投机解码平均接受长度从 4.287 提升至 4.718（贪心）、从 3.787 提升至 4.612（概率采样起草）。</span>
+</blockquote>
+
+<h4>② TreeSpark（2026-10-14）：把 DSpark 长成树，且"训练你所验证的树"</h4>
+<p><b>动机</b>：并行草稿首轮失配就丢弃整个后缀；DSpark 只保留一条续写、排除备选，且其校正头训练用"真值父 token"、部署时却面对"自生成父状态"——训练与部署的树形不一致。<span class="cite">[26]</span></p>
+<p><b>贡献</b>：人大+南大+华为用单次骨干前向构造<b>父条件候选树</b>（B=7、k=4、32 节点预算），训练时<b>回放部署时的展开/剪枝/打包策略</b>；设计两个新目标——survival NLL（按参考路径质量加权保留边）与 capped coverage hinge（在局部选择边界附近提拔目标模型看重的备选），全部复用参考链的目标分布、零额外目标前向。实验跑在昇腾 910B 上，代码 MIT 开源。</p>
+<p><b>收益</b>：平均接受长度比 DSpark +23.4%–31.6%（Qwen3-4B：4.23→5.25）；单请求吞吐 +15.1%–25.0%，并发系统吞吐 +12.6%–17.2%。</p>
+<blockquote class="q">
+  <span class="en">"TreeSpark improves mean acceptance length over DSpark by 23.4% to 31.6%."</span>
+  <span class="src">— Zhao et al., RUC & NJU & Huawei, TreeSpark, arXiv:2610.20175, 2026-10-14 [26]</span>
+  <span class="zh">TreeSpark 把平均接受长度在 DSpark 之上再提升 23.4% 到 31.6%。</span>
+</blockquote>
+
+<h4>③ DPara（2026-09-23）：并行草稿器 × 并行投机解码，回退率结构性归零</h4>
+<p><b>动机</b>：DFlash/DSpark 的起草虽然并行、但仍串在每轮关键路径上（占端到端延迟 24–32%）；已有重叠方案（SSD/PEARL/SpecBranch）必须"猜"接受前缀与 bonus token，猜错整批回退串行——batch 16 时回退率高达 57–96%。<span class="cite">[27]</span></p>
+<p><b>贡献</b>：把 DSpark 的"贵骨干 + 轻 AR 头"拆开：验证进行时，微调出的多锚点骨干（M-DFlash）一次性为<b>所有可能接受边界</b>预计算草稿表示；验证结果揭晓后只跑轻量 AR 头出下一轮草稿——骨干完全藏进验证窗口，<b>回退率结构性为零</b>。一个反直觉细节：DPara 的平均接受长度反而低于 DSpark（4.41 vs 5.36），赢在"藏延迟"而非"草稿更准"。</p>
+<p><b>收益</b>：Qwen3-8B/14B 七基准平均 3.21×/3.52×（最高 4.53×），比 DSpark 再 +11.1%/5.1%，比 PEARL/SSD +31%/64%；batch 1–16 全区间保持优势。</p>
+<blockquote class="q">
+  <span class="en">"DPara, a PSD framework that reuses effective parallel drafters yet guarantees backbone–verification overlap in every round."</span>
+  <span class="src">— Liu et al., NJU & Alibaba Group, When Parallel Drafter Meets Parallel Speculative Decoding, arXiv:2609.27396, 2026-09-23 [27]</span>
+  <span class="zh">DPara 是一个复用高效并行草稿器、并保证每轮"骨干-验证"完全重叠的并行投机解码框架。</span>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/dpara-fig3.svg" loading="lazy" alt="三种投机解码范式的起草-验证调度对比：(a) 串行 SD（EAGLE3 或 DF" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 3（arXiv:2609.27396）</b> · <i style="color:#c8cdd6">Scheduling of drafting and verification across speculative decoding paradigms. (a) Serial SD ... (b) SSD ... forces serial fallback. (c) DPara (ours): the backbone overlaps verification for every acceptance outcome while drafting stays parallel.</i><br>
+<b>译</b>：三种投机解码范式的起草-验证调度对比：(a) 串行 SD（EAGLE3 或 DFlash/DSpark）依次"起草→验证"，起草留在关键路径上；(b) SSD 把起草与验证重叠，但猜错 bonus token 就被迫串行回退；(c) DPara 的扩散骨干为所有可能的接受边界同时预计算，验证窗口内完全重叠，起草保持并行。 <span style="opacity:.7">— 图源：DPara 论文（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+</blockquote>
+
+<div class="grid2">
+<div class="card">
+<h4>✂️ DFlash 2（2026-08，补录）：用"选择"代替"预测"</h4>
+<p>Inco AI 治后缀衰减的轻量新解：~2M 参数路径选择器（每位置留 top-16，低秩双线性"描"出一条连贯路径）+ two-tap 动态深度卷积，合计仅 ~1.3% 周期开销；每次验证多产出 20%+，选择器比 DSpark 方案少约 40× 参数。口号一语中的：<b>"Choosing is cheaper than predicting."</b><span class="cite">[28]</span></p>
+</div>
+<div class="card">
+<h4>👁️ LFM2.5-VL-DSpark（2026-09-24）：并行草稿进多模态端侧</h4>
+<p>Liquid AI 为 LFM2.5-VL-3B 训练 4 层 attention-only 草稿器（~280M 参数，仅占目标 8.9%）：文本和图像 patch 在隐层都是张量，同一套起草算法直接复用。端侧 2.30–3.13×（MLX）/ 服务器 2.04–2.66×（SGLang, H100），输出无损，开放权重 GGUF。<span class="cite">[29]</span></p>
+</div>
+<div class="card">
+<h4>🔗 DSpine（2026-09-28）：因果链沿深度展开</h4>
+<p>上交大+腾讯优图+厦大给并行草稿注入层间因果：每层把前驱预测特征门控写入后继残差流，各位置仍并行、因果链"沿深度展开"。Qwen3-8B 接受长度 4.82 vs DFlash 3.77（+27.8%），SGLang 融合内核实测吞吐 +23.3%。<span class="cite">[30]</span></p>
+</div>
+<div class="card">
+<h4>📐 一张演进图</h4>
+<p>并行草稿的谱系正在三条轴上同时细化：<b>路径结构</b>（块 → 树：JetSpec / TreeSpark）、<b>依赖建模</b>（独立 → 层间因果：DSpine / DFlash 2）、<b>系统重叠</b>（串行起草 → 验证窗口内藏骨干：DPara）。单点创新的红利期正在收束，"三轴联合设计"是下一阶段的门槛。</p>
+</div>
+</div>
+
 </div>
 
 <!-- ===================== 8. FUTURE ===================== -->
@@ -994,6 +1064,12 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
     <li>Yang et al. <i>BitNest: Bit-Nested Speculative Decoding for Memory-Efficient LLM Inference Acceleration</i>. arXiv:2610.02800, 2026-10-02.</li>
     <li>LMSYS & Z Lab & Modal. <i>The Next Generation of Speculative Decoding: DFlash and Spec V2</i>. lmsys.org Blog, 2026-06-15.</li>
     <li>NVIDIA (Ashkenazi et al.). <i>Co-Designing AI Models Using Speculative Decoding for Faster LLM Inference</i>. developer.nvidia.com Blog, 2026-09-02.</li>
+    <li>NVIDIA. <i>Nemotron 3.5 Super and Lightning Technical Report</i>. research.nvidia.com, 2026-10-14.（递归共享 MTP 头 + 后训练 MTP boosting + LiLiCorr/DFlash/DSpark 三套官方草稿器，NVFP4 发布）</li>
+    <li>Zhao et al. (RUC & NJU & Huawei). <i>TreeSpark: Training What You Verify in Parallel Speculative Decoding</i>. arXiv:2610.20175, 2026-10-14. 代码：github.com/Robot2050/TreeSpark（昇腾 910B 实测）。</li>
+    <li>Liu et al. (NJU & Alibaba Group). <i>When Parallel Drafter Meets Parallel Speculative Decoding</i>（DPara）. arXiv:2609.27396, 2026-09-23.</li>
+    <li>Inco AI. <i>DFlash 2: Keep Drafting Parallel</i>. inco.ai Blog, 2026-08-18.（路径选择器 + 动态深度卷积；草稿器发布于 incoai HF collection）</li>
+    <li>Liquid AI. <i>LFM2.5-VL-DSpark: Speculative Decoding for Vision-Language Models</i>. liquid.ai Blog, 2026-09-24.</li>
+    <li>SJTU & Tencent Youtu & XMU. <i>DSpine: Adjacent Causal Injection for Parallel Drafting</i>. arXiv:2609.36173, 2026-09-28. 项目页：dspine-project.github.io。</li>
   </ol>
   <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
   <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">

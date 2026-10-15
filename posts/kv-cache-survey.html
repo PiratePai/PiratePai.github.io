@@ -794,6 +794,55 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 
 <div class="box tip"><b class="t">2026 年的一条主线判断</b>如果 2023 年的关键词是"分页"，2024 年是"复用与压缩"，2025 年是"分层与混合"，那么 2026 年的关键词是<b>"以 KV 为中心的算力经济学"</b>：模型结构（MLA/稀疏/混合）决定 KV 的"产量"，缓存系统（Mooncake/LMCache/Dynamo）决定 KV 的"周转率"，而 API 计费（写贵读廉）把这一切翻译成价格信号反馈给应用开发者。学界与业界的努力正在这三层之间打通接口。</div>
 
+<h3>10.4 2026-10 中旬速览：会话成为一等公民，闪存按"寿命"入场</h3>
+<p class="lead">五件新事把 §10.3 的三个信号各自落地：<b>NVIDIA Dynamo 把"会话"变成路由与缓存的一等原语</b>；<b>高带宽闪存（HBF）以"写入寿命"为约束进入 KV 分层</b>（Lachesis + Berkeley 表征）；<b>驱逐研究回应 Random Attention 的挑战</b>（LORE-KV：用"未来的 query"打分）；<b>LMCache 团队的商业化平台 Tensormesh 发布</b>。</p>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/kvcache-map.svg" loading="lazy" alt="本篇综述的七条战线一图总览：结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸" style="display:block;width:100%;height:auto;background:transparent;padding:0;box-sizing:border-box;max-width:880px;margin:0 auto">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">🖼 本文自绘</b> · <i style="color:#c8cdd6"></i><br>
+<b>译</b>：本篇综述的七条战线一图总览：结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载与混合架构，全部围绕"KV Cache 显存之墙"展开。 <span style="opacity:.7">— 图源：编者据本篇综述内容以 Excalidraw 重绘的手绘风格示意图（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+
+<h4>① Dynamo 会话感知推理（NVIDIA，2026-10-08）：KV 策略的"大脑"上移到路由器</h4>
+<p><b>动机</b>：Agent 会话在工具调用间隙让 KV 长驻显存，请求级路由只看单轮、无视会话工作集，缓存反复抖动。</p>
+<p><b>贡献</b>：以统一 Session ID 为核心原语（开箱识别 Claude Code / Codex / OpenCode 的会话头），把请求级基础设施升级为"程序感知"系统：会话感知准入控制（工具边界背压）；与 Mooncake 团队合作的 shared-pool indexer（跨引擎共享池计入路由成本函数）；"程序化 KV 缓存" KvHint 接口（Share / Prefetch / Demote / Pin / Retain 五类软提示）。</p>
+<p><b>收益</b>：SWE-bench 双 MiniMax-M2 副本吞吐 +12–16%；agentic RL rollout 高并发下 +11.0–14.6%，前缀命中率全程 &gt;94.5%<sup class="c"><a href="#ref-85">[85]</a></sup>。</p>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/dynamo-session.png" loading="lazy" alt="Dynamo 路由器内置会话前缀索引器（SessionPrefixIndexer" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">官方博客配图（pytorch.org，2026-10-08）</b> · <i style="color:#c8cdd6">Dynamo router with SessionPrefixIndexer and KvHint: the router holds the session prefix index and issues programmatic KV movements (Share/Prefetch/Demote/Pin/Retain) to vLLM/SGLang engines, which emit KV events back.</i><br>
+<b>译</b>：Dynamo 路由器内置会话前缀索引器（SessionPrefixIndexer，按会话前缀树路由请求），并通过 KvHint 接口向 vLLM / SGLang 引擎下发程序化 KV 移动指令（Share / Prefetch / Demote / Pin / Retain），引擎再把 KV 事件回传给路由器——"路由器当大脑、引擎当执行器"。 <span style="opacity:.7">— 图源：NVIDIA Dynamo Session-Aware Agentic Inference 博客（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+<div class="quote">
+  <span class="en">"The Dynamo router provides the 'brain' that calculates smart, session/load/cache-aware KV movement policies, while the engine 'executes' the movements that Dynamo mandates."</span>
+  <span class="zh">Dynamo 路由器充当"大脑"，计算会话/负载/缓存感知的 KV 迁移策略；引擎则"执行"Dynamo 下达的迁移。</span>
+  <span class="src">—— NVIDIA, Session-Aware Agentic Inference, pytorch.org Blog · 2026-10-08<sup class="c"><a href="#ref-85">[85]</a></sup></span>
+</div>
+
+<h4>② Lachesis（SNU/KAIST/UIUC，2026-10-06）：按"数据活多久"决定放哪层</h4>
+<p>高带宽闪存（HBF）容量约为 HBM 一个数量级、读带宽同级，但<b>写入寿命有限</b>。Lachesis 指出 Agent KV 的生命周期由 harness 决定且大多可在写入前知晓（reasoning 段 66–83% 的写入只活一轮；lead-agent 段寿命为 sub-agent 的 4.0–6.1×），于是沿时间/结构/worker 三条轴预测寿命、在写入前决定 HBM 或 HBF。<b>收益</b>：HBF 寿命较 HBM-first 延长 1.19–3.13×（紧 SLO 24×7 满载仍超 5 年保修），HBM 吸收 8.2–19.5× 写入量<sup class="c"><a href="#ref-86">[86]</a></sup>。同期的 <b>HBF 系统表征</b>（UC Berkeley + FuriosaAI）给出 HBM–HBF–host 三级层级与缓冲式缓存感知调度：相对纯 HBM 完成时间 −36.1–87.7%，调度使 HBF 预估写入寿命从 1.21 年延至 14.82 年<sup class="c"><a href="#ref-87">[87]</a></sup>——§11 方向六"存储硬件入场"落到了具体介质。</p>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/lachesis-fig1.svg" loading="lazy" alt="左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
+<b style="color:#ffb454">原文 Figure 1（arXiv:2610.08378）</b> · <i style="color:#c8cdd6">Top left: the read window of a conventional request vs. an agent session. Left: the three axes along which context-segment lifetimes differ. Right: Lachesis’s two placement paths.</i><br>
+<b>译</b>：左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文段生命周期分化的三条轴（时间轴 / 结构轴 / worker 间轴）；右：Lachesis 的两条放置路径——确定性路径与预测路径，分别把数据写入 HBM 或高带宽闪存 HBF。 <span style="opacity:.7">— 图源：Lachesis 论文（SNU/KAIST/UIUC）（原图版权归原作者，引用仅作技术说明）</span>
+</figcaption>
+</figure>
+
+
+<h4>③ LORE-KV（2026-10-06）：驱逐该用"未来的 query"打分</h4>
+<p>对 Random Attention（§10.3①）的正面回应：驱逐发生在未来 query 未知时——与其问"读 prompt 时什么重要"，不如<b>采样 M 条短自回归续写作为"未来轨迹"</b>，按投影 leave-one-out 注意力输出删除代价打分、按轨迹可靠性加权。等精度下缓存效率 1.50–1.63×（128K 领先 AnDPro 达 +11.65 点）；代价是一次性压缩开销 1.46–2.77× 墙钟<sup class="c"><a href="#ref-88">[88]</a></sup>。问题不在"要不要打分"，而在"用哪组 query 打分"。</p>
+
+<h4>④ 商业化：Tensormesh Platform（LMCache 母公司，2026-10-14）</h4>
+<p>LMCache 团队（CEO 为共同作者 Junchen Jiang，累计融资 $28.5M，投资方含 NVentures / AMD Ventures / CoreWeave）推出首个企业级 KV 缓存管理平台：多级缓存（HBM/CPU/存储）、前缀与非前缀缓存（CacheBlend）、P2P KV 传输、缓存全生命周期控制，vLLM 与 NVIDIA Dynamo 已验证——"KV 是数据"完成<b>开源 → 商业化</b>闭环<sup class="c"><a href="#ref-89">[89]</a></sup>。窗口内另见 Kioxia 的 KV-Repurpose 非前缀复用测试床（arXiv:2610.13060）与 Apple 的 KV-Kaizen（arXiv:2609.37988）：存储厂商与端侧厂商相继入场。</p>
+
 <!-- ================================================================ -->
 <h2 id="s11"><span class="no">11</span>未来发展方向</h2>
 <ol>
@@ -912,6 +961,11 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <li id="ref-82">华中科大等. "PulseInfer: I/O-Centric Sparse KV-Cache Offloading." <a href="https://arxiv.org/abs/2609.34555">arXiv:2609.34555</a> · 2026-09.</li>
 <li id="ref-83">Ho et al. "Declarative Attention." <a href="https://arxiv.org/abs/2609.02737">arXiv:2609.02737</a> · 2026-09（模型声明注意力范围，可逆上下文压缩）.</li>
 <li id="ref-84">"QuantMLA: Function-Aligned Low-Bit Quantization for MLA." <a href="https://arxiv.org/abs/2609.36760">arXiv:2609.36760</a> · 2026-09.</li>
+<li id="ref-85">NVIDIA. "Session-Aware Agentic Inference with NVIDIA Dynamo." pytorch.org Blog · <a href="https://pytorch.org/blog/session-aware-agentic-inference-with-nvidia-dynamo">2026-10-08</a>.</li>
+<li id="ref-86">Yang et al.（SNU / KAIST / UIUC）. "Lachesis: Lifetime-Aware KV Cache Placement in Heterogeneous Memory." <a href="https://arxiv.org/abs/2610.08378">arXiv:2610.08378</a> · 2026-10-06.</li>
+<li id="ref-87">Yu et al.（UC Berkeley &amp; FuriosaAI）. "Characterizing High Bandwidth Flash for LLM Serving." <a href="https://arxiv.org/abs/2609.39131">arXiv:2609.39131</a> · 2026-09-30.</li>
+<li id="ref-88">Bilal et al. "LORE-KV: Monte Carlo Estimation for KV Cache Eviction." <a href="https://arxiv.org/abs/2610.07643">arXiv:2610.07643</a> · 2026-10-06.</li>
+<li id="ref-89">Tensormesh（LMCache 团队）. "Tensormesh Platform" 企业级 KV 缓存管理平台发布. Business Wire · 2026-10-14.</li>
 </ol>
 
 <div class="footer">
