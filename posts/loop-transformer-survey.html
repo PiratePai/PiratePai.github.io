@@ -840,10 +840,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/loopscal-fig2.svg" loading="lazy" alt="(a) 线性 / 幂律 / 有界三种循环映射下的有效参数增益示意——只有"有界映" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 2（arXiv:2609.40316）</b> · <i style="color:#c8cdd6">(a) Effective-parameter gain under linear, power-law, and bounded recurrence mappings. (b) Each mapping is fitted on R≤8 and applied to predict held-out R up to 16. (c) Formulas and RMSE on held-out R, N, D.</i><br>
-<b>译</b>：(a) 线性 / 幂律 / 有界三种循环映射下的有效参数增益示意——只有"有界映射"刻画了收益随 R 饱和、渐近上界随稀疏度抬高的形态；(b) 各映射在 R≤8 上拟合、外推预测 R 至 16 的预测损失，有界映射外推显著更准；(c) 三种映射的公式与其在留出 R / N / D 上的 RMSE 对比。 <span style="opacity:.7">— 图源：Scaling Laws for Looped MoE 论文（Meta AI）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 2（arXiv:2609.40316）</b> · 有界循环映射的留出外推最准：线性 / 幂律 / 有界三种映射对比</figcaption>
 </figure>
 
 <li><b>LPT：循环 Transformer 的共享记忆</b>（Cornell + IBM，arXiv:2610.02383，2026-10-01，alphaXiv 53 票）：循环模型每圈各写一份 KV，上下文显存随深度线性膨胀——参数省下的钱被显存吃回。LPT 从预训练起"记忆与预测分工"：<b>只有第一圈写全量 KV</b>，后续各圈只读共享记忆 + 自留 64 token 滑窗。反直觉发现：<b>共享不仅不减质反而提质</b>（共享 KV 构成通向第一圈的"梯度高速路"）。150M–1B 全尺度：H-LPT（混合线注意力版）5 圈循环 PPL 比同尺寸标准 Transformer 低 1.12–1.82，上下文显存少 <b>76–79%</b>；基线纯最终损失训练的 LT 在 5 圈即崩塌，LPT 稳定改善到 5 圈<span class="cite">[69]</span>——与 MELT（推理侧）正交的训练侧答案。</li>

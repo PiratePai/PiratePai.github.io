@@ -919,10 +919,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/specdec-loop.svg" loading="lazy" alt="投机解码的"起草-验证-接受"循环（上）与 2026 年草稿形态的三次进化（下）" style="display:block;width:100%;height:auto;background:transparent;padding:0;box-sizing:border-box;max-width:880px;margin:0 auto">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">🖼 本文自绘</b> · <i style="color:#c8cdd6"></i><br>
-<b>译</b>：投机解码的"起草-验证-接受"循环（上）与 2026 年草稿形态的三次进化（下）：串行自回归 → 并行块 → 并行树 → 验证窗口内重叠。 <span style="opacity:.7">— 图源：编者据本篇综述内容以 Excalidraw 重绘的手绘风格示意图（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">🖼 本文自绘</b> · 投机解码的"起草-验证-接受"循环，与 2026 年草稿形态的三次进化</figcaption>
 </figure>
 
 <p class="lead">10 月中旬的三件事把 §7.3 的三条线索各自向前推了一步：<b>NVIDIA Nemotron 3.5 把"原生 MTP + 后训练 boosting + 官方并行草稿器"打包成出厂三件套</b>、<b>TreeSpark 把 DSpark 骨干长成"训练你所验证的树"</b>、<b>DPara 让并行草稿器与并行投机解码相遇，回退率结构性归零</b>。</p>
@@ -958,10 +955,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/dpara-fig3.svg" loading="lazy" alt="三种投机解码范式的起草-验证调度对比：(a) 串行 SD（EAGLE3 或 DF" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 3（arXiv:2609.27396）</b> · <i style="color:#c8cdd6">Scheduling of drafting and verification across speculative decoding paradigms. (a) Serial SD ... (b) SSD ... forces serial fallback. (c) DPara (ours): the backbone overlaps verification for every acceptance outcome while drafting stays parallel.</i><br>
-<b>译</b>：三种投机解码范式的起草-验证调度对比：(a) 串行 SD（EAGLE3 或 DFlash/DSpark）依次"起草→验证"，起草留在关键路径上；(b) SSD 把起草与验证重叠，但猜错 bonus token 就被迫串行回退；(c) DPara 的扩散骨干为所有可能的接受边界同时预计算，验证窗口内完全重叠，起草保持并行。 <span style="opacity:.7">— 图源：DPara 论文（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 3（arXiv:2609.27396）</b> · 三种范式的调度对比：DPara 把草稿骨干完全藏进验证窗口</figcaption>
 </figure>
 
 </blockquote>

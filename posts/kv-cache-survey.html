@@ -799,10 +799,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/kvcache-map.svg" loading="lazy" alt="本篇综述的七条战线一图总览：结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸" style="display:block;width:100%;height:auto;background:transparent;padding:0;box-sizing:border-box;max-width:880px;margin:0 auto">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">🖼 本文自绘</b> · <i style="color:#c8cdd6"></i><br>
-<b>译</b>：本篇综述的七条战线一图总览：结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载与混合架构，全部围绕"KV Cache 显存之墙"展开。 <span style="opacity:.7">— 图源：编者据本篇综述内容以 Excalidraw 重绘的手绘风格示意图（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">🖼 本文自绘</b> · KV Cache 七条战线总览：全部围绕"显存之墙"展开</figcaption>
 </figure>
 
 
@@ -813,10 +810,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/dynamo-session.png" loading="lazy" alt="Dynamo 路由器内置会话前缀索引器（SessionPrefixIndexer" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">官方博客配图（pytorch.org，2026-10-08）</b> · <i style="color:#c8cdd6">Dynamo router with SessionPrefixIndexer and KvHint: the router holds the session prefix index and issues programmatic KV movements (Share/Prefetch/Demote/Pin/Retain) to vLLM/SGLang engines, which emit KV events back.</i><br>
-<b>译</b>：Dynamo 路由器内置会话前缀索引器（SessionPrefixIndexer，按会话前缀树路由请求），并通过 KvHint 接口向 vLLM / SGLang 引擎下发程序化 KV 移动指令（Share / Prefetch / Demote / Pin / Retain），引擎再把 KV 事件回传给路由器——"路由器当大脑、引擎当执行器"。 <span style="opacity:.7">— 图源：NVIDIA Dynamo Session-Aware Agentic Inference 博客（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">官方博客配图（pytorch.org，2026-10-08）</b> · 路由器当"大脑"、引擎当"执行器"：会话前缀索引 + KvHint</figcaption>
 </figure>
 
 <div class="quote">
@@ -830,10 +824,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/lachesis-fig1.svg" loading="lazy" alt="左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 1（arXiv:2610.08378）</b> · <i style="color:#c8cdd6">Top left: the read window of a conventional request vs. an agent session. Left: the three axes along which context-segment lifetimes differ. Right: Lachesis’s two placement paths.</i><br>
-<b>译</b>：左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文段生命周期分化的三条轴（时间轴 / 结构轴 / worker 间轴）；右：Lachesis 的两条放置路径——确定性路径与预测路径，分别把数据写入 HBM 或高带宽闪存 HBF。 <span style="opacity:.7">— 图源：Lachesis 论文（SNU/KAIST/UIUC）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.08378）</b> · 按生命周期的三条轴，把 KV 段放进 HBM 或高带宽闪存</figcaption>
 </figure>
 
 

@@ -1313,10 +1313,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/loopscal-fig1.png" loading="lazy" alt="(a) 稠密循环 Transformer 每圈复用同一组 FFN，而循环 MoE" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 1（arXiv:2609.40316）</b> · <i style="color:#c8cdd6">(a) Dense looped transformers reuse the same FFNs, whereas looped MoE models can route tokens to different experts across recurrent passes. (b) Increasing recurrence yields diminishing returns, with the dense model saturating earlier than MoE. (c) Loop Scaling Laws model a bounded effective-parameter gain conditioned on R and sparsity.</i><br>
-<b>译</b>：(a) 稠密循环 Transformer 每圈复用同一组 FFN，而循环 MoE 可以在不同循环圈把 token 路由到不同专家——两条扩展轴天然正交；(b) 固定激活参数与训练 token 时，增加循环数收益递减，且稠密模型（E=1）比 MoE 更早饱和；(c) Loop Scaling Laws 用"以循环数 R 与稀疏度为条件的有界有效参数增益"统一建模，替代假设收益无界的线性 / 幂律映射。 <span style="opacity:.7">— 图源：Scaling Laws for Looped MoE 论文（Meta AI）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2609.40316）</b> · 循环 × MoE 正交：收益有界、渐近上界随稀疏度抬高</figcaption>
 </figure>
 
 <li><b>PixelMoE</b>（USTC + 快手 KlingAI Research，arXiv:2610.18857，2026-10-13）：LLM 式 MoE（Token-Choice + 细粒度专家 + 共享专家 + 偏置法均衡）<b>零改动</b>迁入像素空间扩散模型，配 Pixel-Space Hierarchical Flow Matching；同激活参数下全面胜稠密基线（ImageNet-1K FID 1.47@256²）——§5"扩散战场"的最新证据<sup class="ref"><a href="#r28">[28]</sup>。</li>

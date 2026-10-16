@@ -830,10 +830,7 @@ in-flight sample to finish."""</span>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/mimo-fig3.svg" loading="lazy" alt="左：DeepSWE v1.1 的 average@3 分数随累计 RL 成本（百" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 3（arXiv:2610.11959）</b> · <i style="color:#c8cdd6">Left: average@3 score on DeepSWE v1.1 versus cumulative RL cost. Right: training, rollout, and grader cost shares for MiMo-V2.6-Pro and MiMo-V2.6-Flash.</i><br>
-<b>译</b>：左：DeepSWE v1.1 的 average@3 分数随累计 RL 成本（百万美元）的爬升曲线（Pro 最终 72.6）；右：训练 / rollout / grader 三项成本占比——rollout 与训练各占约 43.5%，grader 约占 12.7%：第一份把"RL 算力到底花在哪"拆开的百万美元级真实账单。 <span style="opacity:.7">— 图源：MiMo-V2.6 论文（小米 LLM-Core）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 3（arXiv:2610.11959）</b> · RL 分数随累计成本爬升；rollout / 训练 / grader 成本占比账单</figcaption>
 </figure>
 
 <li><b>QwenGyre:为 xLong 任务做弹性 RL</b>(阿里,arXiv:2609.33848,2026-09-27):单条轨迹数十万至百万 token、单次执行数小时的超长程 agent 任务里,固定 GPU 编排让训练/rollout 互相空转——GPU 按"弹性单元(elastic cells)"组织、可在 rollout <b>中途切换角色</b>;轨迹处理平面做分支重建、超时部分进度打分、冗余路径去重。旗舰 Qwen 3.8 2.4T 用 192 节点训练,rollout 约 700K token/条;等分下端到端比 Async 快 1.38–1.78×、比 Colocate 快 1.21–1.85×。</li>

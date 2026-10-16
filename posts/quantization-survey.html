@@ -816,10 +816,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/tempokv-fig3.svg" loading="lazy" alt="视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 3（arXiv:2610.15324）</b> · <i style="color:#c8cdd6">Asymmetric predictability of video KV cache. (a) Temporal history predicts keys well, while values benefit substantially from the aligned key. (b) This advantage holds across all layers. (c) The gain remains stable over long generation.</i><br>
-<b>译</b>：视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦相似度 0.877），而 V 只有借助当前对齐的 K 才变得可预测（0.637→0.881）——这是 TempoKV"预测 + 残差"设计（K 用自身历史、V 用对齐 K）的直接依据；(b) 优势在所有层成立；(c) 长生成过程中保持稳定。 <span style="opacity:.7">— 图源：TempoKV 论文（上交大 + 华南理工 + 阿里）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 3（arXiv:2610.15324）</b> · K 可由时间历史预测、V 依赖对齐 K：视频 KV 的不对称可预测性</figcaption>
 </figure>
 
 </ul>

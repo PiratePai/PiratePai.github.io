@@ -875,10 +875,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/ncclep-fig4.svg" loading="lazy" alt="GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Fig. 4（arXiv:2610.07516）</b> · <i style="color:#c8cdd6">Single FFN-MoE layer transfer latency on GB200 NVL72 + NDR. Dashed lines show the analytical SOL model; the broken y-axis separates the AG+bcast values from the lower-latency paths.</i><br>
-<b>译</b>：GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵轴断开）：flat direct sends 最高 77.3ms、传统 all-gather+broadcast 更高（上段），NCCL-M2N 层级路由仅 9.8ms、贴近 SOL 解析模型（虚线）——r=2/4/8 三档生成侧规模下加速最高 7.9×。 <span style="opacity:.7">— 图源：NCCL-Extensions 论文（NVIDIA）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Fig. 4（arXiv:2610.07516）</b> · 单层 MoE 传输延迟：M2N 9.8ms vs flat direct sends 77.3ms（贴近 SOL）</figcaption>
 </figure>
 
 <li><b>Meta EP-Overlap 与 AutoParallel</b>(PyTorchCon NA 2026 预告,官方博客 2026-09-16):EP-Overlap 以 graph passes 在 TorchTitan <b>GraphTrainer</b> 中实现通用 EP 通信隐藏——不绑定 DualPipe 等特定流水线调度,"任意可用计算都能藏",DeepSeek-V3 上隐藏 <b>76–86%</b> EP 通信、吞吐 ~1.3×;同场 AutoParallel 在模型图上自动搜索并行策略(Llama-3 8B 匹配强手工基线且省 12% 显存);另有 TorchComms 新 torch.distributed API(故障后进程组在线重构、单边 RDMA put/get 窗口)——§11.6"自动并行换发"的框架级回应。</li>

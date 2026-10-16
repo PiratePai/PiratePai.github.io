@@ -884,10 +884,7 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/hypersparse2-fig2.svg" loading="lazy" alt="HySparse2 的两级 KV 共享：左图为 self-decoder 与 c" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 2（arXiv:2609.26368）</b> · <i style="color:#c8cdd6">Two-level KV sharing in HySparse2. Left: the overall architecture with KV Bridging between the self-decoder and cross-decoder; prefill cache construction can exit after the self-decoder. Right: a HySparse2 block with token-level sparse attention and a forced local window.</i><br>
-<b>译</b>：HySparse2 的两级 KV 共享：左图为 self-decoder 与 cross-decoder 之间的 KV Bridging 总体架构——prefill 构建 KV 可在 self-decoder 之后提前退出（跨解码器全跳过）；右图为块内的 token 级稀疏注意力与强制局部窗，SA 层经 KV Reuse 复用该块 FA 层的缓存与选择索引。 <span style="opacity:.7">— 图源：HySparse2 论文（小米 LLM-Core）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 2（arXiv:2609.26368）</b> · 两级 KV 共享：prefill 可在 self-decoder 后提前退出</figcaption>
 </figure>
 
 </ul>

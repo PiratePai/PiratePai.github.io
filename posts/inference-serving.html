@@ -692,10 +692,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/crossflow-fig1.svg" loading="lazy" alt="某真实聊天负载六小时内"prefill / decode 需求比值"的逐分钟变化" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.8;border-top:1px dashed #2a2f3a;padding-top:8px">
-<b style="color:#ffb454">原文 Figure 1（arXiv:2609.27085）</b> · <i style="color:#c8cdd6">Demand ratio over a six-hour period for a chat use case. The rate of fine-grained change in prefill vs decode demand does not match the static partitioning nature of P/D disaggregation.</i><br>
-<b>译</b>：某真实聊天负载六小时内"prefill / decode 需求比值"的逐分钟变化（细线，均值 13.79×，附 30 分钟滚动均值与 ±1σ 带）——需求比值在分钟级剧烈波动，与静态 P/D 分离的固定配比天然不匹配：这正是 FluidPD / Crossflow 等"弹性分离"工作的动机图。 <span style="opacity:.7">— 图源：Crossflow 论文（Meta）（原图版权归原作者，引用仅作技术说明）</span>
-</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2609.27085）</b> · 六小时内 P/D 需求比值剧烈波动——静态配比必然失衡</figcaption>
 </figure>
 
 <li><b>Vera Rubin NVL72 day-0</b>：vLLM 以 MoE locality domains + FlashInfer 0.7.0 内核实现 day-0（AgentX 每芯片吞吐为 GB200 NVL72 的 <b>7.8×</b>，2026-10-09）<sup class="cite">[VERARUBIN26]</sup>；SGLang × NVIDIA Dynamo 组合随后给出 Qwen3.8 Flash Next 每芯片最高 <b>6.6×</b>、每 token 建模成本最多低 76% 的口径（vs GB300，2026-10-14）。新硬件红利能否兑现，越来越取决于引擎的 day-0 响应速度。</li>
