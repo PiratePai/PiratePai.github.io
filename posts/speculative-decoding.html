@@ -426,15 +426,15 @@ reset();
 function newTok(){return TOK[Math.floor(Math.random()*TOK.length)];}
 function step(dt){
   var s=state; s.ti+=dt;
-  var speed=10; // tokens per second for drafting
+  var speed=6; // tokens per second for drafting
   if(s.phase==='draft'){
     var want=Math.min(gamma,Math.floor(s.ti*speed));
     while(s.draft.length<want){
       s.draft.push({t:newTok(),st:'pend'});
     }
-    if(s.draft.length>=gamma&&s.ti>gamma/speed+0.35){s.phase='verify';s.ti=0;s.vi=0;}
+    if(s.draft.length>=gamma&&s.ti>gamma/speed+0.55){s.phase='verify';s.ti=0;s.vi=0;}
   }else if(s.phase==='verify'){
-    var k=Math.min(gamma,Math.floor(s.ti*7));
+    var k=Math.min(gamma,Math.floor(s.ti*4));
     while(s.vi<k){
       var i=s.vi;
       if(s.rej===null||i<s.rej){
@@ -442,7 +442,7 @@ function step(dt){
         else{s.rej=i;s.draft[i].st='bad';s.rejTok=newTok();}
       }else{s.vi++;}
     }
-    if(s.ti>gamma/7+0.55){
+    if(s.ti>gamma/4+0.8){
       var accepted=s.rej===null?gamma:s.rej;
       for(var j=0;j<accepted;j++){s.hist.push({t:s.draft[j].t,st:'ok'});s.nTok++;}
       if(s.rej!==null){s.hist.push({t:s.rejTok,st:'fix'});s.nTok++;}

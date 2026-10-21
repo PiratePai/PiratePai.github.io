@@ -485,7 +485,7 @@ function draw(){
 }
 function step(dt){
   if(!auto)return;
-  layer+=dt*6;
+  layer+=dt*2.4;
   if(layer>24){layer=0;}
   layer=Math.floor(layer);
   root.querySelector('.ppx-layer').value=layer;

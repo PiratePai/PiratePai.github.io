@@ -446,7 +446,7 @@ function softmaxRow(i){
   var e=[],s=0;for(var j=0;j<N;j++){e[j]=Math.exp(S[i][j]/temp-m);s+=e[j];}
   var w=[];for(var j=0;j<N;j++)w[j]=e[j]/s;return w;
 }
-function step(dt){qiT+=dt; if(qiT>1.4){qiT=0;qi=(qi+1)%N;}}
+function step(dt){qiT+=dt; if(qiT>2.0){qiT=0;qi=(qi+1)%N;}}
 function draw(){
   ctx.clearRect(0,0,LW,LH);
   /* ---------- left: heatmap ---------- */

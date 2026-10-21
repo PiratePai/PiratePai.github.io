@@ -585,19 +585,19 @@ function pick3D(THREE){
     hotShown=(hot*100).toFixed(0)+'%';
   }
   function step(dt){
-    if(Math.random()<dt*36)spawn();
+    if(Math.random()<dt*16)spawn();
     for(var i=parts.length-1;i>=0;i--){
       var p=parts[i]; p.t+=dt;
       if(p.phase===0){ // stream to router
         var dx=router.position.x-p.x,dy=router.position.y-p.y,dz=router.position.z-p.z;
         var d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-        var sp=3.2*dt;
+        var sp=2.4*dt;
         if(d<sp){p.phase=1;p.t=0;}
         else{p.x+=dx/d*sp;p.y+=dy/d*sp;p.z+=dz/d*sp;}
       }else{ // to expert
         var dx2=p.tx-p.x,dy2=.8-p.y,dz2=p.tz-p.z;
         var d2=Math.sqrt(dx2*dx2+dy2*dy2+dz2*dz2);
-        var sp2=3.4*dt;
+        var sp2=2.6*dt;
         if(d2<sp2){parts.splice(i,1);}
         else{p.x+=dx2/d2*sp2;p.y+=dy2/d2*sp2;p.z+=dz2/d2*sp2;}
       }
@@ -653,9 +653,9 @@ function pick2D(){
     return best;
   }
   function step(dt){
-    if(Math.random()<dt*30){var e=route();parts.push({x:60,y:LH/2+(Math.random()*80-40),t:0,e:e});EX[e].h+=1;}
+    if(Math.random()<dt*14){var e=route();parts.push({x:60,y:LH/2+(Math.random()*80-40),t:0,e:e});EX[e].h+=1;}
     for(var i=0;i<8;i++)EX[i].h=Math.max(0,EX[i].h-dt*.8);
-    for(var i2=parts.length-1;i2>=0;i2--){var p=parts[i2];var tx=EX[p.e].x,ty=EX[p.e].y;var dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);var sp=170*dt;if(d<sp)parts.splice(i2,1);else{p.x+=dx/d*sp;p.y+=dy/d*sp;}}
+    for(var i2=parts.length-1;i2>=0;i2--){var p=parts[i2];var tx=EX[p.e].x,ty=EX[p.e].y;var dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);var sp=120*dt;if(d<sp)parts.splice(i2,1);else{p.x+=dx/d*sp;p.y+=dy/d*sp;}}
   }
   function draw(){
     ctx.clearRect(0,0,LW,LH);

@@ -564,10 +564,10 @@ function spawn(){
 }
 function step(dt){
   spawnT-=dt;
-  if(spawnT<=0){spawn();spawnT=(mode==='static'?4.4:2.4)+Math.random()*1.5;}
+  if(spawnT<=0){spawn();spawnT=(mode==='static'?6.5:3.6)+Math.random()*2.2;}
   admit();
   for(var i=0;i<reqs.length;i++){
-    var r=reqs[i];r.out+=dt*3.2; // 每秒约 3 个 token，便于观察
+    var r=reqs[i];r.out+=dt*2.0; // 每秒约 2 个 token，便于观察
     if(mode==='paged'){
       var need=needNow(r);
       if(need>r.blocks.length){
