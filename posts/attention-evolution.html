@@ -121,12 +121,13 @@
   <div class="kicker">注意力结构调研 · 2014–2026</div>
 <h1>注意力结构演进：从 MHA、GQA 到 MLA、线性注意力与混合架构</h1>
   <div class="subtitle">一篇原理向技术综述：原理 · 代码 · 发展历程（2014–2026）· 未来方向</div>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-11</b></span><span class="chip">源码 <b>nanoGPT · LLaMA · DeepSeek-V3 · flash-linear-attention · FlashAttention · vLLM · SGLang</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-21</b></span><span class="chip">源码 <b>nanoGPT · LLaMA · DeepSeek-V3 · flash-linear-attention · FlashAttention · vLLM · SGLang</b></span></div>
 </header>
 
 <nav class="toc">
 <b>目录</b>
 <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
   <li><a href="#s0">总览：一张时间线看懂注意力结构的十年演进</a></li>
   <li><a href="#s1">前史：注意力是怎么被发明的（2014–2017）</a></li>
   <li><a href="#s2">基石：缩放点积注意力与多头机制（MHA）</a></li>
@@ -173,6 +174,27 @@ MHA、MQA、GQA、MLA、FlashAttention、稀疏注意力、线性注意力、Mam
 </div>
 
 <!-- ============================================================ -->
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>KronLSTM：写前只擦一格</b><span class="hl-date">10-19 · Hochreiter 组</span></div><p>Kronecker Delta 规则让记忆更新只碰单个键值对，长上下文全面超 GDN-2/KDA/Mamba-3，即将合入 FLA。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>免训练外挂记忆</b><span class="hl-date">10-11 · KAUST</span></div><p>NoteBank：GDN 的 RULER@1M 从 1.7% 拉到 70.3%，存储仅同规模 MHA KV 的 1/2600。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>状态容量新轴</b><span class="hl-date">09-29 · MIT</span></div><p>三阶张量状态（k⊗k′⊗v）：E 倍容量只加两个投影，70 票成为“扩状态”路线代表作。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>FA4 与内核生态</b><span class="hl-date">10 月</span></div><p>FA 2.8.3 维护版发布；FLA 新增 Sinkhorn 内核与昇腾后端，国产硬件版图继续扩大。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div>
+
 <h2 id="s1"><span class="no">1</span>前史：注意力是怎么被发明的（2014–2017）</h2>
 
 <h3>1.1 问题背景：RNN 翻译机的"定长向量瓶颈"</h3>
@@ -373,6 +395,154 @@ Llama 3 全系 8B/70B 均采用 GQA；Qwen3（2025-04）仍是 64 查询头 / 8 
         <span class="kw">return</span> self.wo(output)</pre>
 
 <!-- ============================================================ -->
+<!-- WIDGET:w2 注意力结构 · attention-evolution.html -->
+<div class="ppx-demo" id="PPX-W2">
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>注意力在算什么 · MHA→MQA→GQA→MLA 的 KV 缓存省在哪里</b></div>
+  <div class="ppx-bar">
+    <button class="ppx-mode on" data-m="mha">MHA</button>
+    <button class="ppx-mode" data-m="mqa">MQA</button>
+    <button class="ppx-mode" data-m="gqa">GQA</button>
+    <button class="ppx-mode" data-m="mla">MLA</button>
+    <label style="margin-left:14px">softmax 温度 <input type="range" class="ppx-temp" min="5" max="60" step="1" value="20"> <span class="ppx-tv ppx-stat">0.20</span></label>
+    <span style="margin-left:auto">每 token KV 缓存 <b class="ppx-mem ppx-stat">100%</b>（以 MHA 为基准）</span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">左：每生成一个词（行），模型会「回看」之前所有词（列）并算出一组权重（越亮权重越大）——这就是注意力。拖动温度感受权重如何从「雨露均沾」变「厚此薄彼」。右：同一个模型把 8 个查询头「分组共享」甚至「压缩进一个潜在向量」后，每 token 需要缓存的 K/V 大幅缩水，这就是 MQA / GQA / MLA 做的事。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W2'); if(!root)return;
+var cv=root.querySelector('canvas'),ctx=cv.getContext('2d');
+var LW=880,LH=430,dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
+var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
+var toks=['小','明','在','图','书','馆','读','书'];
+var N=toks.length, temp=0.2, mode='mha', qi=0, qiT=0;
+// toy scores: attend to related words
+var S=[];
+(function(){
+  var rel=[[0,0,0,0,0,0,0,0],[0,0,.3,0,0,0,.2,0],[.6,0,0,0,0,0,0,0],
+           [.5,0,0,0,.3,0,0,0],[0,0,0,.4,0,0,.5,.4],[0,0,0,.2,0,0,0,0],
+           [.8,0,0,0,.4,0,0,.4],[0,0,0,0,.3,0,0,0]];
+  for(var i=0;i<N;i++){S.push([]);for(var j=0;j<N;j++){S[i][j]=(j<=i?1:0)*( (rel[i][j]||0)*3+0.4+((i*7+j*13)%5)*0.22 );}}
+})();
+function softmaxRow(i){
+  var m=-1e9;for(var j=0;j<N;j++)m=Math.max(m,S[i][j]/temp);
+  var e=[],s=0;for(var j=0;j<N;j++){e[j]=Math.exp(S[i][j]/temp-m);s+=e[j];}
+  var w=[];for(var j=0;j<N;j++)w[j]=e[j]/s;return w;
+}
+function step(dt){qiT+=dt; if(qiT>1.4){qiT=0;qi=(qi+1)%N;}}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  /* ---------- left: heatmap ---------- */
+  var x0=56,y0=76,cell=44;
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText('注意力权重矩阵（行=正在生成的词，列=回看的词）',30,40);
+  for(var i=0;i<N;i++){
+    var w=softmaxRow(i);
+    for(var j=0;j<N;j++){
+      var v=w[j], x=x0+j*cell, y=y0+i*cell;
+      if(j>i){ctx.fillStyle='#141822';}
+      else{var a=Math.pow(v,1.1); ctx.fillStyle='rgba(110,168,255,'+(0.06+0.88*a).toFixed(3)+')';}
+      ctx.fillRect(x,y,cell-3,cell-3);
+      if(j<=i&&v>0.09){ctx.fillStyle=v>0.5?'#0d1017':C.ink;ctx.font='10.5px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(v.toFixed(2).slice(1),x+(cell-3)/2,y+(cell-3)/2);}
+    }
+    ctx.fillStyle=i===qi?C.orange:C.muted;ctx.font=(i===qi?'bold ':'')+'14px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText(toks[i],x0-10,y0+i*cell+cell/2);
+  }
+  for(var j=0;j<N;j++){ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(toks[j],x0+j*cell+cell/2,y0+N*cell+14);}
+  // moving highlight row
+  ctx.strokeStyle=C.orange;ctx.lineWidth=2;
+  ctx.strokeRect(x0-1,y0+qi*cell-1,N*cell-2+3,cell-1);
+  ctx.lineWidth=1;
+  ctx.fillStyle=C.orange;ctx.font='11.5px sans-serif';ctx.textAlign='left';
+  ctx.fillText('▸ 当前生成 "'+toks[qi]+'"，权重和 = 1',30,y0+N*cell+40);
+  /* ---------- right: structure ---------- */
+  var RX=500;
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';
+  ctx.fillText('KV 头共享结构（8 个查询头）',RX,40);
+  var qy0=76, qGap=30, qhY=[];
+  for(var i2=0;i2<8;i2++){qhY.push(qy0+i2*qGap+8);}
+  var kvX=RX+250, kvY=[], nkv=1, modeTxt='';
+  if(mode==='mha'){nkv=8;modeTxt='8 份独立 KV · 互不共享';}
+  if(mode==='mqa'){nkv=1;modeTxt='8 个头共用 1 份 KV';}
+  if(mode==='gqa'){nkv=4;modeTxt='每 2 个查询头共享 1 份 KV';}
+  if(mode==='mla'){nkv=1;modeTxt='全部压进 1 个低秩潜在向量 c\\u0027（推理时再还原）';}
+  for(var k=0;k<nkv;k++){kvY.push(qy0+(k+0.5)*(8*qGap)/nkv);}
+  // query heads
+  for(var i3=0;i3<8;i3++){
+    ctx.beginPath();ctx.arc(RX,qhY[i3],7,0,7);
+    ctx.fillStyle='rgba(110,168,255,.2)';ctx.fill();ctx.strokeStyle=C.blue;ctx.stroke();
+    ctx.fillStyle=C.muted;ctx.font='10.5px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText('Q'+(i3+1),RX-14,qhY[i3]);
+  }
+  // kv heads
+  for(var k2=0;k2<nkv;k2++){
+    var isLat=mode==='mla';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(kvX-14,kvY[k2]-10,28,isLat?26:20,6);else ctx.rect(kvX-14,kvY[k2]-10,28,isLat?26:20);
+    ctx.fillStyle=isLat?'rgba(157,123,255,.22)':'rgba(65,209,167,.18)';
+    ctx.fill();ctx.strokeStyle=isLat?C.purple:C.green;ctx.stroke();
+    ctx.fillStyle=isLat?C.purple:C.green;ctx.font='10.5px sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(isLat?"c'":('KV'+(k2+1)),kvX+20,kvY[k2]);
+  }
+  // links (grouped)
+  ctx.lineWidth=1.2;
+  for(var i4=0;i4<8;i4++){
+    var tgt=(mode==='mha')?i4:(mode==='mqa'?0:(mode==='gqa'?Math.floor(i4/2):0));
+    var active=(Math.floor(qiT*8)%8===i4);
+    ctx.strokeStyle=active?(mode==='mla'?C.purple:C.green):'rgba(110,168,255,.28)';
+    if(active)ctx.lineWidth=2.2;
+    ctx.beginPath();ctx.moveTo(RX+7,qhY[i4]);
+    if(mode==='mla'){ctx.bezierCurveTo(RX+120,qhY[i4],kvX-120,kvY[0],kvX-14,kvY[0]);}
+    else{ctx.lineTo(kvX-14,kvY[tgt]);}
+    ctx.stroke();ctx.lineWidth=1.2;
+  }
+  ctx.fillStyle=C.muted;ctx.font='11.5px sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText(modeTxt,RX,qy0+8*qGap+22);
+  // memory bar
+  var memPct={mha:100,mqa:12.5,gqa:50,mla:6.5}[mode];
+  root.querySelector('.ppx-mem').textContent=memPct+'%';
+  var by=qy0+8*qGap+44, bw=340;
+  ctx.fillStyle=C.muted;ctx.font='11.5px sans-serif';ctx.fillText('每 token KV 缓存',RX,by-6);
+  ctx.strokeStyle=C.line;ctx.strokeRect(RX,by,bw,18);
+  var g=ctx.createLinearGradient(RX,0,RX+bw,0);g.addColorStop(0,C.blue);g.addColorStop(1,C.green);
+  ctx.fillStyle=g;ctx.fillRect(RX,by,bw*memPct/100,18);
+  ctx.fillStyle=C.ink;ctx.textAlign='right';
+  ctx.fillText(memPct+'%',RX+bw+52,by+13);ctx.textAlign='left';
+  // tick labels
+  ctx.fillStyle=C.muted;ctx.font='10.5px sans-serif';
+  ctx.fillText('MHA 100%',RX,by+32);ctx.fillText('GQA 50%',RX+120,by+32);ctx.fillText('MQA 12.5%',RX+230,by+32);
+}
+var last=0;
+function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;step(dt);draw();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+root.querySelectorAll('.ppx-mode').forEach(function(b){
+  b.addEventListener('click',function(){
+    root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');mode=b.dataset.m;
+  });
+});
+root.querySelector('.ppx-temp').addEventListener('input',function(){temp=+this.value/100;root.querySelector('.ppx-tv').textContent=temp.toFixed(2);});
+})();
+</script>
+<!-- /WIDGET:w2 -->
+
 <h2 id="s4"><span class="no">4</span>低秩压缩：MLA（DeepSeek）——用数学换显存</h2>
 
 <h3>4.1 思路：KV 缓存的"内容"其实是低秩的</h3>
@@ -482,7 +652,7 @@ Kimi K2（arXiv:2507.20534, 2025-07）也采用 MLA，说明 MLA 已成为国产
 <tr><td>FlashAttention-1</td><td>2022-05</td><td>IO 感知 tiling + 在线 softmax + 反向重计算</td><td>省 10× 显存；GPT-2 训练 3×；BERT-large 比 MLPerf 纪录快 15%</td></tr>
 <tr><td>FlashAttention-2</td><td>2023-07<br><span class="cite">[Dao, arXiv:2307.08691]</span></td><td>减少非矩阵乘 FLOPs、序列维并行、warp 分工</td><td>比 FA1 快 ~2×，A100 上 225 TFLOPs/s（72% 利用率），"reaching 50-73% of the theoretical maximum FLOPs/s on A100"</td></tr>
 <tr><td>FlashAttention-3</td><td>2024-07<br><span class="cite">[Shah et al., arXiv:2407.08608]</span></td><td>Hopper 架构：warp 特化+异步流水（WGMMA）、FP8</td><td>"achieves speedup on H100 GPUs by 1.5-2.0× with FP16 reaching up to 740 TFLOPs/s (75% utilization), and with FP8 reaching close to 1.2 PFLOPs/s"</td></tr>
-<tr><td>FlashAttention-4</td><td>2025-08 预告 / 2026-03 论文<br><span class="cite">[Zadouri et al., arXiv:2603.05451]</span></td><td>首个纯 Python（CuTeDSL）实现；面向 Blackwell 的全异步 MMA 流水、软件模拟 exp</td><td>B200 BF16 上比 cuDNN 9.13 最高快 1.3×、比 Triton 快 2.7×，峰值约 1613 TFLOPs/s（71% 利用率）</td></tr>
+<tr><td>FlashAttention-4</td><td>2025-08 官方博客预告<br><span class="cite">[Zadouri et al., FlashAttention-4 Blog]（截至 2026-10 未见正式论文，本行数字为博客口径）</span></td><td>首个纯 Python（CuTeDSL）实现；面向 Blackwell 的全异步 MMA 流水、软件模拟 exp</td><td>B200 BF16 上比 cuDNN 9.13 最高快 1.3×、比 Triton 快 2.7×，峰值约 1613 TFLOPs/s（71% 利用率）</td></tr>
 </table>
 <div class="tbl-cap">FlashAttention 系列时间线。FA3 引文译：在 H100 上 FP16 提速 1.5–2.0×、高达 740 TFLOPs/s（75% 利用率），FP8 接近 1.2 PFLOPs/s。</div>
 
@@ -544,7 +714,7 @@ KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注�
 用改造版 FlashAttention 内核输出的注意力图做自蒸馏（Llama-3.1-8B 仅需 0.5B token、约 40 A100 小时），
 自发学出 A 形、竖条等长上下文常见模式。原文："SeerAttention achieves highly linear speedup over dense configurations, delivering a 7.3× speedup with 90% sparsity on sequences of 128k."（译：相对稠密配置呈高度线性加速，128K 序列、90% 稀疏度下实现 7.3× 加速。）</p>
 
-<p>同期还有 XAttention（反対角线打分做块选择, arXiv:2503.16428, 2025-03）等；FLA 库已内置 MoBA/NSA 内核（见其 2026-04 News）。
+<p>同期还有 XAttention（反対角线打分做块选择, arXiv:2503.16428, 2025-03）等；FLA 库 v0.5.2（2026-07）已内置 NSA 训练/解码内核与 DSA 参考实现，Gated Slot Attention-2 正在合入主库（2026-10）。
 2026 年的新方向包括"免训练原生稀疏"（Training-Free Native Sparse Attention, OpenReview 2026，声称最高 16× 压缩）
 与潜空间稀疏（SALS, NeurIPS 2025）等，细节仍在快速演化。</p>
 
@@ -554,7 +724,7 @@ KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注�
 <h3>7.1 核心技巧：用结合律交换乘法顺序</h3>
 <p>softmax 注意力 O(n²) 的根源是必须先算出完整的 n×n 打分矩阵。Katharopoulos 等人 2020 年的观察是：
 softmax(qᵀk) 本质是指数核，任何核都能写成特征映射的内积 <span class="f">k(x,y)=⟨φ(x),φ(y)⟩</span>；
-把 softmax 换成正定的特征映射后，<b>矩阵乘法的结合律</b>就救场了<span class="cite">[Katharopoulos et al., ICML 2020, arXiv:2006.16236, v1 2020-06-30]</span>：</p>
+把 softmax 换成正定的特征映射后，<b>矩阵乘法的结合律</b>就救场了<span class="cite">[Katharopoulos et al., ICML 2020, arXiv:2006.16236；v1 原题 Linear Transformers Are Secretly Fast Weight Programmers，2020-10 v2 起改为现题]</span>：</p>
 
 <div class="formula">
 (φ(Q) φ(K)<sup>⊤</sup>) · V &nbsp;=&nbsp; φ(Q) · (φ(K)<sup>⊤</sup> V) &nbsp;&nbsp;&nbsp;
@@ -861,7 +1031,7 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
   <li><b>SwiLA</b>（Stanford，COLM 2026，arXiv:2609.39034）：状态扩展为 J 个线性回归器分量、按预测误差动态切换，等效混合数随 O(JD) 指数增长而状态仅 O(JD²)。</li>
 </ul>
 
-<h3>11.3 2026-10 中旬速览：SSM 状态成为新瓶颈，稀疏检索继续降复杂度</h3>
+<h3>11.3 2026-10 中下旬速览：Delta 家族再进化，SSM 状态与免训练记忆成为新战场</h3>
 <p class="lead">四件新事：<b>ReplaySSM 指出混合模型的解码瓶颈已从注意力层转移到 SSM 状态读写</b>；<b>GLM-5.3-Flash 把"线性 + 稀疏"两种注意力混进同一模型</b>（上期遗漏，补录）；<b>块选择的复杂度从 O(N²/C) 降到 O(N log N)</b>（PISA）；<b>快手让 Summary token 一身兼二职</b>（KSA V2）。</p>
 
 <h4>① ReplaySSM（NVIDIA + Princeton，2026-10-09）：别存状态，存输入</h4>
@@ -901,6 +1071,18 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 </div>
 
 <!-- ============================================================ -->
+<h4>① KronLSTM（2026-10-19，NX-AI / JKU Hochreiter 组）：Kronecker Delta 规则，“写前只擦一格”</h4>
+<p>记忆更新只沿单一方向 (k⊗v) 纠错，不做 GDN/KDA 的整键擦除——干扰更小、检索更稳。1.5B/100B token 四个模型开源（Avg-6 59.72，全面超 KDA 58.12 / GDN-2 57.94 / Mamba-3 57.31；RULER 自 16k 起胜 GDN-2；H100 吞吐再快 11–18%）。仓库即 FLA 快照、官方声明将合入 FLA。代码：github.com/NX-AI/KronLSTM，论文 arXiv:2610.26834。</p>
+
+<h4>② NoteBank（2026-10-11，KAUST / Schmidhuber 等）：免训练外挂情景记忆，绕过“固定状态天花板”</h4>
+<p>预存文本片段 + 骨干原生特征寻址 + 回放读取：GDN-1.3B 的 RULER@1M 从 1.7% 拉到 <b>70.3%</b>，仅 +≤0.025% FLOPs，持久存储只有同规模 MHA KV 的 1/2600。§7.5 论证的线性注意力“检索/复制天花板”第一次被<b>免训练</b>手段显著绕过（arXiv:2610.15715）。</p>
+
+<h4>③ Triadic Linear Attention（2025-09-29 补录，MIT）与 Gated Slot Attention-2（10 月）：状态容量两条新轴</h4>
+<p><b>Triadic</b> 用 k⊗k′⊗v 三阶张量状态：第二键维带来 E 倍状态容量而只加两个投影，triadic GDN(E=8) 全面优于加头/加宽等扩状态方案，且可从预训练 GDN upcycle（arXiv:2609.36529，70 票）。<b>GSA-2</b>（HKUST(GZ)+腾讯，arXiv:2610.02816）把纠错做到读写“双侧”联想记忆；FLA 主库 10-19~20 连续 7 个 PR 合入中。两者共同指向 §11.3 上期判断的落点：<b>状态容量与记忆编辑</b>正取代“又一个核”成为线性注意力的主战场。</p>
+
+<h4>④ 系统与生态（10-13~21）</h4>
+<p><b>FlashAttention v2.8.3.post2</b>（CVE 修复、反向 dq_accum int32 溢出修复、CUDA 13 wheels）；<b>FLA</b> 新增 Sinkhorn 归一化内核、KDA/AttnRes 的 triton-ascend（昇腾）后端（Triton-Ascend 3.6.0 / CANN 9.1 适配）——内核版图继续向国产硬件扩散。<b>LeapQuant</b>（Berkeley/UW/MIT/Perplexity/NVIDIA，arXiv:2609.38166）专攻 GDN/KDA 混合模型的<b>循环状态量化</b>（注意：不是 KV 量化），与 ReplaySSM 互证“SSM 状态成为新瓶颈”。<b>FreeSolo</b>（NUS，arXiv:2610.17191）用“固定状态存键位置、检索按需取回”做到线性时间稀疏注意力 + 零样本长度外推；<b>KPage</b>（快手 KlingAI+NVIDIA，arXiv:2610.28096）把稀疏注意力的跨块页压缩再降一档复杂度。一句话动态：DeltaNet-PC 测试时记忆免 BPTT（2610.15185）；循环深度的临床 NLP 落地（Eli Lilly+NVIDIA，2610.27559）。</p>
+
 <h2 id="s12"><span class="no">12</span>未来发展方向</h2>
 
 <h3>方向一：推理优先（Inference-first）成为第一性设计原则</h3>

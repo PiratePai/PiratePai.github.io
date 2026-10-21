@@ -134,7 +134,7 @@
   <h1>混合专家（MoE）全景</h1>
   <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的读者。</p>
   <div class="meta">
-    <span class="chip">调研日期：<b>2026-08-14</b> · 增补：<b>2026-10-11</b></span>
+    <span class="chip">调研日期：<b>2026-08-14</b> · 增补：<b>2026-10-21</b></span>
     <span class="chip">覆盖模型：<b>Switch / GShard / Mixtral / DeepSeek-V3·R1 / Kimi K2 / Qwen3 / MoE-LLaVA / DiT-MoE / EC-DiT / Race-DiT / DSMoE / Wan2.2 / HunyuanImage3 / Mamoda2.5 / MAGI-2 / HunyuanVideo / LTX-2</b></span>
     <span class="chip">工业数据来源：<b>InfraInsight 架构分析报告库</b></span>
     <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
@@ -143,7 +143,8 @@
 
 <nav class="toc">
   <div class="in">
-    <a href="#s0">导读</a>
+    <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
+     <a href="#s0">导读</a>
     <a href="#s1">① 原理入门</a>
     <a href="#s2">② 发展历程</a>
     <a href="#s3">③ LLM 应用</a>
@@ -173,6 +174,27 @@
 </div>
 
 <!-- ===================== 第一章 原理 ===================== -->
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepSeek 开源生产推理框架</b><span class="hl-date">10-16 · DeepSeek</span></div><p>DeepInfer 把 EP+EPLB 带进生产推理，SM100 与昇腾 950 双后端，5 天 17k star。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>动态冗余专家成 EP 新范式</b><span class="hl-date">10-20 · Moonshot</span></div><p>MoonEP「完美均衡」通信库：失衡加剧时通信时间几乎平坦，与 DeepEP V2.5 原语互相成就。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>共享专家抑制路由探索</b><span class="hl-date">10-15 · ETH 等</span></div><p>MirrorMoE：共享专家让路由器方差低一个数量级、加专家无增益——16 票挑战默认组合。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>跨层共享专家省三成</b><span class="hl-date">10-20 · 清华等</span></div><p>Meta Expert：70–80% 专家即追平 Vanilla MoE，MoE 参数效率的「深度维」新轴。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+
 <span class="anchor" id="s1"></span>
 <h2 class="sec"><span class="num">1</span>MoE 原理入门<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
 
@@ -471,6 +493,205 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
 <div class="note warn"><b>关键认知</b>：MoE 不是「免费午餐」。它用 <b>更高的显存占用</b>（要装下所有专家）和 <b>更复杂的通信</b>（all-to-all 对互联带宽极敏感），换取 <b>更低的单 token 计算量</b>。「总参数 vs 激活参数」是衡量一切 MoE 模型的两把尺子：前者决定显存，后者决定算力。DeepSeek-V3 甚至专门设计了 DualPipe 算法让计算与通信重叠、逼近「零开销」<sup class="ref"><a href="#r4">[4]</a></sup>。</div>
 
 <!-- ===================== 第二章 历史 ===================== -->
+<!-- WIDGET:w6 MoE 路由 · moe-survey.html -->
+<div class="ppx-demo" id="PPX-W6">
+  <div class="ppx-head"><span class="ppx-tag">交互演示 · 3D</span><b>MoE 路由：token 如何流向专家 · 负载均衡为什么是头号难题</b></div>
+  <div class="ppx-bar">
+    <button class="ppx-mode on" data-m="bal">均衡路由（带偏置修正）</button>
+    <button class="ppx-mode" data-m="crash">无均衡（路由崩溃）</button>
+    <button class="ppx-play on">⏸ 暂停</button>
+    <span style="margin-left:auto">每 token 激活 <b class="ppx-k ppx-stat">1</b>/8 个专家 · 最热专家占比 <b class="ppx-hot ppx-stat">–</b>（均衡目标 ≈ 12.5%）· 可拖拽旋转 / 滚轮缩放</span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">8 根柱子 = 8 个专家（真实模型中是几百个），小球 = 一个个 token。路由器给每个 token 打分、选出分数最高的专家。左：带负载均衡偏置（auxiliary-loss-free 类方法）——繁忙的专家会被「降权」，token 流被摊开；右：不加均衡——强者愈强，多数 token 挤进少数热门专家（变红过载），其余专家闲置，对应显存与算力浪费、all-to-all 通信长尾。真实 MoE 每个 token 激活 top-k（k=2~8）个专家，这里为看得清只画 top-1。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W6'); if(!root)return;
+var cv=root.querySelector('canvas');
+var LW=880,LH=480,dpr=Math.min(2,window.devicePixelRatio||1);
+var mode='bal',playing=true;
+var load=new Array(8).fill(0), hotShown='–';
+function pick3D(THREE){
+  cv.width=LW*dpr; cv.height=LH*dpr; cv.style.aspectRatio=LW+'/'+LH;
+  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  renderer.setPixelRatio(dpr); renderer.setSize(LW,LH,false);
+  var scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x0d1017,10,30);
+  var cam=new THREE.PerspectiveCamera(46,LW/LH,.1,100);
+  var camR=13.5,camA=0.9,camY=5.2;
+  function setCam(){cam.position.set(camR*Math.cos(camA),camY,camR*Math.sin(camA));cam.lookAt(0,1.2,0);}
+  setCam();
+  scene.add(new THREE.AmbientLight(0x8899bb,.55));
+  var dl=new THREE.DirectionalLight(0xffffff,.9); dl.position.set(4,8,5); scene.add(dl);
+  // router node
+  var router=new THREE.Mesh(new THREE.SphereGeometry(.55,24,24),new THREE.MeshStandardMaterial({color:0x9d7bff,emissive:0x3d2a80,roughness:.35}));
+  router.position.set(0,1.6,-4.4); scene.add(router);
+  // experts
+  var E=8,experts=[],baseCol=[];
+  var geo=new THREE.CylinderGeometry(.42,.5,1,20);
+  for(var i=0;i<E;i++){
+    var ang=Math.PI*2*i/E, r=3.6;
+    var col=new THREE.Color().setHSL(.36-(i/E)*.36,.62,.55);
+    baseCol.push(col.getHex());
+    var m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:col.getHex(),transparent:true,opacity:.92,roughness:.4}));
+    m.position.set(Math.cos(ang)*r,.5,Math.sin(ang)*r*.72+1.2);
+    scene.add(m); experts.push(m);
+    var ring=new THREE.Mesh(new THREE.TorusGeometry(.62,.03,8,32),new THREE.MeshBasicMaterial({color:0x2a2f3a}));
+    ring.rotation.x=Math.PI/2; ring.position.copy(m.position); ring.position.y=.02;
+    scene.add(ring);
+  }
+  // floor grid
+  var grid=new THREE.GridHelper(14,14,0x222839,0x1a1f2c); grid.position.y=0; scene.add(grid);
+  // particles
+  var MAXP=260, pos=new Float32Array(MAXP*3), col=new Float32Array(MAXP*3), parts=[];
+  var pGeo=new THREE.BufferGeometry();
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  pGeo.setAttribute('color',new THREE.BufferAttribute(col,3));
+  var pMat=new THREE.PointsMaterial({size:.16,vertexColors:true,transparent:true,opacity:.95});
+  var points=new THREE.Points(pGeo,pMat); scene.add(points);
+  function route(){
+    if(mode==='crash'){
+      var r=Math.random();
+      if(r<.55)return 0; if(r<.75)return 1; return 2+Math.floor(Math.random()*6);
+    }
+    var w=[0,0,0,0,0,0,0,0],i2;
+    for(i2=0;i2<8;i2++)w[i2]=Math.random()*(1-load[i2]*.75); // bias against busy
+    var best=0;for(i2=1;i2<8;i2++)if(w[i2]>w[best])best=i2;
+    return best;
+  }
+  function spawn(){
+    var e=route();
+    var ang=Math.PI*2*e/8, r=3.6;
+    var tx=Math.cos(ang)*r, tz=Math.sin(ang)*r*.72+1.2;
+    parts.push({x:-7.5+(Math.random()*1.2-.6),y:1.4+Math.random()*.6,z:-4.4+(Math.random()*1.2-.6),t:0,e:e,tx:tx,tz:tz,phase:0});
+    load[e]+=1; var sum=load.reduce(function(a,b){return a+b;},0)||1;
+    for(var k=0;k<8;k++)load[k]=Math.max(0,load[k]-.02);
+    var hot=Math.max.apply(null,load)/ (load.reduce(function(a,b){return a+b;},0)||1);
+    hotShown=(hot*100).toFixed(0)+'%';
+  }
+  function step(dt){
+    if(Math.random()<dt*36)spawn();
+    for(var i=parts.length-1;i>=0;i--){
+      var p=parts[i]; p.t+=dt;
+      if(p.phase===0){ // stream to router
+        var dx=router.position.x-p.x,dy=router.position.y-p.y,dz=router.position.z-p.z;
+        var d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        var sp=3.2*dt;
+        if(d<sp){p.phase=1;p.t=0;}
+        else{p.x+=dx/d*sp;p.y+=dy/d*sp;p.z+=dz/d*sp;}
+      }else{ // to expert
+        var dx2=p.tx-p.x,dy2=.8-p.y,dz2=p.tz-p.z;
+        var d2=Math.sqrt(dx2*dx2+dy2*dy2+dz2*dz2);
+        var sp2=3.4*dt;
+        if(d2<sp2){parts.splice(i,1);}
+        else{p.x+=dx2/d2*sp2;p.y+=dy2/d2*sp2;p.z+=dz2/d2*sp2;}
+      }
+    }
+    // expert height by load
+    var sumL=load.reduce(function(a,b){return a+b;},0)||1;
+    for(var e2=0;e2<8;e2++){
+      var f=load[e2]/sumL*8; // 1 = even
+      var h=.4+Math.min(2.6,f*.55);
+      experts[e2].scale.y=h; experts[e2].position.y=h*.5;
+      var mat=experts[e2].material;
+      if(f>1.8){mat.color.setHex(0xff6b6b);mat.emissive=new THREE.Color(0x551111);}
+      else{mat.color.setHex(baseCol[e2]);mat.emissive=new THREE.Color(0x0a0a12);}
+    }
+    root.querySelector('.ppx-hot').textContent=hotShown;
+  }
+  function draw(){
+    for(var i=0;i<MAXP;i++){
+      var p=parts[i];
+      if(p){pos[i*3]=p.x;pos[i*3+1]=p.y;pos[i*3+2]=p.z;
+        var c=new THREE.Color(baseCol[p.e]); col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
+      else{pos[i*3+1]=-99;}
+    }
+    pGeo.attributes.position.needsUpdate=true;
+    pGeo.attributes.color.needsUpdate=true;
+    router.rotation.y+=.02;
+    renderer.render(scene,cam);
+  }
+  // orbit
+  var drag=false,lx=0,ly=0;
+  cv.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointerup',function(){drag=false;});
+  window.addEventListener('pointermove',function(e){
+    if(!drag)return;
+    camA+=(e.clientX-lx)*.006; camY=Math.max(1.5,Math.min(11,camY-(e.clientY-ly)*.03));
+    lx=e.clientX;ly=e.clientY;setCam();
+  });
+  cv.addEventListener('wheel',function(e){e.preventDefault();camR=Math.max(7,Math.min(20,camR+e.deltaY*.01));setCam();},{passive:false});
+  var last=0;
+  function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+  return true;
+}
+function pick2D(){
+  var ctx=cv.getContext('2d');
+  cv.width=LW*dpr;cv.height=LH*dpr;ctx.scale(dpr,dpr);
+  var parts=[],EX=[];
+  for(var i=0;i<8;i++)EX.push({x:180+ (i%4)*180, y:120+Math.floor(i/4)*180, h:10});
+  function route(){
+    if(mode==='crash'){var r=Math.random();return r<.6?0:(r<.8?1:Math.floor(Math.random()*8));}
+    var best=0,bw=-1;
+    for(var i=0;i<8;i++){var w=Math.random()*(1-EX[i].h*.04);if(w>bw){bw=w;best=i;}}
+    return best;
+  }
+  function step(dt){
+    if(Math.random()<dt*30){var e=route();parts.push({x:60,y:LH/2+(Math.random()*80-40),t:0,e:e});EX[e].h+=1;}
+    for(var i=0;i<8;i++)EX[i].h=Math.max(0,EX[i].h-dt*.8);
+    for(var i2=parts.length-1;i2>=0;i2--){var p=parts[i2];var tx=EX[p.e].x,ty=EX[p.e].y;var dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);var sp=170*dt;if(d<sp)parts.splice(i2,1);else{p.x+=dx/d*sp;p.y+=dy/d*sp;}}
+  }
+  function draw(){
+    ctx.clearRect(0,0,LW,LH);
+    var mx=Math.max.apply(null,EX.map(function(e){return e.h;}))||1;
+    for(var i=0;i<8;i++){
+      var e=EX[i];e.hh=20+e.h/mx*70;
+      ctx.fillStyle='rgba(110,168,255,'+(0.12+0.5*e.h/mx)+')';
+      ctx.fillRect(e.x-24,e.y-e.hh,48,e.hh);
+      ctx.strokeStyle=e.h/mx>.6?'#ff6b6b':'#6ea8ff';ctx.strokeRect(e.x-24,e.y-e.hh,48,e.hh);
+      ctx.fillStyle='#aeb4bd';ctx.font='11px sans-serif';ctx.textAlign='center';
+      ctx.fillText('专家'+(i+1),e.x,e.y+16);
+      ctx.fillText(Math.round(e.h),e.x,e.y-e.hh-6);
+    }
+    ctx.fillStyle='#9d7bff';ctx.beginPath();ctx.arc(50,LH/2,12,0,7);ctx.fill();
+    ctx.fillStyle='#aeb4bd';ctx.font='11px sans-serif';ctx.fillText('路由',50,LH/2+28);
+    for(var j=0;j<parts.length;j++){var p=parts[j];ctx.fillStyle='rgba(110,168,255,.8)';ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();}
+  }
+  var last=0;
+  function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+}
+var ok=false;
+try{
+  import('https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js').then(function(m){ok=pick3D(m);}).catch(function(){pick2D();});
+}catch(e){pick2D();}
+root.querySelectorAll('.ppx-mode').forEach(function(b){
+  b.addEventListener('click',function(){
+    root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');mode=b.dataset.m;
+  });
+});
+root.querySelector('.ppx-play').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ 暂停':'▶ 播放';this.classList.toggle('on',playing);});
+})();
+</script>
+<!-- /WIDGET:w6 -->
+
 <span class="anchor" id="s2"></span>
 <h2 class="sec"><span class="num">2</span>发展历程：从 1991 到万亿参数<span class="roadmap">四块基石是如何被逐一补齐的：稀疏门控(2017) → 系统并行(2020) → top-1 简化(2021) → 开源爆发(2023–)</span><span class="pill fund">历史</span></h2>
 <p class="lead">回看时间线会发现一条清晰的主线：<b>每一代工作都是在对 §1 的某块基石做「减法」或「补丁」</b>——Shazeer 补上稀疏门控、GShard 补上系统并行、Switch 做减法（K=2→1）、DeepSeek 把负载均衡的辅助损失也做成了减法。</p>
@@ -482,7 +703,7 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
   </div>
   <div class="e"><span class="yr">2017 · ICLR</span>
     <div class="t">Sparsely-Gated MoE Layer（Shazeer 等，Google Brain）<sup class="ref"><a href="#r1">[1]</a></sup></div>
-    <div class="d">首次实现<b>稀疏门控 + Noisy Top-K</b>，把 MoE 作为通用组件插进 LSTM 之间。在 10 亿词语言建模上做到「算力基本不变、模型容量提升 1000 倍以上」，最大 137B 参数。奠定今天所有 MoE 的范式（基石一、二）。</div>
+    <div class="d">首次实现<b>稀疏门控 + Noisy Top-K</b>，把 MoE 作为通用组件插进 LSTM 之间。在 1B-Word 基准与千亿词内部语料上验证「算力基本不变、模型容量大幅提升」；最大的 137B 模型出自千亿词（Google News）语料实验（131072 个专家），1B-Word 基准上最大约 4B 总参。奠定今天所有 MoE 的范式（基石一、二）。</div>
   </div>
   <div class="e"><span class="yr">2020 · GShard</span>
     <div class="t">GShard：条件计算 + 专家并行，6000 亿参数机器翻译模型<sup class="ref"><a href="#r2">[2]</a></sup></div>
@@ -1292,7 +1513,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <p>本文初稿调研于 2026-08，但 2026 年内开源万亿级 MoE 已完成一轮整体换代——新旗舰全部带有值得单独讲的 MoE 设计：</p>
 <ul>
 <li><b>Kimi K3</b>（月之暗面，2026-07-27，arXiv:2607.24653）：迄今最大开源权重模型，<b>2.78T 总参 / 104.2B 激活</b>。三项新设计：① KDA 线性注意力 + 周期性 Gated MLA（约 3:1）撑起 1M 上下文；② Attention Residuals（AttnRes）让每层可选择性回看之前所有层；③ <b>Stable LatentMoE</b>：896 路由专家选 16 + 2 共享，配 RMSNorm + 软上限激活 SiTU-GLU（防低精度数值爆炸）与 <b>Quantile Balancing</b>——把每专家偏置直接设为"恰好达成目标负载的分位数"，一步到位、无需调步长，是 DeepSeek 偏置法之后均衡谱系的最新一代<sup class="ref"><a href="#r16">[16]</sup>。训练全程 MXFP4 权重 / MXFP8 激活的量化感知训练（QAT）——MoE 量化已从 PTQ 走向原生 QAT。</li>
-<li><b>DeepSeek-V4 / V4.1-Flash</b>（2026-04-26 预览，arXiv:2606.19348；V4.1-Flash 2026-09-10）：V4-Pro（1.6T/49B）+ V4-Flash（284B/13B）双型号；V4.1-Flash 更进一步做成<b>因果编码器-解码器</b>：552B 骨干，输入侧激活 8B、输出侧激活 16B——<b>同一个 MoE 在编码/解码两侧用不同激活预算</b>，为 MoE 设计空间打开"不对称激活"新维度；全局 KV 890 字节/token<sup class="ref"><a href="#r17">[17]</sup>。</li>
+<li><b>DeepSeek-V4 / V4.1-Flash</b>（2026-04-26 预览，arXiv:2606.19348；V4.1-Flash 技术报告 2026-09-17（arXiv:2609.19969）；10-17 迭代为 V4.1-Flash-1017 并上线 Search/Fetch API）：V4-Pro（1.6T/49B）+ V4-Flash（284B/13B）双型号；V4.1-Flash 更进一步做成<b>因果编码器-解码器</b>：552B 骨干，输入侧激活 8B、输出侧激活 16B——<b>同一个 MoE 在编码/解码两侧用不同激活预算</b>，为 MoE 设计空间打开"不对称激活"新维度；全局 KV 890 字节/token<sup class="ref"><a href="#r17">[17]</sup>。</li>
 <li><b>GLM-5 / GLM-5.3-Flash</b>（智谱，2026-02-17，arXiv:2602.15763；5.3-Flash 2026-08-26 MIT 开源）：GLM-5 为 744B/40B、256 专家选 8+1 共享、MLA+DSA；GLM-5.3-Flash（320B/18B）首次在开源前沿模型上采用 34 层 KDA + 11 层稀疏 MLA 混合，注意力计算 −3.01×、KV 缓存 −4.44×（1M 上下文）<sup class="ref"><a href="#r18">[18]</sup>。</li>
 <li><b>Qwen3.8-Flash-Next</b>（阿里，2026-08-26，Qwen4 架构预览）：125B-A6B，每 MoE 层 <b>512 个专家选 10 + 1 共享</b>——至今最细粒度的量产配置之一；另有 51B 参数 n-gram 嵌入表放主机内存，"专家 FFN 之外的第二种稀疏容量容器"，官方称训练成本约为 Qwen3.7-Plus 的 1/9<sup class="ref"><a href="#r19">[19]</sup>。此外 <b>Kimi K2.5</b>（2026-01-27）证明成熟 LLM MoE 骨干可<b>不改路由结构、直接持续预训练成原生多模态模型</b>（15T 图文 token，K2 结构不动）<sup class="ref"><a href="#r20">[20]</sup>——与 §4 的 MoE-LLaVA"先密后疏三阶段"旧范式形成路线对照。</li>
 </ul>
@@ -1303,7 +1524,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 </ul>
 <p>推理侧，显存受限部署成为新热点：<b>MoE-CORE</b>（2026-10-02）用 prefill 交替缓冲 + 路由历史感知替换做专家卸载，DeepSeek-V4-Flash-W4A8 上每 token 38–45 ms（对照 vLLM Prefetch 配置 1268.9 ms）；<b>SSD-LLaMA</b>（HKUST，2026-09-16）让消费级 PC 从 SSD 原生推理万亿 MoE 达 1+ token/s；华为"Trillion-Parameter MoE in a Box"（2026-09-14）用高带宽 Flash 解耦内存供给——回应 §6.3"端侧/边缘 MoE"方向<sup class="ref"><a href="#r23">[23]</sup>。</p>
 
-<h4>2026-10 中旬速览：万亿俱乐部再添三家，"循环 × 稀疏"有了缩放定律</h4>
+<h4>2026-10 中下旬速览：万亿俱乐部再添三家，生产推理框架与路由理论双双换代</h4>
 <p>10 月上中旬，开源前沿 MoE 的阵容继续膨胀，且"激活率军备竞赛"与"第五扩展维度"两条线同时推进：</p>
 <ul>
 <li><b>Mistral Large 4「Le Chonk」</b>（Mistral AI，2026-10-06 公开预览，权重承诺月底开源）：<b>1T 总参 / 52B 激活</b>、原生多模态、hybrid instruct-and-reasoning 一体化，3,800 台 Grace Blackwell 在欧洲自建数据中心训练；Cybench 93%、Coding Agent Index 49.8% 超 DeepSeek V4 Pro 与 Qwen3.8-Max——欧洲主权阵营首次回到万亿俱乐部<sup class="ref"><a href="#r24">[24]</sup>。</li>
@@ -1319,6 +1540,16 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li><b>PixelMoE</b>（USTC + 快手 KlingAI Research，arXiv:2610.18857，2026-10-13）：LLM 式 MoE（Token-Choice + 细粒度专家 + 共享专家 + 偏置法均衡）<b>零改动</b>迁入像素空间扩散模型，配 Pixel-Space Hierarchical Flow Matching；同激活参数下全面胜稠密基线（ImageNet-1K FID 1.47@256²）——§5"扩散战场"的最新证据<sup class="ref"><a href="#r28">[28]</sup>。</li>
 </ul>
 
+<h4>2026-10 下旬增补</h4>
+<ul>
+<li><b>DeepSeek 开源 DeepInfer 生产级推理框架</b>（2026-10-16，github.com/deepseek-ai/DeepInfer）：DeepSeek 生产服务同款（Apache 2.0，基于 vLLM 改造），支持 V4.1-Flash；Attention DP / balanced CP + MoE EP + EPLB 进推理，DSpark 置信度调度投机解码（MTP 变长、draft≤5）、SWA bounded replay、batch-invariant 推理；<b>NVIDIA SM100 与华为昇腾 950 双后端</b>。开源 5 天 17.2k star——"EP+EPLB 进推理"从论文配餐变成生产标配<sup class="ref"><a href="#r29">[29]</a></sup>。</li>
+<li><b>MoonEP：动态冗余专家的「完美均衡」EP 通信库</b>（Moonshot，2026-07-24 建、10-20 更新，github.com/MoonshotAI/MoonEP，1.19k star）：GPU 在线近优规划器 + NVLink 权重预取 + 冗余专家 FP32 梯度归约 + 静态形状（固定 S×K 缓冲，消除 host 同步）。H20/EP=8 实测：路由失衡加剧时通信时间几乎平坦，而 DeepEP v2 随最热 rank 劣化直至 OOM——与 DeepEP V2.5 新增的 <code>lb_prefetch_weights / lb_reduce_grads</code> 原语互相成就，「专家复制」路线（TopoEP/MegaFlux 一族）有了官方接口。</li>
+<li><b>MirrorMoE：共享专家会抑制路由探索</b>（ETH+HKU+MPI，arXiv:2610.22353，alphaXiv 一周 16 票）：共享专家主导表征后路由器方差低约一个数量级，K 从 6→10 几乎无增益；用「取反 logit 混合分布选专家 + 原始概率加权」+ ρ 退火，2.4B 困惑度 21.17→20.50——直接挑战「共享专家 + 细粒度」的默认组合，§1.4「路由崩溃」故事线的重要补笔。</li>
+<li><b>Meta Expert：跨层共享专家池</b>（清华+上海AI Lab，arXiv:2610.27598）：各层共享一个专家池（Meta Experts），同等激活量与粒度下用 70–80% 专家（75–90% 参数）追平 Vanilla MoE，规模越大优势越大——MoE 参数效率的「深度维」新轴，与 Loop Scaling Laws（上文）互补。</li>
+<li><b>MoRE 消歧与复用专家线</b>：Cornell 的 <i>MoRE: Mixture of Reused Experts</i>（arXiv:2609.18176，42 票）通过复用/循环专家降显存——与本文 [21] 所引 UPenn 低秩路由 MoRE（arXiv:2609.36301）<b>同名不同文</b>，引用时注意区分。</li>
+<li><b>消费级 MoE 推理爆发</b>：slotstream（SSD 流式 + 热专家内存缓存，16–64GB Mac 跑 105GB 的 Qwen3.8-Flash-Next，478★）与 coachwhip（16GB Mac 跑 80B Qwen3-Coder-Next 约 13 tok/s）验证了 §6.3「端侧 offloading」方向——MoE 的稀疏性天然适配内存分层。</li>
+<li><b>框架侧</b>：DeepSpeed v0.19.8（10-20）AutoEP 子系统成形——跨 MoE 层共享单个 DeepEP buffer、AutoEP+AutoTP 在 ZeRO-3 下折叠、融合 gate+up 分组 GEMM，DualPipeV 正式并入（PR #8576）；Megatron Core v0.19.2 落地「FP4 in 1F1B A2A overlap」——训练栈与并行篇的路线图兑现。</li>
+</ul>
 <h3>6.2 正在发生的几大趋势（2024–2026）</h3>
 <div class="grid two">
   <div class="card"><h4>① 无辅助损失 / 无损负载均衡成新标准</h4>
@@ -1383,6 +1614,7 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li id="r26">Reflection AI. <i>Introducing Beam</i>. 官方博客, 2026-10-05. <a href="https://reflection.ai/blog/introducing-beam" target="_blank">reflection.ai/blog/introducing-beam</a>（501B/23B）.</li>
 <li id="r27">Yanbei Chen, Anirudh Goyal, Raghuraman Krishnamoorthi（Meta AI）. <i>Scaling Laws for Looped Mixture of Experts</i>. arXiv:2609.40316, 2026-09-30. <a href="https://arxiv.org/abs/2609.40316" target="_blank">arxiv.org/abs/2609.40316</a>.</li>
 <li id="r28">USTC &amp; 快手 KlingAI Research. <i>PixelMoE: Scaling Pixel-Space Diffusion with LLM-Style Mixture of Experts</i>. arXiv:2610.18857, 2026-10-13. <a href="https://arxiv.org/abs/2610.18857" target="_blank">arxiv.org/abs/2610.18857</a>.</li>
+  <li id="r29">DeepSeek-AI. <i>DeepInfer: Production Inference Framework</i>. GitHub, 2026-10-16. <a href="https://github.com/deepseek-ai/DeepInfer" target="_blank">github.com/deepseek-ai/DeepInfer</a>.</li>
 </ol>
 
 <div class="footer">

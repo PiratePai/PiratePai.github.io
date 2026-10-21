@@ -143,7 +143,7 @@
     <div class="kicker">Loop Models · Recurrent Depth · Latent Reasoning</div>
     <h1>Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</h1>
     <div class="sub">同一组权重反复使用，让模型"想得深"而不是"说得长"：从 Universal Transformer 到 COCONUT、Huginn、Ouro，再到 2026 年的 Astra 传闻与循环缩放定律</div>
-    <div class="meta">Pai · 2026-09 · 结合 seal-rg/recurrent-pretraining（Huginn）与 facebookresearch/coconut 源码 · 全部引用附原文与译文</div>
+    <div class="meta">Pai · 2026-09 · 增补 2026-10-21 · 结合 seal-rg/recurrent-pretraining（Huginn）与 facebookresearch/coconut 源码 · 全部引用附原文与译文</div>
     <div>
       <span class="tag">循环深度</span><span class="tag">潜空间推理</span><span class="tag">测试时算力</span><span class="tag">自适应计算</span><span class="tag">2026 产业化</span>
     </div>
@@ -155,6 +155,7 @@
 <nav class="toc">
   <b>目录</b>
   <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
     <li><a href="#why">引子：三个让人困惑的现象，指向同一个答案</a></li>
     <li><a href="#prereq">预备知识：本科生也能懂的"循环深度"原理</a></li>
     <li><a href="#timeline">发展时间线一览（2016–2026）</a></li>
@@ -170,6 +171,27 @@
     <li><a href="#refs">参考与引用出处</a></li>
   </ol>
 </nav>
+
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>循环模型设计有了定论</b><span class="hl-date">10-16 · IFM+CMU</span></div><p>受控消融：三明治与输入注入是收益来源、随机初始化无用；Huginn 十项全胜 Ouro。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>截断还是不截断？</b><span class="hl-date">10-20 · HKU+Yale</span></div><p>近 600 次训练的缩放律：环数可自由选时全 BPTT 最优；两个全训练环省 27% 参数。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>循环深度杀入文生图</b><span class="hl-date">09-30 · 商汤等</span></div><p>Looped-DiT：260M 循环模型胜 6.5× 大模型，同预算加环优于加去噪步（233 票）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LoopAhead 7.82×</b><span class="hl-date">10-15 · 上交+同济</span></div><p>循环模型 × 投机解码合流：早环起草 + 反馈调度，比 LoopSpec 再 +79%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
 
 <h2 id="why">1 · 引子：三个让人困惑的现象，指向同一个答案</h2>
 
@@ -214,7 +236,7 @@
 <h3>2.3 三个必须解决的设计问题</h3>
 <p>把 <code>x ← f(x)</code> 写出来只要一行，但直接这么循环会立刻撞上三个问题——它们恰好定义了这个领域十年的技术演进：</p>
 <div class="grid2">
-  <div class="card"><h5>问题一：状态会"忘题"</h5>循环几轮后，初始输入的信息在反复变换中逐渐丢失，模型忘了题目本身。解法是<b>输入注入（input injection）</b>：每一轮都把输入嵌入重新加回状态——Huginn 的 <code>x = x + input_embeds</code>（第 8 节代码）。</div>
+  <div class="card"><h5>问题一：状态会"忘题"</h5>循环几轮后，初始输入的信息在反复变换中逐渐丢失，模型忘了题目本身。解法是<b>输入注入（input injection）</b>：每一轮都把输入嵌入重新加回状态——Huginn 代码默认的 <code>x = x + input_embeds</code>（第 8 节；官方 3.5B 检查点实际采用 linear 注入：适配器拼接融合，加法仅为教学示意）。</div>
   <div class="card"><h5>问题二：循环会"发散"</h5>同一个非线性映射反复复合，状态范数可能指数爆炸或塌缩到平凡不动点。解法包括残差缩放（按循环数 1/N 调整<span class="cite">[33]</span>）、谱范数约束<span class="cite">[23]</span>、LayerNorm 增益控制<span class="cite">[27]</span>、噪声注入<span class="cite">[12]</span>。</div>
   <div class="card"><h5>问题三：梯度传不回来</h5>循环 L=32 次就要存 32 份中间激活做反向传播，显存爆炸。解法是<b>截断反传</b>：前 L−k 步 <code>no_grad</code>，只对最后 k 步回传梯度（Huginn 的做法，第 8.3 节），或者干脆求不动点后用隐函数定理只存一份状态（DEQ 路线<span class="cite">[3]</span>）。</div>
   <div class="card"><h5>（附带问题：何时停）</h5>难题多想、易题少想，才有性价比。这就是<b>自适应计算</b>问题——从 ACT<span class="cite">[1]</span> 的 halting 机制，到 2026 年按 token 路由循环深度<span class="cite">[16]</span>、按难度置信度退出<span class="cite">[37]</span>，是贯穿十年的暗线。</div>
@@ -409,7 +431,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
 </blockquote>
 
 <h3>6.3 Huginn（2025-02，UMD）：第一个"原生循环"的大语言模型</h3>
-<p>Geiping 等（马里兰大学 Goldstein 组，在美国超算 Frontier 的 4096 块 AMD GPU 上训练）发布的 Huginn-3.5B 是这个领域的<b>成人礼</b>：第一次有循环深度模型从零预训练到数十亿参数规模，并且像正常 LLM 一样可用。架构即图 1 的三明治（1 锚 + 4 核 + 1 锚，参数上它是 6 个块的"小"模型），核心发现：</p>
+<p>Geiping 等（马里兰大学 Goldstein 组，在美国超算 Frontier 的 4096 块 AMD GPU 上训练）发布的 Huginn-3.5B 是这个领域的<b>成人礼</b>：第一次有循环深度模型从零预训练到数十亿参数规模，并且像正常 LLM 一样可用。架构即图 1 的三明治——官方 3.5B 检查点为 prelude 2 层 + 核心 4 层 + coda 2 层（共 8 个块；有效深度 132 = 2 + 4×32 + 2；§8.1 表中的 1+4+1 是代码默认配置），核心发现：</p>
 <ul>
   <li><b>推理时任意加深</b>：训练时平均循环 32 次，推理时可以循环 8 次、64 次，正确率随循环数平滑上升，<b>无需任何微调</b>（他们展示过 zero-shot 推到训练从未见过的深度区间）。</li>
   <li><b>零样本自适应算力</b>：循环状态之间的变化率可以当作"收敛信号"——简单句子状态很快稳定（少循环），难句状态持续变化（多循环）。模型自己"知道"难不难。</li>
@@ -833,7 +855,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li><b>社区基建</b>：Awesome-Loop-Models（2026-04 发布，200+ 篇）+ Reza Bayat 阅读清单 + 各模型网站，构成了这个领域快速扩张的文献底座<span class="cite">[36]</span>。</li>
 </ul>
 
-<h3>11.8 2026-10 中旬速览：缩放定律补齐、显存墙被拆、安全争议公开化</h3>
+<h3>11.8 2026-10 中下旬速览：设计消融给出定论，截断反传有了缩放律答案</h3>
 <p class="lead">四件新事：<b>"Chinchilla for Loops" 的第一版答案出现</b>（Meta Loop Scaling Laws）；<b>循环的显存墙从训练侧拆掉</b>（LPT）且<b>推理侧免训练压缩</b>（FlashLoop）；<b>循坏深度的可审计性争议从学术议题变成公共事件</b>（OpenAI 解雇安全研究员）；外加一个统一比较框架（OperLoop）。</p>
 <ul>
 <li><b>Loop Scaling Laws</b>（Meta AI，arXiv:2609.40316，2026-09-30，alphaXiv 64 票）：首个把<b>循环数 R × 专家数 E × 模型尺寸 × 数据</b>一起建模的缩放定律——核心是"有界、依赖稀疏度的循环映射"（有效参数增益随 R 饱和、随稀疏度抬高渐近上界），dense/MoE/dense-looped 定律全部收为特例。万亿 token 级验证：0.3B 激活/1.3B 总参 LoopMoE 在 R∈{4,5} 上匹配 2 倍大的 MoE；测试时 R 1→5 总分 36.6→46.9。§12 方向一"第三轴的确立"有了第一版硬答案——且循环（≈2× 总参效率）与 MoE 稀疏（≈3× 激活效率）被证明是<b>可叠加的正交轴</b><span class="cite">[68]</span>。</li>
@@ -849,6 +871,14 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <li><b>OperLoop：把循环迁移写成优化器更新规则</b>（HKUST(GZ) + StepFun + 上交等，arXiv:2609.37379，2026-09-29）：把循环隐状态视为 fast weight，将 loop 迁移严格写成"投影 + 局部目标 + 优化器更新（权重衰减 λ、步长 η）"的闭式梯度更新；Ouro/Huginn/Parcae/HyperLoop 等全部映射进该框架，指出 Parcae 与 HyperLoop 存在"输入映射错配"、对齐后即提质——"在哪循环、怎么循环"第一次有了统一比较原理<span class="cite">[72]</span>。</li>
 </ul>
 
+<h4>2026-10 下旬增补</h4>
+<ul>
+<li><b>Towards Looped Models Done Right, Part I</b>（IFM/Berkeley + USC + CMU，arXiv:2610.23036，10-16，25 票）：受控解耦「循环拓扑 / 输入注入 / 潜状态组织」三轴——三明治包络贡献最大（MATH500 +12.0）、prelude 注入助上下文类任务（BBH-CoT +6.6）但伤数学（−3.6）、随机初始化与 H/L 双状态无一致收益；730M/336B token 上完整 Huginn 配置<b>十项全胜 Ouro</b>，并迁移到 8B-A0.8B MoE（500B token，比 112 层前馈 MoE 省 75% 驻留参数）。§7.3「缩放定律之战」的第一份受控答案。代码：github.com/ifm-ai/xllm-loop。</li>
+<li><b>Truncate or Not?</b>（HKU MMLab + Yale，arXiv:2610.26030，10-20）：近 600 次训练拟合统一缩放律——前向环数固定时截断反传确实划算（T=8 省 33–35% 训练算力）；但前向/反向环数都可自由选时<b>全 BPTT 最优</b>；两个全训练环是最佳循环设置（较非循环省 27% 参数、仅多 8% 算力）。为 §8.2「截断反传是有偏妥协」补上量化答案，直接更新方向二的结论。</li>
+<li><b>LoopAhead</b>（上交+同济，arXiv:2610.21594，10-15）：循环 LM 的投机解码——早环状态做多 token lookahead 起草 + 中间环反馈调度暂停/复活分支，对 Ouro-1.4B/2.6B、Raven 系免损最高 <b>7.82×</b>（较 LoopSpec 再 +79.2%）——「循环深度 × 投机解码」合流（方向三）的最强新证据。</li>
+<li><b>Looped-DiT</b>（SenseTime + 清华 + NTU，arXiv:2609.40305，09-30 补录，alphaXiv 233 票为窗口最热）：首个文生图系统性 loop 研究——深监督 + 自调制注意力驯服朴素循环；260M 循环模型胜 6.5× 大模型、省 4.9× 推理算力；同预算下<b>加环深度优于加去噪步</b>，且出现跨环自我纠错。§11.5 战线一应以此为首。</li>
+<li><b>一句话动态</b>：Tübingen/Liquid AI 给出潜轨迹震荡的停止判据（arXiv:2610.18174，14 票）；Eli Lilly + NVIDIA 把循环深度用于临床 NLP（arXiv:2610.27559）；DeltaNet-PC 探索测试时记忆免 BPTT（arXiv:2610.15185）；上交+中科大+NTU 非对称循环 Transformer（arXiv:2610.28489）。</li>
+</ul>
 <h2 id="future">12 · 未来发展方向</h2>
 <p class="lead">综合论文脉络与 2026 年的动态，六个方向最值得关注（★ = 未来 1–2 年最可能出成果）。</p>
 

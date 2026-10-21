@@ -142,12 +142,13 @@
 <header class="hero">
   <div class="kicker">训练系统调研 · 2026</div>
 <h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-16</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-21</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
 </header>
 
 <nav class="toc">
   <div class="in">
     <a href="#ch0">导读</a>
+     <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
     <a href="#ch1">① 为什么并行</a>
     <a href="#ch2">② 预备知识</a>
     <a href="#ch3">③ 数据并行</a>
@@ -192,6 +193,27 @@
 </table>
 </section>
 <section id="ch1">
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EP 进推理成生产标配</b><span class="hl-date">10-16 · DeepSeek</span></div><p>DeepInfer 开源：EP+EPLB 支撑生产服务，SM100 与昇腾 950 双后端。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>通信库跨厂商互认</b><span class="hl-date">10-20 · Moonshot/DeepSeek</span></div><p>MoonEP 与 DeepEP V2.5 原语互相成就，动态冗余专家成 EP 新范式。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>DualPipeV 进主框架</b><span class="hl-date">10-20 · DeepSpeed</span></div><p>v0.19.8 把 DeepEP 缓冲与 V 形流水线收进默认路径，AutoEP 成形。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>AFD：注意力-FFN 解耦</b><span class="hl-date">10-19 · NVIDIA</span></div><p>nccl-extensions 收编 Attention-FFN 解耦原语，与学术线会师。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div></div></div>
+
 <h2 class="sec"><span class="num">1</span>为什么需要并行:显存墙、算力墙与通信墙<span class="roadmap">显存墙 16N 账本 → 算力墙 MFU → 通信墙 α+V/B → 并行是生存问题</span><span class="pill fund">基础</span></h2>
 
 <h3>1.1 模型大了多少?</h3>
@@ -593,6 +615,195 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
 <div class="note"><b>本章小结:</b>PP 通信 = 段间小数据点对点(激活),量小但串行依赖强;优化主旋律是<b>调度(scheduling)</b>:GPipe(简单,显存 O(m))→ 1F1B(显存 O(p))→ 交错式(气泡÷v)→ 零气泡(拆 backward 填气泡)→ 广度优先 / DualPipe(V 形、双向,重排掩盖 EP 通信)。PP 是五类并行中"通信最少"的,因此适合跨节点部署(段间流量小),这使它成为万卡级训练的骨干维度。</div>
 </section>
 <section id="ch6">
+<!-- WIDGET:w7 流水线并行 Gantt · parallelism-survey.html -->
+<div class="ppx-demo" id="PPX-W7">
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>流水线并行：GPipe vs 1F1B——「气泡」没变，变的是显存</b></div>
+  <div class="ppx-bar">
+    <button class="ppx-mode on" data-m="gpipe">GPipe（全前向后全反向）</button>
+    <button class="ppx-mode" data-m="pipedream">1F1B（交替执行）</button>
+    <button class="ppx-play on">⏸ 暂停</button>
+    <button class="ppx-replay">↹ 重播</button>
+    <span style="margin-left:auto">气泡占比 <b class="ppx-bubble ppx-stat">–</b> · 峰值在途微批 <b class="ppx-inflight ppx-stat">–</b>/8（决定激活显存）</span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">横轴时间、纵轴 4 张卡（流水级），蓝块 = 前向 F，橙块 = 反向 B，斜纹 = 卡在干等的「气泡」。一个反直觉的事实：<b>切换模式会发现 1F1B 的总时间和气泡占比与 GPipe 完全一样</b>——它省的不是时间，而是显存：GPipe 要把 8 个微批的激活全部驻留到反向开始，1F1B「前向一个、就反向一个」，每张卡最多驻留 4 个微批（绿色数字 = 当前时刻在途微批数，红色 = 接近上限）。要真正把气泡压小，需要交错调度（VPP）或零气泡调度（ZB：把反向拆成 dgrad + wgrad，让可延后的 wgrad 去填气泡）——这正是正文 §5.4 与 §10.3 的内容。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W7'); if(!root)return;
+var cv=root.querySelector('canvas'),ctx=cv.getContext('2d');
+var LW=880,LH=430,dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
+var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
+var S=4,M=8,F=1,B=2;
+var mode='gpipe',playing=true,cursor=0;
+function buildSchedule(){
+  var seq=[],s,m;
+  for(s=0;s<S;s++)seq.push([]);
+  if(mode==='gpipe'){
+    for(s=0;s<S;s++){for(m=0;m<M;m++)seq[s].push({op:'F',mb:m});for(m=M-1;m>=0;m--)seq[s].push({op:'B',mb:m});}
+  }else if(mode==='pipedream'){
+    for(s=0;s<S;s++){
+      var warm=Math.min(S-1-s,M);
+      for(m=0;m<warm;m++)seq[s].push({op:'F',mb:m});
+      var nf=warm,b=0;
+      while(nf<M){seq[s].push({op:'F',mb:nf});nf++;seq[s].push({op:'B',mb:b});b++;}
+      while(b<M){seq[s].push({op:'B',mb:b});b++;}
+    }
+  }
+  var freeAt=new Array(S).fill(0),fDone=[],bDone=[];
+  for(s=0;s<S;s++){fDone.push(new Array(M).fill(-1));bDone.push(new Array(M).fill(-1));}
+  var ptr=new Array(S).fill(0),events=[],guard=0;
+  while(guard++<20000){
+    var progressed=false;
+    for(var s2=0;s2<S;s2++){
+      while(ptr[s2]<seq[s2].length){
+        var ins=seq[s2][ptr[s2]],ready,dur;
+        if(ins.op==='F'){ready=(s2===0)?0:fDone[s2-1][ins.mb];dur=F;}
+        else{ready=(s2===S-1)?fDone[s2][ins.mb]:bDone[s2+1][ins.mb];dur=B;}
+        var st=Math.max(freeAt[s2],ready===-1?Infinity:ready);
+        if(st===Infinity)break;
+        events.push({s:s2,op:ins.op,mb:ins.mb,st:st,en:st+dur});
+        if(ins.op==='F')fDone[s2][ins.mb]=st+dur;else bDone[s2][ins.mb]=st+dur;
+        freeAt[s2]=st+dur;ptr[s2]++;progressed=true;
+      }
+    }
+    if(!progressed)break;
+    if(ptr.every(function(p,s3){return p>=seq[s3].length;}))break;
+  }
+  var T=Math.max.apply(null,events.map(function(e){return e.en;}));
+  return {events:events,T:T};
+}
+function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+var sched=buildSchedule();
+function inflightAt(s,t){
+  // 微批 mb 在 stage s 已完成前向且反向(W 视为反向尾)未完成
+  var n=0;
+  for(var m=0;m<M;m++){
+    var f=null,bw=null;
+    for(var i=0;i<sched.events.length;i++){
+      var e=sched.events[i];
+      if(e.s===s&&e.mb===m){
+        if(e.op==='F')f=e.en;
+        if(e.op==='B')bw=Math.max(bw||0,e.en);
+      }
+    }
+    if(f!==null&&f<=t+1e-9&&(bw===null||bw>t+1e-9))n++;
+  }
+  return n;
+}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  var x0=86,y0=64,cw=(LW-x0-64),ch=64,gap=14;
+  var T=sched.T;
+  var X=function(t){return x0+t/T*cw;};
+  var names={gpipe:'GPipe',pipedream:'1F1B'};
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText(names[mode]+'：8 微批 × 4 级流水 · F=1 格，B=2 格',x0,40);
+  for(var s=0;s<S;s++){
+    var sy=y0+s*(ch+gap);
+    ctx.strokeStyle=C.line;ctx.strokeRect(x0,sy,cw,ch);
+    ctx.fillStyle=C.muted;ctx.font='12px sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText('卡 '+(s+1),x0-10,sy+ch/2);
+  }
+  for(var i=0;i<sched.events.length;i++){
+    var e=sched.events[i],sy=y0+e.s*(ch+gap);
+    var ex0=X(e.st),ex1=X(e.en);
+    var col=e.op==='F'?C.blue:(e.op==='B'?C.orange:C.purple);
+    ctx.fillStyle=hexA(col,.8);
+    ctx.fillRect(ex0,sy+3,Math.max(1.5,ex1-ex0-2),ch-6);
+    ctx.strokeStyle=col;ctx.strokeRect(ex0+.5,sy+3.5,Math.max(1.5,ex1-ex0-2),ch-7);
+    if(ex1-ex0>15){
+      ctx.fillStyle='#0d1017';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(e.op+(e.mb+1),(ex0+ex1)/2,sy+ch/2);
+    }
+  }
+  // bubbles + inflight
+  var bubble=0,total=S*T,peakIn=0;
+  var tc=Math.min(cursor,T);
+  for(var s2=0;s2<S;s2++){
+    var sy2=y0+s2*(ch+gap);
+    var busy=sched.events.filter(function(e){return e.s===s2;}).map(function(e){return [e.st,e.en];});
+    busy.sort(function(a,b){return a[0]-b[0];});
+    var cur=0;
+    for(var b2=0;b2<busy.length;b2++){
+      if(busy[b2][0]>cur+0.01){
+        hatch(X(cur),sy2,X(busy[b2][0])-X(cur),ch,'rgba(255,107,107,.28)');
+        bubble+=(busy[b2][0]-cur);
+      }
+      cur=Math.max(cur,busy[b2][1]);
+    }
+    if(cur<T-0.01){hatch(X(cur),sy2,X(T)-X(cur),ch,'rgba(255,107,107,.28)');bubble+=(T-cur);}
+    var nf=inflightAt(s2,tc);
+    peakIn=Math.max(peakIn,nf);
+    ctx.fillStyle=nf>=6?C.red:(nf>=4?C.orange:C.green);
+    ctx.font='bold 12px monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(nf+' 在途',x0+cw+8,sy2+ch/2);
+  }
+  root.querySelector('.ppx-bubble').textContent=Math.round(100*bubble/total)+'%';
+  // 峰值在途（全程最大，每个调度只算一次并缓存）
+  if(sched.__peak===undefined){
+    var pk=0;
+    for(var t=0;t<=T;t+=0.25){var m2=0;for(var s3=0;s3<S;s3++)m2=Math.max(m2,inflightAt(s3,t));pk=Math.max(pk,m2);}
+    sched.__peak=pk;
+  }
+  root.querySelector('.ppx-inflight').textContent=sched.__peak;
+  // cursor
+  var cx=X(tc);
+  ctx.strokeStyle=C.green;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx,y0-8);ctx.lineTo(cx,y0+S*(ch+gap)-gap+6);ctx.stroke();ctx.lineWidth=1;
+  ctx.fillStyle=C.green;ctx.font='11px sans-serif';ctx.textAlign='left';
+  ctx.fillText('t='+tc.toFixed(1),cx+4,y0-12);
+  var ly=y0+S*(ch+gap)-gap+22;
+  ctx.font='12px sans-serif';ctx.textBaseline='middle';
+  var lx=x0;
+  ctx.fillStyle=hexA(C.blue,.8);ctx.fillRect(lx,ly-8,15,15);ctx.strokeStyle=C.blue;ctx.strokeRect(lx,ly-8,15,15);
+  ctx.fillStyle=C.muted;ctx.fillText('F 前向',lx+20,ly);lx+=75;
+  ctx.fillStyle=hexA(C.orange,.8);ctx.fillRect(lx,ly-8,15,15);ctx.strokeStyle=C.orange;ctx.strokeRect(lx,ly-8,15,15);
+  ctx.fillStyle=C.muted;ctx.fillText('B 反向',lx+20,ly);lx+=75;
+  ctx.fillStyle=hexA(C.purple,.8);ctx.fillRect(lx,ly-8,15,15);ctx.strokeStyle=C.purple;ctx.strokeRect(lx,ly-8,15,15);
+  ctx.fillStyle=C.muted;ctx.fillText('W 权重梯度（可延后）',lx+20,ly);lx+=185;
+  hatch(lx,ly-8,15,15,'rgba(255,107,107,.3)');
+  ctx.fillStyle=C.muted;ctx.fillText('气泡（级数越多越痛 ≈ (级数−1)×(F+B)/总时长）',lx+20,ly);
+}
+function hatch(x,y,w,h,color){
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  ctx.strokeStyle=color;ctx.lineWidth=1;
+  for(var d=-h;d<w;d+=7){ctx.beginPath();ctx.moveTo(x+d,y+h);ctx.lineTo(x+d+h,y);ctx.stroke();}
+  ctx.restore();
+}
+var last=0;
+function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;
+  if(playing){cursor+=dt*3;if(cursor>sched.T+1)cursor=0;}
+  draw();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+root.querySelectorAll('.ppx-mode').forEach(function(b){
+  b.addEventListener('click',function(){
+    root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');mode=b.dataset.m;sched=buildSchedule();cursor=0;
+  });
+});
+root.querySelector('.ppx-play').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ 暂停':'▶ 播放';this.classList.toggle('on',playing);});
+root.querySelector('.ppx-replay').addEventListener('click',function(){cursor=0;});
+})();
+</script>
+<!-- /WIDGET:w7 -->
+
 <h2 class="sec"><span class="num">6</span>专家并行(EP)与 MoE:让 token 去找专家<span class="roadmap">MoE 负载不均 → all-to-all 通信 → DeepEP → DeepSeek-V3 实战</span><span class="pill ep">专家并行 EP</span></h2>
 <div class="tl">
   <div class="e"><div class="yr">2017-01</div><div class="t">稀疏门控 MoE(开山)</div></div>
@@ -869,9 +1080,9 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li><b>MSCCL++ 被 ASPLOS 2026 录用</b>(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
 </ul>
 
-<h3>10.8 2026-10 中旬速览:NCCL 收编 EP 原语,通算掩盖进框架图编译</h3>
+<h3>10.8 2026-10 中下旬速览:NCCL 收编 EP 原语,EP 通信库跨厂商、AFD 解耦进场</h3>
 <ul>
-<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统——<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%——"EP 原语进通信库"与 DeepEP 形成正面会师,§11.2 预言的"统一 EP 通信抽象"正在被 NVIDIA 官方兑现。</li>
+<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7（注：DeepEP V2.5 起另要求 NCCL ≥ 2.32.3 的 Gin 后端，两条版本线并行）):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统——<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%——"EP 原语进通信库"与 DeepEP 形成正面会师,§11.2 预言的"统一 EP 通信抽象"正在被 NVIDIA 官方兑现。</li>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/ncclep-fig4.svg" loading="lazy" alt="GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
@@ -885,6 +1096,14 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </ul>
 </section>
 <section id="ch11">
+<h4>2026-10 下旬增补</h4>
+<ul>
+<li><b>DeepInfer:DeepSeek 生产推理框架开源</b>(2026-10-16,5 天 17.2k star):Attention DP/balanced CP + MoE EP + EPLB 进入<b>推理</b>侧,NVIDIA SM100 与华为昇腾 950 双后端——§11.5「训练-推理边界消融」的最强实证:EP 不只用于训练,反向成为推理服务的并行主轴。</li>
+<li><b>MoonEP「完美均衡」EP 通信库</b>(Moonshot,H20/EP=8 实测失衡加剧时通信时间几乎平坦,与 DeepEP V2.5 的 <code class="inl">lb_prefetch_weights/lb_reduce_grads</code> 原语互相成就):动态冗余专家 + 静态形状缓冲,「专家复制」线(TopoEP/MegaFlux)的官方化落地。</li>
+<li><b>DeepSpeed v0.19.8(10-20):AutoEP 子系统成形 + DualPipeV 正式并入</b>(PR #8576):跨 MoE 层共享单个 DeepEP buffer、AutoEP+AutoTP 在 ZeRO-3 下折叠、融合 gate+up 分组 GEMM——DeepEP 缓冲与 V 形流水线从「专用组件」变「框架默认路径」。</li>
+<li><b>nccl-extensions 新增 AFD(Attention-FFN Disaggregation)</b>(NVIDIA,10-19 连续三提交):注意力-FFN 解耦的通信支持进入官方扩展,与 DisagMoE/HeterMoE 学术线会师。</li>
+<li><b>Megatron Core v0.19.2(09-18)</b>:路线图上的「1F1B EP A2A overlap」落地且支持 FP4(PR #6135);10 月另出 26.09 系列 5 个 RC。<b>FastEEP</b>(上交,arXiv:2610.18451)把「弹性 EP」带进 serving——§11.8 弹性并行预言的首个 serving 侧代表作。<b>Zyphra</b>(arXiv:2610.09372)用专家共激活相关性做放置+token 重排,免费降低跨 rank 流量。</li>
+</ul>
 <h2 class="sec"><span class="num">11</span>未来发展方向<span class="roadmap">scale-up 域膨胀 → EP 主战场 → 精度下沉 → 边界消融</span><span class="pill fut">未来</span></h2>
 <p class="lead">综合第 10 章的证据,以下八个方向是未来 2~5 年并行策略与通信优化最可能的主战场。每条都标注了当前的最新锚点。</p>
 <h3>11.1 Scale-up 域膨胀,重画并行版图</h3>

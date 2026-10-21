@@ -143,7 +143,7 @@
     <div class="kicker">Speculative Decoding · Post-Training</div>
     <h1>投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）</h1>
     <div class="sub">训练如何让"起草—验证"范式越跑越快：草稿蒸馏、解码头训练、目标模型自投机、训练时测试、在策蒸馏与 RL 协同训练</div>
-    <div class="meta">Pai · 2026-09 · 结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码 · 全部引用附原文与译文</div>
+    <div class="meta">Pai · 2026-09 · 增补 2026-10-21 · 结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码 · 全部引用附原文与译文</div>
     <div>
       <span class="tag">草稿侧训练</span><span class="tag">目标侧训练</span><span class="tag">训练目标革新</span><span class="tag">RL 协同训练</span><span class="tag">2026 生产化</span>
     </div>
@@ -155,6 +155,7 @@
 <nav class="toc">
   <b>目录</b>
   <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
     <li><a href="#why">为什么投机解码需要"后训练"？—— 一个公式讲清全部动机</a></li>
     <li><a href="#prereq">预备知识：本科生也能懂的投机采样原理</a></li>
     <li><a href="#timeline">发展时间线一览（2018–2026）</a></li>
@@ -168,6 +169,27 @@
     <li><a href="#refs">参考与引用出处</a></li>
   </ol>
 </nav>
+
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>ECHO：主干即草稿</b><span class="hl-date">10-17 · 百度</span></div><p>主干终层自递归预测、零外挂模块，开放生成反超 EAGLE-3/DSpark——“预训练自带”首次正面击败后训练草稿器。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>千分算力装上 MTP</b><span class="hl-date">10-01 · 微软</span></div><p>冻结目标模型、仅 2.5B 自生成 CoT token 后训练 MTP 头，追平联合预训练的 MiMo-7B 草稿链。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>γ 旋钮的理论化</b><span class="hl-date">10-20 · Georgia Tech</span></div><p>AMTP 把 MTP 视界选择建成在线控制问题（survival 建模+次线性 regret），8/10 胜固定窗口。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>agentic 负载新战场</b><span class="hl-date">10-16 · 上交大等</span></div><p>DLite：智能体场景免草稿历史 KV，两阶段训练，比 DSpark 最高 +70%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
 
 <h2 id="why">1 · 为什么投机解码需要"后训练"？</h2>
 
@@ -666,7 +688,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr><td>外溢与基准</td><td>OUTLETS、Speed-Bench、多模态综述（2026）</td><td>草稿特征服务调度；评测从接受率走向实际加速</td></tr>
 </table>
 
-<h3>9.8 2026-10 中旬速览：MTP 进入后训练循环，"训练你所验证的"</h3>
+<h3>9.8 2026-10 中下旬速览：MTP 进入后训练循环，主干即草稿挑战后训练范式</h3>
 <p class="lead">三件新事直接落在本文的主线上：<b>NVIDIA 把 MTP 头纳入后训练强化（MTP boosting）</b>、<b>TreeSpark 把"部署时的树形展开"搬进训练目标</b>、<b>verl-SpeCo 让草稿在 RL 训练循环内持续对齐</b>。</p>
 
 <h4>① Nemotron 3.5 的 MTP boosting（2026-10-14）：草稿头也要"后训练强化"</h4>
@@ -683,6 +705,18 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 
 <h4>③ verl-SpeCo：草稿协同训练进 RL 循环</h4>
 <p>verl 项目（字节 Seed 发起的社区）发布 SpeCo 框架：RL 训练与推理共享同一套草稿，<b>训练期保持草稿对齐、部署期直接复用</b>——把"在策蒸馏"（§7）推广为"训练-部署草稿一体化"，与 NVIDIA 模型-系统协同设计博客构成同一趋势的两个落点。<span class="cite">[48]</span></p>
+
+<h4>④ ECHO（2026-10-17，百度 ERNIE）：主干自递归，“预训练自带”首次正面击败后训练草稿器</h4>
+<p><b>范式信号</b>：ECHO 用主干自己的最后一层递归预测每个 horizon——零外挂模块、零草稿对齐损失；Dynamic Depth Sampling 让期望训练深度仅 1.5（深度 3 的开销减半）。10B-A1B MoE 预训练 600B token：深度 3 时 14 基准 36.36，超过 DeepSeek 式外挂 MTP 的 35.38；推理时主干自己当草稿、可外推超出训练深度；在开放高熵生成上反超 EAGLE-3 / DSpark / DFlash 等“后训练草稿器”。这直接挑战本文的主线叙事：草稿能力未必需要“训练一个草稿”，可以“把草稿长在主干里”。代码开源（github.com/ernie-research/ECHO）。</p>
+
+<h4>⑤ 微软：Match the Distribution, Not the Compute（2026-10-01）：后训练算力再砍三个数量级</h4>
+<p>冻结 Qwen3-8B，仅用 ≈2.5B 目标自生成 CoT token 做链式 MTP 头后训练（纯交叉熵），MAL 追平/超过联合预训练的 MiMo-7B 草稿链——MTP 训练算力省 10³–10⁴×；另提出链感知近似验证（MAL +12–16%）与自适应 K bandit。本文“后训练 vs 预训练”之争的最强新证据：蒸馏分布比算力规模更关键。</p>
+
+<h4>⑥ γ 旋钮、评测与 agentic 负载（10-18 – 10-20）</h4>
+<p><b>AMTP</b>（Georgia Tech，arXiv:2610.28619）把“选多长的 MTP 视界”建成在线控制问题（survival/hazard 建模 + 次线性 regret），10 组实验 8 组胜固定窗口、最高 +10%，跨模型组态 4.55×——SpecDec++/DSpark 置信度头这条“γ 旋钮”线的理论升级版；<b>BitMTP</b>（港理工，arXiv:2610.28500）首次系统研究 MTP×低比特 LLM。<b>When Does Better Acceptance Pay?</b>（百度+北大，arXiv:2610.24993）用受控实验回答“多花算力换接受长度何时划算”。<b>DLite</b>（上交大，arXiv:2610.23787）则证明 agentic 负载需要“免草稿历史”的两阶段训练（同构 teacher 热身）——与 §9.7 的“训练你所验证的”形成互补：一个改训练目标，一个改训练数据来源。</p>
+
+<h4>⑦ 框架侧（10-18/19）</h4>
+<p>vLLM v0.32.0：DFlash/DSpark 草稿 in-graph metadata（#60692）、adaptive block verification（#60945）、DeepSeek-V4 融合 MTP drafting（#58463）；SGLang v0.5.22：DSpark 上 AMD MI350X/MI355X（#41308）、DFlash 家族 block verification（#43012）；FlashInfer v0.7.2 投机验证多 token 行在 B200/B300 自动路由 cuDNN（#5508）。“并行草稿 + 其后训练”已是引擎默认路径。</p>
 
 <h2 id="future">10 · 未来发展方向</h2>
 
@@ -748,7 +782,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr><td>[40]</td><td>Gu et al. (NAVER AI Lab &amp; Korea Univ.). DLoop: Looped Speculative Decoding. <a href="https://arxiv.org/abs/2610.07659">arXiv:2610.07659</a>；代码 github.com/naver-ai/dloop</td><td>2026-10-06</td></tr>
   <tr><td>[41]</td><td>Yu et al. (UC Riverside &amp; AWS &amp; NYU). DEdit: Iterative Draft Editing for Speculative Decoding. <a href="https://arxiv.org/abs/2609.38510">arXiv:2609.38510</a></td><td>2026-09-29</td></tr>
   <tr><td>[42]</td><td>Eldenk et al. Attention Drift: What Autoregressive Speculative Decoding Models Learn. <a href="https://arxiv.org/abs/2605.09992">arXiv:2605.09992</a></td><td>2026-05-11</td></tr>
-  <tr><td>[43]</td><td>Sandler et al. (Lehigh Univ.). SpecDiff-2: Scaling Diffusion Drafter Alignment for Faster Speculative Decoding. MLSys 2026 Oral. <a href="https://mlsys.org/virtual/2026/oral/3755">mlsys.org</a></td><td>2026-05</td></tr>
+  <tr><td>[43]</td><td>Sandler et al. (Lehigh Univ.). SpecDiff-2: Scaling Diffusion Drafter Alignment for Faster Speculative Decoding. MLSys 2026 Oral. <a href="https://mlsys.org/virtual/2026/oral/3755">mlsys.org</a>（arXiv:2511.00606 首发 2025-11-01）</td><td>2026-05（会议时间）</td></tr>
   <tr><td>[44]</td><td>Google. Multi-Token Prediction in Gemma 4. 官方博客（权重 Apache 2.0）. <a href="https://blog.google/technology/developers/multi-token-prediction-gemma-4">blog.google</a></td><td>2026-05-05</td></tr>
   <tr><td>[45]</td><td>北京大学 &amp; 腾讯. DFlare: Scaling Up Draft Capacity for Block Diffusion Speculative Decoding. <a href="https://arxiv.org/abs/2606.02091">arXiv:2606.02091</a>；代码 github.com/Tencent/AngelSlim</td><td>2026-06-01</td></tr>
   <tr><td>[46]</td><td>NVIDIA. Nemotron 3.5 Super and Lightning Technical Report（MTP 热身 + 后训练 boosting）. <a href="https://research.nvidia.com/labs/nemotron/">research.nvidia.com</a></td><td>2026-10-14</td></tr>

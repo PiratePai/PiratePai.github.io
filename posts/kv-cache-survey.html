@@ -249,14 +249,35 @@
 <b class="t">一张"记账卡"帮助理解全文</b>
 每个 token 每层需要缓存的字节数 ≈ <code>2 × n_kv_heads × head_dim × dtype_bytes</code>（因子 2 是 K 和 V）。
 <ul>
-<li><b>Llama-1-65B 若不用 GQA</b>（80 层 MHA 64 头 × 128 维，FP16）：≈ 5.2 MB/token → 一条 128K 请求就要 <b>约 680 GB</b>，单卡 80GB 根本放不下（注：Llama-2-70B 实际已用 GQA，见下一行）；</li>
+<li><b>Llama-1-65B 若不用 GQA</b>（80 层 MHA 64 头 × 128 维，FP16）：2×80×64×128×2 B ≈ 2.6 MB/token → 一条 128K 请求就要 <b>约 340 GB</b>，单卡 80GB 根本放不下（注：Llama-2-70B 实际已用 GQA，见下一行）；</li>
 <li><b>Llama-3-70B</b>（GQA 8 个 KV 头）：≈ 320 KB/token → 128K 约 <b>40 GB</b>，勉强一两并发；</li>
 <li><b>DeepSeek-V3</b>（MLA，每层每 token 只缓存 512 维 latent + 64 维 RoPE 键）：≈ 70 KB/token → 128K 仅 <b>约 8.7 GB</b>。</li>
 </ul>
-同一个 128K 上下文，从 680 GB 到 8.7 GB，差 80 倍——这就是各条路线叠加后能到达的地方。KVQuant 论文给出的对照：LLaMA-7B 存 128K 上下文的 KV 需要 64GB（FP16），量化到 2 bit 后单张 A100-80G 可服务 1M 上下文<sup class="c"><a href="#ref-26">[26]</a></sup>。
+同一个 128K 上下文，从 340 GB 到 8.7 GB，差约 40 倍——这就是各条路线叠加后能到达的地方。KVQuant 论文给出的对照：LLaMA-7B 存 128K 上下文的 KV 需要 64GB（FP16），量化到 2 bit 后单张 A100-80G 可服务 1M 上下文<sup class="c"><a href="#ref-26">[26]</a></sup>。
 </div>
 
 <!-- ================================================================ -->
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>前缀缓存上互联网</b><span class="hl-date">10-16 · UCSC</span></div><p>KVCompass 提出跨地理集群共享前缀缓存的"发现平面"，复用收益首次突破单集群边界。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Agent KV 常驻显存实测</b><span class="hl-date">10-16 · MSR+IISc</span></div><p>首个生产级 Agent 负载 KV 常驻行为刻画，为会话感知路由补上实证地基。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>低比特 KV 出厂默认</b><span class="hl-date">10-18 · vLLM v0.32</span></div><p>NVFP4 KV 铺满 SM8x–SM12x，GLM-5.x 默认 FP8 KV，4-bit KV 进稀疏注意力模型。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>KV 池走向多租户</b><span class="hl-date">10-21 · Mooncake</span></div><p>跨 TP/PP 布局 reshard 重用、Intel XPU RDMA、多租户配额相继合入。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div>
+
 <h2 id="s1"><span class="no">1</span>预备知识：KV Cache 是什么，为什么它既是救星又是瓶颈</h2>
 
 <h3>1.1 从注意力的计算说起</h3>
@@ -291,7 +312,7 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
 <p>对标准的多头注意力（MHA）模型，KV cache 大小的经典公式（PagedAttention 论文中亦给出）为：</p>
 <pre><code>KV_bytes = 2 × batch × seq_len × n_layers × n_kv_heads × head_dim × dtype_bytes
            └K,V┘   └── 每条请求 ──┘ └────── 每 token 每层 ──────┘</code></pre>
-<p>代入第 0 节表格中的三个模型即可感受到量级差异：70B 级 MHA 模型每 token 约 5MB，128K 上下文单请求 680GB——这意味着<strong>不经任何优化，长上下文服务在物理上不可能</strong>。而每 token 70KB 的 MLA 模型，一张 80GB 卡可以同时服务多条 128K 请求。七条技术路线，就是从公式中的每一个因子下手：<code>n_kv_heads</code>（结构压缩）、<code>dtype_bytes</code>（量化）、有效 <code>seq_len</code>（稀疏/驱逐）、被同时保留的 <code>batch × seq_len</code>（分页/复用/卸载）、乃至"还要不要这个公式"（混合架构）。</p>
+<p>代入第 0 节表格中的三个模型即可感受到量级差异：70B 级 MHA 模型每 token 约 2.6MB，128K 上下文单请求约 340GB——这意味着<strong>不经任何优化，长上下文服务在物理上不可能</strong>。而每 token 70KB 的 MLA 模型，一张 80GB 卡可以同时服务多条 128K 请求。七条技术路线，就是从公式中的每一个因子下手：<code>n_kv_heads</code>（结构压缩）、<code>dtype_bytes</code>（量化）、有效 <code>seq_len</code>（稀疏/驱逐）、被同时保留的 <code>batch × seq_len</code>（分页/复用/卸载）、乃至"还要不要这个公式"（混合架构）。</p>
 
 <p>最后补一个系统视角：vLLM 论文实测，服务 13B 模型时显存里权重占约 65%，KV cache 可占 30% 以上，且随批大小增长——<strong>KV cache 的管理方式直接决定最大批大小，从而决定吞吐</strong><sup class="c"><a href="#ref-12">[12]</a></sup>。</p>
 
@@ -378,7 +399,7 @@ k_C = W_uk @ c_kv           # 还原出各头的“无位置”部分
 v   = W_uv @ c_kv           # 还原出各头的 V
 k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
 # 注意力照常：q @ kᵀ → softmax → @ v</code></pre>
-<p class="code-note">DeepSeek-V3 实际配置：61 层 × (512 + 64) 维 × 2 字节(bf16) ≈ 70 KB/token。作为对比，Llama-3-70B（GQA）约 320 KB/token，Llama-2-70B（MHA）约 5.2 MB/token。</p>
+<p class="code-note">DeepSeek-V3 实际配置：61 层 × (512 + 64) 维 × 2 字节(bf16) ≈ 70 KB/token。作为对比，Llama-3-70B（GQA）约 320 KB/token，而 Llama-1-65B 这类 MHA 老模型约 2.6 MB/token（Llama-2-70B 本身已用 GQA）。</p>
 
 <p>这里有个绕不开的细节：<b>为什么位置编码部分要单独拎出来？</b>主流模型用 RoPE（旋转位置编码），它把位置信息乘进 K 向量。如果对带 RoPE 的 K 做低秩压缩，还原时的矩阵乘法会与旋转操作"打架"（旋转依赖 token 位置，而缓存的对端是任意位置的 query）。DeepSeek 的解法是<b>解耦</b>：无位置信息的部分走低秩 latent（512 维），带 RoPE 的键单独小份缓存（64 维），两头拼接后参与注意力。这就是论文中"Decoupled RoPE"一节的内容。</p>
 
@@ -474,6 +495,178 @@ class KVCacheManager:
 <p>几个值得注意的工程细节：① 前缀缓存以<strong>块哈希</strong>为单位（token 序列 + 模型/LoRA 等命名空间信息一起哈希），命中即免 prefill；② 滑窗模型中"滑出窗口"的块会被立即回收（<code>remove_skipped_blocks</code>），这就是 3.3 节说的交替滑窗模型的 KV 管理方式；③ 2025 年后的 vLLM 已原生支持 Mamba/混合层——RNN 状态作为一种新的"块类型"参与同一套池子，这为第 9 节的混合架构铺平了系统侧道路。</p>
 
 <!-- ================================================================ -->
+<!-- WIDGET:w3 KV Cache 分页管理 · kv-cache-survey.html -->
+<div class="ppx-demo" id="PPX-W3">
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>KV Cache 显存管理：静态预留 vs 分页分配 vs 前缀缓存</b></div>
+  <div class="ppx-bar">
+    <button class="ppx-mode" data-m="static">静态预留（旧方式）</button>
+    <button class="ppx-mode on" data-m="paged">分页分配（PagedAttention）</button>
+    <label><input type="checkbox" class="ppx-prefix"> 共享系统提示词（前缀缓存）</label>
+    <button class="ppx-play on" style="margin-left:6px">⏸ 暂停</button>
+    <button class="ppx-reset">↻ 重置</button>
+    <span style="margin-left:auto">占用 <b class="ppx-occ ppx-stat">0</b>/96 块 · 有效利用率 <b class="ppx-util ppx-stat">–</b> · 内部碎片 <b class="ppx-frag ppx-stat">0</b> 块 · 排队 <b class="ppx-wait ppx-stat">0</b></span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">每个色块 = 一页 16 个 token 的 KV Cache，色块内填充高度 = 已写入的 token 数。静态方式按「最大可能长度」整段预留，请求未生成到的部分全部浪费（橙色斜纹 = 预留未用，即内部碎片），且必须连续、放不下就只能排队；PagedAttention 像操作系统一样按页按需分配、见缝插针，利用率显著提高。勾选前缀缓存后，所有请求共享同一份系统提示词 KV（左上角紫色两块），每个请求都少算少存一截。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W3'); if(!root)return;
+var cv=root.querySelector('canvas'),ctx=cv.getContext('2d');
+var LW=880,LH=478,dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
+var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
+var COLS=16,ROWS=6,TOT=COLS*ROWS,BS=46,BLK=16;
+var COL=['#41d1a7','#6ea8ff','#ffb454','#ff8fa3','#9d7bff','#5fd4f0','#c9d86b','#f09a5f'];
+var mode='paged',prefix=false,playing=true;
+var blocks,reqs,queue,nextId,spawnT;
+function PFX(){return prefix?32:0;} // shared prefix tokens
+function ownTokens(r){return Math.max(0,r.P-PFX())+r.out;}
+function needNow(r){return Math.ceil(ownTokens(r)/BLK);}
+function needMax(r){return Math.ceil((Math.max(0,r.P-PFX())+r.G)/BLK);}
+function reset(){
+  blocks=new Array(TOT).fill(null);
+  reqs=[];queue=[];nextId=1;spawnT=0.5;
+  if(prefix){blocks[0]={req:0,kind:'pfx',fill:16};blocks[1]={req:0,kind:'pfx',fill:16};}
+}
+function freeRun(n){var run=0;for(var i=0;i<TOT;i++){if(!blocks[i])run++;else run=0;if(run===n)return i-n+1;}return -1;}
+function freeAny(n){var out=[];for(var i=0;i<TOT&&out.length<n;i++)if(!blocks[i])out.push(i);return out.length===n?out:null;}
+function admit(){
+  for(var w=0;w<queue.length;w++){
+    var r=queue[w],need=(mode==='static')?needMax(r):needNow(r),got=null;
+    if(mode==='static'){var st=freeRun(need);if(st>=0){got=[];for(var b=0;b<need;b++)got.push(st+b);}}
+    else got=freeAny(need);
+    if(got){
+      r.blocks=got;r.max=(mode==='static')?need:0;
+      for(var g=0;g<got.length;g++)blocks[got[g]]={req:r.id,fill:0};
+      reqs.push(r);queue.splice(w,1);w--;
+    }
+  }
+}
+function spawn(){
+  queue.push({id:nextId++,P:40+Math.floor(Math.random()*24),G:28+Math.floor(Math.random()*60),out:0,
+              color:COL[(nextId-1)%8]});
+}
+function step(dt){
+  spawnT-=dt;
+  if(spawnT<=0){spawn();spawnT=(mode==='static'?4.4:2.4)+Math.random()*1.5;}
+  admit();
+  for(var i=0;i<reqs.length;i++){
+    var r=reqs[i];r.out+=dt*3.2; // 每秒约 3 个 token，便于观察
+    if(mode==='paged'){
+      var need=needNow(r);
+      if(need>r.blocks.length){
+        var g=freeAny(1);
+        if(g){blocks[g[0]]={req:r.id,fill:0};r.blocks.push(g[0]);}
+        else{r.out=r.G;continue;} // OOM → 结束该请求（简化处理）
+      }
+    }
+    if(r.out>=r.G){
+      for(var b=0;b<r.blocks.length;b++)blocks[r.blocks[b]]=null;
+      reqs.splice(i,1);i--;
+    }
+  }
+  // fill levels: distribute ownTokens over r.blocks (sorted)
+  for(var q=0;q<reqs.length;q++){
+    var rr=reqs[q],T=ownTokens(rr),arr=rr.blocks.slice().sort(function(a,b){return a-b;});
+    for(var m=0;m<arr.length;m++){
+      blocks[arr[m]].fill=Math.max(0,Math.min(BLK,T-m*BLK));
+    }
+  }
+  // stats
+  var occ=0,frag=0,used=0;
+  for(var s=0;s<TOT;s++){
+    var bl=blocks[s];if(!bl)continue;occ++;
+    if(bl.req===0){used+=bl.fill;continue;}
+    var own=reqs.filter(function(x){return x.id===bl.req;})[0];
+    if(own){
+      used+=bl.fill;
+      if(mode==='static'){var idx=own.blocks.indexOf(s);if(bl.fill===0&&idx*BLK>=T)frag++;}
+    }
+  }
+  root.querySelector('.ppx-occ').textContent=occ;
+  root.querySelector('.ppx-frag').textContent=frag;
+  root.querySelector('.ppx-wait').textContent=queue.length;
+  root.querySelector('.ppx-util').textContent=occ?Math.round(100*used/(occ*BLK))+'%':'–';
+}
+function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+function hatch(x,y,w,h,color){
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  ctx.strokeStyle=color;ctx.lineWidth=1;
+  for(var d=-h;d<w;d+=7){ctx.beginPath();ctx.moveTo(x+d,y+h);ctx.lineTo(x+d+h,y);ctx.stroke();}
+  ctx.restore();
+}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  var x0=36,y0=64,gap=6;
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText('GPU 显存：96 个 KV 块 × 每块 16 token'+(prefix?'（左上紫块 = 所有请求共享的系统提示词前缀）':''),x0,40);
+  for(var i=0;i<TOT;i++){
+    var cx=x0+(i%COLS)*(BS+gap),cy=y0+Math.floor(i/COLS)*(BS+gap),bl=blocks[i];
+    ctx.strokeStyle=C.line;ctx.strokeRect(cx,cy,BS,BS);
+    ctx.fillStyle='#5a6270';ctx.font='9px monospace';ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(i,cx+3,cy+2);
+    if(!bl){ctx.fillStyle='rgba(19,23,33,.7)';ctx.fillRect(cx+1,cy+1,BS-2,BS-2);continue;}
+    var col=bl.req===0?C.purple:(COL[(bl.req-1)%8]);
+    var f=bl.fill/BLK;
+    if(f>0){ctx.fillStyle=hexA(col,0.55);ctx.fillRect(cx+1,cy+1+(BS-2)*(1-f),BS-2,(BS-2)*f);}
+    ctx.strokeStyle=col;ctx.strokeRect(cx+.5,cy+.5,BS-1,BS-1);
+    if(bl.req!==0){
+      var own=reqs.filter(function(x){return x.id===bl.req;})[0];
+      var isWaste=own&&mode==='static'&&f===0;
+      if(isWaste){hatch(cx,cy,BS,BS,'rgba(255,180,84,.4)');ctx.strokeStyle='rgba(255,180,84,.55)';ctx.strokeRect(cx+.5,cy+.5,BS-1,BS-1);}
+      ctx.fillStyle=isWaste?'rgba(255,180,84,.8)':(bl.fill>0?'#0d1017':col);
+      ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(bl.req,cx+BS/2,cy+BS/2);
+    }else{
+      ctx.fillStyle='#0d1017';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('sys',cx+BS/2,cy+BS/2);
+    }
+  }
+  var ly=y0+ROWS*(BS+gap)+16,lx=x0;
+  ctx.font='12px sans-serif';ctx.textBaseline='middle';
+  ctx.fillStyle=hexA(C.green,.55);ctx.fillRect(lx,ly-8,15,15);ctx.strokeStyle=C.green;ctx.strokeRect(lx,ly-8,15,15);
+  ctx.fillStyle=C.muted;ctx.textAlign='left';ctx.fillText('某请求的 KV 页（填充高度=已写 token）',lx+21,ly);lx+=235;
+  hatch(lx,ly-8,15,15,'rgba(255,180,84,.4)');
+  ctx.fillStyle=C.muted;ctx.fillText('静态预留未用（碎片）',lx+21,ly);lx+=160;
+  ctx.fillStyle='rgba(19,23,33,.7)';ctx.fillRect(lx,ly-8,15,15);ctx.strokeStyle=C.line;ctx.strokeRect(lx,ly-8,15,15);
+  ctx.fillStyle=C.muted;ctx.fillText('空闲',lx+21,ly);
+  var qy=ly+26;
+  ctx.fillStyle=C.muted;ctx.font='12.5px sans-serif';
+  ctx.fillText('正在解码：'+(reqs.length?reqs.map(function(r){return '#'+r.id+'（'+Math.round(ownTokens(r))+'/'+(Math.max(0,r.P-PFX())+r.G)+' tok）';}).join('　'):'（无）')+'　｜　排队：'+(queue.length?queue.slice(0,8).map(function(r){return '#'+r.id}).join(' ')+(queue.length>8?' …':''):'（无）'),x0,qy);
+}
+var last=0;
+function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+reset();
+root.querySelectorAll('.ppx-mode').forEach(function(b){
+  b.addEventListener('click',function(){
+    root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');mode=b.dataset.m;reset();
+  });
+});
+root.querySelector('.ppx-prefix').addEventListener('change',function(){prefix=this.checked;reset();});
+root.querySelector('.ppx-play').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ 暂停':'▶ 播放';this.classList.toggle('on',playing);});
+root.querySelector('.ppx-reset').addEventListener('click',reset);
+})();
+</script>
+<!-- /WIDGET:w3 -->
+
 <h2 id="s5"><span class="no">5</span>前缀复用：能不算，就不算</h2>
 <p class="lead">因果注意力有个美妙性质：第 t 个 token 的 K/V 只取决于它前面的 token（<b>前缀</b>），与后面的内容无关。因此两条请求只要开头相同，前缀部分的 KV cache 就是逐比特相同的——可以直接借。这条路线不省单条请求的显存，而是省掉<strong>重复的预填充计算</strong>，并大幅降低首 token 延迟（TTFT）。</p>
 
@@ -794,7 +987,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 
 <div class="box tip"><b class="t">2026 年的一条主线判断</b>如果 2023 年的关键词是"分页"，2024 年是"复用与压缩"，2025 年是"分层与混合"，那么 2026 年的关键词是<b>"以 KV 为中心的算力经济学"</b>：模型结构（MLA/稀疏/混合）决定 KV 的"产量"，缓存系统（Mooncake/LMCache/Dynamo）决定 KV 的"周转率"，而 API 计费（写贵读廉）把这一切翻译成价格信号反馈给应用开发者。学界与业界的努力正在这三层之间打通接口。</div>
 
-<h3>10.4 2026-10 中旬速览：会话成为一等公民，闪存按"寿命"入场</h3>
+<h3>10.4 2026-10 中下旬速览：会话成为一等公民，Agent 负载重塑缓存语义</h3>
 <p class="lead">五件新事把 §10.3 的三个信号各自落地：<b>NVIDIA Dynamo 把"会话"变成路由与缓存的一等原语</b>；<b>高带宽闪存（HBF）以"写入寿命"为约束进入 KV 分层</b>（Lachesis + Berkeley 表征）；<b>驱逐研究回应 Random Attention 的挑战</b>（LORE-KV：用"未来的 query"打分）；<b>LMCache 团队的商业化平台 Tensormesh 发布</b>。</p>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
@@ -835,8 +1028,21 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <p>LMCache 团队（CEO 为共同作者 Junchen Jiang，累计融资 $28.5M，投资方含 NVentures / AMD Ventures / CoreWeave）推出首个企业级 KV 缓存管理平台：多级缓存（HBM/CPU/存储）、前缀与非前缀缓存（CacheBlend）、P2P KV 传输、缓存全生命周期控制，vLLM 与 NVIDIA Dynamo 已验证——"KV 是数据"完成<b>开源 → 商业化</b>闭环<sup class="c"><a href="#ref-89">[89]</a></sup>。窗口内另见 Kioxia 的 KV-Repurpose 非前缀复用测试床（arXiv:2610.13060）与 Apple 的 KV-Kaizen（arXiv:2609.37988）：存储厂商与端侧厂商相继入场。</p>
 
 <!-- ================================================================ -->
+<h4>① 前缀缓存上互联网：KVCompass（10-16，UC Santa Cruz）</h4>
+<p>当 provider 在多个地理集群部署同一模型时，KV 复用收益此前被锁死在单集群内。KVCompass 提出<b>发现平面（discovery plane）</b>：跨地理集群共享前缀缓存（arXiv:2610.24179）——前缀复用从"跨机器"升级到"互联网尺度"，也为 §5.3 的缓存定价提供了跨区域基础。</p>
+
+<h4>② Agent 负载的 KV 常驻实测（10-16，IISc + Microsoft M365 Research）与缓存工程（10-20，清华）</h4>
+<p>首个<b>生产级 Agent 负载</b>的 KV 常驻（residency）行为刻画（arXiv:2610.22863）：多轮长轨迹下哪些前缀真正被复用、常驻多久——为 Dynamo 的"会话感知"路线补上实证地基。同期清华提出 <b>Cache Engineering for Agents</b>（arXiv:2610.28577）：把 Agent 长轨迹的 KV I/O 与存储当作独立的缓存工程问题系统化。两者共同指向本节判断的落点：<b>面向 Agent 的缓存语义</b>（会话、工具调用、多轮复用）正成为一等研究对象。</p>
+
+<h4>③ 低比特 KV 成为出厂默认（10-18/19，vLLM / SGLang）</h4>
+<p>vLLM v0.32.0：NVFP4 KV cache 从 Blackwell 铺满到 SM8x/SM12x/SM90（含 XQA decode），并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3–5.5%，TTFT 代价 7–11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）。SGLang v0.5.22：FP8 KV 融合进 prefix-valid commit kernel（B200 上该 kernel 2.99×）。§6.3 的"自适应比特"愿景之前，工程界先把<b>统一低比特</b>做成了默认值。</p>
+
+<h4>④ 存储/传输生态与多模态（10-11 – 10-21）</h4>
+<p><b>Mooncake</b> 主线合入 KV 跨 TP/PP/host 布局的 reshard 重用规划（#4762，跨并行度布局直接复用而不重算）、自适应 RDMA 拥塞控制（#4197）、Intel XPU GPUDirect dma-buf RDMA（#4378）与 Store 多租户配额（#4809）——KV 池向"跨并行度、跨硬件、多租户"演进。<b>LMCache v0.5.6</b>（10-14）：修复 MP 模式 pickle IPC 的 RCE（CVE-2026-105192）、admin 端口收敛，新增 SGLang MP 统一 radix cache、原生 NIXL、3FS L2、Kafka 缓存事件流与 Multi-L1。<b>TempoKV</b>（上交+阿里，arXiv:2610.15324，19 票）面向自回归视频扩散做预测式 KV 量化——§6.3"多模态 KV 量化刚起步"的最新例证。另：SGLang 修复了混合线性模型在"投机解码 + 结构化输出"同开时 Mamba 状态恢复错误（Baseten 发现）——混合架构的 KV/状态管理仍是大意不得的深水区。</p>
+
 <h2 id="s11"><span class="no">11</span>未来发展方向</h2>
 <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
 <li><b>算法-系统协同设计（co-design）成为默认方法论。</b>NSA 的教训（理论加速 ≠ 墙上时钟加速）已被广泛接受：未来的稀疏/压缩算法必须带着内存对齐、Tensor Core 友好、与 GQA/MLA 兼容的约束去设计；反过来，调度器要理解模型的稀疏模式（如 DSA 的索引）来做预取。2026 年的系统感知综述已把这条列为首要方向<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
 <li><b>稀疏注意力 + 外部索引：KV 变成"注意力专用数据库"。</b>Quest 的页元数据、DSA 的闪电索引、LSA 的前瞻记忆索引器（2026-06）<sup class="c"><a href="#ref-61">[61]</a></sup>、SeKV 的语义层级<sup class="c"><a href="#ref-71">[71]</a></sup>指向同一个终局：KV cache 不再是被动的张量堆，而是带索引、可检索、可分级存储的存储系统。学习式索引（哪个 query 需要哪块 KV）是核心开放问题。</li>
 <li><b>混合线性架构的"容量墙"攻坚。</b>固定大小状态的精确检索上限是理论约束（associative recall 容量 ∝ 状态维度）。GDN-2 的擦写解耦、稀疏状态扩展（Sparse Delta Memory）、核化线性注意力等都在扩容"固定记忆"；另一条路是 3:1 比例的再优化与蒸馏（把全注意力模型"蒸馏"成混合模型以复用存量算力）。</li>

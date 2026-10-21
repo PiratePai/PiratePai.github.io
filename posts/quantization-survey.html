@@ -170,6 +170,7 @@
 <div class="toc">
   <h2>目录</h2>
   <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
     <li><a href="#s1">为什么需要量化：一张账单讲清楚</a></li>
     <li><a href="#s2">五分钟补齐基础：定点数与量化公式</a></li>
     <li><a href="#s3">发展历程总览（时间线）</a></li>
@@ -191,6 +192,27 @@
 </div>
 
 <!-- ============================================================ -->
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>NVFP4 KV 全架构铺开</b><span class="hl-date">10-18 · vLLM v0.32</span></div><p>NVFP4 KV 扩到 SM8x–SM12x，GLM-5.x 默认 FP8 KV，4-bit KV 首次进稀疏注意力模型。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>稀疏与量化同栈落地</b><span class="hl-date">10-14 · TensorRT-LLM</span></div><p>块稀疏 FMHA、SageAttention 与 NVFP4 KV 合入同一引擎，算法红利沉到 kernel。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>FP4 训练配方对照表</b><span class="hl-date">10-17 · NVIDIA 等</span></div><p>首份 NVFP4 预训练配方系统对比，为"训练全链路低精度"补上参照系。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>GGUF 直连 ComfyUI</b><span class="hl-date">10-19 · SGLang</span></div><p>MiniMax-H3 / Qwen-Image 2.1 经 SGLang Diffusion 直接加载社区 GGUF 与 LoRA。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
+
 <h2 id="s1"><span class="no">1</span>为什么需要量化：一张账单讲清楚</h2>
 
 <p>大模型的一切部署成本，几乎都可以换算成两个字：<strong>显存</strong>（容纳模型）与<strong>带宽</strong>（搬运数据）。量化（Quantization）就是把原本用 16 位浮点（FP16/BF16）存储和计算的数字，换成更少的位数（8 位、4 位甚至 2 位）来表示，从而同时省下显存和带宽。</p>
@@ -282,6 +304,162 @@
 </ul>
 
 <!-- ============================================================ -->
+<!-- WIDGET:w4 量化 · quantization-survey.html -->
+<div class="ppx-demo" id="PPX-W4">
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>量化：把 FP16 权重「四舍五入」到更少的比特会发生什么</b></div>
+  <div class="ppx-bar">
+    <label>目标比特 <input type="range" class="ppx-bits" min="2" max="16" step="1" value="4"> <b class="ppx-bv ppx-stat">4-bit</b></label>
+    <label>截断范围 ±<input type="range" class="ppx-clip" min="15" max="60" step="1" value="30"> <span class="ppx-cv ppx-stat">3.0σ</span></label>
+    <button class="ppx-resample">↻ 重新采样权重</button>
+    <span style="margin-left:auto">量化误差 MSE <b class="ppx-mse ppx-stat">–</b> · 等效信噪比 <b class="ppx-snr ppx-stat">–</b> dB · 体积压缩 <b class="ppx-ratio ppx-stat">4×</b></span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">蓝色直方图 = 原始 FP16 权重的分布（含少量离群值）；绿色阶梯 = 量化后能取到的值（一共 2<sup>b</sup> 个档位）。比特越少、档位越稀，「四舍五入」造成的误差（红色区域）越大；截断范围收得太紧则离群值被「削顶」——这正是 AWQ / SmoothQuant 等方法要解决的两难：离群值只占极少数权重，却逼迫整个刻度变粗。试着把比特调到 2 观察误差爆炸，再放宽截断范围观察离群值被裁剪。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W4'); if(!root)return;
+var cv=root.querySelector('canvas'),ctx=cv.getContext('2d');
+var LW=880,LH=430,dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
+var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
+var bits=4,clipSig=3.0,W;
+function sample(){
+  W=[];
+  for(var i=0;i<600;i++)W.push(gauss());
+  for(var j=0;j<14;j++)W.push((Math.random()<.5?-1:1)*(3.2+Math.random()*2.6)); // outliers
+}
+function gauss(){var u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function q(x){
+  var L=clipSig,lev=Math.pow(2,bits)-1;
+  var xc=Math.max(-L,Math.min(L,x));
+  var s=(2*L)/lev;
+  return Math.max(-L,Math.min(L,(Math.round(xc/s))*s));
+}
+function calc(){
+  var mse=0,pw=0;
+  for(var i=0;i<W.length;i++){var e=q(W[i])-W[i];mse+=e*e;pw+=W[i]*W[i];}
+  mse/=W.length;pw/=W.length;
+  return {mse:mse,snr:10*Math.log10(pw/Math.max(1e-12,mse))};
+}
+function step(){}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  var x0=70,y0=300,plotW=LW-140,plotH=200;
+  var L=clipSig, X=function(v){return x0+(v+L)/(2*L)*plotW;}, Y=function(c){return y0-c/60*plotH;};
+  // axis
+  ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x0+plotW,y0);ctx.stroke();
+  ctx.fillStyle=C.muted;ctx.font='11.5px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+  for(var t=-Math.round(L);t<=L;t+=Math.max(1,Math.round(L/4))){ctx.fillText((t>0?'+':'')+t,X(t),y0+6);ctx.strokeStyle='rgba(42,47,58,.6)';ctx.beginPath();ctx.moveTo(X(t),y0);ctx.lineTo(X(t),y0-plotH);ctx.stroke();}
+  ctx.fillText('权重值（σ 为单位）',x0+plotW/2,y0+24);
+  // histogram of originals (60 bins)
+  var NB=72,hist=new Array(NB).fill(0),qh=new Array(NB).fill(0);
+  var i2,e;
+  for(i2=0;i2<W.length;i2++){
+    var b=Math.min(NB-1,Math.max(0,Math.floor((W[i2]+L)/(2*L)*NB)));
+    hist[b]++;
+    var bq=Math.min(NB-1,Math.max(0,Math.floor((q(W[i2])+L)/(2*L)*NB)));
+    qh[bq]++;
+  }
+  var mx=Math.max.apply(null,hist);
+  for(var b2=0;b2<NB;b2++){
+    var bw=plotW/NB-1.5;
+    ctx.fillStyle='rgba(110,168,255,.45)';
+    ctx.fillRect(x0+b2*(plotW/NB),Y(hist[b2]/mx*60),bw,y0-Y(hist[b2]/mx*60));
+  }
+  // quantization levels (green dashes) & quantized histogram outline
+  var lev=Math.pow(2,bits)-1;
+  if(lev<=64){
+    ctx.strokeStyle=C.green;ctx.setLineDash([5,4]);
+    for(var k=0;k<=lev;k++){
+      var v=-L+k*(2*L)/lev;
+      ctx.beginPath();ctx.moveTo(X(v),y0);ctx.lineTo(X(v),y0-plotH);ctx.stroke();
+    }
+    ctx.setLineDash([]);
+  }else{
+    ctx.fillStyle=C.green;ctx.font='11px sans-serif';ctx.textAlign='right';
+    ctx.fillText('（'+(lev+1)+' 个档位过密，图中省略）',x0+plotW,y0-plotH+12);
+  }
+  ctx.strokeStyle=C.green;ctx.lineWidth=1.8;ctx.beginPath();
+  for(var b3=0;b3<NB;b3++){
+    var xx=x0+b3*(plotW/NB)+bw0()/2, yy=Y(qh[b3]/mx*60);
+    if(b3===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();ctx.lineWidth=1;
+  function bw0(){return plotW/NB-1.5;}
+  // clipped outliers shading (beyond clip)
+  ctx.fillStyle='rgba(255,107,107,.14)';
+  var nClip=0;
+  for(i2=0;i2<W.length;i2++)if(Math.abs(W[i2])>L)nClip++;
+  // error text
+  var st=calc();
+  root.querySelector('.ppx-mse').textContent=st.mse.toFixed(3);
+  root.querySelector('.ppx-snr').textContent=st.snr.toFixed(1);
+  root.querySelector('.ppx-ratio').textContent=(16/bits).toFixed(0)+'×';
+  // top annotation: formula
+  ctx.fillStyle=C.ink;ctx.font='14px Consolas,monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText('x_q = clip(x, ±'+L.toFixed(1)+') → round(x / s) · s ,  s = 2·'+L.toFixed(1)+' / (2^'+bits+' − 1)',x0,52);
+  ctx.fillStyle=C.muted;ctx.font='12.5px sans-serif';
+  ctx.fillText('共 '+Math.pow(2,bits)+' 个可表示的档位（含符号）；红色阴影 = 误差能量',x0,80);
+  // mini error curve: SNR vs bits (fixed clip)
+  var mx0=x0+plotW-190,my0=88,mw=170,mh=64;
+  ctx.strokeStyle=C.line;ctx.strokeRect(mx0,my0,mw,mh);
+  ctx.fillStyle=C.muted;ctx.font='10.5px sans-serif';ctx.textAlign='left';
+  ctx.fillText('信噪比 ∝ 比特数（每 +1 bit ≈ +6 dB）',mx0,my0-8);
+  var s2=function(bb){var save=bits;bits=bb;var r=calc();bits=save;return r.snr;};
+  var mn=40,mxv=100;
+  ctx.strokeStyle=C.orange;ctx.lineWidth=1.8;ctx.beginPath();
+  for(var bb=2;bb<=8;bb++){
+    var px=mx0+(bb-2)/6*mw, py=my0+mh-(Math.max(mn,Math.min(mxv,s2(bb)))-mn)/(mxv-mn)*mh;
+    if(bb===2)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();ctx.lineWidth=1;
+  // current marker
+  if(bits>=2&&bits<=8){
+    var px2=mx0+(bits-2)/6*mw,py2=my0+mh-(Math.max(mn,Math.min(mxv,st.snr))-mn)/(mxv-mn)*mh;
+    ctx.fillStyle=C.orange;ctx.beginPath();ctx.arc(px2,py2,3.5,0,7);ctx.fill();
+  }
+  // outliers note
+  if(nClip>0){
+    ctx.fillStyle=C.red;ctx.font='12px sans-serif';
+    ctx.fillText('⚠ '+nClip+' 个离群权重被截断在 ±'+L.toFixed(1)+'（削顶误差）',x0,y0+46);
+  }
+  // error-area glyphs on main plot: draw red ticks where |q-x| large
+  ctx.strokeStyle='rgba(255,107,107,.55)';
+  for(i2=0;i2<W.length;i2+=1){
+    var e2=q(W[i2])-W[i2];
+    if(Math.abs(e2)>0.25){
+      var xv=X(W[i2]);
+      ctx.beginPath();ctx.moveTo(xv,y0-2);ctx.lineTo(xv,y0-2-Math.min(26,Math.abs(e2)*22));ctx.stroke();
+    }
+  }
+}
+var last=0;
+function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;step(dt);draw();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+sample();
+root.querySelector('.ppx-bits').addEventListener('input',function(){bits=+this.value;root.querySelector('.ppx-bv').textContent=bits+'-bit';});
+root.querySelector('.ppx-clip').addEventListener('input',function(){clipSig=+this.value/10;root.querySelector('.ppx-cv').textContent=clipSig.toFixed(1)+'σ';});
+root.querySelector('.ppx-resample').addEventListener('click',sample);
+})();
+</script>
+<!-- /WIDGET:w4 -->
+
 <h2 id="s3"><span class="no">3</span>发展历程总览（时间线）</h2>
 
 <p>量化的历史比 LLM 更早——CNN 时代（2015 年前后）的 Deep Compression 就在做剪枝＋量化。真正让这条技术线"爆炸"的，是 2022 年两个发现：<strong>大模型激活里存在系统性离群值</strong>，以及<strong>大模型对权重低比特出乎意料地鲁棒</strong>。下面按时间梳理主线（每条都标注发表时间）：</p>
@@ -299,7 +477,7 @@
     <div class="desc">Dettmers &amp; Zettlemoyer 实证：4-bit 是 LLM 推理的甜点，低于 4-bit 需要（当时）更大的模型才能补回精度<sup class="cite"><a href="#ref10">[10]</a></sup>。</div></li>
   <li><span class="era">2023.06 · AWQ / SpQR</span>
     <div class="desc">AWQ：靠激活分布找出 1% 关键权重、用等价缩放保护，无需反向传播<sup class="cite"><a href="#ref4">[4]</a></sup>；SpQR：把离群权重稀疏地留在 FP16、其余 3–4 bit<sup class="cite"><a href="#ref5">[5]</a></sup>。</div></li>
-  <li><span class="era">2023.07 · llama.cpp k-quants</span>
+  <li><span class="era">2023.06 · llama.cpp k-quants</span>
     <div class="desc">ikawrakow 为 GGML/GGUF 设计 256 权重一组的"超块 + 双重量化"，Q4_K 以 ~4.5 bit 达到接近 Q8_0 的质量，成为本地部署默认格式<sup class="cite"><a href="#ref6">[6]</a></sup>。</div></li>
   <li><span class="era">2023.08–11 · OmniQuant / HQQ</span>
     <div class="desc">可学习截断（OmniQuant<sup class="cite"><a href="#ref9">[9]</a></sup>）；无需校准数据的快速量化 HQQ<sup class="cite"><a href="#ref8">[8]</a></sup>。</div></li>
@@ -421,7 +599,7 @@ def scale_ln_fcs(ln, fcs, scales):
 
 <p>AWQ 不需要反向传播与逐层重构，因此<strong>跨领域/跨模态泛化好</strong>（论文首次把 PTQ 用到多模态模型上），配套的 TinyChat 推理框架在桌面/手机 GPU 上取得对 FP16 的 3× 以上加速<sup class="cite"><a href="#ref4">[4]</a></sup>。今天 Qwen、Mistral、VuLM 等官方发布的 INT4 权重很多都是 AWQ/GPTQ 格式。</p>
 
-<h4>4.2.3 GGUF k-quants：为 CPU/端侧而生的工程艺术 <span class="tag">2023.07</span></h4>
+<h4>4.2.3 GGUF k-quants：为 CPU/端侧而生的工程艺术 <span class="tag">2023.06</span></h4>
 
 <p>llama.cpp 生态（GGML→GGUF）走的是另一条路：不追求 GPU Tensor Core，而是让<strong>CPU/核显也能解码大模型</strong>。ikawrakow 的 k-quants 设计了层级化的"超块"结构：</p>
 <ul>
@@ -433,7 +611,7 @@ def scale_ln_fcs(ln, fcs, scales):
 <div class="quote">
   <span class="en">"…each super-block of 256 weights has 1–2 floating point scales that convert quants to actual model weights…"（k-quants 作者 ikawrakow 在官方讨论中的描述）</span>
   <span class="zh">译：每个由 256 个权重构成的超块拥有 1–2 个浮点 scale，用于把量化值还原为真实权重。</span>
-  <span class="src">— llama.cpp Discussion #5063（2023）<sup class="cite"><a href="#ref7">[7]</a></sup>；原始实现见 PR #1684（2023-07）<sup class="cite"><a href="#ref6">[6]</a></sup></span>
+  <span class="src">— llama.cpp Discussion #5063（2023）<sup class="cite"><a href="#ref7">[7]</a></sup>；原始实现见 PR #1684（2023-06-03 提出、06-05 合并）<sup class="cite"><a href="#ref6">[6]</a></sup></span>
 </div>
 
 <p>后来的 <strong>i-quants</strong>（IQ4_XS 等，2024）用重要性矩阵做非均匀编码，进一步压低元数据开销。k-quants 证明了一件事：<strong>分组粒度 + 双重量化本身就是一种强大的误差控制手段</strong>，这条思路后来在 GPU 侧以 Microscaling 格式"复活"（§4.4）。</p>
@@ -805,12 +983,12 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <li><b>SplitQ</b>（KAUST，arXiv:2605.19929）：揭示 VLM 量化的新难点——文本与视觉激活的离群值落在<b>不同通道</b>，旋转类 PTQ 直接搬用会失效；按模态分解通道再做 W4A4/W3A3<sup class="cite"><a href="#ref62">[62]</a></sup>。另有"Why Gated DeltaNet Survives 4-Bit Quantization"（arXiv:2609.04098）首次系统研究混合线性注意力模型的 NVFP4 量化机理。</li>
 </ul>
 
-<h3>9.2 2026-10 中旬速览：推理引擎成为"数值规范"，FP4 走进 RL 训练循环</h3>
+<h3>9.2 2026-10 中下旬速览：NVFP4 KV 成为出厂默认，训练与格式的低精度合流</h3>
 <p>五件新事的共同主题是<b>量化与训练/服务系统的边界继续溶解</b>：训练侧把推理引擎的数值语义当作规范来对齐（QATFactory / TRACE），工具链把 KV cache 纳入自动混精搜索（ModelOpt），极低比特有了统一"坐标系"（CanonQ），视频生成的 KV 量化从分组走向"预测"（TempoKV）。</p>
 <ul>
 <li><b>QATFactory</b>（Together AI + UIUC/UT Austin，arXiv:2609.39223）：现有 QAT 工具链的 fake quantizer 与 vLLM/SGLang/llama.cpp 的数值语义不一致，"训出来的 checkpoint 装不进目标引擎"。QATFactory 把<b>推理引擎当作"数值规范"</b>——在 BF16 中精确模拟 NVFP4/MXFP4/Q4_K 的可表示值集、两级块缩放与舍入行为，训练后无损导出可直接部署的 checkpoint，无需 FP4 硬件即可在 H100 上做 NVFP4 QAT。Qwen3.5-9B NVFP4 平均 68.9% vs 最优 PTQ 65.4%；QARL（量化感知 RL）平均精度再 +2.7 点<sup class="cite"><a href="#ref63">[63]</a></sup>。论文还预告 NVIDIA Rubin 下一代将引入"3-bit 索引 + 共享非均匀码本"的可编程查表 Tensor Core 格式——§10①"焊进硬件"的下一步。</li>
 <li><b>TRACE</b>（阿里 Token Hub + OSU，arXiv:2610.07767，本窗口 alphaXiv 最高热度）：FP4 RL 的已有方法（QaRL/QUADS/Rollout-ResQ）各自降低训练/rollout 两条通路的量化误差，但"每条路都准 ≠ 两条路一致"——FP4 舍入跨界会让 MoE 路由错位、策略发散。TRACE 用 <b>rollout 侧 FP4 量化结果直接引导训练侧舍入方向</b>（rollout-guided QAT），并发现 99% 的不一致仅差一个相邻码字——只需缓存深层一半层数的尾数+scale（每 token 约 7.5KB），通信量降 6×。联合 NVFP4 W/A+KV rollout 下 Qwen3.5-35B-A3B 平均 75.3 分 vs BF16 的 74.9，最大 5.4× rollout 解码加速；验证至 Qwen3.8-2.4T-A95B<sup class="cite"><a href="#ref64">[64]</a></sup>。</li>
-<li><b>ModelOpt AutoQuant KV</b>（NVIDIA，2026-10-08）：把逐层敏感度搜索扩展到 KV cache——在 FP8 K/V、NVFP4 K/V、FP8-K+NVFP4-V 候集中按存储预算自动分配混精，权重与 KV 可各设独立预算联合搜索。Qwen3-8B 上 AQ 5.76 有效 bit 时 KV 负载较 BF16 降 64.0%，RULER-128K 仅 −1.04（全域 NVFP4 为 −6.54）<sup class="cite"><a href="#ref65">[65]</a></sup>——KVTuner（§6）的层间混精思想进入官方工具链。</li>
+<li><b>ModelOpt AutoQuant KV</b>（NVIDIA，2026-10-08 公告；0.48 版本线 10-08 rc0 → 10-17 rc1）：把逐层敏感度搜索扩展到 KV cache——在 FP8 K/V、NVFP4 K/V、FP8-K+NVFP4-V 候集中按存储预算自动分配混精，权重与 KV 可各设独立预算联合搜索。Qwen3-8B 上 AQ 5.76 有效 bit 时 KV 负载较 BF16 降 64.0%，RULER-128K 仅 −1.04（全域 NVFP4 为 −6.54）<sup class="cite"><a href="#ref65">[65]</a></sup>——KVTuner（§6）的层间混精思想进入官方工具链。</li>
 <li><b>CanonQ</b>（Meta AI，arXiv:2610.09202）：同时压到 W2A4KV2 时任何单点 PTQ 都崩溃、码本类方法又绑定校准数据。CanonQ"先规范化、再让模型学会用固定编解码器"——固定 Hadamard-对角-置换变换 + 能量归一把 W/A/K/V 映射到同一规范坐标，一套<b>冻结的高斯参考码本</b>跨层跨模型复用，再联合 QAT 适应耦合误差。LLaMA3-8B W2A4KV2：WikiText-2 PPL 9.41 vs ParetoQ 的 134.36（低 14.28×），8 任务均值 59.81% vs 37.87%<sup class="cite"><a href="#ref66">[66]</a></sup>。</li>
 <li><b>TempoKV</b>（上交大 + 华南理工 + 阿里，arXiv:2610.15324，2026-10-11）：把 LLM 的 KV 量化搬到自回归视频模型会失效——它从<b>时间可预测性</b>切入：K 沿潜帧平滑演化（自身历史线性预测余弦 0.877）、V 强烈依赖当前对齐的 K（加入对齐 K 后 0.881）。免训练的"预测 + 低位残差"框架在 Self-Forcing / Causal Forcing / LongCat-Video-13B 上最高 <b>6.71× KV 压缩</b>（超 Quant VideoGen 的 6.61×）且 PSNR 从 18.34 提到 19.85；INT4 档 KV 从 48.18GB 降到 13.2GB，生成延迟开销仅 11.9%<sup class="cite"><a href="#ref67">[67]</a></sup>。同期 <b>PulseQuant</b>（arXiv:2609.33384，视频 DiT 4-bit PTQ）用三联散点证明"局部块重建误差与最终 latent 误差几乎无关（ρ=−0.08）"、误差要到 4 步传播后才相关（ρ=+0.70）——为 §10⑧"困惑度已不足以刻画量化伤害"补上视频版证据；RTX 5080 上 packed NVFP4 使 DiT 峰值显存 7.86→3.63 GiB<sup class="cite"><a href="#ref68">[68]</a></sup>。</li>
 
@@ -822,6 +1000,15 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 </ul>
 
 <!-- ============================================================ -->
+<h4>① 低比特 KV 与 W4A4 的版图再扩（10-14 – 10-19，三大引擎）</h4>
+<p><b>vLLM v0.32.0</b>（10-18）：NVFP4 KV cache 从 Blackwell 扩到 SM8x/SM12x/SM90（SM12x 配 XQA decode）并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3~5.5%、TTFT 代价 7~11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）；MXFP4 MoE W4A4（CUTLASS）+ FP8 激活。<b>SGLang v0.5.22</b>（10-19）：FP8 KV 融合进 prefix-valid commit kernel；<b>ConvRot：扩散 Transformer 的在线 INT8 W8A8</b>；MiniMax-H3 与 Qwen-Image 2.1 经 SGLang Diffusion 跑 ComfyUI 且<b>直接加载社区 GGUF 检查点与 LoRA</b>——量化生态与创作工具链正式打通。<b>TensorRT-LLM v1.4.0rc0</b>（10-14）：MiniMax-M3 NVFP4 KV（含 P128 draft KV 视图）、Qwen-Image-Layered FP8 + Cache-DiT、块稀疏 FMHA + 更新版 SM90 SageAttention——"量化 × 稀疏 × 跨步缓存"打进同一引擎。</p>
+
+<h4>② FP4 也有训练配方了（10-17，NVIDIA + ISTA + Red Hat AI）</h4>
+<p><b>What Matters for NVFP4 Training?</b>（arXiv:2610.24343）：首份 FP4 <b>预训练</b>配方的系统性对比研究——各设计选择（scale 格式、随机舍入、混合精度边界等）逐一实证校验。§10③"训练全链路低精度化"方向的第一份系统参照。</p>
+
+<h4>③ 旋转 PTQ 与格点量化的新进展（10-14 – 10-20）</h4>
+<p><b>SpectrumQuant</b>（IISc，arXiv:2610.20303，本窗口量化类最高热度）：对 QuaRot/SpinQuant 一系旋转 PTQ 做"频谱对齐"改进，重塑激活分布。<b>E8-QAT</b>（北大+城大+腾讯，arXiv:2610.27699）：隐式格码本（implicit lattice）的 2-bit QAT——QTIP/CanonQ 的"格量化"与 QAT 两条线正式合流。<b>MultiAlloc</b>（南大+HKUST，arXiv:2610.18642）：预算感知的 KV 逐层精度分配。跨界新交叉点：<b>Q-CRL</b>（汉阳+LG，10-11）用 RL 恢复 VLA 低比特量化掉点；<b>LoopQuant</b>（北大+后摩，10-12）量化循环 Transformer；<b>Beyond 4 bits</b>（Microsoft，10-20）以数据为中心修复 2-bit PTQ。</p>
+
 <h2 id="s10"><span class="no">10</span>未来发展方向</h2>
 <p>综合学界论文与业界动向，以下八条线值得持续关注（序号不代表优先级）：</p>
 
@@ -886,7 +1073,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
   <li id="ref3">Xiao, G., Lin, J., Seznec, M., Wu, H., Demouth, J., Han, S. <b>SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models</b>. ICML 2023（arXiv:2211.10438，2022-11-18 提交）. <a href="https://arxiv.org/abs/2211.10438">arxiv.org/abs/2211.10438</a> · 代码 <a href="https://github.com/mit-han-lab/smoothquant">github.com/mit-han-lab/smoothquant</a>（repos/smoothquant）</li>
   <li id="ref4">Lin, J., Tang, J., Tang, H., et al. <b>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration</b>. MLSys 2024 最佳论文（arXiv:2306.00978，2023-06-01 提交）. <a href="https://arxiv.org/abs/2306.00978">arxiv.org/abs/2306.00978</a> · 工程化实现 <a href="https://github.com/casper-hansen/AutoAWQ">github.com/casper-hansen/AutoAWQ</a>（repos/AutoAWQ）</li>
   <li id="ref5">Dettmers, T., Svirschevski, R., Egiazarian, V., et al. <b>SpQR: A Sparse-Quantized Representation for Near-Lossless LLM Weight Compression</b>. ICLR 2024（arXiv:2306.03078，2023-06-05 提交）. <a href="https://arxiv.org/abs/2306.03078">arxiv.org/abs/2306.03078</a></li>
-  <li id="ref6">ikawrakow. <b>llama.cpp: k-quants implementation</b>（PR #1684，2023-07）. <a href="https://github.com/ggml-org/llama.cpp/pull/1684">github.com/ggml-org/llama.cpp/pull/1684</a></li>
+  <li id="ref6">ikawrakow. <b>llama.cpp: k-quants implementation</b>（PR #1684，2023-06）. <a href="https://github.com/ggml-org/llama.cpp/pull/1684">github.com/ggml-org/llama.cpp/pull/1684</a></li>
   <li id="ref7">llama.cpp Discussion <b>#5063 "Even more quantization types?"</b>（2023，k-quants 作者参与讨论）. <a href="https://github.com/ggml-org/llama.cpp/discussions/5063">github.com/ggml-org/llama.cpp/discussions/5063</a></li>
   <li id="ref8">Badr, A., et al. <b>HQQ: Half-Quadratic Quantization</b>（2023-11）. <a href="https://github.com/mobiusml/hqq">github.com/mobiusml/hqq</a></li>
   <li id="ref9">Shao, W., Chen, M., Zhang, Z., et al. <b>OmniQuant: Omnidirectionally Calibrated Quantization for Large Language Models</b>. ICLR 2024（arXiv:2308.13137，2023-08-25 提交）. <a href="https://arxiv.org/abs/2308.13137">arxiv.org/abs/2308.13137</a></li>
@@ -927,7 +1114,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
   <li id="ref44">He, Y., et al. <b>PTQD: Accurate Post-Training Quantization for Diffusion Models</b>. NeurIPS 2023（arXiv:2305.10657，2023-05 提交）. <a href="https://arxiv.org/abs/2305.10657">arxiv.org/abs/2305.10657</a></li>
   <li id="ref45">Zhao, T., Fang, T., Huang, H., et al. <b>ViDiT-Q: Efficient and Accurate Quantization of Diffusion Transformers for Image and Video Generation</b>. ICLR 2025（arXiv:2406.02540，2024-06-04 提交）. <a href="https://arxiv.org/abs/2406.02540">arxiv.org/abs/2406.02540</a> · <a href="https://github.com/thu-nics/ViDiT-Q">github.com/thu-nics/ViDiT-Q</a>（repos/ViDiT-Q）</li>
   <li id="ref46"><b>Q-VDiT: Accurate Quantization for Video Diffusion Transformers</b>. ICML 2025（arXiv:2508.04016，2025-08 提交）. <a href="https://arxiv.org/abs/2508.04016">arxiv.org/abs/2508.04016</a></li>
-  <li id="ref47">Li, M., Lin, Y., Zhang, Z., et al. <b>SVDQuant: Absorbing Outliers by Low-Rank Components for 4-Bit Diffusion Models</b>. ICLR 2025 Spotlight（arXiv:2411.05007，2024-11-07 提交）. <a href="https://arxiv.org/abs/2411.05007">arxiv.org/abs/2411.05007</a> · <a href="https://github.com/mit-han-lab/nunchaku">github.com/mit-han-lab/nunchaku</a>（repos/nunchaku）</li>
+  <li id="ref47">Li, M., Lin, Y., Zhang, Z., et al. <b>SVDQuant: Absorbing Outliers by Low-Rank Components for 4-Bit Diffusion Models</b>. ICLR 2025 Spotlight（arXiv:2411.05007，2024-11-07 提交）. <a href="https://arxiv.org/abs/2411.05007">arxiv.org/abs/2411.05007</a> · <a href="https://github.com/nunchux-ai/nunchaku（原 mit-han-lab/nunchaku，2026-03 起迁至新 org）">github.com/nunchux-ai/nunchaku（原 mit-han-lab/nunchaku，2026-03 起迁至新 org）</a>（repos/nunchaku）</li>
   <li id="ref48">Zhang, J., Wei, J., Huang, H., et al. <b>SageAttention: Accurate 8-Bit Attention for Plug-and-Play Inference Acceleration</b>. ICLR 2025（arXiv:2410.02367，2024-10-03 提交）. <a href="https://arxiv.org/abs/2410.02367">arxiv.org/abs/2410.02367</a> · <a href="https://github.com/thu-ml/SageAttention">github.com/thu-ml/SageAttention</a></li>
   <li id="ref49">city96. <b>ComfyUI-GGUF: GGUF Quantization support for native ComfyUI models</b>（2024-08 起）. <a href="https://github.com/city96/ComfyUI-GGUF">github.com/city96/ComfyUI-GGUF</a></li>
   <li id="ref50">Wang, C., Wang, Z., Xu, X., et al. <b>Q-VLM: Post-training Quantization for Large Vision-Language Models</b>. NeurIPS 2024（arXiv:2410.08119，2024-10-10 提交）. <a href="https://arxiv.org/abs/2410.08119">arxiv.org/abs/2410.08119</a></li>

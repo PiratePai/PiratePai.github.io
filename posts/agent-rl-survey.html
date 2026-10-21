@@ -121,6 +121,7 @@
 <nav class="toc">
   <h3>目录</h3>
   <ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
     <li><a href="#s0">§0 全景导览:一条时间线看懂</a></li>
     <li><a href="#s1">§1 预备知识:读懂 RL for LLM 所需的全部基础</a></li>
     <li><a href="#s2">§2 Agent 数据飞轮</a></li>
@@ -233,6 +234,27 @@
 <div class="note"><b>一个直觉性的总结:</b>2022 年 RLHF 让模型学会"说人话";2025 年初 DeepSeek-R1 证明<b>可验证奖励 + 大规模 RL</b> 能让模型自己"学会思考";2025 下半年开始,大家把同样的配方搬到 <b>Agent</b>(会调工具、会上网、会写代码的模型)上,发现训练的瓶颈从"算法"变成了"<b>系统</b>"——一条训练轨迹要和环境(浏览器、终端、API)来回交互几十轮,采样(rollout)比更新参数慢一个数量级,于是 rollout 引擎、异步化、数据飞轮成了 2025–2026 最热的工程话题;与此同时,同一套免价值模型的 RL 算法(GRPO)被搬到图像/视频/音乐生成上,引发了多模态生成的 RL 浪潮。</div>
 
 <!-- ============================================================ -->
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>阿里开源 MAI-Gym</b><span class="hl-date">10-14 · 通义</span></div><p>GUI Agent 评测与 RL 训练一体化，移动+桌面环境全开源。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>slime v0.4.0 容错异步</b><span class="hl-date">10-09 · 智谱</span></div><p>straw 持久化数据层 + 全异步统一入口，训练崩溃不再丢 rollout。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>树感知蒸馏走红</b><span class="hl-date">10-16 · 清华+腾讯</span></div><p>树形轨迹后验蒸馏 × RLVR，46 票成 10 月下旬最高热度。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Meta 端侧 30B 开源</b><span class="hl-date">10-17 · Meta</span></div><p>Muse Glimmer：自带感知编码器的消费级硬件 agentic 模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+
 <h2 class="sec" id="s1"><span class="num">1</span>预备知识:读懂 RL for LLM 所需的全部基础<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
 
 <h3>1.1 用一句话讲清强化学习</h3>
@@ -419,7 +441,7 @@ slime/
   </div>
   <div class="card">
     <h5>GLM-4.5(355B MoE, 2025-08)</h5>
-    <p><b>配方:</b>以 slime 为基础设施做"长程 agentic RL",聚焦<b>网页搜索与代码生成</b>两个可自动判分的场景;提出 GSPO 序列级目标稳定长序列训练。<b>飞轮特征:</b>奖励全部来自环境终局判定,无需人类偏好标注。<span class="cite">[17]</span></p>
+    <p><b>配方:</b>以 slime 为基础设施做"长程 agentic RL",聚焦<b>网页搜索与代码生成</b>两个可自动判分的场景;采用 Qwen 提出的 GSPO 序列级目标（见 §1.3[9]）稳定长序列训练。<b>飞轮特征:</b>奖励全部来自环境终局判定,无需人类偏好标注。<span class="cite">[17]</span></p>
   </div>
   <div class="card">
     <h5>AgentGym-RL / ASearcher(2025)</h5>
@@ -455,7 +477,7 @@ slime/
 
 <h3>3.3 第一派:混合引擎 / 训推同卡(colocate)</h3>
 <p>verl 的 HybridFlow 论文<span class="cite">[20]</span>确立了"单控制器 + 混合引擎"范式:训练侧用 FSDP/Megatron 切分权重做更新,rollout 侧在同卡的 vLLM/SGLang 实例里生成;两套系统<b>共享同一批 GPU</b>,靠"参数重分片 + 显存 offload(训练时把推理引擎的 KV/权重卸载,推理时把训练优化器状态卸载)"来切换。好处是省卡、权重同步快(同机内存拷贝);代价是切换有开销、两类任务互相挤压显存。看本地 verl 源码里的主训练循环,可以清楚看到"生成 → 收卡(sleep)→ 更新"的同步节拍:</p>
-<pre><code><span class="c"># 仓库:verl(volcengine,本地 clone)— verl/trainer/ppo/ray_trainer.py,fit() 主循环(节选)</span>
+<pre><code><span class="c"># 仓库:verl(verl-project,原 volcengine;本地 clone)— verl/trainer/ppo/ray_trainer.py,fit() 主循环(节选)</span>
 <span class="k">with</span> marked_timer(<span class="s">"gen"</span>, timing_raw, color=<span class="s">"red"</span>):
     combined_gen_output = self.async_rollout_manager.generate_sequences(combined_gen_batch)  <span class="c"># ① rollout:推理引擎生成整批回答/轨迹</span>
     self.checkpoint_manager.sleep_replicas()            <span class="c"># ② 让 rollout 副本"睡眠":释放显存给训练用(混合引擎的节拍切换)</span>
@@ -528,7 +550,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 
 <h3>3.5 rollout 加速的奇招:投机解码与部分 rollout</h3>
 <p>除了架构,还有两个单点加速技术值得知道:<b>面向 RL 的投机解码</b>(在 rollout 阶段用分布感知的草稿模型加速采样,Together AI 报告最高 50% 提速且不改变输出分布)<span class="cite">[23]</span>;以及 <b>APRIL(主动部分 rollout)</b>——对"长尾未完成"的样本不抛弃,而是把已生成部分作为部分轨迹回收利用,专为推理模型的长尾生成设计<span class="cite">[24]</span>。</p>
-<div class="srcnote"><small><b>[23] Together AI, "Accelerate RL rollouts by up to 50% with distribution-aware speculative decoding", 官方博客, 2026(月份未核实)。</b><br>
+<div class="srcnote"><small><b>[23] Together AI, "Accelerate RL rollouts by up to 50% with distribution-aware speculative decoding", 官方博客, 2026-04-24 发布(2026-09-10 更新)。</b><br>
 <b>[24] "APRIL: Active Partial Rollouts in Reinforcement Learning to Tame Long-Tail Generation", arXiv:2509.18521, 2025-09。</b><br>
 <span class="zh">两者分别从"单位时间 token 数"与"样本利用率"两个正交维度压榨 rollout 阶段——这是 2026 年 rollout 引擎竞争的白热化标志。</span></small></div>
 
@@ -662,7 +684,7 @@ in-flight sample to finish."""</span>
 <div class="srcnote"><small><b>[29] Zhong et al. (Microsoft), "StreamRL: Scalable, Heterogeneous, and Elastic RL for LLMs with Disaggregated Stream Generation", arXiv:2504.15930, 2025-04。</b><br>
 <span class="en">"StreamRL is designed with disaggregation from first principles and fully unlocks its potential by addressing two types of performance bottlenecks in existing disaggregated RL frameworks: pipeline bubbles, caused by stage dependencies, and skewness bubbles, resulting from long-tail output length distributions."</span><br>
 <span class="zh">译:"StreamRL 从第一性原理出发做解耦设计,通过解决现有解耦 RL 框架的两类性能瓶颈——阶段依赖造成的流水线气泡,以及长尾输出长度分布造成的偏斜气泡——充分释放了解耦的潜力。"</span><br><br>
-<b>[30] THUDM / 智谱, "slime: An SGLang-Native Post-Training Framework for RL Scaling", 官方博客 + GitHub, 2025-08。</b><br>
+<b>[30] THUDM / 智谱, "slime: An SGLang-Native Post-Training Framework for RL Scaling", 官方博客(2025-07-09) + GitHub, 2025-07。</b><br>
 <b>[31] "Agent Lightning v1.0: Towards Harnessed Agentic RL", arXiv:2608.17528, 2026-08。</b><br>
 <span class="en">[31] 原文:"By pausing new rollout requests during the update phase and resuming them immediately after, the system achieves a 2x speedup compared to standard synchronous RL setups, while requiring fewer GPUs."</span><br>
 <span class="zh">[31] 译:"在权重更新阶段暂停新的 rollout 请求、更新完立即恢复,系统相比标准同步 RL 取得 2 倍加速,同时需要更少的 GPU。"</span></small></div>
@@ -693,7 +715,7 @@ in-flight sample to finish."""</span>
 
 <h3>5.1 理解侧:VLM 的 RLVR 与 GUI Agent</h3>
 <h4>"3 美元的顿悟":RLVR 配方直接搬到 VLM</h4>
-<p>DeepSeek-R1 之后一个月内,开源社区就验证了:Qwen2.5-VL 3B + GRPO + 约 1700 条 CLEVR 计数样本(数值匹配即奖励),总花费不到 3 美元,VLM 的计数与推理能力大幅跃升并泛化到其他基准——这就是 R1-V<span class="cite">[36]</span>。随后 Vision-R1<span class="cite">[37]</span>、VLM-R1<span class="cite">[38]</span> 等把配方系统化。这一波确立的结论与文本侧一致:<b>在足够强的基座上,极少量可验证数据 + GRPO 就能激发推理,且比 SFT 泛化更好</b>。</p>
+<p>DeepSeek-R1 之后一个月内,开源社区就验证了:Qwen2.5-VL 3B + GRPO + 少量 CLEVR 计数样本(数值匹配即奖励;官方示例用 CLEVR-70k-Counting 数据集),总花费不到 3 美元,VLM 的计数与推理能力大幅跃升并泛化到其他基准——这就是 R1-V<span class="cite">[36]</span>。随后 Vision-R1<span class="cite">[37]</span>、VLM-R1<span class="cite">[38]</span> 等把配方系统化。这一波确立的结论与文本侧一致:<b>在足够强的基座上,极少量可验证数据 + GRPO 就能激发推理,且比 SFT 泛化更好</b>。</p>
 <div class="srcnote"><small><b>[36] R1-V(开源项目, Liang Chen 等), GitHub, 2025-02。</b><br>
 <span class="en">项目口号:"Witness the aha moment of VLM with less than $3."</span><br>
 <span class="zh">译:"用不到 3 美元,见证 VLM 的'顿悟时刻'。"</span><br>
@@ -823,7 +845,7 @@ in-flight sample to finish."""</span>
 <li><b>框架生态</b>:AReaL 2.0(2026-07-01)重构为微服务架构(训练/推理/agent/权重更新四类独立服务)+ Hermes 在线 RL 环境,黑盒 agent 改个 base_url 即可接入;slime 的官方后继 <b>Miles v0.1</b>(2026-09-08)成为 GLM-5.2 全异步 agentic RL 的载体(64×GB300,中位步时 263s)。另有 VenusRL(优先级调度 + 环境内存管理,最高 4.24×)、ThunderSyncRL("无损"加速 agentic RL)等一批新作。</li>
 </ul>
 
-<h3>6.1.6 2026-10 中旬速览:RL 算力经济学、弹性 GPU 与 PD 分离进 rollout</h3>
+<h3>6.1.6 2026-10 中下旬速览:环境基建与大厂框架竞速,蒸馏并入 agentic RL 主配方</h3>
 <p>五件新事,一件比一件"系统":<b>小米把 RL 算力的账本公开到百万美元级</b>;<b>阿里为超长程任务做"弹性单元"GPU 编排</b>;<b>百度开源 agent 原生全异步框架</b>;<b>PD 分离被系统性地搬进 RL rollout</b>;<b>投机解码思想进入工具观察</b>。</p>
 <ul>
 <li><b>MiMo-V2.6:RL 算力的三轴扩展与一份真实账单</b>(小米,arXiv:2610.11959,2026-10-08,窗口内 alphaXiv 最高热度):全模态 MoE 家族(Pro 1.02T/42B、Flash 310B/15B)沿三轴扩展 RL——批规模与环境多样性、以及"<b>grader 算力</b>"(Groupwise Agentic Grading,组内比较解的质量产出细粒度奖励)。异步 GRPO 每步 1,568 prompts × G16 = 25K 条轨迹、2.7–3.7B token、上下文至 1M;<b>RL 花费 $2.6M(Pro)/$0.9M(Flash),成本拆分 rollout 43.8% / 训练 43.5% / grader 12.7%</b>;DeepSWE v1.1 从 58.4 升至 72.6。训练全程冻结 MoE router + Muown + MXFP4 QAT 保持稳定——"RL 是软硬协同的放大器"的旗舰级实证,且罕见地公开了完整 RL 栈(蒸馏模型、带验证器的环境、端到端框架)。</li>
@@ -839,6 +861,16 @@ in-flight sample to finish."""</span>
 <li><b>ObsSpec:对"工具观察"做投机</b>(UCSC + 字节 Seed,arXiv:2610.15246,2026-10-11):工具调用 agent 的延迟近半耗在等工具执行(终端任务 47.1%)。0.6B 世界模型在工具执行期间<b>预测其输出、策略提前开跑</b>;预测与实际观察逐字精确匹配才保留(66.4% 命中、快约 16×),否则丢弃重生成——rollout 不含任何被污染样本。agent 延迟 −9.3%(8B)/−14.2%(32B),异步 rollout 吞吐 +11.5%,奖励与基线持平——投机解码的"起草-验证"思想跨域落地。</li>
 </ul>
 
+<h3>6.1.7 2026-10 下旬增补:环境即数据落地,异步基建成军</h3>
+<ul>
+<li><b>MAI-Gym</b>(阿里通义 MAI,10-14,arXiv:2610.20939 + GitHub 开源):GUI Agent 评测 + RL 训练一体化平台,移动 + 桌面双环境——「环境规模化」一节的大厂级落地。</li>
+<li><b>Tree-Aware Posterior Distillation</b>(清华+腾讯,10-16,arXiv:2610.23181,46 票为 10 月中下旬 agentic RL 最高热度):在树形轨迹后验上做长程蒸馏并与 RLVR 结合——蒸馏正并入 agentic RL 主配方。</li>
+<li><b>slime v0.4.0</b>(智谱,10-09):straw 持久化队列 + 张量存储、每 Ray 节点一个 rollout worker 的分布式全异步、Megatron 训练崩溃后独立于 SGLang 服务恢复、score centering;发布说明以 OpenAI Navier-Stokes(1 万并发 agent、130B token)为动机——容错异步成为标配。</li>
+<li><b>Muse Glimmer 30B</b>(Meta 超级智能实验室,10-17,arXiv:2610.24628):开源 30B 端侧 agentic 模型,自带感知编码器、面向消费级硬件自主任务。</li>
+<li><b>OpenGCUA</b>(阿里,10-15,arXiv:2610.22200,34 票):定义 generalist computer use(GUI + 程序化接口并用)并放出全开源栈。<b>VeriCUA</b>(清华+UESTC,10-19):主动操作执行来验证「截图看不出」的任务完成状态,提升 GUI 奖励可靠性。</li>
+<li><b>环境合成的两条新径</b>:Agent World Model in the Wild(UNC+MSR 等,10-19,arXiv:2610.26828)用世界模型在受控合成环境中复刻真实计算系统;browser-use 官方 <b>rl-env-use</b>(10-21 建仓)从真实网页案例自动构建任意领域 RL 环境——「环境即数据」的社区化落地。</li>
+<li><b>算法与系统侧</b>:Self-Credit(Meta+NYU+Duke,10-20)组内重标定实现端到端可学的功劳分配;Mosaic(HKUST(GZ)+CityU,10-15)首批多会话 agentic RL;ReFlow(HKU+USTC+阿里,10-15)回放驱动解耦后训练;SPROUT/SERO/RSIPO(SJTU+Amazon 等,10-09~11)长程 SWE 的成功轨迹外推、oracle 续跑与技能-策略共进化;KV4-RL(KAIST,10-10)用 INT4 KV 量化给异步 rollout 提速;Prorsa(PKU+小米,10-12)把 P/D 分离搬进 agentic RL rollout。框架侧:verl v0.9.1(09-20,仓库迁 verl-project org:可插拔路由、TorchTitan delta_sharded 权重同步 10.3×、verl-vla v0.1.0)、OpenRLHF v0.11.2(09-14,FlashREINFORCE 配置化)。</li>
+</ul>
 <h3>6.2 未来发展方向研判(附依据)</h3>
 <ol style="font-size:15px;line-height:2">
   <li><b>异步/解耦将成为 RL 系统的默认形态,同步模式退居小规模调试用途。</b>依据:AReaL 2.77×、StreamRL 2.66×、Agent Lightning v1.0 2× 的加速证据链,以及 vLLM 把异步支持内置于引擎本身(2026-05)——当推理引擎原生支持 pause/resume,同步模式的"省事"优势不复存在。</li>
@@ -853,7 +885,7 @@ in-flight sample to finish."""</span>
   <li><b>对 RLVR 本身的反思将持续:增益的鲁棒性、可迁移性与持续学习。</b>依据:多模态 RLVR 换模板即失效(2608.08802)、correct-set 周转(2606.03087)、以及 Magistral/AReaL 系列对 off-policy 负奖励塌缩的观察——"RL 学到的是能力还是过拟合验证器"将是 2026–2027 的核心议题。</li>
 </ol>
 
-<div class="note"><b>学习路径建议:</b>① 用 <code>verl</code> + 单卡跑通一个 GRPO 数学任务(官方有 notebook),读懂 <code>ray_trainer.py</code> 的 fit 循环;② 换成多轮 tool-use 任务,体会环境交互对同步模式的毒害;③ 切到 <code>train_async.py</code>(slime)或 AReaL,对比 GPU 利用率曲线;④ 把奖励函数换成自己的"可验证"任务(比如让你写的小游戏可判胜负)——走完这四步,你就把本文 §1–§4 亲手摸了一遍。多模态生成侧则推荐从 Flow-GRPO 的开源实现入手。</div>
+<div class="note"><b>学习路径建议:</b>① 用 <code>verl</code> + 单卡跑通一个 GRPO 数学任务(官方有 notebook),读懂 <code>ray_trainer.py</code> 的 fit 循环;② 换成多轮 tool-use 任务,体会环境交互对同步模式的毒害;③ 切到 slime 的全异步模式(v0.4.0 起同步/异步统一走 <code>train.py</code>,已移除 train_async.py)或 AReaL,对比 GPU 利用率曲线;④ 把奖励函数换成自己的"可验证"任务(比如让你写的小游戏可判胜负)——走完这四步,你就把本文 §1–§4 亲手摸了一遍。多模态生成侧则推荐从 Flow-GRPO 的开源实现入手。</div>
 
 <!-- ============================================================ -->
 <h2 class="sec" id="s7"><span class="num">7</span>参考文献<span class="roadmap">全部标注发表时间;引文处已附原文与译文</span></h2>
@@ -872,7 +904,7 @@ in-flight sample to finish."""</span>
   <li>Fang et al. <i>Towards General Agentic Intelligence via Environment Scaling</i>. arXiv:2509.13311, 2025-09.</li>
   <li>Xi et al. <i>AgentGym-RL: Training LLM Agents for Long-Horizon Decision Making through Multi-Turn RL</i>. arXiv:2509.08755, 2025-09.</li>
   <li>Feng et al. <i>The Landscape of Agentic Reinforcement Learning for LLMs: A Survey</i>. arXiv:2509.02547, 2025-09(TMLR).</li>
-  <li>ByteDance AgentTars Team. <i>Agent-World: Scaling Real-World Environment Synthesis for Evolving General Agent Intelligence</i>. arXiv:2604.18292, 2026-07.</li>
+  <li>ByteDance AgentTars Team. <i>Agent-World: Scaling Real-World Environment Synthesis for Evolving General Agent Intelligence</i>. arXiv:2604.18292, 2026-04.</li>
   <li>Prime Intellect. <i>General Agent: A Self-Evolving, Synthetic Agent Environment</i>. 官方博客, 2026-05-18.</li>
   <li>Kimi Team (Moonshot AI). <i>Kimi K2: Open Agentic Intelligence</i>. arXiv:2507.20534, 2025-07.</li>
   <li>GLM Team (Z.ai). <i>GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models</i>. arXiv:2508.06471, 2025-08.</li>

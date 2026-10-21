@@ -153,6 +153,7 @@
 <nav class="toc">
   <b>目录</b>
   <a href="#s0">0. 太长不看（TL;DR）</a>
+     <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
   <a href="#s1">1. 预备知识：把图变成序列</a>
   <a href="#s2">2. 概念地图：稀疏化的三大技术族</a>
   <a href="#s3">3. 发展历程时间线</a>
@@ -181,7 +182,28 @@
 
 <!-- ================================================================ -->
 <section id="s1">
-  <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
+  <div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:var(--panel,#1b2127);border:1px solid var(--line,#2a2f3a);border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:var(--ink,#e8eaed);font-size:14px}
+.hl-date{color:var(--blue,#6ea8ff);font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:var(--muted,#aeb4bd);font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DiT 缓存合并双升级</b><span class="hl-date">10-15 · 2 篇 10 票</span></div><p>SoftCache 自适应步长缓存 + 扩散动力学 token 合并，TeaCache/ToMeSD 迎来直接后继。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>具身侧 token 压缩升温</b><span class="hl-date">10-15 · Microsoft AI 等</span></div><p>FastVLA：任务条件化 + 时间自适应压缩，VLA 视觉 token 也能砍大半。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>token 路由进 DiT</b><span class="hl-date">10-20 · 牛津</span></div><p>MoDDiT 把 MoE 式路由搬进扩散 Transformer，面向实时视频合成。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>三件套进同一引擎</b><span class="hl-date">10-14 · TensorRT-LLM</span></div><p>Cache-DiT + 块稀疏 FMHA + SageAttention 合入 v1.4.0rc0。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+
+<h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
   <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>
 
   <h3>1.1 ViT：图像切块 → 序列 → Transformer</h3>
@@ -274,7 +296,217 @@
 
 <!-- ================================================================ -->
 <section id="s3">
-  <h2><span class="num">3</span>发展历程时间线（2017–2026）</h2>
+  <!-- WIDGET:w8 Token 稀疏化 · vit-sparsification.html -->
+<div class="ppx-demo" id="PPX-W8">
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>视觉 Token 压缩：该合并的合并、该扔的扔</b></div>
+  <div class="ppx-bar">
+    <button class="ppx-mode on" data-m="tome">ToMe 风格：相似 token 合并</button>
+    <button class="ppx-mode" data-m="fastv">FastV 风格：低注意力 token 剪枝</button>
+    <label style="margin-left:8px">网络深度 <input type="range" class="ppx-layer" min="0" max="24" step="1" value="0"> <span class="ppx-lv ppx-stat">第 0/24 层</span></label>
+    <button class="ppx-play on">▶ 自动播放</button>
+    <span style="margin-left:auto">剩余视觉 token <b class="ppx-n ppx-stat">256</b>/256 · 理论注意力 FLOPs <b class="ppx-f ppx-stat">100%</b></span>
+  </div>
+  <canvas></canvas>
+  <div class="ppx-cap">16×16 = 256 个图像块进入 ViT。左：模拟一张图——中间亮斑是「主体」（如一只猫），四周是平淡背景。右：随网络加深（拖动滑块或自动播放），ToMe 把越来越相似的背景块两两合并成大块，FastV 则直接丢弃注意力分数低的背景块（虚线=被丢弃）；两种策略下「主体」token 都存活到最后。下方曲线是剩余 token 数——注意力是平方复杂度，token 减半 ≈ FLOPs 降到 1/4。</div>
+</div>
+<style>
+.ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
+.ppx-demo .ppx-head{display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--line,#2a2f3a); background:rgba(110,168,255,.06); flex-wrap:wrap}
+.ppx-demo .ppx-head b{font-size:14.5px}
+.ppx-demo .ppx-tag{font-size:11px; color:var(--green,#41d1a7); border:1px solid rgba(65,209,167,.4); padding:1px 8px; border-radius:999px; letter-spacing:.1em; flex:none}
+.ppx-demo .ppx-bar{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:center; padding:10px 18px; border-bottom:1px solid var(--line,#2a2f3a); color:var(--muted,#aeb4bd); font-size:12.5px}
+.ppx-demo .ppx-bar label{display:flex; align-items:center; gap:6px}
+.ppx-demo canvas{display:block; width:100%; height:auto; background:#0d1017}
+.ppx-demo .ppx-cap{padding:10px 18px 14px; color:var(--muted,#aeb4bd); font-size:13px; line-height:1.7; border-top:1px solid var(--line,#2a2f3a)}
+.ppx-demo button{cursor:pointer; background:#1d2330; color:var(--ink,#e8eaed); border:1px solid var(--line,#2a2f3a); border-radius:7px; padding:4px 12px; font-size:12.5px}
+.ppx-demo button:hover{border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo button.on{background:rgba(110,168,255,.15); border-color:var(--blue,#6ea8ff); color:var(--blue,#6ea8ff)}
+.ppx-demo input[type=range]{accent-color:var(--blue,#6ea8ff); width:110px}
+.ppx-demo .ppx-stat{font-variant-numeric:tabular-nums; color:var(--ink,#e8eaed)}
+</style>
+<script>
+(function(){
+var root=document.getElementById('PPX-W8'); if(!root)return;
+var cv=root.querySelector('canvas'),ctx=cv.getContext('2d');
+var LW=880,LH=460,dpr=Math.min(2,window.devicePixelRatio||1);
+cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
+var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
+var N=16, layer=0, mode='tome', auto=false;
+// synthetic image: importance = distance to blob center (high=object)
+var imp=[];
+(function(){
+  var cx=7.2+Math.random()*1.6, cy=7.2+Math.random()*1.6;
+  for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+    var d=Math.hypot(x-cx,y-cy);
+    imp.push(Math.max(0,1-d/6.5)+Math.random()*.12);
+  }
+})();
+function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+// ToMe: greedy pair merges among low-importance cells, priority by similarity(≈ both background)
+// build merge plan: at each of 12 merge steps, merge the two adjacent alive cells with lowest combined importance
+var tomePlan=[]; // list of {a,b} cell indices merged at step k
+(function(){
+  var alive={};
+  for(var i=0;i<N*N;i++)alive[i]=true;
+  var adj=function(a,b){
+    var ax=a%N,ay=(a-ax)/N,bx=b%N,by=(b-bx)/N;
+    return Math.abs(ax-bx)<=1&&Math.abs(ay-by)<=1&&a!==b;
+  };
+  for(var step=0;step<128;step++){
+    var best=null,bs=1e9;
+    for(var a in alive){
+      for(var b in alive){
+        if(+b<=+a)continue;
+        if(!adj(+a,+b))continue;
+        var sc=imp[+a]+imp[+b]+Math.abs(imp[+a]-imp[+b]);
+        if(sc<bs){bs=sc;best=[+a,+b];}
+      }
+    }
+    if(!best)break;
+    tomePlan.push(best);
+    delete alive[best[1]]; // b merges into a
+  }
+})();
+function tomeGroups(L){
+  // replay merge plan up to floor(L/24*len) steps
+  var parent={};
+  for(var i=0;i<N*N;i++)parent[i]=i;
+  var find=function(x){while(parent[x]!==x)x=parent[x]=parent[parent[x]];return x;};
+  var steps=Math.floor(L/24*tomePlan.length);
+  for(var s=0;s<steps;s++){
+    var m=tomePlan[s];
+    parent[find(m[1])]=find(m[0]);
+  }
+  var groups={};
+  for(var j=0;j<N*N;j++){
+    var r=find(j);
+    (groups[r]=groups[r]||[]).push(j);
+  }
+  return groups;
+}
+function fastvAlive(L){
+  // drop bottom r% by importance after layer 2; r grows with depth to 70%
+  if(L<2)return {set:null,kept:N*N};
+  var r=Math.min(.7,(L-2)/24*.75);
+  var order=[];
+  for(var i=0;i<N*N;i++)order.push(i);
+  order.sort(function(a,b){return imp[b]-imp[a];});
+  var keep=Math.max(20,Math.round(N*N*(1-r)));
+  var set={};
+  for(var k=0;k<keep;k++)set[order[k]]=true;
+  return {set:set,kept:keep};
+}
+function draw(){
+  ctx.clearRect(0,0,LW,LH);
+  var x0=64,y0=64,cell=20,gap=2;
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.fillText('16×16 图像块（亮 = 主体/高注意力）',x0,40);
+  var nAlive=N*N, flops=1;
+  if(mode==='tome'){
+    var groups=tomeGroups(layer);
+    nAlive=Object.keys(groups).length;
+    flops=nAlive*nAlive/(N*N*N*N);
+    for(var g in groups){
+      var arr=groups[g];
+      var minx=99,miny=99,maxx=-1,maxy=-1,sum=0;
+      for(var k=0;k<arr.length;k++){
+        var idx=arr[k],ix=idx%N,iy=(idx-ix)/N;
+        minx=Math.min(minx,ix);maxx=Math.max(maxx,ix);
+        miny=Math.min(miny,iy);maxy=Math.max(maxy,iy);
+        sum+=imp[idx];
+      }
+      var v=sum/arr.length;
+      var gx=x0+minx*(cell+gap),gy=y0+miny*(cell+gap);
+      var gw=(maxx-minx+1)*cell+(maxx-minx)*gap,gh=(maxy-miny+1)*cell+(maxy-miny)*gap;
+      var col=v>.45?C.green:C.blue;
+      ctx.fillStyle=hexA(v>.45?'#41d1a7':'#6ea8ff',.25+.45*v);
+      ctx.beginPath();
+      if(ctx.roundRect)ctx.roundRect(gx,gy,gw,gh,Math.min(6,gw/3));else ctx.rect(gx,gy,gw,gh);
+      ctx.fill();
+      ctx.strokeStyle=hexA(v>.45?'#41d1a7':'#6ea8ff',.75);ctx.stroke();
+      if(arr.length>1&&gw>26){
+        ctx.fillStyle=C.muted;ctx.font='9.5px monospace';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('×'+arr.length,gx+gw/2,gy+gh/2);
+      }
+    }
+  }else{
+    var fv=fastvAlive(layer);
+    nAlive=fv.set?fv.kept:N*N;
+    flops=nAlive*nAlive/(N*N*N*N);
+    for(var i2=0;i2<N*N;i2++){
+      var ix2=i2%N,iy2=(i2-ix2)/N;
+      var gx2=x0+ix2*(cell+gap),gy2=y0+iy2*(cell+gap);
+      var v2=imp[i2];
+      var aliveNow=!fv.set||fv.set[i2];
+      if(aliveNow){
+        ctx.fillStyle=hexA(v2>.45?'#41d1a7':'#6ea8ff',.25+.45*v2);
+        ctx.fillRect(gx2,gy2,cell,cell);
+        ctx.strokeStyle=hexA(v2>.45?'#41d1a7':'#6ea8ff',.7);ctx.strokeRect(gx2+.5,gy2+.5,cell-1,cell-1);
+      }else{
+        ctx.setLineDash([3,3]);
+        ctx.strokeStyle='rgba(255,107,107,.4)';
+        ctx.strokeRect(gx2+2.5,gy2+2.5,cell-5,cell-5);
+        ctx.setLineDash([]);
+      }
+    }
+  }
+  // axes labels
+  ctx.fillStyle=C.muted;ctx.font='10.5px monospace';ctx.textAlign='center';
+  for(var c=0;c<N;c+=4)ctx.fillText(c,x0+c*(cell+gap)+cell/2,y0+N*(cell+gap)+10);
+  // right: token count curve
+  var px=520,py=64,pw=300,ph=240;
+  ctx.fillStyle=C.muted;ctx.font='13px sans-serif';ctx.textAlign='left';
+  ctx.fillText('剩余 token 数随深度变化',px,40);
+  ctx.strokeStyle=C.line;ctx.strokeRect(px,py,pw,ph);
+  ctx.fillStyle='#5a6270';ctx.font='10px monospace';
+  ctx.fillText('256',px-26,py+8);ctx.fillText('0',px-18,py+ph);
+  ctx.fillText('层 0',px+2,py+ph+14);ctx.fillText('层 24',px+pw-28,py+ph+14);
+  // curve
+  ctx.strokeStyle=C.orange;ctx.lineWidth=2;ctx.beginPath();
+  for(var L=0;L<=24;L++){
+    var n=L===0?N*N:(mode==='tome'?Object.keys(tomeGroups(L)).length:fastvAlive(L).kept);
+    var xx=px+L/24*pw, yy=py+ph-(n/(N*N))*ph;
+    if(L===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);
+  }
+  ctx.stroke();ctx.lineWidth=1;
+  // baseline
+  ctx.strokeStyle='rgba(174,180,189,.4)';ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(px,py+8);ctx.lineTo(px+pw,py+8);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle=C.muted;ctx.font='10.5px sans-serif';
+  ctx.fillText('不压缩（恒为 256）',px+8,py+20);
+  // current marker
+  var nn=layer===0?N*N:nAlive;
+  var mx2=px+layer/24*pw,my2=py+ph-(nn/(N*N))*ph;
+  ctx.fillStyle=C.orange;ctx.beginPath();ctx.arc(mx2,my2,4,0,7);ctx.fill();
+  // stats
+  root.querySelector('.ppx-n').textContent=nAlive;
+  root.querySelector('.ppx-f').textContent=Math.round(flops*100)+'%';
+  root.querySelector('.ppx-lv').textContent='第 '+layer+'/24 层';
+}
+function step(dt){
+  if(!auto)return;
+  layer+=dt*6;
+  if(layer>24){layer=0;}
+  layer=Math.floor(layer);
+  root.querySelector('.ppx-layer').value=layer;
+  draw();
+}
+var last=0;
+function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;step(dt);draw();requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+root.querySelector('.ppx-layer').addEventListener('input',function(){layer=+this.value;auto=false;var b=root.querySelector('.ppx-play');b.textContent='▶ 自动播放';b.classList.remove('on');});
+root.querySelector('.ppx-play').addEventListener('click',function(){auto=!auto;this.textContent=auto?'⏸ 暂停播放':'▶ 自动播放';this.classList.toggle('on',auto);});
+root.querySelectorAll('.ppx-mode').forEach(function(b){
+  b.addEventListener('click',function(){
+    root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on');mode=b.dataset.m;
+  });
+});
+})();
+</script>
+<!-- /WIDGET:w8 -->
+
+<h2><span class="num">3</span>发展历程时间线（2017–2026）</h2>
   <p class="lead">ViT 稀疏化并非凭空出现——它的两个源头都在 NLP（稀疏注意力、token 剪枝），2020 年 ViT 诞生后，视觉社区先在图像分类上验证了 token 稀疏化（2021–2022），随后被 VLM 和 DiT 两大新架构各自"重新发明"并推向极限。</p>
 
   <ul class="tl">
@@ -672,7 +904,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <li><b>VLM 剪枝 9 月新潮</b>：VPRune（arXiv:2609.24485，2026-09-21）指出激进压缩崩塌的三个被忽视原因——文本引导选择偏差、被弃 token 信息损失、位置失真，用"相似度引导回收 + 位置保持恢复"在 FastVLM-1.5B 等边缘模型上占优；同潮还有 ACPruner（复旦，偏置注意力覆盖最大化统一跨模态重要性）、RobustPruner（NeurIPS 2026）、VIP-Router（样本自适应路由）等。另 Song Han 系 <b>DSA</b>（ICLR 2026）把稀疏注意力与序列并行结合做分布式推理——视觉稀疏化正从"单卡 kernel"走向"多卡通信"。</li>
   </ul>
 
-  <h3>6.5 2026-10 中旬速览：50 FPS 视频生成、"注意力必然稀疏"被挑战、评测方法学警示</h3>
+  <h3>6.5 2026-10 中下旬速览：缓存与合并双升级，VLA 压缩与评测方法学升温</h3>
   <p>五件新事：<b>免训练 wrapper 把因果视频模型推上 50 FPS</b>（UnStep）；<b>MonarchRT 证明视频注意力并非可靠稀疏</b>（NeurIPS 2026，补录）；<b>线性注意力 VLM 让旧剪枝方法集体失效</b>（V-CoLA）；<b>TwinPrune 揭出"prefill 探针测不出 decode 压缩"的评测缺陷</b>；<b>剪枝外溢到 VLA 机器人模型</b>（VLA-ACL）。</p>
   <ul>
     <li><b>UnStep</b>（Meta Superintelligence Labs，arXiv:2609.32518，2026-09-26，代码开源）：免训练推理 wrapper——低于蒸馏步数的调度 + sink+滑窗 KV 窗口 + 精修 clean-cache pass + 注意力 V/O 投影截断 SVD + Triton RoPE/FP16 VAE 等运行时优化，<b>速度-质量权衡可在推理时自由选择</b>（不被蒸馏"冻结"在权重里）。Wan2.1-1.3B 的 Self Forcing <b>17 → 49.8 FPS（H100）</b>且 VBench 84.31→84.56（质量反升）；1 步变体 59.6 FPS（H100）/ 77 FPS（GB200）；30s 长视频 51.2 FPS——"免训练 + 运行时栈协同"路线的当前标杆<sup class="cite">[UnStep · arXiv:2609.32518 · 2026-09]</sup>。</li>
@@ -691,7 +923,16 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 
 <!-- ================================================================ -->
 <section id="s7">
-  <h2><span class="num">7</span>未来发展方向</h2>
+  <h4>2026-10 下旬增补</h4>
+<ul>
+<li><b>SoftCache</b>（特拉维夫大学，arXiv:2610.22369，10 票）：DiT 免训练缓存的<b>自适应步长</b>选择——针对"均匀选步要么浪费、要么冒进"的问题，TeaCache（§5.3）的直接后继。</li>
+<li><b>Which Tokens to Merge?</b>（汉阳大学，arXiv:2610.22370，10 票）：用<b>扩散动力学</b>决定"该在哪些步合并哪些 token"，图像生成 token merging（ToMeSD 一族，§5.2）的新解法。</li>
+<li><b>FastVLA</b>（Colorado Mines + Texas A&amp;M + Microsoft AI，arXiv:2610.22146，12 票）：VLA 模型的任务条件化 + 时间自适应视觉 token 压缩——继 VLA-ACL 之后"具身侧 token 压缩"的又一强证（§6.1 趋势④ 的延伸）。</li>
+<li><b>MoDDiT</b>（牛津，arXiv:2610.28086）：在 DiT 内做 MoE 式 <b>token 路由</b>，面向实时视频/端侧合成——§7.3 预判的"token 路由器"在 DiT 侧的雏形。</li>
+<li><b>TensorRT-LLM v1.4.0rc0</b>（10-14）：Qwen-Image-Layered 的 FP8 + <b>Cache-DiT</b> 支持；块稀疏 FMHA 集成更新版 SM90 SageAttention——"跨步缓存 + 稀疏注意力 + 量化"三件套进同一引擎。SGLang v0.5.22 亦为 DiT 带来在线 INT8 W8A8（ConvRot）。</li>
+<li><b>一句话动态</b>：FoveaTree（USTC，10-12）按信息密度树做视频 LLM 剪枝；CatchUp（10-16）让被剪 token 按"深度感知"重新录取；TokenGate（Stanford+Berkeley，10-19，12 票）学习式 LLM prefill 剪枝；Offline Makes Online Better（10-20）把 AR 视频 KV 与 token merging 联合压缩；Are We Evaluating VLM Token Pruning Right?（NTU，10-17）再度警示评测方法学。</li>
+</ul>
+<h2><span class="num">7</span>未来发展方向</h2>
   <p class="lead">综合发展脉络与 2026 年最新动态，以下七个方向最值得关注（按"距离成熟"从近到远排序）：</p>
   <ol>
     <li><b>训练时原生稀疏（Native Sparsity）</b>。当前主流仍是"训练完再加速"，天花板明显。Sparse Forcing（训练-推理一致的原生稀疏自回归扩散）和 Veda（蒸馏适配稀疏）已示范：让模型<b>在训练中就适应稀疏计算</b>，可在同等质量下把稀疏率推到免训练方法不敢碰的水平。预期下一代视频基础模型会把稀疏注意力掩码作为可学习参数端到端训练。</li>
