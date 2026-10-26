@@ -124,20 +124,20 @@
     再向训练与架构延伸——每篇综述都沿「整体概况 · 前沿亮点 · 基础原理 · 发展历程」展开，
     并配有可直接上手的交互式原理动画。</p>
   <div class="meta">
-    <span class="chip"><b>11</b> 篇综述</span>
+    <span class="chip"><b>12</b> 篇综述</span>
     <span class="chip">覆盖 2014 – 2026</span>
     <span class="chip">LLM · VLM · DiT</span>
     <span class="chip">范式 · 历史 · 原理 · 前沿</span>
     <span class="chip">2026-10-21 · 增补下旬动态</span>
-    <span class="chip"><b>8</b> 个可交互原理动画</span>
+    <span class="chip"><b>10</b> 个可交互原理动画</span>
   </div>
 </header>
 
 <main>
   <p class="section-label">知识地图 · 推理效率栈</p>
-  <p class="section-note">五个层面自上而下构成推理优化的完整视图：算法层改变解码方式，结构层改变模型本身，
-    显存层管理 KV Cache，压缩层降低数值精度，系统层负责调度与服务。</p>
-  <div class="stack-axis">从算法到系统 · 五个层面</div>
+  <p class="section-note">六个层面自上而下构成推理优化的完整视图：算法层改变解码方式，结构层改变模型本身，
+    显存层管理 KV Cache，压缩层降低数值精度，系统层负责调度与服务，仿真层在不部署的前提下回答"能跑多快、要多少资源、扛多少 QPS"。</p>
+  <div class="stack-axis">从算法到系统 · 六个层面</div>
   <div class="stack">
 
     <a class="layer" href="posts/speculative-decoding.html" style="--layer-c:#41d1a7">
@@ -186,6 +186,16 @@
         <div class="lt">系统层 · 调度与服务</div>
         <h2>大模型推理服务优化：技术发展史、原理与前沿展望</h2>
         <p>从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。</p>
+      </div>
+      <span class="arrow">阅读 →</span>
+    </a>
+
+    <a class="layer" href="posts/llm-perf-simulation-2026.html" style="--layer-c:#e59fd0">
+      <div class="no">L6</div>
+      <div class="info">
+        <div class="lt">仿真层 · 不部署就预估性能</div>
+        <h2>大模型性能仿真：从算子账本到请求曲线</h2>
+        <p>从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真——以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。</p>
       </div>
       <span class="arrow">阅读 →</span>
     </a>
