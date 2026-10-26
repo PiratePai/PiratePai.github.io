@@ -283,6 +283,22 @@
   if (!el) return;
   fetch('views.json?t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
     var s = (d.series || []).slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+    // busuanzi 接口故障时的降级：用最近快照回填面板数字（服务恢复后被实时值覆盖）
+    var lastSnap = s[s.length - 1];
+    setTimeout(function(){
+      var pvEl = document.getElementById('busuanzi_value_site_pv');
+      var uvEl = document.getElementById('busuanzi_value_site_uv');
+      var dash = pvEl && (/^[–\s-]*$/.test(pvEl.textContent.trim()));
+      if (lastSnap && dash) {
+        pvEl.textContent = String(lastSnap.pv);
+        if (uvEl) uvEl.textContent = String(lastSnap.uv);
+        var note = document.querySelector('.views-note');
+        if (note && note.textContent.indexOf('暂不可用') === -1) {
+          var md = lastSnap.date.slice(5).replace('-', '/');
+          note.textContent = '实时计数服务暂不可用，以下为最近快照(' + md + ') · 每日 04:30 自动更新 · 计数服务：不蒜子';
+        }
+      }
+    }, 2500);
     if (s.length < 2) return; // 少于两个点时保留占位文案
     var W = 900, H = 300, L = 58, R = 18, T = 18, B = 36;
     var iw = W - L - R, ih = H - T - B;
