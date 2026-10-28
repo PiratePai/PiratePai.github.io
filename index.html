@@ -124,7 +124,7 @@
     再向训练与架构延伸——每篇综述都沿「整体概况 · 前沿亮点 · 基础原理 · 发展历程」展开，
     并配有可直接上手的交互式原理动画。</p>
   <div class="meta">
-    <span class="chip"><b>14</b> 篇综述</span>
+    <span class="chip"><b>15</b> 篇综述</span>
     <span class="chip">覆盖 2014 – 2026</span>
     <span class="chip">LLM · VLM · DiT · 世界模型</span>
     <span class="chip">范式 · 历史 · 原理 · 前沿</span>
@@ -215,6 +215,13 @@
   <div class="group">
     <p class="section-label">延伸 · 训练与架构</p>
     <div class="grid">
+
+      <a class="card" href="posts/strata-hybrid-inference.html">
+        <div class="tags"><span class="tag">端侧推理</span><span class="tag">CPU-GPU 混合推理 · MoE 卸载</span></div>
+        <h2>大模型 CPU-GPU 混合推理：从专家卸载到分层缓存</h2>
+        <p>以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。</p>
+        <div class="foot"><span>2026-10 · 综述 · 源码 0.2.7</span><span class="arrow">阅读全文 →</span></div>
+      </a>
 
       <a class="card" href="posts/realtime-world-models-2026.html">
         <div class="tags"><span class="tag">世界模型</span><span class="tag">实时交互 · 因果流式 · 神经渲染</span></div>
