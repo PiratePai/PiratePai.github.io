@@ -188,7 +188,7 @@
     <span class="tag">无损 · 草稿-验证范式</span>
     <h1>投机解码全景</h1><p class="sub">从经典投机采样，到 MTP / DFlash / DSpark</p>
     <div class="sub">一篇通俗易懂的推理加速发展史 · 含代码与原始引用</div>
-    <div class="meta"><span class="chip">调研日期：<b>2026-08-13</b> · 增补：<b>2026-10-21</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
+    <div class="meta"><span class="chip">调研日期：<b>2026-08-13</b> · 增补：<b>2026-10-30</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
   </div>
 </header>
 
@@ -227,10 +227,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DLite：免历史草稿</b><span class="hl-date">10-16 · 上交大等</span></div><p>智能体负载下现有草稿器接受长度掉 80%、草稿 KV 维护占延迟 10–20%；DLite 复用目标隐态局部起草，比 DSpark 最高 +70%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>并行草稿成框架标配</b><span class="hl-date">10-18/19 · vLLM/SGLang</span></div><p>v0.32.0 与 v0.5.22 双周连发：DFlash/DSpark 进 CUDA 图、块验证上 AMD MI350X、GLM-5.3-Flash 官配 DFlash2。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>ECHO：主干即草稿</b><span class="hl-date">10-17 · 百度</span></div><p>自递归终层 MTP 零外挂模块，开放高熵生成反超 EAGLE-3 / DSpark / DFlash 等后训练草稿器。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>FlashMap 与"回收验证"新支线</b><span class="hl-date">10-14~20</span></div><p>流匹配引入并行起草（FlashMap）；被拒的验证前向被 ReAnchor/DStill 回收再利用，谱系继续分叉。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EAGLE-4：负载校准草稿树</b><span class="hl-date">10-20/21 · eagle-hq</span></div><p>硬件/负载校准的草稿树：Qwen3.8-27B 3.59×，反超 DFlash2 2.80× / DSpark 2.57× / MTP 2.22×；B300 单请求 3.42×→64 并发 1.39×。（eagle-hq 出品，source-available，与 SafeAILab EAGLE-1~3 无确认关联）</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DSpark 的置信度调度+自适应验证长度随生产级推理栈一起开源（10-20，GitHub 首次提交口径）；官方 Q&amp;A 称单集群 155T tokens/天。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>xPress 进 vLLM</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>DFlash 草稿+精化器成为原生 dflash 方法：2026-10-22 合入 main，v0.33 起正式搭载（晚于 v0.32.0）；训练配方进 speculators 库。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>接受率不随位置衰减</b><span class="hl-date">10-22 · Z. Meng</span></div><p>500 题 ~178 万轮验证：接受率不随位置衰减，拒绝集中于 wait/check 等反思 token——直接挑战“位置衰减（后缀衰减）”叙事。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
 
 <h2 id="why"><span class="num">1</span>为什么大模型推理"慢"？<span class="cite" title="Leviathan et al. 2022 / Chen et al. 2023">[2,3]</span></h2>
 
@@ -1160,6 +1160,21 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 </div>
 
+<h3>7.5 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>EAGLE-4</b>（eagle-hq（Eagle AI Corp），10-20/21）：硬件/负载校准的草稿树；Qwen3.8-27B 3.59×，反超 DFlash2 2.80×、DSpark 2.57×、MTP 2.22×；B300 SGLang 单请求 3.42×→64 并发 1.39×，MI355X 2.07×；无 arXiv（仓库 PDF）。注意：eagle-hq 出品、source-available，与 SafeAILab 的 EAGLE-1~3 无确认关联。<sup class="cite">[32]</sup></li>
+<li><b>DeepInfer 开源</b>（DeepSeek，10-20）：DSpark 的置信度调度+自适应验证长度随生产级推理栈开源；官方 Q&amp;A 称单集群 155T tokens/天。开源日期 10-20 以 GitHub 首次提交为准（tech-insider 10-21、vLLM 官方 10-24 推文同口径，二手信源）。<sup class="cite">[33]</sup></li>
+<li><b>xPress 上游化 vLLM</b>（UIUC SSAIL，10-22）：DFlash 草稿+精化器成为原生 dflash 方法（PR #54448，2026-10-22 合入 main，v0.33 起正式搭载——晚于 v0.32.0，v0.33.0rc0 已于 10-26 发布）；训练配方进 speculators 库，Qwen3-8B-XPress-b16 权重已发。<sup class="cite">[34]</sup></li>
+<li><b>Speculative Acceptance Does Not Decay with Position</b>（Z. Meng，10-22）：500 题 ~178 万轮验证表明接受率不随位置衰减，拒绝集中于 wait/check 反思 token（def2 0.747 vs 数字/算子 ≥0.93）——挑战“位置衰减”叙事，也动摇按位置衰减加权一类训练设计的前提。<sup class="cite">[35]</sup></li>
+<li><b>Packed-SS（One Call Ahead）</b>（密歇根大学，10-24）：自投机一次调用，验证与起草同前向、输入长度线性增长；Nemotron 3B/8B 贪心 vs Linear-SS +3.5–9.3%、vs Quadratic-SS +3.4–32.3%。<sup class="cite">[36]</sup></li>
+<li><b>Tale of Two Tradeoffs</b>（UCLA，10-22）：扩散力度 K × 接受宽松度 λ 联合扩展 Pareto 前沿；SDAR 未专训即追平 Uno/DFlash/DSpark 前沿。<sup class="cite">[37]</sup></li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/packedss-fig1.svg" loading="lazy" alt="Linear-SS、Quadratic-SS 与 Packed-SS 三种自投机调度对比" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.33379）</b> · Linear-SS 必须等验证完成才能起草（每轮两次模型调用）；Quadratic-SS 塞进一次调用，但要为每个可能停下的位置起草（输入随宽度 W 二次增长）；Packed-SS 同样一次调用、只从已验证前缀起草单一草稿——输入线性增长。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
+
 <!-- ===================== 8. FUTURE ===================== -->
 <h2 id="future"><span class="num">8</span>未来发展方向</h2>
 <p>综合各路线与最新工作，未来几年最值得关注的方向：</p>
@@ -1217,7 +1232,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <p><b>贡献</b>：上交大（戴国浩组）+清华+Infinigence 提出<b>不维护草稿 KV</b>：直接复用目标模型隐状态做局部预测，配轻量串行头；两阶段训练（同构 teacher 热身 + 后训练）。Qwen3-4B/8B 上 τ 达 2~6，智能体任务比 DSpark 最高 +70%（SWE-Bench 3.15 vs 1.89，约 2× 端到端加速），代码与权重已开源。</p>
 <blockquote class="q">
   <span class="en">"Draft-history KV maintenance alone accounts for 10–20% of end-to-end latency in agentic workloads, where acceptance length of existing drafters collapses by up to 80%."</span>
-  <span class="src">— SJTU & Tsinghua & Infinigence, DLite: History-free Speculative Decoding for Agentic AI, arXiv:2610.23787, 2026-10-16 [28]</span>
+  <span class="src">— SJTU & Tsinghua & Infinigence, DLite: History-free Speculative Decoding for Agentic AI, arXiv:2610.23787, 2026-10-16 [31]</span>
   <span class="zh">在智能体负载中，草稿历史 KV 的维护一项就占端到端延迟的 10–20%，现有草稿器的接受长度最高塌缩 80%。</span>
 </blockquote>
 
@@ -1254,12 +1269,18 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
     <li>LMSYS & Z Lab & Modal. <i>The Next Generation of Speculative Decoding: DFlash and Spec V2</i>. lmsys.org Blog, 2026-06-15.</li>
     <li>NVIDIA (Ashkenazi et al.). <i>Co-Designing AI Models Using Speculative Decoding for Faster LLM Inference</i>. developer.nvidia.com Blog, 2026-09-02.</li>
     <li>NVIDIA. <i>Nemotron 3.5 Super and Lightning Technical Report</i>. research.nvidia.com, 2026-10-14.（递归共享 MTP 头 + 后训练 MTP boosting + LiLiCorr/DFlash/DSpark 三套官方草稿器，NVFP4 发布）</li>
-    <li>Zhao et al. (RUC & NJU & Huawei). <i>TreeSpark: Training What You Verify in Parallel Speculative Decoding</i>. arXiv:2610.20175, 2026-10-14. 代码：github.com/Robot2050/TreeSpark（昇腾 910B 实测）。</li>
+    <li>Zhao et al. (RUC & NJU & Huawei). <i>TreeSpark: Learning to Draft the Trees You Verify for Speculative Decoding</i>. arXiv:2610.20175, 2026-10-14. 代码：github.com/Robot2050/TreeSpark（昇腾 910B 实测）。</li>
     <li>Liu et al. (NJU & Alibaba Group). <i>When Parallel Drafter Meets Parallel Speculative Decoding</i>（DPara）. arXiv:2609.27396, 2026-09-23.</li>
     <li>Inco AI. <i>DFlash 2: Keep Drafting Parallel</i>. inco.ai Blog, 2026-08-18.（路径选择器 + 动态深度卷积；草稿器发布于 incoai HF collection）</li>
     <li>Liquid AI. <i>LFM2.5-VL-DSpark: Speculative Decoding for Vision-Language Models</i>. liquid.ai Blog, 2026-09-24.</li>
     <li>SJTU & Tencent Youtu & XMU. <i>DSpine: Adjacent Causal Injection for Parallel Drafting</i>. arXiv:2609.36173, 2026-09-28. 项目页：dspine-project.github.io。</li>
   <li>SJTU (DAI-Sys) &amp; Tsinghua &amp; Infinigence. <i>DLite: History-free Speculative Decoding for Agentic AI</i>. arXiv:2610.23787, 2026-10-16. 代码：github.com/SJTU-DAI-Sys/DLite。</li>
+  <li id="r32">eagle-hq（Eagle AI Corp）. <i>EAGLE-4</i>（硬件/负载校准草稿树）. 仓库 PDF（无 arXiv）, 2026-10-20/21.（source-available，与 SafeAILab EAGLE-1~3 无确认关联；加速比随并发衰减：B300 单请求 3.42×→64 并发 1.39×，MI355X 2.07×）</li>
+  <li id="r33">DeepSeek-AI. <i>DeepInfer</i>（生产级开源推理系统，含 DSpark 置信度调度+自适应验证长度）. 2026-10-20 开源（GitHub 首次提交口径；tech-insider 10-21、vLLM 官方 10-24 推文同口径）. 官方 Q&amp;A：单集群 155T tokens/天；开源版不含 KV cache 系统、prefill/decode 分离与跨副本负载均衡（README 明示）。</li>
+  <li id="r34">UIUC SSAIL. <i>xPress</i>（DFlash 草稿+精化器；论文 arXiv:2608.02438）. vLLM PR #54448 于 2026-10-22 合入 main，v0.33 起为原生 dflash 方法（晚于 v0.32.0，v0.33.0rc0 10-26 已发）；训练配方进 speculators 库，Qwen3-8B-XPress-b16 权重已发。</li>
+  <li id="r35">Meng, Z. <i>Speculative Acceptance Does Not Decay with Position</i>. arXiv:2610.30644, 2026-10-22.（500 题 ~178 万轮验证；拒绝集中于 wait/check 反思 token，def2 0.747 vs 数字/算子 ≥0.93）</li>
+  <li id="r36">University of Michigan. <i>Packed-SS（One Call Ahead）</i>：自投机一次调用，验证与起草同前向. arXiv:2610.33379, 2026-10-24.（Nemotron 3B/8B 贪心 vs Linear-SS +3.5–9.3%、vs Quadratic-SS +3.4–32.3%）</li>
+  <li id="r37">UCLA. <i>Tale of Two Tradeoffs</i>（扩散力度 × 接受宽松度联合扩展）. arXiv:2610.31819, 2026-10-22.（SDAR 未专训即追平 Uno/DFlash/DSpark 前沿）</li>
 </ol>
   <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
   <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">

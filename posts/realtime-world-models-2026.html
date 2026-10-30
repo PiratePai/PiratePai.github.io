@@ -74,7 +74,7 @@
   .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
   .summary3 b{color:#41d1a7;}
   .summary3 ol{margin:6px 0 2px;}
-  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%;} }
 </style>
 </head>
 <body>
@@ -83,8 +83,8 @@
 <header class="hero"><div class="inner">
   <div class="kicker" style="color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px">实时交互世界模型调研 · 2026</div>
 <h1>实时交互世界模型全景：从"看视频"到"进世界"（2024–2026）</h1>
-  <p class="sub">Genie 4 两天前刚发布，Matrix-Game 4.0 两周前开源，LingBot-World 2.0 把连续交互推到一小时——实时交互世界模型正在从"能动的视频"变成"可进入的世界"。本文沿一条主线展开：<b>因果流式视频模型（每块 4 帧、干净预测回写 KV） × 记忆机制（滑窗 / 检索 / 3D / 外部引擎状态） × 实时化（少步蒸馏 + 动作感知缓存） × 服务栈（vLLM-Omni / Dynamo / WebRTC 全链路）</b>；四大范式、十三个前沿模型逐一拆解，原理写到本科生能懂的程度。</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-10-29</b></span><span class="chip">对象 <b>Genie 4 · Matrix-Game 4.0 · LingBot-World 2.0 · HY-World 1.5/2.0 · Code Video Model · Oneira · Cosmos 3</b></span><span class="chip">源码实测 <b>Matrix-Game-4（main）· lingbot-world-v2 · CodeVideoModel</b></span></div>
+  <p class="sub">Genie 4（10-27）刚发布，Matrix-Game 4.0（10-15）刚开源，LingBot-World 2.0 把连续交互推到一小时——实时交互世界模型正在从"能动的视频"变成"可进入的世界"。本文沿一条主线展开：<b>因果流式视频模型（每块 4 帧、干净预测回写 KV） × 记忆机制（滑窗 / 检索 / 3D / 外部引擎状态） × 实时化（少步蒸馏 + 动作感知缓存） × 服务栈（vLLM-Omni / Dynamo / WebRTC 全链路）</b>；四大范式、十三个前沿模型逐一拆解，原理写到本科生能懂的程度。</p>
+  <div class="meta"><span class="chip">调研日期：<b>2026-10-29</b> · 增补：<b>2026-10-30</b></span><span class="chip">对象 <b>Genie 4 · Matrix-Game 4.0 · LingBot-World 2.0 · HY-World 1.5/2.0 · Hy-Nomas · Code Video Model · Oneira · Cosmos 3</b></span><span class="chip">源码实测 <b>Matrix-Game-4（main）· lingbot-world-v2 · CodeVideoModel</b></span></div>
 </div></header>
 
 <div class="wrap">
@@ -122,12 +122,14 @@
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月 · 本方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid">
-<div class="hl-card"><div class="hl-meta"><b>Genie 4：DeepMind 把 Gemini 装进世界模型</b><span class="hl-date">10-27 · Google DeepMind</span></div><p>首个原生音频的实时世界模型（环境音 / 音乐 / 实时对话），Gemini Omni 锚定真实感、Gemini 3.8 Flash 在环推理维持连贯——研究预览，SynthID 水印，将进 Project Genie。</p><a class="hl-link" href="#s31">→ 3.1</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Genie 4：DeepMind 把 Gemini 装进世界模型</b><span class="hl-date">10-27 · Google DeepMind</span></div><p>首个原生音频的实时世界模型（环境音 / 音乐 / 实时对话），Gemini Omni 锚定真实感、Gemini 3.8 Flash 在环推理维持连贯；后续报道补齐硬数字：场景一致性约 2 分钟（Genie 3 的两倍）——研究预览，SynthID 水印，将进 Project Genie。</p><a class="hl-link" href="#s31">→ 3.1</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Hy-Nomas：腾讯混元开源自由格式交互世界生成</b><span class="hl-date">10-27 · 腾讯混元</span></div><p>8B HunyuanVideo 1.5 底座，任意轮次文本指令 + 连续相机控制；action-aware causal attention 把动作指令锁进时间窗防跨段重放；Apache-2.0，社区 ComfyUI 移植 12GB 显存可跑、INT8/FP8 下 720p 单步 1.02s。</p><a class="hl-link" href="#s34">→ 3.4</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Matrix-Game 4.0：引擎管世界，模型管画面</b><span class="hl-date">10-15 · Skywork AI</span></div><p>原生 C++ 游戏引擎（120Hz JoltPhysics）+ Wan2.2 5B 因果 DiT 流式神经渲染，A100 上 864×480 @ 38.5 FPS；"模型无记忆、引擎即记忆"——范式级转向，本文基于源码逐行拆解。</p><a class="hl-link" href="#s32">→ 3.2</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LingBot-World 2.0：一小时不断流</b><span class="hl-date">07-08 · Robbyant（蚂蚁集团）</span></div><p>因果预训练（MoBA 混合注意力）+ 一致性蒸馏 + DMD 长程自回放抗漂移，720p@60fps 实时、60 分钟不衰减；pilot/director 双 agent 马甲让世界"自己演下去"；14B + 1.3B 双开源。</p><a class="hl-link" href="#s33">→ 3.3</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Oneira / Code Video Model：代码重新发明世界状态</b><span class="hl-date">10-01 / 10 · CUHK-SZ 等 / 微软</span></div><p>coding agent 维护显式世界状态表（3D 盒子+状态码）或 Three.js 程序，视频模型只做"渲染器"——开放世界交互与状态持久第一次有了可验证的显式载体。</p><a class="hl-link" href="#s35">→ 3.5</a></div>
-<div class="hl-card"><div class="hl-meta"><b>World Labs Atlas 并入 AMD；世界模型融资破 30 亿美元</b><span class="hl-date">09-28 · World Labs / AMD</span></div><p>空间智能公司 World Labs（Fei-Fei Li）9 月发布 Atlas 后整体并入 AMD；2026 年六家纯世界模型公司合计融资约 30.5 亿美元（World Labs 10 亿 / AMI Labs 10.3 亿 / Odyssey 3.1 亿 / Decart 3 亿…）。</p><a class="hl-link" href="#s6">→ 6</a></div>
 <div class="hl-card"><div class="hl-meta"><b>服务栈成型：vLLM-Omni 0.30 原生支持交互世界模型</b><span class="hl-date">09 / 10 · vLLM 社区</span></div><p>vLLM-Omni 0.30.0 把 LingBot-World 做成官方交互式 world-model serving 用例（引擎内会话 + 跨阶段 KV 传递 + Mooncake AR→DiT 接力），10 月发技术报告（arXiv 2610.09307）；Dynamo 1.5 单卡 B200 实时 1080p 视频生成。</p><a class="hl-link" href="#s5">→ 5</a></div>
+<div class="hl-card"><div class="hl-meta"><b>World Labs Atlas 并入 AMD；世界模型融资破 30 亿美元</b><span class="hl-date">09-28 · World Labs / AMD</span></div><p>空间智能公司 World Labs（Fei-Fei Li）9 月发布 Atlas 后整体并入 AMD；2026 年六家纯世界模型公司合计融资约 30.5 亿美元（World Labs 10 亿 / AMI Labs 10.3 亿 / Odyssey 3.1 亿 / Decart 3 亿…）。</p><a class="hl-link" href="#s6">→ 6</a></div>
+<div class="hl-card"><div class="hl-meta"><b>并购潮：算力厂与车企直接买世界模型团队</b><span class="hl-date">10 · Amazon / Rivian</span></div><p>Amazon 洽购 Decart 约 70 亿美元（WSJ 10-11 首报，Decart 5 月估值约 40 亿）；Rivian 10-22 收购 Third Dimension 做自动驾驶仿真——加上 AMD 收 World Labs，10 月三笔交易把"买团队"变成主旋律。</p><a class="hl-link" href="#s6">→ 6</a></div>
 </div></div>
 
 <h2 id="s0"><span class="no">0</span>导读与大事记：世界模型是什么、为什么是现在</h2>
@@ -284,9 +286,9 @@
 
 <h3 id="s31">3.1 Genie 4（Google DeepMind，2026-10-27）：把 Gemini 装进世界模型</h3>
 
-<p>Genie 4 是 DeepMind 两天前（10-27）发布的第四代世界模型，目前以研究预览形态面向受信测试者开放，随后将进入 Google AI Ultra 的 Project Genie 与 Gemini API / AI Studio 早期接入。它有三个"第一"：</p>
+<p>Genie 4 是 DeepMind 于 10-27 发布的第四代世界模型（本文调研次日的后续报道补齐了关键数字：场景一致性维持最长约 <b>2 分钟</b>，为 Genie 3 约 1 分钟的两倍；参数量、分辨率、帧率均未披露[GENIE4B]），目前以研究预览形态面向受信测试者开放，随后将进入 Google AI Ultra 的 Project Genie 与 Gemini API / AI Studio 早期接入。它有三个"第一"：</p>
 <ul>
-<li><b>原生音频</b>：第一个实时生成音频的世界模型——环境音（风声、海浪）、音乐、以及<b>会实时对话的角色</b>全部与画面同步生成，不再是后期配音[GENIE4]。</li>
+<li><b>原生音频</b>：DeepMind 第一个原生音频的实时世界模型——环境音（风声、海浪）、音乐、以及<b>会实时对话的角色</b>全部与画面同步生成，不再是后期配音。（更早带音频的交互世界模型已有 Runway GWM Worlds 2 与 HelixWorld，见 §3.7 对照表。）[GENIE4]</li>
 <li><b>Gemini 在环</b>：架构上"incorporates and builds on capabilities from the Gemini family"——Gemini Omni 负责把模拟锚定在真实世界的外观与行为上，其他 Gemini 模型提供维持模拟连贯所需的复杂推理；演示中 Gemini 3.8 Flash 实时观察生成画面、把任务拆成步骤、随场景变化更新计划。这与 Genie 3 "纯像素生成器"的定位有本质区别——<b>推理模型成了世界模型的"导演"</b>[GENIE4]。</li>
 <li><b>物理与人物</b>：官方强调空气动力学、碰撞等真实物理场景的模拟，以及"会自然移动、对环境有机反应、可被实时引导"的人物——后者被称为最大的进步[GENIE4]。</li>
 </ul>
@@ -353,6 +355,7 @@
 <tr><td>2025-11</td><td><b>HunyuanGameCraft-2</b>（arXiv 2511.23429，2026-02 更新）</td><td>指令跟随交互：文本指令 + 键鼠统一控制空间；随机长视频微调 + <b>KV-recache</b>（动作改变时重算缓存）等工程加速到 <b>16 FPS</b>；正式定义"交互视频数据"与自动合成管线[HGC2]</td></tr>
 <tr><td>2025-12→2026</td><td><b>WorldPlay → HY-World 1.5</b>（WorldPlay arXiv 2512.14614）</td><td>实时 + 几何一致：流式视频扩散，双动作表征 + 重建式 KV 缓存（RKC）等技术换取"实时延迟下的长期几何一致性"[HYW15]</td></tr>
 <tr><td>2026-04</td><td><b>HY-World 2.0</b>（arXiv 2604.14268，04-16）</td><td>多模态 3D 世界模型全家桶：全景生成（HY-Pano-2 约 80B）→ 相机轨迹规划（WorldNav）→ 视角外扩 → 3D 重建（WorldStereo-2 约 17B，3DGS/网格/点云可导出 Unity/Unreal/Blender）；WorldMirror 2.0 重建；<b>2.1 版 07 月更新</b>；腾讯社区许可证（有地区限制）[HYW2]</td></tr>
+<tr><td>2026-10</td><td><b>Hy-Nomas</b>（模型与代码 10-21 开源，论文 10-27 挂出，arXiv 2610.36729）</td><td>自由格式交互：8B HunyuanVideo 1.5 底座，任意轮次文本指令 + 连续相机控制；<b>action-aware causal attention</b> 把每条动作指令锁定在其时间窗内、防止跨段重放；VLM Prompt Enhancer 组织多轮历史；配 Hy-Nomas-Bench（4 基准 280 案例）；Apache-2.0，社区 ComfyUI 移植 12GB 显存可跑、INT8/FP8 下 720p 单步 1.02s[HYNOMAS]</td></tr>
 </table>
 
 <p>HY-World 1.5 的技术报告副标题就是本文的主题——"实时延迟与几何一致性"（real-time latency and geometric consistency）：它指出业界在"速度 vs 记忆"之间二选一的困境，并用流式扩散 + 结构化缓存同时拿两头[HYW15]。这条"几何先验"路线与 World Labs 的 3D 原生派（§3.7）殊途同归：<b>把一致性外包给几何，而不是指望模型记住</b>。</p>
@@ -476,7 +479,7 @@
 
 <h3>5.3 NVIDIA Dynamo 1.5 与 Cosmos 生态：编排层的答案</h3>
 
-<p>Dynamo 定位为"推理引擎之上的编排层"——把一集群 GPU 变成一个协调的推理系统。当前 1.5.0 版本与视频/世界模型直接相关的面板：<b>原生 FastVideo 与 SGLang Diffusion 支持（单卡 B200 实时 1080p 视频生成）</b>；多模态 E/P/D 分离（编码/prefill/decode 三池 + 嵌入缓存，图像负载 TTFT 快 30%）；KVBM 把 KV 卸载到 GPU→CPU→SSD→远端；KV 感知路由（TTFT 快 2×）；1.0 起的 DGDR 零配置部署（模型+硬件+SLA 一份 YAML，AISimulate 离线搜配置）[DYNAMO]。Cosmos 3 的官方服务矩阵则是：Reasoner 走 vLLM / TensorRT-LLM（分页 KV + 连续批处理），Generator 走 vLLM-Omni，NIM 版支持 BF16/FP8/NVFP4（约 2× 加速）[COSMOS3]。</p>
+<p>Dynamo 定位为"推理引擎之上的编排层"——把一集群 GPU 变成一个协调的推理系统。当前 1.5.0 版本与视频/世界模型直接相关的面板：<b>原生 FastVideo 与 SGLang Diffusion 支持（单卡 B200 实时 1080p 视频生成）</b>；多模态 E/P/D 分离（编码/prefill/decode 三池 + 嵌入缓存，图像负载 TTFT 快 30%）；KVBM 把 KV 卸载到 GPU→CPU→SSD→远端；KV 感知路由（TTFT 快 2×）；1.0 起的 DGDR 零配置部署（模型+硬件+SLA 一份 YAML，AISimulate 离线搜配置）[DYNAMO]。Cosmos 3 的官方服务矩阵则是：Reasoner 走 vLLM / TensorRT-LLM（分页 KV + 连续批处理），Generator 走 vLLM-Omni，NIM 版支持 BF16/FP8/NVFP4（约 2× 加速）[COSMOS3]。增补（10-30）：Dynamo 已发布 <b>v1.5.1 补丁版</b>，官方兼容矩阵对齐 SGLang 0.5.18 / TensorRT-LLM 1.3.0rc25 / vLLM 0.28.0——跨引擎版本对齐是编排层落地的实际约束。</p>
 
 <h3>5.4 端到端案例：Matrix-Game 4.0 的传输与背压设计</h3>
 
@@ -522,6 +525,7 @@
 
 <h3>6.2 商业化：钱流向了哪里（2026）</h3>
 <p>2026 年六家相对纯粹的世界模型公司公布约 <b>30.5 亿美元</b>大额融资：World Labs 10 亿（并入 AMD 前最后冲刺）、AMI Labs 10.3 亿（通用世界模型与规划）、General Intuition 3.2 亿（经模拟世界训练的动作模型）、Odyssey 3.1 亿（通用交互模拟）、Decart 3 亿（实时世界模型与推理基础设施）、Veeda AI 0.9 亿+（物理 AI 模拟现实）[SIG26]。大厂侧：Google 用 Project Genie 验证订阅化（60 秒会话限制直白反映自回归生成的算力成本）；NVIDIA 把 Cosmos 做成物理 AI 数据工厂；字节 Seed 公开路线图押注"年底追平 Genie 3"；腾讯/阿里/蚂蚁用开源换生态。共同判断：<b>短期变现靠"内容制作管线"（预可视化、世界资产、机器人数据），"AI 原生游戏"仍是 1–2 年外的赌注</b>。</p>
+<p><b>增补（2026-10-30）：10 月成了"直接买团队"的并购月。</b>① AMD 于 09-28 整体收购 World Labs（二手信源口径约 82 亿美元，标注可信度：金额未获双方官方确认）；② Amazon 正洽谈以约 <b>70 亿美元</b>收购 Decart（WSJ 10-11 首报——若成交将超过其 2022 年 65 亿收购 MGM 的纪录；此前 Anthropic 约 60 亿美元的谈判已于 9 月告吹，Decart 5 月融资时估值约 40 亿，8 个月内近翻倍）[DECART26]；③ Rivian 于 10-22 收购 Third Dimension，把仿真能力收进门内做自动驾驶测试[RIVIAN26]。算力厂商、云巨头与车企在一个月内三度出手，印证了"世界模型团队成为稀缺资产"的判断——而 Genie 4 发布（10-27）当天 TechCrunch 亦把这轮整合作为行业背景再次确认[GENIE4B]。</p>
 
 <div class="summary3"><b>本章小结（记住三句话）</b>
 <ol>
@@ -581,9 +585,13 @@
 <li><b>基准汇总.</b> WorldScore（Duan 等, arXiv:2504.00983, 2025-04）; WBench / WorldMark / Omni-WorldBench / Physics-IQ / GameCraft-Bench / InteractionBench（各自论文, 2025–2026, 见 Awesome 收录）; WBench"35 个视频世界模型"规模数字转引自 Awesome-Interactive-World-Model 与社区追踪（二手信源）. <a href="https://arxiv.org/abs/2504.00983">arXiv:2504.00983</a></li>
 <li><b>Signals Inbox.</b> <i>World Models: Top Startups Today.</i> 2026（2026 年六家世界模型公司约 30.5 亿美元融资汇总：World Labs 10 亿 / AMI Labs 10.3 亿 / General Intuition 3.2 亿 / Odyssey 3.1 亿 / Decart 3 亿 / Veeda 0.9 亿+，二手信源，标注可信度：金额为公告口径）. <a href="https://signalsinbox.com/blogs/news/world-models-top-startups">链接</a></li>
 <li><b>36kr / Intelligent Emergence.</b> 字节 2026 年四大 AI 方向报道（世界模型年底对标 Genie 3），2026；Bloomberg 经由 TechNode/Sedaily 转述的实时空间视频系统报道. 媒体二手信源，标注可信度：方向性信息、无技术细节</li>
+<li><b>Hynomas Team（腾讯混元）.</b> <i>Hy-Nomas: Towards Free-form Interactive World Generation.</i> arXiv, 2026-10-27（模型与代码 2026-10-21 开源，Apache-2.0）. <a href="https://arxiv.org/abs/2610.36729">arXiv:2610.36729</a> · <a href="https://huggingface.co/tencent/Hy-Nomas">HuggingFace</a></li>
+<li><b>TechCrunch / The Verge.</b> <i>Google's Genie 4 world model adds audio, more realistic worlds and real-time steering.</i> 2026-10-27（补齐场景一致性约 2 分钟、Genie 3 约 1 分钟等硬数字；参数/分辨率/帧率官方未披露）. <a href="https://techcrunch.com/2026/10/27/googles-genie-4-world-model-adds-audio-more-realistic-worlds-and-real-time-steering">链接</a>（二手信源，标注可信度：与官方发布同日、数字与 The Verge 交叉）</li>
+<li><b>WSJ / TechCrunch.</b> Amazon 洽购 Decart 约 70 亿美元（WSJ 2026-10-11 首报；Anthropic 约 60 亿谈判 2026-09 告吹；Decart 2026-05 融资估值约 40 亿）. 二手信源，标注可信度：谈判阶段、未官宣. <a href="https://techcrunch.com/2026/10/27/googles-genie-4-world-model-adds-audio-more-realistic-worlds-and-real-time-steering">链接</a></li>
+<li><b>Rivian / Third Dimension.</b> Rivian 收购世界模型公司 Third Dimension（2026-10-22，用于自动驾驶仿真测试）；AMD 收购 World Labs 约 82 亿美元为二手信源口径（2026-09-28，金额未获官方确认）. 二手信源，标注可信度：交易事实多源一致、金额待官方口径. <a href="https://aihubmix.com/blog/genie-4-explained-what-world-models-are-and-why-google-keeps-chasing-them">链接</a></li>
 </ol>
 
-<p style="font-size:12.5px;color:var(--muted)">注：闭源系统（Genie 3/4、Happy Oyster、Marble/Atlas、Oasis 3）的技术细节仅取自官方一手来源（官方博客/技术报告/发布会），未采信未经证实的传闻；开源系统（Matrix-Game 4.0、LingBot-World 2.0、Code Video Model、HY-World 2.0、Cosmos 3）的关键数字经本地克隆仓库源码与文档核对（快照日期 2026-10-29）；性能类数字（FPS/延迟）高度依赖硬件与配置，跨系统比较请认准各自的测量口径。Genie 4 发布于本文调研截止日前两天（10-27），信息以当日官方博客为准，后续版本可能快速演化。</p>
+<p style="font-size:12.5px;color:var(--muted)">注：闭源系统（Genie 3/4、Happy Oyster、Marble/Atlas、Oasis 3）的技术细节仅取自官方一手来源（官方博客/技术报告/发布会），未采信未经证实的传闻；开源系统（Matrix-Game 4.0、LingBot-World 2.0、Code Video Model、HY-World 2.0、Hy-Nomas、Cosmos 3）的关键数字经本地克隆仓库源码与文档核对（快照日期 2026-10-29）；性能类数字（FPS/延迟）高度依赖硬件与配置，跨系统比较请认准各自的测量口径。Genie 4 发布于 2026-10-27（调研期内），信息以当日官方博客为准，后续版本可能快速演化；并购类金额多为媒体二手口径。</p>
 
 </div><!-- /wrap -->
 

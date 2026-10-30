@@ -114,7 +114,12 @@
   .pill.p{background:rgba(185,162,255,.14); color:#cdbaff; border:1px solid rgba(185,162,255,.4)}
 
   .grid2{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin:16px 0}
-  @media (max-width:760px){ .grid2{grid-template-columns:1fr} }
+  @media (max-width:760px){
+    .grid2{grid-template-columns:1fr}
+    table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%}
+    code{word-break:break-all}
+    td code,th code{white-space:normal}
+  }
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; font-size:.93rem;
   }
@@ -143,7 +148,7 @@
     <div class="kicker">Loop Models · Recurrent Depth · Latent Reasoning</div>
     <h1>Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</h1>
     <div class="sub">同一组权重反复使用，让模型"想得深"而不是"说得长"：从 Universal Transformer 到 COCONUT、Huginn、Ouro，再到 2026 年的 Astra 传闻与循环缩放定律</div>
-    <div class="meta">Pai · 2026-09 · 增补 2026-10-21 · 结合 seal-rg/recurrent-pretraining（Huginn）与 facebookresearch/coconut 源码 · 全部引用附原文与译文</div>
+    <div class="meta">Pai · 2026-09 · 增补 2026-10-30 · 结合 seal-rg/recurrent-pretraining（Huginn）与 facebookresearch/coconut 源码 · 全部引用附原文与译文</div>
     <div>
       <span class="tag">循环深度</span><span class="tag">潜空间推理</span><span class="tag">测试时算力</span><span class="tag">自适应计算</span><span class="tag">2026 产业化</span>
     </div>
@@ -188,10 +193,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>循环模型设计有了定论</b><span class="hl-date">10-16 · IFM+CMU</span></div><p>受控消融：三明治与输入注入是收益来源、随机初始化无用；Huginn 十项全胜 Ouro。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>截断还是不截断？</b><span class="hl-date">10-20 · HKU+Yale</span></div><p>近 600 次训练的缩放律：环数可自由选时全 BPTT 最优；两个全训练环省 27% 参数。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>循环深度杀入文生图</b><span class="hl-date">09-30 · 商汤等</span></div><p>Looped-DiT：260M 循环模型胜 6.5× 大模型，同预算加环优于加去噪步（233 票）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>LoopAhead 7.82×</b><span class="hl-date">10-15 · 上交+同济</span></div><p>循环模型 × 投机解码合流：早环起草 + 反馈调度，比 LoopSpec 再 +79%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>LoopFold 循环折叠并行</b><span class="hl-date">10-26 · 上交+中山</span></div><p>5 个串行阶段替代 9 环朴素展开，端到端延迟 −46%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LSTM-Style 共享 KV</b><span class="hl-date">10-23 · Kirsch</span></div><p>同 FLOPs 参数省 40.4%，持久 KV 缓存 15 份→4 份。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Looped UDLM</b><span class="hl-date">10-21 · MBZUAI 等</span></div><p>同 NLL 训练 FLOPs 省 2.7–3.3×，自适应循环再省 26–35% 环数。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>PAR 进度对齐循环</b><span class="hl-date">10-20</span></div><p>swap-S5 任务 16× 长度外推 95.5%（RLT 55.7%、CoT 0.8%）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div>
 
 <h2 id="why">1 · 引子：三个让人困惑的现象，指向同一个答案</h2>
 
@@ -873,12 +878,28 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <h4>2026-10 下旬增补</h4>
 <ul>
-<li><b>Towards Looped Models Done Right, Part I</b>（IFM/Berkeley + USC + CMU，arXiv:2610.23036，10-16，25 票）：受控解耦「循环拓扑 / 输入注入 / 潜状态组织」三轴——三明治包络贡献最大（MATH500 +12.0）、prelude 注入助上下文类任务（BBH-CoT +6.6）但伤数学（−3.6）、随机初始化与 H/L 双状态无一致收益；730M/336B token 上完整 Huginn 配置<b>十项全胜 Ouro</b>，并迁移到 8B-A0.8B MoE（500B token，比 112 层前馈 MoE 省 75% 驻留参数）。§7.3「缩放定律之战」的第一份受控答案。代码：github.com/ifm-ai/xllm-loop。</li>
-<li><b>Truncate or Not?</b>（HKU MMLab + Yale，arXiv:2610.26030，10-20）：近 600 次训练拟合统一缩放律——前向环数固定时截断反传确实划算（T=8 省 33–35% 训练算力）；但前向/反向环数都可自由选时<b>全 BPTT 最优</b>；两个全训练环是最佳循环设置（较非循环省 27% 参数、仅多 8% 算力）。为 §8.2「截断反传是有偏妥协」补上量化答案，直接更新方向二的结论。</li>
+<li><b>Towards Looped Models Done Right, Part I</b>（IFM + USC + CMU——无 Berkeley；arXiv:2610.23036，10-16，41 票（截至 10-30））：受控解耦「循环拓扑 / 输入注入 / 潜状态组织」三轴——三明治包络贡献最大（MATH500 +12.0）、prelude 注入助上下文类任务（BBH-CoT +6.6）但伤数学（−3.6）、随机初始化与 H/L 双状态无一致收益；730M/336B token 上完整 Huginn 配置<b>十项全胜 Ouro</b>，并迁移到 8B-A0.8B MoE（500B token，比 112 层前馈 MoE 省 75% 驻留参数）。§7.3「缩放定律之战」的第一份受控答案。代码：github.com/ifm-ai/xllm-loop。</li>
+<li><b>Truncate or Not?</b>（HKU MMLab + Yale，arXiv:2610.26030，10-19（v1；v2 为 10-20））：近 600 次训练拟合统一缩放律——前向环数固定时截断反传确实划算（T=8 省 33–35% 训练算力）；但前向/反向环数都可自由选时<b>全 BPTT 最优</b>；两个全训练环是最佳循环设置（较非循环省 27% 参数、仅多 8% 算力）。为 §8.2「截断反传是有偏妥协」补上量化答案，直接更新方向二的结论。</li>
 <li><b>LoopAhead</b>（上交+同济，arXiv:2610.21594，10-15）：循环 LM 的投机解码——早环状态做多 token lookahead 起草 + 中间环反馈调度暂停/复活分支，对 Ouro-1.4B/2.6B、Raven 系免损最高 <b>7.82×</b>（较 LoopSpec 再 +79.2%）——「循环深度 × 投机解码」合流（方向三）的最强新证据。</li>
 <li><b>Looped-DiT</b>（SenseTime + 清华 + NTU，arXiv:2609.40305，09-30 补录，alphaXiv 233 票为窗口最热）：首个文生图系统性 loop 研究——深监督 + 自调制注意力驯服朴素循环；260M 循环模型胜 6.5× 大模型、省 4.9× 推理算力；同预算下<b>加环深度优于加去噪步</b>，且出现跨环自我纠错。§11.5 战线一应以此为首。</li>
 <li><b>一句话动态</b>：Tübingen/Liquid AI 给出潜轨迹震荡的停止判据（arXiv:2610.18174，14 票）；Eli Lilly + NVIDIA 把循环深度用于临床 NLP（arXiv:2610.27559）；DeltaNet-PC 探索测试时记忆免 BPTT（arXiv:2610.15185）；上交+中科大+NTU 非对称循环 Transformer（arXiv:2610.28489）。</li>
 </ul>
+<h3>11.9 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<p class="lead">一周多内八件新事挑六件展开：上交+中山连发三篇把「并行化、状态化、表示复用」推到台前，KV 共享则是本月最集中的主题。</p>
+<ul>
+<li><b>LoopFold</b>（上交+中山（Zhouhan Lin 组），10-26，arXiv:2610.35556）：循环折叠并行——把串行循环重排成少数阶段并行执行，5 个串行阶段即可替代 9 环朴素循环，端到端延迟 <b>−46%</b>；1.4B 模型 8 任务均值 53.41→56.38%<span class="cite">[73]</span>。</li>
+<li><b>P2N</b>（同组，10-24，arXiv:2610.25076）：深表示复用——浅层循环直接复用深层表示，1.5B 模型 GSM8K 提升 10pp 以上、解码几乎零额外成本<span class="cite">[74]</span>。</li>
+<li><b>LSTM-Style Looped + 共享 KV</b>（Kirsch，10-23，arXiv:2610.33360）：LSTM 式跨环状态组织 + 各环共享一份 KV——同 FLOPs 下参数省 <b>40.4%</b>、持久 KV 缓存 15 份→4 份；一致性损失消除 81–89% 的续写惩罚<span class="cite">[75]</span>。</li>
+<li><b>BeNice!</b>（Cornell+IBM，10-22，arXiv:2610.31633）：KV 广播后训练——跨环近无损共享 KV，显存省 66.2%（社区口径）<span class="cite">[76]</span>。</li>
+<li><b>Looped UDLM</b>（MBZUAI+Sony+MIT，10-21，arXiv:2610.30066，18 票）：UDLM 的循环化——同 NLL 下训练 FLOPs 省 <b>2.7–3.3×</b>，自适应循环再省 26–35% 环数<span class="cite">[77]</span>。</li>
+<li><b>PAR 进度对齐循环</b>（10-20，arXiv:2610.27628）：为不同 token 对齐循环进度，swap-S5 任务 16× 长度外推 <b>95.5%</b>（RLT 55.7%、CoT 0.8%）——状态跟踪长程泛化的新基准线<span class="cite">[78]</span>。</li>
+<li><b>一句话动态</b>：StateLoop（同组，10-26，arXiv:2610.35544，12 票）做 per-token 持久状态 + 门控；TUM 分析深度生长 × 循环的 ICL 机制（10-22，arXiv:2610.31421，12 票）；Inside the Loop（牛津+BBC，arXiv:2610.24135）、Apple Halting Heads（arXiv:2610.32246）、Cross-Loop Query Handoff（UBC，arXiv:2610.34639）、LoopGR（中山+腾讯，arXiv:2610.34157）、Recursive CLIP（三星，arXiv:2610.34563）、One Model Two Paths（港中深，arXiv:2610.33517）。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/loopfold-fig1.svg" loading="lazy" alt="LoopFold 1+3+3 调度：预测-校正的三阶段并行批" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.35556）</b> · 1+3+3 调度：三个阶段、宽度 3，七次主干前向达到目标深度 D=5——(a) 由 H₁−H₀ 预测更深输入，(b) 三态并算并用早环真值校正，(c) 重复阶段并预测下一 token。串行循环被“折叠”成同前缀并行批。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 <h2 id="future">12 · 未来发展方向</h2>
 <p class="lead">综合论文脉络与 2026 年的动态，六个方向最值得关注（★ = 未来 1–2 年最可能出成果）。</p>
 
@@ -892,7 +913,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <p>2026 年的趋势已经明确：<b>循环的全部理论收益，最终要以"零额外延迟、零额外显存"交付</b>。路线图：跨循环并行（PLT）+ 并行采样（扩散强制）→ 连续深度批调度 → KV 跨轮压缩（MELT / Looped Latent Attention）→ 专用内核与编译器支持（循环友好的 CUDA graph / paged cache 变体）→ 与投机解码的合流（LoopMTP：循环深度生产多 token 草稿<span class="cite">[36]</span>）。更远处是硬件侧：循环模型的算术强度（小权重、高复用）天然适配存算一体与片上大 SRAM——这是一个"架构定义芯片"的候选场景。</p>
 
 <h3>方向四：可解释与对齐——看见潜思维</h3>
-<p>如果思考不可读，过程监督、安全审计、法规合规都会变成硬约束。研究前沿：<b>潜思维的可解码性</b>（目前证据有限<span class="cite">[26]</span>）、<b>读出转向</b>（用读出头反馈操控循环动力系统）、<b>潜轨迹奖励</b>（奖励可解释的中间状态而非只看结果）、<b>探针实时监控</b>（对循环状态做在线安全分类）。Astra 争议的本质是：<b>范式收益与可审计性存在结构性交换</b>，这个交换率本身值得作为一个科学问题来研究<span class="cite">[21][22]</span>。</p>
+<p>如果思考不可读，过程监督、安全审计、法规合规都会变成硬约束。研究前沿：<b>潜思维的可解码性</b>（目前证据有限<span class="cite">[26]</span>）、<b>读出转向</b>（用读出头反馈操控循环动力系统）、<b>潜轨迹奖励</b>（奖励可解释的中间状态而非只看结果）、<b>探针实时监控</b>（对循环状态做在线安全分类）。Astra 争议的本质是：<b>范式收益与可审计性存在结构性交换</b>，这个交换率本身值得作为一个科学问题来研究<span class="cite">[21][22]</span>。后续（增补 2026-10-30）：METR 的 Ryan Greenblatt 于 10 月下旬公开否认"泄露架构／未授权备忘录"的指控，争议至今未平息<span class="cite">[79]</span>（二手信源：社区转述）。</p>
 
 <h3>方向五：与生成式范式深度融合</h3>
 <p>循环结构与扩散语言模型、世界模型的合流是 2026 年最新鲜的方向：Thinking with Looped Flows 把循环去噪器耦合进概率流积分<span class="cite">[35]</span>；Looped Diffusion LM 把"去噪步"与"循环步"统一；Looped World Models 把循环深度引入交互式环境模型。统一视角呼之欲出：<b>迭代精炼（refine）本身就是一种通用计算原语</b>——去噪、思考、规划、控制都在"反复把状态变得更好"，循环 Transformer 给了这个原语一个可学习的载体。</p>
@@ -976,6 +997,13 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <li>ELLIS Tübingen / MPI-IS. <i>FlashLoop: Training-Free Acceleration of Looped Transformers.</i> arXiv:2609.29812 <span class="src-date">2026-09-24</span>. <a href="https://arxiv.org/abs/2609.29812">link</a> · github.com/Superone77/FlashLoop</li>
   <li>TechTimes. <i>OpenAI Fired Three Researchers Who Said Loop Transformer Would Blind Safety Monitors.</i> <span class="src-date">2026-10-14</span>. <a href="https://www.techtimes.com/articles/329046/20261014/openai-fired-three-researchers-who-said-loop-transformer-would-blind-safety-monitors.htm">link</a></li>
   <li>HKUST(GZ) &amp; StepFun &amp; SJTU 等. <i>OperLoop: Loop Transitions as Optimizer Updates.</i> arXiv:2609.37379 <span class="src-date">2026-09-29</span>. <a href="https://arxiv.org/abs/2609.37379">link</a></li>
+  <li>上海交大+中山大学（Zhouhan Lin 组）. <i>LoopFold: 循环折叠并行.</i> arXiv:2610.35556 <span class="src-date">2026-10-26</span>. <a href="https://arxiv.org/abs/2610.35556">link</a></li>
+  <li>上海交大+中山大学. <i>P2N: 深表示复用.</i> arXiv:2610.25076 <span class="src-date">2026-10-24</span>. <a href="https://arxiv.org/abs/2610.25076">link</a></li>
+  <li>Kirsch, N. <i>LSTM-Style Looped Transformer + 共享 KV 缓存.</i> arXiv:2610.33360 <span class="src-date">2026-10-23</span>. <a href="https://arxiv.org/abs/2610.33360">link</a></li>
+  <li>Cornell &amp; IBM Research. <i>BeNice!（跨环 KV 广播后训练）.</i> arXiv:2610.31633 <span class="src-date">2026-10-22</span>. <a href="https://arxiv.org/abs/2610.31633">link</a></li>
+  <li>MBZUAI &amp; Sony &amp; MIT. <i>Looped UDLM（UDLM 的循环化）.</i> arXiv:2610.30066 <span class="src-date">2026-10-21</span>. <a href="https://arxiv.org/abs/2610.30066">link</a></li>
+  <li><i>PAR: 进度对齐循环.</i> arXiv:2610.27628 <span class="src-date">2026-10-20</span>. <a href="https://arxiv.org/abs/2610.27628">link</a></li>
+  <li>METR（Ryan Greenblatt）. 对"GPT-6 Astra 泄露架构／未授权备忘录"指控的公开否认（社区转述，二手信源）. <span class="src-date">2026-10 下旬</span>.</li>
 </ol>
 
 <div class="callout"><b>关于"传闻类"引用的说明（2026-10-11 更新）</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>）。<b>事实更新：OpenAI 已于 2026-09-03 正式发布 GPT-6 Astra</b>；The Information 于发布前两日报道其使用 recurrent depth / looped transformers，Jakub Pachocki 回应称 Astra 的计算图深度在 GPT-4 的 2× 以内，但 <b>OpenAI 至今未官方确认架构</b>。Astra 系统卡确认了安全性影响：其 CoT 可监控性低于此前模型（更短、更少文字化的推理轨迹），UK AISI 实测其无 CoT 数学任务时域 30.9 分钟——但 OpenAI 声明"分析未将可控性变化归因于架构"。结论：模型已发布、架构仍未证实，"循环深度假说"保持假说身份<span class="cite">[21][22][44][61]</span>。</div>

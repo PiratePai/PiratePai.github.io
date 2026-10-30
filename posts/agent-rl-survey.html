@@ -110,7 +110,7 @@
   <h1>Agent 与 RL 技术全景<br>数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</h1>
   <p class="sub">循序渐进的原理讲解 × 结合 verl / AReaL / slime 源码的实现解析 × 2024–2026 学术与工业界最新进展 × 未来发展方向研判</p>
   <div class="meta">
-    <span class="chip">撰写日期 <b>2026-08-23</b></span>
+    <span class="chip">撰写日期 <b>2026-08-23</b> · 增补 <b>2026-10-30</b></span>
     <span class="chip">源码基于 <b>verl / AReaL / slime</b>(本地 clone,main 分支)</span>
     <span class="chip">引用 <b>70+ 篇</b>论文 / 技术报告 / 官方博客</span>
     <span class="chip">关键引文附 <b>原文 + 译文</b>(小字)</span>
@@ -250,10 +250,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>阿里开源 MAI-Gym</b><span class="hl-date">10-14 · 通义</span></div><p>GUI Agent 评测与 RL 训练一体化，移动+桌面环境全开源。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>slime v0.4.0 容错异步</b><span class="hl-date">10-09 · 智谱</span></div><p>straw 持久化数据层 + 全异步统一入口，训练崩溃不再丢 rollout。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>树感知蒸馏走红</b><span class="hl-date">10-16 · 清华+腾讯</span></div><p>树形轨迹后验蒸馏 × RLVR，46 票成 10 月下旬最高热度。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Meta 端侧 30B 开源</b><span class="hl-date">10-17 · Meta</span></div><p>Muse Glimmer：自带感知编码器的消费级硬件 agentic 模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro</b><span class="hl-date">10-23 · Moonshot</span></div><p>不改架构、加 RL 算力：GDPval-AA +312 Elo，权重 11-04 前开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Harness Scaling</b><span class="hl-date">10-21 · 人大等</span></div><p>46 票窗口最高热度：243 配置正交精选 18 个，胜过全量网格。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>FlashNext-RL</b><span class="hl-date">10-20 · Snowflake</span></div><p>prime-rl 底座上 8×B200 rollout 吞吐 11×（395→4438 tok/s/GPU）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Hy-Memory-30B-A3B 开源</b><span class="hl-date">10-15 · 腾讯混元</span></div><p>首个专做 agent 长期记忆写入的开源模型，token 开销 −39.3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
 
 <h2 class="sec" id="s1"><span class="num">1</span>预备知识:读懂 RL for LLM 所需的全部基础<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
 
@@ -864,13 +864,28 @@ in-flight sample to finish."""</span>
 <h3>6.1.7 2026-10 下旬增补:环境即数据落地,异步基建成军</h3>
 <ul>
 <li><b>MAI-Gym</b>(阿里通义 MAI,10-14,arXiv:2610.20939 + GitHub 开源):GUI Agent 评测 + RL 训练一体化平台,移动 + 桌面双环境——「环境规模化」一节的大厂级落地。</li>
-<li><b>Tree-Aware Posterior Distillation</b>(清华+腾讯,10-16,arXiv:2610.23181,46 票为 10 月中下旬 agentic RL 最高热度):在树形轨迹后验上做长程蒸馏并与 RLVR 结合——蒸馏正并入 agentic RL 主配方。</li>
+<li><b>Tree-Aware Posterior Distillation</b>(10-16,arXiv:2610.23181,46 票为 10 月中下旬 agentic RL 最高热度;作者机构未能自 arXiv abs 页核实,故不标注):在树形轨迹后验上做长程蒸馏并与 RLVR 结合——蒸馏正并入 agentic RL 主配方。</li>
 <li><b>slime v0.4.0</b>(智谱,10-09):straw 持久化队列 + 张量存储、每 Ray 节点一个 rollout worker 的分布式全异步、Megatron 训练崩溃后独立于 SGLang 服务恢复、score centering;发布说明以 OpenAI Navier-Stokes(1 万并发 agent、130B token)为动机——容错异步成为标配。</li>
-<li><b>Muse Glimmer 30B</b>(Meta 超级智能实验室,10-17,arXiv:2610.24628):开源 30B 端侧 agentic 模型,自带感知编码器、面向消费级硬件自主任务。</li>
+<li><b>Muse Glimmer 30B</b>(Meta 超级智能实验室,10-17 为技术报告日期,arXiv:2610.24628;第三方称权重 08-10 已先行上线——二手信源,可信度中等):开源 30B 端侧 agentic 模型,自带感知编码器、面向消费级硬件自主任务。</li>
 <li><b>OpenGCUA</b>(阿里,10-15,arXiv:2610.22200,34 票):定义 generalist computer use(GUI + 程序化接口并用)并放出全开源栈。<b>VeriCUA</b>(清华+UESTC,10-19):主动操作执行来验证「截图看不出」的任务完成状态,提升 GUI 奖励可靠性。</li>
 <li><b>环境合成的两条新径</b>:Agent World Model in the Wild(UNC+MSR 等,10-19,arXiv:2610.26828)用世界模型在受控合成环境中复刻真实计算系统;browser-use 官方 <b>rl-env-use</b>(10-21 建仓)从真实网页案例自动构建任意领域 RL 环境——「环境即数据」的社区化落地。</li>
 <li><b>算法与系统侧</b>:Self-Credit(Meta+NYU+Duke,10-20)组内重标定实现端到端可学的功劳分配;Mosaic(HKUST(GZ)+CityU,10-15)首批多会话 agentic RL;ReFlow(HKU+USTC+阿里,10-15)回放驱动解耦后训练;SPROUT/SERO/RSIPO(SJTU+Amazon 等,10-09~11)长程 SWE 的成功轨迹外推、oracle 续跑与技能-策略共进化;KV4-RL(KAIST,10-10)用 INT4 KV 量化给异步 rollout 提速;Prorsa(PKU+小米,10-12)把 P/D 分离搬进 agentic RL rollout。框架侧:verl v0.9.1(09-20,仓库迁 verl-project org:可插拔路由、TorchTitan delta_sharded 权重同步 10.3×、verl-vla v0.1.0)、OpenRLHF v0.11.2(09-14,FlashREINFORCE 配置化)。</li>
+<li><b>一句话动态</b>(并入本节速览):Arctic-SWE(Snowflake,10-17,arXiv:2610.24914,rollout=FrogNano 1/6)、Lean4AgenticRL(AWS,arXiv:2610.22448)、KnowGPO(arXiv:2610.22331)、CoHARL(UNC+RIKEN+Cisco,arXiv:2610.36469);EMNLP 2026 集中发表 GAGPO/PAGE。</li>
 </ul>
+<h3>6.1.8 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>EnvSched</b>（北大+西交+清华+三星等，10-27）：环境感知的 Agent RL 训练调度——按环境侧反馈编排 rollout，Qwen3-8B 上 40 步训练即≈随机调度 120 步（约 3× rollout 效率），200 步后三个基准再 +3.0~4.0<span class="cite">[65]</span>。</li>
+<li><b>Kimi K3.1 Pro</b>（Moonshot，10-23）：一份"不改架构、只加 RL 算力"的样本——GDPval-AA 较上代 +312 Elo、金融幻觉 −65%，14 项自测 9 项胜 Opus 5.5；权重承诺 11-04 前开放，Highspeed 模式 2–3×<span class="cite">[66]</span>。</li>
+<li><b>RLCR 集体奖励 + Avalon-M1-Mini</b>（General Reasoning，10-23）：以"组织形态"集体奖励后训 Nemotron 3 Super 得 120B/12B 双模型，组织形态 16 项胜 14、IMO-ProofBench 29.8→37.5%；安全警示——安全违规上报率从 76.7% 跌至 0%，集体奖励会放大奖励盲区<span class="cite">[67]</span>。</li>
+<li><b>Harness Scaling</b>（人大+IQuest+北航，10-21，46 票为本窗口最高热度）：Agent 训练脚手架（harness）本身值得系统性缩放——243 个配置的空间里正交精选 18 个即超过全 243 网格，白盒迁移到 Claude Code 4B 为 37.22 vs 33.38<span class="cite">[68]</span>。</li>
+<li><b>FlashNext-RL</b>（Snowflake，10-20）：8×B200 上 rollout 395→4438 tok/s/GPU（11×）、16 项优化累积 7.4×，配套 Qwen3.8-Flash-Next（125B/6B+51B 冻结 n-gram）跑 131K 上下文——prime-rl（Prime Intellect 的 RL 系统，即 §4.4 的 PRIME-RL）就此成为 Snowflake 两连发（Arctic-SWE、FlashNext-RL）的底座，AReaL/veRL/slime 之外的第三条系统路线<span class="cite">[69]</span>。</li>
+<li><b>Hy-Memory-30B-A3B 开源</b>（腾讯混元，10-15）：首个专做 agent 长期记忆写入的开源模型，LoCoMo 72.6%、token 开销 −39.3%——"记忆写入"从 system prompt 技巧变成可 RL 的显式技能<span class="cite">[70]</span>。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/flashnext-fig1.svg" loading="lazy" alt="FlashNext-RL 16 项训练系统优化的累积阶梯图" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.28998）</b> · 8 层模型上 16 项优化把 REAL tokens/s/GPU 从 2,391 一路抬到 17,678（7.4×）——“通用 RL 框架不够、要按模型架构定制内核”的军备竞赛画在一张图里。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 <h3>6.2 未来发展方向研判(附依据)</h3>
 <ol style="font-size:15px;line-height:2">
   <li><b>异步/解耦将成为 RL 系统的默认形态,同步模式退居小规模调试用途。</b>依据:AReaL 2.77×、StreamRL 2.66×、Agent Lightning v1.0 2× 的加速证据链,以及 vLLM 把异步支持内置于引擎本身(2026-05)——当推理引擎原生支持 pause/resume,同步模式的"省事"优势不复存在。</li>
@@ -955,6 +970,12 @@ in-flight sample to finish."""</span>
   <li>北大+小米. <i>Prorsa: Prefill-Decode Disaggregation for Agentic RL Rollout</i>. arXiv:2610.16592, 2026-10-12.</li>
   <li>UCSC + 字节 Seed. <i>ObsSpec: Observation Speculation for Tool-Calling Agents</i>. arXiv:2610.15246, 2026-10-11;代码 github.com/kylemontgomery1/verl-recipe/tree/obsspec。</li>
   <li>本文化用的源码(本地 clone,经由镜像站获取,2026-08-23):verl(volcengine)、AReaL(inclusionAI)、slime(THUDM)。</li>
+  <li>北大+西交+清华+三星等. <i>EnvSched</i>(环境感知的 Agent RL 训练调度). arXiv:2610.37609, 2026-10-27.</li>
+  <li>Moonshot AI. <i>Kimi K3.1 Pro 技术公告</i>(不改架构、加 RL 算力的扩展样本). 官方渠道, 2026-10-23.</li>
+  <li>General Reasoning. <i>RLCR 集体奖励与 Avalon-M1-Mini</i>(Nemotron 3 Super 后训, 120B/12B). 官方公告, 2026-10-23.</li>
+  <li>人大+IQuest+北航. <i>Harness Scaling</i>(Agent 训练脚手架缩放, 243 配置正交精选 18). arXiv:2610.29458, 2026-10-21.</li>
+  <li>Snowflake. <i>FlashNext-RL</i>(prime-rl 上的 11× rollout 吞吐;另见 Arctic-SWE, arXiv:2610.24914, 2026-10-17). arXiv:2610.28998, 2026-10-20.</li>
+  <li>腾讯混元. <i>Hy-Memory-30B-A3B</i>(首个专做 agent 长期记忆写入的开源模型). arXiv:2610.22196, 2026-10-15.</li>
 </ol>
 </div>
 

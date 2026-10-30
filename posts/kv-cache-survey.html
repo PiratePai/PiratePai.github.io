@@ -223,6 +223,7 @@
   <div class="kicker">推理显存优化调研 · 2017–2026</div>
   <h1>KV Cache 技术全景：从原理到前沿</h1>
   <div class="sub">结构压缩 · 分页管理 · 前缀复用 · 量化 · 稀疏驱逐 · 分层卸载 · 混合架构</div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-30</b></span><span class="chip">七条路线 <b>少存 / 管好 / 别重算 / 存粗 / 扔掉 / 分层 / 不用</b></span></div>
 </header>
 
 <p class="lead">大模型（LLM）生成文字的方式是"一次写一个词"。为了让第 1000 个词能"回看"前 999 个词，Transformer 的注意力机制必须保留每个历史 token 的两份小向量——Key（键）与 Value（值）。这些向量随上下文线性增长、随模型规模巨大，被统称为 <strong> KV Cache</strong>。它既是长上下文能力的基石，也是显存、带宽和成本的头号瓶颈：今天几乎所有推理系统的核心设计，本质上都在回答一个问题——<strong>"这份缓存，我们能不能少存一点、管好一点、直接别重算、存粗一点、扔掉一点、分层放、或者干脆不用？"</strong> 本文按这七条路线梳理二十余项代表性工作，讲解原理到可以动手复现的程度，并盘点 2025–2026 年的最新动态与未来方向。</p>
@@ -273,10 +274,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>前缀缓存上互联网</b><span class="hl-date">10-16 · UCSC</span></div><p>KVCompass 提出跨地理集群共享前缀缓存的"发现平面"，复用收益首次突破单集群边界。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Agent KV 常驻显存实测</b><span class="hl-date">10-16 · MSR+IISc</span></div><p>首个生产级 Agent 负载 KV 常驻行为刻画，为会话感知路由补上实证地基。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>低比特 KV 出厂默认</b><span class="hl-date">10-18 · vLLM v0.32</span></div><p>NVFP4 KV 铺满 SM8x–SM12x，GLM-5.x 默认 FP8 KV，4-bit KV 进稀疏注意力模型。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>KV 池走向多租户</b><span class="hl-date">10-21 · Mooncake</span></div><p>跨 TP/PP 布局 reshard 重用、Intel XPU RDMA、多租户配额相继合入。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换——latent 供 value、RoPE 键主导打分，四模型精度损失 &lt;0.5pp、KV 容量 6.5×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div>
 
 <h2 id="s1"><span class="no">1</span>预备知识：KV Cache 是什么，为什么它既是救星又是瓶颈</h2>
 
@@ -1019,6 +1020,11 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <img src="img/lachesis-fig1.svg" loading="lazy" alt="左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.08378）</b> · 按生命周期的三条轴，把 KV 段放进 HBM 或高带宽闪存</figcaption>
 </figure>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/gandalf-fig1.svg" loading="lazy" alt="缓存命中率与 SSD 写入寿命的权衡散点及 Gandalf 的帕累托边界" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.30791）</b> · 按历史访问模式做 KV 准入时，命中率与 SSD 写入寿命构成权衡（重负载把寿命从“年”打到“月”）；Gandalf 按注意力类型准入——全注意力 KV 优先入 SSD——在几乎不损命中率的前提下把寿命拉长 7.3×，与 Lachesis 构成“存储介质寿命”双联。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 
 
 <h4>③ LORE-KV（2026-10-06）：驱逐该用"未来的 query"打分</h4>
@@ -1038,7 +1044,17 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <p>vLLM v0.32.0：NVFP4 KV cache 从 Blackwell 铺满到 SM8x/SM12x/SM90（含 XQA decode），并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3–5.5%，TTFT 代价 7–11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）。SGLang v0.5.22：FP8 KV 融合进 prefix-valid commit kernel（B200 上该 kernel 2.99×）。§6.3 的"自适应比特"愿景之前，工程界先把<b>统一低比特</b>做成了默认值。</p>
 
 <h4>④ 存储/传输生态与多模态（10-11 – 10-21）</h4>
-<p><b>Mooncake</b> 主线合入 KV 跨 TP/PP/host 布局的 reshard 重用规划（#4762，跨并行度布局直接复用而不重算）、自适应 RDMA 拥塞控制（#4197）、Intel XPU GPUDirect dma-buf RDMA（#4378）与 Store 多租户配额（#4809）——KV 池向"跨并行度、跨硬件、多租户"演进。<b>LMCache v0.5.6</b>（10-14）：修复 MP 模式 pickle IPC 的 RCE（CVE-2026-105192）、admin 端口收敛，新增 SGLang MP 统一 radix cache、原生 NIXL、3FS L2、Kafka 缓存事件流与 Multi-L1。<b>TempoKV</b>（上交+阿里，arXiv:2610.15324，19 票）面向自回归视频扩散做预测式 KV 量化——§6.3"多模态 KV 量化刚起步"的最新例证。另：SGLang 修复了混合线性模型在"投机解码 + 结构化输出"同开时 Mamba 状态恢复错误（Baseten 发现）——混合架构的 KV/状态管理仍是大意不得的深水区。</p>
+<p><b>Mooncake</b> 主线合入 KV 跨 TP/PP/host 布局的 reshard 重用规划（#4762，跨并行度布局直接复用而不重算）、自适应 RDMA 拥塞控制（#4197）、Intel XPU GPUDirect dma-buf RDMA（#4378）与 Store 多租户配额（#4809）——KV 池向"跨并行度、跨硬件、多租户"演进。<b>LMCache v0.5.6</b>（10-14）：修复 MP 模式 pickle IPC 的 RCE（安全编号待复核）、admin 端口收敛，新增 SGLang MP 统一 radix cache、原生 NIXL、3FS L2、Kafka 缓存事件流与 Multi-L1。<b>TempoKV</b>（上交+阿里，arXiv:2610.15324，19 票）面向自回归视频扩散做预测式 KV 量化——§6.3"多模态 KV 量化刚起步"的最新例证。另：SGLang 修复了混合线性模型在"投机解码 + 结构化输出"同开时 Mamba 状态恢复错误（Baseten 发现）——混合架构的 KV/状态管理仍是大意不得的深水区。</p>
+
+<h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>KVStream</b>（Argonne+RIT+IIT，10-22）：分层 KV 聚合的带宽调度，检索达到带宽界 95%，比 LMCache 高 1.49×、突发负载 TTFT −6.1×<sup class="c"><a href="#ref-93">[93]</a></sup>。</li>
+<li><b>GLM-5.3 破 1M KV 墙</b>（vLLM×Z.ai，10-23）：1M 上下文的 FP8 KV 需 53.4GiB，而单张 H200 权重外仅剩 15GiB；组合 PCP/DCP 上下文并行（DCP 把 KV 轮转切到 8 卡、每卡 6.7GiB）与 Hybrid HiSparse 稀疏注意力后，16×H200 吞吐 1.7–3.2×、TTFT 1.5–5.2s→0.8–0.9s<sup class="c"><a href="#ref-90">[90]</a></sup>。</li>
+<li><b>RAQ-MLA</b>（中科院自动化所+腾讯，10-24）：把 MLA 缓存（含 RoPE 键）整体量化到 ~2.5bit——latent 供 value、RoPE 键主导打分，按"角色"分别变换；四模型精度损失 &lt;0.5pp，KV 容量 6.5×，H20 上 decode kernel 1.38×<sup class="c"><a href="#ref-91">[91]</a></sup>。</li>
+<li><b>ZipFusion</b>（10-24）：无损 KV 解压不再单走一遍 kernel，而是以寄存器位运算融进注意力计算重建 value；H100 decode 比 FlashInfer 快 1.25×，同显存 8K 上下文吞吐 +26.3%<sup class="c"><a href="#ref-92">[92]</a></sup>。</li>
+<li><b>KV 跨请求泄露披露</b>（Cloudflare×SGLang，10-26）：P/D 分离下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 被后续请求读出——155 条响应泄漏他人 prompt 内容；修复落在 v0.5.21（Mooncake/NIXL 默认防护）与 v0.5.22（MORI 标记 ack），官方建议运营方升级 v0.5.22+<sup class="c"><a href="#ref-95">[95]</a></sup>。</li>
+<li><b>偏置折进 Keys</b>（Kanwat，10-27）：把注意力偏置折进 K，不改 FlashAttention/vLLM 内核即可直接服务压缩缓存，14 组对照中 13 组与注意力矩阵方案无差<sup class="c"><a href="#ref-94">[94]</a></sup>。</li>
+</ul>
 
 <h2 id="s11"><span class="no">11</span>未来发展方向</h2>
 <ol>
@@ -1050,7 +1066,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <li><b>长上下文的经济学：百万到千万 token。</b>KVQuant 的 10M 愿景、Llama-4 的 10M 宣称、Kimi Linear 的 1M 实测吞吐优势，都指向"上下文长度成为定价维度"。多模态（视频 token 动辄数十万）会进一步放大需求；多模态 KV 的压缩与量化刚起步。</li>
 <li><b>存储与网络硬件的入场。</b>Mooncake 未来工作点名：带宽/美元与带宽/瓦特上，GDDR/LPDDR/存算一体/混合键合内存可能比旗舰 GPU 高一个数量级，解码这类访存受限阶段值得搬到"内存导向"的专用设备；CXL、NVL 互联、以太网 RDMA 上的 KV 传输正在成为新基准测试对象。</li>
 <li><b>量化与驱逐的联合理论。</b>"分辨率（每 token 比特）× 覆盖度（保留多少 token）"的二维联合优化刚被形式化（arXiv:2608.07001，2026-08）<sup class="c"><a href="#ref-66">[66]</a></sup>；离群值、sink、检索头的联合保护策略，以及与调度器水位联动的动态预算，都缺统一理论。</li>
-<li><b>安全与正确性：缓存污染、侧信道与"忠实性"。</b>跨租户共享前缀缓存引入新的攻击面（缓存侧信道、提示注入的持久化）；压缩后"答案对但推理链断"的忠实性问题需要新的评测与修复手段<sup class="c"><a href="#ref-68">[68]</a></sup>。随着缓存成为计费与合规对象，这一支会越来越重要。</li>
+<li><b>安全与正确性：缓存污染、侧信道与"忠实性"。</b>跨租户共享前缀缓存引入新的攻击面（缓存侧信道、提示注入的持久化）；压缩后"答案对但推理链断"的忠实性问题需要新的评测与修复手段<sup class="c"><a href="#ref-68">[68]</a></sup>。10-26 的 SGLang×Cloudflare 安全披露让这一条从理论风险变成公开事件：P/D 分离部署下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 随后被别的请求读走——155 条响应泄漏了他人 prompt 内容；修复分两步落在 v0.5.21（Mooncake/NIXL 默认隔离）与 v0.5.22（MORI 标记 ack），其余 #43719（deferred release，吞吐代价约 −0.38%）将随 v0.5.23 发布（截至 2026-10-30 未发 tag）<sup class="c"><a href="#ref-95">[95]</a></sup>。随着缓存成为计费与合规对象，这一支会越来越重要。</li>
 </ol>
 
 <!-- ================================================================ -->
@@ -1163,6 +1179,12 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <li id="ref-87">Yu et al.（UC Berkeley &amp; FuriosaAI）. "Characterizing High Bandwidth Flash for LLM Serving." <a href="https://arxiv.org/abs/2609.39131">arXiv:2609.39131</a> · 2026-09-30.</li>
 <li id="ref-88">Bilal et al. "LORE-KV: Monte Carlo Estimation for KV Cache Eviction." <a href="https://arxiv.org/abs/2610.07643">arXiv:2610.07643</a> · 2026-10-06.</li>
 <li id="ref-89">Tensormesh（LMCache 团队）. "Tensormesh Platform" 企业级 KV 缓存管理平台发布. Business Wire · 2026-10-14.</li>
+<li id="ref-90">vLLM × Z.ai. GLM-5.3 长上下文部署：PCP / DCP / Hybrid HiSparse（GLM-5.3 系列博客 Part 2）. blog.vllm.ai · 2026-10-23.</li>
+<li id="ref-91">中科院自动化所+腾讯. RAQ-MLA：MLA 缓存整体 ~2.5bit 量化（latent 供 value、RoPE 键主导打分）. <a href="https://arxiv.org/abs/2610.33625">arXiv:2610.33625</a> · 2026-10-24.</li>
+<li id="ref-92">ZipFusion：无损解压融进注意力内核（寄存器位运算重建 value）. <a href="https://arxiv.org/abs/2610.33719">arXiv:2610.33719</a> · 2026-10-24.</li>
+<li id="ref-93">Argonne+RIT+IIT. KVStream：自适应并行 KV 存储的分层聚合与带宽调度. <a href="https://arxiv.org/abs/2610.31827">arXiv:2610.31827</a> · 2026-10-22.</li>
+<li id="ref-94">Kanwat. Folding Attention Biases into Keys：偏置折进 K、免改内核服务压缩缓存. <a href="https://arxiv.org/abs/2610.36520">arXiv:2610.36520</a> · 2026-10-27.</li>
+<li id="ref-95">Cloudflare × SGLang. P/D 分离下 KV 跨请求泄漏的安全披露（155 条响应泄漏；修复见 v0.5.21/v0.5.22，#43719 待 v0.5.23）. 2026-10-26.</li>
 </ol>
 
 <div class="footer">

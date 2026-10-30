@@ -13,7 +13,7 @@
   *{box-sizing:border-box;}
   body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
-  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero{background:radial-gradient(900px 380px at 20% -10%,rgba(110,168,255,.16),transparent 70%),radial-gradient(700px 360px at 90% 0%,rgba(157,123,255,.15),transparent 70%),linear-gradient(180deg,#11161d 0%,#151d27 100%);color:#c3cad3;padding:56px 24px 44px;margin-bottom:32px;border-bottom:1px solid #2a2f3a;}
   header.hero .inner{max-width:1080px;margin:0 auto;}
   header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
   header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
@@ -112,7 +112,7 @@
   <div class="kicker">推理性能仿真调研 · 2026</div>
 <h1>大模型性能仿真：从算子账本到请求曲线</h1>
   <p class="sub">不部署就回答"这套模型+硬件+配置能跑多快、要多少显存、扛得住多少 QPS"——从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs/权重/激活/KV 的记账方法，再到 Roofline 与请求级离散事件仿真的完整推导；全程以 DeepSeek-V4.1-Flash（AR-LLM）与 MiniMax-H3（全模态 DiT）为双案例，并给出一个可改 config 的开源原型。</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-10-26</b></span><span class="chip">案例 <b>DeepSeek-V4.1-Flash · MiniMax-H3</b></span><span class="chip">源码 <b>vLLM 0.32 · vLLM-Omni 0.30</b> + 自研 llsim 原型</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-10-26</b> · 增补：<b>2026-10-30</b></span><span class="chip">案例 <b>DeepSeek-V4.1-Flash · MiniMax-H3</b></span><span class="chip">源码 <b>vLLM 0.32 · vLLM-Omni 0.30</b> + 自研 llsim 原型</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div></header>
 <div class="wrap">
 
@@ -154,17 +154,29 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>KernelSight-LM 把仿真做到 kernel 级</b><span class="hl-date">2026-06/07 · AWS</span></div><p>roofline×效率双档预测：纯数据手册跨代预测 kernel 误差 12.1%，一次微基准实测后收敛到 3.8%，端到端吞吐误差 2.7%。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>DeepSeek-V4.1-Flash 把 KV 压到 890 B/token</b><span class="hl-date">2026-09-17 · arXiv</span></div><p>CSA2 跨层 KV 复用 + FP4 主 KV：全局 KV 降为上代 1/4，SWA Bounded Replay 让持久层 KV 降为 1/8；decode 激活 16B、prefill 只激活 8B。</p><a class="hl-link" href="#s2">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>vLLM-Omni 0.30 + 技术报告</b><span class="hl-date">2026-09/10 · vllm-project</span></div><p>AR/DiT 统一 paged KV 运行时、OmniConnector 全解耦、MiniMax-H3 实时 Turbo 推理上 Blackwell 与昇腾 950——DiT 服务正式进入"性能工程"时代。</p><a class="hl-link" href="#s7">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>NVIDIA Dynamo 1.0 GA</b><span class="hl-date">2026-03 · GTC</span></div><p>GB200 NVL72 上分离式服务 + 宽专家并行宣称 7×；调度器内部就用"吞吐曲线外推"做决策——性能模型已是生产组件。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Koi 自校准部署规划器</b><span class="hl-date">10-17 · Tandemn 等</span></div><p>仿真内核包成 engine/router 之上的规划器：104-GPU 三地集群 goodput ×1.18、$/token −20%；反例同样刺眼——校准前 roofline 误差可达 4.7×、LLM 直接预测高估 4–9×。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Token-Energy Law</b><span class="hl-date">10-20 · NVIDIA 等</span></div><p>每 token 能耗 = 常数 + 权重项 + KV 项 + 时延项：374 次留出验证误差 ≤3.73%，大批比小批每 token 能耗低 33.2–46.8%——账本从时延扩展到能耗。</p><a class="hl-link" href="#s4">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>HBFSim 闪存层仿真器</b><span class="hl-date">10-16 · MBZUAI</span></div><p>首个 HBM+HBF 闪存层闭环仿真器：HBF 供数比 host DRAM 快 11–19×；70B 峰值负载下 HBF 寿命 2.0–6.9 年——存储层级进了仿真账本。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Waypoint CPU GEMM 解析模型</b><span class="hl-date">10-26 · AMD</span></div><p>纯解析模型预测 CPU 推理 GEMM 误差 1.096×/1.012×，指导 OPAM 库 TTFT 提速 1.36–1.98×——roofline 流派从 GPU 延伸到 CPU。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
 
 <!-- ============================================================ -->
 <h2 id="s0"><span class="no">0</span>导读与大事记：性能仿真是什么、为什么现在</h2>
 <p>这份报告回答四个问题：<b>性能仿真在估什么、账怎么记、框架与硬件要摸清哪些参数、以及怎么自己搭一个</b>。全文沿一条主线展开——<b>性能仿真 = 算子级账本（FLOPs/字节） × 硬件屋顶模型（算力/带宽） × 系统动力学（排队/批处理/缓存）</b>。前两者决定"一步多快"，后者决定"用户等多久"。</p>
-<p>为什么是现在？三个变化叠加：（1）模型结构进入"为推理设计"的时代——DeepSeek-V4.1-Flash 用 CED 结构让 prefill 只激活 8B 参数、KV 每 token 仅 890 字节<sup class="cite">[DSV41FLASH26]</sup>，账本从"两个矩阵乘"变成"三种注意力模式 × 跨层共享 × 四种精度"；（2）部署形态爆炸——TP/EP/PP/USP、P/D 与 E-P-D 分离、投机解码、KV 卸载，组合空间靠实测试错已经试不过来；（3）仿真器本身成熟了——从 Vidur（MLSys 2024）到 KernelSight-LM（2026），预测误差从 ~9% 进入 3-6% 区间，且不再需要对每对(模型, GPU)做画像<sup class="cite">[VIDUR24][KERNELSIGHT26]</sup>。</p>
+<p>为什么是现在？三个变化叠加：（1）模型结构进入"为推理设计"的时代——DeepSeek-V4.1-Flash 用 CED 结构让 prefill 只激活 8B 参数、KV 每 token 仅 890 字节<sup class="cite">[DSV41FLASH26]</sup>，账本从"两个矩阵乘"变成"三种注意力模式 × 跨层共享 × 四种精度"；（2）部署形态爆炸——TP/EP/PP/USP、P/D 与 E-P-D 分离、投机解码、KV 卸载，组合空间靠实测试错已经试不过来；（3）仿真器本身成熟了——从 Vidur（MLSys 2024）到 KernelSight-LM（2026），预测误差从 ~9% 进入 3-6% 区间，且不再需要对每对(模型, GPU)做画像<sup class="cite">[VIDUR24][KERNELSIGHT26]</sup>。注意 ~9% 是 Vidur 原论文在自家画像场景的口径——KernelSight-LM 同场对比实测，在 graphed vLLM 上 Vidur 的 decode 中位误差达 <b>436%</b>：预测精度强依赖"被测引擎与场景是否对齐"，跨场景引用误差数字必须注明口径<sup class="cite">[KERNELSIGHT26]</sup>。</p>
 
 <div class="note"><b>[KERNELSIGHT26]</b> Yao, Kim, Pei, et al. (AWS + Boston University). <i>KernelSight-LM: A Kernel-Level LLM Inference Simulator</i>. arXiv, 2026-06-26（v2 2026-07-02）。原文："We present KernelSight-LM, a fine-grained inference simulator that models token-level execution and produces kernel-level latency breakdowns… the cross-generation tier uses no target-GPU measurements, only hardware specifications and kernel microbenchmarks from previously profiled GPUs, and predicts per-kernel latency on an unseen GPU generation to <b>12.1% error</b>… A second target-measured tier adds one model-agnostic kernel-microbenchmark sweep on the target GPU, sharpening per-kernel error to <b>3.8%</b>."（译文：我们提出 KernelSight-LM，一个建模 token 级执行、输出 kernel 级时延拆解的细粒度推理仿真器……跨代档不用任何目标 GPU 实测，只靠硬件规格与已画像 GPU 的 kernel 微基准，在未见过的新 GPU 代上预测每 kernel 时延误差 12.1%；目标实测档加一次与模型无关的微基准扫描后，每 kernel 误差收敛到 3.8%。）链接：<a href="https://arxiv.org/abs/2606.28565">arXiv:2606.28565</a></div>
+
+<h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>Koi 自校准部署规划器</b>（Tandemn+UIUC+Berkeley+字节+NVIDIA，10-17）：把性能仿真内核包成多云/多集群的部署规划器，104-GPU 三地集群 goodput ×1.18、$/token −20%；反例数字同样关键——校准前 roofline 误差可达 <b>4.7×</b>、LLM 直接预测高估 4–9×（alphaXiv 窗口内最热 51 票，开源）<sup class="cite">[KOI26]</sup>。</li>
+<li><b>Token-Energy Law</b>（NVIDIA+TTU+TACC，10-20）：每 token 能耗解析式 e = c + α·q_w + β·q_KV + P_τ·τ，374 次留出验证误差 ≤3.73%；大批比小批每 token 能耗低 33.2–46.8%——第 4 节的算子级账本从时延扩展到能耗<sup class="cite">[TOKENENERGY26]</sup>。</li>
+<li><b>HBFSim</b>（MBZUAI，10-16）：首个把 HBM+HBF 闪存层纳入闭环的 LLM 推理仿真器（RACS'26）：HBF 供数比 host DRAM 快 11–19×；70B 峰值负载下 HBF 寿命 2.0–6.9 年——存储层级第一次进了仿真器的账本<sup class="cite">[HBFSIM26]</sup>。</li>
+<li><b>Waypoint</b>（AMD，10-26）：CPU GEMM 解析性能模型，误差 1.096×/1.012×；指导 OPAM 库 CPU 推理 TTFT 提速 1.36–1.98×——roofline 流派从 GPU 延伸到 CPU 推理<sup class="cite">[WAYPOINT26]</sup>。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/koi-fig2.svg" loading="lazy" alt="同一 70B 模型在不同并行配置下的吞吐与成本差异" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 2（arXiv:2610.24355）</b> · 同一个 Llama 3 70B（AWS A10G，2,048 入 / 512 出）只换并行配置，吞吐与成本就差出数倍——并行度"substantially changes inference performance and cost"，这正是"配置空间必须靠仿真/规划器而不是逐个实测"的最直接论据。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
 
 <h3>一页纸地图：仿真器的三个流派</h3>
 <div class="card">
@@ -176,6 +188,7 @@
 <tr><td><b>生产级画像/压测</b><span class="tag ind">ind</span></td><td>NVIDIA GenAI-Perf / Triton Perf Analyzer；vLLM <code>bench serve</code>；字节 AIBrix 混沌与性能模拟（2025-03）<sup class="cite">[AIBRIX25]</sup></td><td>真实部署</td><td>真值与回归；但<b>慢、贵、且买不到没发布的硬件</b></td></tr>
 </table>
 </div>
+<p>10 月下旬注脚：上表"服务级离散事件仿真"一行之上又长出新的一层——<b>Koi</b>（10-17）把仿真内核包成 engine/router 之上的<b>部署规划器</b>（自校准性能模型 + 多云放置决策），说明"仿真器作为规划器的内核"正在成为独立层<sup class="cite">[KOI26]</sup>。</p>
 
 <h3>大事记时间线</h3>
 <ul class="timeline">
@@ -675,6 +688,10 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 <li id="LMSYSEP">SGLang/LMSYS 团队. <i>96×H100 复现 DeepSeek 大规模 EP + P/D 生产配置</i>. 博客, <b>2025-05</b>. <a href="https://docs.sglang.ai/reproduce_deepseek.html">链接</a></li>
 <li id="LLMVIEWER24">Kim et al. <i>LLM-Viewer: An Open Source Tool to Analyze the Resource Usage of Large Language Models</i>. arXiv, <b>2024-09</b>. <a href="https://arxiv.org/abs/2409.02420">arXiv:2409.02420</a></li>
 <li id="GENAIPERF">NVIDIA. <i>GenAI-Perf：LLM 推理基准工具</i>. Triton 工具链, <b>2024-2026</b>. <a href="https://github.com/triton-inference-server/perf_analyzer">链接</a></li>
+<li id="KOI26">Tandemn + UIUC + UC Berkeley + 字节跳动 + NVIDIA. <i>Koi：自校准性能模型驱动的多云 LLM 部署规划器</i>（题名意译，开源）. arXiv, <b>2026-10-17</b>. <a href="https://arxiv.org/abs/2610.24355">arXiv:2610.24355</a></li>
+<li id="TOKENENERGY26">NVIDIA + Texas Tech + TACC. <i>Token-Energy Law：LLM 推理每 token 能耗的解析模型</i>（题名意译）. arXiv, <b>2026-10-20</b>. <a href="https://arxiv.org/abs/2610.28576">arXiv:2610.28576</a></li>
+<li id="HBFSIM26">MBZUAI. <i>HBFSim：HBM+HBF 闪存层闭环 LLM 推理仿真器</i>（题名意译）. RACS 2026（arXiv, <b>2026-10-16</b>）. <a href="https://arxiv.org/abs/2610.23503">arXiv:2610.23503</a></li>
+<li id="WAYPOINT26">AMD. <i>Waypoint：CPU GEMM 解析性能模型</i>（题名意译）. arXiv, <b>2026-10-26</b>. <a href="https://arxiv.org/abs/2610.34914">arXiv:2610.34914</a></li>
 </ol>
 <p style="font-size:13px;color:var(--muted)">注：模型结构数字以 DeepSeek-V4.1-Flash 官方 config.json 与技术报告（arXiv:2609.19969）为准；H3 逐算子结构对照 <code>vllm-project/vllm-omni</code> main 分支 <code>vllm_omni/diffusion/models/minimax_h3/</code>（2026-10 快照）；vLLM 特性以 v0.31/v0.32.0 Release Notes 为准；硬件数值为公开 Datasheet 口径（dense 无稀疏），绝对值随 SKU 略有出入。本文所有复算数字来自配套 llsim 原型（本仓库 <code>llsim/</code>），η 为未校准默认值，绝对时延偏乐观、比例关系结构成立。</p>
 

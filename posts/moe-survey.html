@@ -134,7 +134,7 @@
   <h1>混合专家（MoE）全景</h1>
   <p class="sub">从基本原理到 LLM / VLM / DiT 三大典型架构的应用梳理、发展脉络、代码实现与未来方向 —— 写给能看懂 Transformer 的读者。</p>
   <div class="meta">
-    <span class="chip">调研日期：<b>2026-08-14</b> · 增补：<b>2026-10-21</b></span>
+    <span class="chip">调研日期：<b>2026-08-14</b> · 增补：<b>2026-10-30</b></span>
     <span class="chip">覆盖模型：<b>Switch / GShard / Mixtral / DeepSeek-V3·R1 / Kimi K2 / Qwen3 / MoE-LLaVA / DiT-MoE / EC-DiT / Race-DiT / DSMoE / Wan2.2 / HunyuanImage3 / Mamoda2.5 / MAGI-2 / HunyuanVideo / LTX-2</b></span>
     <span class="chip">工业数据来源：<b>InfraInsight 架构分析报告库</b></span>
     <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
@@ -190,10 +190,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepSeek 开源生产推理框架</b><span class="hl-date">10-16 · DeepSeek</span></div><p>DeepInfer 把 EP+EPLB 带进生产推理，SM100 与昇腾 950 双后端，5 天 17k star。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>动态冗余专家成 EP 新范式</b><span class="hl-date">10-20 · Moonshot</span></div><p>MoonEP「完美均衡」通信库：失衡加剧时通信时间几乎平坦，与 DeepEP V2.5 原语互相成就。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>共享专家抑制路由探索</b><span class="hl-date">10-15 · ETH 等</span></div><p>MirrorMoE：共享专家让路由器方差低一个数量级、加专家无增益——16 票挑战默认组合。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>跨层共享专家省三成</b><span class="hl-date">10-20 · 清华等</span></div><p>Meta Expert：70–80% 专家即追平 Vanilla MoE，MoE 参数效率的「深度维」新轴。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepSeek 开源生产推理框架</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 把 EP+EPLB 带进生产推理，SM100 与昇腾 950 双后端，开源一周即超 1.7 万 star。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro 性价比再进阶</b><span class="hl-date">10-23 · Moonshot</span></div><p>AA Index 44→55（升至第 4），Terminal-Bench 4.0 65.7%；API 降价 33%，权重 11-04 开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>免校准通道选择</b><span class="hl-date">10-27 · KAIST 等</span></div><p>只读 17.8% 专家权重即保留 98.1% 精度，MoE 块比调优 vLLM 快 1.60–1.90×（大 batch 2.69×）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>动态冗余专家成 EP 新范式</b><span class="hl-date">10-20 · Moonshot</span></div><p>MoonEP「完美均衡」通信库：失衡加剧时通信时间几乎平坦，与 DeepEP V2.5 原语互相成就。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
 
 <span class="anchor" id="s1"></span>
 <h2 class="sec"><span class="num">1</span>MoE 原理入门<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
@@ -1542,14 +1542,18 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 
 <h4>2026-10 下旬增补</h4>
 <ul>
-<li><b>DeepSeek 开源 DeepInfer 生产级推理框架</b>（2026-10-16，github.com/deepseek-ai/DeepInfer）：DeepSeek 生产服务同款（Apache 2.0，基于 vLLM 改造），支持 V4.1-Flash；Attention DP / balanced CP + MoE EP + EPLB 进推理，DSpark 置信度调度投机解码（MTP 变长、draft≤5）、SWA bounded replay、batch-invariant 推理；<b>NVIDIA SM100 与华为昇腾 950 双后端</b>。开源 5 天 17.2k star——"EP+EPLB 进推理"从论文配餐变成生产标配<sup class="ref"><a href="#r29">[29]</a></sup>。</li>
+<li><b>DeepSeek 开源 DeepInfer 生产级推理框架</b>（2026-10-20，github.com/deepseek-ai/DeepInfer）：DeepSeek 生产服务同款（Apache 2.0，基于 vLLM 改造），支持 V4.1-Flash；Attention DP / balanced CP + MoE EP + EPLB 进推理，DSpark 置信度调度投机解码（MTP 变长、draft≤5）、SWA bounded replay、batch-invariant 推理；<b>NVIDIA SM100 与华为昇腾 950 双后端</b>。开源一周即超 1.7 万 star——"EP+EPLB 进推理"从论文配餐变成生产标配<sup class="ref"><a href="#r29">[29]</a></sup>。</li>
 <li><b>MoonEP：动态冗余专家的「完美均衡」EP 通信库</b>（Moonshot，2026-07-24 建、10-20 更新，github.com/MoonshotAI/MoonEP，1.19k star）：GPU 在线近优规划器 + NVLink 权重预取 + 冗余专家 FP32 梯度归约 + 静态形状（固定 S×K 缓冲，消除 host 同步）。H20/EP=8 实测：路由失衡加剧时通信时间几乎平坦，而 DeepEP v2 随最热 rank 劣化直至 OOM——与 DeepEP V2.5 新增的 <code>lb_prefetch_weights / lb_reduce_grads</code> 原语互相成就，「专家复制」路线（TopoEP/MegaFlux 一族）有了官方接口。</li>
-<li><b>MirrorMoE：共享专家会抑制路由探索</b>（ETH+HKU+MPI，arXiv:2610.22353，alphaXiv 一周 16 票）：共享专家主导表征后路由器方差低约一个数量级，K 从 6→10 几乎无增益；用「取反 logit 混合分布选专家 + 原始概率加权」+ ρ 退火，2.4B 困惑度 21.17→20.50——直接挑战「共享专家 + 细粒度」的默认组合，§1.4「路由崩溃」故事线的重要补笔。</li>
-<li><b>Meta Expert：跨层共享专家池</b>（清华+上海AI Lab，arXiv:2610.27598）：各层共享一个专家池（Meta Experts），同等激活量与粒度下用 70–80% 专家（75–90% 参数）追平 Vanilla MoE，规模越大优势越大——MoE 参数效率的「深度维」新轴，与 Loop Scaling Laws（上文）互补。</li>
+<li><b>MirrorMoE：共享专家会抑制路由探索</b>（ETH+HKU，arXiv:2610.22353，alphaXiv 一周 16 票）：共享专家主导表征后路由器方差低约一个数量级，K 从 6→10 几乎无增益；用「取反 logit 混合分布选专家 + 原始概率加权」+ ρ 退火，2.4B 困惑度 21.17→20.50——直接挑战「共享专家 + 细粒度」的默认组合，§1.4「路由崩溃」故事线的重要补笔。</li>
+<li><b>Meta Expert：跨层共享专家池</b>（清华+上海AI Lab，arXiv:2610.27598）：各层共享一个专家池（Meta Experts），同等激活量与粒度下用 70–80% 专家（75–90% 参数）追平 Vanilla MoE，规模越大优势越大——MoE 参数效率的「深度维」新轴，与 Loop Scaling Laws（上文）互补，放大性已在 Intern-S2-Mobius 上验证。</li>
 <li><b>MoRE 消歧与复用专家线</b>：Cornell 的 <i>MoRE: Mixture of Reused Experts</i>（arXiv:2609.18176，42 票）通过复用/循环专家降显存——与本文 [21] 所引 UPenn 低秩路由 MoRE（arXiv:2609.36301）<b>同名不同文</b>，引用时注意区分。</li>
 <li><b>消费级 MoE 推理爆发</b>：slotstream（SSD 流式 + 热专家内存缓存，16–64GB Mac 跑 105GB 的 Qwen3.8-Flash-Next，478★）与 coachwhip（16GB Mac 跑 80B Qwen3-Coder-Next 约 13 tok/s）验证了 §6.3「端侧 offloading」方向——MoE 的稀疏性天然适配内存分层。</li>
 <li><b>框架侧</b>：DeepSpeed v0.19.8（10-20）AutoEP 子系统成形——跨 MoE 层共享单个 DeepEP buffer、AutoEP+AutoTP 在 ZeRO-3 下折叠、融合 gate+up 分组 GEMM，DualPipeV 正式并入（PR #8576）；Megatron Core v0.19.2 落地「FP4 in 1F1B A2A overlap」——训练栈与并行篇的路线图兑现。</li>
 </ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/metaexpert-fig2.svg" loading="lazy" alt="Local Experts（层私有专家池）与 Meta Experts（全层共享专家池）的结构对比" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 2（arXiv:2610.27598）</b> · 左：Local Experts——每层私有一个专家池；右：Meta Experts——所有层共享同一个池。跨层共享把"专家"从层内资源变成全模型资源，这是 MoE 参数效率在深度维上的新轴。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
 <h3>6.2 正在发生的几大趋势（2024–2026）</h3>
 <div class="grid two">
   <div class="card"><h4>① 无辅助损失 / 无损负载均衡成新标准</h4>
@@ -1579,6 +1583,16 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <tr><td><b>硬件协同设计</b></td><td>DeepSeek 公开呼吁更好的通信硬件与低精度算力<sup class="ref"><a href="#r4">[4]</a></sup>。MoE 的 all-to-all 通信模式对下一代 GPU/互联提出新需求。</td></tr>
 </tbody>
 </table>
+
+<h3>6.4 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>Kimi K3.1 Pro</b>（月之暗面，10-23）：AA Index 44→55（升至第 4），Terminal-Bench 4.0 65.7%；API 降价 33% 至 $2/$10，权重定于 2026-11-04 开放——万亿稀疏旗舰进入「性能上调、价格下调」的双通道迭代<sup class="ref"><a href="#r31">[31]</a></sup>。</li>
+<li><b>Channel Selection for MoE Decoding Needs No Calibration Data</b>（KAIST+DeepAuto，10-27）：免校准的通道选择——只读 17.8% 专家权重即保留 98.1% 精度；MoE 块比调优后 vLLM 在 batch-1 快 1.60–1.90×、大 batch 达 2.69×，显存受限推理的又一「免费午餐」<sup class="ref"><a href="#r30">[30]</a></sup>。</li>
+<li><b>Flint 开源</b>（Recursive，10-21，Apache-2.0）：39.8B/2.5B 激活、262K 上下文；SWE-bench Verified 74.2%，RTX Spark 64GB 单机跑出 220+ tok/s——细粒度 MoE 落地消费级设备的最新样本<sup class="ref"><a href="#r33">[33]</a></sup>。</li>
+<li><b>Prime Mega MoE</b>（Prime Intellect，10-23）：MoE 内核较 PyTorch 默认快 3.11×、端到端训练较 Prime-RL 基线快 1.34×——「EP 通信 + 专家 GEMM」协同优化进入开源训练栈<sup class="ref"><a href="#r32">[32]</a></sup>。</li>
+<li><b>Muse Spark Open</b>（Meta，10-15）：816B/42B、1M 上下文的全模态开放权重；BF16 权重 1.65TB、NVFP4 版 537GB（仅量化专家）——压缩 MoE 块（pooler/unpooler）+ 混合全局/局部注意力同时省跨卡流量与 KV<sup class="ref"><a href="#r35">[35]</a></sup>。</li>
+<li><b>V4.1-Flash-1017 基准跃升</b>（DeepSeek，10-17）：DeepSWE 74.2→77.0（单任务成本 $0.50→$0.20）、HLE 36.8→42.6、Terminal-Bench 4.0 31.2→42.3、AA 39→45——生产迭代与开源权重同步快跑<sup class="ref"><a href="#r34">[34]</a></sup>。</li>
+</ul>
 
 <div class="note ok"><b>展望</b>：MoE 已从「小众技巧」变成「顶级模型的默认骨架」。未来 2–3 年，胜负手不在「要不要用 MoE」，而在 <b>如何让路由更智能（动态化）、训练更稳定（万亿级）、部署更便宜（合并/端侧）、专家更可解释</b>——这四个方向都还有大量适合上手的好问题（本报告 §1 的 toy 代码与 collapse 模拟就是很好的起点）。</div>
 
@@ -1614,7 +1628,13 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <li id="r26">Reflection AI. <i>Introducing Beam</i>. 官方博客, 2026-10-05. <a href="https://reflection.ai/blog/introducing-beam" target="_blank">reflection.ai/blog/introducing-beam</a>（501B/23B）.</li>
 <li id="r27">Yanbei Chen, Anirudh Goyal, Raghuraman Krishnamoorthi（Meta AI）. <i>Scaling Laws for Looped Mixture of Experts</i>. arXiv:2609.40316, 2026-09-30. <a href="https://arxiv.org/abs/2609.40316" target="_blank">arxiv.org/abs/2609.40316</a>.</li>
 <li id="r28">USTC &amp; 快手 KlingAI Research. <i>PixelMoE: Scaling Pixel-Space Diffusion with LLM-Style Mixture of Experts</i>. arXiv:2610.18857, 2026-10-13. <a href="https://arxiv.org/abs/2610.18857" target="_blank">arxiv.org/abs/2610.18857</a>.</li>
-  <li id="r29">DeepSeek-AI. <i>DeepInfer: Production Inference Framework</i>. GitHub, 2026-10-16. <a href="https://github.com/deepseek-ai/DeepInfer" target="_blank">github.com/deepseek-ai/DeepInfer</a>.</li>
+  <li id="r29">DeepSeek-AI. <i>DeepInfer: Production Inference Framework</i>. GitHub, 2026-10-20. <a href="https://github.com/deepseek-ai/DeepInfer" target="_blank">github.com/deepseek-ai/DeepInfer</a>.</li>
+  <li id="r30">KAIST &amp; DeepAuto. <i>Channel Selection for MoE Decoding Needs No Calibration Data</i>. arXiv 2026-10-27. <a href="https://arxiv.org/abs/2610.37386" target="_blank">arXiv:2610.37386</a>.（免校准通道选择：17.8% 权重保 98.1% 精度；MoE 块 batch-1 1.60–1.90×、大 batch 2.69×）</li>
+  <li id="r31">Moonshot AI. <i>Kimi K3.1 Pro</i>. 官方发布, 2026-10-23.（AA Index 44→55（第 4）、Terminal-Bench 4.0 65.7%；API 降价 33% 至 $2/$10；权重 2026-11-04 开放）</li>
+  <li id="r32">Prime Intellect. <i>Prime Mega MoE</i>. 2026-10-23.（MoE 内核 3.11×、端到端训练 1.34×，vs PyTorch 默认 / Prime-RL 基线）</li>
+  <li id="r33">Recursive. <i>Flint</i>（Apache-2.0 开源）. 2026-10-21.（39.8B/2.5B 激活、262K 上下文；SWE-bench Verified 74.2%；RTX Spark 64GB 220+ tok/s）</li>
+  <li id="r34">DeepSeek-AI. <i>DeepSeek-V4.1-Flash-1017</i>. 2026-10-17.（DeepSWE 74.2→77.0（成本 $0.50→$0.20/任务）、HLE 36.8→42.6、Terminal-Bench 4.0 31.2→42.3、AA 39→45）</li>
+  <li id="r35">Meta. <i>Muse Spark Open</i>. 官方发布, 2026-10-15.（816B/42B、1M 上下文全模态；BF16 1.65TB / NVFP4 537GB；压缩 MoE 块（pooler/unpooler）+ 混合全局/局部注意力）</li>
 </ol>
 
 <div class="footer">

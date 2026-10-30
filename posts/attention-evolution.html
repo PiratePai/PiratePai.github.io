@@ -121,7 +121,7 @@
   <div class="kicker">注意力结构调研 · 2014–2026</div>
 <h1>注意力结构演进：从 MHA、GQA 到 MLA、线性注意力与混合架构</h1>
   <div class="subtitle">一篇原理向技术综述：原理 · 代码 · 发展历程（2014–2026）· 未来方向</div>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-21</b></span><span class="chip">源码 <b>nanoGPT · LLaMA · DeepSeek-V3 · flash-linear-attention · FlashAttention · vLLM · SGLang</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-30</b></span><span class="chip">源码 <b>nanoGPT · LLaMA · DeepSeek-V3 · flash-linear-attention · FlashAttention · vLLM · SGLang</b></span></div>
 </header>
 
 <nav class="toc">
@@ -190,10 +190,10 @@ MHA、MQA、GQA、MLA、FlashAttention、稀疏注意力、线性注意力、Mam
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>KronLSTM：写前只擦一格</b><span class="hl-date">10-19 · Hochreiter 组</span></div><p>Kronecker Delta 规则让记忆更新只碰单个键值对，长上下文全面超 GDN-2/KDA/Mamba-3，即将合入 FLA。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>免训练外挂记忆</b><span class="hl-date">10-11 · KAUST</span></div><p>NoteBank：GDN 的 RULER@1M 从 1.7% 拉到 70.3%，存储仅同规模 MHA KV 的 1/2600。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>状态容量新轴</b><span class="hl-date">09-29 · MIT</span></div><p>三阶张量状态（k⊗k′⊗v）：E 倍容量只加两个投影，70 票成为“扩状态”路线代表作。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>FA4 与内核生态</b><span class="hl-date">10 月</span></div><p>FA 2.8.3 维护版发布；FLA 新增 Sinkhorn 内核与昇腾后端，国产硬件版图继续扩大。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>全层 MSA 旗舰</b><span class="hl-date">10-22 · MiniMax</span></div><p>M3.1-Flash（428B-A23B、1M）把 MSA 块稀疏铺满全部注意力层：128-token 块 + NVFP4 KV QAT，GB300 单用户 418.9 tok/s。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>2.3B token 转混合线性</b><span class="hl-date">10-24 · 清华 THUNLP</span></div><p>HypeNet/HALO 入选 EMNLP 2026 主会：不足预训练 0.01% 的 token 把 Qwen3 全系转混合线性，HyPE 位置编码，已开源。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>SWA 对线性的公开论战</b><span class="hl-date">10-17 · NVIDIA/Meta</span></div><p>「三家前沿实验室生产用 KDA 跑 1M+ RL」——Pavlichenko 与 Hatamizadeh 隔空交锋，Beyer 看好 SWA、Catanzaro 转发。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>46+16 混合注意力</b><span class="hl-date">10-15 · Meta</span></div><p>Muse Spark Open：62 层中 46 层 SWA（2048/RoPE）+16 层全局 NoPE、GQA 128/16，KV 缩 3.7×、1M 上下文。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div>
 
 <h2 id="s1"><span class="no">1</span>前史：注意力是怎么被发明的（2014–2017）</h2>
 
@@ -963,7 +963,7 @@ Gemma 3（2025-03）以 5:1 的局部:全局滑窗比例大幅削减 KV 缓存�
 <!-- ============================================================ -->
 <h2 id="s11"><span class="no">11</span>前沿模型的注意力选型一览（2024–2026）</h2>
 
-<p>把截至 2026 年 8 月主要开源/可考证模型用的注意力结构集中对齐（闭源模型 GPT-5.x / Gemini 3 / Claude 均未官方披露架构，
+<p>把截至 2026 年 10 月主要开源/可考证模型用的注意力结构集中对齐（闭源模型 GPT-5.x / Gemini 3 / Claude 均未官方披露架构，
 OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错 + RoPE/YaRN）：</p>
 
 <table>
@@ -978,6 +978,8 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 <tr><td><b>Qwen3-Next</b>（2025-09-11）</td><td>阿里</td><td><b>Gated DeltaNet : 门控注意力 = 3:1</b>，256K 上下文</td><td>官方博客："When we mix Gated DeltaNet with standard attention at a 3:1 ratio (75% layers use Gated DeltaNet, 25% keep standard attention), the model consistently outperforms any monolithic architecture."（译：以 3:1 混合 GDN 与标准注意力时，模型稳定优于任何单一架构。）注意力层改造：输出门控、head dim 128→256、partial RoPE（仅前 25% 维度带位置）；官方宣称较 Qwen3-32B 训练便宜 10×、推理快 10×</td></tr>
 <tr><td>Qwen3.5（2026-02）/ Qwen3.8-Max（2026-08）</td><td>阿里</td><td>延续 3:1 GDN 混合</td><td>Qwen3.5-397B-A17B、Qwen3.8-Max 2.4T-A95B（1M 上下文）——3:1 配方已沉淀为阿里旗舰标准</td></tr>
 <tr><td>Llama 4 Scout/Maverick（2025-04-05）</td><td>Meta</td><td><b>iRoPE</b></td><td>"A key innovation in the Llama 4 architecture is the use of interleaved attention layers without positional embeddings. We call this the iRoPE."（官方博客，译：交错使用无位置编码的注意力层——我们称之为 iRoPE。）= 8K 块内 chunked 注意力（RoPE）+ NoPE 全局层交错；Scout 10M / Maverick 1M 上下文；理论源头是 Cohere 的 "RoPE to NoPE"（arXiv:2501.18795）。Llama 5 未发布</td></tr>
+<tr><td><b>Muse Glimmer</b>（2026-08-10 权重 / 10-17 技术报告）</td><td>Meta</td><td>GQA + 滑窗 SWA</td><td>30B 端侧模型；权重先行发布、技术报告后补——两处日期口径以官方渠道为准<span class="cite"><a href="#ref-muse">[Muse]</a></span></td></tr>
+<tr><td><b>Muse Spark Open</b>（2026-10-15）</td><td>Meta</td><td><b>混合 SWA + NoPE 全局</b>（62 层中 46 层 SWA 窗口 2048/RoPE + 16 层全局 NoPE）</td><td>816B-A42B 全模态 MoE、1M 上下文；GQA 128 Q/16 KV，官方称 KV 缩 3.7×；8×B300 14.8K tok/s/GPU<span class="cite"><a href="#ref-muse">[Muse]</a></span></td></tr>
 <tr><td>Gemma 3（2025-03）/ <b>Gemma 4</b>（2026-06）</td><td>Google</td><td>5:1 局部:全局滑窗（Gemma 4 增加 p-RoPE、keys 复用为 values）</td><td>Gemma 3：局部滑窗 1024（arXiv:2503.19786）；Gemma 4 报告（arXiv:2607.02770）："reduce the global KV cache footprint by up to 37.5%"（译：全局层 KV 缓存占用最多减少 37.5%）</td></tr>
 <tr><td>MiniMax-01 / M1（2025-01 / 2025-06）</td><td>MiniMax</td><td>Lightning Attention，7:1</td><td>"within every 8 layers, 7 are based on Lightning Attention with linear attention, and 1 layer employs traditional SoftMax attention."（arXiv:2501.08313，译：每 8 层中 7 层用线性闪电注意力，1 层用传统 softmax 注意力。）M1：456B-A45.9B，1M 上下文</td></tr>
 <tr><td><b>MiniMax-M2 / M2.5</b>（2025-10 / 2026-02）</td><td>MiniMax</td><td><b>回归全注意力（M2.5 用 MHA）</b><span class="tag hot">争议</span></td><td>线性路线的著名反例。官方解释："Compute is finite. We need an architecture that makes better use of it"（译：算力是有限的，我们需要更会用算力的架构）——线性注意力在其多跳推理实验中缺陷明显；M2.5 一度是唯一坚持 MHA 的前沿模型（"for reliability purposes"，为了可靠性）；2026-06 的 M3 已转向 GQA+MSA 块稀疏（arXiv:2606.13392）</td></tr>
@@ -1045,7 +1047,7 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 </blockquote>
 
 <h4>② GLM-5.3-Flash（Z.ai，2026-08-26，补录）：线性 × 稀疏的第一次同框</h4>
-<p>320B-A18B 的 MIT 开源模型：45 层中 34 层 KDA（Moonshot 线性注意力）+ <b>11 层 DeepSeek 式稀疏注意力</b>（index_topk 2048），并用 IndexPool（4 个索引器 key 向量加权池化为 1）压索引器开销；mHC 超连接、原生多模态、1M 上下文。发布前以"Ox Alpha"匿名登顶 OpenRouter/OpenCode 榜。官方口径：对比 GLM-5.3 注意力计算量降 <b>3.0×</b>、KV cache 小 <b>4.4×</b>。"线性管成本、稀疏管精确检索"的分工自此有了旗舰级样本。</p>
+<p>320B-A18B 的 MIT 开源模型：45 层中 34 层 KDA（Moonshot 线性注意力）+ <b>11 层 DeepSeek 式稀疏注意力</b>（index_topk 2048），并用 IndexPool（4 个索引器 key 向量加权池化为 1）压索引器开销；mHC 超连接、原生多模态、1M 上下文。发布前以"Ox Alpha"匿名登顶 OpenRouter/OpenCode 榜。官方口径：对比 GLM-5.3 注意力计算量降 <b>3.0×</b>、KV cache 小 <b>4.4×</b>。"线性管成本、稀疏管精确检索"的分工自此有了旗舰级样本。与标准版 GLM-5.3 的注意力差异一句话点明：标准版全层走注意力路线（MLA latent 压缩 + DSA 式 indexer top-2048 稀疏），Flash 版则把 34/45 层换成 KDA 固定状态、只留 11 层稀疏注意力——同一家族内"latent 压缩"与"线性状态"两条减 KV 路线并行成套。</p>
 
 <h4>③ 复杂度与角色的两条新解法</h4>
 <ul>
@@ -1066,13 +1068,18 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 </div>
 <div class="card">
 <h4>⚙️ 系统侧与会议信号</h4>
-<p>FlashMLA 2026.09.30 版本移除 Hopper 支持、仅留 SM100/SM103，并新增华为昇腾 950 NPU 稀疏 prefill/decode 内核——注意力内核的硬件版图在分化。NeurIPS 2026 确认收录 GDN-2（擦/写解耦）、STILL、CSLA 等线性注意力论文；另见 GateSight（上交，GDN 递归记忆做 query 无关 KV 驱逐，arXiv:2610.14754）与 LatentIndex（北大+小红书，稀疏索引器跨层共享，arXiv:2610.04635）。</p>
+<p>FlashMLA 2026.09.30 版本移除 Hopper 支持、仅留 SM100/SM103，并新增华为昇腾 950 NPU 稀疏 prefill/decode 内核——注意力内核的硬件版图在分化。NeurIPS 2026 确认收录 GDN-2（擦/写解耦）、Raven（写侧稀疏记忆路由）、STILL、CSLA 等线性注意力论文；另见 GateSight（上交，GDN 递归记忆做 query 无关 KV 驱逐，arXiv:2610.14754）与 LatentIndex（北大+小红书，稀疏索引器跨层共享，arXiv:2610.04635）。</p>
 </div>
 </div>
 
 <!-- ============================================================ -->
 <h4>① KronLSTM（2026-10-19，NX-AI / JKU Hochreiter 组）：Kronecker Delta 规则，“写前只擦一格”</h4>
-<p>记忆更新只沿单一方向 (k⊗v) 纠错，不做 GDN/KDA 的整键擦除——干扰更小、检索更稳。1.5B/100B token 四个模型开源（Avg-6 59.72，全面超 KDA 58.12 / GDN-2 57.94 / Mamba-3 57.31；RULER 自 16k 起胜 GDN-2；H100 吞吐再快 11–18%）。仓库即 FLA 快照、官方声明将合入 FLA。代码：github.com/NX-AI/KronLSTM，论文 arXiv:2610.26834。</p>
+<p>记忆更新只沿单一方向 (k⊗v) 纠错，不做 GDN/KDA 的整键擦除——干扰更小、检索更稳。1.5B/100B token 四个模型开源（Avg-6 59.72，全面超 KDA 58.12 / GDN-2 57.94 / Mamba-3 57.31；RULER 自 16k 起胜 GDN-2；H100 吞吐较 GDN-2 快 11–18%）。基于 FLA 的 Triton 内核实现、代码开源：github.com/NX-AI/KronLSTM，论文 arXiv:2610.26834。</p>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/kronlstm-fig1.svg" loading="lazy" alt="mLSTM、Gated DeltaNet 与 KronLSTM 三种记忆修订规则的干扰范围对比" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.26834）</b> · 三种记忆修订规则的干扰范围：mLSTM 动全部值、Gated DeltaNet 动重叠键对应的值、KronLSTM 只动键值都重叠的那一格——“写前只擦一格”让干扰最小、检索最稳。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 
 <h4>② NoteBank（2026-10-11，KAUST / Schmidhuber 等）：免训练外挂情景记忆，绕过“固定状态天花板”</h4>
 <p>预存文本片段 + 骨干原生特征寻址 + 回放读取：GDN-1.3B 的 RULER@1M 从 1.7% 拉到 <b>70.3%</b>，仅 +≤0.025% FLOPs，持久存储只有同规模 MHA KV 的 1/2600。§7.5 论证的线性注意力“检索/复制天花板”第一次被<b>免训练</b>手段显著绕过（arXiv:2610.15715）。</p>
@@ -1082,6 +1089,16 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 
 <h4>④ 系统与生态（10-13~21）</h4>
 <p><b>FlashAttention v2.8.3.post2</b>（CVE 修复、反向 dq_accum int32 溢出修复、CUDA 13 wheels）；<b>FLA</b> 新增 Sinkhorn 归一化内核、KDA/AttnRes 的 triton-ascend（昇腾）后端（Triton-Ascend 3.6.0 / CANN 9.1 适配）——内核版图继续向国产硬件扩散。<b>LeapQuant</b>（Berkeley/UW/MIT/Perplexity/NVIDIA，arXiv:2609.38166）专攻 GDN/KDA 混合模型的<b>循环状态量化</b>（注意：不是 KV 量化），与 ReplaySSM 互证“SSM 状态成为新瓶颈”。<b>FreeSolo</b>（NUS，arXiv:2610.17191）用“固定状态存键位置、检索按需取回”做到线性时间稀疏注意力 + 零样本长度外推；<b>KPage</b>（快手 KlingAI+NVIDIA，arXiv:2610.28096）把稀疏注意力的跨块页压缩再降一档复杂度。一句话动态：DeltaNet-PC 测试时记忆免 BPTT（2610.15185）；循环深度的临床 NLP 落地（Eli Lilly+NVIDIA，2610.27559）。</p>
+
+<h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>Muse Spark Open 混合注意力</b>（Meta，10-15）：816B-A42B 全模态 MoE、1M 上下文——62 层中 46 层 SWA（窗口 2048、RoPE）+16 层全局 NoPE，GQA 128 Q/16 KV，KV 缩 3.7×，8×B300 达 14.8K tok/s/GPU<span class="cite"><a href="#ref-muse">[Muse]</a></span>。</li>
+<li><b>SWA vs 线性注意力公开论战</b>（NVIDIA/Meta 研究者，10-17/18）：Pavlichenko 与 Hatamizadeh 就「线性注意力是否已在生产成熟」隔空交锋，一方引"三家前沿实验室生产环境用 KDA 跑 1M+ RL"为据；Meta 的 Beyer 表态看好 SWA，Catanzaro 转发扩散（二手信源：研究者公开帖转述，可信度中）<span class="cite"><a href="#ref-swadebate">[SWAdebate]</a></span>。</li>
+<li><b>MiniMax-M3.1-Flash 全层 MSA</b>（MiniMax，10-22）：428B-A23B、1M 上下文，把 MSA 块稀疏（128-token 块）铺满全部注意力层并做 NVFP4 KV QAT；QMUL4 指令把 indexer 提速 1.7×，GB300 单用户 418.9 tok/s<span class="cite"><a href="#ref-m31">[M3.1]</a></span>。</li>
+<li><b>HypeNet / HALO 入选 EMNLP 2026 主会</b>（清华 THUNLP，10-24 起陆续确认）：2.3B token（不足预训练 0.01%）把 Qwen3 全系转换成混合线性注意力，HyPE 位置编码解决线性层的位置敏感问题，代码已开源（arXiv:2601.22156）<span class="cite"><a href="#ref-hypenet">[HypeNet]</a></span>。</li>
+<li><b>Kimi K3.1 Pro 架构原封不动</b>（Moonshot，10-23）：93 层 = 69 KDA + 24 Gated MLA（仍 3:1），Highspeed 托管侧投机 2–3×、API 降价 1/3——K3 系旗舰换代中坚持 KDA 路线<span class="cite"><a href="#ref-k31">[K3.1]</a></span>。</li>
+<li><b>GLM-5.3 的 PCP/DCP</b>（vLLM×Z.ai，10-23）：indexer 做 TP8 切分后通信开销反超不切分——改用 PCP（算术强度 26→191 FLOPs/byte）+ DCP 组合，规模拐点在 32K→256K 之间<span class="cite"><a href="#ref-glmpcp">[GLM-PCP]</a></span>。</li>
+</ul>
 
 <h2 id="s12"><span class="no">12</span>未来发展方向</h2>
 
@@ -1247,6 +1264,16 @@ FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SG
 <li>快手 OneRec Team. <i>Kwai Summary Attention V2 (KSA V2)</i>. arXiv:2610.18654 (2026-10-13). https://arxiv.org/abs/2610.18654</li>
 <li>小米 LLM-Core. <i>HySparse2</i>（两级 KV 共享 + prefill 提前退出）. arXiv:2609.26368 (2026-09-22). https://arxiv.org/abs/2609.26368</li>
 <li>DeepSeek. <i>FlashMLA</i> 2026.09.30 版本更新（移除 Hopper、新增昇腾 950 内核）. github.com/deepseek-ai/FlashMLA</li>
+</ol>
+
+<h4>2026-10 下旬增补（§11 快讯）</h4>
+<ol>
+<li id="ref-m31">MiniMax. <i>MiniMax-M3.1-Flash</i>（全层 MSA 块稀疏 + NVFP4 KV QAT，428B-A23B、1M 上下文）. 2026-10-22；MSA 论文 arXiv:2606.13392. https://arxiv.org/abs/2606.13392</li>
+<li id="ref-hypenet">清华 THUNLP. <i>HypeNet / HALO</i>（2.3B token 把 Qwen3 全系转混合线性注意力，HyPE 位置编码；入选 EMNLP 2026 主会）. arXiv:2601.22156 (2026-01). https://arxiv.org/abs/2601.22156 · 代码已开源</li>
+<li id="ref-swadebate">NVIDIA / Meta 研究者（N. Pavlichenko、A. Hatamizadeh、M. Beyer 等）关于滑动窗口注意力与线性注意力的公开讨论. X 公开帖 · 2026-10-17/18.（二手信源：研究者公开帖与转发，标注可信度：中）</li>
+<li id="ref-muse">Meta. <i>Muse Spark Open</i>（816B-A42B 全模态，46/62 层 SWA + 16 层 NoPE 全局，1M 上下文）. 2026-10-15；端侧 <i>Muse Glimmer</i> 30B（GQA+SWA）权重 2026-08-10 发布、技术报告 10-17 补发.</li>
+<li id="ref-k31">Moonshot AI. <i>Kimi K3.1 Pro / Highspeed</i>（93 层 = 69 KDA + 24 Gated MLA；Highspeed 2–3×、API 降价 1/3）. 2026-10-23.</li>
+<li id="ref-glmpcp">vLLM × Z.ai. GLM-5.3 长上下文部署（PCP/DCP，indexer 不做 TP 切分）官方博客. blog.vllm.ai · 2026-10-23.</li>
 </ol>
 
 <footer>

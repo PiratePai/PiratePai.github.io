@@ -13,7 +13,7 @@
   *{box-sizing:border-box;}
   body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
   .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
-  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero{background:radial-gradient(900px 380px at 20% -10%,rgba(110,168,255,.16),transparent 70%),radial-gradient(700px 360px at 90% 0%,rgba(157,123,255,.15),transparent 70%),linear-gradient(180deg,#11161d 0%,#151d27 100%);color:#c3cad3;padding:56px 24px 44px;margin-bottom:32px;border-bottom:1px solid #2a2f3a;}
   header.hero .inner{max-width:1080px;margin:0 auto;}
   header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
   header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
@@ -112,7 +112,7 @@
   <div class="kicker">推理服务系统调研 · 2026</div>
 <h1>大模型推理服务优化：技术发展史、原理与前沿展望</h1>
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译——系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-11</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-30</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div></header>
 <div class="wrap">
 
@@ -188,10 +188,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>双引擎三天两大版本</b><span class="hl-date">10-18/19 · vLLM/SGLang</span></div><p>v0.32.0 与 v0.5.22 相继落地：AMD MI355X 追平 B300、P/D 的 TTFT 再减半。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Kimi K3 day-0 megakernel</b><span class="hl-date">10-16 · vLLM+NVIDIA</span></div><p>每层 130µs/23 kernels 压到 69µs/13，batch-1 达 842 tok/s——新模型 day-0 定制成主战场。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Elastic EP 近零停机</b><span class="hl-date">10-19 · vLLM</span></div><p>MoE 服务可按负载近零停机扩缩容，弹性从"优化项"变"标配"。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Humming 统一量化内核</b><span class="hl-date">10-21 · 蚂蚁+vLLM</span></div><p>W4A4 到 W8A8 一套表示 + 1.8s JIT 编译，MoE 吞吐最高 +43%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>生产推理框架开源：单集群 155T tokens/天、波谷 $38/卡/小时，SM100+昇腾 950 双后端；开源一周 star 超 1.7 万。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>GB300 NVL72 追平 DeepInfer</b><span class="hl-date">10-23 · vLLM</span></div><p>P/D + Wide-EP：AgentX 每 GPU 954K tokens/s；decode 与 DeepInfer 差距 batch 8–256 全程 ≤6%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>P/D 分离 KV 跨请求泄露</b><span class="hl-date">10-26 · SGLang×Cloudflare</span></div><p>155 个响应串入他人 prompt：修复随 v0.5.21/22 落地，运营方应升级 v0.5.22+。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>TAO 工具感知调度</b><span class="hl-date">10-27 · 上交+斯坦福</span></div><p>工具执行下放分布式 CPU、GPU 聚簇推理：延迟最多 −26.8%、TTFT −36.3%、吞吐 +29.5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
 
 <h2 id="s1"><span class="no">1</span>预备知识：一次推理到底发生了什么</h2>
 
@@ -826,6 +826,19 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <h2 id="s9"><span class="no">9</span>2024–2026 最新进展盘点</h2>
 <p>前八节是"教科书"，本节是"新闻联播"：按引擎/系统、模型-系统协同、新负载、学界动态四个板块，梳理最近两年多值得知道的进展（均标注出处与时间）。</p>
 
+<h3>9.0 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>DeepInfer 开源</b>（DeepSeek，10-20）：生产推理框架开源（Apache 2.0，基于 vLLM 改造，默认 checkpoint 为 DeepSeek-V4.1-Flash-1017）：官方 Q&A 披露单集群 155T tokens/天、波谷电价 $38/卡/小时，SM100 与昇腾 950 双后端；开源一周 star 超 1.7 万。注意 README 明示开源版<b>不含</b> KV cache 池化、prefill/decode 分离与跨副本负载均衡<sup class="cite">[DEEPINFER26]</sup>。</li>
+<li><b>vLLM GB300 NVL72 追平 DeepInfer</b>（vLLM，10-23）：GB300 NVL72 上 P/D 分离 + Wide-EP，AgentX 每 GPU 954K tokens/s、P90 每用户 196 tok/s（单机 7.9×）、$38.96/GPU-hour；decode 与 DeepInfer 的差距在 batch 8–256 全程 ≤6%（DEP32 vs EP64DP64），prefill 侧 layer-20 replay + Engram 2MB 页 + DeepSelect 再 +35.6–43.9%<sup class="cite">[VLLMGB300]</sup>。</li>
+<li><b>SGLang×Cloudflare KV 泄露披露</b>（SGLang + Cloudflare，10-26）：P/D 分离配置下 KV 跨请求泄漏——Cloudflare 在 GLM-5.3 上实测 155 个响应携带他人 prompt 内容（最长 >681,280 tokens）；修复随 v0.5.21（Mooncake/NIXL 默认防护）与 v0.5.22（MORI 标记 ack）落地，建议运营方升级 v0.5.22+（v0.5.23 将载进一步修复，截至 10-28 未发布 tag）<sup class="cite">[SGLANGKVLEAK]</sup>。</li>
+<li><b>TAO 工具感知调度</b>（上交+斯坦福，10-27）：Agent 负载下 GPU 推理与 CPU 工具执行的联合调度（CGDC：聚簇 GPU + 分布式 CPU 工具执行），vs Dynamo/vLLM/ThunderAgent 延迟最多 −26.8%、TTFT −36.3%、吞吐 +29.5%<sup class="cite">[TAO26]</sup>。</li>
+<li><b>HAWK 异构 P/D</b>（佐治亚理工+ETRI，10-21）：A100 做 prefill + Tenstorren p150a 做 decode 的 GPU-NPU 异构分离，专用异构 KV 传输比 host 中转快 27.69×；与同规模 GPU 基线相比整机性能差 ≤7.88%、能效 1.26×、成本效率 2.03×（NPU decode 每 $1000 吞吐 4.31×）<sup class="cite">[HAWK26]</sup>。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/hawk-fig5.svg" loading="lazy" alt="HAWK 的 GPU prefill + NPU decode 异构分离系统总览" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 5（arXiv:2610.29873）</b> · GPU（A100×4）负责 prefill、NPU（Tenstorrent p150a×4）负责 decode 的异构 P/D 分离系统：HAWK 为 NPU 侧实现 RDMA peer-memory client 与张量布局感知的 KV 传输缓冲，让 KV 跨架构流动不必经 host 中转——异构算力拼成一台"推理机"的数据面。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 <h3>9.1 引擎与编排系统</h3>
 <table>
 <tr><th style="width:22%">系统（时间）</th><th>要点</th></tr>
@@ -834,7 +847,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <tr><td><b>NVIDIA Dynamo + NIXL</b>（GTC 2025-03）<sup class="cite">[DYNAMO25]</sup></td><td>数据中心级推理编排框架（Triton 后继）：KV 感知路由（radix 树追踪全集群 KV 位置）、P/D 分离调度、GPU 动态分配；NIXL 统一 KV 传输层（RDMA/UCX/TCP/NVMe-oF/S3）。官方称 DeepSeek-R1 on Blackwell 场景可服务请求数最高提升 <b>30×</b>。</td></tr>
 <tr><td><b>llm-d</b>（2025 起；v0.8，2026）<sup class="cite">[LLMD]</sup></td><td>K8s 原生推理编排（红帽/Google Cloud 等参与）：前缀相似度路由、P/D 与 E/PD 分离指南、agentic serving；自研栈在 prefill 受限负载下比 K8s Service 轮询高 2–3× 吞吐。</td></tr>
 <tr><td><b>Mooncake 开源 + ProductionStack</b>（2024–2026）<sup class="cite">[MOONCAKE25]</sup></td><td>KVCache 池化成为独立基础设施：vLLM 通过 Mooncake/LMCache 连接器接入"以 KV 为中心的调度"；vLLM×Mooncake 的 agentic 生产实践博客（2026-04）。</td></tr>
-<tr><td><b>TensorRT-LLM</b>（2023-10 起）</td><td>持续走"全家桶"路线：强量化 + 图编译 + in-flight batching + 分离式 serving；2025-01 起默认集成 XGrammar。</td></tr>
+<tr><td><b>TensorRT-LLM</b>（2023-10 起）</td><td>持续走"全家桶"路线：强量化 + 图编译 + in-flight batching + 分离式 serving；2025-01 起默认集成 XGrammar；2026-10-10 原生 Mooncake Store 连接器合入 KV Cache Manager v2（main 分支 2026-10 快照口径）——TRT-LLM 也接上了 KV 池化这层公共设施。</td></tr>
 </table>
 <div class="note"><b>[DYNAMO25]</b> NVIDIA. <i>Introducing NVIDIA Dynamo</i>. GTC 2025（2025-03）。官方博客原文："NVIDIA Dynamo is a high-throughput, low-latency open-source inference serving framework……The framework boosts the number of requests served by <b>up to 30x</b>, when running the open-source DeepSeek-R1 models on NVIDIA Blackwell."（译文：Dynamo 是高吞吐低延迟的开源推理服务框架；在 Blackwell 上运行 DeepSeek-R1 时可服务的请求数最高提升 30 倍。）链接：<a href="https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models">developer.nvidia.com/…/introducing-nvidia-dynamo…</a></div>
 
@@ -983,6 +996,11 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <li id="MUXWISE26"><i>Towards High-Goodput LLM Serving with Prefill-decode Multiplexing (MuxWise)</i>. <b>ASPLOS 2026</b>（arXiv 2504.14489）. <a href="https://dl.acm.org/doi/10.1145/3779212.3790236">DOI</a></li>
 <li id="SUN26">Park et al. <i>SUN: Shared Use of Next-token Prediction for Efficient Multi-LLM Disaggregated Serving</i>. arXiv, <b>2026-03-03</b>. <a href="https://arxiv.org/abs/2603.02599">arXiv:2603.02599</a></li>
 <li id="NVIDIA26TOKEN">NVIDIA. <i>How NVIDIA's Inference Software Stack Powers the Lowest Token Cost</i>. 官方博客, <b>2026-06-30</b>. <a href="https://blogs.nvidia.com/blog/inference-software-lowest-token-cost">链接</a></li>
+<li id="DEEPINFER26">DeepSeek-AI. <i>DeepInfer: Production Inference Framework</i>. GitHub, <b>2026-10-20</b> 首次提交（Apache 2.0，基于 vLLM 改造）. <a href="https://github.com/deepseek-ai/DeepInfer">GitHub</a>（README 明示开源版不含 KV 池化 / P/D 分离 / 跨副本负载均衡；题外数字出自官方 Q&A）</li>
+<li id="VLLMGB300">vLLM Team. <i>GB300 NVL72 上的 P/D + Wide-EP 服务（decode 追平 DeepInfer）</i>. vLLM 博客, <b>2026-10-23</b>. <a href="https://vllm.ai/blog">vllm.ai/blog</a></li>
+<li id="SGLANGKVLEAK">SGLang Team × Cloudflare. <i>P/D 分离场景 KV Cache 跨请求泄漏安全披露</i>. 官方披露, <b>2026-10-26</b>（修复随 v0.5.21 / v0.5.22 发布）. <a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.22">GitHub Release v0.5.22</a></li>
+<li id="TAO26">上海交通大学 + 斯坦福. <i>TAO：工具感知的 GPU/CPU 联合调度（CGDC）</i>（题名意译）. arXiv, <b>2026-10-27</b>. <a href="https://arxiv.org/abs/2610.37230">arXiv:2610.37230</a></li>
+<li id="HAWK26">佐治亚理工 + ETRI. <i>HAWK：GPU-NPU 异构 Prefill/Decode 分离服务</i>（题名意译）. arXiv, <b>2026-10-21</b>. <a href="https://arxiv.org/abs/2610.29873">arXiv:2610.29873</a></li>
 </ol>
 <p style="font-size:13px;color:var(--muted)">注：源码引用基于 2026-08-23 克隆的 <code>vllm-project/vllm</code>、<code>sgl-project/sglang</code>、<code>mlc-ai/xgrammar</code> 三个仓库的 main 分支（位于本目录 <code>repos/</code> 下），行号可能随后续提交漂移。经典论文中未逐字核对原句的引文标注为"译文大意"。</p>
 

@@ -141,7 +141,7 @@
 <h1>ViT 稀疏化技术梳理</h1><p class="sub">从 Attention 结构稀疏、Token 压缩到步间缓存 —— 在 VLM 与 DiT 两大架构中的应用（2017–2026）</p>
     <p class="sub">本报告面向具备基础深度学习知识（了解 CNN / Transformer 基本概念）的读者，结合 6 个开源仓库的一手代码讲解原理，梳理 ViT 稀疏化的完整发展脉络，并综述 2025–2026 年学界与业界的最新进展和未来方向。</p>
     <div class="meta-chips">
-      <span class="chip">调研日期：<b>2026-08-17</b> · 增补：<b>2026-10-16</b></span>
+      <span class="chip">调研日期：<b>2026-08-17</b> · 增补：<b>2026-10-30</b></span>
       <span class="chip">代码仓库：ToMe · DiT · FastV · VisionZip · Sparse-VideoGen · TeaCache（本地克隆分析）</span>
       <span class="chip">引用格式：出处+发表时间标注于引用处，小字附原文/译文</span>
     </div>
@@ -198,10 +198,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DiT 缓存合并双升级</b><span class="hl-date">10-15 · 2 篇 10 票</span></div><p>SoftCache 自适应步长缓存 + 扩散动力学 token 合并，TeaCache/ToMeSD 迎来直接后继。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>具身侧 token 压缩升温</b><span class="hl-date">10-15 · Microsoft AI 等</span></div><p>FastVLA：任务条件化 + 时间自适应压缩，VLA 视觉 token 也能砍大半。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>token 路由进 DiT</b><span class="hl-date">10-20 · 牛津</span></div><p>MoDDiT 把 MoE 式路由搬进扩散 Transformer，面向实时视频合成。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>三件套进同一引擎</b><span class="hl-date">10-14 · TensorRT-LLM</span></div><p>Cache-DiT + 块稀疏 FMHA + SageAttention 合入 v1.4.0rc0。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，PSNR 反高 0.3–3.0dB。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LearnPrunerV2 学习式剪枝</b><span class="hl-date">10-27 · 理想汽车 · ACM MM 2026</span></div><p>剪 77.8% 视觉 token 保留 99.8%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LOWN：扩散 VLM 按需看图</b><span class="hl-date">10-27 · KAIST</span></div><p>去掉图像只改 22.8% 步的决策：0.353× 解码 FLOPs 保留 99.6%，叠 Fast-dLLM 达 5.6–7.0×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8——"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
 
 <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
   <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>
@@ -890,7 +890,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
   <h3>6.3 业界动态（系统与产品侧）</h3>
   <ul>
     <li><b>推理系统</b>：HuggingFace diffusers 内置 ToMe 优化文档（2023 起）；NUS-HPC-AI-Lab 的 <b>VideoSys</b>（PAB 的工程化，2024）把缓存加速做成可复用系统；Berkeley 的 <b>FastVideo</b> 团队与 <b>FastWan</b>（Hao AI Lab，2025）将稀疏注意力 + FP8 后训练用于 Wan2.2，实现 H200 上约 5 秒生成 5 秒视频。</li>
-    <li><b>kernel 生态</b>：FlashAttention（2022-05）确立 IO 感知精确注意力的基线后，<b>FlashInfer</b> 块稀疏 kernel、<b>SageAttention</b>（INT8 量化注意力）、<b>SpargeAttention / XAttention</b>（2025，通用训练无关稀疏加速，跨 LLM/VLM/视频 DiT）逐步把"稀疏"下沉为推理基础设施的原生能力；PyTorch <b>FlexAttention</b> 允许研究者以类 Python 掩码函数定义稀疏模式并自动编译高效 kernel。</li>
+    <li><b>kernel 生态</b>：FlashAttention（2022-05）确立 IO 感知精确注意力的基线后，<b>FlashInfer</b> 块稀疏 kernel、<b>SageAttention</b>（INT8 量化注意力；2026 年的 <b>SageAttention3</b> 更进一步把 Q/K 量化到 NVFP4——低精度注意力核与稀疏化的"低精度 skim 档"正式合流，量化侧的系统梳理见本站《模型量化综述》§7，此处不展开）、<b>SpargeAttention / XAttention</b>（2025，通用训练无关稀疏加速，跨 LLM/VLM/视频 DiT）逐步把"稀疏"下沉为推理基础设施的原生能力；PyTorch <b>FlexAttention</b> 允许研究者以类 Python 掩码函数定义稀疏模式并自动编译高效 kernel。</li>
     <li><b>架构侧的"原生稀疏"</b>：Qwen2-VL（arXiv:2409.12191 · 2024-09）用<b>原生动态分辨率</b>从源头避免 AnyRes 的 token 乘法；NVIDIA <b>Sana</b>（arXiv:2410.10629 · 2024-12）用<b>线性注意力 DiT</b> 生成 4096×4096 图像——线性注意力可视为"极端稀疏化"的极限形式，与本文所有方法构成同一光谱的两端。</li>
     <li><b>LLM 侧反哺</b>：NSA / MoBA / Quest 等 LLM 稀疏注意力与 KV 压缩研究（2024–2025）持续为视觉侧提供"按头分类、按块稀疏、KV 分级"的方法论与 kernel。</li>
   </ul>
@@ -923,7 +923,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 
 <!-- ================================================================ -->
 <section id="s7">
-  <h4>2026-10 下旬增补</h4>
+  <h4>2026-10 下旬增补（文中 alphaXiv 票数均为截至 2026-10-21 的快照）</h4>
 <ul>
 <li><b>SoftCache</b>（特拉维夫大学，arXiv:2610.22369，10 票）：DiT 免训练缓存的<b>自适应步长</b>选择——针对"均匀选步要么浪费、要么冒进"的问题，TeaCache（§5.3）的直接后继。</li>
 <li><b>Which Tokens to Merge?</b>（汉阳大学，arXiv:2610.22370，10 票）：用<b>扩散动力学</b>决定"该在哪些步合并哪些 token"，图像生成 token merging（ToMeSD 一族，§5.2）的新解法。</li>
@@ -932,6 +932,20 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 <li><b>TensorRT-LLM v1.4.0rc0</b>（10-14）：Qwen-Image-Layered 的 FP8 + <b>Cache-DiT</b> 支持；块稀疏 FMHA 集成更新版 SM90 SageAttention——"跨步缓存 + 稀疏注意力 + 量化"三件套进同一引擎。SGLang v0.5.22 亦为 DiT 带来在线 INT8 W8A8（ConvRot）。</li>
 <li><b>一句话动态</b>：FoveaTree（USTC，10-12）按信息密度树做视频 LLM 剪枝；CatchUp（10-16）让被剪 token 按"深度感知"重新录取；TokenGate（Stanford+Berkeley，10-19，12 票）学习式 LLM prefill 剪枝；Offline Makes Online Better（10-20）把 AR 视频 KV 与 token merging 联合压缩；Are We Evaluating VLM Token Pruning Right?（NTU，10-17）再度警示评测方法学。</li>
 </ul>
+  <h4>⚡ 10 月下旬快讯（增补 2026-10-30）</h4>
+<ul>
+<li><b>Triage</b>（首尔大学，10-26，arXiv:2610.35706）：视频 DiT 注意力 tile <b>三档分诊</b>——skip（跳过）/ skim（NVFP4 低精度粗算）/ refine（高精度精算），端到端最高 <b>2.32×</b>（单注意力 8.6×），PSNR 反而高 0.3–3.0dB<sup class="cite">[Triage]</sup>；其 skim 档即 NVFP4 注意力，与 SageAttention3（NVFP4 量化注意力核，见 §6.3）正式合流。另注：<b>SGLang Diffusion（0.5.20）已成为 10 月视频生成新论文的默认实验底座</b>（Triage 等即在其上评测）。</li>
+<li><b>LearnPrunerV2</b>（理想汽车，10-27，ACM MM 2026，arXiv:2610.36986）：学习式 VLM 剪枝——<b>剪 77.8% 视觉 token 保留 99.8%</b> 性能；NeXT-7B 剪 94.4% 仍保留 96.2%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×<sup class="cite">[LearnPrunerV2]</sup>。</li>
+<li><b>LOWN</b>（KAIST + AITRICS，10-27，arXiv:2610.36671）：扩散 VLM 的<b>按需看图</b>——去掉图像输入只改变 22.8% 步的决策，<b>0.353× 解码 FLOPs</b> 仍保留 99.6% 性能，叠加 Fast-dLLM 达 5.6–7.0×<sup class="cite">[LOWN]</sup>。</li>
+<li><b>Rescuing Your Pruning</b>（东方理工 + 上交 + Uppsala，10-24，arXiv:2610.33688）：282K 样本、36 种剪枝配置的<b>压缩感知后训练</b>——grounding retention 从 4.0 拉到 64.8；并发现 Qwen2.5-VL 的 prefill 计算有 56.5% 在 encoder：<b>"在哪剪"比"剪多少"更重要</b><sup class="cite">[Rescuing]</sup>。</li>
+<li><b>ToDoPro</b>（港大 + NTU，10-26，arXiv:2610.34782）：多参考图生成的 token <b>早期削减</b>——3× 加速、峰值显存 −50%<sup class="cite">[ToDoPro]</sup>。</li>
+<li><b>QViD</b>（UT Austin + Samsung，10-23，arXiv:2610.33215）：<b>免训练查询感知剪枝</b>——对 Q_txt·K_vis^T 做 SVD 取前 16 个模式，仅留 64 个视觉 token 时保留 90.4%（V²Drop 为 86.9%）<sup class="cite">[QViD]</sup>。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/triage-fig1.svg" loading="lazy" alt="四种注意力精度策略在三种注意力分布上的逐 tile 选择" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.35706）</b> · 同一算力预算下，(a) 稀疏、(b) 低比特、(c) 二者组合各自偏爱不同的注意力分布；(d) Triage 按 tile 分诊——skip / skim / refine 自适应。单一策略总把准确性留在桌上。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
 <h2><span class="num">7</span>未来发展方向</h2>
   <p class="lead">综合发展脉络与 2026 年最新动态，以下七个方向最值得关注（按"距离成熟"从近到远排序）：</p>
   <ol>
@@ -1010,6 +1024,15 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <li>Tencent Hunyuan. <i>HunyuanVideo-1.5</i>（SSTA 原生稀疏注意力）. GitHub/HF 开源，2025-11. github.com/Tencent-Hunyuan/HunyuanVideo-1.5</li>
     <li>Lv et al. <i>VPRune: Training-Free Visual Token Pruning for Pre-LLM Stage</i>. arXiv:2609.24485（2026-09-21）；同潮：ACPruner arXiv:2609.34558、RobustPruner（NeurIPS 2026）、VIP-Router（2026-09）.</li>
     <li>Song Han 系. <i>DSA: Distributed Sparse Attention</i>. ICLR 2026（稀疏注意力 × 序列并行分布式推理）.</li>
+  </ol>
+  <h4>2026-10 下旬快讯（增补 2026-10-30）</h4>
+  <ol start="45">
+    <li id="Triage">Seoul National University. <i>Triage: 视频 DiT 注意力 tile 三档分诊（skip / skim·NVFP4 / refine）</i>. arXiv:2610.35706（2026-10-26）.</li>
+    <li id="LearnPrunerV2">理想汽车（Li Auto）. <i>LearnPrunerV2: 学习式 VLM 视觉 token 剪枝</i>. ACM MM 2026. arXiv:2610.36986（2026-10-27）.</li>
+    <li id="LOWN">KAIST &amp; AITRICS. <i>LOWN: 扩散 VLM 按需看图（learning-when-to-observe）</i>. arXiv:2610.36671（2026-10-27）.</li>
+    <li id="Rescuing">东方理工（EIT）&amp; 上海交大 &amp; Uppsala. <i>Rescuing Your Pruning: 压缩感知后训练修复 VLM 剪枝</i>. arXiv:2610.33688（2026-10-24）.</li>
+    <li id="ToDoPro">香港大学 &amp; NTU. <i>ToDoPro: 多参考图生成的视觉 token 早期削减</i>. arXiv:2610.34782（2026-10-26）.</li>
+    <li id="QViD">UT Austin &amp; Samsung. <i>QViD: 免训练查询感知视觉 token 剪枝</i>. arXiv:2610.33215（2026-10-23）.</li>
   </ol>
   <p style="font-size:12.5px; color:#8a94ab;">注：标注"本地已克隆"的 6 个仓库（ToMe / DiT / FastV / VisionZip / Sparse-VideoGen / TeaCache）均在当前目录下，本文代码解析均引自这些仓库的实际源码（文件路径与行号已标注）。引用处的小字引文来自论文原文（arXiv 版本），译文为本报告作者翻译。</p>
 </section>

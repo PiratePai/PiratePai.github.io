@@ -99,7 +99,12 @@
     display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--blue); font-size:13px;
   }
   .gpu-npu{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:16px 0;}
-  @media (max-width:860px){ .gpu-npu{grid-template-columns:1fr;} }
+  @media (max-width:860px){
+    .gpu-npu{grid-template-columns:1fr;}
+    main table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%;}
+    small.cite{display:block; overflow-x:auto; max-width:100%; white-space:normal;}
+    small.cite .src{white-space:normal;}
+  }
   .gpu-npu .col{border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:#1a202b;}
   .gpu-npu .col h4{margin-top:0;}
   .gpu-npu .gpu h4{color:var(--green);}
@@ -115,6 +120,7 @@
 <nav class="toc">
   <div class="toc-title">🚀 本文导航</div>
   <a class="back-home" href="../index.html">← 返回首页</a>
+  <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10</a>
   <h4>原理与地图</h4>
   <a href="#s0">0. TL;DR</a>
   <a href="#s1">1. 为什么不动权重也能加速</a>
@@ -146,8 +152,31 @@
 <header class="hero">
   <div class="kicker">INFERENCE · TRAINING-FREE · AGENT-AUTOTUNE</div>
   <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
-  <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
+  <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· <b>2026-10-30 增补</b>（版本事实与 Agent 自动优化最新动态，见前沿亮点与 §2 快讯）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华 / UC Berkeley）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
 </header>
+
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:26px 0 8px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
+.hl-head i{color:var(--muted,#aeb4bd);font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:#e8eaed;font-size:14px}
+.hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月 · Agent 自动调优方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid">
+<div class="hl-card"><div class="hl-meta"><b>Evolving Agent Teams：监督者动态重组团队写 kernel</b><span class="hl-date">10-27 · UC Berkeley</span></div><p>监督者 agent 诊断平台期并重构 agent 团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 1.21× 均值加速（47 个 DeepSeek-V3 生产负载赢 36 个；同预算 Claude Code 仅 0.51×）。</p><a class="hl-link" href="#s3">→ §3</a></div>
+<div class="hl-card"><div class="hl-meta"><b>ATRL：昇腾 Triton kernel 的 agentic RL 首发</b><span class="hl-date">10-09 · 华为</span></div><p>Qwen3.6-35B 后训练 + 昇腾知识库，KernelBench（昇腾实测）Pass@1 相对 GRPO 66%→73%（L1）、19%→35%（L2）——§5 表中"昇腾尚待复现"的机会点已被补上。</p><a class="hl-link" href="#s5">→ §5</a></div>
+<div class="hl-card"><div class="hl-meta"><b>TensorRT 11.1 Global Performance Tuner</b><span class="hl-date">10-23 · NVIDIA</span></div><p>把 200+ 编译旋钮展开为可搜索的显式 build routes，trtexec 一条命令"构建→端到端测量→精度门过滤→选最快"——厂商版"自动调优 + 精度门"，与本文四站式闭环同构。</p><a class="hl-link" href="#s3">→ §3</a></div>
+<div class="hl-card"><div class="hl-meta"><b>配置错配的安全后果：SGLang KV 隔离披露</b><span class="hl-date">10-26 · Cloudflare × LMSYS</span></div><p>1M 上下文窗口配 681K prefill KV 池 + 被拒请求占位符交接，导致跨请求 KV 泄露（155 条响应受影响）；修复随 v0.5.21/22 发布——印证"支持矩阵先于动手、质量门只读"的规程设计。</p><a class="hl-link" href="#s2-1">→ L1</a></div>
+</div></div>
 
 <h2 id="s0"><span class="no">0.</span>TL;DR</h2>
 <div class="tldr">
@@ -157,7 +186,7 @@
 原文：“CUDA Agent achieves state-of-the-art results on KernelBench, delivering 100%, 100%, and 92% faster rate over torch.compile on KernelBench Level-1/2/3 splits.” 译：在 KernelBench 三个难度级上，分别有 100%/100%/92% 的用例快于 torch.compile。</small>），
 而以 ZCode 为代表的编码 Agent 配上一份<b>操作手册（AGENTS.md）+ 基准脚本 + 质量门</b>，就能对任意部署形态的模型自动做 training-free 调优：
 <b>度量 → 画像 → 假设 → A/B 验证 → 端到端质量门 → 沉淀报告</b>。<br><br>
-本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 vLLM-Omni 0.28 / SGLang v0.5.21 / TensorRT-LLM 1.0 / Dynamo 1.0 / FlashInfer v0.7 的版本事实）；
+本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 vLLM-Omni 0.28 / SGLang v0.5.22 / TensorRT-LLM 1.3 / Dynamo 1.5 / FlashInfer v0.7 的版本事实，截至 2026-10-30）；
 (2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>——目标与基线 → 三层诊断 → 处方循环 → 收口，
 每一步都有动机、可直接复制的命令、示例输出与判读规则、明确的反馈信号与阈值，并以官方生产博客的系统级优化（无损 1.445×、DLO/FP8/SageAttention 各 lane 数字）为量级锚点；
 GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路径）分别落地。
@@ -200,11 +229,11 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 
 <h3 id="s2-1">L1 服务与调度层：引擎大战进入“PD 分离 + 全栈”时代</h3>
 <ul>
-  <li><b>vLLM</b>（加州大学等，2023 开源）：当前最新 <b>v0.27.0</b>（561 commits/242 贡献者，Kimi K3 全栈支持）；2026 Q2 官方 Roadmap 把重心压在 <b>RL rollout</b>（权重同步、KV cache 重置、易改性）——推理引擎正在同时成为训练系统的"执行器"。
+  <li><b>vLLM</b>（加州大学等，2023 开源）：截至 2026-10-30 最新 <b>v0.32.0</b>（2026-10-18 发布，814 commits/363 贡献者；NVFP4 KV 扩展到 SM8x–SM12x，GLM-5.x 默认 FP8 KV）；2026 Q2 官方 Roadmap 把重心压在 <b>RL rollout</b>（权重同步、KV cache 重置、易改性）——推理引擎正在同时成为训练系统的"执行器"。
   <small class="cite"><span class="src">[vLLM Releases / Roadmap Issue #39749, 2026]</span>译要点：路线图三条主线——为 RL 服务的权重同步与 KV 复位、易修改性。</small></li>
-  <li><b>SGLang</b>（2023 论文，LMSYS/社区）：以 RadixAttention（基数树组织的跨请求 KV 复用）著称，2026 年迭代极快：v0.5.17（2026-08-08）<b>day-0 支持 MiniMax-H3</b>（"video generation with synchronized stereo audio track in one request"，在 B200/H100/MI300X/2×RTX5090 验证）与 Kimi K3（2.8T 参数、1M 上下文）；v0.5.20 增加统一基数树 + SWA 分支点缓存（TTFT 1.57s→1.07s）；v0.5.21（2026-10-02）实现 <b>PD 实例动态切换（prefill/decode 免重启互转）</b>与 Rust 前缀缓存内核。
+  <li><b>SGLang</b>（2023 论文，LMSYS/社区）：以 RadixAttention（基数树组织的跨请求 KV 复用）著称，2026 年迭代极快：v0.5.17（2026-08-08）<b>day-0 支持 MiniMax-H3</b>（"video generation with synchronized stereo audio track in one request"，在 B200/H100/MI300X/2×RTX5090 验证）与 Kimi K3（2.8T 参数、1M 上下文）；v0.5.20 增加统一基数树 + SWA 分支点缓存（TTFT 1.57s→1.07s）；v0.5.21（2026-10-02）实现 <b>PD 实例动态切换（prefill/decode 免重启互转）</b>与 Rust 前缀缓存内核；<b>v0.5.22（2026-10-19）</b>载入 MORI 生成标记 ack 等 KV 隔离加固（Cloudflare 披露的跨请求 KV 泄露修复链，官方建议所有运营方升级至 v0.5.22+）。
   <small class="cite"><span class="src">[SGLang GitHub Releases, 2026-08 ~ 2026-10]</span>原文（v0.5.17）：“MiniMax-H3 day-0: video generation with synchronized stereo audio track in one request, verified on B200, H100, MI300X/MI355X, 2x RTX 5090.”</small></li>
-  <li><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）→ <b>Dynamo 1.0</b>（GTC 2026-03-16 "production ready"）：数据中心级分布式推理编排层——把 prefill 与 decode 拆成独立 worker 池（PD 分离）、跨节点调度，底下可以挂 TensorRT-LLM/vLLM/SGLang，也支持 <b>vLLM-Omni 后端</b>（多模态生成）。<b>TensorRT-LLM 1.0</b>（2025-09-25）则完成了全面开源化重写（“Easier. Faster. Open.”）。</li>
+  <li><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）→ <b>Dynamo 1.0</b>（GTC 2026-03-16 "production ready"）：数据中心级分布式推理编排层——把 prefill 与 decode 拆成独立 worker 池（PD 分离）、跨节点调度，底下可以挂 TensorRT-LLM/vLLM/SGLang，也支持 <b>vLLM-Omni 后端</b>（多模态生成）。截至 2026-10-30 已迭代到 <b>v1.5.1</b>（原生 FastVideo + SGLang Diffusion，单卡 B200 实时 1080p；兼容矩阵对齐 SGLang 0.5.18 / TRT-LLM 1.3.0rc25 / vLLM 0.28.0）。<b>TensorRT-LLM</b> 则从 1.0（2025-09-25 全面开源化重写"Easier. Faster. Open."）走到 2026-10 的 <b>1.3.0rc25 / 1.4.0 dev 构建</b>，并把原生 Mooncake Store 连接器合入 KV Cache Manager v2（10-10）。</li>
   <li><b>vLLM-Omni</b>（vllm-project，2025-11 首发）：面向任意模态生成（文/语音/图/视频）的服务框架——阶段图（stage-graph）编排器+worker、阶段间流水重叠、基于 OmniConnector 的<b>全分解服务</b>；版本线与 vLLM 对齐（0.14→0.28.0），<b>0.26.0（2026-08）day-0 支持 MiniMax-H3 联合音视频生成，0.28.0 宣布 H3 在 GPU 与 NPU 生产就绪</b>，还实验性支持全双工实时模式与 DLO 分层卸载。
   <small class="cite"><span class="src">[vllm-project/vllm-omni, 2025-11~2026-08；vLLM-Omni: Fully Disaggregated Serving for Any-to-Any Multimodal Models, arXiv:2602.02204, 2026-02]</span>README 原文：“vLLM-Omni 0.28.0 ... production-ready MiniMax H3 serving on GPU and NPU, unified AR/DiT paged KV cache runtime.”</small></li>
   <li><b>腾讯</b>在此层的代表是 xDiT（视频 DiT 分布式推理，配合混元视频系）与 ncnn/TNN（端侧）;<b>字节</b>则是 FlashInfer（见 L2）与 veRL/AReaL 等 RL 训推一体设施。Mooncake（月之暗面，2024 开源）把 KVCache 做成全局池化存储，是"缓存即服务"的代表。</li>
@@ -248,6 +277,15 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 
 <h3 id="s2-6">L6 ★ Agent 自动优化层：2026 年最陡的成长曲线</h3>
 <p>这是本文主题，单独成章（§3）。先给一个坐标系：<b>谁</b>（通用编码 Agent / 专门 RL 训出的模型 / 多 Agent 系统）×<b>优化什么</b>（kernel / 框架配置 / 编译器本身）×<b>怎么保证不坏</b>（验证门）。</p>
+
+<h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>Evolving Agent Teams</b>（UC Berkeley，10-27，arXiv:2610.36848）：监督者 agent 诊断平台期并动态重构团队——从零写出达生产版 FlashInfer MLA paged decode kernel 的 <b>1.21× 均值加速</b>（47 个 DeepSeek-V3 生产负载赢 36 个；同预算 Claude Code 仅 0.51×）；KDA prefill 在 AMD MI350X 上 3.01×（vs vLLM 生产 HIP kernel）、B200 上 3.44×（vs FlashKDA）。"固定团队会卡死"有了第一个量化证据。</li>
+<li><b>ATRL：Compaction-Aware RL for Ascend Triton</b>（华为，10-09，arXiv:2610.23950）：首个面向昇腾 NPU Triton 的 agentic RL——Qwen3.6-35B 后训练，KernelBench（昇腾实测）Pass@1 相对 GRPO <b>66%→73%（L1）、19%→35%（L2）</b>，配昇腾知识库 + 结构化轨迹压缩检查点。</li>
+<li><b>TensorRT 11.1 Global Performance Tuner</b>（NVIDIA 开发者博客两部曲，10-23）：200+ 编译旋钮显式化为可搜索 build routes，accuracy 作为约束过滤候选、端到端性能作为排序——厂商版"自动调优 + 精度门"。</li>
+<li><b>vLLM-TorchTPU / SGLang-TorchTPU</b>（Google ×Inferact ×RadixArk，10-20）：原生 PyTorch TPU 后端 + 开源 C++ 库 TPU Sync（直读设备缓冲做 KV 迁移、无 host staging）——"多后端 serving"再添一极，自动调优的目标矩阵随之扩大。</li>
+<li><b>SGLang v0.5.22 与 KV 隔离披露</b>（Cloudflare × LMSYS，10-26）：155 条 GLM-5.3 响应跨请求泄露（prompt &gt; 681,280 tokens 的"KV 池 &lt; 上下文窗口"配置错配）；官方建议升级 v0.5.22+——本文 §4 流程"先核对支持矩阵、质量门只读"的规程价值被生产事故反向验证。</li>
+</ul>
 
 <h2 id="s3"><span class="no">3.</span>Agent 自动优化：三条研究线与三个教训</h2>
 
@@ -429,7 +467,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 <h2 id="s5"><span class="no">5.</span>GPU vs NPU 对照总表</h2>
 <table>
   <tr><th>维度</th><th>GPU（NVIDIA 栈）</th><th>NPU（昇腾栈）</th></tr>
-  <tr><td>推理引擎</td><td><b>vLLM-Omni 0.28（H3 主轴）</b> / SGLang v0.5.21 / vLLM v0.27 / TensorRT-LLM 1.0 + Dynamo 1.0（含 vLLM-Omni backend）</td><td>vLLM-Omni NPU 后端（经 vllm-ascend/torch_npu/CANN）+ MindIE/MindIE Turbo（LLM）、MindIE-SD（DiT/视频）</td></tr>
+  <tr><td>推理引擎</td><td><b>vLLM-Omni 0.28（H3 主轴）</b> / SGLang v0.5.22 / vLLM v0.32 / TensorRT-LLM 1.3 + Dynamo 1.5（含 vLLM-Omni backend）</td><td>vLLM-Omni NPU 后端（经 vllm-ascend/torch_npu/CANN）+ MindIE/MindIE Turbo（LLM）、MindIE-SD（DiT/视频）</td></tr>
   <tr><td>H3 现状</td><td>day-0 官方支持（vLLM-Omni 0.26+ 与 SGLang v0.5.17+；B200/H100/B300/MI300X 验证；0.28 宣布 GPU+NPU 生产就绪）</td><td>vLLM-Omni 0.28 官方宣布 NPU 生产就绪；落地双路径（vLLM-Omni NPU 后端 / MindIE-SD 原生），成熟度以当版 recipes 为准；首次上机先 §A Dummy Run</td></tr>
   <tr><td>画像工具</td><td>nsys / ncu（--set full）/ torch.profiler</td><td>msprof / Ascend Profiler</td></tr>
   <tr><td>图捕获</td><td>CUDA Graph（默认开，breakable CG v0.5.15+）</td><td>ACL Graph（版本相关开关，先查文档）</td></tr>
@@ -439,7 +477,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <tr><td>编译改图</td><td>torch.compile/Inductor（Agent 可经 KernelOPT 式流程优化其产物）</td><td>MindIE-SD compilation（fx graph 自动改图）</td></tr>
   <tr><td>自定义算子语言</td><td>Triton / CUTLASS / Cake IR / Helion</td><td>AscendC / CANN 算子仓</td></tr>
   <tr><td>通信/拓扑</td><td>NCCL / NVLink，TP×DP×CP 自由度高</td><td>HCCL / HCCS，TP 贴 8 卡一机拓扑</td></tr>
-  <tr><td>Agent 写 kernel 的已有证据</td><td>KernelBench/CUDA Agent/CAKE/Hawkeye（Ampere→Blackwell）</td><td>同范式跨厂商可行（Hawkeye on MI350；AccelOpt on Trainium），昇腾尚待开源复现——<b>机会点</b></td></tr>
+  <tr><td>Agent 写 kernel 的已有证据</td><td>KernelBench/CUDA Agent/CAKE/Hawkeye（Ampere→Blackwell）/ Evolving Agent Teams（10-27，1.21× 生产级 MLA kernel）</td><td>同范式跨厂商可行（Hawkeye on MI350；AccelOpt on Trainium）；<b>昇腾已被华为 ATRL 补上首发</b>（10-09，arXiv:2610.23950，KernelBench 昇腾实测 Pass@1 +7pp）</td></tr>
   <tr><td>调优四抓手（实战共识）</td><td>并行度/图/量化/缓存 + 算子</td><td>W8A8 / TP 拓扑 / MindIE 插件 / ACL Graph</td></tr>
 </table>
 
@@ -453,9 +491,14 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <li>Zhang et al. TeaCache: Timestep Embedding Tells. <i>CVPR 2025 Highlight</i>. arXiv:2411.xxxx（本地仓库 TeaCache）</li>
   <li>Xi et al. Sparse VideoGen (SVG1/SVG2/SVG-EAR). arXiv:2502.01776 / 2505.18875 / 2603.08982, ECCV 2026.（本地仓库 Sparse-VideoGen）</li>
   <li>Lin et al. FastV. <i>ECCV 2024</i>（arXiv:2403.06764）；Yang et al. VisionZip（arXiv:2412.04467）；Bolya et al. ToMe. <i>ICLR 2023</i>.</li>
-  <li>vLLM Releases（v0.27.0）与 2026 Q2 Roadmap（Issue #39749）. github.com/vllm-project/vllm, 2026.</li>
-  <li>SGLang Release Notes v0.5.14–v0.5.21（2026-06-26 ~ 2026-10-02），含 MiniMax-H3 day-0（v0.5.17）与 FastH3/VDN-H3（v0.5.20）. github.com/sgl-project/sglang.</li>
-  <li>NVIDIA Dynamo（GTC 2025-03）与 Dynamo 1.0（2026-03-16）；TensorRT-LLM v1.0 开源（2025-09-25）. nvidianews.nvidia.com / developer.nvidia.com/dynamo.</li>
+  <li>vLLM Releases（v0.32.0，2026-10-18）与 2026 Q2 Roadmap（Issue #39749）. github.com/vllm-project/vllm, 2026.</li>
+  <li>SGLang Release Notes v0.5.14–v0.5.22（2026-06-26 ~ 2026-10-19），含 MiniMax-H3 day-0（v0.5.17）、FastH3/VDN-H3（v0.5.20）与 KV 隔离加固（v0.5.22）. github.com/sgl-project/sglang.</li>
+  <li>NVIDIA Dynamo（GTC 2025-03）→ v1.5/v1.5.1（2026-10）；TensorRT-LLM v1.0 开源（2025-09-25）→ 1.3.0rc25 / 1.4.0 dev（2026-10）. nvidianews.nvidia.com / developer.nvidia.com/dynamo.</li>
+  <li>Cao, Mao, Li, Gonzalez, Stoica (UC Berkeley). <i>Evolving Agent Teams.</i> arXiv:2610.36848, 2026-10-27. arxiv.org/abs/2610.36848.</li>
+  <li>Huawei Technologies. <i>ATRL: Compaction-Aware RL for Ascend Triton Kernel Generation.</i> arXiv:2610.23950, 2026-10-09. arxiv.org/abs/2610.23950.</li>
+  <li>NVIDIA. <i>Scaling NVIDIA TensorRT Performance Optimization Beyond a Single Build Route with the Global Performance Tuner.</i> Developer Blog, 2026-10-23. developer.nvidia.com.</li>
+  <li>Google. <i>Announcing new vLLM and SGLang inference engines on TPU.</i> Developers Blog, 2026-10-20. developers.googleblog.com.</li>
+  <li>Cloudflare × LMSYS. <i>SGLang security update: improving request isolation</i>（KV 跨请求泄露披露）. 2026-10-26. blog.cloudflare.com / lmsys.org/blog.</li>
   <li><b>vllm-project/vllm-omni</b>（2025-11 首发，0.26.0/0.28.0 2026-08）. github.com/vllm-project/vllm-omni.</li>
   <li><b>vLLM Blog: MiniMax H3 on vLLM-Omni — System-Wide Optimizations & Faster-Than-Real-Time Generation. 2026-09-01.</b> vllm.ai/blog/2026-09-01-minimax-h3-production-serving.（§4.1/§4.3 全部 lane 数字与 serve 命令来源）</li>
   <li>vLLM-Omni: Fully Disaggregated Serving for Any-to-Any Multimodal Models. arXiv:2602.02204, 2026-02.</li>

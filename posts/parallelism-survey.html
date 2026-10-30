@@ -142,7 +142,7 @@
 <header class="hero">
   <div class="kicker">训练系统调研 · 2026</div>
 <h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
-  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-21</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
+  <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-30</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
 </header>
 
 <nav class="toc">
@@ -209,10 +209,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EP 进推理成生产标配</b><span class="hl-date">10-16 · DeepSeek</span></div><p>DeepInfer 开源：EP+EPLB 支撑生产服务，SM100 与昇腾 950 双后端。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>通信库跨厂商互认</b><span class="hl-date">10-20 · Moonshot/DeepSeek</span></div><p>MoonEP 与 DeepEP V2.5 原语互相成就，动态冗余专家成 EP 新范式。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>DualPipeV 进主框架</b><span class="hl-date">10-20 · DeepSpeed</span></div><p>v0.19.8 把 DeepEP 缓冲与 V 形流水线收进默认路径，AutoEP 成形。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>AFD：注意力-FFN 解耦</b><span class="hl-date">10-19 · NVIDIA</span></div><p>nccl-extensions 收编 Attention-FFN 解耦原语，与学术线会师。</p><a class="hl-link" href="#sec10">→ 跳到详情</a></div></div></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EP 进推理成生产标配</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 开源：EP+EPLB 支撑生产服务，SM100 与昇腾 950 双后端；开源版不含 KV cache 池化与 P/D 分离（README 明示待补全）。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>PyTorch 2.15 定档 NCCL2</b><span class="hl-date">10-28 · PyTorch</span></div><p>NCCL2 成默认后端 + NIXL 单边传输（可 CUDA graph 捕获）；Apple Silicon MoE 解码 1.32–1.34×。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>INC-MoE：EP 通信进交换机</b><span class="hl-date">10-26 · 华为</span></div><p>dispatch/combine 下沉网内 AG/RS，四节点 prefill TTFT −20~33%、吞吐 +25~50%，vLLM 即插即用。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>通信库跨厂商互认</b><span class="hl-date">10-20 · Moonshot/DeepSeek</span></div><p>MoonEP 与 DeepEP V2.5 原语互相成就，动态冗余专家成 EP 新范式。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div></div></div>
 
 <h2 class="sec"><span class="num">1</span>为什么需要并行:显存墙、算力墙与通信墙<span class="roadmap">显存墙 16N 账本 → 算力墙 MFU → 通信墙 α+V/B → 并行是生存问题</span><span class="pill fund">基础</span></h2>
 
@@ -1082,7 +1082,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 
 <h3>10.8 2026-10 中下旬速览:NCCL 收编 EP 原语,EP 通信库跨厂商、AFD 解耦进场</h3>
 <ul>
-<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7（注：DeepEP V2.5 起另要求 NCCL ≥ 2.32.3 的 Gin 后端，两条版本线并行）):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统——<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%——"EP 原语进通信库"与 DeepEP 形成正面会师,§11.2 预言的"统一 EP 通信抽象"正在被 NVIDIA 官方兑现。</li>
+<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7（注：DeepEP V2.5 起另要求 NCCL ≥ 2.32.3 的 Gin 后端，两条版本线并行；PyPI 截至 2026-10-30 仍为 0.1.0（2026-09-02），v0.3（Compute Fabric Transport + 专用 EP）预告 10 月底发布、尚未上架）):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统——<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%——"EP 原语进通信库"与 DeepEP 形成正面会师,§11.2 预言的"统一 EP 通信抽象"正在被 NVIDIA 官方兑现。</li>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/ncclep-fig4.svg" loading="lazy" alt="GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
@@ -1094,11 +1094,25 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li><b>Echo:4-bit 张量并行通信</b>(北大/NUS/AMD 等,arXiv:2610.14277,2026-10-14):TP 的 all-reduce 夹在两个依赖 matmul 之间无法掩盖;Echo 把它重构为"量化 all-to-all → owner 高精度求和 → 量化 all-gather"(任意 GPU 数下每元素每次调用至多量化两次),用双时间尺度补偿器控制舍入误差累积。1GB 消息比 16-bit NCCL all-reduce 快 2.09×;4-bit 预训练 10B token 损失仅比 16-bit 高 <0.9%——§11.3"精度下沉到通信"再添一员。</li>
 <li><b>SC'26 万卡通信压缩评测与优化</b>(浙大/中科院计算所/港中深等,SC 2026 Paper Highlight 场次,报告 2026-11-18):首个万卡级训练上通信压缩的系统评估——"压缩集合通信 × 超大规模网络设计 × 万卡实证"三线合流,细节待 11 月会议公开。</li>
 </ul>
+
+<h3>10.9 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<ul>
+<li><b>PyTorch 2.15</b>(PyTorch,10-28):NCCL2 成默认后端并新增 flight recorder;NIXL 单边传输支持 CUDA graph 捕获;FSDP2 的 MoE 门控保 fp32 精度;Apple Silicon grouped_mm 让 MoE 解码快 1.32–1.34×;版本收录 3117 commits——训练栈通信层的"默认选项"之争落定<sup class="ref">[<a href="#r46">PyTorch 2.15, 2026-10-28</a>]</sup>。</li>
+<li><b>INC-MoE:EP dispatch/combine 下沉交换机</b>(华为,10-26,arXiv:2610.36339):把 MoE 的 all-to-all 做成网内 AG/RS(in-network computing),省带宽 (N−2)/2(N−1);vLLM 即插即用,四节点 prefill TTFT −20~33%、吞吐 +25~50%——§11.2「专用内核」路线再添「换网络引擎」一支<sup class="ref">[<a href="#r47">INC-MoE, 华为, arXiv 2610.36339, 2026-10-26</a>]</sup>。</li>
+<li><b>HyScale:DSA/CSA/QSA 长上下文训练系统</b>(腾讯混元+爱丁堡,10-26,arXiv:2610.32057):GLM-5.1 1M 上下文在 512×H20 上比 Megatron-LM 快 2.07×(选择类算子原本占 47% 步时);CP 层级加速 11.7×@256K;已在腾讯生产部署——§11.4「系统×架构合流」的最大号实证<sup class="ref">[<a href="#r48">HyScale, 腾讯混元+爱丁堡, arXiv 2610.32057, 2026-10-26</a>]</sup>。</li>
+<li><b>vLLM 追平 DeepInfer</b>(vLLM,10-24):官方推文称 GB300 NVL72 P/D + Wide-EP 配置下,decode 与 DeepInfer 的差距在 batch 8–256 全程 ≤6%(DEP32 vs EP64DP64)——开源推理栈的 EP 竞争进入个位数差距阶段<sup class="ref">[<a href="#r49">vLLM 官方博客与推文, 2026-10-23/24</a>]</sup>。</li>
+<li><b>llm-d v1.0</b>(CNCF 社区,10-20):分布式推理参考栈首个正式版——跨 AMD MI355X 的宽 EP(MoRI-EP)、MoRI-IO 分离式与前缀路由进主线,贡献者 500+<sup class="ref">[<a href="#r50">llm-d v1.0, CNCF, 2026-10-20</a>]</sup>。</li>
+<li><b>Google 把 vLLM/SGLang 带上 TPU</b>(Google,10-20):原生 PyTorch TPU 后端(TorchTPU):DP 注意力+EP、双阶段 CP、FP8 KV、TPU Sync 跨主机分离——EP/CP 的并行抽象首次跨 GPU/TPU 可移植<sup class="ref">[<a href="#r51">Google, TorchTPU, 2026-10-20</a>]</sup>。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/incmoe-fig4.svg" loading="lazy" alt="Ring 与 in-network 两种 AllGather/ReduceScatter 完成路径对比（N=4）" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 4（arXiv:2610.36339）</b> · N=4 时 Ring 与 INC-MoE 完成 AG（上）/RS（下）的对比：Ring 需要 N−1 个串行步、每步都在接收侧加速器上做归约；INC-MoE 由交换机一步完成——AG 用组播、RS 把 N−1 份非根贡献在网内归并，根节点只剩一次本地归约。这就是"把集合通信下沉给网络引擎"的直观含义。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
 </section>
 <section id="ch11">
 <h4>2026-10 下旬增补</h4>
 <ul>
-<li><b>DeepInfer:DeepSeek 生产推理框架开源</b>(2026-10-16,5 天 17.2k star):Attention DP/balanced CP + MoE EP + EPLB 进入<b>推理</b>侧,NVIDIA SM100 与华为昇腾 950 双后端——§11.5「训练-推理边界消融」的最强实证:EP 不只用于训练,反向成为推理服务的并行主轴。</li>
+<li><b>DeepInfer:DeepSeek 生产推理框架开源</b>(2026-10-20,开源一周即超 1.7 万 star):Attention DP/balanced CP + MoE EP + EPLB 进入<b>推理</b>侧,NVIDIA SM100 与华为昇腾 950 双后端(注:开源版不含 KV cache 池化、P/D 分离与跨副本负载均衡,README 明示为待补全项)——§11.5「训练-推理边界消融」的最强实证:EP 不只用于训练,反向成为推理服务的并行主轴。</li>
 <li><b>MoonEP「完美均衡」EP 通信库</b>(Moonshot,H20/EP=8 实测失衡加剧时通信时间几乎平坦,与 DeepEP V2.5 的 <code class="inl">lb_prefetch_weights/lb_reduce_grads</code> 原语互相成就):动态冗余专家 + 静态形状缓冲,「专家复制」线(TopoEP/MegaFlux)的官方化落地。</li>
 <li><b>DeepSpeed v0.19.8(10-20):AutoEP 子系统成形 + DualPipeV 正式并入</b>(PR #8576):跨 MoE 层共享单个 DeepEP buffer、AutoEP+AutoTP 在 ZeRO-3 下折叠、融合 gate+up 分组 GEMM——DeepEP 缓冲与 V 形流水线从「专用组件」变「框架默认路径」。</li>
 <li><b>nccl-extensions 新增 AFD(Attention-FFN Disaggregation)</b>(NVIDIA,10-19 连续三提交):注意力-FFN 解耦的通信支持进入官方扩展,与 DisagMoE/HeterMoE 学术线会师。</li>
@@ -1220,6 +1234,16 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li>Princeton &amp; NVIDIA, <i>MegaFlux: Skew-Resilient MoE Megakernels via Pipelined Expert Replication</i>, arXiv:2610.00671, 2026-09-30。</li>
 <li><i>Echo: Error-Compensated 4-Bit Tensor-Parallel Communication</i>(北大/NUS/AMD 等), arXiv:2610.14277, 2026-10-14。</li>
 <li>浙大/中科院计算所/港中深等, <i>Evaluation and Optimization of Communication Compression for 10K-GPU LLM Training</i>, SC 2026(Paper Highlight)。</li>
+</ol>
+
+<h3>2026 年 10 月下旬快讯(§10.9)</h3>
+<ol start="46" class="ref-list">
+<li id="r46">PyTorch, <i>PyTorch 2.15</i>(版本发布,3117 commits), 2026-10-28。NCCL2 默认后端 + flight recorder;NIXL 单边传输(可 CUDA graph 捕获);FSDP2 MoE 门控 fp32 保真;Apple Silicon grouped_mm MoE 解码 1.32–1.34×。</li>
+<li id="r47">华为, <i>INC-MoE</i>, arXiv:2610.36339, 2026-10-26。EP dispatch/combine 下沉交换机(网内 AG/RS),省带宽 (N−2)/2(N−1);vLLM 即插即用,四节点 prefill TTFT −20~33%、吞吐 +25~50%。<br><a href="https://arxiv.org/abs/2610.36339">https://arxiv.org/abs/2610.36339</a></li>
+<li id="r48">腾讯混元 &amp; University of Edinburgh, <i>HyScale</i>, arXiv:2610.32057, 2026-10-26。DSA/CSA/QSA 长上下文训练;GLM-5.1 1M 在 512×H20 上比 Megatron-LM 快 2.07×(选择类算子原占 47% 步时);CP 层级加速 11.7×@256K;腾讯生产部署。<br><a href="https://arxiv.org/abs/2610.32057">https://arxiv.org/abs/2610.32057</a></li>
+<li id="r49">vLLM Team, <i>GB300 NVL72 P/D + Wide-EP</i>(官方博客 2026-10-23)及「追平 DeepInfer」推文(2026-10-24)。AgentX 每 GPU 954K tokens/s、P90 每用户 196 tok/s(单机 7.9×);decode 与 DeepInfer 差距 batch 8–256 全程 ≤6%(DEP32 vs EP64DP64)。</li>
+<li id="r50">llm-d 社区(CNCF), <i>llm-d v1.0</i>, 2026-10-20。MoRI-EP 宽 EP(跨 AMD MI355X)、MoRI-IO 分离式、前缀路由;500+ 贡献者。</li>
+<li id="r51">Google, <i>PyTorch TPU 后端(TorchTPU) for vLLM/SGLang</i>, 2026-10-20。DP attn+EP、双阶段 CP、FP8 KV、TPU Sync 跨主机分离。</li>
 </ol>
 <p style="font-size:12.5px;color:#aeb4bd">注:文中"未查到/未证实"的事项(NVIDIA TDT、DeepSeek-R2、"BFPP 用于 Llama 4"、DeepEP 独立论文等)均经检索后不收录或明确标注;所有逐字引文均出自上述来源原文,译文为本整理者所译。</p>
 </section>
