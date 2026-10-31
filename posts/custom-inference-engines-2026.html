@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:radial-gradient(900px 380px at 20% -10%,rgba(110,168,255,.16),transparent 70%),radial-gradient(700px 360px at 90% 0%,rgba(157,123,255,.15),transparent 70%),linear-gradient(180deg,#11161d 0%,#151d27 100%);color:#c3cad3;padding:56px 24px 44px;margin-bottom:32px;border-bottom:1px solid #2a2f3a;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;color:#eef1f5;font-weight:800;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.95;max-width:880px;color:#bcc5d1;}
+  header.hero p.sub b{color:#e8eaed;}
+  header.hero .meta{margin-top:18px;font-size:13px;}
+  header.hero .chip{display:inline-block;background:rgba(23,26,33,.85);border:1px solid #3a536e;color:#b9c2ce;border-radius:999px;padding:4px 12px;margin:3px 6px 3px 0;}
+  header.hero .chip b{color:#8db8ff;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;word-break:break-word;overflow-wrap:anywhere;}
+  .refs li{overflow-wrap:anywhere;} .refs a{word-break:break-all;}
+  .codecap{font-size:12.5px;color:var(--muted);margin:-6px 0 10px;}
+  .codecap b{color:#6ea8ff;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:#171a21;font-size:14.5px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:#17212b;color:#6ea8ff;}
+  tr:nth-child(even) td{background:#112132;}
+  .timeline{list-style:none;margin:18px 0;padding:0;border-left:3px solid #3e5770;}
+  .timeline li{margin:0 0 14px;padding:0 0 0 22px;position:relative;}
+  .timeline li::before{content:"";position:absolute;left:-8.5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #2a2f3a;box-shadow:0 0 0 2px var(--accent);}
+  .timeline .t{font-weight:700;color:var(--accent);font-family:Consolas,monospace;margin-right:10px;}
+  .fig{background:#171a21;border:1px dashed #40596e;border-radius:10px;padding:16px 18px;margin:16px 0;font-size:14px;overflow-x:auto;}
+  .fig .cap{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .flowrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .fbox{border:1.5px solid #3f576e;border-radius:8px;padding:8px 12px;background:#15212e;font-size:13px;text-align:center;min-width:92px;}
+  .fbox.hl{border-color:#7c5a31;background:#312411;}
+  .fbox.ok{border-color:#387553;background:#192a1e;}
+  .arr{align-self:center;color:#6ea8ff;font-size:18px;font-weight:700;}
+  .pill{display:inline-block;background:#16212c;border:1px solid #385975;color:#6ea8ff;border-radius:20px;padding:1px 12px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap;}
+  .kbd{font-family:Consolas,monospace;background:#12212f;color:#6ea8ff;padding:2px 7px;border-radius:5px;font-size:12.5px;}
+  .good{color:var(--ok);font-weight:600;} .bad{color:#ff6b6b;font-weight:600;}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .refs li{margin:8px 0;font-size:14px;}
+  details{margin:10px 0;}
+  summary{cursor:pointer;color:var(--accent);font-weight:600;}
+  .tag{font-size:11px;padding:1px 8px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle;}
+  .tag.sys{background:#1e261c;color:#41d1a7;} .tag.paper{background:#20182a;color:#9d7bff;} .tag.ind{background:#322111;color:#ffb454;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
+  .summary3 b{color:#41d1a7;}
+  .summary3 ol{margin:6px 0 2px;}
+  #hl{margin-top:8px;}
+  .hl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+  .hl-card{background:#171a21;border:1px solid #375876;border-left:4px solid #41d1a7;border-radius:10px;padding:14px 16px;font-size:14.5px;}
+  .hl-card .d{font-family:Consolas,monospace;color:#41d1a7;font-size:12.5px;font-weight:700;}
+  .hl-card b{color:#e8eaed;}
+  .hl-card a{color:var(--accent);text-decoration:none;}
+  .hl-card a:hover{text-decoration:underline;}
+  .layers{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+  .layer{display:flex;align-items:stretch;gap:0;border-radius:8px;overflow:hidden;border:1px solid #35506a;}
+  .layer .ln{width:64px;min-width:64px;background:#1c2a3a;color:#8db8ff;font-family:Consolas,monospace;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+  .layer .lt{flex:1;background:#15212e;padding:8px 12px;font-size:13.5px;}
+  .layer .lt b{color:#c3d5ee;}
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+  .duo .card{margin:0;}
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%;} .hl-grid,.duo{grid-template-columns:1fr;} .fig,.citebox,.note,.layers{overflow-x:auto; max-width:100%;} .citebox a{word-break:break-all;} .layer{flex-wrap:wrap;} }
+</style>
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:13px;border:1px solid #385975;box-shadow:0 4px 14px rgba(0,0,0,.4)">← 返回首页</a></div>
+
+<header class="hero"><div class="inner">
+  <div class="kicker" style="color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px">大模型推理系统深度调研 · 2026</div>
+  <h1>定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）</h1>
+  <p class="sub">一条主线：<b>推理系统的每一步演进，都是把"通用"换成"专用"——为 Transformer 的两阶段计算特征、为自回归的 KV 增长、为具体芯片的内存层级，重新造一遍执行栈</b>。2026 年 10 月 DeepSeek 把自家生产引擎 DeepInfer 开源，第一次让外界能逐行读到一个"每台机器每天挣 38 美元"的极致专用引擎——本文沿技术演进讲清每层设计的 why/how/代价，并以 DeepInfer 源码为标本做全景解剖。</p>
+  <div class="meta">
+    <span class="chip">调研截止 <b>2026-10-31</b></span>
+    <span class="chip">核心案例 <b>deepseek-ai/DeepInfer（main 分支 2026-10 快照）</b></span>
+    <span class="chip">源码实测对象 <b>DeepInfer 270 个 Python 文件 + vendor 内核库</b></span>
+    <span class="chip">对比框架 <b>FT / TRT-LLM / DeepSpeed / vLLM / SGLang / LightLLM / LMDeploy 等</b></span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<div class="toc">
+<h3>目录</h3>
+<ol>
+  <li><a href="#hl">★ 前沿亮点（2024–2026）</a></li>
+  <li><a href="#s0">0. 导读与大事记：本文回答哪四个问题</a></li>
+  <li><a href="#s1">1. 预备知识：一次推理到底在算什么</a></li>
+  <li><a href="#s2">2. 发展历程：从通用框架到定制引擎</a></li>
+  <li><a href="#s3">3. 定制化引擎的十层技术栈</a></li>
+  <li><a href="#s4">4. DeepInfer 深拆：一台被做到极致的推理引擎</a></li>
+  <li><a href="#s5">5. 横向比较：谁在什么条件下更快</a></li>
+  <li><a href="#s6">6. 前沿进展与开放问题（2025–2026）</a></li>
+  <li><a href="#s7">7. 总结与展望：未来三到五年</a></li>
+  <li><a href="#s8">8. 术语表</a></li>
+  <li><a href="#refs">参考文献</a></li>
+</ol>
+</div>
+
+<h2 id="hl"><span class="no">★</span>前沿亮点</h2>
+<div class="hl-grid">
+  <div class="hl-card"><div class="d">2026-10-20</div><b>DeepSeek 开源生产推理引擎 DeepInfer</b>：支撑单集群 <b>155 万亿 tokens/日</b>、每 GPU 小时营收 38 美元（谷电价）的引擎本体；开源版含内核、调度、投机解码、结构化输出，KV 存储与负载均衡未含。→ <a href="#s4">第 4 章</a></div>
+  <div class="hl-card"><div class="d">2026-10</div><b>DeepSeek-V4.1-Flash：为推理而生的模型结构</b>——MLA 压缩 KV + 稀疏 indexer + 滑动窗口 + YOCO 跨层复用 + FP4 KV，让 KV 落 SSD 存 72 小时成为划算生意。模型—系统—芯片协同设计的最新样本。→ <a href="#s4-3">4.3 节</a></div>
+  <div class="hl-card"><div class="d">2026-10</div><b>DSpark：投机解码从"固定猜 5 个"到"按置信度分配验证预算"</b>——验证 token 数省约 30%，线上吞吐 +4~7%（60 并发点）。调度决策搬到 GPU 上用 TileLang kernel 完成。→ <a href="#s4-7">4.7 节</a></div>
+  <div class="hl-card"><div class="d">2025–2026</div><b>Prefill/Decode 分离成为生产标配</b>：DistServe/Splitwise 论文（2024）→ Mooncake（FAST'25）→ NVIDIA Dynamo（2025-03）→ vLLM/SGLang/TRT-LLM 内置 disaggregation。→ <a href="#s2-5">2.5 节</a>、<a href="#s6">第 6 章</a></div>
+  <div class="hl-card"><div class="d">2025-02/09</div><b>DeepSeek 开源周 + DSA 稀疏注意力</b>：FlashMLA/DeepGEMM/DeepEP/3FS 等推理底座组件陆续开源；V3.2-Exp 引入 DSA，注意力渐成"可学的稀疏检索"。→ <a href="#s3-8">3.8 节</a></div>
+  <div class="hl-card"><div class="d">2025–2026</div><b>通用引擎军备竞赛转向"宽矩阵"</b>：vLLM V1 重写、SGLang 大规模 EP 部署、FlashInfer 统一 kernel 层——通用框架与专用引擎的分工在 2026 年彻底清晰。→ <a href="#s5-1">5.1 节</a></div>
+</div>
+<h2 id="s0"><span class="no">0</span>导读与大事记</h2>
+
+<div class="card">
+<p>本文回答四个问题：</p>
+<ol>
+  <li><b>为什么"拿 PyTorch 直接跑大模型"撑不起一个服务？</b>——通用框架缺了什么，每代推理系统分别补上了哪块拼图（第 2 章）。</li>
+  <li><b>"定制化推理引擎"到底定制了什么？</b>——从算子、KV 内存管理、调度、并行到量化、投机解码的完整技术栈，每层设计的收益与代价（第 3 章）。</li>
+  <li><b>DeepInfer 这类"模型厂商自研引擎"极致在哪、边界在哪？</b>——以 2026-10 开源的 deepseek-ai/DeepInfer 源码为标本，逐模块解剖，并追踪一个请求从进门到吐完 token 的全过程（第 4 章）。</li>
+  <li><b>今天（2026-10）选型该看什么？未来 3–5 年往哪走？</b>——横向对比的口径陷阱、性能提升来源归因、开放问题与短期/长期路线（第 5–7 章）。</li>
+</ol>
+</div>
+
+<h3>0.1 一页纸地图：两大流派的分化</h3>
+<p>把 2018–2026 的主要系统放进一张表，立刻能看出行业的两条路线：<b>通用引擎</b>（宽：多模型、多硬件、社区演进）与<b>定制引擎</b>（深：单一模型族、专属集群拓扑、贴芯片）。</p>
+
+<table>
+<tr><th>流派</th><th>代表</th><th>起源年份</th><th>核心贡献</th><th>适配面</th></tr>
+<tr><td rowspan="2">通用深度学习服务（前 LLM 时代）</td><td>TensorFlow Serving / TorchServe</td><td>2016 / 2020</td><td>模型版本管理、A/B、请求批处理（request-level）</td><td>CV/推荐/小模型</td></tr>
+<tr><td>ONNX Runtime</td><td>2017–</td><td>图编译、跨框架算子</td><td>一次前向型模型</td></tr>
+<tr><td rowspan="4">算子库 / 编译型引擎（厂商系）</td><td>NVIDIA FasterTransformer</td><td>2021</td><td>Transformer 算子融合、多卡 KV 并行（后被并入 TRT-LLM）</td><td>NVIDIA GPU</td></tr>
+<tr><td>NVIDIA TensorRT-LLM</td><td>2023</td><td>图编译 + in-flight batching + 量化矩阵 + kernel 库</td><td>NVIDIA（2025 起部分开放他架构）</td></tr>
+<tr><td>OpenVINO / IPEX-LLM 等</td><td>2018– / 2023–</td><td>Intel 系硬件的同型方案</td><td>Intel CPU/GPU/NPU</td></tr>
+<tr><td>llama.cpp / MLC-LLM</td><td>2023</td><td>端侧量化推理（GGUF / TVM 编译）</td><td>CPU / Apple / 手机</td></tr>
+<tr><td rowspan="5">调度系统型引擎（学界/开源系）</td><td>Orca（论文）</td><td>2022</td><td>iteration-level scheduling = continuous batching 概念源头</td><td>概念基座</td></tr>
+<tr><td>vLLM</td><td>2023</td><td>PagedAttention 分页 KV；事实上的开源标准</td><td>最宽（N卡/A卡/TPU/NPU/CPU…）</td></tr>
+<tr><td>SGLang</td><td>2023-12</td><td>RadixAttention 前缀复用、zero-overhead 调度器</td><td>宽，NVIDIA/AMD</td></tr>
+<tr><td>LightLLM / LMDeploy / TGI</td><td>2023</td><td>token 级调度 / TurboMind W4A16 / HF 官方服务栈</td><td>中等</td></tr>
+<tr><td>DeepSpeed-Inference / FastGen</td><td>2022 / 2024</td><td>超大模型多卡推理、SplitFuse</td><td>微软系</td></tr>
+<tr><td rowspan="3">定制化专用引擎（模型厂商系）</td><td>DeepSeek 推理系统（V3/R1 时代，仅博客披露）</td><td>2024-12</td><td>大规模 PD 分离 + MLA + MoE EP 的生产架构</td><td>自家模型 + H800/H100</td></tr>
+<tr><td><b>DeepInfer（开源）</b></td><td><b>2026-10</b></td><td><b>本文标本</b>：内核/调度/投机解码/SWA 有界重放/结构化输出开源；KV 存储、LB、Entrypoint 未开源</td><td>DeepSeek-V4.1-Flash；SM100 与昇腾 950</td></tr>
+<tr><td>各家闭源生产栈（未公开）</td><td>—</td><td>OpenAI/Anthropic/Google 等自研引擎（只能从招聘/博客窥见）</td><td>—</td></tr>
+</table>
+<p class="codecap">表 0-1 · 本文研究的"DeepInfer"明确指 <b>github.com/deepseek-ai/DeepInfer</b>（2026-10-20 开源）。GitHub 上另有多个同名项目：DeepInfer/Slicer-DeepInfer（2016 年起的医学影像 3D Slicer 插件）、ICSE 2024 软工论文复现包 shibbirtanvin/DeepInfer、以及一批 2026-10 出现的社区学习复刻（nano-deepinfer、mini-deepinfer 等），均与本文无关。</p>
+
+<h3>0.2 大事记</h3>
+<ul class="timeline">
+  <li><span class="t">2016–2019</span><b>前 LLM 时代的推理服务。</b>TensorFlow Serving（2016-02）确立"模型服务器"形态：版本管理、request-level 批处理；Triton Inference Server（2018-10 起）把多框架后端装进一个服务。它们假设的负载是"一次前向几十毫秒"的 CV/推荐模型，为自回归生成式模型服务时先天不足。</li>
+  <li><span class="t">2021</span><b>算子库时代：FasterTransformer。</b>NVIDIA 开源 Transformer 推理算子库，证明"把 Transformer 各步融合成少量大 kernel"本身就能带来数倍加速，但仍是静态 batch（请求级组批），生成式服务吞吐受限。</li>
+  <li><span class="t">2022</span><b>系统调度时代开启：Orca 与 FlashAttention。</b>OSDI'22 的 Orca 提出 iteration-level scheduling（选择性批处理）：批的组装单位从"请求"细化到"迭代步"，论文报告在 2020 年代初期配置下相对 FasterTransformer 最高 36.9× 吞吐<sup class="cite">[ORCA22]</sup>；NeurIPS'22 FlashAttention 把 attention 的 IO 复杂度降到线性，成为之后所有引擎的标配算子<sup class="cite">[FA22]</sup>。DeepSpeed-Inference（2022）面向千亿模型多卡推理。</li>
+  <li><span class="t">2023</span><b>LLM 推理工程大爆发。</b>vLLM（2023-06-20 博客，SOSP'23 论文）以 PagedAttention 把 KV 显存浪费压到 4% 以下：博客口径相对 HF Transformers 14–24×、相对 TGI 2.2–2.5×（LLaMA-7B@A10G / 13B@A100-40GB，ShareGPT 长度）<sup class="cite">[VLLMBLOG23]</sup>，论文口径相对 FasterTransformer/Orca 为 2–4×（OPT 系、A100，normalized latency 曲线）<sup class="cite">[VLLM23]</sup>——两组数字基线与指标不同，不可混引；llama.cpp（2023-03）让消费级 CPU/Mac 跑量化模型成为可能；HuggingFace TGI、LMDeploy、LightLLM 相继发布；NVIDIA 发布 TensorRT-LLM（2023-10 前后）把编译、量化、in-flight batching 打包；Anyscale 博客（2023-06-22）把 continuous batching 一词推广为行业词汇（实测 CB ≈8× over 静态批、CB+PagedAttention 的 vLLM 最高 23×，OPT-13B@A100-40GB、输入 512 tok）<sup class="cite">[ANYSCALE23]</sup>。</li>
+  <li><span class="t">2024</span><b>调度精细化与分离式架构。</b>SGLang（NeurIPS'24）以 RadixAttention 自动复用共享前缀，复杂 prompt 程序任务混合体上最高 6.4×（vs Guidance/vLLM/LMQL，Llama-2-7B@A10G，缓存命中 50–99%）<sup class="cite">[SGLANG24]</sup>；Sarathi-Serve（OSDI'24）chunked prefill 化解"长 prompt 卡住 decode"的尾延迟（P99 TBT SLO 下 vs vLLM 容量 2.6–4.7×，Mistral-7B 到 LLaMA2-70B）<sup class="cite">[SARATHI24]</sup>；DistServe（OSDI'24）与 Splitwise（ISCA'24）论证 prefill/decode 分离的资源解耦收益（DistServe 摘要口径 7.4× 请求率或 12.6× 更紧 SLO；Splitwise 同功率预算 2.35× 吞吐）<sup class="cite">[DISTSERVE24]</sup><sup class="cite">[SPLITWISE24]</sup>；Mooncake（arXiv v1 2024-06-26）把"KVCache 优先"的分离架构做成月之暗面 Kimi 生产系统<sup class="cite">[MOONCAKE25]</sup>。DeepSeek-V2（2024-05）引入 MLA，KV 压缩一个数量级<sup class="cite">[DSV2]</sup>；DeepSeek-V3（2024-12）671B MoE + MTP 投机头上线，KV 占用与投机解码自此成为模型设计的一部分<sup class="cite">[DSV3]</sup>。FlashAttention-3（2024-07）面向 Hopper<sup class="cite">[FA3]</sup>。</li>
+  <li><span class="t">2025</span><b>底座组件开源 + 分离式架构产品化。</b>DeepSeek 开源周（2025-02）放出 FlashMLA / DeepEP / DeepGEMM / 3FS 等推理底座组件并预告自研引擎<sup class="cite">[DSOSW25]</sup>；EAGLE-3（2025-03）刷新投机解码接受长度<sup class="cite">[EAGLE3]</sup>；NVIDIA Dynamo（2025-03 GTC）把 KV 感知路由与 PD 分离做成官方推理服务框架；Mooncake 获 FAST'25 最佳论文（第二作者团队领取口径见第 6 章注）<sup class="cite">[MOONCAKE25]</sup>；vLLM 完成历史上最大规模的单引擎架构演进"V1"（2025-02 alpha、2025 年内 GA）<sup class="cite">[VLLMV1]</sup>；DeepSeek V3.2-Exp（2025-09）引入 DSA 稀疏注意力并把 API 降价 50%+<sup class="cite">[DSV32]</sup>。</li>
+  <li><span class="t">2026-10</span><b>定制引擎本体开源：DeepInfer。</b>DeepSeek 发布 DeepSeek-V4.1-Flash 并开源支撑其大规模生产的推理引擎 DeepInfer（2026-10-20）：单集群 155 万亿 tokens/日、每 GPU 小时营收 38 美元（谷电价）<sup class="cite">[DIQA26]</sup>。同期开源 deepseek-recipe（生产级 token 编解码组件）。通用引擎（vLLM/SGLang/TRT-LLM）与专用引擎（DeepInfer）的分工自此完全显性化。</li>
+</ul>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>推理系统的演进主线是"通用 → 专用"：先有算子库（FasterTransformer），再有调度系统（Orca/vLLM），然后是分离式架构（DistServe/Mooncake），最后是模型厂商自研引擎整体开源（DeepInfer）。</li>
+<li>2023 年的 vLLM + continuous batching + FlashAttention 三件事，定义了之后所有引擎的公共底座；2024–2026 的分化发生在 KV 管理、PD 分离、投机解码与 MoE 并行上。</li>
+<li>DeepInfer 的开源证明：当模型结构与服务形态足够收敛，"把引擎做专"可以把吞吐和时延推到通用框架难以企及的位置——代价是放弃宽适配（单模型族、两种加速器）。</li>
+</ol>
+</div>
+<h2 id="s1"><span class="no">1</span>预备知识：一次推理到底在算什么</h2>
+
+<p>本章只假设你知道<b>矩阵乘法</b>和"神经网络 = 一堆矩阵乘 + 非线性"这两个事实。所有后文的概念（PagedAttention、TP、投机解码……）都建立在本章的四个直觉上：<b>两阶段计算、KV 缓存、访存瓶颈、批处理两难</b>。</p>
+
+<h3>1.1 自回归：模型是一个字一个字往外蹦的</h3>
+<p>大语言模型生成文本的唯一动作是：<b>给定前面所有 token，预测下一个 token 的概率分布，采样一个，拼回去，再来</b>。你要它写 1000 字的回答，它就要做 1000 次几乎一样的"向前计算"。这个循环叫<b>自回归（autoregressive）</b>。它和传统 CV 模型"一张图进来、一个标签出去"的一次前向完全不同——<b>传统推理服务的全部假设（一次请求 = 一次计算）在这里都不成立</b>，这就是为什么 TensorFlow Serving 时代的"模型服务器"搬不动 LLM。</p>
+
+<h3>1.2 两阶段：prefill 与 decode，两种完全不同的计算</h3>
+<div class="analogy">把模型想成一个<b>戴着老花镜的抄写员</b>：先把你递进来的 30 页材料<b>通读一遍并做笔记</b>（prefill，预填充），然后开始<b>看着笔记一个字一个字写答案</b>（decode，解码）。通读时他可以一目十行（一次并行处理所有输入 token），写字时却只能一笔一划（每步只产出一个 token）。两种活儿的体力消耗模式完全不同——前者费脑子（计算），后者费眼睛和笔记翻找（访存）。</div>
+
+<div class="fig">
+<div class="flowrow">
+  <div class="fbox hl"><b>Prefill</b><br>一次吃整段 prompt<br><b>并行</b>算所有位置<br>计算密集（GEMM）<br>产出：KV Cache<br>决定 <b>TTFT</b></div>
+  <div class="arr">→</div>
+  <div class="fbox ok"><b>Decode</b><br>每步只算 1 个新 token<br>但要<b>读回全部历史 KV</b><br>访存密集（GEMV）<br>产出：下一个 token<br>决定 <b>TPOT</b></div>
+</div>
+<div class="cap">图 1-1 · 本文自绘。一次生成请求 = 1 次 prefill + N 次 decode；N = 输出长度。两阶段的资源画像截然相反，这是后文一切"分阶段优化 / 分离部署"设计的根源。</div>
+</div>
+
+<p>定量一点：prefill 一步处理 <code>P</code> 个输入 token，attention 与 MLP 都是大矩阵乘（GEMM），能打满 GPU 的算力；decode 一步只处理 <code>batch × 1</code> 个 token，矩阵退化成向量（GEMV），算力大量闲置。<b>同一个模型、同一张卡，两个阶段的瓶颈一个是 FLOPs、一个是显存带宽</b>——这就是为什么成熟的引擎会为两个阶段准备不同的 kernel、不同的批策略、甚至不同的机器。</p>
+
+<h3>1.3 KV Cache：自回归的"笔记本"</h3>
+<p>Attention 的公式里，第 <code>i</code> 个 token 的输出要看它和<b>所有</b>前文 token 的关系。如果每生成一个新 token 都重算全部历史，复杂度是 O(n²) 次前向。解决办法：把每个 token 在每层算出的 Key/Value 向量<b>缓存</b>下来，之后每步只需算新 token 自己的 Q/K/V，再拿 Q 去查历史缓存。这块缓存就是 <b>KV Cache</b>。</p>
+<p>它的显存占用有一个必须背下来的公式：</p>
+<pre>KV 显存(bytes) = 2(K与V) × L(层数) × n_kv(KV头数) × d_head(每头维度) × b(每元素字节) × seq_len(token数)</pre>
+<p>代入一个具体模型感受量级：Llama-2-70B（80 层、GQA 8 个 KV 头、head_dim 128、FP16），每 token 需要 2×80×8×128×2 = <b>327,680 B ≈ 320 KB</b>。一个 32K 长度的请求就要 10 GB 起——<b>比很多人直觉大一到两个数量级</b>。服务 100 个这样的并发，KV 就要 1 TB，远超单卡。KV Cache 的存、取、放、换，占据了大模型推理系统设计的半壁江山（第 3.5 节、第 4.5 节）。</p>
+<div class="note"><b>三个直接推论：</b>① 显存里放不下权重 + 全部 KV，就必须对 KV 做分页/压缩/分层（PagedAttention、MLA、KV 量化）；② 多轮对话/Agent 场景里，历史 KV 是<b>可复用资产</b>，重复 prefill 是巨大浪费（prefix caching）；③ KV 随 token 线性增长，长上下文服务的成本主要在"笔记本身"而不在计算。</div>
+
+<h3>1.4 为什么 decode 慢：访存瓶颈与"算术强度"</h3>
+<p>判断一段计算是算力瓶颈还是带宽瓶颈，用 <b>roofline 模型</b>：算出它的<b>算术强度</b>（每读 1 字节显存做多少次浮点运算，FLOP/Byte），再和 GPU 的"平衡点"（峰值算力 ÷ 峰值带宽）比较。</p>
+<pre>decode 每步（batch=B）：
+  读显存 ≈ 模型权重 W(bytes) + 该步全部 KV              （W 与 B 几乎无关）
+  做计算 ≈ 2 × 参数量 × B                              （随 B 线性增长）
+  算术强度 ≈ 2 × 参数量 × B / W = 2B / b(每参数字节)    （BF16 时 = B FLOP/Byte）</pre>
+<p>以 H100（BF16 峰值约 990 TFLOPS、HBM 带宽约 3.35 TB/s，平衡点 ≈ 295 FLOP/Byte）为例：batch=1 的 decode 算术强度是 1，只有平衡点的 <b>1/295</b>——GPU 99% 以上的算力在等数据。把 batch 加到 256，算术强度升到 256，才接近打满。这解释了两件事：</p>
+<ul>
+<li><b>decode 天生适合大 batch</b>：并发用户数翻倍，权重只读一遍，吞吐几乎翻倍而单用户速度几乎不掉——直到 KV 读取也成为带宽压力或显存放不下；</li>
+<li><b>一切 decode 优化都在"少读字节"</b>：量化（把每参数 2 字节压到 0.5 字节）、KV 压缩（MLA）、稀疏 attention（只读一部分 KV）、投机解码（一次前向多产出几个 token，摊薄每次访存）。</li>
+</ul>
+<div class="citebox">[PA23] vLLM 论文 (SOSP'23) 对此有标准表述：decode 阶段 "memory-bound"，其 GPU 利用率典型不足 1%…4%（论文 Figure 5 区间口径，A100/Llama-13B 实测）。<span class="q">"we observe that the GPU utilization of the decoding phase is typically below 4%"</span>（该阶段 GPU 利用率典型低于 4%）。arXiv:2309.06180，2023-09。</div>
+
+<h3>1.5 显存账本：一张卡上要放下什么</h3>
+<table>
+<tr><th>占用项</th><th>大小（量级）</th><th>说明</th></tr>
+<tr><td>模型权重</td><td>参数量 × 每参数字节（70B/FP16 ≈ 140 GB）</td><td>通常跨多卡切分（TP/PP/EP）；量化可压到 1/2~1/8</td></tr>
+<tr><td>KV Cache</td><td>§1.3 公式，随 总token数 线性增长</td><td>并发 × 长度的乘积，是服务容量的第一约束</td></tr>
+<tr><td>激活与 workspace</td><td>与 batch × 序列长 成正比</td><td>大 batch prefill 时的临时峰值</td></tr>
+<tr><td>框架与 CUDA 上下文</td><td>数 GB</td><td>常量开销，决定了"最小可部署单元"</td></tr>
+</table>
+<p class="codecap">表 1-1 · "能塞多少 KV"决定"能同时服务多少人"。vLLM 的 gpu_memory_utilization 参数（DeepInfer 默认 0.85）就是先扣除权重与预留，把剩余显存全部划给 KV 池。</p>
+
+<h3>1.6 服务指标：延迟的两张面孔与吞吐</h3>
+<div class="analogy">把推理服务想成一家<b>奶茶店</b>：<b>TTFT</b>（Time To First Token，首 token 延迟）是"从下单到吸上第一口"的时间，主要由 prefill 决定；<b>TPOT/ITL</b>（Time Per Output Token，逐 token 延迟/间隔）是"后续每一口之间的间隔"，由 decode 决定；<b>吞吐</b>（tokens/s）是全店每分钟出杯总量；<b>并发数</b>是同时在等餐的客人数。让全店吞吐最大的办法（狂加订单、大锅乱炖）恰恰会毁掉单客体验（TTFT 飙升）——<b>吞吐与延迟的取舍是推理调度永恒的主题</b>。</div>
+<p>工程上还要加一个概念：<b>goodput</b>（有效吞吐）——只统计满足 SLO（如 TTFT &lt; 2s 且 TPOT &lt; 50ms）的请求吞吐。它把"延迟约束"直接写进优化目标，是 DistServe 等系统提出的核心度量<sup class="cite">[DISTSERVE24]</sup>。</p>
+
+<h3>1.7 阅读地图</h3>
+<p>后面所有章节的技术，都可以按"作用于哪个瓶颈"归位：</p>
+<table>
+<tr><th>瓶颈</th><th>对应技术（章节）</th></tr>
+<tr><td>算力利用率（prefill &amp; kernel 效率）</td><td>算子融合、FlashAttention、GEMM 优化、量化、CUDA Graph（3.1/3.2/3.7）</td></tr>
+<tr><td>访存带宽（decode）</td><td>大 batch、量化/FP8/FP4、KV 压缩与稀疏、投机解码（3.7、4.3、4.7）</td></tr>
+<tr><td>显存容量（KV 放不下）</td><td>PagedAttention、prefix caching、KV 分层与卸载（3.5、4.5）</td></tr>
+<tr><td>GPU 空转（调度与气泡）</td><td>continuous batching、chunked prefill、异步调度、PD 分离（3.3/3.4、4.4）</td></tr>
+<tr><td>单卡放不下模型 / 单卡吞吐不够</td><td>TP/PP/DP/EP、多机通信、EPLB（3.6、4.9）</td></tr>
+</table>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>LLM 推理 = 一次计算密集的 prefill + N 次访存密集的 decode；前者决定 TTFT、后者决定 TPOT，两者的优化手段几乎相反。</li>
+<li>decode 是访存瓶颈：batch=1 时算术强度约 1 FLOP/Byte，离 GPU 平衡点（数百）差两个数量级——所以"加并发"和"少读字节"是 decode 优化的全部秘密。</li>
+<li>KV Cache 每 token 数百 KB（MHA 大模型）、随上下文线性增长，是显存、成本与复杂度的第一来源；对它的每一步管理创新（分页、复用、压缩、分层）都造就了一代系统。</li>
+</ol>
+</div>
+<h2 id="s4"><span class="no">4</span>DeepInfer 深拆：一台被做到极致的推理引擎</h2>
+
+<h3 id="s4-1">4.1 先辨名：本文说的是哪一个 DeepInfer</h3>
+<p>GitHub 上叫 "DeepInfer" 的项目至少有五个以上：医学影像社区 3D Slicer 的插件（2016 年起）、一篇 ICSE 2024 软件工程论文的复现包、若干 2026 年 10 月出现的社区学习复刻（nano-deepinfer / mini-deepinfer / deepinfer-unpacked 等）。<b>本文研究的是 deepseek-ai/DeepInfer：DeepSeek 于 2026-10-20 开源的、支撑其大规模生产服务的高性能推理框架</b>，开源当天即获大量关注（截至 2026-10-31 约 24.5k stars）<sup class="cite">[DI26]</sup>。</p>
+<div class="citebox">[DI26] DeepSeek-AI. <i>DeepInfer: High-performance, large-scale inference framework for DeepSeek models</i>. GitHub README（main 分支 2026-10 快照）。<span class="q">"DeepInfer is the high-performance inference framework that powers DeepSeek's large-scale production services."</span>（DeepInfer 是支撑 DeepSeek 大规模生产服务的高性能推理框架。）链接：<a href="https://github.com/deepseek-ai/DeepInfer">github.com/deepseek-ai/DeepInfer</a>，2026-10-20。</div>
+<p>它的定位一句话讲清：<b>只服务一个模型族（DeepSeek-V4.1-Flash：总参数 763B、上下文 1M、Causal Encoder-Decoder 架构，552B 主干 + 输入侧激活 8B / 输出侧激活 16B<sup class="cite">[DIV4126]</sup>）、两类加速器（NVIDIA SM100 / 华为昇腾 950）的离线推理引擎内核</b>。README 明确列出"组成完整服务还缺什么"：KV cache 系统、VE/Prefill/Decode 分离编排与负载均衡均不在开源范围内（引擎侧接口已实现）<sup class="cite">[DI26]</sup>。代码体量很小——270 个 Python 文件、约 4.6 万行 Python，加上 vendor 目录里的 DeepEP / DeepGEMM / FlashMLA / DeepSelect 内核库子模块；构建要求 Linux + GCC≥13 + Python 3.12 + CUDA 13（或 CANN 9.2）<sup class="cite">[DI26]</sup>。开源方式是"fresh drop"：仅 5 个 commit 一次性放出（非滚动开发），社区复刻与解读在数日内涌现（均属二手信源）。</p>
+
+<h4>4.1.1 开源边界：给了什么，没给什么</h4>
+<table>
+<tr><th>组件</th><th>是否开源</th><th>说明</th></tr>
+<tr><td>引擎内核（调度/执行/采样/CUDA Graph）</td><td class="good">开源</td><td><code>deepinfer/engine</code>、<code>deepinfer/worker</code>；调度器核心是 C++ 实现（<code>deepinfer/_C/engine</code>，nanobind 绑定）</td></tr>
+<tr><td>模型与算子运行时</td><td class="good">开源</td><td><code>model_executor/models</code>（V4.1-Flash 结构）+ 30 余个 TileLang 自定义算子（CUDA/昇腾双后端）</td></tr>
+<tr><td>投机解码 DSpark（MTP/DFlash + 置信度调度）</td><td class="good">开源</td><td><code>models/mtp/dflash.py</code>：ConfidenceHead + 变长验证；环境变量 <code>DEEPINFER_ENABLE_MTP_VARLEN=1</code></td></tr>
+<tr><td>SWA bounded replay / 异步调度 / batch-invariant / 确定性采样 / 结构化输出</td><td class="good">开源</td><td>分别见 <code>cache_engine.py</code>、<code>worker.py</code>、<code>structure_output/</code></td></tr>
+<tr><td>视觉编码器（VE）运行时</td><td class="good">开源</td><td><code>deepinfer/ve</code>（多模态处理器；但 VE 的服务化编排未含）</td></tr>
+<tr><td>KV cache 分布式存储（3FS 对接、kvcache-store）</td><td class="bad">未开源</td><td>与内部基础设施强耦合；官方在知乎博客中描述设计<sup class="cite">[DIZH26]</sup></td></tr>
+<tr><td>Prefill/Decode 负载均衡器（四件套）与 Entrypoint</td><td class="bad">未开源</td><td>引擎侧已留接口（<code>EngineType.PROMPT/COMPLETION</code>、<code>init_pd_split</code>、<code>send_processed_prompts</code>）</td></tr>
+<tr><td>在线 API 服务层</td><td class="bad">未开源</td><td>开源版仅离线 <code>LLM.generate()</code>；在线协议转换由同期开源的 deepseek-recipe 提供<sup class="cite">[DIRECIPE26]</sup></td></tr>
+</table>
+<p class="codecap">表 4-1 · DeepInfer 开源边界（依据 README "not included in this release" 一节与源码结构，main 分支 2026-10 快照）。QA 文档原话："The KV cache management and load balancing components … are tightly coupled to our internal infrastructure, so that code is not yet fully open-sourced."</p>
+
+<h3 id="s4-2">4.2 整体架构：EPD 分离 + KV 存储集群 + 四个负载均衡器</h3>
+<p>DeepInfer 的"生产形态"不是一台引擎，而是一个<b>集群系统</b>。QA 文档给出了三条设计目标：支持多厂商加速器；用<b>普通 8 卡机做 prefill、普通 64–128 卡超节点做 decode</b>；KV cache 保留 72 小时以上以复用<sup class="cite">[DIQA26]</sup>。规模数字也出自同源：<b>单集群日服务 155 万亿 tokens，整体每 GPU 小时营收 38 美元（谷电价）</b>。</p>
+
+<div class="fig">
+<div class="flowrow" style="justify-content:center">
+  <div class="fbox">API 网关<br><span style="color:#aeb4bd">多协议请求</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl"><b>Recipe</b><br>token 编解码<br>防注入·分段并行</div>
+  <div class="arr">→</div>
+  <div class="fbox">Entrypoint<br><span style="color:#aeb4bd">前缀哈希匹配<br>(CHECK 角色)</span></div>
+</div>
+<div class="flowrow" style="justify-content:center;margin-top:8px">
+  <div class="arr">→</div>
+  <div class="fbox hl"><b>VE 引擎</b><br>视觉编码<br>单卡/实例</div>
+  <div class="arr">→</div>
+  <div class="fbox hl"><b>Prefill 引擎 (PE)</b><br>EP2–8 / DP2–8<br>分桶 LB + 成本模型<br>产出 KV 落 3FS</div>
+  <div class="arr">→</div>
+  <div class="fbox hl"><b>Decode 引擎 (CE)</b><br>EP64–128 Wide-EP<br>双维 LB + EPLB<br>DSpark + ZOS</div>
+  <div class="arr">→</div>
+  <div class="fbox">流式返回<br><span style="color:#aeb4bd">增量 KMP 解析</span></div>
+</div>
+<div class="flowrow" style="justify-content:center;margin-top:8px">
+  <div class="fbox ok"><b>KVCache 存储集群（3FS，~100 PiB SSD）</b><br>TTL：agent 流量 3 天 / chatbot 7 天 · EC 10+2 · GDR 异步拉取 · 每存储服务器 20×30.72TB SSD、读 40GB/s</div>
+</div>
+<div class="cap">图 4-1 · 本文自绘，DeepSeek V4.1 Flash 推理系统总架构。机制综合自 DeepInfer 仓库 <code>doc/inference_deployment_qa.md</code>（2026-10）与 DeepSeek 官方知乎架构博客<sup class="cite">[DIQA26]</sup><sup class="cite">[DIZH26]</sup>。开源部分为图中的 PE/CE/VE 引擎内核与 Recipe；Entrypoint、各负载均衡器与 kvcache-store 未开源。</div>
+</div>
+
+<p>几个反直觉但关键的架构决定（QA 文档原文口径）<sup class="cite">[DIQA26]</sup>：</p>
+<ul>
+<li><b>Prefill 和 Decode 用不同大小的 EP</b>：prefill 尽量小（EP2–8，"HBM 允许的最小值"），decode 尽量大（EP64–128，"GPU 允许的最大值"）。原因：prefill 是算力瓶颈，专家切太碎通信占比高；decode 是访存瓶颈，Wide-EP 让每卡只驻留一小部分专家，<b>每步 MoE 读取的权重量随 EP 变宽线性下降</b>（QA："Wide-EP substantially reduces per-step memory traffic in the MoE expert part"）。</li>
+<li><b>KV 存储用专用 3FS 集群而非分层卸载</b>：任何 prefill 机器都能命中任意前缀，避免"前缀亲和路由"和负载均衡打架；存储节点故障率比计算节点低一个数量级以上，KV 生命周期与计算节点解耦。</li>
+<li><b>不用 TP/PP</b>："TP and CP are not used for now"（当前不用张量并行；CP 仅在源码中留有 balanced CP 的实现用于超长序列）。通信全部压在 EP 的 all-to-all 上（vendor 里的 DeepEP）。注意力部分用 <b>Attention DP</b>（#DP = #EP），每张卡持有一部分请求的完整注意力。</li>
+<li><b>VE/P/D 三段全部独立部署、独立扩缩</b>：prefill 按非缓存 token 数扩、decode 按在途请求数扩；长尾请求在 decode 引擎缩容时有 1 分钟宽限期，未完成请求连同 KV 一次性转发给其他引擎继续解码。</li>
+</ul>
+
+<h3 id="s4-3">4.3 模型结构：V4.1-Flash 是一台"为推理而生"的模型</h3>
+<p>DeepInfer 最有意思的标本价值在于：<b>模型结构和引擎是同一拨人一起设计的</b>。读 <code>model_executor/models/</code> 的源码会发现，V4.1-Flash 的几乎每个结构组件都直接对应一个推理系统约束——这就是第 3.8 节"模型—系统—芯片协同设计"的全尺寸样本。</p>
+<table>
+<tr><th>结构组件（源码位置）</th><th>解决什么系统问题</th><th>机制一句话</th></tr>
+<tr><td><b>MLA 压缩 KV</b>（<code>v4_modules/attn.py</code>，继承自 DeepSeek-V2 的 MLA<sup class="cite">[DSV2]</sup>）</td><td>KV 每 token 数百 KB 放不下</td><td>K/V 先压到低秩潜空间（kv_lora_rank + rope 部分）再缓存，注意力时在线解压</td></tr>
+<tr><td><b>压缩 KV Compressor</b>（<code>compress.py</code>：门控低秩压缩）</td><td>进一步压主 KV</td><td>pre-RoPE 潜向量喂给 indexer、post-RoPE 向量进主 KV cache</td></tr>
+<tr><td><b>稀疏 indexer</b>（<code>index_attn.py</code> MQA + <code>deep_select</code> top-k）</td><td>长上下文 attention O(n²) 读不动</td><td>每 query 用轻量 MQA 打分 relu(q·k)·w 选 top-k 块，只对选中块做完整 MLA attention（DSA 路线的工程化）</td></tr>
+<tr><td><b>SWA 滑窗层 + YOCO 生产者/消费者层</b>（<code>yoco.py</code>：n_prefill_layer 之后的层是 consumer）</td><td>深层网络 KV 写放大</td><td>YOCO："You Only Cache Once"——只有前 n_prefill_layer 生产 KV，后续层复用（跨层共享 share-KV/share-index 的拓扑在 <code>cross_layer.py</code> 中配置化）</td></tr>
+<tr><td><b>MoE + MTP/DFlash 头</b>（<code>moe.py</code>、<code>mtp/dflash.py</code>）</td><td>decode 每 token 一次前向太贵</td><td>稀疏激活控制算力；DFlash=MTP 多 token 预测头，一次前向"猜 5 个"，交给 DSpark 验证（4.7 节）</td></tr>
+<tr><td><b>mHC 残差干道</b>（<code>hc.py</code>：hc_mult 路残差混合，<code>HCHead</code> 折回）</td><td>（2026 新结构，用于支撑上述跨层/复用拓扑的表征）</td><td>每子层前后对多路残差干道做混合，末端 HCHead 折回单隐状态；本文不展开其训练动机</td></tr>
+<tr><td><b>Engram n-gram 检索</b>（<code>engram.py</code> + <code>tile_kernels.engram</code> 哈希）</td><td>重复片段加速</td><td>对 n-gram 做哈希检索嵌入钩子（与投机解码互补的"查表式"生成加速）</td></tr>
+</table>
+<p class="codecap">表 4-2 · V4.1-Flash 结构与系统约束的对应关系。依据 DeepInfer 源码（main 分支 2026-10 快照）各模块 docstring：<code>attn.py</code> 自述 "MLA attention runtime: Q/KV projection, KV storage, prefill/decode and DFlash drafts"；<code>compress.py</code> 自述 "gated low-rank compression"；<code>index_attn.py</code> 自述 "score compressed KV per query and select the top-k blocks"。架构级参数（层数、专家数等）以 HuggingFace 模型卡为准<sup class="cite">[DIV4126]</sup>。</p>
+
+<div class="note"><b>FP4 的 KV：</b>QA 文档给出三处低精度配置——主 KV 用 per-16 e4m3（"像 NVFP4 但没有全局 scale"）、indexer KV 用 per-32 UE8M0 MXFP4、MoE 路由专家权重用 per-32 UE8M0 MXFP4<sup class="cite">[DIQA26]</sup>。源码 <code>cache_engine.py</code> 中 <code>V41_FP4_FORMAT</code>（每 token 字节数 = head_dim/2 + head_dim/32）与之对应。<b>KV 已经压到 FP4 量级，KV 显存不再是容量瓶颈，才有"KV 落 SSD 存 3–7 天还划算"的整套经济账</b>（4.5 节）。</div>
+
+<h3 id="s4-4">4.4 执行引擎：一次 step 的"四拍"与零开销调度</h3>
+<p>引擎内核（<code>deepinfer/engine/llm_engine.py</code>，文件头注明 "Derived from vLLM; modified by DeepSeek"）沿用了 vLLM 的 iteration-level 调度骨架，但把<b>调度器本体搬进了 C++</b>（<code>deepinfer/_C/engine</code>：Scheduler / BlockManager / SequenceMetadataPool / RequestOutputPool / process_MTPInfo 都是 C++ 实现），Python 层只做编排。这正是 QA 里"asynchronous scheduling (zero-overhead batch scheduler)"的落地。</p>
+
+<h4>4.4.1 四拍执行</h4>
+<p><code>Worker.execute_model_step()</code>（<code>worker/worker.py</code>）把每一步收成固定的四拍，docstring 原文："every step goes through this Forward-Post_process-Sample round"：</p>
+<pre># 代码 4-1 · DeepInfer 一步执行的"四拍"（据 worker/worker.py:execute_model_step 精简，注释为本文所加）
+def execute_model_step(step):          # ZOS=零开销调度 默认开启
+    # ① 本步前向：主模型（prefill 或 decode），可走 CUDA Graph
+    main_out = model_runner.execute_main_model(seq_metadata, gpu_cache)
+
+    # ② 后处理【上一步】的结果 —— 关键：延迟一拍，与本步前向在时间上重叠
+    request_outputs = post_process(prev_step_state)   # 等 sample 完成事件 → 引擎回调
+
+    # ③ 本步采样：拒绝采样(投机验证)/温度/top-k 都在融合 kernel 里
+    sampler_out = model_runner.execute_sample(...)    # 同时产出 draft 的置信度
+
+    # ④ 本步后处理：prefill 步或未开 ZOS 时当场做；
+    #    ZOS 的 decode 步留到下一步（回到②），GPU 全程不空转
+    prev_step_state = curr_step_state</pre>
+<p class="codecap">代码 4-1 · 依据 DeepInfer 源码 <code>deepinfer/worker/worker.py</code> L88–189（main 分支 2026-10 快照）改写的伪代码。QA 文档口径："while the GPU runs forward(N) → sample(N), the CPU concurrently runs schedule(N+1) → launch_forward(N+1) → post-process(N−1)"，并注明该思路"following existing implementations (SGLang, NanoFlow)"<sup class="cite">[DIQA26]</sup>。</p>
+
+<div class="analogy">传统执行像<b>单人家务</b>：洗衣机转完（GPU 前向）→ 人停下来晾衣服（CPU 后处理）→ 再回去按下一桶（调度）。四拍重叠像<b>流水线主妇</b>：洗衣机转着第 N 桶时，人晾第 N−1 桶、顺便把第 N+1 桶衣服塞进盆里——洗衣机（GPU）永远在转。<b>如果去掉这个设计</b>：每步 decode 后 GPU 都要停下来等 CPU 做批调度与后处理（毫秒级），decode 每步本来就只有几毫秒，等于一半时间 GPU 在发呆——QA 与 SGLang 论文都把这类 CPU-GPU 串行化列为 decode 吞吐的头号杀手<sup class="cite">[SGLANG24]</sup>。</div>
+
+<h4>4.4.2 ZOS 下"迟到一步"的元数据修正</h4>
+<p>延迟一拍的后处理带来一个连锁问题：调度第 N+1 步时，第 N 步的采样结果（尤其投机解码<b>实际接受了几个 draft token</b>）还没回来，CPU 侧每个请求的 seqlen_q/seqlen_k 是过期的。DeepInfer 的解法是把修正<b>也搬到 GPU 上</b>：<code>_correct_seqlens_qk()</code> 把上一步采样产物（接受 token 数、置信度）留在显存里，用 kernel 算出修正后的 seqlens 与请求重排表（remap），D2H 回来只用于"更正 CPU 账本"，不阻塞本步前向。DSpark 的变长验证预算也在这条路径上用 TileLang kernel（累积积 → 全局排序 top-k → fused remap scatter）算出，写回 pinned buffer<sup class="cite">[DIQA26]</sup>。</p>
+
+<h3 id="s4-5">4.5 KV Cache 三层存储：把"笔记"存到 SSD 上 72 小时</h3>
+<p>DeepInfer 生产系统的 KV 管理分三层（QA 表格原文口径）<sup class="cite">[DIQA26]</sup>：</p>
+<table>
+<tr><th>层</th><th>介质</th><th>放什么</th><th>谁来管</th></tr>
+<tr><td>① 在途 KV + 状态 KV</td><td>推理 GPU 显存</td><td>分页 block KV（主 KV + indexer K）+ 每序列固定槽 StateBlock</td><td>Prefill / Decode 实例（<code>BlockManager</code>，C++）</td></tr>
+<tr><td>② SWA KV</td><td>本机内存</td><td>滑窗层状态（仅前 20 层），每序列 20 层 × 134 token × 528 B ≈ <b>1.36 MB</b>（MXFP8）</td><td>引擎实例；跨机命中走 400G VLAN 拉回</td></tr>
+<tr><td>③ 分页 block KV</td><td>专用 3FS 集群（SSD）</td><td>全部主 KV 的持久副本；~100 PiB，TTL 3 天(agent)/7 天(chatbot)</td><td>kvcache-store（未开源）+ 3FS 自身 GC</td></tr>
+</table>
+<p class="codecap">表 4-3 · 三层 KV 存储（QA 文档 "KV cache storage" 一节，2026-10）<sup class="cite">[DIQA26]</sup>。源码侧对应：<code>cache_engine.py</code> 中 <code>KVSTORE_GRAIN = 128</code>（"只在 token 数为 128 的倍数处落盘"）、<code>gpu_states</code>（StateBlock 槽）、<code>get_kvstore_swa_block_size()</code>（滑窗 + 回退余量）。</p>
+
+<h4>4.5.1 命中规则：块 KV 定长度，SWA KV 定"回不回退"</h4>
+<p>多轮对话来了，前缀能复用多少？规则（QA 原文公式化）：</p>
+<pre># 代码 4-2 · 前缀命中规则（据 QA 文档 "hit policy" 节转写）
+# YOCO 截断要求下，长度 L 的输入最大可命中 L − 134（128 窗口 + 6 个投机回退 token）
+L1 = 查 block KV（3FS 哈希链前缀匹配，命中长度为 128 的倍数）
+if 在 [L1−128, L1] 区间内能查到 SWA KV:
+    命中长度 = L1                 # 直接复用，从 L1 续算
+else:
+    命中长度 = L1 − 128           # 回退一个块，末 128 token 重算（SWA bounded replay）</pre>
+<p class="codecap">代码 4-2 · 依据 <code>doc/inference_deployment_qa.md</code> "KV cache hits and recomputation" 节（2026-10）转写。</p>
+
+<h4>4.5.2 SWA bounded replay：常数代价重建滑窗缓存</h4>
+<p>滑窗层的 KV 只在最近 W 个 token 内有意义，但严格重建需要重放最后 2,560 个 token 过 20 层 decoder。V4.1 的做法：<b>只重放最后 128 个 token，且重放时注意力窗口也被截断在重放段内</b>——得到一份"近似但自洽"的滑窗 KV，重算代价与上下文长度、层数全部无关（常数）。QA 给出量化效果：prefill 总计算量"nearly halving"（近乎减半）<sup class="cite">[DIQA26]</sup>。源码开关即 README 中的 <code>DEEPINFER_YOCO_PREFILL_TRUNCATION_MODE=compact</code> + <code>DEEPINFER_YOCO_PREFILL_KEEP_TOKENS=140</code>（128 窗口 + 最大回退长度）<sup class="cite">[DI26]</sup>。</p>
+
+<h4>4.5.3 KV 的搬运如何不挡路</h4>
+<p>命中后的取回链路（QA "cache-related overhead" 节）：<b>匹配</b>在 Entrypoint 以 CHECK 角色对本地 kvcache-store 做纯元数据哈希链匹配（必须在路由前完成，无法隐藏）→ <b>拉取</b>在独立进程异步把 KV 从 3FS 搬进主机共享内存 → <b>换入</b>由引擎进程内线程执行，"目标是逐层 H2D 与前向计算重叠"，且因 CUDA copy engine 对细粒度块拷贝低效，换入用 <b>GDR（GPUDirect RDMA）</b>：网卡直写显存、打满 PCIe、不占 SM<sup class="cite">[DIQA26]</sup>。</p>
+
+<div class="summary3"><b>本章小结（4.1–4.5，记住三句话）</b>
+<ol>
+<li>DeepInfer = "EPD 三段分离的集群系统"的开源内核：prefill 用小 EP、decode 用 EP64–128 Wide-EP，KV 存独立 3FS 集群（TTL 3–7 天、~100 PiB），这是它与单机引擎的根本差异。</li>
+<li>V4.1-Flash 的模型结构（MLA 压缩 KV、indexer 稀疏、SWA+YOCO 跨层复用、FP4 KV、MTP 头）每一项都直接服务于"KV 变小、decode 读得更少"的系统目标——模型是为引擎设计的。</li>
+<li>引擎内核的关键工程：调度器 C++ 化 + 四拍流水把 CPU 工作藏进 GPU 前向里（ZOS），过期的批元数据在 GPU 上用 kernel 修正——删掉任何一条，decode 的毫秒级步长都会被 CPU 开销吃掉一半。</li>
+</ol>
+</div>
+<h3 id="s4-6">4.6 调度与负载均衡：四档分桶、二次成本模型、双维均衡</h3>
+<p>开源范围外的四个负载均衡器（Prefill/Decode/VE/EPLB）的设计在 QA 文档中有完整描述<sup class="cite">[DIQA26]</sup>，其中 prefill 侧的算法最能代表"把调度做到细处"的思路：</p>
+<pre># 代码 4-3 · Prefill 负载均衡与 chunk 求解（据 QA "Prefill Load Balancer" 节转写）
+# ① 分桶：按总上下文长度分 4 档 —— <16K / 16–64K / 64–256K / ≥256K
+#    每轮按各档上一轮的算力配额占比，动态重分配档内引擎数
+# ② 跨 DP 组：各引擎按"剩余算力配额"主动拉活 —— 任意引擎可命中任意前缀，
+#    因此不需要前缀亲和路由（与 3FS 全局可见配套）
+# ③ 组内：请求到达时发给当前配额负载最低的 DP rank
+# ④ 单卡内：chunk 大小不是固定值，而是解一个方程——
+budget = compute_quota_limit(纳秒级时间预算, 组内再经 all-reduce MIN 收紧)
+cost(q, c) = 拟合的二次成本模型   # q=本 chunk token 数, c=该序列已算前缀长
+q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃下的最大 chunk</pre>
+<p class="codecap">代码 4-3 · 依据 <code>doc/inference_deployment_qa.md</code> "Data-parallel load balancing" 节转写（2026-10）<sup class="cite">[DIQA26]</sup>。这是 chunked prefill（第 3.4 节）的"预算化"版本：不按固定 token 数切，而是按<b>每步时间预算</b>反解 chunk 大小，使每个 prefill 步的时延可预测。</p>
+<p>Decode 侧的均衡同时照顾两个维度：<b>请求数</b>（决定每步 batch 大小）与 <b>KV 总长度</b>（决定 attention 成本），启发式地把短请求发给"并发低但 KV 长"的卡、长请求发给"KV 短"的卡。EPLB 则在专家维度均衡：每卡除本职专家外多驻若干<b>冗余热专家副本</b>，按统计窗口（prefill 100 步/decode 1000 步）周期性重排专家，权重经 NVLink <code>symm_mem</code> 在组内洗牌。实测不均衡度 moe_lb（最慢 rank/均值）prefill 1.045–1.074、decode 1.090；整套 LB 让线上达到离线理想基准的约 80%<sup class="cite">[DIQA26]</sup>。</p>
+
+<h3 id="s4-7">4.7 DSpark：投机解码的"置信度预算分配"</h3>
+<p>DeepInfer 把 MTP 投机解码（DeepSeek-V3 起 MTP 头即为模型一部分<sup class="cite">[DSV3]</sup>）推进到了"按边际收益分配验证算力"的版本，内部代号 <b>DSpark</b>：</p>
+<div class="fig">
+<div class="flowrow" style="justify-content:center">
+  <div class="fbox">DFlash 头连猜 5 个<br><span style="color:#aeb4bd">draft tokens</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl"><b>ConfidenceHead</b><br>预测每个 draft token<br>的接受概率</div>
+  <div class="arr">→</div>
+  <div class="fbox hl">按期望接受率排序<br>选"边际收益最大"的<br>前缀子集去验证</div>
+  <div class="arr">→</div>
+  <div class="fbox ok">主模型一次前向<br>验证 k ≤ 5 个</div>
+  <div class="arr">→</div>
+  <div class="fbox">拒绝采样收下<br>被接受的连续前缀</div>
+</div>
+<div class="cap">图 4-2 · 本文自绘，DSpark 置信度调度验证。机制依据 QA 文档 "Speculative decoding" 节与源码 <code>models/mtp/dflash.py</code>（ConfidenceHead：hidden + markov 嵌入 → 标量概率，融合 kernel <code>confidence_head_fused</code>）<sup class="cite">[DIQA26]</sup>。</div>
+</div>
+<p>QA 给出的关键对比数据（EP64/DP64 离线基准，每 rank 并发 16–96 序列）<sup class="cite">[DIQA26]</sup>：</p>
+<table>
+<tr><th>并发/rank</th><th>固定-5 平均验证长度</th><th>动态平均验证长度</th><th>固定-5 接受长度</th><th>动态接受长度</th><th>吞吐增益</th></tr>
+<tr><td>16</td><td>5.00</td><td>4.44</td><td>3.32</td><td>3.24</td><td class="bad">−1.5%</td></tr>
+<tr><td>32</td><td>5.00</td><td>3.65</td><td>3.25</td><td>3.17</td><td>+1.6%</td></tr>
+<tr><td>48</td><td>5.00</td><td>3.94</td><td>3.30</td><td>3.26</td><td>+3.6%</td></tr>
+<tr><td>60（生产工作点）</td><td>5.00</td><td>3.58</td><td>3.30</td><td>3.21</td><td><b>+5.4%</b></td></tr>
+<tr><td>72</td><td>5.00</td><td>3.24</td><td>3.29</td><td>3.12</td><td>+6.7%</td></tr>
+<tr><td>96</td><td>5.00</td><td>3.24</td><td>3.30</td><td>3.15</td><td>+11.0%</td></tr>
+</table>
+<p class="codecap">表 4-4 · 动态验证长度 vs 固定-5（QA 文档原表，tok/s/rank 口径估算）。三个读数：<b>①</b> 验证计算省约 30%（5.00 → 3.2–4.4）而接受长度几乎不掉（3.29 vs 3.20）；<b>②</b> 并发越高收益越大——大 batch 下验证算力从"闲置"变"稀缺"，预算分配才有意义；<b>③</b> 低并发（16）时轻微负收益，说明该优化有明确的适用域。</p>
+<div class="analogy">固定猜 5 个像<b>每次考试都安排 5 道大题的阅卷</b>，哪怕其中 3 道明摆着不会对；DSpark 像<b>按模拟考成绩分配阅卷配额</b>——置信度高的多验几个，大概率被拒的直接不送审。<b>如果去掉这个设计</b>：验证算力浪费在低概率 token 上，大并发时这部分浪费挤占本可用于新增请求的吞吐（上表 96 并发的 11% 就是这条边界）。</div>
+<p>工程上最妙的一笔是<b>它与零开销调度的冲突如何解决</b>：调度第 N+1 步时第 N 步的置信度还没从 GPU 回来，于是 CPU 只定"总预算"，每请求的验证长度由 GPU 上的 TileLang kernel（累积积 → 全局排序 top-k → fused remap scatter）实时算好写回 pinned buffer<sup class="cite">[DIQA26]</sup>——调度决策本身也"躲进"了 GPU 流水线的阴影里。</p>
+
+<h3 id="s4-8">4.8 算子与低精度：TileLang 双后端 + 自家内核全家桶</h3>
+<p>DeepInfer 的 kernel 栈分三层：</p>
+<div class="layers">
+  <div class="layer"><div class="ln">L1</div><div class="lt"><b>vendor 内核库（子模块）</b>：FlashMLA（MLA attention）、DeepGEMM（FP8 GEMM）、DeepEP（MoE all-to-all 通信）、DeepSelect（top-k 选择）、TileKernels——全部来自 DeepSeek 开源周（2025-02 起）<sup class="cite">[DSOSW25]</sup>，且每库都带 NVIDIA 与昇腾（-Ascend）双实现</div></div>
+  <div class="layer"><div class="ln">L2</div><div class="lt"><b>TileLang 自定义算子层</b>：<code>model_executor/layers/tilelang_ops/</code> 下 30+ 个算子（norm / fused_sample / fused_transform / compress / swa_index / prepare_v4_decode_metadata / schedule_mtp_varlen / structure_output…），按 <code>cuda/</code> 与 <code>asc/</code> 两套后端组织——<b>同一算子逻辑、两份生成代码</b>，这是"多厂商加速器"目标的直接体现</div></div>
+  <div class="layer"><div class="ln">L3</div><div class="lt"><b>第三方</b>：flash-attn-4、torch 2.13+cu132（requirements-nvidia.txt，2026-10 快照）；CANN 9.2 对应昇腾侧</div></div>
+</div>
+<p>低精度策略非常激进（QA "Low-precision computation" 节）：主 KV per-16 e4m3（≈NVFP4 无全局 scale）、indexer KV 与 MoE 路由专家权重 per-32 UE8M0 MXFP4<sup class="cite">[DIQA26]</sup>。计算主 dtype 固定 bfloat16，低精度只用在 KV 与 MoE 专家权重上——<b>在"显存与带宽收益最大、精度风险可控"的位置下手</b>。QA 同时披露了与内部版的差距：开源 FlashMLA 缺一处手调 SASS 优化，decode kernel 慢 5%–10%，端到端差距 ≤5%<sup class="cite">[DIQA26]</sup>。</p>
+
+<h3 id="s4-9">4.9 并行拓扑：为什么是 Attention-DP + Wide-EP，而不是 TP</h3>
+<p>DeepInfer 的默认并行（README "Parallelism: Attention DP / balanced CP, MoE EP + EPLB"）与多数开源引擎的"TP 优先"截然不同。用第 3.6 节的概念对照：</p>
+<table>
+<tr><th>阶段</th><th>并行方案</th><th>通信原语</th><th>为什么</th></tr>
+<tr><td>Prefill</td><td>Attention DP2–8 + MoE EP2–8（+ 超长序列时 balanced CP）</td><td>MoE 层 all-to-all（DeepEP），Attention 层无通信</td><td>prefill 算力密集：每卡放完整注意力副本避免通信；EP 取 HBM 允许的最小值，减少 all-to-all 流量</td></tr>
+<tr><td>Decode</td><td>Attention DP64–128 + MoE <b>EP64–128（Wide-EP）</b></td><td>每步 all-to-all 分发 token → 各卡算本地专家 → all-to-all 汇聚</td><td>decode 访存密集：EP 越宽每卡驻留专家越少、每步 MoE 权重读取越少；代价是 all-to-all 域跨整机，必须落在 scale-up 域内（NVLink/超节点）</td></tr>
+<tr><td>VE</td><td>每实例单卡（可用便宜卡）</td><td>—</td><td>视觉编码是短突发的卷积/attention，与 LLM 主干资源画像不同</td></tr>
+</table>
+<p class="codecap">表 4-5 · 并行拓扑（QA "Inference system overview" + README，2026-10）<sup class="cite">[DIQA26]</sup><sup class="cite">[DI26]</sup>。"TP and CP are not used for now"（TP 暂不使用）：TP 的每层两次 all-reduce 在大 EP 部署里反而成为带宽负担；Attention DP 的代价是每卡都要装下各自请求的完整 KV——这正是 MLA 压缩 KV + FP4 先把 KV 做小的前提下才成立的组合（模型结构为并行方案让路）。</p>
+
+<h3 id="s4-10">4.10 案例追踪：一个图文请求的一生</h3>
+<p>把前面所有模块串起来。输入：用户在 App 里发了一张病房照片并问"帮我看下这个监护仪数值正常吗"，多轮对话第 3 轮（历史 20K token），输出要求 JSON 格式。</p>
+<div class="fig">
+<div class="flowrow">
+  <div class="fbox">① API 进网关<br><span style="color:#aeb4bd">Chat/Responses/<br>Messages 三协议</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl">② Recipe 编码<br>特殊 token 显式登记防注入<br>分段并行 tokenize</div>
+  <div class="arr">→</div>
+  <div class="fbox">③ Entrypoint CHECK<br>哈希链匹配 3FS 前缀<br>命中 20K−128</div>
+</div>
+<div class="flowrow" style="margin-top:8px">
+  <div class="arr">↓</div>
+</div>
+<div class="flowrow">
+  <div class="fbox hl">④ VE 引擎<br>单卡视觉编码<br>图片 → ~数百 token 嵌入</div>
+  <div class="arr">→</div>
+  <div class="fbox hl">⑤ Prefill 引擎（EP4）<br>异步拉取命中 KV（GDR 直写显存）<br>只 prefill 新增 token+重放 128<br>时间预算反解 chunk<br>SO 编译机并行编译 JSON 自动机<br>EPLB 周期重排专家<br>KV 落 3FS（128 对齐）</div>
+  <div class="arr">→</div>
+  <div class="fbox hl">⑥ Decode 引擎（EP64）<br>SWA KV 经 400G VLAN 随行<br>ZOS 四拍流水：调度藏在 GPU 背后<br>DSpark 猜 5 验 3.6（置信度调度）<br>每步推自动机生成合法 token mask<br>每跨 128 token 存一次 SWA 快照</div>
+</div>
+<div class="flowrow" style="margin-top:8px">
+  <div class="arr">↓</div>
+</div>
+<div class="flowrow">
+  <div class="fbox ok">⑦ 流式返回：token 粒度 chunk → Recipe 增量 KMP 状态机解析（跨 chunk UTF-8 / DSML 工具调用边界）→ 三协议流式响应；请求结束时 SWA KV 留在本机目录、block KV 已在 3FS，TTL 内下一轮对话直接命中</div>
+</div>
+<div class="cap">图 4-3 · 本文自绘，一个多模态多轮请求在 DeepSeek 生产推理系统中的路径。每一步的机制依据：QA 文档各节（2026-10）<sup class="cite">[DIQA26]</sup> + deepseek-recipe 仓库<sup class="cite">[DIRECIPE26]</sup> + DeepInfer 源码（<code>llm_engine.add_request</code> 的 SO matcher 异步编译、<code>ve/multimodal_processor</code>、<code>cache_engine</code> 的 128 落盘粒度）。</div>
+</div>
+<p>两个值得停留的瞬间：</p>
+<ul>
+<li><b>第 ③→⑤ 步的"命中即省略"</b>：20K 历史中命中约 19.9K，prefill 实际只算新增部分 + 128 token 重放。若没有这套 KV 复用，每轮对话都要重算全部 20K——这正是 3FS 存 3–7 天 TTL 的经济学：多存一天磁盘，换 chatbot 流量 0.5–1% 的命中率<sup class="cite">[DIQA26]</sup>。</li>
+<li><b>第 ⑥ 步的"结构化输出不打断流水线"</b>：JSON 约束的编译在请求进入引擎<b>之前</b>就在专用 SO 机器上完成（<code>so_matcher_builder.submit</code> 异步回调入队，源码 <code>llm_engine.py</code> L606–630），decode 每步只是推进自动机 + 生成 token mask 送进融合采样 kernel（<code>tilelang_ops/structure_output.py</code>）——语法约束的代价被压到 kernel 内一次 mask 查表。</li>
+</ul>
+
+<h3 id="s4-11">4.11 优化边界与"专 vs 通"的账单</h3>
+<p>DeepInfer 的极致是<b>有明确边界的极致</b>。把它的取舍列成账单：</p>
+<table>
+<tr><th>维度</th><th>DeepInfer（专用引擎）</th><th>通用引擎（vLLM/SGLang 类）</th></tr>
+<tr><td>吞吐/时延上限</td><td class="good">高：Wide-EP + FP4 KV + DSpark + ZOS 全部为单一模型调优</td><td>中高：同样的单点技术大多也有，但要服务宽矩阵不能绑死拓扑</td></tr>
+<tr><td>支持模型</td><td class="bad">1 个（DeepSeek-V4.1-Flash）</td><td class="good">数百个模型族（vllm.ai 2026-10 列出 DeepSeek/Qwen/Llama/GLM/Kimi 等）</td></tr>
+<tr><td>硬件</td><td class="bad">SM100 与昇腾 950 两类</td><td class="good">NVIDIA/AMD/TPU/NPU/CPU/Gaudi/Apple… 十余平台</td></tr>
+<tr><td>部署单元</td><td class="bad">生产推荐 64P+64D 起步（最小 1P+1D 可跑）</td><td class="good">单卡到集群连续可调</td></tr>
+<tr><td>在线服务能力</td><td class="bad">开源版不含（API 层、LB、KV 存储都要自建或等官方）</td><td class="good">OpenAI 兼容 API server 开箱即用</td></tr>
+<tr><td>上游演进成本</td><td class="good">低：无需在宽矩阵上回归每次改动</td><td class="bad">高：每次模型/后端/算子演进都要全矩阵回归</td></tr>
+</table>
+<p class="codecap">表 4-6 · 专用 vs 通用的取舍（综合 README、QA 文档与 dev.to 等第三方解读——后者为二手信源，标注可信度：中等，与官方文档一致<sup class="cite">[DEVTO26]</sup>）。DeepInfer 自己的定位陈述也印证这一点：README 致谢节自述 "originally built primarily on vLLM, with additional inspiration from SGLang and TensorRT-LLM"<sup class="cite">[DI26]</sup>——专用引擎不是推倒重来，而是站在通用引擎肩膀上把"广度"换成"深度"。</p>
+
+<div class="summary3"><b>本章小结（4.6–4.11，记住三句话）</b>
+<ol>
+<li>调度做到细处的形态：prefill 按上下文长度分四档 + 单卡内按时间预算反解 chunk 大小；decode 同时均衡请求数与 KV 总长；EPLB 用冗余专家副本把 MoE 不均衡压到 10% 以内。</li>
+<li>DSpark 证明投机解码的第二增长曲线不在"猜得更多"而在"验得更省"：按置信度分配验证预算，验证量省 30%、线上吞吐 +4~7%，且调度决策在 GPU 上完成、不破坏零开销流水线。</li>
+<li>DeepInfer 的能力边界清晰：单模型、两类加速器、最小 64+64 卡的生产单元、在线层未开源——它展示了"专"的上限，也把"通"的价值（宽模型/硬件矩阵、开箱即用）反向衬托出来。</li>
+</ol>
+</div>
+<h2 id="s3"><span class="no">3</span>定制化推理引擎的十层技术栈</h2>
+
+<p>第 2 章按时间讲"谁做了什么"；本章按栈讲"一块饼图怎么切"——一个定制化推理引擎从上到下共十层技术决策。每一层我们都回答三件事：<b>机制是什么（本科生能懂）、为什么非做不可、去掉它会怎样</b>。</p>
+
+<div class="fig">
+<div class="layers">
+  <div class="layer"><div class="ln">L10</div><div class="lt"><b>服务与全链路</b>：权重转换 → 引擎构建 → 请求接入 → 监控剖析（3.10）</div></div>
+  <div class="layer"><div class="ln">L9</div><div class="lt"><b>取舍哲学</b>：静态 vs 动态、离线 vs 在线、通用 vs 专用（3.9）</div></div>
+  <div class="layer"><div class="ln">L8</div><div class="lt"><b>特殊负载</b>：MoE / 超长上下文 / 多模态 / 异构硬件（3.8）</div></div>
+  <div class="layer"><div class="ln">L7</div><div class="lt"><b>算法级加速</b>：FlashAttention / 量化 / 稀疏化 / 投机·并行解码（3.7）</div></div>
+  <div class="layer"><div class="ln">L6</div><div class="lt"><b>并行与通信</b>：TP / PP / DP / EP / CP，多机多卡（3.6）</div></div>
+  <div class="layer"><div class="ln">L5</div><div class="lt"><b>KV Cache 管理</b>：布局 / 分页 / 前缀复用 / 压缩 / 分层卸载（3.5）</div></div>
+  <div class="layer"><div class="ln">L4</div><div class="lt"><b>请求调度</b>：continuous batching / chunked prefill / 异步调度（3.4）</div></div>
+  <div class="layer"><div class="ln">L3</div><div class="lt"><b>两阶段执行</b>：prefill 与 decode 的分治（3.3）</div></div>
+  <div class="layer"><div class="ln">L2</div><div class="lt"><b>算子层</b>：CUDA / Triton / TileLang 自定义算子与融合（3.2）</div></div>
+  <div class="layer"><div class="ln">L1</div><div class="lt"><b>图与编译</b>：计算图解析 / 算子替换 / 图优化 / CUDA Graph（3.1）</div></div>
+</div>
+<div class="cap">图 3-1 · 本文自绘，定制化推理引擎的十层技术栈。下层是上层的前提：没有 L5 的 KV 分页，L4 的 continuous batching 无法稳定；没有 L2 的算子，L7 的算法加速落不了地。</div>
+</div>
+
+<h3>3.1 计算图与编译：把"逐算子的解释执行"变成"整图的机器码"</h3>
+<div class="analogy">PyTorch 直接跑模型像<b>现场点菜的厨师</b>：每做一道工序（一个算子）都停下来看下一张订单。图编译像<b>中央厨房的预制流水线</b>：提前把整个菜单拆解、合并工序、备好料，开餐时按 SOP 一次走完。</div>
+<p>这一层做四件事：</p>
+<ol>
+<li><b>计算图解析</b>：把 HuggingFace checkpoint（safetensors + config.json）加载进来，在引擎里重建为自家 IR（中间表示）。vLLM 为每个模型族手写 <code>*ForCausalLM</code> 执行类；TensorRT-LLM 走 ONNX/权重转换 + builder 编译为 engine plan；llama.cpp 需要转 GGUF。</li>
+<li><b>算子替换与图优化</b>：把通用算子序列换成融合/专用版本——LayerNorm+Residual 合并、QKV 三个投影合并为一个大 GEMM、GatedMLP 的两次 GEMM+SiLU 合并；常量折叠、死代码消除。经典结论：Transformer 推理的 kernel 数能从一个前向 ~1500+ 个降到数百个。</li>
+<li><b>Kernel 编译与自动调优</b>：Triton（OpenAI，2019）让 Python 写 GPU kernel、按硬件即时编译；DeepGEMM 为 FP8 GEMM 做 JIT 编译；TensorRT 的 builder 对每层做 tactic 搜索选最快的实现。</li>
+<li><b>CUDA Graph 捕获</b>：decode 每步的算子序列几乎不变，把整步前后向<b>录制成一张 CUDA Graph</b>，之后每步一次 launch 传入不同指针即可。这消除了"每步几百次 kernel launch、每次几微秒 CPU 开销"的致命问题——对单步仅几毫秒的 decode，launch 开销可占 30%+。vLLM 的 piecewise CUDA graph、DeepInfer 的 <code>cuda_graph_runner.py</code> 与 <code>dflash_cuda_graph_runner.py</code>（把 DFlash 草稿路径也捕获进同一张图）都是这个目的。</li>
+</ol>
+<div class="note"><b>去掉这一层会怎样？</b>回到 2022 年的 HuggingFace <code>generate()</code>：Python 循环 + 逐算子调度 + 每次 launch 都过一遍框架分发，A100 上 13B 模型单序列 decode 只有每秒几十 token，而且 GPU 利用率常年在个位数。vLLM 论文的对照实验显示，仅"kernel 化 + CUDA graph"一类工程就能带来数倍差距（24× 总差距中与调度、KV 管理并列的第三根支柱）<sup class="cite">[VLLM23]</sup><sup class="cite">[ANYSCALE23]</sup>。</div>
+<p><b>代价</b>：编译型引擎（TRT-LLM 的 plan、MLC 的 .so）换模型/换硬件/换 batch 形状都要重编译（分钟级），且对动态形状（变长序列）处理笨拙——这正是"静态引擎 vs 动态运行时"取舍的源头（3.9 节）。2023 年后主流方向是<b>混合</b>：保留 eager 执行框架做调度，只对 decode 热路径做 graph 捕获（vLLM/DeepInfer 路线），或用 torch.compile 做自动图编译。</p>
+
+<h3>3.2 算子层：CUDA / Triton / TileLang 与算子融合</h3>
+<p>不管上面几层多聪明，最终在 GPU 上跑的是一个个 kernel。定制化引擎在算子层做三类事：</p>
+<ul>
+<li><b>融合（fusion）</b>：相邻小算子合成一个 kernel，省掉中间结果写回显存。RMSNorm、RoPE、残差加、激活这类"访存多、计算少"的算子最该融合——它们是 roofline 上的极致低算术强度操作。DeepInfer 的 <code>tilelang_ops/norm.py</code>、<code>fused_transform.py</code>（1330 行）就是这类。</li>
+<li><b>专用大 kernel</b>：FlashAttention 是范本（3.7 节展开）。同类还有 FlashMLA（MLA decode）、fused MoE kernel（vLLM 的 <code>fused_moe</code> Triton kernel 把路由+gather+GEMM+scatter 融在一起）。</li>
+<li><b>DSL 生成</b>：CUDA C++ 性能最高但开发慢、不可移植；Triton 面向 NVIDIA（社区有 AMD 后端）；TileLang（北大-DeepSeek 合作开源，2024–2025）用 Python 声明式写法生成多后端代码，DeepInfer 用它同时生成 CUDA 与昇腾两套算子（<code>tilelang_ops/cuda/</code> 与 <code>tilelang_ops/asc/</code> 平行目录）<sup class="cite">[DI26]</sup>。昇腾 NPU 无法直接跑 CUDA，"TileLang 双后端"就是 DeepInfer 支持多厂商加速器的工程底座。</li>
+</ul>
+<div class="note"><b>去掉这一层会怎样？</b>FasterTransformer 时代的历史对照最清楚：2021 年在同一张 A100 上，仅靠把 Transformer 各算子融合重写，GPT-3 类模型的推理就能比 PyTorch eager 快 2–5×（NVIDIA 官方博客口径，2021–2022，模型与配置各异）<sup class="cite">[FT21]</sup>。算子层是所有其他优化的"地基收益"。</div>
+
+<h3>3.3 两阶段执行：prefill 与 decode 的分治</h3>
+<p>第 1.2 节已给出两阶段的资源画像。引擎层的分治体现在四处：</p>
+<table>
+<tr><th></th><th>Prefill</th><th>Decode</th></tr>
+<tr><td>kernel 形态</td><td>大 GEMM（长序列变长 batch 维），FlashAttention 的"长 query"分支</td><td>GEMV/小 GEMM，FlashDecoding/FlashMLA 的"单 query 长 KV"分支</td></tr>
+<tr><td>批策略</td><td>chunked：长 prompt 切块混入 decode 步（3.4）</td><td>尽量大 batch（算术强度随 batch 线性上升，1.4 节公式）</td></tr>
+<tr><td>并行策略</td><td>可小 EP/TP（计算饱和，通信占比小）</td><td>Wide-EP/大 DP（每步读权重量才是瓶颈，切得越碎每卡读得越少）</td></tr>
+<tr><td>硬件选择</td><td>高算力卡划算（H100/B200）</td><td>高带宽、大显存划算；KV 常驻与带宽优先（DeepInfer decode 用 64–128 卡超节点）</td></tr>
+</table>
+<p>2024 年起两个阶段甚至<b>物理分离部署</b>（DistServe/Splitwise/Mooncake，见 2.5 与 6 章）：prefill 集群与 decode 集群各自独立扩缩，KV 经 RDMA/存储层转运。收益是 TTFT 与 TPOT 可以独立优化到各自 SLO；代价是 KV 传输链路与系统复杂度。</p>
+
+<h3>3.4 请求调度：continuous batching 与 chunked prefill</h3>
+<h4>3.4.1 从 request-level 到 iteration-level</h4>
+<div class="analogy">static batching 像<b>旅行团发团</b>：凑齐一车人（请求）才出发，全程一起走，<b>一个人没玩完所有人都得等</b>。iteration-level（continuous batching）像<b>地铁</b>：每站（每个解码迭代）都可以下客（完成的请求）和上客（新请求），车厢永远尽量满。</div>
+<div class="fig">
+<div class="flowrow">
+  <div class="fbox" style="min-width:270px"><b>Static batching</b><br>req1 ████████<br>req2 ████<span style="opacity:.35">░░░░（空等）</span><br>req3 ██████<span style="opacity:.35">░░</span><br>批耗时 = 最长请求</div>
+  <div class="arr">→</div>
+  <div class="fbox ok" style="min-width:270px"><b>Continuous batching</b><br>req1 ██▌完成即离场，req4 立即补位<br>每步批 = 当前活跃请求<br>批吞吐 ≈ 各步之和，GPU 永远满载</div>
+</div>
+<div class="cap">图 3-2 · 本文自绘。Orca（OSDI'22）将这一机制命名为 selective batching / iteration-level scheduling，并报告相对 request-level 基线（FasterTransformer）最高 36.9× 吞吐提升（GPT-3-175B、16×A100-40GB、同等归一化延迟下 6.81 vs 0.185 req/s；注意 Orca 论文无 arXiv 版本，正式出处为 USENIX OSDI'22 页面）<sup class="cite">[ORCA22]</sup>；Anyscale 博客（2023-06-22）将其以 "continuous batching" 之名推广，实测：仅 continuous batching ≈8× over 朴素静态批、FasterTransformer（优化静态批）≈4×、vLLM（CB+PagedAttention）最高 23×（OPT-13B、单张 A100-40GB、输入 512 tok、输出指数分布）<sup class="cite">[ANYSCALE23]</sup>。</div>
+</div>
+<p><b>去掉它会怎样？</b>生成长度高度不齐（10 到 1000 token），static batch 的有效利用率被最长请求绑架：vLLM 论文与 Anyscale 博客都给出 10× 量级的浪费场景；这也是 2023 年前所有"模型服务器"跑 LLM 的共同瓶颈<sup class="cite">[ORCA22]</sup><sup class="cite">[ANYSCALE23]</sup>。</p>
+<h4>3.4.2 Chunked prefill：让长 prompt 不再"卡全场"</h4>
+<p>continuous batching 混批 prefill 与 decode 后出现新问题：一个 32K prompt 的 prefill 是一次数百毫秒的大计算，期间同批所有 decode 用户的逐 token 延迟瞬间抖动（TBT 毛刺）。Sarathi-Serve 的答案：<b>把长 prompt 切成固定预算的 chunk，每个调度步只混入一个 chunk</b>，让每步计算量平滑（stall-free decoding）。论文报告：P99 TBT 约束（strict = 单次 decode 步时延 ×5）下的服务容量 vs vLLM——Mistral-7B（1×A100）2.6×、Yi-34B（2×A100）最高 3.7×、LLaMA2-70B（8×A40）4.69×、Falcon-180B 4.3×（sharegpt4 与 arxiv 摘要负载，Poisson 到达）<sup class="cite">[SARATHI24]</sup>。TensorRT-LLM 的 chunked context、DeepSpeed-FastGen 的 SplitFuse 同属此族。DeepInfer 更进一步：chunk 大小不固定，而是<b>由每步时间预算反解</b>（4.6 节代码 4-3）。</p>
+<h4>3.4.3 调度器实现：从 Python 循环到 C++ 与零开销</h4>
+<p>调度本身是纯 CPU 逻辑，但每步都要做（组批、分配 block、更新状态）。三代演进：vLLM V0 的 Python Scheduler（每步毫秒级）→ vLLM V1 的 C++ 调度核心 + async scheduling（2025）→ SGLang 的 zero-overhead scheduler 与 DeepInfer 的 ZOS（调度与上一步后处理藏进 GPU 前向时间里，QA 明言借鉴 SGLang 与 NanoFlow<sup class="cite">[DIQA26]</sup>）。<b>去掉异步调度会怎样</b>：decode 步长 5–10ms 中 CPU 要占 1–3ms，吞吐直接损失 20–40%（SGLang 论文与 vLLM V1 博客的动机部分均有此口径）<sup class="cite">[SGLANG24]</sup><sup class="cite">[VLLMV1]</sup>。</p>
+
+<h3>3.5 KV Cache 管理：布局、分页、复用、压缩、卸载</h3>
+<h4>3.5.1 为什么"连续分配"是灾难，分页是解药</h4>
+<p>最朴素的 KV 布局：每个请求预留一段<b>连续</b>显存（按 max_len 预留）。三个恶果：① 预留了用不完（内部碎片，max_len 4096 平均用 800 → 80% 浪费）；② 请求长度各异导致显存空洞（外部碎片）；③ 无法共享相同前缀。vLLM 的 <b>PagedAttention</b> 借操作系统虚拟内存的思路：KV 切成固定 block（vLLM 默认 16 token/块，DeepInfer 为 128），每请求持有 block table 指向离散块。论文实测 KV 浪费 &lt;4%（对比连续分配最差 ~80%），并发数提升 2–4×（sharegpt 轨迹、A100、Llama 系口径）<sup class="cite">[VLLM23]</sup>。</p>
+<div class="analogy">连续预留像<b>酒店只卖整层</b>（按最大团建规模留房间），分页像<b>按间卖</b>：旅游团来多少住多少，退房立刻再卖。<b>去掉分页会怎样</b>：同样显存少服务 2–4 倍的人，长尾请求（很短的对话）最吃亏。</div>
+<h4>3.5.2 前缀复用：RadixAttention 与 prefix cache</h4>
+<p>多轮对话、few-shot、Agent 循环都会重复发送几乎相同的前缀（系统提示 + 历史）。Prefix caching 把完成请求的 KV block 保留，新请求命中前缀直接复用。SGLang 的 <b>RadixAttention</b> 用基数树组织所有前缀、LRU 淘汰，论文报告高复用场景（复杂 prompt 程序）较 vLLM 最高 5× 加速（GPT/Llama 系、A100×8，2023-12 论文口径）<sup class="cite">[SGLANG24]</sup>；vLLM 的 automatic prefix caching、TensorRT-LLM 的 KV reuse 是同类。生产系统进一步把前缀 KV 挪出 GPU：Mooncake 用 CPU DRAM + SSD 做全局 KV 池（FAST'25）<sup class="cite">[MOONCAKE25]</sup>，DeepInfer 用 3FS 集群存 3–7 天（4.5 节）——<b>前缀复用是 Agent 时代省钱的第一杠杆</b>。</p>
+<h4>3.5.3 压缩与卸载：让 KV 更小、放得更远</h4>
+<ul>
+<li><b>结构压缩（模型侧）</b>：MQA/GQA 把 KV 头数减少（Llama-2-70B 用 GQA 已省 8×）；DeepSeek MLA 把 KV 压到低秩潜变量（70B 级模型每 token ~70KB→ 数 KB 量级）<sup class="cite">[DSV2]</sup>。</li>
+<li><b>量化（数值侧）</b>：KV cache 是容忍度较高的量化对象，KIVI（2-bit，per-channel K + per-token V）在保持精度的同时把 KV 压 8×（2024-02）<sup class="cite">[KIVI24]</sup>；DeepInfer 生产直接用 FP4 级主 KV + MXFP4 indexer KV<sup class="cite">[DIQA26]</sup>。</li>
+<li><b>稀疏/检索（访问侧）</b>：H2O 重影注意力（保留累积分数高的 token）<sup class="cite">[H2O23]</sup>、Quest 按查询选块<sup class="cite">[QUEST24]</sup>、MInference 长 prefill 稀疏化<sup class="cite">[MINFER24]</sup>——只读"可能重要"的 KV。</li>
+<li><b>分层卸载（容量侧）</b>：GPU→CPU DRAM→SSD 的阶梯；LMCache（vLLM 生态）、InfiniGen（OSDI'24）、Mooncake transfer engine 是代表；DeepInfer 的三层结构（4.5 节）是"存储集群化"的极端形态。</li>
+</ul>
+<div class="note"><b>去掉这一层会怎样？</b>并发上限 = 显存 ÷ 每 token KV：以 Llama-2-70B FP16 为例，80GB A100 除去权重（需 TP）后单卡可容纳 KV 约 20 万 token——只能同时服务个位数长上下文用户。KV 压缩 8× 就是并发×8、SSD 池化就是"命中率即利润"。</div>
+<h3>3.6 并行与通信：TP / PP / DP / EP / CP</h3>
+<div class="analogy">单卡装不下大模型，就像<b>一本书要多人一起抄</b>：张量并行（TP）是<b>每页拆成几半各抄一半再拼</b>（切矩阵）；流水线并行（PP）是<b>每人负责几章，传着抄</b>（切层）；数据并行（DP）是<b>每小组领不同的书整套抄</b>（复制整个模型）；专家并行（EP）是<b>百科全书按词条分人</b>（切 MoE 专家）。前两种抄写时大家要不停对暗号（通信），后两种基本各干各的。</div>
+<table>
+<tr><th>策略</th><th>切什么</th><th>通信量/何时通信</th><th>推理中的角色与代价</th></tr>
+<tr><td><b>TP</b>（Megatron 路线）<sup class="cite">[MEG19]</sup></td><td>权重矩阵按行/列切</td><td>每层前向 2 次 all-reduce（激活全量）</td><td>单机多卡装下模型的主力；通信量大，基本只适合 NVLink 域内（8 卡）。MLA 类单 KV 头结构下 TP 还会重复保存 KV，DeepSeek 因此改用 Attention DP</td></tr>
+<tr><td><b>PP</b></td><td>按层切</td><td>层间点对点传激活（小）</td><td>训练常用；推理里 bubble 与流水线延迟明显，在线服务少用（vLLM/SGLang 支持但非默认）</td></tr>
+<tr><td><b>DP（副本）</b></td><td>整个模型复制</td><td>无（每副本独立服务不同请求）</td><td>扩吞吐最便宜的方式，前提是单副本装得下模型+KV；DeepInfer 的 Attention DP 即"注意力部分按请求切副本"</td></tr>
+<tr><td><b>EP</b>（MoE 专用）</td><td>专家（权重）切到各卡</td><td>每层 2 次 all-to-all：token 发给持有目标专家的卡，算完收回</td><td>MoE 模型跨机扩展的正解；带宽敏感（DeepEP 为此而生）；负载不均需 EPLB 补偿</td></tr>
+<tr><td><b>CP</b>（上下文并行）</td><td>长序列切成段</td><td>attention 内 all-gather/reduce（Ring Attention 一族）</td><td>超长 prompt（≥64K）prefill 专用；DeepInfer 的 balanced CP 实现（<code>prepare_cp_mirror.py</code>）留作超长序列选项</td></tr>
+</table>
+<p class="codecap">表 3-1 · 五种并行策略对照。DeepSeek V3/R1 时代官方部署即组合拳：prefill 4 节点（TP4+DP8+EP32）、decode 40 节点（DP80+EP320）（DeepSeek 官方知乎博客《浅谈 DeepSeek V3/V4... 推理系统》口径，2025）<sup class="cite">[DSV3ZH]</sup>；DeepInfer 时代简化为 Prefill EP2–8 / Decode EP64–128 + Attention DP、不用 TP/PP（4.9 节）。通信库 DeepEP 的带宽-延迟表见其 GitHub README（2025-02 开源）<sup class="cite">[DEEPEP25]</sup>。</p>
+<div class="note"><b>去掉并行会怎样？</b>模型物理放不下（70B FP16 = 140GB &gt; 单卡 80GB）一切免谈；但并行过度同样有害：TP 超出 NVLink 域后 all-reduce 走 PCIe/IB，带宽骤降一个数量级，吞吐不升反降——"并行度选择"本质是<b>通信成本与容量/带宽收益的平衡</b>。</div>
+
+<h3>3.7 算法级加速：FlashAttention、量化、稀疏化、投机解码</h3>
+<h4>3.7.1 FlashAttention：从"少算"到"少搬"</h4>
+<p>标准 attention 先把整个 S=PQK^T 写回显存再 softmax 再读回乘 V——S 矩阵 O(n²) 大小，读写三遍。FlashAttention 的洞见：<b>瓶颈不是乘法，是把中间矩阵搬进搬出 HBM</b>。它把 Q/K/V 切块装进 SRAM（片上共享内存），用 <b>online softmax</b>（边累加边归一，数学上精确等价）在片内直接算完，HBM 访问从 O(n²) 降到 O(n)。v1（NeurIPS'22）证明 2–4× 加速且省显存<sup class="cite">[FA22]</sup>；v2（2023-07）优化并行划分与非 matmul FLOPs，decode 场景大幅增强<sup class="cite">[FA2]</sup>；v3（2024-07）用 Hopper 的 warp specialization 与异步流水<sup class="cite">[FA3]</sup>。<b>去掉它会怎样</b>：长上下文 prefill 的中间矩阵显存与访存爆炸——32K 序列的 S 矩阵（FP16）单头就要 2GB×读写三遍；今天所有引擎的全部 attention 路径都建立在其分块思想之上（FlashMLA、FlashDecoding、FlashInfer 均为其变体）。</p>
+<h4>3.7.2 量化：把每个数字从 2 字节压到 1/0.5 字节</h4>
+<p>三条路线：<b>权重量化</b>（W4A16：GPTQ<sup class="cite">[GPTQ22]</sup>/AWQ<sup class="cite">[AWQ23]</sup>，只压权重存储，计算时反量化——LMDeploy TurboMind 的主打；W8A8：SmoothQuant<sup class="cite">[SQ22]</sup> 权重激活都压）；<b>全链路低精度</b>（FP8：Hopper 起硬件原生支持，DeepSeek-V3 训练推理全 FP8<sup class="cite">[DSV3]</sup>；FP4：Blackwell 起原生，DeepInfer 用 FP4 KV 与 MXFP4 专家权重<sup class="cite">[DIQA26]</sup>）；<b>KV 量化</b>（3.5.3 节）。收益直接换算成 §1.4 的算术强度：decode 的算术强度 ∝ 1/每参数字节，W4 相对 FP16 直接×4。<b>代价</b>：精度损失任务相关（量化研究的评测口径从困惑度走向下游任务），错误累积在长生成下更明显——生产系统普遍"权重可以激进、激活与 KV 保守"。</p>
+<h4>3.7.3 稀疏化：不读"不重要"的 KV</h4>
+<p>训练后稀疏（H2O 重影注意力：按累积注意力分数保留 top-k token<sup class="cite">[H2O23]</sup>）、查询感知检索（Quest：每 query 只取相关块<sup class="cite">[QUEST24]</sup>）、预填充稀疏（MInference：长 prompt 的 attention 天然集中在对角/竖条模式，2024-07）<sup class="cite">[MINFER24]</sup>、以及模型原生稀疏（NSA<sup class="cite">[NSA25]</sup>/DSA<sup class="cite">[DSA25]</sup>——训练时就学会稀疏注意，V4.1-Flash 的 indexer 属于这一族）。<b>去掉会怎样</b>：不会"错"，只是长上下文的成本二次增长；稀疏化是"用可控的近似换线性成本"。</p>
+<h4>3.7.4 投机解码与并行解码：一次前向多产 token</h4>
+<div class="analogy">正常 decode 像<b>邮件一封一封寄</b>；投机解码像<b>先把可能要写的回信草稿都打好，一次性拿去盖章</b>：草稿（draft）便宜，盖章（verify）用的是正式模型一次前向——盖过章的部分全部有效。数学上由拒绝采样保证<b>输出分布与原模型完全一致</b>（Leviathan et al. ICML'23；Chen et al. 2023）<sup class="cite">[SPEC23]</sup>。</div>
+<pre># 代码 3-1 · 投机解码期望加速（ γ 个草稿、第 i 个被接受概率 αᵢ ）
+E[每步产出 token] = (1 − α^(γ+1)) / (1 − α)     # α=0.8, γ=4 时 ≈ 3.36 个/步
+成本 = 1 次草稿前向(便宜) + 1 次验证前向(γ+1 个位置并行, compute 更饱满)
+净加速条件：接受长度 × (1/草稿成本占比) > 验证成本增幅</pre>
+<p class="codecap">代码 3-1 · 期望接受长度公式（Leviathan et al. 2023<sup class="cite">[SPEC23]</sup>）。draft 方案三代演进：独立小模型（难对齐主模型分布）→ <b>Medusa</b> 多头（2024-01）<sup class="cite">[MEDUSA24]</sup> / <b>EAGLE</b> 特征级自回归草稿（2024-01 起，EAGLE-3 于 2025-03 报告 temp=0 下 4.1–6.5× 加速，Vicuna-13B/Llama-3 系实测）<sup class="cite">[EAGLE3]</sup> → <b>MTP 头</b>（模型自带，DeepSeek-V3 起生产标配，V3 报告 MTP 使解码吞吐提升 1.8×、接受率 85%+，2024-12）<sup class="cite">[DSV3]</sup>；调度侧则有 DeepInfer DSpark 的置信度预算分配（4.7 节）。</p>
+<p><b>并行解码</b>是另一族：不猜不验，直接改生成范式（Medusa 树状头、diffusion LLM 一次去噪多 token）。2025 年起商用化加速（Inception Labs Mercury、Google Gemini Diffusion 等，公开数据仍有限，可信度：厂商宣称）。<b>投机解码的边界</b>：大 batch 下验证前向挤占算力，收益递减甚至为负。EAGLE-3 论文自带锚点：SGLang 上 EAGLE 在 batch=24 时已只有 0.93×（负收益）、EAGLE-3 在 batch=64 仍有 1.38×；MLSys 2026 实测 Llama3.1-8B/GSM8K 上 EAGLE 从 bs=1 的 1.73× 掉到 bs=128 的 1.21×<sup class="cite">[MLSYS26SD]</sup>；DeepInfer 的表 4-4 在 16 并发时 −1.5% 是又一实证——<b>它与"吞吐优先的大 batch 服务"存在结构性张力，开与不开、开多深必须随负载自适应</b>（DSpark 的置信度预算是第一个生产级自适应答案）。</p>
+
+<h3 id="s3-8">3.8 特殊负载：MoE、超长上下文、多模态、异构硬件</h3>
+<h4>3.8.1 MoE 推理：权重全驻留 + 专家不均衡 + all-to-all</h4>
+<p>MoE（如 Mixtral 46.7B/激活 12.9B<sup class="cite">[MIXTRAL24]</sup>、DeepSeek-V3 671B/激活 37B<sup class="cite">[DSV3]</sup>）推理的三重挑战：<b>①</b> 全部专家权重必须常驻（不激活也要在显存里等着被路由）→ 必须跨卡（EP）或卸载（LRU+投机预取，Mixtral-offloading 思路）；<b>②</b> 每个 token 只访 8/256（V3）的专家，batch 内专家负载天然不均 → EPLB 冗余副本重排；<b>③</b> EP 的 all-to-all 延迟在小 batch 时占比高 → DeepEP 提供 NVLink/RDMA 两套内核，prefill 用正常内核、decode 用低精度内核压缩流量<sup class="cite">[DEEPEP25]</sup>。SGLang 2025-05 实测 DeepSeek-R1 大规模 EP：EP72 decode 22,282 tok/s/节点，相对 TP16 方案 5.2×（H100/H200，官方博客口径）<sup class="cite">[SGEP25]</sup>。</p>
+<h4>3.8.2 超长上下文：64K 到 1M</h4>
+<p>四件事配合：位置外推（YaRN 类 RoPE 缩放，DeepSeek-V3 用 s=40 外推到 128K<sup class="cite">[DSV3]</sup>）、prefill 并行（CP/Ring Attention，可跨 32×A100 算 1M 上下文<sup class="cite">[RING23]</sup>）、KV 侧稀疏（NSA/DSA/MInference/Quest，把 O(L²) 注意力降到 O(L·k)，DSA 技术报告口径 k=2048 仍保精度，2025-09）<sup class="cite">[DSA25]</sup>、以及长上下文评测（RULER：一半模型过不了 32K 线，2024）<sup class="cite">[RULER24]</sup>。DeepInfer 的答案是把模型结构（indexer+SWA+YOCO）与 KV 存储（3FS）一起设计。</p>
+<h4>3.8.3 多模态（VLM）：两段式前向</h4>
+<p>VLM = 视觉编码器（ViT/卷积）+ LLM 主干。系统要点：图片变数百 token 插入序列（VL2 动态 tiling 可把 729→196 token，DeepSeek-VL2 论文口径）<sup class="cite">[VL224]</sup>、视觉 token 剪枝（FastV：深层对 system prompt 的注意力效率极低，K=2/R=50% 时省 45% 计算，2024-03）<sup class="cite">[FASTV24]</sup>、以及 VE 独立部署（DeepInfer 的 VE 引擎单卡即可、推荐便宜卡）<sup class="cite">[DIQA26]</sup>。</p>
+<h4>3.8.4 异构硬件：CUDA 之外的世界</h4>
+<table>
+<tr><th>平台</th><th>软件栈</th><th>生态位（2026-10 快照）</th></tr>
+<tr><td>NVIDIA</td><td>CUDA/CUTLASS/Triton</td><td>事实标准；引擎全部首发于此</td></tr>
+<tr><td>AMD</td><td>ROCm/HIP</td><td>vLLM/SGLang 官方支持（MI300 系列文档）</td></tr>
+<tr><td>华为昇腾</td><td>CANN/TileLang-Ascend</td><td>DeepInfer 支持 950；MindIE 商用栈；vllm-ascend 项目</td></tr>
+<tr><td>Google TPU</td><td>JetStream/MaxText→tpu.vllm.ai</td><td>vLLM TPU 后端（JetStream 2026-02 归档并入）</td></tr>
+<tr><td>Intel</td><td>IPEX-LLM/OpenVINO/Gaudi</td><td>消费级 CPU/GPU/NPU；IPEX-LLM 2026-01 起归档维护</td></tr>
+<tr><td>Apple/移动端</td><td>MLX/llama.cpp(Metal)/CoreML</td><td>端侧量化推理主力</td></tr>
+</table>
+<p class="codecap">表 3-2 · 异构平台一览（各官方渠道核实，2026-10）。跨平台的三条工程路径：① 直接移植 kernel（成本高）；② 中间层（Triton 的多后端、TileLang 的 cuda/asc 双后端——DeepInfer 路线）；③ 编译器路线（MLC/TVM 一份算子定义多平台生成）。</p>
+
+<h3>3.9 取舍：静态引擎 vs 动态运行时、离线 vs 在线、通用 vs 专用</h3>
+<table>
+<tr><th>取舍轴</th><th>一端</th><th>另一端</th><th>判据</th></tr>
+<tr><td>静态 vs 动态</td><td>TensorRT plan/MLC 编译产物：整图编译、极致优化</td><td>vLLM eager+逐算子（仅 decode 捕 CUDA Graph）</td><td>模型/形状/硬件是否收敛。收敛→静态收益大；快速迭代/多模型→动态生存性强</td></tr>
+<tr><td>离线 vs 在线</td><td>离线批处理（吞吐至上，超发 batch，DeepInfer 的 LLM.generate 离线模式）</td><td>在线服务（TTFT/TBT SLO 优先，超时控制、抢占、优先级）</td><td>延迟敏感度；离线可把 batch 推到极限（吞吐最高点），在线要在 SLO 内求最大 goodput</td></tr>
+<tr><td>通用 vs 专用</td><td>vLLM/SGLang：宽模型×硬件矩阵、社区演进</td><td>DeepInfer/厂商自研：单模型族、专属拓扑、贴 SASS</td><td>流量规模是否值得养一支引擎团队；模型结构是否特殊到通用框架吃不满（MLA+MoE+MTP 的 DeepSeek 恰好全是）</td></tr>
+</table>
+<p class="codecap">表 3-3 · 三条经典取舍轴。三轴常常联动：DeepInfer = 静态倾向（单模型）+ 在线形态（EPD 分离）+ 极致专用；llama.cpp = 动态（模型随便换）+ 端侧（吞吐无所谓）+ 极致通用。</p>
+
+<h3>3.10 全链路：从 Hugging Face 模型到线上服务</h3>
+<div class="fig">
+<div class="flowrow" style="justify-content:center">
+  <div class="fbox">① 权重获取<br><span style="color:#aeb4bd">HF hub 下载/私有转换</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl">② 权重转换与加载<br><span style="color:#aeb4bd">safetensors→引擎布局</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl">③ 引擎构建<br><span style="color:#aeb4bd">显存 profiling 定 KV 池<br>kernel JIT、CUDA Graph 捕获</span></div>
+</div>
+<div class="flowrow" style="justify-content:center;margin-top:8px">
+  <div class="fbox hl">④ 服务接入<br><span style="color:#aeb4bd">OpenAI 兼容 API/路由<br>tokenizer/多协议</span></div>
+  <div class="arr">→</div>
+  <div class="fbox hl">⑤ 请求调度执行<br><span style="color:#aeb4bd">调度器→KV 管理→并行执行<br>→采样/结构化约束</span></div>
+  <div class="arr">→</div>
+  <div class="fbox ok">⑥ 监控与剖析<br><span style="color:#aeb4bd">TTFT/TPOT/吞吐/命中率<br>火焰图/nsys/torch profiler</span></div>
+</div>
+<div class="cap">图 3-3 · 本文自绘，部署全链路。以 DeepInfer 为例的逐环节注脚：① <code>DEEPINFER_HF_MODEL_DIR</code> 支持本地 checkpoint，或 <code>load_format=dummy</code> 合成权重做 profiling<sup class="cite">[DI26]</sup>；② <code>hugging_face/weights.py</code>（436 行）做 HF→引擎张量映射；③ <code>_init_cache()</code> 先 profile 显存再定 KV blocks（<code>llm_engine.py</code> L416–458）；④ 开源版仅离线，在线协议由 deepseek-recipe 承担<sup class="cite">[DIRECIPE26]</sup>；⑤ 第 4 章全流程；⑥ <code>profile_server.py</code> 运行时 HTTP 剖析接口 + <code>stats_logger.py</code> 每步统计（含 attn_tflops、moe_load_balance_ratio、batch_confidence_error）。</div>
+</div>
+<p><b>监控的定制化信号</b>是引擎成熟度的标志：通用引擎给 GPU 利用率与时延分位数；DeepInfer 直接暴露"投机接受置信度误差""专家负载不均衡比"这类引擎内部健康度指标——因为它的优化依赖这些回路（DSpark 用置信度调度、EPLB 用负载统计）。</p>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>十层栈环环相扣：图编译与算子（L1–L2）决定单步多快，调度与 KV（L4–L5）决定 GPU 多满，并行（L6）决定能装多大、算法加速（L7）决定每 token 多便宜——任何一层缺失都会让其他层的收益打折。</li>
+<li>四大算法杠杆各有公式可算：FlashAttention 省的是 O(n²)→O(n) 的访存，量化乘的是算术强度，稀疏化换的是线性成本，投机解码的期望产出 = (1−α^(γ+1))/(1−α)。</li>
+<li>MoE/长上下文/多模态/异构不是"附加题"而是 2025 年后的主战场：专家并行与 all-to-all、KV 稀疏与存储分层、VE 独立部署、TileLang 双后端——定制化引擎的护城河恰恰在这些"通用框架难以同时伺候"的地方。</li>
+</ol>
+</div>
+<h2 id="s2"><span class="no">2</span>发展历程：从通用框架到定制引擎</h2>
+
+<p>本章按"题目"而非论文组织：每一代系统都在解决上一代暴露出的特定瓶颈，而每个被解决的问题又会暴露下一个。链条是：<b>算子慢（FT 时代）→ 批处理僵硬（Orca）→ KV 显存浪费（vLLM）→ 前缀重复计算（SGLang）→ 两阶段互相干扰（Sarathi/分离派）→ 通用框架吃不满专属模型（DeepInfer）</b>。</p>
+
+<h3>2.1 朴素时代：直接用训练框架跑推理为什么不行（2017–2022）</h3>
+<p>2022 年之前，"部署一个大模型"的默认姿势是 HuggingFace Transformers 的 <code>generate()</code>，配上一个传统模型服务器。三宗罪：</p>
+<ol>
+<li><b>Python/launch 开销</b>：每个生成 token 跑一遍完整前向，所有算子逐个 eager 启动，小 batch 下 GPU 大部分时间在等 CPU——训练 kernel 本为大 batch 高利用率设计，对小 batch 延迟敏感场景天生次优<sup class="cite">[DSINF22]</sup>。</li>
+<li><b>无迭代级批处理</b>：批内先完成的请求空转、后到的排队，不同长度输入还要 padding 齐平<sup class="cite">[ORCA22]</sup>。</li>
+<li><b>KV 静态连续分配</b>：按最大长度预留显存。vLLM 论文实测这类系统 KV 显存有效利用率仅 <b>20.4%–38.2%</b>（即六到八成 KV 显存被浪费）<sup class="cite">[VLLM23]</sup>。</li>
+</ol>
+<p>传统通用 serving（TF Serving 2016 / TorchServe 2020 / ONNX Runtime 2018）的强项是版本管理、A/B、动态批处理（request 级）与图编译——它们假设"一次请求 = 一次前向"，<b>不理解自回归的多迭代负载，不理解 KV 生命周期，不理解 prefill/decode 差异</b>。结局颇有象征意味：TorchServe 于 2025-08-07 归档只读<sup class="cite">[TORCHSERVE]</sup>；ONNX Runtime 到 2023 年底才以 GenAI 扩展补 LLM 支持。</p>
+
+<h3>2.2 算子库时代：FasterTransformer → TensorRT-LLM（2021–2023）</h3>
+<p><b>FasterTransformer（NVIDIA，2019 年起服务 BERT，2021 年 v4.0 支持多机 GPT）</b>回答的问题是"Transformer 的算子本身太慢"：kernel 多、launch 开销大、小 batch GEMM 带宽利用率低。答案是纯 C++/CUDA 算子库 + 深度融合（LayerNorm/Attention/采样融合）+ TP/PP 多卡。官方 README 数字（T4/A100，静态定长 batch）：BERT 对 TF XLA ~3×、端到端解码吞吐比 TensorFlow 4–18×<sup class="cite">[FT21]</sup>。<b>它的两个先天缺陷恰好是下一代系统的靶子</b>：自身无调度器（要靠 Triton 做 request 级组批）、KV 按最大长度预分配（Orca 论文实测 13B 模型 batch≥8 即 OOM）。2023-05 官方公告"开发迁移至 TensorRT-LLM"<sup class="cite">[FT21]</sup>。</p>
+<p><b>TensorRT-LLM（2023-09-09 博客发布，10-19 公开可用）</b>是 FT 的继任者，把"编译"补进来：模型编译为 TensorRT engine plan（融合 kernel + 算子调度图）、FlashAttention/XQA kernel、FP8/INT8/AWQ/GPTQ 量化矩阵、<b>in-flight batching</b>（TRT-LLM 对 continuous batching 的命名）。官方口径：GPT-J-6B 在 H100 上比"A100 FP16 PyTorch eager"基线共 8× 吞吐<sup class="cite">[TRTLLM23]</sup>——注意基线是 PyTorch eager 而非 vLLM。<b>代价</b>是部署复杂度：engine 编译构建流程长（第三方教程常引"28 分钟级"构建时间<sup class="cite">[SPHERON26]</sup>）、版本兼容脆弱、绑定 NVIDIA。2025 年它经历了"补课式开源"：2025-03-22 宣布全面开源（C++ 运行时核心进 GitHub）、2025-04 宣布新 PyTorch 架构去 TensorRT 硬依赖、2025-09-25 发布 TRT-LLM 1.0（"Easier. Faster. Open."）<sup class="cite">[TRTLLM1]</sup>——编译型引擎向动态运行时低头，是生态选择的结果。</p>
+
+<h3>2.3 系统调度时代：Orca 与 vLLM（2022–2023）</h3>
+<h4>2.3.1 Orca：把调度单位从"请求"改成"迭代"</h4>
+<p>OSDI'22 的 Orca（首尔大学 + FriendliAI）指出 request 级调度的死穴：批内早完成的请求无法返回、晚到的进不来（论文原话 "early-finished and late-joining requests"）。两个机制：<b>iteration-level scheduling</b>（调度器每次只让引擎跑一个迭代，每步后即可换人）与 <b>selective batching</b>（Linear/Norm 等规则算子按 token 维 flatten 批处理，形状不规则的 attention 拆开算——任意请求集合都能进同一批）<sup class="cite">[ORCA22]</sup>。</p>
+<div class="citebox">[ORCA22] Yu et al. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. OSDI'22（2022-07；无 arXiv 版本，正式出处为 USENIX 页面）。GPT-3-175B、16×A100-40GB、合成泊松负载：归一化延迟同为 190 ms/token 时 FT+request 级调度 0.185 req/s vs Orca 6.81 req/s = <b>36.9×</b>。<span class="q">"Orca improves the throughput by up to 36.9×"</span>。注意：引擎微基准里 13B 下 Orca 与 FT 相当甚至略慢——<b>收益几乎全部来自调度层</b>，这正是它成为"系统论文"而非"kernel 论文"的原因。</div>
+<p>Orca 的局限：KV 仍按请求 max_tokens 预留连续空间（buddy allocation）——这成了 vLLM 论文的直接攻击面。其思想由团队创业公司 FriendliAI 与整个行业继承：TGI 的 "continuous batching"、TRT-LLM 的 "in-flight batching"、vLLM/LightLLM/TurboMind 的调度器全部源于此。</p>
+<h4>2.3.2 vLLM：把操作系统分页搬进 KV 显存</h4>
+<p>vLLM（UC Berkeley Sky Lab，2023-06-20 博客、SOSP'23 论文，2025-05 起由 PyTorch Foundation 托管）攻 KV 显存管理：借<b>虚拟内存分页</b>——KV 切成 16-token block，逻辑块经 block table 映射到任意物理块。三重收益：消外部碎片（块等大）、内部碎片只剩最后一块（<b>浪费 &lt;4%</b> vs 现有系统 20.4–38.2% 有效率）、天然支持块级共享（并行采样/beam search 的 copy-on-write、前缀共享）。论文数字：对 Orca(Oracle) 1.7–2.7×、对 FT 最高 22×（OPT 系、A100）<sup class="cite">[VLLM23]</sup>；博客口径对 HF 14–24×、对 TGI 2.2–2.5×（LLaMA-7B@A10G/13B@A100，ShareGPT 分布）<sup class="cite">[VLLMBLOG23]</sup>。<b>诚实的代价</b>（论文 §7.1 自述）：PagedAttention 因 block table 间接寻址，attention kernel 本身比 FT 慢 20–26%——<b>收益在系统层而非 kernel 层</b>，这是"内存管理 vs 算子极致"的第一笔公开账。</p>
+<div class="note"><b>谱系铁证（官方原文）</b>：vLLM 论文 §5.1 明言其 attention kernel "adapt the attention kernel in FasterTransformer"（改造自 FT）；2025 年 vLLM V1 博客致谢 "the design of vLLM V1 builds upon and enhances several open-source LLM inference engines, including LightLLM, LMDeploy, SGLang, TGI, and TRT-LLM"<sup class="cite">[VLLMV1]</sup>。开源引擎间的继承与反哺，比"谁抄谁"的叙事健康得多。</div>
+<p><b>vLLM V1（2025-01-27 alpha，年内转正）</b>是单引擎历史上最大规模的一次重写：调度器统一（取消 prefill/decode 二分表示，请求即 <code>{id: num_tokens}</code>）、prefix caching 默认开（0% 命中时损失 &lt;1%）、EngineCore 独立进程、piecewise CUDA graph + torch.compile、FlashAttention-3，相对 V0 最高 1.7× 吞吐<sup class="cite">[VLLMV1]</sup>；2025-12 又交付 DeepSeek Wide-EP 部署（2.2k tok/s/H200）、async scheduling、PD 分离<sup class="cite">[VLLMLSC25]</sup>。</p>
+
+<div class="summary3"><b>本节小结（记住三句话）</b>
+<ol>
+<li>通用框架的三宗罪——launch 开销、request 级批处理、KV 静态分配——分别被三代技术解决：算子融合/CUDA Graph（FT/TRT-LLM）、iteration-level 调度（Orca，36.9×）、分页 KV（vLLM，浪费 60–80%→&lt;4%）。</li>
+<li>关键分水岭在 2023：Orca+vLLM 证明"系统层收益可以远大于 kernel 层收益"，此后所有引擎都是调度系统而不仅是算子集合。</li>
+<li>谱系是继承而非颠覆：vLLM 的 kernel 出自 FT，V1 吸收 LightLLM/LMDeploy/SGLang/TGI/TRT-LLM，TRT-LLM 2025 年全面开源并向 PyTorch 动态架构靠拢——静态编译与动态运行时在互相靠近。</li>
+</ol>
+</div>
+<h3>2.4 生态爆发：百家争鸣的 2023–2024</h3>
+<p>vLLM 证明了"LLM 推理系统"是一门独立学问后，2023–2024 年各路人马从不同切口入场。按核心切口归类：</p>
+<table>
+<tr><th>框架（时间）</th><th>核心切口</th><th>关键机制</th><th>代表数字（口径见正文）</th></tr>
+<tr><td><b>SGLang</b>（2023-12 arXiv，NeurIPS'24）</td><td>"LM 程序"的执行效率：多轮调用+控制流+结构化输出</td><td>RadixAttention（radix tree 组织 KV、LRU、cache-aware 调度）+ 前端 DSL + 压缩有限状态机（多 token 路径压成单步）</td><td>复杂程序负载最高 6.4× vs Guidance/vLLM/LMQL（Llama-2-7B@A10G，命中 50–99%）；调度开销 &lt;0.3%；生产 TTFT 降 1.7×<sup class="cite">[SGLANG24]</sup></td></tr>
+<tr><td><b>LightLLM</b>（ModelTC，2023）</td><td>调度粒度再细一层：token-wise</td><td>Router/HttpServer/Detokenizer 多进程解耦；token 级 KV 管理；纯 Python 便于研究</td><td>学术衍生 ParrotServe（OSDI'24）、LoongServe（SOSP'24）、ASPLOS'25 调度器论文、ACL'25 杰出论文 Pre³；被 vLLM V1/SGLang 致谢<sup class="cite">[LIGHTLLM]</sup></td></tr>
+<tr><td><b>LMDeploy/TurboMind</b>（InternLM，2023）</td><td>量化推理落地：W4A16</td><td>TurboMind 引擎（最初 fork 自 FasterTransformer 的 C++ 后端）+ AWQ 4-bit + KV int8/int4 在线量化 + 后期整合 FlashMLA/DeepGEMM/DeepEP 与 PD 分离</td><td>2023-08 W4A16 为 FP16 的 2.4×（当时最快开源实现）；2025-09 MXFP4（H800 上 gpt-oss 为 vLLM 的 1.5×）<sup class="cite">[LMDEPLOY]</sup></td></tr>
+<tr><td><b>DeepSpeed-Inference</b>（微软，ICML'22）/ <b>FastGen</b>（2024-01）</td><td>超大模型多卡与 kernel 注入</td><td>深度算子融合 + skinny GEMM + 推理自适应并行 + ZeRO-Inference；FastGen 的 Dynamic SplitFuse</td><td>DS-Inf：175B 比 FT 1.51×、MoE 最高 7.3×延迟降低（256×A100）<sup class="cite">[DSINF22]</sup>；FastGen vs vLLM(v0.2.x)：最高 2.3× 有效吞吐、3.7× P95 尾延迟改善<sup class="cite">[DSFG24]</sup></td></tr>
+<tr><td><b>HuggingFace TGI</b>（2023-05 前后）</td><td>开箱即用的服务化</td><td>Rust 路由 + continuous batching + PagedAttention（后接入）+ 模型生态绑定 HF Hub</td><td>作为 vLLM 博客/SGLang 论文的常用基线存在；开源声量后被 vLLM/SGLang 超过【第三方观察】</td></tr>
+<tr><td><b>llama.cpp / MLC-LLM</b>（2023-03 起）</td><td>端侧与消费级硬件</td><td>GGUF 量化格式（k-quants）+ 纯 C/CPU 推理 / TVM 编译多后端</td><td>让 4-bit 70B 跑进 Mac/手机，催生"本地推理"生态；与数据中心引擎分属两个世界</td></tr>
+</table>
+<p class="codecap">表 2-1 · 2023–2024 生态爆发期的框架谱系（各官方仓库/论文核实，2026-10 快照）。三个切口洞察：<b>①</b> SGLang 证明"前缀复用"是被低估的金矿（Agent 时代的入场券）；<b>②</b> LightLLM 证明调度粒度还有细的余地，其研究价值大于其市场份额；<b>③</b> LMDeploy 证明量化是国产/消费级硬件的第一刚需。</p>
+<p>同期还有两条重要的"外部线"：FlashAttention v2（2023-07）让长上下文服务可行<sup class="cite">[FA2]</sup>；llama.cpp 的 GGUF 与 vLLM 的 PagedAttention 分别成为端侧与数据中心的事实标准格式。DeepSeek-V2（2024-05）从模型侧扔下重磅 MLA——KV 压缩一个数量级（70B 级每 token 从数百 KB 到数 KB 量级），后续所有 DeepSeek 系部署（包括 DeepInfer）都建立在这之上<sup class="cite">[DSV2]</sup>。</p>
+
+<h3 id="s2-5">2.5 专用化时代：从分离式架构到模型厂商自研引擎（2024–2026）</h3>
+<h4>2.5.1 学术三部曲：PD 分离成为共识</h4>
+<p>2024 年三篇论文把"prefill 与 decode 干扰"这个矛盾推到台前并给出同方向解法——<b>物理分离</b>：</p>
+<ul>
+<li><b>DistServe</b>（OSDI'24）：论证两阶段资源画像互斥、混部署注定顾此失彼；提出按 per-GPU goodput（SLO 内请求率）做放置与配比。摘要口径 7.4× 请求率或 12.6× 更紧 SLO（vs vLLM/DeepSpeed-MII，OPT 系、32×A100）；KV 传输在最优放置下占总时延 &lt;0.1%<sup class="cite">[DISTSERVE24]</sup>。</li>
+<li><b>Splitwise</b>（ISCA'24，微软）：从数据中心视角看，同功率预算下分离集群 2.35× 吞吐（DGX-A100/H100 集群级模拟+实测 profile，BLOOM-176B）<sup class="cite">[SPLITWISE24]</sup>。</li>
+<li><b>Mooncake</b>（月之暗面 Kimi 生产系统，arXiv v1 2024-06-26 / FAST'25 最佳论文）：把分离做到极致——KVCache 为中心的分层池（GPU/CPU/SSD），Conductor 全局调度；真实负载回放多承载 75% 请求且 TBT 达标率 ~100%（vs vLLM 混部署 57%），A800/H800 集群实际多承载 115%/107%<sup class="cite">[MOONCAKE25]</sup>。月活数亿用户的生产规模（数千节点、日处理 100B+ token）使其成为"分离式架构可行"的最强证据。</li>
+</ul>
+<h4>2.5.2 工业落地线：从组件开源到引擎开源</h4>
+<ul class="timeline">
+  <li><span class="t">2024-12</span><b>DeepSeek-V3 上线</b>：671B MoE、FP8 训推一体、MTP 投机头进模型结构；技术报告披露生产推理为 PD 分离 + 跨机房布局，MTP 使解码吞吐 1.8×（接受率 85–90%）<sup class="cite">[DSV3]</sup>。官方知乎博客进一步给出 V3/R1 部署拓扑：prefill 4 节点（TP4+DP8+EP32）、decode 40 节点（DP80+EP320）<sup class="cite">[DSV3ZH]</sup>。</li>
+  <li><span class="t">2025-02</span><b>DeepSeek 开源周</b>：六个工作日放出 FlashMLA（H800 上 3000 GB/s、580 TFLOPS）、DeepEP、DeepGEMM（1350+ FP8 TFLOPS）、3FS（聚合读 6.6 TiB/s、KVCache 查询单客户端 &gt;40 GiB/s）、DualPipe/EPLB 等，最后预告"One More Thing"——自研推理引擎<sup class="cite">[DSOSW25]</sup>。推理底座组件首次以"生产同款"姿态开源，SGLang/vLLM/LMDeploy 随即全量吸收。</li>
+  <li><span class="t">2025-03</span><b>NVIDIA Dynamo</b>（GTC 2025）：Triton 后继的分布式推理框架——KV 感知路由、分布式 KV 管理、GPU-aware 调度、NIXL 传输抽象层；官方宣称 DeepSeek-R1 on Blackwell 服务能力最高 30×（宣传口径，基线未公开）<sup class="cite">[DYNAMO25]</sup>。PD 分离进入官方工业标准件时代。同期 vLLM v0.8 生产化 disaggregated prefilling，SGLang 以 96×H100 复刻 DeepSeek 大规模 EP（每节点 52.3k in / 22.3k out tok/s @ISL2000）<sup class="cite">[SGEP25]</sup>。</li>
+  <li><span class="t">2025-09</span><b>DeepSeek V3.2-Exp 引入 DSA</b>：lightning indexer + top-2048 token 选择的稀疏注意力进生产，API 价格随之下调 50%+<sup class="cite">[DSV32]</sup>——"模型结构为推理成本让路"首次明码标价。</li>
+  <li><span class="t">2026-10-20</span><b>DeepInfer 开源</b>：模型厂商第一次把<b>生产推理引擎本体</b>放进开源（此前只有组件与博客）。GitHub 仓库 2026-10-16 创建、10-20 官方公告（fresh drop：仅 5 个 commit）；单集群 155 万亿 tokens/日、每 GPU 小时营收 38 美元（谷电价）<sup class="cite">[DI26]</sup><sup class="cite">[DIQA26]</sup>。同期开源 deepseek-recipe（Rust 实现的生产级 token 编解码，多协议 API 对齐官方行为）<sup class="cite">[DIRECIPE26]</sup>。第 4 章全程解剖。</li>
+</ul>
+<div class="note"><b>这一代与前代的本质区别</b>：2023 年的引擎在"通用负载"上优化（谁都能跑，尽量快）；2025–2026 年的定制引擎在<b>收敛后的负载</b>上优化（单一模型族 + 固定集群拓扑 + 已知流量形态），于是可以把 KV 存储做进文件系统、把调度决策搬上 GPU、把验证预算按 token 分配——这些设计的共同前提是"我不需要服务别人家的模型"。与此同时通用引擎也吸收了全部单点技术（vLLM/SGLang 的 Wide-EP、PD 分离、FlashMLA/DeepGEMM/DeepEP 集成均已落地），两条路线在 2026 年形成稳定分工：通用引擎吃宽矩阵，定制引擎打深极限。</div>
+
+<div class="summary3"><b>本节小结（记住三句话）</b>
+<ol>
+<li>2023–2024 的百家争鸣各攻一个切口：SGLang 攻前缀复用（RadixAttention）、LightLLM 攻 token 级调度、LMDeploy 攻量化落地、DeepSpeed 攻超大模型多卡——它们的最好设计全部被 vLLM V1 / SGLang / TRT-LLM 吸收（官方致谢可查）。</li>
+<li>PD 分离三部曲（DistServe/Splitwise/Mooncake）证明了同一个论断：混部署的 goodput 损失可达数倍，分离的代价（KV 传输与系统复杂度）在 RDMA 与分层存储下可承受。</li>
+<li>DeepSeek 用两年时间完成了"模型创新（MLA/MTP/DSA）→ 组件开源（FlashMLA/DeepGEMM/DeepEP/3FS）→ 引擎开源（DeepInfer）"的三级跳，把"模型—系统—芯片协同设计"从口号变成可逐行阅读的代码。</li>
+</ol>
+</div>
+<h2 id="s5"><span class="no">5</span>横向比较：谁在什么条件下更快</h2>
+
+<h3 id="s5-1">5.1 七维度定性对比</h3>
+<p>下表是"设计取向"层面的对比——不写具体数字（数字见 5.2），只回答"这个框架天生擅长什么、付出什么"：</p>
+<table>
+<tr><th>框架</th><th>吞吐</th><th>首 token 延迟</th><th>逐 token 延迟</th><th>显存效率</th><th>并发能力</th><th>部署复杂度</th><th>硬件适配</th></tr>
+<tr><td>HF Transformers</td><td class="bad">基线（最慢）</td><td>差</td><td>差</td><td class="bad">无 KV 管理</td><td>个位数</td><td class="good">最简单</td><td class="good">广（但慢）</td></tr>
+<tr><td>FasterTransformer（已停更）</td><td>静态批下好</td><td>中</td><td>好（kernel 快）</td><td class="bad">连续预分配</td><td class="bad">受限于显存碎片</td><td>中（C++ 集成）</td><td class="bad">仅 NVIDIA</td></tr>
+<tr><td>TensorRT-LLM</td><td class="good">编译后稳态最高梯队</td><td>好</td><td class="good">好（XQA 等 kernel）</td><td>分页 KV</td><td>好</td><td class="bad">高（编译/校准/版本兼容）</td><td>NVIDIA 为主</td></tr>
+<tr><td>DeepSpeed-Inference/FastGen</td><td>超大模型多卡好</td><td>中</td><td>中</td><td>ZeRO 卸载突出</td><td>中</td><td>中</td><td>NVIDIA 为主</td></tr>
+<tr><td>vLLM</td><td class="good">高（分页 KV 满并发）</td><td>中（V1 默认 chunked）</td><td>好</td><td class="good">浪费 &lt;4%</td><td class="good">最强之一</td><td class="good">低（pip 即用）</td><td class="good">最宽（十余平台）</td></tr>
+<tr><td>SGLang</td><td class="good">高（前缀复用加成）</td><td class="good">命中时最好</td><td class="good">好（overlap 调度）</td><td>分页+radix</td><td class="good">强</td><td class="good">低</td><td>宽（含 AMD/TPU/昇腾）</td></tr>
+<tr><td>LightLLM</td><td>中高（token 级调度）</td><td>中</td><td>中</td><td>token 级管理</td><td>中</td><td class="good">低（纯 Python）</td><td>中</td></tr>
+<tr><td>LMDeploy/TurboMind</td><td>中高（W4A16 强）</td><td>中</td><td>好（C++ 后端）</td><td class="good">KV 在线量化</td><td>中高</td><td>中</td><td>NVIDIA+国产卡跟进快</td></tr>
+<tr><td>llama.cpp / MLC</td><td>端侧口径下好</td><td>好（小模型）</td><td>中</td><td class="good">GGUF 量化极致</td><td>单机低并发</td><td class="good">低</td><td class="good">CPU/Mac/手机</td></tr>
+<tr><td><b>DeepInfer</b></td><td class="good">专属负载下最高梯队</td><td class="good">好（EPD 分离+KV 池）</td><td class="good">好（Wide-EP+DSpark+ZOS）</td><td class="good">FP4 KV+SSD 池化</td><td class="good">超大（64+64 卡单元）</td><td class="bad">高（自建 KV 存储/LB）</td><td class="bad">窄（SM100+昇腾 950）</td></tr>
+</table>
+<p class="codecap">表 5-1 · 设计取向对比（本文综合判断，依据各官方文档与论文；评级为定性判断而非实测）。读法：没有全绿的行——<b>吞吐与部署复杂度、适配宽度与极致深度，是稳定的交换关系</b>。</p>
+
+<h3 id="s5-2">5.2 定量数据：口径、条件与可信度</h3>
+<p>先立规矩。<b>跨口径不可比</b>是性能数据的头号陷阱，以下每一行都带完整条件与证据等级（分级：实测（可复现脚本）&gt; 论文（同行评审）&gt; 官方博客（自测自报）&gt; 官方宣传 &gt; 第三方横评 &gt; 推断；跨来源倍数相乘一律禁止）：</p>
+<details open><summary><b>表 5-2 · 公开性能数据点（点开查看，按时间排序）</b></summary>
+<table>
+<tr><th>来源（等级）</th><th>结论</th><th>精确条件</th><th>出处</th></tr>
+<tr><td>Orca（论文）</td><td>vs FasterTransformer 36.9× 吞吐</td><td>GPT-3-175B、16×A100-40GB、合成泊松（输入 U(32,512)、输出 U(1,128)）、归一化延迟同为 190 ms/token：0.185→6.81 req/s</td><td>OSDI'22（2022-07）<sup class="cite">[ORCA22]</sup></td></tr>
+<tr><td>vLLM 博客（官方）</td><td>vs HF 14–24×；vs TGI 2.2–2.5×</td><td>LLaMA-7B@A10G / 13B@A100-40GB、ShareGPT 长度分布</td><td>2023-06-20<sup class="cite">[VLLMBLOG23]</sup></td></tr>
+<tr><td>vLLM 论文（论文）</td><td>vs FT/Orca 2–4×；vs FT 最高 22×</td><td>OPT-13B/66B/175B、A100、ShareGPT/Alpaca、归一化延迟曲线拐点；KV 有效率 20.4–38.2%→96.3%</td><td>SOSP'23（2023-09）<sup class="cite">[VLLM23]</sup></td></tr>
+<tr><td>Anyscale（官方）</td><td>CB ≈8× static；FT ≈4×；vLLM（CB+PA）最高 23×</td><td>OPT-13B、单张 A100-40GB、1000 请求、输入 512 tok、输出指数分布</td><td>2023-06-22<sup class="cite">[ANYSCALE23]</sup></td></tr>
+<tr><td>SGLang（论文）</td><td>最高 6.4×（vs Guidance/vLLM v0.2.5/LMQL）</td><td>Llama-2-7B@A10G 为主、11 类"LM 程序"负载、缓存命中 50–99%</td><td>NeurIPS'24（arXiv 2023-12）<sup class="cite">[SGLANG24]</sup></td></tr>
+<tr><td>Sarathi-Serve（论文）</td><td>vs vLLM 容量 2.6–4.7×</td><td>Mistral-7B/Yi-34B/LLaMA2-70B/Falcon-180B、A100/A40、P99 TBT SLO（strict=5×单步时延）</td><td>OSDI'24（2024）<sup class="cite">[SARATHI24]</sup></td></tr>
+<tr><td>DistServe（论文）</td><td>7.4× 请求率 / 12.6× 更紧 SLO</td><td>vs vLLM/DeepSpeed-MII、OPT-13B/66B/175B、32×A100-80GB；KV 传输占时延 &lt;0.1%</td><td>OSDI'24（2024）<sup class="cite">[DISTSERVE24]</sup></td></tr>
+<tr><td>Mooncake（论文+官方）</td><td>真实负载多承载 75% 请求 / 集群实际 +115%/107%</td><td>LLaMA2-70B、8×A800-80GB/节点 + 800Gbps RDMA、TBT SLO P90；FAST'25 最佳论文</td><td>arXiv 2024-07（v5 至 2026-10）<sup class="cite">[MOONCAKE25]</sup></td></tr>
+<tr><td>SGLang EP 博客（官方实测）</td><td>每节点 52.3k in / 22.3k out tok/s</td><td>DeepSeek-R1/V3、96×H100（12 节点）、PD 分离+大规模 EP、ISL=2000；EPLB 带来 decode 2.54×</td><td>2025-05-05<sup class="cite">[SGEP25]</sup></td></tr>
+<tr><td>DeepInfer QA（官方）</td><td>155T tokens/日/集群；$38/GPU·h；DSpark +5.4%（生产点）</td><td>V4.1-Flash 生产集群；DSpark 为 EP64/DP64 离线基准、每 rank 60 并发</td><td>2026-10<sup class="cite">[DIQA26]</sup></td></tr>
+<tr><td>第三方横评（第三方）</td><td>唯一 prompt 下 vLLM≈SGLang（±5%）；共享前缀下 SGLang 领先；TRT-LLM 稳态吞吐最高但构建 ~28 min</td><td>Llama-3.3-70B FP8@H100 等各口径（Spheron 2026-03、sglang#1639 2024-11 等，口径不一）</td><td>【第三方，仅方向性参考】<sup class="cite">[SPHERON26]</sup></td></tr>
+</table>
+</details>
+<div class="note"><b>可以并列比较的只有四类</b>：① 同一论文内部的对比；② 条件完整且第三方按同口径复测过（如 AMD 用 TRT-LLM 公布方法在 MI300X 复测，2025-01）；③ MLPerf 同版本同场景（v5.0，2025-04）；④ 同工具同参数的社区互跑。<b>不可并列的典型错误</b>：vLLM 博客 24×（vs HF）与论文 2–4×（vs FT/Orca）混用；DistServe 的 goodput 倍数与 Sarathi 的容量倍数混用（SLO 定义不同）；DeepInfer 单机 Pareto（4P+64D 卡）与生产集群总量（155T/日，含 KV 池与跨 DC）混用。</div>
+
+<h3 id="s5-3">5.3 性能提升到底来自哪里：一笔归因账</h3>
+<p>把"我比你快 N 倍"拆开看，钱花在五个口袋里。以两个标本为例：</p>
+<h4>5.3.1 vLLM 的 24×（vs HF，博客口径）分解</h4>
+<table>
+<tr><th>来源</th><th>贡献（估计）</th><th>证据</th></tr>
+<tr><td>算子/kernel 化 + 去除 Python 开销</td><td>~3–5×</td><td>HF eager 是最软基线；FT/TRT-LLM 时代已证明此量级<sup class="cite">[FT21]</sup></td></tr>
+<tr><td>Continuous batching（迭代级调度）</td><td>~8×（相对朴素静态批）</td><td>Anyscale 博客单独隔离了此变量<sup class="cite">[ANYSCALE23]</sup></td></tr>
+<tr><td>PagedAttention（并发上限 ×2–4）</td><td>~2–4×</td><td>vLLM 论文：KV 有效率 20.4–38.2%→96.3%，同样显存下并发更大<sup class="cite">[VLLM23]</sup></td></tr>
+</table>
+<p class="codecap">表 5-3 · 分解为本文根据三份公开实验的推断（标"估计"；三项相乘约 48–160×，实际 24×，因各因素有重叠与饱和——归因账只能看量级与主次，不能精确相乘）。</p>
+<h4>5.3.2 DeepInfer 的快来自哪里（对照第 4 章机制）</h4>
+<table>
+<tr><th>口袋</th><th>DeepInfer 的具体设计</th><th>量级证据（官方口径）</th></tr>
+<tr><td>算子/软硬协同</td><td>FlashMLA/DeepGEMM/Mega MoE/30+ TileLang 算子、FP4 KV、MXFP4 专家权重</td><td>开源 FlashMLA 与内部版差 5–10%（SASS 级）→ kernel 层已接近榨干<sup class="cite">[DIQA26]</sup></td></tr>
+<tr><td>内存管理</td><td>分页 block KV + StateBlock + 3FS 全局池（TTL 3–7 天）+ FP4 KV</td><td>chatbot 3 天 TTL 损失命中率仅 0.5–1%——存储换算力的直接定价<sup class="cite">[DIQA26]</sup></td></tr>
+<tr><td>调度</td><td>C++ 调度器 + ZOS 四拍流水 + 预算化 chunked prefill + 四个 LB</td><td>整套 LB 达到离线理想基准 ~80%<sup class="cite">[DIQA26]</sup>；ZOS 借鉴 SGLang<sup class="cite">[SGLANG24]</sup></td></tr>
+<tr><td>算法（投机）</td><td>MTP 头 + DSpark 置信度验证调度</td><td>接受长度 3.2–3.3/步；动态验证 +5.4%（生产点）到 +11%（96 并发）<sup class="cite">[DIQA26]</sup></td></tr>
+<tr><td>并行拓扑</td><td>Wide-EP（decode EP64–128）+ Attention DP + EPLB</td><td>QA：Wide-EP"大幅减少每步 MoE 显存流量"；EPLB 把不均衡压到 ~1.09<sup class="cite">[DIQA26]</sup></td></tr>
+</table>
+<p class="codecap">表 5-4 · DeepInfer 的五口袋归因（证据均为官方 QA 文档，2026-10）。注意最后两行只占总增益的小头——<b>这就是"系统时代"的特征：最大的钱在内存与调度，不在 kernel</b>；模型侧（MLA/indexer/SWA/YOCO 压小 KV）则是 DeepInfer 相对通用引擎最深的护城河。</p>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>横向比较的第一纪律是口径纪律：基线（vs 谁）、指标（吞吐/容量/goodput）、SLO 定义、硬件与负载四件套不全，数字就不能并列；本文表 5-2 的每行都带全套条件。</li>
+<li>社区共识（第三方，方向性）：唯一 prompt 下 vLLM≈SGLang；共享前缀/多轮/Agent 负载下 SGLang 的 RadixAttention 优势明显；TRT-LLM 编译后稳态吞吐最高但构建最重；DeepInfer 在其专属负载与拓扑下吞吐最高但只服务一个模型族。</li>
+<li>归因账显示：2023 年代的加速大头在"调度+内存"（Orca 36.9× 全来自调度层；vLLM 的 kernel 反而比 FT 慢 20–26%）；2026 年代的定制引擎再把大头挪到"模型—内存—存储协同"（FP4 KV 进 SSD 池）与"调度躲进 GPU"（ZOS/DSpark）。</li>
+</ol>
+</div>
+<h2 id="s6"><span class="no">6</span>前沿进展与开放问题（2025–2026）</h2>
+
+<p>本章按九个子方向盘点"截至 2026-10 学界与业界在做什么"，每个方向一段进展、一段开放问题。所有条目带来源与日期；未能核实的传言一律不收。</p>
+
+<h3>6.1 高吞吐低延迟调度与 SLO 保障</h3>
+<p><b>进展</b>：goodput 成为一等目标（DistServe/Sarathi-Serve 之后成为论文标配口径）；Llumnix（OSDI'24）做跨实例动态调度 + KV 迁移（prefill P99 ≤5.5×、成本 −36% vs INFaaS 口径）<sup class="cite">[LLUMNIX24]</sup>；ServerlessLLM（OSDI'24）面向 serverless 冷启动，checkpoint 加载比 Safetensors 快 3.6–8.2×、负载延迟改善 10–200×<sup class="cite">[SLLM24]</sup>；生产栈层出：vLLM Production Stack（UChicago/LMCache，2025-01）、AIBrix（字节，2025-02）把 router/session-aware 调度/K8s 弹性打包<sup class="cite">[VLLMPS25]</sup>；NVIDIA Dynamo（2025-03）以 KV 感知路由 + NIXL 把编排做成标准件<sup class="cite">[DYNAMO25]</sup>。<b>Agent 负载</b>成为新主战场：Autellix（2025-02）把 agent 程序建成动态 DAG 调度，吞吐 4–15× vs vLLM（同延迟）<sup class="cite">[AUTELLIX25]</sup>；vLLM 2025–2026 的 Bi-Directional KV Transfer 把多轮 agent 的 TTFT 改善最高 3.3×<sup class="cite">[VLLMKVT26]</sup>；DeepInfer 的 agent TTL=3 天/chatbot=7 天是生产侧 KV 生命周期管理的直接证据<sup class="cite">[DIQA26]</sup>。</p>
+<p><b>开放问题</b>：agent 请求间 DAG 依赖与连续批调度的联合优化尚无理论；thinking/answer 双相 SLO（推理链长、答案段要快）尚未形式化；多租户多层 SLA 的公平性与抢占代价（2026-08 有首批工作）；过载下的早拒/降级（Mooncake Early Rejection 的推广）。</p>
+
+<h3>6.2 KV Cache 管理：全局池、传输层与新存储层</h3>
+<p><b>进展</b>：传输抽象层 NIXL（2024-12 开源，插件式 UCX/GDS/S3 后端）成为 Dynamo/vLLM PD 分离的底座<sup class="cite">[NIXL25]</sup>；Mooncake Store 2025-03 开源，vLLM 自 2024-12 官方支持 Mooncake Transfer Engine、2025-12 TRT-LLM/vLLM v1 接入、2026 年演进到跨引擎 KV 复用（FlexKV）<sup class="cite">[MOONCAKE25]</sup>；LMCache 做分层 store（HBM/DRAM/NVMe/Redis + P2P 共享），系统论文 2025-10 发布<sup class="cite">[LMCACHE25]</sup>；硬件侧出现新层：华为 OceanStor M900（HC 2026，原生 KV 语义、单节点 480GB/s）与业界首个量产 CXL KV 服务器（Penguin Solutions，2025–2026）<sup class="cite">[M90026]</sup>；语义/记忆缓存兴起：MemOS（2025-07）用 MemCube 统一明文/激活/KV 三类记忆，宣称 token 节省 35%<sup class="cite">[MEMOS25]</sup>。SGLang×Mooncake PD 实测 KV 传输仅占 TTFT 2.4%（164.3 GB/s，2026）<sup class="cite">[MOONCAKE25]</sup>。</p>
+<p><b>开放问题</b>：跨引擎 KV 格式标准缺失（块大小/量化/哈希链各不相同）；语义缓存命中率不可复现（Mooncake 论文指出公开基准高估实际复用率，线上理论上限 ~55%）；KV 池化后的计费、隔离与一致性；CXL/SSD 新层的统一抽象与基准。</p>
+
+<h3>6.3 推测式解码与并行生成</h3>
+<p><b>进展</b>：EAGLE-3（2025-03）报告 temp=0 下 4.1–6.5× 加速，vLLM Speculators v0.3（2025-12）支持其训练<sup class="cite">[EAGLE3]</sup>；MTP 成为部署标配（DeepSeek 系、GLM 系）；<b>置信度调度</b>进入生产（DeepInfer DSpark：+1.6%~+11%，验证量 −30%）<sup class="cite">[DIQA26]</sup>；P-EAGLE（AWS，B200）单前向并行出 K 个 draft，再快 1.69×<sup class="cite">[PEAGLE26]</sup>；<b>扩散/并行解码商用</b>：Inception Labs Mercury（2025-02 首发，1000+ tok/s）、Mercury 2.5（1107 tok/s、260K ctx）、Google Gemini Diffusion（I/O 2025 预览，外部实测 ~1000–2000 tok/s）、开源 DiffusionGemma（2026-06，25.2B MoE）<sup class="cite">[MERCURY25]</sup>。<b>负面结果同样重要</b>："Speculative Decoding: Performance or Illusion?"（MLSys 2026）实测 EAGLE 在 Llama3.1-8B/GSM8K 上从 bs=1 的 1.73× 掉到 bs=128 的 1.21×；"Batch Speculative Decoding Done Right"（2025-10）指出公开 batch 实现存在正确性 bug 与"被最差序列拖垮"的截断问题；工程经验法则"bs&gt;32 关投机"流传（第三方）<sup class="cite">[MLSYS26SD]</sup>。</p>
+<p><b>开放问题</b>：batch 与投机的结构性冲突（memory-bound→compute-bound 切换点随模型/硬件漂移，需在线自适应）；temperature&gt;0 时等价性证明的边界；扩散 LLM 与 KV 语义不兼容，需要全新 serving 栈。</p>
+
+<h3>6.4 分离式 Prefill/Decode 与算力解耦</h3>
+<p><b>进展</b>：学术（DistServe/Splitwise/Mooncake）→ 工业标准件（Dynamo/NIXL，2025-03）→ 引擎内置（vLLM v0.8 起、SGLang、TRT-LLM 2025 主打特性）<sup class="cite">[DYNAMO25]</sup><sup class="cite">[VLLMLSC25]</sup>；vLLM 2025–2026 演进路线：Push-based KV Transfer（prefill 直写 decode 显存）→ Bi-Directional（多轮 agent）→ 混合 SSM 状态迁移<sup class="cite">[VLLMKVT26]</sup>；DeepSeek 生产口径：E/P/D 三分离、P:D≈1:1、最小单元 64P+64D、跨相邻 DC ~400Gbps/GPU<sup class="cite">[DIQA26]</sup>。</p>
+<p><b>开放问题</b>：P:D 配比随负载漂移的自适应；分离后 prefill 侧 HBM 冗余的再利用；跨 DC RTT 抖动下的 SLO 保障；KV 传输与计算重叠已接近极限（layer-wise streaming 后剩余收益小）。</p>
+
+<h3>6.5 MoE 推理与超长上下文</h3>
+<p><b>进展</b>：NSA（DeepSeek，2025-02，ACL'25 最佳论文）确立"原生可训练稀疏注意力"路线<sup class="cite">[NSA25]</sup>；DSA 随 V3.2-Exp 上生产（2025-09，lightning indexer + top-2048，API −50%+）<sup class="cite">[DSV32]</sup>；超大 EP 实践成熟：DeepSeek 生产 decode EP64–128<sup class="cite">[DIQA26]</sup>、SGLang 96×H100 复刻并扩展至数百卡<sup class="cite">[SGEP25]</sup>；Kimi K2 系列（2025-07 起开源，1T 总参/32B 激活、MLA、256K ctx）延续 MLA+MoE 路线<sup class="cite">[K2]</sup>；DeepSeek-V4.1-Flash（2026-10）以 CED 架构 + indexer + SWA + YOCO 把 1M 上下文做进 763B 模型<sup class="cite">[DIV4126]</sup>。</p>
+<p><b>开放问题</b>：稀疏注意力与前缀缓存的块语义冲突（被选中的 token 跨块复用困难——DSA 类模型的多轮复用比连续 KV 更棘手）；KV 压缩的可逆性验证；超长上下文 TTFT 的用户可感知上限；专家负载突变下 EPLB 的时滞。</p>
+
+<h3>6.6 异构硬件与国产栈</h3>
+<p><b>进展</b>：昇腾路线图（HC 2025-09）：950PR（2026-Q1，主打 prefill）→ 950DT（2026-Q4，训练+decode）→ 960/970；DeepInfer 支持 Ascend 950（CANN 9.2），TileLang-Ascend/DeepGEMM-Ascend 同步开源<sup class="cite">[DI26]</sup><sup class="cite">[ASCEND25]</sup>；寒武纪 vllm-mlu 2026-04-24 day-0 支持 DeepSeek-V4<sup class="cite">[MLU26]</sup>；摩尔线程 MUSA 后端合入 SGLang 主线；AMD MI300/MI325 在 MLPerf v5.0 与 H200 对位（2025-04）；TPU 侧 JetStream 并入 tpu.vllm.ai（2026-02）。"day-0 支持新模型"已成为国产芯片竞争的核心话术。</p>
+<p><b>开放问题</b>：算子生态碎片化（Triton kernel 四家国产硬件均不直接支持，各持私有 DSL：AscendC/CNRT/MATE）；MLA/MoE/MTP 新结构的跟进速度差距；异构混布集群的调度与 KV 互传缺统一抽象；MLPerf 级中立基准覆盖不足导致"各家自说自话"。</p>
+
+<h3>6.7 自动编译与算子 DSL</h3>
+<p><b>进展</b>：TileLang（2025-01 开源、ICLR 2026 论文）证明 tile 级 DSL 可同时覆盖 CUDA/AMD MI300X（FlashMLA 移植，2025-04）/昇腾（2025-09）/Metal（2025-10）多后端，DeepInfer 的 DSpark 调度算子即用其编写<sup class="cite">[TILELANG26]</sup>；NVIDIA 开放 CUDA 编译栈（cuda-tile，MLIR 基 tile IR，随 CUDA 13.1 开源，2025-10 起）与 CuTe Python DSL（编译时间比 C++ 路线低最多两个数量级，CUTLASS 4.8，2026-09）<sup class="cite">[CUTLASS26]</sup>；DeepJIT（轻量 xPU kernel JIT，2026-10 出现在 DeepSeek GitHub org）；FlashInfer 成为 vLLM/SGLang 共享 kernel 层，SGLang 2026 年向 TVM-FFI 按需 JIT 体系迁移。</p>
+<p><b>开放问题</b>：DSL 碎片化（Triton/TileLang/CuTe/cuda-tile/MATE/AscendC 并存）与长尾算子维护负担；JIT 冷启动与确定性；"模型结构向系统让步"的边界（稀疏/SWA 损害质量时的回退机制）。</p>
+
+<h3>6.8 模型—系统—芯片协同设计</h3>
+<p><b>进展</b>：协同已成标配而非口号——MLA（DeepSeek/K2/GLM）、MTP 投机头、GQA、SWA、DSA/indexer 逐个从"论文技巧"变成"模型出厂配置"，引擎则为其反向定制（DeepInfer 的 SWA bounded replay、StateBlock、Engram 全是"模型结构在引擎里的投影"）<sup class="cite">[DIQA26]</sup>；FlashMLA/DeepGEMM/DeepEP 是"模型定义的 kernel"（MLA decode、FP8 GEMM、MoE all-to-all 各自专用）<sup class="cite">[DSOSW25]</sup>；昇腾 950 与 SM100 的硬件特性（HiBL HBM、FP4 单元）直接进入 DeepInfer 的低精度决策。</p>
+<p><b>开放问题</b>：协同的僵化风险——模型绑引擎、引擎绑芯片后，社区复现与第三方创新变难（DeepInfer 单模型单硬件即是显例）；结构创新的评测标准（KV 压缩了，检索质量掉没掉？）滞后于结构迭代。</p>
+
+<h3>6.9 服务级目标与成本：能耗、碳与"每 token 成本"</h3>
+<p><b>进展</b>：Splitwise 首次把功率写进推理目标（-15%~-25%）<sup class="cite">[SPLITWISE24]</sup>；DeepInfer 公开"每 GPU 小时营收 38 美元（谷电价）"——<b>推理系统第一次把电价写进 KPI</b><sup class="cite">[DIQA26]</sup>；API 价格战的技术面：DeepSeek V3.2（DSA，−50%+）与 V4.1 的降价曲线背后是"KV 进 SSD + FP4 + Wide-EP"的组合账。</p>
+<p><b>开放问题</b>：主流基准仍无能耗/碳口径；"每 token 成本"缺乏跨厂商可比的公开模型（推理侧碳核算几乎空白）；长尾 P99.9 与成本的联合优化。</p>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>2025–2026 的主旋律是三件事落地：PD 分离成为标配（Dynamo/NIXL/Mooncake 系）、KV 从"显存问题"升级为"存储系统问题"（全局池/TTL/跨引擎复用）、投机解码从"能不能"进入"何时值得"（batch 冲突与置信度调度）。</li>
+<li>负面结果与边界同样关键：大 batch 下投机收益衰减（1.73×→1.21×）、公开基准高估前缀复用率、稀疏注意力与前缀缓存互相打架——工程界正在为这些边界设计自适应机制。</li>
+<li>最大的结构性变化在生态：模型—引擎—芯片三方互相"投影"（MLA→FlashMLA→950PR；MTP→DSpark→SM100 FP4），开源组件（DeepSeek 开源周→TileLang→cuda-tile）让这种协同第一次可被外部复现与研究。</li>
+</ol>
+</div>
+<h2 id="s7"><span class="no">7</span>总结与展望：未来三到五年</h2>
+
+<h3>7.1 当前格局一句话版</h3>
+<div class="card">
+<p><b>通用引擎（vLLM/SGLang/TRT-LLM）</b>吃宽矩阵：多模型、多硬件、开箱即用，吸收一切可泛化的单点技术；<b>定制引擎（DeepInfer 类）</b>打深极限：单模型族、专属拓扑、贴 SASS 与 SSD，把"专"的红利换算成 $38/GPU·h；<b>编排层（Dynamo/Mooncake/Production Stack）</b>负责把两者组装成集群服务。三层分工在 2026 年已稳定，且互相开源反哺（vLLM V1 致谢五个引擎；DeepInfer 自述基于 vLLM）。</p>
+</div>
+
+<h3>7.2 尚未解决的问题（按紧迫度）</h3>
+<ol>
+<li><b>Agent 负载的调度理论缺位</b>：DAG 依赖、超长会话、双相 SLO（thinking 慢答案快）、KV 跨请求生命周期——现有 continuous batching 理论（Orca/Sarathi 一族）没有覆盖"请求之间有依赖"的世界，而这正在成为主要流量。</li>
+<li><b>batch 与投机的结构性冲突</b>：投机解码只在低并发时有效，而低并发恰恰不赚钱；DSpark 式动态预算是补丁不是终局，需要的是"随 batch 在线切换生成策略"的自适应机制与理论。</li>
+<li><b>KV 生态碎片化</b>：块大小、量化格式、哈希链、TTL 语义各引擎互不兼容；跨引擎/跨厂商 KV 复用（迁移模型、混合集群、灾备）没有标准——NIXL/FlexKV 在做传输层，格式层仍是空白。</li>
+<li><b>稀疏注意力 × 前缀缓存</b>：DSA/indexer 类模型的 KV 复用语义（哪些选中 token 可以跨请求共享）尚无解法，直接威胁 Agent 场景的成本曲线。</li>
+<li><b>能耗与碳成本不可见</b>：所有主流基准都不报每 token 焦耳；而电力已是推理成本的一阶项（DeepInfer 的谷电价定价是明证）。</li>
+<li><b>可复现横评基础设施缺失</b>：版本锁定 + 全条件披露 + 第三方运行的公开基准不存在，导致选型靠信仰与营销。</li>
+</ol>
+
+<h3>7.3 短期可落地（0–2 年）</h3>
+<ul>
+<li><b>PD 分离 + KV 全局池的"商品化"</b>：Dynamo/NIXL/Mooncake/LMCache 的组合会变成云厂商一键产品；中小企业不再自建。</li>
+<li><b>置信度自适应投机解码</b>：DSpark 的思路（接受概率预测 + 预算分配）会被 vLLM/SGLang 吸收为默认开关，配合"大 batch 自动关闭"策略。</li>
+<li><b>FP4/MXFP4 全面进生产</b>：Blackwell 与昇腾 950 的 FP4 单元 + DeepInfer 已验证的 KV FP4 路线，会在 2027 年前成为大流量服务的默认精度（权重激进、KV 谨慎的分层策略）。</li>
+<li><b>TileLang/Triton 多后端成为算子层的"写一次到处跑"层</b>：国产芯片 day-0 支持新模型的速度竞赛会推动 DSL 统一（cuda-tile 开源是同方向信号）。</li>
+<li><b>Agent 专用服务特性</b>：会话亲和路由、KV TTL 策略化、结构化输出编译机、流式工具调用解析（DeepInfer recipe 的防注入与增量 KMP 是模板）成为标准 API。</li>
+</ul>
+
+<h3>7.4 长期研究方向（3–5 年）</h3>
+<ul>
+<li><b>生成范式的更替</b>：扩散/并行解码 LLM 若证明可在质量上对齐 AR 模型，"逐 token + KV cache"的整套世界观（本文全部内容的地基）将被重写——serving 栈要为"一次产出一段"重新设计内存与调度。这是最大的不确定项。</li>
+<li><b>推理系统进入"存储系统"成熟期</b>：KV 的全局寻址、跨引擎复用、纠删码与 GC、SSD/CXL 分层的统一抽象——类比数据库的 buffer pool 演进史，最终会出现"KV OS"标准。</li>
+<li><b>模型—系统—芯片协同的自动化</b>：给定目标负载与硬件约束，自动搜索模型结构（KV 形态/稀疏模式/MTP 深度）与引擎配置的联合设计空间（把 DeepInfer 工程师做的事变成编译器问题）。</li>
+<li><b>SLO 与成本的联合最优理论</b>：goodput、能耗、碳、价格的统一目标函数；过载下的早拒/降级/优先级有了理论根基。</li>
+<li><b>端云一体的推理</b>：3B–30B 端侧模型 + 云端大模型的路由与协同缓存（端侧命中就不上云），把"前缀复用"扩展到设备维度。</li>
+</ul>
+
+<div class="summary3"><b>本章小结（记住三句话）</b>
+<ol>
+<li>三年内最确定的四件事：PD 分离商品化、投机解码自适应化、FP4 生产化、算子 DSL 统一化——全部已有生产级证据（Dynamo、DSpark、DeepInfer、TileLang）。</li>
+<li>最不确定也最颠覆的是生成范式：若并行/扩散式生成在质量上追平，KV cache 中心的世界观将被替换，那是推理系统的"下一张白纸"。</li>
+<li>选型建议一句话：<b>多模型/多硬件/快速迭代选 vLLM 或 SGLang；单一 DeepSeek 系模型 + 大规模集群 + 有平台工程能力，参考 DeepInfer 路线；两者都会活的很好，因为它们解决的不是同一个问题。</b></li>
+</ol>
+</div>
+
+<h2 id="s8"><span class="no">8</span>术语表</h2>
+<details open><summary><b>按主题折叠的术语速查（点击展开/收起）</b></summary>
+<table>
+<tr><th>术语</th><th>一句话解释</th></tr>
+<tr><td><b>Prefill / Decode</b></td><td>一次生成的两阶段：并行读入 prompt（计算密集、决定 TTFT）与逐 token 生成（访存密集、决定 TPOT）</td></tr>
+<tr><td><b>TTFT / TPOT / TBT / ITL</b></td><td>首 token 时延 / 每输出 token 平均时延 / 相邻 token 间隔 / token 间时延（TPOT 是均值口径，TBT/ITL 逐 token 口径，P99 更严苛）</td></tr>
+<tr><td><b>KV Cache</b></td><td>每层每个 token 的 Key/Value 缓存，自回归生成的"笔记本"；每 token 数 KB～数百 KB，随上下文线性增长</td></tr>
+<tr><td><b>MHA / MQA / GQA / MLA</b></td><td>注意力 KV 组织方式演进：多头各自 KV → 单头共享 → 分组共享 → 低秩压缩潜变量（DeepSeek-V2 起，KV 降一个数量级）</td></tr>
+<tr><td><b>PagedAttention / block table</b></td><td>把 KV 切成固定 block 按需分配（借 OS 虚拟内存分页思想），浪费从 60–80% 降到 &lt;4%</td></tr>
+<tr><td><b>Continuous batching / iteration-level scheduling</b></td><td>批的组装单位从"请求"细到"迭代步"：每步可换人，GPU 持续满载（Orca 首创，业界通称 continuous batching）</td></tr>
+<tr><td><b>In-flight batching</b></td><td>TensorRT-LLM 对 continuous batching 的命名</td></tr>
+<tr><td><b>Chunked prefill / SplitFuse</b></td><td>把长 prompt 切成小块分多步混入 decode，消除 TBT 尖刺（Sarathi 首创；FastGen 的变体叫 Dynamic SplitFuse）</td></tr>
+<tr><td><b>PD 分离（disaggregation）</b></td><td>Prefill 与 Decode 用不同机器/集群独立部署扩缩，KV 经 RDMA/存储层转运（DistServe/Splitwise/Mooncake）</td></tr>
+<tr><td><b>Prefix caching / RadixAttention</b></td><td>保留已完成请求的前缀 KV 供后续命中复用；SGLang 用 radix tree 组织全部前缀并 LRU 淘汰</td></tr>
+<tr><td><b>Goodput</b></td><td>只统计满足 SLO 请求的有效吞吐（DistServe 提出的优化目标）</td></tr>
+<tr><td><b>Roofline / 算术强度</b></td><td>每字节访存对应的浮点运算数；与 GPU 峰值算力÷带宽的"平衡点"比较判断瓶颈。decode batch=1 时约 1，远低于数百的平衡点</td></tr>
+<tr><td><b>FlashAttention / online softmax</b></td><td>分块进 SRAM + 在线归一化，HBM 访问 O(n²)→O(n)，数学上精确等价的 attention 算子族</td></tr>
+<tr><td><b>投机解码（speculative decoding）</b></td><td>便宜 draft 模型连猜 γ 个 token，目标模型一次前向验证，拒绝采样保证分布不变；期望产出 (1−α^(γ+1))/(1−α)</td></tr>
+<tr><td><b>MTP / DFlash / DSpark</b></td><td>多 token 预测头（模型自带 draft 结构）；DeepInfer 中的 draft 模块名；DeepInfer 的置信度调度验证子系统名</td></tr>
+<tr><td><b>量化：GPTQ / AWQ / FP8 / FP4 / MXFP4</b></td><td>把权重/KV 从 16bit 压到 4–8bit 的方法族；MXFP4/UE8M0 是带块缩放的低精度格式（DeepInfer 用于专家权重与 indexer KV）</td></tr>
+<tr><td><b>TP / PP / DP / EP / CP</b></td><td>张量并行（切矩阵，层内 all-reduce）/ 流水线并行（切层）/ 数据并行（整模型复制）/ 专家并行（切 MoE 专家，all-to-all）/ 上下文并行（切长序列）</td></tr>
+<tr><td><b>Wide-EP / Attention DP</b></td><td>DeepInfer 的 decode 并行：EP 尽量宽（64–128 卡）以减少每卡专家读取；注意力按请求切副本（#DP=#EP）</td></tr>
+<tr><td><b>EPLB</b></td><td>专家并行负载均衡：每卡多放冗余热专家副本，按统计窗口周期重排</td></tr>
+<tr><td><b>DeepEP / DeepGEMM / FlashMLA / DeepSelect / 3FS</b></td><td>DeepSeek 开源周组件：MoE all-to-all 通信库 / FP8 GEMM / MLA decode kernel / top-k 选择算子 / 分布式文件系统（KV 存储底座）</td></tr>
+<tr><td><b>MoE</b></td><td>混合专家：每 token 只激活少数专家（如 DeepSeek-V3 671B 总参/37B 激活），权重需全量驻留显存</td></tr>
+<tr><td><b>DSA / NSA / indexer</b></td><td>原生稀疏注意力（训练即稀疏）：lightning indexer 打分选 top-k token 再做完整注意力，O(L²)→O(L·k)</td></tr>
+<tr><td><b>SWA / YOCO</b></td><td>滑动窗口注意力（只看最近 W 个 token）/ You Only Cache Once（只有前 n_prefill_layer 生产 KV，后续层复用）</td></tr>
+<tr><td><b>SWA bounded replay</b></td><td>DeepInfer 机制：SWA KV 丢失时只重放末 128 token 且注意力截断在重放段内，常数代价重建近似滑窗缓存</td></tr>
+<tr><td><b>ZOS（零开销调度）/ CUDA Graph</b></td><td>把 CPU 调度与后处理藏进 GPU 前向时间的流水线技术 / 把整步 kernel 序列录制成单次 launch 的机制</td></tr>
+<tr><td><b>TileLang / Triton</b></td><td>GPU kernel 的 Python DSL（多后端生成，DeepInfer 用其生成 CUDA+昇腾两套算子）/ NVIDIA 系主流 kernel DSL</td></tr>
+<tr><td><b>Batch-invariant / 确定性采样</b></td><td>DeepInfer 特性：批组成不同结果仍一致 / 相同输入与采样参数输出完全一致（可复现性需求）</td></tr>
+<tr><td><b>EPD 分离 / VE</b></td><td>视觉编码器、Prefill、Decode 三段独立部署；VE=Vision Encoder（单卡即可，可用便宜卡）</td></tr>
+<tr><td><b>deepseek-recipe / DSML</b></td><td>DeepSeek 开源的生产级 token 编解码组件（Rust；多协议转换、防特殊 token 注入、流式增量解析）/ DeepSeek 的工具调用标记语言</td></tr>
+</table>
+</details>
+<h2 id="refs">参考文献</h2>
+<ol class="refs">
+<li id="r-ORCA22"><b>Yu, Jeong, Kim, Kim, Chun</b>. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. USENIX OSDI'22, 2022-07（无 arXiv 版本；网络流传的 arXiv:2205.05120 实为 CERN 论文，谨防误引）。<a href="https://www.usenix.org/conference/osdi22/presentation/yu">usenix.org/conference/osdi22/presentation/yu</a></li>
+<li id="r-VLLM23"><b>Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica</b>. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP'23, 2023-09-12. arXiv:2309.06180.<a href="https://arxiv.org/abs/2309.06180">arxiv.org/abs/2309.06180</a></li>
+<li id="r-VLLMBLOG23"><b>Woosuk Kwon, Zhuohan Li, et al. (vLLM team)</b>. <i>vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention</i>. 官方博客, 2023-06-20（14–24× vs HF / 2.2–2.5× vs TGI 的出处）。<a href="https://vllm.ai/blog/2023-06-20-vllm">vllm.ai/blog/2023-06-20-vllm</a></li>
+<li id="r-ANYSCALE23"><b>Cade Daniel, et al. (Anyscale)</b>. <i>Continuous Batching for LLM Inference</i>. 官方博客, 2023-06-22.<a href="https://www.anyscale.com/blog/continuous-batching-llm-inference">anyscale.com/blog/continuous-batching-llm-inference</a></li>
+<li id="r-SGLANG24"><b>Zheng, Sheng, et al.</b>. <i>SGLang: Efficient Execution of Structured Language Model Programs</i>. NeurIPS 2024；arXiv:2312.07104（v1 2023-12-11，v2 摘要 6.4×）。<a href="https://arxiv.org/abs/2312.07104">arxiv.org/abs/2312.07104</a></li>
+<li id="r-SARATHI24"><b>Agrawal, Panwar, Kwinter, et al.</b>. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. OSDI'24；arXiv:2403.02310（v1 2024-03-04）。前身 Sarathi: arXiv:2308.16369（2023-08-31，chunked prefill 首创）。<a href="https://arxiv.org/abs/2403.02310">arxiv.org/abs/2403.02310</a></li>
+<li id="r-DISTSERVE24"><b>Zhong, Liu, et al.</b>. <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>. OSDI'24；arXiv:2401.09670（v1 2024-01-17）。<a href="https://arxiv.org/abs/2401.09670">arxiv.org/abs/2401.09670</a></li>
+<li id="r-SPLITWISE24"><b>Patel, Choukse, et al. (Microsoft)</b>. <i>Splitwise: Efficient Generative LLM Inference Using Phase Splitting</i>. ISCA'24；arXiv:2311.18677（v1 2023-11-30）。<a href="https://arxiv.org/abs/2311.18677">arxiv.org/abs/2311.18677</a></li>
+<li id="r-MOONCAKE25"><b>Qin, et al. (Moonshot AI)</b>. <i>Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving</i>. FAST'25 Erik Riedel 最佳论文（2025-02-25）；arXiv:2407.00079（v1 2024-06-26；v5 更新至 2026-10-08）。<a href="https://arxiv.org/abs/2407.00079">arxiv.org/abs/2407.00079</a> ｜ 仓库 <a href="https://github.com/kvcache-ai/Mooncake">github.com/kvcache-ai/Mooncake</a></li>
+<li id="r-FA22"><b>Dao, Fu, Ermon, Rudra, Ré</b>. <i>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</i>. NeurIPS'22；arXiv:2205.14135（2022-05-27）。<a href="https://arxiv.org/abs/2205.14135">arxiv.org/abs/2205.14135</a></li>
+<li id="r-FA2"><b>Dao</b>. <i>FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning</i>. arXiv:2307.08691（2023-07-20）。<a href="https://arxiv.org/abs/2307.08691">arxiv.org/abs/2307.08691</a></li>
+<li id="r-FA3"><b>Shah, Bikshandi, Zhang, Thakkar, Ramani, Dao</b>. <i>FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-precision</i>. arXiv:2407.08608（2024-07-11）。<a href="https://arxiv.org/abs/2407.08608">arxiv.org/abs/2407.08608</a></li>
+<li id="r-DSV2"><b>DeepSeek-AI</b>. <i>DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model</i>（MLA 出处）. arXiv:2405.04434（2024-05-07）。MLA 每 token 每层缓存 576 维（512 压缩 + 64 RoPE），60 层约 69 KB/token，较 67B MHA 模型 KV 降 93.3%。<a href="https://arxiv.org/abs/2405.04434">arxiv.org/abs/2405.04434</a></li>
+<li id="r-DSV3"><b>DeepSeek-AI</b>. <i>DeepSeek-V3 Technical Report</i>. arXiv:2412.19437（2024-12-26）。671B/37B 激活、FP8、MTP 1.8× 解码吞吐（接受率 85–90%）、无辅助损失负载均衡。<a href="https://arxiv.org/abs/2412.19437">arxiv.org/abs/2412.19437</a></li>
+<li id="r-DSV3ZH"><b>DeepSeek（知乎官方号）</b>. <i>浅谈 DeepSeek V3/R1 推理系统</i>. 知乎专栏（V3/R1 部署拓扑：prefill TP4+DP8+EP32 / decode DP80+EP320 的出处）。<a href="https://zhuanlan.zhihu.com/p/27181462601">zhuanlan.zhihu.com/p/27181462601</a></li>
+<li id="r-DSV32"><b>DeepSeek</b>. <i>DeepSeek-V3.2-Exp: DeepSeek Sparse Attention（DSA）与 API 降价</i>. 官方新闻 2025-09-29.<a href="https://www.deepseek.com/en/news/v3-2-exp">deepseek.com/en/news/v3-2-exp</a> ｜ 代码 <a href="https://github.com/deepseek-ai/DeepSeek-V3.2-Exp">github.com/deepseek-ai/DeepSeek-V3.2-Exp</a></li>
+<li id="r-DI26"><b>DeepSeek-AI</b>. <i>DeepInfer: High-performance, large-scale inference framework for DeepSeek models</i>. GitHub（仓库 2026-10-16 创建、2026-10-20 公告；Apache-2.0；main 分支 2026-10 快照；本地克隆 D:\Github\DeepInfer）。<a href="https://github.com/deepseek-ai/DeepInfer">github.com/deepseek-ai/DeepInfer</a></li>
+<li id="r-DIQA26"><b>DeepSeek-AI</b>. <i>DeepSeek V4.1 Flash Inference Deployment Q&amp;A</i>. DeepInfer 仓库 doc/inference_deployment_qa.md（2026-10）。本文 DeepInfer 章节的生产数据主源（155T tokens/日、$38/GPU·h、EPD/EPLB/3FS/DSpark/SWA replay 全部细节）。<a href="https://github.com/deepseek-ai/DeepInfer/blob/main/doc/inference_deployment_qa.md">仓库文档链接</a></li>
+<li id="r-DIZH26"><b>DeepSeek（知乎官方号）</b>. <i>DeepSeek V4.1 Flash 推理系统架构长文</i>. 知乎专栏, 2026-10.<a href="https://zhuanlan.zhihu.com/p/2095560295930508953">zhuanlan.zhihu.com/p/2095560295930508953</a></li>
+<li id="r-DIRECIPE26"><b>DeepSeek-AI</b>. <i>deepseek-recipe: 生产级 token 编解码组件</i>. GitHub, 2026-10（Rust；多协议转换/防注入/分段并行编码/增量 KMP 流式解析）。<a href="https://github.com/deepseek-ai/deepseek-recipe">github.com/deepseek-ai/deepseek-recipe</a></li>
+<li id="r-DIV4126"><b>DeepSeek-AI</b>. <i>DeepSeek-V4.1-Flash-1017 模型卡</i>. HuggingFace, 2026-10-17（763B 总参、1M 上下文、CED/Causal Encoder-Decoder、552B backbone、输入激活 8B/输出激活 16B）。<a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017">huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017</a></li>
+<li id="r-DSOSW25"><b>DeepSeek-AI</b>. <i>开源周（Open Source Week）组件：FlashMLA / DeepEP / DeepGEMM / 3FS / DualPipe &amp; EPLB / One More Thing</i>. 2025-02-24 至 03-01. FlashMLA <a href="https://github.com/deepseek-ai/FlashMLA">repo</a>（首发版 2025-02-24 口径：H800 3000 GB/s、580 TFLOPS；2026-09 版本 B200 上 1460/950 TFLOPs——引用需带版本日期）｜ DeepGEMM <a href="https://github.com/deepseek-ai/DeepGEMM">repo</a>（1350+ FP8 TFLOPS）｜ DeepEP <a href="https://github.com/deepseek-ai/DeepEP">repo</a> ｜ 3FS <a href="https://github.com/deepseek-ai/3FS">repo</a>（6.6 TiB/s 聚合读、KVCache 查询 &gt;40 GiB/s/客户端，2025-02-28）</li>
+<li id="r-DEVTO26"><b>Jamil (dev.to)</b>. <i>DeepInfer vs vLLM: DeepSeek's New Engine Is Not a Drop-In Replacement</i>. 2026-10（二手信源，可信度：中；用于"专 vs 通"定位佐证）。<a href="https://dev.to/jamilxt/deepinfer-vs-vllm-deepseeks-new-engine-is-not-a-drop-in-replacement-549n">dev.to 文章</a></li>
+<li id="r-FT21"><b>NVIDIA</b>. <i>FasterTransformer</i>. GitHub（2019 v1.0 → 2021 v4.0 → 2023-05 停更迁往 TRT-LLM；README 性能图）。<a href="https://github.com/NVIDIA/FasterTransformer">github.com/NVIDIA/FasterTransformer</a></li>
+<li id="r-TRTLLM23"><b>NVIDIA</b>. <i>TensorRT-LLM Supercharges LLM Inference on NVIDIA H100 GPUs</i>. 开发者博客 2023-09-09（10-19 公开可用）。<a href="https://developer.nvidia.com/blog/nvidia-tensorrt-llm-supercharges-large-language-model-inference-on-nvidia-h100-gpus/">developer.nvidia.com 博客</a></li>
+<li id="r-TRTLLM1"><b>NVIDIA</b>. <i>TensorRT-LLM 全面开源（2025-03-22）与 1.0 "Easier. Faster. Open."（2025-09-25）</i>. 仓库与官方论坛。<a href="https://github.com/NVIDIA/TensorRT-LLM">github.com/NVIDIA/TensorRT-LLM</a> ｜ <a href="https://forums.developer.nvidia.com/t/easier-faster-open-tensorrt-llm-1-0-is-here/346086">1.0 公告</a></li>
+<li id="r-DSINF22"><b>Aminabadi, et al. (Microsoft)</b>. <i>DeepSpeed-Inference: Enabling Efficient Inference of Transformer Models at Unprecedented Scale</i>. ICML'22；arXiv:2207.00032（2022-06-30）。<a href="https://arxiv.org/abs/2207.00032">arxiv.org/abs/2207.00032</a></li>
+<li id="r-DSFG24"><b>Holmes, et al. (Microsoft)</b>. <i>DeepSpeed-FastGen: High-throughput Text Generation for LLMs via Mamba-in-KV and Dynamic SplitFuse</i>. arXiv:2401.08671（2024-01-08；论文 §3.2 承认 chunked prefill 首创为 Sarathi）。<a href="https://arxiv.org/abs/2401.08671">arxiv.org/abs/2401.08671</a></li>
+<li id="r-LIGHTLLM"><b>ModelTC</b>. <i>LightLLM</i>. GitHub（2023 年中开源；token-wise 调度；衍生 ParrotServe/LoongServe、ASPLOS'25 调度器论文、ACL'25 杰出论文 Pre³）。<a href="https://github.com/ModelTC/LightLLM">github.com/ModelTC/LightLLM</a></li>
+<li id="r-LMDEPLOY"><b>InternLM</b>. <i>LMDeploy（TurboMind）</i>. GitHub（README News 时间线：2023-08 W4A16 2.4×、2025-06 PD 分离、2025-09 MXFP4）。<a href="https://github.com/InternLM/lmdeploy">github.com/InternLM/lmdeploy</a></li>
+<li id="r-VLLMV1"><b>vLLM team</b>. <i>vLLM v1: A Major Upgraded Architecture</i>. 官方博客 2025-01-27（致谢 LightLLM/LMDeploy/SGLang/TGI/TRT-LLM）。<a href="https://vllm.ai/blog/2025-01-27-v1-alpha-release">vllm.ai/blog/2025-01-27-v1-alpha-release</a></li>
+<li id="r-VLLMLSC25"><b>vLLM team</b>. <i>Large-scale Serving of DeepSeek with Wide-EP</i>. 官方博客 2025-12-17（2.2k tok/s/H200、async scheduling、PD 分离）。<a href="https://vllm.ai/blog/2025-12-17-large-scale-serving">vllm.ai/blog/2025-12-17-large-scale-serving</a></li>
+<li id="r-SGEP25"><b>SGLang team (LMSYS)</b>. <i>Deploying DeepSeek-R1/V3 with SGLang: Large-scale Expert Parallelism</i>. 官方博客 2025-05-05（96×H100、52.3k/22.3k tok/s/节点、EPLB 2.54×）。<a href="https://lmsys.org/blog/2025-05-05-large-scale-ep/">lmsys.org/blog/2025-05-05-large-scale-ep</a></li>
+<li id="r-DEEPEP25"><b>DeepSeek-AI</b>. <i>DeepEP: MoE Expert Parallelism Communication Library</i>. GitHub 2025-02-25（NVLink-RDMA/纯 RDMA 双模式内核与带宽表）。<a href="https://github.com/deepseek-ai/DeepEP">github.com/deepseek-ai/DeepEP</a></li>
+<li id="r-MEG19"><b>Shoeybi, et al.</b>. <i>Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</i>. arXiv:1909.08053（2019-09；TP 的 f/g 算子与每层 2 次 all-reduce 出处）。<a href="https://arxiv.org/abs/1909.08053">arxiv.org/abs/1909.08053</a></li>
+<li id="r-GPTQ22"><b>Frantar, et al.</b>. <i>GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers</i>. ICLR'23；arXiv:2210.17323（2022-10-24）。<a href="https://arxiv.org/abs/2210.17323">arxiv.org/abs/2210.17323</a></li>
+<li id="r-AWQ23"><b>Lin, et al.</b>. <i>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration</b>. MLSys'24；arXiv:2306.00978（2023-06-01）。<a href="https://arxiv.org/abs/2306.00978">arxiv.org/abs/2306.00978</a></li>
+<li id="r-SQ22"><b>Xiao, et al.</b>. <i>SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models</i>. ICLR'23；arXiv:2211.10438（2022-11-21）。<a href="https://arxiv.org/abs/2211.10438">arxiv.org/abs/2211.10438</a></li>
+<li id="r-KIVI24"><b>Liu, et al.</b>. <i>KIVI: A Tuning-Free Asymmetric 2-bit Quantization for KV Cache</i>. ICML 2024；arXiv:2402.02750（2024-02-05）。<a href="https://arxiv.org/abs/2402.02750">arxiv.org/abs/2402.02750</a></li>
+<li id="r-H2O23"><b>Zhang, et al.</b>. <i>H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models</i>. NeurIPS'23；arXiv:2306.14048（2023-06-26）。<a href="https://arxiv.org/abs/2306.14048">arxiv.org/abs/2306.14048</a></li>
+<li id="r-QUEST24"><b>Tang, et al.</b>. <i>Quest: Query-Aware Sparsity for Efficient Long-Context LLM Inference</i>. ICML 2024；arXiv:2406.10774（2024-06-16）。<a href="https://arxiv.org/abs/2406.10774">arxiv.org/abs/2406.10774</a></li>
+<li id="r-MINFER24"><b>Jiang, et al. (Microsoft)</b>. <i>MInference 1.0: Accelerating Pre-filling for Long-Context LLMs via Dynamic Sparse Attention</i>. arXiv:2407.02490（2024-07-02）。<a href="https://arxiv.org/abs/2407.02490">arxiv.org/abs/2407.02490</a></li>
+<li id="r-NSA25"><b>DeepSeek-AI</b>. <i>Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention</i>. ACL 2025 最佳论文；arXiv:2502.11089（2025-02-18）。<a href="https://arxiv.org/abs/2502.11089">arxiv.org/abs/2502.11089</a></li>
+<li id="r-SPEC23"><b>Leviathan, Kalman, Matias</b>. <i>Fast Inference from Transformers via Speculative Decoding</i>. ICML'23；arXiv:2211.17192（2022-11-01）。同期 Chen, et al. arXiv:2302.01318（2023-02-02）。<a href="https://arxiv.org/abs/2211.17192">arxiv.org/abs/2211.17192</a></li>
+<li id="r-MEDUSA24"><b>Cai, et al.</b>. <i>Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads</i>. ICML 2024；arXiv:2401.10774（2024-01-19）。<a href="https://arxiv.org/abs/2401.10774">arxiv.org/abs/2401.10774</a></li>
+<li id="r-EAGLE3"><b>Li, et al.</b>. <i>EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test</i>. arXiv:2503.01840（2025-03-03；temp=0 下 4.1–6.5×）。<a href="https://arxiv.org/abs/2503.01840">arxiv.org/abs/2503.01840</a></li>
+<li id="r-MLSYS26SD"><b>MLSys 2026</b>. <i>Speculative Decoding: Performance or Illusion?</i>（EAGLE 加速 bs=1 1.73× → bs=128 1.21×）与 arXiv:2510.22876 <i>Batch Speculative Decoding Done Right</i>（2025-10，公开 batch 实现的正确性问题）。<a href="https://proceedings.mlsys.org/paper_files/paper/2026/file/554e056fe2b6d9fd27ffcd3367ae1267-Paper-Conference.pdf">MLSys 2026 论文</a> ｜ <a href="https://arxiv.org/abs/2510.22876">arXiv:2510.22876</a></li>
+<li id="r-MIXTRAL24"><b>Jiang, et al. (Mistral)</b>. <i>Mixtral of Experts</i>. arXiv:2401.04088（2024-01-17）。<a href="https://arxiv.org/abs/2401.04088">arxiv.org/abs/2401.04088</a></li>
+<li id="r-RING23"><b>Liu, et al.</b>. <i>Ring Attention with Blockwise Transformers for Near-Infinite Context</i>. arXiv:2310.01889（2023-10-03；32×A100 1M 上下文）。<a href="https://arxiv.org/abs/2310.01889">arxiv.org/abs/2310.01889</a></li>
+<li id="r-RULER24"><b>Hsieh, et al.</b>. <i>RULER: What's the Real Context Size of Your Long-Context Language Models?</i>. arXiv:2405.06949（2024-05-11）。<a href="https://arxiv.org/abs/2405.06949">arxiv.org/abs/2405.06949</a></li>
+<li id="r-VL224"><b>Wu, et al. (DeepSeek)</b>. <i>DeepSeek-VL2: Mixture-of-Small-Experts Vision-Language Models</i>. arXiv:2412.10302（2024-12-13；动态 tiling 729→196 token）。<a href="https://arxiv.org/abs/2412.10302">arxiv.org/abs/2412.10302</a></li>
+<li id="r-FASTV24"><b>Chen, et al.</b>. <i>Image Matters: Visual Modality Helps Restore Long-context Multimodal Understanding</b>（FastV）. arXiv:2403.06764（2024-03-11）。<a href="https://arxiv.org/abs/2403.06764">arxiv.org/abs/2403.06764</a></li>
+<li id="r-DYNAMO25"><b>NVIDIA</b>. <i>Introducing NVIDIA Dynamo</i>. GTC 2025-03-18（KV 感知路由、NIXL、"30×"为宣传口径）。<a href="https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models">developer.nvidia.com 博客</a> ｜ <a href="https://github.com/ai-dynamo/dynamo">github.com/ai-dynamo/dynamo</a></li>
+<li id="r-NIXL25"><b>NVIDIA</b>. <i>NIXL: Inference Transfer Library</i>. GitHub（2024-12 随 Dynamo 体系开源；UCX/GDS/S3 插件后端）。<a href="https://github.com/ai-dynamo/nixl">github.com/ai-dynamo/nixl</a></li>
+<li id="r-LLUMNIX24"><b>Sun, et al. (Alibaba)</b>. <i>Llumnix: Dynamic Scheduling for Large-Scale LLM Serving</i>. OSDI'24；arXiv:2406.03243（2024-06-05）。<a href="https://arxiv.org/abs/2406.03243">arxiv.org/abs/2406.03243</a></li>
+<li id="r-SLLM24"><b>Fu, et al.</b>. <i>ServerlessLLM: Low-Latency Serverless Inference for Large Language Models</i>. OSDI'24；arXiv:2401.14351（2024-01-25）。<a href="https://arxiv.org/abs/2401.14351">arxiv.org/abs/2401.14351</a></li>
+<li id="r-VLLMPS25"><b>vLLM Production Stack (UChicago/LMCache) 与 AIBrix (ByteDance)</b>. 2025-01 / 2025-02-21 发布。<a href="https://github.com/vllm-project/production-stack">production-stack</a> ｜ <a href="https://vllm.ai/blog/2025-02-21-aibrix-release">AIBrix 发布博客</a></li>
+<li id="r-AUTELLIX25"><b>Dong, et al.</b>. <i>Autellix: Serving Large Language Models Efficiently via Program-level Orchestration</i>. arXiv:2502.13965（2025-02-19；agent DAG 调度 4–15×）。<a href="https://arxiv.org/abs/2502.13965">arxiv.org/abs/2502.13965</a></li>
+<li id="r-VLLMKVT26"><b>vLLM team</b>. <i>Disaggregated Serving 系列：Push-based KV Transfer / Bi-Directional KV Transfer（多轮 agent TTFT 最高 3.3×）</i>. 官方博客 2025–2026。<a href="https://vllm.ai/blog/tags/disaggregation">vllm.ai/blog/tags/disaggregation</a></li>
+<li id="r-LMCACHE25"><b>LMCache team (UChicago)</b>. <i>LMCache: 高效 KV 分层存储</i>. arXiv:2510.09665（2025-10）。<a href="https://arxiv.org/abs/2510.09665">arxiv.org/abs/2510.09665</a> ｜ <a href="https://github.com/LMCache/LMCache">github.com/LMCache/LMCache</a></li>
+<li id="r-M90026"><b>华为</b>. <i>Huawei Connect 2026：OceanStor M900 AI 记忆存储（原生 KV 语义，单节点 480GB/s）与灵衢总线</i>. 官方发布 2026.<a href="https://www.huawei.com/cn/events/huaweiconnect">huawei.com/cn/events/huaweiconnect</a>（官方宣传口径）</li>
+<li id="r-MEMOS25"><b>MemTensor 团队</b>. <i>MemOS: A Memory OS for AI System</i>. arXiv:2507.03724（2025-07-03）。<a href="https://arxiv.org/abs/2507.03724">arxiv.org/abs/2507.03724</a></li>
+<li id="r-MERCURY25"><b>Inception Labs</b>. <i>Mercury / Mercury 2 / Mercury 2.5 商用扩散 LLM</i>. 官方博客 2025-02 起（1000+ tok/s；1107 tok/s、260K ctx）；Google <i>Gemini Diffusion</i>（I/O 2025-05-20 预览）。<a href="https://www.inceptionlabs.ai/blog/introducing-mercury">inceptionlabs.ai</a>（厂商宣称口径）</li>
+<li id="r-PEAGLE26"><b>AWS</b>. <i>P-EAGLE: Parallel Speculative Decoding in vLLM on B200</i>. AWS ML Blog（2025–2026；再快 1.69×）。<a href="https://aws.amazon.com/blogs/machine-learning/p-eagle-faster-llm-inference-with-parallel-speculative-decoding-in-vllm/">aws.amazon.com ML 博客</a></li>
+<li id="r-K2"><b>Moonshot AI</b>. <i>Kimi K2: Open Agentic Intelligence</i>. arXiv:2507.20534（2025-07；1T/32B 激活、MLA、384 专家）。<a href="https://arxiv.org/abs/2507.20534">arxiv.org/abs/2507.20534</a></li>
+<li id="r-ASCEND25"><b>华为</b>. <i>徐直军 HC 2025 主题演讲：昇腾 950PR（2026-Q1）/ 950DT（2026-Q4）/ 960 / 970 路线图</i>. 2025-09-18（官方宣传口径）。<a href="https://www.huawei.com/cn/news/2025/9/hc-xu-keynote-speech">huawei.com 新闻</a> ｜ vLLM-Ascend <a href="https://github.com/vllm-project/vllm-ascend">github.com/vllm-project/vllm-ascend</a></li>
+<li id="r-MLU26"><b>寒武纪</b>. <i>vllm-mlu：vLLM 昇腾/MLU 插件式移植</i>. GitHub（2026-04-24 day-0 支持 DeepSeek-V4）。<a href="https://github.com/Cambricon/vllm-mlu">github.com/Cambricon/vllm-mlu</a></li>
+<li id="r-TILELANG26"><b>tile-ai</b>. <i>TileLang: A Tile-Level DSL for GPU Kernels</i>. GitHub（2025-01-20 开源；ICLR 2026 论文；2025-09 昇腾适配、2025-10 Metal 后端）。<a href="https://github.com/tile-ai/tilelang">github.com/tile-ai/tilelang</a></li>
+<li id="r-CUTLASS26"><b>NVIDIA</b>. <i>CUTLASS 4 / CuTe Python DSL 与 cuda-tile（CUDA Tile IR，随 CUDA 13.1 开源）</i>. 2025-10 至 2026-09（官方博客与仓库）。<a href="https://github.com/NVIDIA/cuda-tile">github.com/NVIDIA/cuda-tile</a> ｜ <a href="https://developer.nvidia.com/blog/achieve-cutlass-c-performance-with-python-apis-using-cute-dsl/">CuTe DSL 博客</a></li>
+<li id="r-SPHERON26"><b>Spheron / sglang#1639 等</b>. 第三方横评汇编（口径不一，仅方向性参考：唯一 prompt vLLM≈SGLang；TRT-LLM 构建 ~28 min 稳态最高）。<a href="https://www.spheron.network/blog/tensorrt-llm-production-deployment-guide">Spheron 2026</a> ｜ <a href="https://github.com/sgl-project/sglang/issues/1639">sglang#1639 实测</a></li>
+<li id="r-TORCHSERVE"><b>pytorch/serve</b>. <i>TorchServe 归档公告</i>. GitHub（2025-08-07 只读）。<a href="https://github.com/pytorch/serve">github.com/pytorch/serve</a></li>
+<li id="r-MLPERF25"><b>MLCommons</b>. <i>MLPerf Inference v5.0</i>. 2025-04-02（Llama-2-70B offline/server 场景；MI325X vs H200）。<a href="https://mlcommons.org/benchmarks/inference-datacenter/">mlcommons.org</a></li>
+<li id="r-DSA25"><b>DeepSeek-AI</b>. <i>DeepSeek Sparse Attention（DSA）技术报告</i>. 随 DeepSeek-V3.2-Exp 仓库发布（2025-09-29；lightning indexer KL 暖机 2.1B token + 稀疏训练 943.7B token、O(L²)→O(Lk)、k=2048=128K 的 1.6%、API 降价 50%+；"48.7× 加速"未见官方出处，勿引）。<a href="https://github.com/deepseek-ai/DeepSeek-V3.2-Exp">github.com/deepseek-ai/DeepSeek-V3.2-Exp</a></li>
+</ol>
+<p style="font-size:12.5px;color:var(--muted);">注：① 本文信源口径——论文（同行评审）&gt; 官方博客/文档（自测自报）&gt; 官方宣传页 &gt; 第三方横评 &gt; 二手转述；凡宣传口径（如 TRT-LLM "8×"、Dynamo "30×"、NVIDIA "26×"）均在正文标注且未用于跨系统比较。② 开源仓库事实基于 main 分支 2026-10 快照（DeepInfer 为 2026-10-20 公告版，本地克隆核对：270 个 Python 文件、vendor 含 DeepEP/DeepGEMM/FlashMLA/DeepSelect 双后端）。③ 所有"×N"倍数均随附基线与测试条件；不同条件数字不可并列，正文表 5-2 已逐行标注。④ DeepInfer 的 155T tokens/日与 $38/GPU·h 为官方口径，截至 2026-10-31 未见独立第三方复现。⑤ 未能核实的传闻（如"LFN AI 24×""DSA 48.7×"）一律未收录。</p>
+
+</div><!-- /wrap -->
+
+<footer>
+  <p>调研与写作：Pai · ZCode 协作 · 2026-10-31 ｜ 数据快照与开源仓库核对：2026-10-31 ｜ 转载请保留出处与引用链接。</p>
+  <p id="busuanzi" style="font-size:12px;">本文阅读 <span id="busuanzi_value_page_pv">-</span> 次 · 总访问 <span id="busuanzi_value_site_pv">-</span> 次</p>
+</footer>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</body>
+</html>
