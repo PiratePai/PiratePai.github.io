@@ -14,6 +14,7 @@
 
 ## 延伸 · 训练与架构
 
+- 大模型 CPU-GPU 混合推理：从专家卸载到分层缓存（以 Strata 为引，125B MoE 跑进 12 GB 显卡；谱系：ZeRO-Infinity → FlexGen → Fiddler / MoE-Infinity / Pre-gated / PowerInfer / KTransformers → Splash / Strata）
 - 投机解码的后训练：草稿蒸馏、解码头、训练时测试与 RL 协同训练（2023–2026）
 - 混合专家（MoE）全景
 - 大模型并行策略与通信优化
