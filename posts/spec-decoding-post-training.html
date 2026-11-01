@@ -206,10 +206,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>目标再生成让 KD 收益塌缩</b><span class="hl-date">10-21 · 韩国大学+延世</span></div><p>外部语料上的蒸馏收益 +14.4%/+18.0%，换成目标模型再生成语料后只剩 +3.7%/+3.6%、gate 归零——“草稿语料必须目标自生成”再添实证。</p><a class="hl-link" href="#latest">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>T2D：剪枝造草稿</b><span class="hl-date">10-25 · USF+ASU+UC Davis</span></div><p>延迟感知的结构化剪枝+蒸馏，直接从目标模型剪出草稿，最高剪掉 92%。</p><a class="hl-link" href="#latest">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">更新附录（展开选读）</a></div></div></div></details>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>目标再生成让 KD 收益塌缩</b><span class="hl-date">10-21 · 韩国大学+延世</span></div><p>外部语料上的蒸馏收益 +14.4%/+18.0%，换成目标模型再生成语料后只剩 +3.7%/+3.6%、gate 归零——“草稿语料必须目标自生成”再添实证。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>T2D：剪枝造草稿</b><span class="hl-date">10-25 · USF+ASU+UC Davis</span></div><p>延迟感知的结构化剪枝+蒸馏，直接从目标模型剪出草稿，最高剪掉 92%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="why">1 · 为什么投机解码需要"后训练"？</h2>
 

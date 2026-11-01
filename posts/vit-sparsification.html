@@ -212,10 +212,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>LearnPrunerV2 学习式剪枝</b><span class="hl-date">10-27 · 理想汽车 · ACM MM 2026</span></div><p>剪 77.8% 视觉 token 保留 99.8%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×。</p><a class="hl-link" href="#s6">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>LOWN：扩散 VLM 按需看图</b><span class="hl-date">10-27 · KAIST</span></div><p>去掉图像只改 22.8% 步的决策：0.353× 解码 FLOPs 保留 99.6%，叠 Fast-dLLM 达 5.6–7.0×。</p><a class="hl-link" href="#s6">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8——"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">更新附录（展开选读）</a></div></div></div></details>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LearnPrunerV2 学习式剪枝</b><span class="hl-date">10-27 · 理想汽车 · ACM MM 2026</span></div><p>剪 77.8% 视觉 token 保留 99.8%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>LOWN：扩散 VLM 按需看图</b><span class="hl-date">10-27 · KAIST</span></div><p>去掉图像只改 22.8% 步的决策：0.353× 解码 FLOPs 保留 99.6%，叠 Fast-dLLM 达 5.6–7.0×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8——"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
 <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
   <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>

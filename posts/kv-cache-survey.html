@@ -288,10 +288,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换——latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">更新附录（展开选读）</a></div>
-<div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">更新附录（展开选读）</a></div></div></div></details>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换——latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>预备知识：KV Cache 是什么，为什么它既是救星又是瓶颈</h2>
 
