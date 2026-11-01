@@ -25,12 +25,17 @@
 
 文章源文件在 `posts/` 目录，均为自包含 HTML（暗色主题、移动端适配）。
 
+阅读器统一采用可收起的左侧目录，手机端使用抽屉。目录展开到章内各页，正文按小节和完整内容块分页；工具栏与页尾可翻页，支持直接链接、浏览器前进后退，以及全文阅读切换。论文配图保留在原有内容中，默认展开，并可从侧栏配图目录直达。
+
+阅读器源文件位于 `scripts/chapter-reader.js` 和 `scripts/chapter-reader.css`；修改后执行 `python scripts/build-reader.py`，将它们内嵌进全部文章。分页在单个 HTML 内完成，初次下载仍包含全文；关闭 JavaScript 时保留全文和原有目录。设计边界、配图审计与验证记录见 [阅读器修订说明](docs/chapter-reader-review.md)。
+
 补充专题：定制推理引擎、性能仿真、Loop Transformer、实时世界模型、免训练自动调优。
 
 本地检查（Python 标准库；站点检查另需 Node.js）：
 
 ```text
 python scripts/verify-mechanisms.py
+python scripts/build-reader.py --check
 python scripts/check-site.py
 python -m http.server 8000
 ```

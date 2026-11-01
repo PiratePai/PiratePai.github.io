@@ -794,7 +794,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <div class="callout"><b>给入门者的路线图</b>：① 先跑通第 2.4 节的 40 行 LoopLM；② 读 Huginn 论文 + 对照第 8 节代码；③ 读 COCONUT 论文 + 第 9 节代码；④ 按Awesome-Loop-Models<span class="cite">[36]</span> 的 "Theoretical and Mechanical Analysis" 分支跟进理论；⑤ 想做系统就从 PLT / MELT 的开源实现入手。这个领域 2023 年才真正起步，本科背景完全来得及在 frontier 上找到自己的位置。</div>
 
 
-<details id="latest" class="note" data-research-updates><summary>更新附录 · 研究进展与发布记录（展开选读）</summary>
+<section id="latest" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
 <h2 id="latest-content">更新附录 · 研究进展与发布记录</h2>
 <p class="lead">以下按五个子领域整理；论文条目后括号为 arXiv 编号与发布时间，均可回溯到 Awesome-Loop-Models 的条目页<span class="cite">[36]</span>。</p>
@@ -942,7 +942,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.35556）</b> · 1+3+3 调度：三个阶段、宽度 3，七次主干前向达到目标深度 D=5——(a) 由 H₁−H₀ 预测更深输入，(b) 三态并算并用早环真值校正，(c) 重复阶段并预测下一 token。串行循环被“折叠”成同前缀并行批。（版权归原作者，引用仅作技术说明）</figcaption>
 </figure>
 
-</details>
+</section>
 <h2 id="refs">13 · 参考与引用出处</h2>
 <ol class="refs">
   <li>Graves, A. <i>Adaptive Computation Time for Recurrent Neural Networks.</i> arXiv:1603.08983 <span class="src-date">2016-03-29</span>. <a href="https://arxiv.org/abs/1603.08983">link</a></li>
@@ -1040,8 +1040,369 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<script>
-(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+
+<!-- chapter-reader:start -->
+<style id="chapter-reader-style">
+/* Inlined by build-reader.py; articles remain standalone HTML. */
+html.reader-ready { scroll-behavior:auto; scroll-padding-top:76px; }
+.reader-ready body { padding:64px 0 0; margin-left:292px; }
+.reader-ready.reader-collapsed body { margin-left:0; }
+.reader-ready .toc { display:none!important; }
+.reader-ready .reader-legacy-home { display:none!important; }
+.reader-ready .layout { display:block; max-width:1100px; }
+.reader-ready .wrap,.reader-ready main { box-sizing:border-box; width:100%; max-width:1100px; margin-inline:auto; }
+.reader-ready [hidden] { display:none!important; }
+.reader-ready .reader-chapter { min-width:0; }
+.reader-ready .reader-page > h2:first-child,.reader-ready .reader-page > h3:first-child { margin-top:20px; }
+.reader-ui { font:14px/1.6 "Segoe UI","Microsoft YaHei",sans-serif; color:#e8eaed; box-sizing:border-box; }
+.reader-ui * { box-sizing:border-box; }
+.reader-ui a { color:#b6cfff; text-decoration:none; }
+.reader-ui button { font:inherit; color:#e8eaed; background:#242d3c; border:1px solid #45536a; border-radius:7px; padding:7px 12px; cursor:pointer; }
+.reader-ui a:focus-visible,.reader-ui button:focus-visible,.reader-ui summary:focus-visible { outline:2px solid #6ea8ff; outline-offset:3px; }
+.reader-toolbar { position:fixed; inset:0 0 auto 292px; height:58px; z-index:100010; display:flex; gap:12px; align-items:center; padding:8px 22px; background:#171d28; border-bottom:1px solid #354054; }
+.reader-collapsed .reader-toolbar { left:0; }
+.reader-toolbar-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#b8c4d8; }
+.reader-sidebar { position:fixed; inset:0 auto 0 0; width:292px; z-index:100012; background:#141b27; border-right:1px solid #354054; display:flex; flex-direction:column; }
+.reader-sidebar-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px 16px; border-bottom:1px solid #354054; }
+.reader-sidebar-head strong { color:#e8eaed; }
+.reader-sidebar-scroll { overflow-y:auto; overscroll-behavior:contain; padding:12px 12px 36px; }
+.reader-sidebar nav { display:block; }
+.reader-sidebar details { margin:4px 0; border:0; background:none; padding:0; }
+.reader-sidebar summary { cursor:pointer; padding:9px 7px; font-weight:600; color:#ced8e8; border-radius:6px; }
+.reader-sidebar summary:hover { background:#233047; }
+.reader-sidebar a { display:block; margin:3px 0; padding:7px 10px; border-radius:6px; overflow-wrap:anywhere; font-size:13px; }
+.reader-sidebar a[aria-current="page"] { color:#d7e8ff; background:#263b58; border-left:3px solid #78adff; }
+.reader-sidebar details[data-reader-active] > summary { color:#80b2ff; }
+.reader-sidebar .reader-page-link { margin-left:12px; }
+.reader-sidebar .reader-figure-link { color:#aabbd3; }
+.reader-sidebar small { color:#9eacc1; }
+.reader-pager { display:flex; align-items:center; gap:16px; justify-content:space-between; margin:22px 0; padding:16px 0; border-block:1px solid #354054; }
+.reader-pager a { flex:1; overflow-wrap:anywhere; }
+.reader-pager a:last-child { text-align:right; }
+.reader-pager-status { color:#aebbd0; text-align:center; flex:0 0 auto; }
+.reader-pager-top { margin-top:0; }
+.reader-backdrop { display:none; }
+.reader-skip { position:fixed; top:-100px; left:16px; z-index:100020; background:#263b58; padding:10px; }
+.reader-skip:focus { top:8px; }
+.reader-page { min-width:0; }
+.reader-flow.grid2 { display:block; }
+.reader-arrow { display:inline-flex; align-items:center; justify-content:center; flex:0 0 34px; min-height:36px; border:1px solid #45536a; border-radius:7px; }
+@media (max-width:980px) {
+  .reader-ready body { margin-left:0; }
+  .reader-toolbar { left:0; padding-inline:12px; gap:8px; }
+  .reader-toolbar button { white-space:nowrap; padding:7px 9px; }
+  .reader-sidebar { width:min(320px,86vw); box-shadow:10px 0 40px #0008; }
+  .reader-ready:not(.reader-collapsed) .reader-backdrop { display:block; position:fixed; inset:0; background:#0009; border:0; border-radius:0; z-index:100011; }
+  .reader-ready main,.reader-ready .wrap { padding-inline:16px; }
+  .reader-pager { gap:8px; font-size:13px; }
+  .reader-pager-status { max-width:76px; }
+  .reader-current-title,.reader-pager-top { display:none; }
+  .reader-toolbar-label { text-align:center; white-space:nowrap; font-size:13px; }
+  .reader-ready .tl:has(.when)::before { left:5px; }
+  .reader-ready .tl:has(.when) li { padding-left:24px; }
+  .reader-ready .tl .when { position:static; display:block; width:auto; text-align:left; }
+  .reader-ready .tl .dot { left:0; }
+}
+@media print {
+  .reader-ready body { margin:0; padding:0; }
+  .reader-ui { display:none!important; }
+  .reader-ready .reader-chapter[hidden],.reader-ready .reader-page[hidden],.reader-ready .reader-flow[hidden] { display:block!important; }
+  .reader-ready .toc { display:block!important; }
+}
+</style>
+<script id="chapter-reader-script">
+/* Standalone progressive reader: semantic pages inside each chapter. */
+(function () {
+  'use strict';
+  const guide = document.getElementById('reading-path');
+  const originalTOC = document.querySelector('.toc');
+  if (!guide || !originalTOC) return;
+  const root = guide.parentElement;
+  const html = document.documentElement;
+  document.querySelectorAll('a[href="../index.html"]').forEach(a => {
+    if (a.parentElement.style.position === 'fixed') a.parentElement.classList.add('reader-legacy-home');
+  });
+  const chapters = [], pages = [], flows = [];
+  const mobile = matchMedia('(max-width:980px)');
+  const clean = node => node.textContent.replace(/\s+/g, ' ').trim();
+  function label(node) {
+    const copy = node.cloneNode(true);
+    copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    return clean(copy);
+  }
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text) node.textContent = text;
+    return node;
+  }
+  function link(text, id, className) {
+    const a = element('a', className, text);
+    a.href = '#' + encodeURIComponent(id);
+    return a;
+  }
+  // Keep the original nodes, IDs and demo listeners; only add reading containers.
+  const start = document.getElementById('evidence-scope') || guide;
+  let collecting = false, chapter, pending = [];
+  function newChapter(id, title, before) {
+    const node = element('section', 'reader-chapter');
+    node.setAttribute('aria-label', title);
+    root.insertBefore(node, before);
+    chapter = {id, title, node, pages:[]};
+    chapters.push(chapter);
+    if (id !== 'reading-path') { pending.forEach(n => node.append(n)); pending = []; }
+  }
+  for (const node of Array.from(root.childNodes)) {
+    if (node.nodeType === 1 && node.matches('span.anchor')) { pending.push(node); continue; }
+    if (node === start) collecting = true;
+    if (!collecting || node === originalTOC) continue;
+    let heading = null;
+    if (node.nodeType === 1) {
+      if (node.matches('h2[id]')) heading = node;
+      else if (node.matches('section[id]:not(#reading-path)')) heading = node.querySelector('h2');
+      else if (node.matches('footer.foot')) {
+        node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
+      }
+    }
+    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (heading) newChapter(node.id || heading.id, label(heading), node);
+    chapter.node.append(node);
+  }
+  pending.forEach(n => chapter.node.append(n));
+  // Legacy MoE aliases sN refer to headings chN, including the reference chapter.
+  root.querySelectorAll('span.anchor[id]').forEach(anchor => {
+    if (/^s\d+$/.test(anchor.id)) {
+      const heading = document.getElementById(anchor.id.replace(/^s/, 'ch'));
+      if (heading) heading.before(anchor);
+    }
+  });
+
+  function weight(node) {
+    if (node.nodeType !== 1) return node.nodeType === 3 ? node.textContent.trim().length : 0;
+    if (node.matches('script,style')) return 0;
+    const copy = node.cloneNode(true);
+    copy.querySelectorAll('script,style,details:not([open]) > :not(summary)').forEach(n => n.remove());
+    return clean(copy).length + copy.querySelectorAll('img,svg,canvas').length * 650;
+  }
+  // Split long reference/update lists between complete items; retain OL numbering.
+  function splitLists(parent) {
+    for (const list of Array.from(parent.children)) {
+      if (!list.matches('ol,ul') || weight(list) < 2600 || list.children.length < 4) continue;
+      const items = Array.from(list.children);
+      let chunk = list, used = 0, index = Number(list.getAttribute('start') || 1);
+      for (const item of items) {
+        const size = weight(item);
+        if (used > 1100 && used + size > 1900) {
+          const next = list.cloneNode(false); next.removeAttribute('id');
+          if (list.tagName === 'OL') next.start = index;
+          chunk.after(next); chunk = next; used = 0;
+        }
+        chunk.append(item); used += size;
+        index = item.hasAttribute('value') ? Number(item.value) + 1 : index + 1;
+      }
+    }
+  }
+  function splitReferenceTables(parent, owner) {
+    if (!/参考|引用出处/.test(owner.title)) return;
+    for (const table of Array.from(parent.children)) {
+      if (table.tagName !== 'TABLE' || weight(table) < 2600) continue;
+      const rows = Array.from(table.rows), headers = rows.filter(r => r.querySelector('th'));
+      let chunk = table, used = 0;
+      for (const row of rows.filter(r => !headers.includes(r))) {
+        const size = weight(row);
+        if (used > 1000 && used + size > 1700) {
+          const next = table.cloneNode(false); next.removeAttribute('id');
+          const head = next.createTHead();
+          headers.forEach(r => {
+            const repeated = r.cloneNode(true); repeated.setAttribute('data-reader-repeat', '');
+            repeated.removeAttribute('id'); repeated.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+            head.append(repeated);
+          });
+          chunk.after(next); chunk = next; used = 0;
+        }
+        (chunk.tBodies[0] || chunk.createTBody()).append(row); used += size;
+      }
+    }
+  }
+  function paginate(parent, owner) {
+    parent.classList.add('reader-flow'); flows.push(parent);
+    splitLists(parent); splitReferenceTables(parent, owner);
+    let page = null, used = 0, title = owner.title, part = 0, leading = [];
+    const nodes = Array.from(parent.childNodes);
+    for (const node of nodes) {
+      const isElement = node.nodeType === 1;
+      // Recurse through structural sections, keeping their IDs and styling intact.
+      if (isElement && node.matches('section,footer.foot,div.grid2') && node.querySelector('h2,h3') && weight(node) > 2300) {
+        page = null; used = 0;
+        paginate(node, owner);
+        continue;
+      }
+      const size = weight(node);
+      const heading = isElement && node.matches('h2,h3,h4');
+      const attached = isElement && node.matches('figure,.fig,.citebox,.codecap,.cap,script,style');
+      if (heading) { title = label(node); part = 0; }
+      const boundary = page && ((heading && used > 450) || (!heading && !attached && used > 1100 && used + size > 2100));
+      if (boundary) { page = null; used = 0; }
+      if (!page) {
+        // Ignore whitespace-only tails instead of creating empty pages.
+        if (!size) {
+          if (owner.pages.length) owner.pages.at(-1).node.append(node);
+          else leading.push(node);
+          continue;
+        }
+        const wrapper = element('div', 'reader-page');
+        wrapper.id = 'reader-page-' + (pages.length + 1);
+        parent.insertBefore(wrapper, node);
+        leading.forEach(n => wrapper.append(n)); leading = [];
+        part += 1;
+        page = {id:wrapper.id, title:title + (part > 1 ? '（续 ' + part + '）' : ''), node:wrapper, chapter:owner};
+        pages.push(page); owner.pages.push(page);
+      }
+      page.node.append(node); used += size;
+    }
+  }
+  chapters.forEach(c => paginate(c.node, c));
+  if (!pages.length) return;
+
+  // Figures stay expanded with their surrounding explanation, including no-JS HTML.
+  const figures = [];
+  root.querySelectorAll('img').forEach((img, i) => {
+    if (!img.id) img.id = 'reader-figure-' + (i + 1);
+    const caption = img.closest('figure')?.querySelector('figcaption');
+    figures.push({id:img.id, title:caption ? clean(caption) : img.alt || '论文配图 ' + (i + 1)});
+    let ancestor = img.parentElement;
+    while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
+  });
+
+  const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';
+  sidebar.setAttribute('aria-label', '文章目录');
+  const head = element('div', 'reader-sidebar-head');
+  const home = element('a', '', '← 推理效率与架构'); home.href = '../index.html';
+  const close = element('button', '', '收起'); close.type = 'button'; close.setAttribute('aria-label', '收起目录');
+  head.append(home, close);
+  const scroll = element('div', 'reader-sidebar-scroll');
+  const nav = element('nav'); nav.setAttribute('aria-label', '章节与章内分页');
+  const navLinks = [];
+  for (const c of chapters) {
+    if (!c.pages.length) continue;
+    const details = element('details');
+    const summary = element('summary', '', c.title + ' · ' + c.pages.length + ' 页');
+    details.append(summary); c.nav = details;
+    c.pages.forEach((p, i) => {
+      p.link = link((i + 1) + '. ' + p.title, p.id, 'reader-page-link');
+      navLinks.push(p.link); details.append(p.link);
+    });
+    nav.append(details);
+  }
+  const highlights = document.getElementById('hl');
+  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (figures.length) {
+    const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
+    figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));
+    nav.append(gallery);
+  }
+  scroll.append(element('small', '', '按章展开，选择章内各页。原有引用链接仍可直达。'), nav);
+  sidebar.append(head, scroll);
+  const toolbar = element('div', 'reader-ui reader-toolbar');
+  const toggle = element('button', '', '☰ 目录'); toggle.type = 'button'; toggle.setAttribute('aria-controls', sidebar.id);
+  const status = element('span', 'reader-toolbar-label'); status.setAttribute('aria-live', 'polite');
+  const currentTitle = element('span', 'reader-current-title');
+  const counter = element('span'); status.append(currentTitle, counter);
+  const previousButton = element('a', 'reader-arrow', '←'); previousButton.setAttribute('aria-label', '上一页');
+  const nextButton = element('a', 'reader-arrow', '→'); nextButton.setAttribute('aria-label', '下一页'); nextButton.setAttribute('data-reader-next', '');
+  const mode = element('button'); mode.type = 'button';
+  toolbar.append(toggle, previousButton, status, nextButton, mode);
+  const backdrop = element('button', 'reader-ui reader-backdrop'); backdrop.type = 'button'; backdrop.setAttribute('aria-label', '关闭目录'); backdrop.tabIndex = -1;
+  const skip = link('跳到正文', pages[0].id, 'reader-ui reader-skip');
+  document.body.append(skip, backdrop, sidebar, toolbar);
+
+  const pagers = [element('nav', 'reader-ui reader-pager reader-pager-top'), element('nav', 'reader-ui reader-pager')];
+  pagers.forEach(p => p.setAttribute('aria-label', '阅读翻页'));
+  root.insertBefore(pagers[0], chapters[0].node); root.append(pagers[1]);
+  let current = pages[0], collapsed = true, full = false;
+  function setCollapsed(value, remember, focus) {
+    collapsed = value; html.classList.toggle('reader-collapsed', value); sidebar.hidden = value;
+    toggle.setAttribute('aria-expanded', String(!value));
+    document.body.style.overflow = !value && mobile.matches ? 'hidden' : '';
+    if (remember && !mobile.matches) { saved = value; try { localStorage.setItem('reader-sidebar-collapsed', value ? '1' : '0'); } catch (_) {} }
+    if (focus) (value ? toggle : close).focus({preventScroll:true});
+  }
+  let saved = false; try { saved = localStorage.getItem('reader-sidebar-collapsed') === '1'; } catch (_) {}
+  toggle.addEventListener('click', () => setCollapsed(!collapsed, true, true));
+  close.addEventListener('click', () => setCollapsed(true, true, true));
+  backdrop.addEventListener('click', () => setCollapsed(true, false, true));
+  mobile.addEventListener('change', () => setCollapsed(mobile.matches || saved, false, false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !collapsed) { setCollapsed(true, true, true); return; }
+    if (e.key === 'Tab' && mobile.matches && !collapsed) {
+      const focusables = Array.from(sidebar.querySelectorAll('a,button,summary')).filter(n => n.getClientRects().length);
+      const first = focusables[0], last = focusables.at(-1);
+      if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+      else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+    }
+  });
+  function pageFor(target) {
+    if (!target) return null;
+    return pages.find(p => p.node === target || p.node.contains(target)) || pages.find(p => target.contains(p.node));
+  }
+  function render(shouldScroll) {
+    full = new URL(location.href).searchParams.get('view') === 'all';
+    let id = ''; try { id = decodeURIComponent(location.hash.slice(1)); } catch (_) {}
+    const target = id ? document.getElementById(id) : null;
+    current = pageFor(target) || pages[0];
+    pages.forEach(p => { p.node.hidden = !full && p !== current; });
+    flows.slice().reverse().forEach(f => { f.hidden = !full && !f.querySelector('.reader-page:not([hidden])'); });
+    chapters.forEach(c => {
+      c.node.hidden = !full && c !== current.chapter;
+      if (c.nav) { c.nav.toggleAttribute('data-reader-active', c === current.chapter); c.nav.open = c === current.chapter; }
+    });
+    navLinks.forEach(a => a.removeAttribute('aria-current')); current.link.setAttribute('aria-current', 'page');
+    const localIndex = current.chapter.pages.indexOf(current);
+    currentTitle.textContent = current.chapter.title + ' · ';
+    counter.textContent = full ? '全文' : '第 ' + (localIndex + 1) + '/' + current.chapter.pages.length + ' 页';
+    status.title = current.title;
+    mode.textContent = full ? '分页阅读' : '全文阅读'; mode.setAttribute('aria-pressed', String(full));
+    skip.href = '#' + current.id;
+    const index = pages.indexOf(current);
+    [previousButton, nextButton].forEach((a, i) => {
+      const p = pages[index + (i ? 1 : -1)];
+      a.hidden = full || !p;
+      if (p) { a.href = '#' + p.id; a.title = p.title; }
+    });
+    pagers.forEach(pager => {
+      pager.replaceChildren(); pager.hidden = full;
+      const previous = pages[index - 1], next = pages[index + 1];
+      pager.append(previous ? link((previous.chapter === current.chapter ? '← 上一页：' : '← 上一章：') + previous.title, previous.id) : element('span', '', '已是首页'));
+      pager.append(element('span', 'reader-pager-status', '章内 ' + (localIndex + 1) + ' / ' + current.chapter.pages.length));
+      pager.append(next ? link((next.chapter === current.chapter ? '下一页：' : '下一章：') + next.title + ' →', next.id) : element('span', '', '已读至文末'));
+    });
+    if (target) { let n = target; while (n && n !== root) { if (n.tagName === 'DETAILS') n.open = true; n = n.parentElement; } }
+    requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('resize'));
+      if (!collapsed) current.link.scrollIntoView({block:'nearest', behavior:'instant'});
+      if (shouldScroll) (target || current.node).scrollIntoView({block:'start', behavior:'instant'});
+    });
+  }
+  mode.addEventListener('click', () => {
+    const url = new URL(location.href);
+    if (full) url.searchParams.delete('view'); else url.searchParams.set('view', 'all');
+    if (!url.hash) url.hash = current.id;
+    history.pushState(null, '', url); render(true);
+  });
+  // Same-anchor clicks must still close a mobile drawer and reveal folded targets.
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a'); if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === '_blank') return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || url.pathname !== location.pathname || url.search !== location.search || !url.hash) return;
+    if (mobile.matches && !collapsed) setCollapsed(true, false, false);
+    if (url.hash === location.hash) render(true);
+  });
+  window.addEventListener('hashchange', () => render(true));
+  window.addEventListener('popstate', () => render(true));
+  html.classList.add('reader-ready'); setCollapsed(mobile.matches || saved, false, false);
+  render(Boolean(location.hash));
+})();
 </script>
+<!-- chapter-reader:end -->
 </body>
 </html>
