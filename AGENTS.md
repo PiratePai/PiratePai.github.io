@@ -66,7 +66,7 @@
 
 配色变量：`--ink:#6ea8ff`（主蓝）`--muted:#aeb4bd` `--bg:#1b2128` `--card:#171a21`
 `--ok:#41d1a7`（绿=亮点/正确）`--warn:#ffb454`（橙=引用框标题/警示）`--accent2:#9d7bff`。
-表格奇偶行交替（`tr:nth-child(even)`）。统一阅读器在桌面端使用左侧可收起目录，移动端使用抽屉；章节内部按小节和完整图文单元分页。共享实现位于 `scripts/chapter-reader.js/css`，修改后运行 `python scripts/build-reader.py` 内嵌到文章，保持 HTML 自包含。不得将论文配图藏在默认关闭的更新附录里。
+表格奇偶行交替（`tr:nth-child(even)`）。统一阅读器在桌面端使用左侧可收起目录，移动端使用抽屉。短章节整章阅读，长章节才按完整图文单元分页；不得把每个小节机械拆成独立短页，须合并过短尾页。排版和深灰／纸白主题统一由 `scripts/chapter-reader.css` 控制，文章内不要再叠加配色覆盖。共享逻辑位于 `scripts/chapter-reader.js`，修改后运行 `python scripts/build-reader.py` 内嵌到文章，保持 HTML 自包含。不得将论文配图藏在默认关闭的更新附录里。
 
 ## 四、引用规范（最硬的一条）
 
