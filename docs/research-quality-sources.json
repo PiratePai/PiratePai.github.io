@@ -1,0 +1,517 @@
+{
+  "checked_at": "2026-11-01",
+  "scope": "Bibliographic identity and submission metadata only; not blanket claim or performance verification.",
+  "sources": [
+    {
+      "id": "1909.11942",
+      "url": "https://arxiv.org/abs/1909.11942",
+      "title": " ALBERT: A Lite BERT for Self-supervised Learning of Language Representations",
+      "history": "[Submitted on 26 Sep 2019 ( v1 ), last revised 9 Feb 2020 (this version, v6)]",
+      "first_author": "Zhenzhong Lan "
+    },
+    {
+      "id": "1910.02054",
+      "url": "https://arxiv.org/abs/1910.02054",
+      "title": " ZeRO: Memory Optimizations Toward Training Trillion Parameter Models",
+      "history": "[Submitted on 4 Oct 2019 ( v1 ), last revised 13 May 2020 (this version, v3)]",
+      "first_author": "Samyam Rajbhandari "
+    },
+    {
+      "id": "2009.14794",
+      "url": "https://arxiv.org/abs/2009.14794",
+      "title": " Rethinking Attention with Performers",
+      "history": "[Submitted on 30 Sep 2020 ( v1 ), last revised 19 Nov 2022 (this version, v4)]",
+      "first_author": "Krzysztof Choromanski "
+    },
+    {
+      "id": "2205.14135",
+      "url": "https://arxiv.org/abs/2205.14135",
+      "title": " FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness",
+      "history": "[Submitted on 27 May 2022 ( v1 ), last revised 23 Jun 2022 (this version, v2)]",
+      "first_author": "Tri Dao "
+    },
+    {
+      "id": "2211.15841",
+      "url": "https://arxiv.org/abs/2211.15841",
+      "title": " MegaBlocks: Efficient Sparse Training with Mixture-of-Experts",
+      "history": "[Submitted on 29 Nov 2022]",
+      "first_author": "Trevor Gale "
+    },
+    {
+      "id": "2211.17192",
+      "url": "https://arxiv.org/abs/2211.17192",
+      "title": " Fast Inference from Transformers via Speculative Decoding",
+      "history": "[Submitted on 30 Nov 2022 ( v1 ), last revised 18 May 2023 (this version, v2)]",
+      "first_author": "Yaniv Leviathan "
+    },
+    {
+      "id": "2303.06865",
+      "url": "https://arxiv.org/abs/2303.06865",
+      "title": " FlexGen: High-Throughput Generative Inference of Large Language Models with a Single GPU",
+      "history": "[Submitted on 13 Mar 2023 ( v1 ), last revised 12 Jun 2023 (this version, v2)]",
+      "first_author": "Ying Sheng "
+    },
+    {
+      "id": "2305.09781",
+      "url": "https://arxiv.org/abs/2305.09781",
+      "title": " SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification",
+      "history": "[Submitted on 16 May 2023 ( v1 ), last revised 1 Apr 2024 (this version, v4)]",
+      "first_author": "Xupeng Miao "
+    },
+    {
+      "id": "2305.14314",
+      "url": "https://arxiv.org/abs/2305.14314",
+      "title": " QLoRA: Efficient Finetuning of Quantized LLMs",
+      "history": "[Submitted on 23 May 2023]",
+      "first_author": "Tim Dettmers "
+    },
+    {
+      "id": "2306.00978",
+      "url": "https://arxiv.org/abs/2306.00978",
+      "title": " AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration",
+      "history": "[Submitted on 1 Jun 2023 ( v1 ), last revised 25 Apr 2026 (this version, v6)]",
+      "first_author": "Ji Lin "
+    },
+    {
+      "id": "2307.13304",
+      "url": "https://arxiv.org/abs/2307.13304",
+      "title": " QuIP: 2-Bit Quantization of Large Language Models With Guarantees",
+      "history": "[Submitted on 25 Jul 2023 ( v1 ), last revised 15 Jan 2024 (this version, v2)]",
+      "first_author": "Jerry Chee "
+    },
+    {
+      "id": "2309.08168",
+      "url": "https://arxiv.org/abs/2309.08168",
+      "title": " Draft & Verify: Lossless Large Language Model Acceleration via Self-Speculative Decoding",
+      "history": "[Submitted on 15 Sep 2023 ( v1 ), last revised 20 May 2024 (this version, v2)]",
+      "first_author": "Jun Zhang "
+    },
+    {
+      "id": "2310.01801",
+      "url": "https://arxiv.org/abs/2310.01801",
+      "title": " Model Tells You What to Discard: Adaptive KV Cache Compression for LLMs",
+      "history": "[Submitted on 3 Oct 2023 ( v1 ), last revised 29 Oct 2024 (this version, v4)]",
+      "first_author": "Suyu Ge "
+    },
+    {
+      "id": "2310.01889",
+      "url": "https://arxiv.org/abs/2310.01889",
+      "title": " Ring Attention with Blockwise Transformers for Near-Infinite Context",
+      "history": "[Submitted on 3 Oct 2023 ( v1 ), last revised 27 Nov 2023 (this version, v4)]",
+      "first_author": "Hao Liu "
+    },
+    {
+      "id": "2310.02226",
+      "url": "https://arxiv.org/abs/2310.02226",
+      "title": " Think before you speak: Training Language Models With Pause Tokens",
+      "history": "[Submitted on 3 Oct 2023 ( v1 ), last revised 21 Apr 2024 (this version, v3)]",
+      "first_author": "Sachin Goyal "
+    },
+    {
+      "id": "2310.06825",
+      "url": "https://arxiv.org/abs/2310.06825",
+      "title": " Mistral 7B",
+      "history": "[Submitted on 10 Oct 2023]",
+      "first_author": "Albert Q. Jiang "
+    },
+    {
+      "id": "2310.08461",
+      "url": "https://arxiv.org/abs/2310.08461",
+      "title": " DistillSpec: Improving Speculative Decoding via Knowledge Distillation",
+      "history": "[Submitted on 12 Oct 2023 ( v1 ), last revised 31 Mar 2024 (this version, v2)]",
+      "first_author": "Yongchao Zhou "
+    },
+    {
+      "id": "2310.18547",
+      "url": "https://arxiv.org/abs/2310.18547",
+      "title": " Punica: Multi-Tenant LoRA Serving",
+      "history": "[Submitted on 28 Oct 2023]",
+      "first_author": "Lequn Chen (1)"
+    },
+    {
+      "id": "2311.03285",
+      "url": "https://arxiv.org/abs/2311.03285",
+      "title": " S-LoRA: Serving Thousands of Concurrent LoRA Adapters",
+      "history": "[Submitted on 6 Nov 2023 ( v1 ), last revised 5 Jun 2024 (this version, v3)]",
+      "first_author": "Ying Sheng "
+    },
+    {
+      "id": "2311.12424",
+      "url": "https://arxiv.org/abs/2311.12424",
+      "title": " Looped Transformers are Better at Learning Learning Algorithms",
+      "history": "[Submitted on 21 Nov 2023 ( v1 ), last revised 16 Mar 2024 (this version, v3)]",
+      "first_author": "Liu Yang "
+    },
+    {
+      "id": "2312.03134",
+      "url": "https://arxiv.org/abs/2312.03134",
+      "title": " A Hardware Evaluation Framework for Large Language Model Inference",
+      "history": "[Submitted on 5 Dec 2023]",
+      "first_author": "Hengrui Zhang "
+    },
+    {
+      "id": "2401.08671",
+      "url": "https://arxiv.org/abs/2401.08671",
+      "title": " DeepSpeed-FastGen: High-throughput Text Generation for LLMs via MII and DeepSpeed-Inference",
+      "history": "[Submitted on 9 Jan 2024]",
+      "first_author": "Connor Holmes "
+    },
+    {
+      "id": "2401.10774",
+      "url": "https://arxiv.org/abs/2401.10774",
+      "title": " Medusa: Simple LLM Inference Acceleration Framework with Multiple Decoding Heads",
+      "history": "[Submitted on 19 Jan 2024 ( v1 ), last revised 14 Jun 2024 (this version, v3)]",
+      "first_author": "Tianle Cai "
+    },
+    {
+      "id": "2401.14361",
+      "url": "https://arxiv.org/abs/2401.14361",
+      "title": " MoE-Infinity: Efficient MoE Inference on Personal Machines with Sparsity-Aware Expert Cache",
+      "history": "[Submitted on 25 Jan 2024 ( v1 ), last revised 12 Mar 2025 (this version, v3)]",
+      "first_author": "Leyang Xue "
+    },
+    {
+      "id": "2402.02750",
+      "url": "https://arxiv.org/abs/2402.02750",
+      "title": " KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache",
+      "history": "[Submitted on 5 Feb 2024 ( v1 ), last revised 25 Jul 2024 (this version, v2)]",
+      "first_author": "Zirui Liu "
+    },
+    {
+      "id": "2402.04396",
+      "url": "https://arxiv.org/abs/2402.04396",
+      "title": " QuIP#: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks",
+      "history": "[Submitted on 6 Feb 2024 ( v1 ), last revised 4 Jun 2024 (this version, v2)]",
+      "first_author": "Albert Tseng "
+    },
+    {
+      "id": "2402.14740",
+      "url": "https://arxiv.org/abs/2402.14740",
+      "title": " Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs",
+      "history": "[Submitted on 22 Feb 2024 ( v1 ), last revised 26 Feb 2024 (this version, v2)]",
+      "first_author": "Arash Ahmadian "
+    },
+    {
+      "id": "2404.16710",
+      "url": "https://arxiv.org/abs/2404.16710",
+      "title": " LayerSkip: Enabling Early Exit Inference and Self-Speculative Decoding",
+      "history": "[Submitted on 25 Apr 2024 ( v1 ), last revised 18 Oct 2024 (this version, v4)]",
+      "first_author": "Mostafa Elhoushi "
+    },
+    {
+      "id": "2404.18911",
+      "url": "https://arxiv.org/abs/2404.18911",
+      "title": " Kangaroo: Lossless Self-Speculative Decoding via Double Early Exiting",
+      "history": "[Submitted on 29 Apr 2024]",
+      "first_author": "Fangcheng Liu "
+    },
+    {
+      "id": "2404.19737",
+      "url": "https://arxiv.org/abs/2404.19737",
+      "title": " Better & Faster Large Language Models via Multi-token Prediction",
+      "history": "[Submitted on 30 Apr 2024]",
+      "first_author": "Fabian Gloeckle "
+    },
+    {
+      "id": "2405.04434",
+      "url": "https://arxiv.org/abs/2405.04434",
+      "title": " DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model",
+      "history": "[Submitted on 7 May 2024 ( v1 ), last revised 19 Jun 2024 (this version, v5)]",
+      "first_author": "DeepSeek-AI "
+    },
+    {
+      "id": "2405.04437",
+      "url": "https://arxiv.org/abs/2405.04437",
+      "title": " vAttention: Dynamic Memory Management for Serving LLMs without PagedAttention",
+      "history": "[Submitted on 7 May 2024 ( v1 ), last revised 29 Jan 2025 (this version, v3)]",
+      "first_author": "Ramya Prabhu "
+    },
+    {
+      "id": "2405.05254",
+      "url": "https://arxiv.org/abs/2405.05254",
+      "title": " You Only Cache Once: Decoder-Decoder Architectures for Language Models",
+      "history": "[Submitted on 8 May 2024 ( v1 ), last revised 9 May 2024 (this version, v2)]",
+      "first_author": "Yutao Sun "
+    },
+    {
+      "id": "2405.05465",
+      "url": "https://arxiv.org/abs/2405.05465",
+      "title": " Vidur: A Large-Scale Simulation Framework For LLM Inference",
+      "history": "[Submitted on 8 May 2024 ( v1 ), last revised 21 May 2024 (this version, v2)]",
+      "first_author": "Amey Agrawal "
+    },
+    {
+      "id": "2405.14838",
+      "url": "https://arxiv.org/abs/2405.14838",
+      "title": " From Explicit CoT to Implicit CoT: Learning to Internalize CoT Step by Step",
+      "history": "[Submitted on 23 May 2024]",
+      "first_author": "Yuntian Deng "
+    },
+    {
+      "id": "2406.01698",
+      "url": "https://arxiv.org/abs/2406.01698",
+      "title": " Demystifying AI Platform Design for Distributed Inference of Next-Generation LLM models",
+      "history": "[Submitted on 3 Jun 2024 ( v1 ), last revised 15 May 2025 (this version, v3)]",
+      "first_author": "Abhimanyu Bambhaniya "
+    },
+    {
+      "id": "2406.02540",
+      "url": "https://arxiv.org/abs/2406.02540",
+      "title": " ViDiT-Q: Efficient and Accurate Quantization of Diffusion Transformers for Image and Video Generation",
+      "history": "[Submitted on 4 Jun 2024 ( v1 ), last revised 22 Feb 2025 (this version, v3)]",
+      "first_author": "Tianchen Zhao "
+    },
+    {
+      "id": "2406.14066",
+      "url": "https://arxiv.org/abs/2406.14066",
+      "title": " TurboSpec: Closed-loop Speculation Control System for Optimizing LLM Serving Goodput",
+      "history": "[Submitted on 20 Jun 2024 ( v1 ), last revised 27 Jul 2025 (this version, v3)]",
+      "first_author": "Xiaoxuan Liu "
+    },
+    {
+      "id": "2406.19707",
+      "url": "https://arxiv.org/abs/2406.19707",
+      "title": " InfiniGen: Efficient Generative Inference of Large Language Models with Dynamic KV Cache Management",
+      "history": "[Submitted on 28 Jun 2024]",
+      "first_author": "Wonbeom Lee "
+    },
+    {
+      "id": "2407.01392",
+      "url": "https://arxiv.org/abs/2407.01392",
+      "title": " Diffusion Forcing: Next-token Prediction Meets Full-Sequence Diffusion",
+      "history": "[Submitted on 1 Jul 2024 ( v1 ), last revised 10 Dec 2024 (this version, v4)]",
+      "first_author": "Boyuan Chen "
+    },
+    {
+      "id": "2408.06072",
+      "url": "https://arxiv.org/abs/2408.06072",
+      "title": " CogVideoX: Text-to-Video Diffusion Models with An Expert Transformer",
+      "history": "[Submitted on 12 Aug 2024 ( v1 ), last revised 26 Mar 2025 (this version, v3)]",
+      "first_author": "Zhuoyi Yang "
+    },
+    {
+      "id": "2408.15766",
+      "url": "https://arxiv.org/abs/2408.15766",
+      "title": " Learning Harmonized Representations for Speculative Sampling",
+      "history": "[Submitted on 28 Aug 2024 ( v1 ), last revised 26 Feb 2025 (this version, v3)]",
+      "first_author": "Lefan Zhang "
+    },
+    {
+      "id": "2409.19256",
+      "url": "https://arxiv.org/abs/2409.19256",
+      "title": " HybridFlow: A Flexible and Efficient RLHF Framework",
+      "history": "[Submitted on 28 Sep 2024 ( v1 ), last revised 2 Oct 2024 (this version, v2)]",
+      "first_author": "Guangming Sheng "
+    },
+    {
+      "id": "2410.10819",
+      "url": "https://arxiv.org/abs/2410.10819",
+      "title": " DuoAttention: Efficient Long-Context LLM Inference with Retrieval and Streaming Heads",
+      "history": "[Submitted on 14 Oct 2024]",
+      "first_author": "Guangxuan Xiao "
+    },
+    {
+      "id": "2410.21465",
+      "url": "https://arxiv.org/abs/2410.21465",
+      "title": " ShadowKV: KV Cache in Shadows for High-Throughput Long-Context LLM Inference",
+      "history": "[Submitted on 28 Oct 2024 ( v1 ), last revised 25 Apr 2025 (this version, v3)]",
+      "first_author": "Hanshi Sun "
+    },
+    {
+      "id": "2411.05007",
+      "url": "https://arxiv.org/abs/2411.05007",
+      "title": " SVDQuant: Absorbing Outliers by Low-Rank Components for 4-Bit Diffusion Models",
+      "history": "[Submitted on 7 Nov 2024 ( v1 ), last revised 8 Nov 2025 (this version, v4)]",
+      "first_author": "Muyang Li "
+    },
+    {
+      "id": "2411.11217",
+      "url": "https://arxiv.org/abs/2411.11217",
+      "title": " MoE-Lightning: High-Throughput MoE Inference on Memory-constrained GPUs",
+      "history": "[Submitted on 18 Nov 2024]",
+      "first_author": "Shiyi Cao "
+    },
+    {
+      "id": "2411.19108",
+      "url": "https://arxiv.org/abs/2411.19108",
+      "title": " Timestep Embedding Tells: It's Time to Cache for Video Diffusion Model",
+      "history": "[Submitted on 28 Nov 2024 ( v1 ), last revised 18 Mar 2025 (this version, v2)]",
+      "first_author": "Feng Liu "
+    },
+    {
+      "id": "2412.06464",
+      "url": "https://arxiv.org/abs/2412.06464",
+      "title": " Gated Delta Networks: Improving Mamba2 with Delta Rule",
+      "history": "[Submitted on 9 Dec 2024 ( v1 ), last revised 6 Mar 2025 (this version, v3)]",
+      "first_author": "Songlin Yang "
+    },
+    {
+      "id": "2412.06769",
+      "url": "https://arxiv.org/abs/2412.06769",
+      "title": " Training Large Language Models to Reason in a Continuous Latent Space",
+      "history": "[Submitted on 9 Dec 2024 ( v1 ), last revised 23 Aug 2026 (this version, v4)]",
+      "first_author": "Shibo Hao "
+    },
+    {
+      "id": "2501.12948",
+      "url": "https://arxiv.org/abs/2501.12948",
+      "title": " DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+      "history": "[Submitted on 22 Jan 2025 ( v1 ), last revised 4 Jan 2026 (this version, v2)]",
+      "first_author": "DeepSeek-AI "
+    },
+    {
+      "id": "2502.04507",
+      "url": "https://arxiv.org/abs/2502.04507",
+      "title": " Fast Video Generation with Sliding Tile Attention",
+      "history": "[Submitted on 6 Feb 2025 ( v1 ), last revised 4 Jun 2025 (this version, v3)]",
+      "first_author": "Peiyuan Zhang "
+    },
+    {
+      "id": "2502.05171",
+      "url": "https://arxiv.org/abs/2502.05171",
+      "title": " Scaling up Test-Time Compute with Latent Reasoning: A Recurrent Depth Approach",
+      "history": "[Submitted on 7 Feb 2025 ( v1 ), last revised 17 Feb 2025 (this version, v2)]",
+      "first_author": "Jonas Geiping "
+    },
+    {
+      "id": "2502.11494",
+      "url": "https://arxiv.org/abs/2502.11494",
+      "title": " Stop Looking for Important Tokens in Multimodal Language Models: Duplication Matters More",
+      "history": "[Submitted on 17 Feb 2025 ( v1 ), last revised 8 Jun 2025 (this version, v2)]",
+      "first_author": "Zichen Wen "
+    },
+    {
+      "id": "2503.06923",
+      "url": "https://arxiv.org/abs/2503.06923",
+      "title": " From Reusing to Forecasting: Accelerating Diffusion Models with TaylorSeers",
+      "history": "[Submitted on 10 Mar 2025 ( v1 ), last revised 11 Aug 2025 (this version, v2)]",
+      "first_author": "Jiacheng Liu "
+    },
+    {
+      "id": "2503.09516",
+      "url": "https://arxiv.org/abs/2503.09516",
+      "title": " Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning",
+      "history": "[Submitted on 12 Mar 2025 ( v1 ), last revised 5 Aug 2025 (this version, v5)]",
+      "first_author": "Bowen Jin "
+    },
+    {
+      "id": "2504.12369",
+      "url": "https://arxiv.org/abs/2504.12369",
+      "title": " WorldMem: Long-term Consistent World Simulation with Memory",
+      "history": "[Submitted on 16 Apr 2025 ( v1 ), last revised 1 Jan 2026 (this version, v3)]",
+      "first_author": "Zeqi Xiao "
+    },
+    {
+      "id": "2505.09388",
+      "url": "https://arxiv.org/abs/2505.09388",
+      "title": " Qwen3 Technical Report",
+      "history": "[Submitted on 14 May 2025]",
+      "first_author": "An Yang "
+    },
+    {
+      "id": "2506.13585",
+      "url": "https://arxiv.org/abs/2506.13585",
+      "title": " MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention",
+      "history": "[Submitted on 16 Jun 2025]",
+      "first_author": "MiniMax : Aili Chen "
+    },
+    {
+      "id": "2508.06471",
+      "url": "https://arxiv.org/abs/2508.06471",
+      "title": " GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models",
+      "history": "[Submitted on 8 Aug 2025]",
+      "first_author": "GLM-4.5 Team : Aohan Zeng "
+    },
+    {
+      "id": "2508.13009",
+      "url": "https://arxiv.org/abs/2508.13009",
+      "title": " Matrix-game 2.0: An open-source, real-time, and streaming interactive world model",
+      "history": "[Submitted on 18 Aug 2025 ( v1 ), last revised 29 Sep 2026 (this version, v5)]",
+      "first_author": "Xianglong He "
+    },
+    {
+      "id": "2511.01884",
+      "url": "https://arxiv.org/abs/2511.01884",
+      "title": " CudaForge: An Agent Framework with Hardware Feedback for CUDA Kernel Optimization",
+      "history": "[Submitted on 23 Oct 2025 ( v1 ), last revised 5 Nov 2025 (this version, v2)]",
+      "first_author": "Zijian Zhang "
+    },
+    {
+      "id": "2512.14614",
+      "url": "https://arxiv.org/abs/2512.14614",
+      "title": " WorldPlay: Towards Long-Term Geometric Consistency for Real-Time Interactive World Modeling",
+      "history": "[Submitted on 16 Dec 2025 ( v1 ), last revised 9 Jun 2026 (this version, v2)]",
+      "first_author": "Wenqiang Sun "
+    },
+    {
+      "id": "2602.16052",
+      "url": "https://arxiv.org/abs/2602.16052",
+      "title": " MoE-Spec: Expert Budgeting for Efficient Speculative Decoding",
+      "history": "[Submitted on 17 Feb 2026]",
+      "first_author": "Bradley McDanel "
+    },
+    {
+      "id": "2603.05451",
+      "url": "https://arxiv.org/abs/2603.05451",
+      "title": " FlashAttention-4: Algorithm and Kernel Pipelining Co-Design for Asymmetric Hardware Scaling",
+      "history": "[Submitted on 5 Mar 2026]",
+      "first_author": "Ted Zadouri "
+    },
+    {
+      "id": "2606.28565",
+      "url": "https://arxiv.org/abs/2606.28565",
+      "title": " KernelSight-LM: A Kernel-Level LLM Inference Simulator",
+      "history": "[Submitted on 26 Jun 2026 ( v1 ), last revised 2 Jul 2026 (this version, v2)]",
+      "first_author": "Xiteng Yao "
+    },
+    {
+      "id": "2607.05147",
+      "url": "https://arxiv.org/abs/2607.05147",
+      "title": " DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation",
+      "history": "[Submitted on 6 Jul 2026]",
+      "first_author": "Xin Cheng "
+    },
+    {
+      "id": "2609.30059",
+      "url": "https://arxiv.org/abs/2609.30059",
+      "title": " KernelOPT: Dispatch-Aware Agentic Search for GPU Kernel Optimization",
+      "history": "[Submitted on 24 Sep 2026 ( v1 ), last revised 6 Oct 2026 (this version, v2)]",
+      "first_author": "Aheli Poddar "
+    },
+    {
+      "id": "2609.39223",
+      "url": "https://arxiv.org/abs/2609.39223",
+      "title": " QATFactory: A Versatile, Deployment-Aligned Framework for Quantization-aware Training and Distillation of LLMs",
+      "history": "[Submitted on 30 Sep 2026 ( v1 ), last revised 1 Oct 2026 (this version, v2)]",
+      "first_author": "Weili Xu "
+    },
+    {
+      "id": "2610.28355",
+      "url": "https://arxiv.org/abs/2610.28355",
+      "title": " Beyond the Point Mass: Acceptance-Derived Weights and Distributional Losses for Speculative Decoding",
+      "history": "[Submitted on 20 Oct 2026]",
+      "first_author": "Tianyu Wu "
+    },
+    {
+      "id": "2610.33625",
+      "url": "https://arxiv.org/abs/2610.33625",
+      "title": " RAQ-MLA: Role-Aware Quantization for Multi-Head Latent Attention Caches",
+      "history": "[Submitted on 24 Oct 2026]",
+      "first_author": "Tianqi Chen "
+    },
+    {
+      "id": "2610.35706",
+      "url": "https://arxiv.org/abs/2610.35706",
+      "title": " Triage: Skip, Skim, or Refine Attention Tiles in Video Diffusion Transformers",
+      "history": "[Submitted on 26 Oct 2026]",
+      "first_author": "Yeonjae Kim "
+    },
+    {
+      "id": "2610.36848",
+      "url": "https://arxiv.org/abs/2610.36848",
+      "title": " Evolving Agent Teams",
+      "history": "[Submitted on 27 Oct 2026]",
+      "first_author": "Shiyi Cao "
+    }
+  ]
+}
