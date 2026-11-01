@@ -216,7 +216,7 @@
 
 <!-- ===================== 1. WHY ===================== -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
 <div class="note"><b>从这里读起 · 把分布正确性与墙钟收益分别证明</b><p><a href="#why">普通解码</a> → <a href="#core">提议与验证</a> → <a href="#phase1">拒绝修正</a> → <a href="#phase2">多头与树</a> → <a href="#phase3">并行草稿</a> → <a href="#summary">比较</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>目标分布记 p、草稿记 q、条件接受率记 α、草稿数记 γ，含已知锚点的块长另记 B。候选已知时 causal mask 可并行打分各条件分布；自由生成时下一输入尚未采样，因此不能直接等价并行生成。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>提出三个候选 a,b,c：若 a 接受、b 拒绝，则保留 a，从归一化正部 (p−q)⁺ 采一个修正 token，丢弃 b、c 的候选及其缓存；若三个全接受，还从目标采 bonus token。该轮最多产出 γ+1 个。分布相同不意味着固定随机种子逐 token 相同。</div>
@@ -241,10 +241,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EAGLE-4：负载校准草稿树</b><span class="hl-date">10-20/21 · eagle-hq</span></div><p>硬件/负载校准的草稿树：Qwen3.8-27B 3.59×，反超 DFlash2 2.80× / DSpark 2.57× / MTP 2.22×；B300 单请求 3.42×→64 并发 1.39×。（eagle-hq 出品，source-available，与 SafeAILab EAGLE-1~3 无确认关联）</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EAGLE-4：负载校准草稿树</b><span class="hl-date">10-20/21 · eagle-hq</span></div><p>硬件/负载校准的草稿树：Qwen3.8-27B 3.59×，反超 DFlash2 2.80× / DSpark 2.57× / MTP 2.22×；B300 单请求 3.42×→64 并发 1.39×。（eagle-hq 出品，source-available，与 SafeAILab EAGLE-1~3 无确认关联）</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DSpark 的置信度调度+自适应验证长度随生产级推理栈一起开源（10-20，GitHub 首次提交口径）；官方 Q&amp;A 称单集群 155T tokens/天。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>xPress 进 vLLM</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>DFlash 草稿+精化器成为原生 dflash 方法：2026-10-22 合入 main，v0.33 起正式搭载（晚于 v0.32.0）；训练配方进 speculators 库。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>接受率不随位置衰减</b><span class="hl-date">10-22 · Z. Meng</span></div><p>500 题 ~178 万轮验证：接受率不随位置衰减，拒绝集中于 wait/check 等反思 token——直接挑战“位置衰减（后缀衰减）”叙事。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
+<div class="hl-card"><div class="hl-meta"><b>接受率不随位置衰减</b><span class="hl-date">10-22 · Z. Meng</span></div><p>500 题 ~178 万轮验证：接受率不随位置衰减，拒绝集中于 wait/check 等反思 token，直接挑战"位置衰减（后缀衰减）"叙事。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="why"><span class="num">1</span>为什么大模型推理"慢"？<span class="cite" title="Leviathan et al. 2022 / Chen et al. 2023">[2,3]</span></h2>
 
@@ -252,7 +252,7 @@
 
 <div class="formula">第 t 步：&nbsp; <i>x</i><sub>t</sub> &nbsp;∼&nbsp; <i>p</i>( · | x<sub>1</sub>, x<sub>2</sub>, …, x<sub>t−1</sub>) &nbsp;&nbsp;⇒&nbsp;&nbsp; 生成 K 个 token 要 <b>K 次串行前向</b></div>
 
-<p>关键洞察是：在 <strong>batch size 较小</strong>（比如单用户对话）时，推理瓶颈<strong>不是算力（FLOPs），而是显存带宽（memory bandwidth）</strong>。每一步都要把整个模型的几百亿参数从显存（HBM）搬运到计算芯片，却只算出 1 个 token——算力被严重浪费了。<span class="cite" title="Medusa (Cai et al. 2024)">[7]</span></p>
+<p>关键洞察是：在 <strong>batch size 较小</strong>（比如单用户对话）时，推理瓶颈<strong>不是算力（FLOPs），而是显存带宽（memory bandwidth）</strong>。每一步都要把整个模型的几百亿参数从显存（HBM）搬运到计算芯片，却只算出 1 个 token，算力被严重浪费了。<span class="cite" title="Medusa (Cai et al. 2024)">[7]</span></p>
 
 <blockquote class="q">
   <span class="en">"each forward pass requires transferring the complete model parameters from High-Bandwidth Memory (HBM) to the accelerator's cache. This process, which generates only a single token, underutilizes the arithmetic computation potential of modern accelerators, leading to inefficiency."</span>
@@ -262,7 +262,7 @@
 
 <p>打个比方：你（计算芯片）有一支超快的笔，但每次写字前，都要等别人把整本字典（模型参数）从书架（显存）搬到你面前，你才能写一个字。瓶颈在"搬字典"而不是"写字"。</p>
 
-<div class="note"><b>于是有了一个朴素的想法：</b>既然搬一次字典只写一个字太亏了，那能不能<u>一次搬运，多写几个字</u>？——这就是投机解码的出发点：用并行的多余算力，换更少的"搬字典"次数。</div>
+<div class="note"><b>于是有了一个朴素的想法：</b>既然搬一次字典只写一个字太亏了，那能不能<u>一次搬运，多写几个字</u>？这就是投机解码的出发点：用并行的多余算力，换更少的"搬字典"次数。</div>
 
 <!-- ===================== 2. CORE ===================== -->
 <h2 id="core"><span class="num">2</span>核心思想：用"草稿+验证"换并发</h2>
@@ -280,7 +280,7 @@
 <p>如此一来，目标模型每跑一次（搬一次字典），<strong>最少产出 1 个 token，最多产出 γ+1 个 token</strong>。如果草稿猜得准，整个生成过程就被大幅加速了。</p>
 
 <h3>2.1 为什么能做到"无损"（不改变输出分布）？</h3>
-<p>这是投机解码最巧妙、也最重要的性质。它依赖一种叫 <strong>投机采样（speculative sampling）/ 改进版拒绝采样</strong> 的接受规则。对于草稿在第 k 位猜的 token <code class="inl">x̂<sub>k</sub></code>，目标模型在该位给了概率 <code class="inl">p(x̂<sub>k</sub>)</code>，草稿模型给了概率 <code class="inl">q(x̂<sub>k</sub>)</code>，则：</p>
+<p>这是投机解码最巧妙、也最重要的性质。它依赖一种叫 <strong>投机采样（speculative sampling）/ 改进版拒绝采样</strong> 的接受规则。草稿在第 k 位猜的 token 记作 <code class="inl">x̂<sub>k</sub></code>：目标模型在该位给了概率 <code class="inl">p(x̂<sub>k</sub>)</code>，草稿模型给了概率 <code class="inl">q(x̂<sub>k</sub>)</code>，则：</p>
 
 <div class="formula">接受概率 = min( 1 , &nbsp; p(x̂<sub>k</sub>) / q(x̂<sub>k</sub>) )</div>
 
@@ -303,7 +303,7 @@
 </table>
 <p>逐项验证最终分布（只列"爱"和"是"，其余同理）：</p>
 <div class="formula">P(爱) = q·min(1,p/q) = <b>0.50</b> ✓　　P(是) = min(q,p) + P(拒绝)·残差(是) = 0.20 + 0.10×1.0 = <b>0.30</b> ✓</div>
-<p class="muted">可以看到：唯一被"打折"的"爱"少掉的概率（0.60→0.50），恰好通过残差重采样补给了唯一被低估的"是"（0.20→0.30）——<b>此消彼长，总量守恒</b>，这就是无损的全部秘密。同时可算出这一步的理论接受率 <code class="inl">α = Σ min(p,q) = 0.900</code>。</p>
+<p class="muted">可以看到：唯一被"打折"的"爱"少掉的概率（0.60→0.50），恰好通过残差重采样补给了唯一被低估的"是"（0.20→0.30）。<b>此消彼长，总量守恒</b>，这就是无损的全部秘密。同时可算出这一步的理论接受率 <code class="inl">α = Σ min(p,q) = 0.900</code>。</p>
 
 <blockquote class="q">
   <span class="en">"We present speculative sampling, an algorithm for accelerating transformer decoding by enabling the generation of multiple tokens from each transformer call… combined with a novel modified rejection sampling scheme which preserves the distribution of the target model within hardware numerics."</span>
@@ -323,23 +323,23 @@ P(X=x) = P(x̂=x)·P(接受|x̂=x)   +   P(被拒绝)·P(X=x | 被拒绝)
 <p class="muted">（其中用到了 <code class="inl">1 − Σmin(p,q) = Σmax(0,p−q)</code>，因为 Σp = Σq = 1。）</p>
 </details>
 
-<h3>2.2 加速从何而来？——一个简洁的公式</h3>
+<h3>2.2 加速从何而来？一个简洁的公式</h3>
 <p>设每个解码周期里：草稿耗时 <code class="inl">T<sub>draft</sub></code>，验证耗时 <code class="inl">T<sub>verify</sub></code>，平均接受 token 数 <code class="inl">τ</code>。那么每个 token 的平均延迟是<span class="cite" title="DFlash (Chen et al. 2026)">[11]</span>：</p>
 <div class="formula">L = ( T<sub>draft</sub> + T<sub>verify</sub> ) / τ ，&nbsp;&nbsp;加速比 η = L<sub>目标自回归</sub> / L</div>
 <p>也就是说，加速只有三条路可走：<b>① 让草稿更快（降低 T<sub>draft</sub>）；② 让草稿更准（提高 τ）；③ 让验证更聪明（减少 T<sub>verify</sub> 的浪费）。</b>后面你会看到，整个投机解码的发展史，就是围绕这三条杠杆的军备竞赛。</p>
 
-<h4>📏 草稿该猜多长？——期望产出公式的直觉</h4>
+<h4>📏 草稿该猜多长？期望产出公式的直觉</h4>
 <p>Leviathan 等证明了：在逐位置接受事件独立同分布的简化模型中，每步条件接受率为 α、每轮猜 γ 个，则每轮目标模型前向的<strong>期望产出 token 数</strong>为 <code class="inl">(1−α<sup>γ+1</sup>)/(1−α)</code>。<span class="cite" title="Leviathan et al. 2022">[2]</span> 用上面例子里的 α=0.9 代入：</p>
 <table>
 <thead><tr><th>草稿长度 γ</th><th>1</th><th>2</th><th>4</th><th>6</th><th>8</th><th>∞（上限 1/(1−α)）</th></tr></thead>
 <tbody><tr><td><b>期望产出（含 bonus）</b></td><td>1.90</td><td>2.71</td><td>4.10</td><td>5.22</td><td>6.13</td><td><b>10.0</b></td></tr></tbody>
 </table>
-<p class="muted">规律很清楚：<b>边际收益递减</b>——γ 从 1 加到 4，期望产出翻了一倍多；从 8 加到无穷也只再多不到 4 个。而草稿成本（自回归时）却在线性上涨。这说明"猜多长"存在一个甜点，且随 α 变化——<b>这正是后来"动态长度/置信度调度"（如 DSpark、SpecDec++等）的理论根源</b>。</p>
+<p class="muted">规律很清楚：<b>边际收益递减</b>。γ 从 1 加到 4，期望产出翻了一倍多；从 8 加到无穷也只再多不到 4 个。而草稿成本（自回归时）却在线性上涨。这说明"猜多长"存在一个甜点，且随 α 变化，<b>这正是后来"动态长度/置信度调度"（如 DSpark、SpecDec++等）的理论根源</b>。</p>
 
 <div class="note warn"><b>⚠️ 一句话记住全部：</b> <b>草稿要"快"，目标要"准"，验证要"无损且省"。</b> 任何方法都在权衡这三者。</div>
 
 <h3 id="lab">2.3 · 动手实验：50 行代码亲眼验证"无损"</h3>
-<p>光看公式不过瘾？下面这段代码<strong>不依赖任何深度学习框架</strong>（纯 Python 标准库），把上面的接受规则原样实现一遍，然后重复 20 万次，统计投机采样产出的每个 token 的频率——如果"无损"成立，频率应当收敛到目标分布 p。</p>
+<p>光看公式不过瘾？下面这段代码<strong>不依赖任何深度学习框架</strong>（纯 Python 标准库），把上面的接受规则原样实现一遍，然后重复 20 万次，统计投机采样产出的每个 token 的频率。如果"无损"成立，频率应当收敛到目标分布 p。</p>
 <p class="codecap">demo_speculative_sampling.py（与本页同目录，可直接 python 运行；已实测通过）</p>
 <pre><span class="k">import</span> random
 <span class="k">from</span> collections <span class="k">import</span> Counter
@@ -384,20 +384,20 @@ token&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 目标分布 p&nbsp;&nbsp;&nbsp; 投�
 在&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.1010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +0.0010<br>
 了&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.0508&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; +0.0008<br>
 有&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.050&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0.0492&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; −0.0008</div>
-<p>所有偏差都在 ±0.0013 以内（纯粹的随机涨落，N 再大 10 倍还会缩小 √10 倍）——<b>投机采样的输出分布确实与目标模型一致</b>。此段原代码没有统计接受次数，因而不宣称它独立验证了接受率；配套标准库脚本另行统计该量。这只验证固定上下文的单位置分布，不覆盖完整序列回滚。接受率的解析式为 <code class="inl">α = Σ min(p,q)</code> 同样得到验证。<span class="cite" title="Leviathan et al. 2022, Corollary 3.6">[2]</span></p>
+<p>所有偏差都在 ±0.0013 以内（纯粹的随机涨落，N 再大 10 倍还会缩小 √10 倍），<b>投机采样的输出分布确实与目标模型一致</b>。此段原代码没有统计接受次数，因而不宣称它独立验证了接受率；配套标准库脚本另行统计该量。这只验证固定上下文的单位置分布，不覆盖完整序列回滚。接受率的解析式为 <code class="inl">α = Σ min(p,q)</code> 同样得到验证。<span class="cite" title="Leviathan et al. 2022, Corollary 3.6">[2]</span></p>
 
 <h3>2.4 · 四个常见误区（最容易踩的坑）</h3>
 <div class="grid2">
 <div class="card" style="margin:0"><b>❌ 误区一："投机解码会降低输出质量。"</b><p style="margin:6px 0">不会。改进拒绝采样在数学上保证每个 token 的边缘分布与目标模型完全相同（贪心解码时输出甚至逐 token 一致）。"投机"投的是<b>时间</b>，不是<b>质量</b>。</p></div>
-<div class="card" style="margin:0"><b>❌ 误区二："草稿被拒就白干了。"</b><p style="margin:6px 0">即使第一个草稿就被拒，目标模型也会在拒绝位重采样出 1 个"修正 token"——<b>至少产出 1 个 token 仅保证算法进展，不保证基线速度；草稿与验证成本会使低接受率配置比普通解码更慢</b>，额外代价只是草稿那点时间。每轮保底 1 个、上限 γ+1 个。</p></div>
-<div class="card" style="margin:0"><b>❌ 误区三："并发/batch 越大越划算。"</b><p style="margin:6px 0">恰恰相反。batch 大了以后 GPU 已经吃满（compute-bound），验证不再"免费"，甚至会挤占别的请求——这正是 DSpark 要做<b>负载感知调度</b>的原因。<span class="cite">[12]</span></p></div>
+<div class="card" style="margin:0"><b>❌ 误区二："草稿被拒就白干了。"</b><p style="margin:6px 0">即使第一个草稿就被拒，目标模型也会在拒绝位重采样出 1 个"修正 token"，每轮保底 1 个、上限 γ+1 个，额外代价只是草稿那点时间。<b>不过"至少产出 1 个 token"仅保证算法进展，不保证基线速度；草稿与验证成本会使低接受率配置比普通解码更慢</b>。</p></div>
+<div class="card" style="margin:0"><b>❌ 误区三："并发/batch 越大越划算。"</b><p style="margin:6px 0">恰恰相反。batch 大了以后 GPU 已经吃满（compute-bound），验证不再"免费"，甚至会挤占别的请求。这正是 DSpark 要做<b>负载感知调度</b>的原因。<span class="cite">[12]</span></p></div>
 <div class="card" style="margin:0"><b>❌ 误区四："草稿猜的 token 必须和目标一样。"</b><p style="margin:6px 0">不需要"猜中"，只需要分布<b>覆盖</b>得好：q 给了概率而 p 给得更高的 token 永远会被接受。所以即使草稿"口味"略有不同，仍能高速通过验证。</p></div>
 </div>
 
 <!-- ===================== 3. TIMELINE ===================== -->
 <!-- WIDGET:w1 投机解码 · speculative-decoding.html -->
 <div class="ppx-demo" id="PPX-W1">
-  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>投机解码：「起草—验证」如何一次算出多个 token</b></div>
+  <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>投机解码："起草—验证"如何一次算出多个 token</b></div>
   <div class="ppx-bar">
     <button class="ppx-play on">⏸ 暂停</button>
     <button class="ppx-reset">↻ 重置</button>
@@ -406,7 +406,7 @@ token&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 目标分布 p&nbsp;&nbsp;&nbsp; 投�
     <span style="margin-left:auto">目标前向 <span class="ppx-nf ppx-stat">0</span> 次 · 产出 <span class="ppx-nt ppx-stat">0</span> token · 每次前向平均产出 <b class="ppx-tpf ppx-stat">–</b>（基线 = 1）</span>
   </div>
   <canvas></canvas>
-  <div class="ppx-cap">绿色 = 目标模型验证通过并接受；红色 = 验证失败，从失败处回滚并由目标模型亲自重写（红色斜体 token）。注意每个「轮次」无论接受多少，目标模型只做 <b>1 次前向</b>——这正是加速的来源；而验证规则保证输出分布与目标模型完全一致（无损）。把 q 调低观察回滚变多、γ 调大观察「一次验证更多 token」。</div>
+  <div class="ppx-cap">绿色 = 目标模型验证通过并接受；红色 = 验证失败，从失败处回滚并由目标模型亲自重写（红色斜体 token）。注意每个"轮次"无论接受多少，目标模型只做 <b>1 次前向</b>，这正是加速的来源；而验证规则保证输出分布与目标模型完全一致（无损）。把 q 调低观察回滚变多、γ 调大观察"一次验证更多 token"。</div>
 </div>
 <style>
 .ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
@@ -585,7 +585,7 @@ root.querySelector('.ppx-q').addEventListener('input',function(){acc=+this.value
 <blockquote class="q">
   <span class="en">"(1) hard language-modeling tasks often include easier subtasks that can be approximated well by more efficient models, and (2) using speculative execution and a novel sampling method, we can make exact decoding from the large models faster, by running them in parallel on the outputs of the approximation models, potentially generating several tokens concurrently, and without changing the distribution."</span>
   <span class="src">— Leviathan et al., "Fast Inference from Transformers via Speculative Decoding", ICML 2023 (arXiv:2211.17192, 2022-11)</span>
-  <span class="zh">（1）困难的语言建模任务里，常常包含能被更高效模型很好近似的"简单子任务"；（2）借助投机执行和一种新颖的采样方法，我们可以让从大模型解码变得更快——把大模型对近似模型输出并行计算，从而可能一次生成多个 token，并且不改变输出分布。</span>
+  <span class="zh">（1）困难的语言建模任务里，常常包含能被更高效模型很好近似的"简单子任务"；（2）借助投机执行和一种新颖的采样方法，我们可以让从大模型解码变得更快：把大模型对近似模型输出并行计算，从而可能一次生成多个 token，并且不改变输出分布。</span>
 </blockquote>
 
 <p>实验：用更小的近似模型（M<sub>q</sub>）给目标模型（M<sub>p</sub>）当草稿，在 T5-XXL（110 亿参数）上取得 <strong>2–3 倍</strong>加速，且输出完全一致。<span class="cite">[2]</span></p>
@@ -601,8 +601,8 @@ root.querySelector('.ppx-q').addEventListener('input',function(){acc=+this.value
  本周期产出：               tok1 tok2 tok3  + [修正token] = 4 个 token
                           （最多 γ+1 个，最少 1 个）</div>
 
-<h3>4.2 DeepMind 版（Chen et al.）—— 为什么"并行打分"几乎不增加耗时？</h3>
-<p>DeepMind 在 Chinchilla 70B 上验证了 2–2.5× 加速。他们额外解释了一个工程上的关键点：对大模型而言，<strong>"给 K 个 token 打分"和"生成 1 个 token"耗时几乎一样</strong>，因为瓶颈在搬运参数/通信，而非计算本身——这正是投机解码能"免费"加速的根源。<span class="cite">[3]</span></p>
+<h3>4.2 DeepMind 版（Chen et al.）：为什么"并行打分"几乎不增加耗时？</h3>
+<p>DeepMind 在 Chinchilla 70B 上验证了 2–2.5× 加速。他们额外解释了一个工程上的关键点：<strong>大模型"给 K 个 token 打分"和"生成 1 个 token"耗时几乎一样</strong>，因为瓶颈在搬运参数/通信，而非计算本身。这正是投机解码能"免费"加速的根源。<span class="cite">[3]</span></p>
 
 <blockquote class="q">
   <span class="en">"computing the logits of a short continuation of K tokens in parallel has a very similar latency to that of sampling a single token."</span>
@@ -610,7 +610,7 @@ root.querySelector('.ppx-q').addEventListener('input',function(){acc=+this.value
   <span class="zh">并行计算一段长度为 K 的续写的 logits，其延迟与采样单个 token 非常接近。</span>
 </blockquote>
 
-<div class="note"><b>阶段一的小结：</b>这一代方法的<strong>草稿模型是一个独立的小模型</strong>（比如同系列的更小版本）。它的局限是——(a) 还得训练/维护一个额外小模型；(b) 草稿本身仍是<strong>自回归</strong>的，要串行跑 γ 次；(c) 接受率受小模型能力限制。这些痛点，直接催生了阶段二。</div>
+<div class="note"><b>阶段一的小结：</b>这一代方法的<strong>草稿模型是一个独立的小模型</strong>（比如同系列的更小版本）。它的局限是：(a) 还得训练/维护一个额外小模型；(b) 草稿本身仍是<strong>自回归</strong>的，要串行跑 γ 次；(c) 接受率受小模型能力限制。这些痛点，直接催生了阶段二。</div>
 
 <!-- ===================== 5. PHASE 2 ===================== -->
 <h2 id="phase2"><span class="num">5</span>阶段二（2024）：自投机与特征级草稿</h2>
@@ -705,20 +705,20 @@ loss  = L_reg + <span class="n">0.1</span> * L_cls                             <
 </blockquote>
 
 <h4>🔎 看一眼 EAGLE 真实代码（已 clone 到 <code class="inl">eagle/</code>）</h4>
-<p class="codecap">eagle/eagle/model/cnets.py —— 草稿模型把 [token嵌入 ; 目标 hidden 特征] 拼成 2 倍宽输入</p>
+<p class="codecap">eagle/eagle/model/cnets.py：草稿模型把 [token嵌入 ; 目标 hidden 特征] 拼成 2 倍宽输入</p>
 <pre><span class="c"># EAGLE 草稿模型的 decoder layer：特征外推的核心</span>
 residual = hidden_states
 hidden_states = self.hidden_norm(hidden_states)
 input_emb = self.input_layernorm(input_emb)
 hidden_states = torch.cat((input_emb, hidden_states), dim=-1)   <span class="c"># 把 token 嵌入和目标特征拼起来</span>
 hidden_states, ... = self.self_attn(hidden_states=hidden_states, ...)  <span class="c"># q/k/v 投影宽度 = 2×hidden</span></pre>
-<p class="codecap">eagle/eagle/model/utils.py —— 贪心验证：用 cumprod 取最长匹配前缀</p>
+<p class="codecap">eagle/eagle/model/utils.py：贪心验证，用 cumprod 取最长匹配前缀</p>
 <pre><span class="c"># 拿每个候选路径去比目标模型的 argmax，连乘取最长一致前缀</span>
 posterior_mask = (candidates[:, 1:] == torch.argmax(logits[:, :-1], dim=-1)).int()
 candidates_accept_length = (torch.cumprod(posterior_mask, dim=1)).sum(dim=1)
 accept_length = candidates_accept_length.max()</pre>
 
-<div class="note"><b>到 EAGLE 为止，"特征级自回归草稿"已经能把接受率做到约 0.8。</b>但它依然是<b>自回归式</b>草稿——要串行 γ 次生成，这带来串行起草成本，却没有统一 2–3× 的机制上限；EAGLE-3 在论文相应设置中最高约 6.5×。打破这个串行瓶颈，就是 DFlash 的使命。</div>
+<div class="note"><b>到 EAGLE 为止，"特征级自回归草稿"已经能把接受率做到约 0.8。</b>但它依然是<b>自回归式</b>草稿，要串行 γ 次生成，这带来串行起草成本，却没有统一 2–3× 的机制上限；EAGLE-3 在论文相应设置中最高约 6.5×。打破这个串行瓶颈，就是 DFlash 的使命。</div>
 
 <h3>5.3 MTP（多 Token 预测）：一个训练目标，顺带做推理加速</h3>
 <p><span class="chip c-purple">训练目标</span><span class="chip c-blue">自投机</span><span class="chip c-gold">DeepSeek-V3 落地</span></p>
@@ -734,7 +734,7 @@ accept_length = candidates_accept_length.max()</pre>
 <p>关键点：MTP 在<b>训练</b>时就让模型"预看"多个未来 token。这样做有两个好处：① 更强的训练信号、更好的样本效率（13B 模型在 HumanEval 上多解 12%）；② 训练好的多个头可以直接拿来<b>自投机解码</b>，推理快 3×。<span class="cite">[6]</span></p>
 
 <h4>DeepSeek-V3 如何落地 MTP（2024.12）<span class="cite">[4]</span></h4>
-<p>DeepSeek-V3 借鉴了 Meta 的 MTP 思想，但做了一个关键改造：Meta 是"并行独立头"，而 DeepSeek-V3 改成 <strong>"顺序预测、保留完整因果链"</strong>（和 EAGLE 的精神类似，但目标不同——DeepSeek 主要为提升主模型质量）。</p>
+<p>DeepSeek-V3 借鉴了 Meta 的 MTP 思想，但做了一个关键改造：Meta 是"并行独立头"，而 DeepSeek-V3 改成 <strong>"顺序预测、保留完整因果链"</strong>（和 EAGLE 的精神类似，但目标不同：DeepSeek 主要为提升主模型质量）。</p>
 <blockquote class="q">
   <span class="en">"Different from Gloeckle et al. (2024), which parallelly predicts D additional tokens using independent output heads, we sequentially predict additional tokens and keep the complete causal chain at each prediction depth."</span>
   <span class="src">— DeepSeek-AI, "DeepSeek-V3 Technical Report", 2024-12 (arXiv:2412.19437)</span>
@@ -798,7 +798,7 @@ P_i = softmax(out_head(h_k))
 
 <!-- ===================== 6. PHASE 3 ===================== -->
 <h2 id="phase3"><span class="num">6</span>阶段三（2025–2026）：并行 / 块草稿 —— DFlash 与 DSpark</h2>
-<p>前面所有方法的草稿（除 Medusa/Lookahead 外）都是<b>自回归</b>的——要串行生成 γ 个 token，草稿耗时 <code class="inl">T<sub>draft</sub> = γ · t<sub>step</sub></code> 线性增长。这逼着草稿只能做得很浅（EAGLE-3 只有 1 层），草稿质量被压住，整体加速卡在 2–3×。</p>
+<p>前面所有方法的草稿（除 Medusa/Lookahead 外）都是<b>自回归</b>的，要串行生成 γ 个 token，草稿耗时 <code class="inl">T<sub>draft</sub> = γ · t<sub>step</sub></code> 线性增长。这逼着草稿只能做得很浅（EAGLE-3 只有 1 层），草稿质量被压住，整体加速卡在 2–3×。</p>
 <div class="formula">自回归草稿：T<sub>draft</sub> = γ · t<sub>step</sub>　　→　　并行草稿：T<sub>draft</sub> = t<sub>parallel</sub>（与 γ 几乎无关）</div>
 
 <h3 id="dflash">6.1 DFlash（2026.02）：用"块扩散模型"做并行草稿 <span class="cite">[11]</span></h3>
@@ -814,8 +814,8 @@ P_i = softmax(out_head(h_k))
 
 <p>它的两个关键设计：</p>
 <ol>
-  <li><b>"目标最懂未来"（the target knows best）—— KV 注入。</b>把大模型若干层的 hidden feature 拼起来、投影，作为持久上下文，<b>注入到草稿模型每一层的 K/V 里</b>（而非只在输入层融合一次）。这样即使草稿模型变深，目标模型的信息也不会被稀释，接受长度能随层数有效提升。</li>
-  <li><b>并行块草稿。</b>草稿模型一次前向就把整块（比如 16 个）token 全部去噪出来，<code class="inl">T<sub>draft</sub></code> 几乎不随块长增长——于是可以放心地用更深的草稿模型（5 层）。</li>
+  <li><b>"目标最懂未来"（the target knows best）：KV 注入。</b>把大模型若干层的 hidden feature 拼起来、投影，作为持久上下文，<b>注入到草稿模型每一层的 K/V 里</b>（而非只在输入层融合一次）。这样即使草稿模型变深，目标模型的信息也不会被稀释，接受长度能随层数有效提升。</li>
+  <li><b>并行块草稿。</b>草稿模型一次前向就把整块（比如 16 个）token 全部去噪出来，<code class="inl">T<sub>draft</sub></code> 几乎不随块长增长，于是可以放心地用更深的草稿模型（5 层）。</li>
 </ol>
 
 <div class="ascii">DFlash 推理一周期全流程（块大小 = 16）
@@ -848,7 +848,7 @@ P_i = softmax(out_head(h_k))
 </blockquote>
 
 <h4>🔎 看一眼 DFlash 真实代码（已 clone 到 <code class="inl">dflash/</code>）</h4>
-<p class="codecap">dflash/dflash/model.py —— 注意力的"KV 注入"：K/V = [目标上下文 ; 草稿噪声特征]</p>
+<p class="codecap">dflash/dflash/model.py：注意力的"KV 注入"，K/V = [目标上下文 ; 草稿噪声特征]</p>
 <pre><span class="c"># Q 来自草稿（噪声/掩码）嵌入；K、V = 目标上下文特征 ‖ 草稿噪声特征，沿序列维拼接</span>
 q = self.q_proj(hidden_states).view(bsz, q_len, -1, self.head_dim).transpose(1, 2)
 k_ctx   = self.k_proj(target_hidden)        <span class="c"># 目标模型的上下文 → K 的一部分</span>
@@ -857,7 +857,7 @@ v_ctx   = self.v_proj(target_hidden)
 v_noise = self.v_proj(hidden_states)
 k = torch.cat([k_ctx, k_noise], dim=1).view(bsz, ctx_len + q_len, -1, self.head_dim)
 v = torch.cat([v_ctx, v_noise], dim=1).view(bsz, ctx_len + q_len, -1, self.head_dim)</pre>
-<p class="codecap">dflash/dflash/model.py —— 生成循环：草稿出整块、目标验证、用 cumprod 数接受长度</p>
+<p class="codecap">dflash/dflash/model.py：生成循环，草稿出整块、目标验证、用 cumprod 数接受长度</p>
 <pre><span class="c"># 草稿：复用目标的 embed/lm_head，围绕草稿骨干一次出 block_size 个 token</span>
 draft_logits = target.lm_head(model(target_hidden=target_hidden,
                                     noise_embedding=target.model.embed_tokens(block_output_ids),
@@ -879,7 +879,7 @@ acceptance_length = (block_output_ids[:, 1:] == posterior[:, :-1]).cumprod(dim=1
 <blockquote class="q">
   <span class="en">"We introduce DSpark, a speculative decoding framework that unifies high-throughput parallel generation with adaptive, load-aware verification. To maintain draft quality, DSpark utilizes a semi-autoregressive architecture—coupling a parallel backbone with a lightweight sequential module—to introduce intra-block dependency modeling and mitigate suffix decay. To optimize system efficiency, DSpark employs confidence-scheduled verification…"</span>
   <span class="src">— Cheng et al. (Peking University & DeepSeek), "DSpark", arXiv:2607.05147, 2026-07</span>
-  <span class="zh">我们提出 DSpark，一个把高吞吐并行生成与自适应、负载感知验证统一起来的投机解码框架。为保持草稿质量，DSpark 采用半自回归架构——把一个并行骨干与一个轻量串行模块耦合起来——引入块内依赖建模以缓解后缀衰减。为优化系统效率，DSpark 采用置信度调度的验证……</span>
+  <span class="zh">我们提出 DSpark，一个把高吞吐并行生成与自适应、负载感知验证统一起来的投机解码框架。为保持草稿质量，DSpark 采用半自回归架构，把一个并行骨干与一个轻量串行模块耦合起来，引入块内依赖建模以缓解后缀衰减。为优化系统效率，DSpark 采用置信度调度的验证……</span>
 </blockquote>
 
 <h4>① 半自回归生成（治"后缀衰减"）</h4>
@@ -923,7 +923,7 @@ acceptance_length = (block_output_ids[:, 1:] == posterior[:, :-1]).cumprod(dim=1
      目标模型验证 "E F G"：E✓ F✓ G✗ → 用目标分布重采样出 G*
      本轮产出 = E F G*（3 个 token，只验证了 3 个位置而非 4 个）</div>
 
-<p class="codecap">deepspec/modeling/dspark/markov_head.py —— 串行头逐位采样循环（真实源码，节选）</p>
+<p class="codecap">deepspec/modeling/dspark/markov_head.py：串行头逐位采样循环（真实源码，节选）</p>
 <pre><span class="c"># VanillaMarkov.sample_block_tokens：块内自回归采样，每个位置看到已采样的前缀</span>
 prev = first_prev_token_ids                        <span class="c"># 锚点 token（上一轮目标模型的产出）</span>
 <span class="k">for</span> step_idx <span class="k">in</span> range(proposal_len):
@@ -933,7 +933,7 @@ prev = first_prev_token_ids                        <span class="c"># 锚点 toke
     sampled_tokens.append(next_token_ids)
     prev = next_token_ids                          <span class="c"># ★ 关键：采样结果立刻喂给下一位置</span>
 <span class="k">return</span> torch.stack(sampled_tokens, dim=<span class="n">1</span>), corrected_logits</pre>
-<p class="muted">对应公式：低秩分解 <code class="inl">B ≈ W<sub>1</sub>W<sub>2</sub></code>，其中 <code class="inl">W<sub>1</sub>∈ℝ<sup>V×r</sup></code> 是嵌入查表（r=256），<code class="inl">W<sub>2</sub>∈ℝ<sup>r×V</sup></code> 是 logit 投影——避免存下 V×V 的完整转移矩阵。回到前文的例子：一旦第 1 位采样了 "of"，Markov 头就会在第 2 位抬升 "course"、压低 "problem"，把"串味"组合扼杀在采样阶段。</p>
+<p class="muted">对应公式：低秩分解 <code class="inl">B ≈ W<sub>1</sub>W<sub>2</sub></code>，其中 <code class="inl">W<sub>1</sub>∈ℝ<sup>V×r</sup></code> 是嵌入查表（r=256），<code class="inl">W<sub>2</sub>∈ℝ<sup>r×V</sup></code> 是 logit 投影，避免存下 V×V 的完整转移矩阵。回到前文的例子：一旦第 1 位采样了 "of"，Markov 头就会在第 2 位抬升 "course"、压低 "problem"，把"串味"组合扼杀在采样阶段。</p>
 
 <blockquote class="q">
   <span class="en">"A parallel drafter produces all γ draft logits in one forward pass, so each prediction cannot condition on tokens sampled elsewhere in the block. When the context admits multiple plausible continuations… a parallel drafter may produce incoherent combinations such as 'of problem' or 'no course'… We therefore adopt a semi-autoregressive structure that splits draft generation into two stages."</span>
@@ -945,7 +945,7 @@ prev = first_prev_token_ids                        <span class="c"># 锚点 toke
 <p>这是 DSpark 的系统级创新。在生产高并发场景下，<b>无脑验证整块草稿会浪费宝贵的 batch 容量</b>（很多尾部 token 本来就会被拒）。DSpark 用两件套解决：</p>
 <ul>
   <li><b>置信度头（confidence head）</b>：给每个草稿位置预测一个 <code class="inl">c<sub>k</sub>∈(0,1)</code>，表示"在前缀都被接受的前提下，本位 token 能存活"的条件概率。监督信号用草稿/目标分布的<b>总变差距离</b> <code class="inl">c*<sub>k</sub> = 1 − ½‖p<sub>d</sub>−p<sub>t</sub>‖<sub>1</sub></code>。</li>
-  <li><b>硬件感知前缀调度器</b>：用 <code class="inl">Πc<sub>i</sub></code> 估计期望接受长度，结合实时引擎吞吐画像，<b>动态决定每个请求验证多长</b>——负载轻就验长一点、多赚 token；负载重就截短，把 batch 容量让给别的请求。</li>
+  <li><b>硬件感知前缀调度器</b>：用 <code class="inl">Πc<sub>i</sub></code> 估计期望接受长度，结合实时引擎吞吐画像，<b>动态决定每个请求验证多长</b>：负载轻就验长一点、多赚 token；负载重就截短，把 batch 容量让给别的请求。</li>
 </ul>
 
 <div class="ascii">置信度调度怎么随"系统负载"伸缩（论文图 8 所述行为，示意）
@@ -962,7 +962,7 @@ prev = first_prev_token_ids                        <span class="c"># 锚点 toke
  一句话：轻载时"贪"（多验证多接受），重载时"省"（截前缀保吞吐）——
         这正是 DSpark 能在严格 SLA 下不"塌方"的原因。</div>
 
-<p class="codecap">deepspec/modeling/dspark/loss.py —— 置信度头的监督信号：解析接受率（真实源码，节选）</p>
+<p class="codecap">deepspec/modeling/dspark/loss.py：置信度头的监督信号，解析接受率（真实源码，节选）</p>
 <pre><span class="c"># c*_k = 1 − ½·‖p_draft − p_target‖₁  （两个分布的总变差距离的补）</span>
 draft_probs  = torch.softmax(outputs.draft_logits.float(), dim=-1)
 target_probs = torch.softmax(aligned_target_logits.float(), dim=-1)
@@ -977,7 +977,7 @@ confidence_loss = F.binary_cross_entropy_with_logits(
 <span class="c"># 训练日志同时跟踪 cumprod 偏差：∏̂c（预测的联合存活率） vs ∏c*（真实联合存活率），</span>
 <span class="c"># 因为调度器要的正是"前缀联合概率"的绝对值（须经 STS 逐位置校准），而非相对排序</span></pre>
 
-<h4>为什么"并行+串行"两头都要？——位置维度的接受率证据</h4>
+<h4>为什么"并行+串行"两头都要？位置维度的接受率证据</h4>
 <p>DSpark 论文对"块内每个位置的接受率"做了精细分析，结论非常有启发性：<b>并行草稿的强项在块的前段（初始容量高），自回归草稿的强项在块的后段（衰减平缓）</b>，而 DSpark 的半自回归结构恰好把两者捏在了一起：<span class="cite" title="DSpark: 'combines the high initial-token capacity of parallel models with the suffix coherence of autoregressive models'">[12]</span></p>
 <div class="ascii">块内逐位置接受概率（定性示意，依据 DSpark §4.3.1 位置维度分析）
 
@@ -991,7 +991,7 @@ confidence_loss = F.binary_cross_entropy_with_logits(
 <h4>🔎 看 DSpark 真实代码（已 clone 到 <code class="inl">deepspec/</code>）</h4>
 <div class="grid2">
 <div>
-<p class="codecap">deepspec/.../dspark/markov_head.py —— RNN 头的循环更新</p>
+<p class="codecap">deepspec/.../dspark/markov_head.py：RNN 头的循环更新</p>
 <pre><span class="c"># GRU 式门控：状态 s 跨位置累积前缀，输出转移偏置</span>
 z = torch.cat([state, prev_embeddings, hidden_states], dim=-1)
 proj = self.joint_proj(z)
@@ -1001,7 +1001,7 @@ new_state = gate*state + (1-gate)*torch.tanh(cand_raw)
 bias = self.project_bias(torch.tanh(out_raw))</pre>
 </div>
 <div>
-<p class="codecap">deepspec/.../eval/dspark/draft_ops.py —— 置信度截断</p>
+<p class="codecap">deepspec/.../eval/dspark/draft_ops.py：置信度截断</p>
 <pre><span class="c"># 低于阈值的第一个位置即截断草稿前缀</span>
 below = confidence_logits.sigmoid() &lt; threshold
 if not bool(below[0].any().item()):
@@ -1009,7 +1009,7 @@ if not bool(below[0].any().item()):
 return int(torch.nonzero(below[0])[0].item())  <span class="c"># 否则截到首个低置信处</span></pre>
 </div>
 </div>
-<p class="codecap">deepspec/.../eval/base_evaluator.py —— 投机解码的核心接受循环（DSpark/Eagle3 共用）</p>
+<p class="codecap">deepspec/.../eval/base_evaluator.py：投机解码的核心接受循环（DSpark/Eagle3 共用）</p>
 <pre><span class="c"># 改进版拒绝采样：以 min(1, p_target/p_draft) 接受，cumprod 取最长前缀</span>
 accept_prob = torch.clamp(selected_target_probs / selected_draft_probs, max=1.0)
 accept_mask = (torch.rand_like(accept_prob) &lt; accept_prob).to(torch.int64)
@@ -1020,7 +1020,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <h4>结果（强！）<span class="cite">[12]</span></h4>
 <ul>
   <li><b>离线</b>：在 Qwen3-4B/8B/14B 上，平均接受长度比自回归的 Eagle3 高 30.9% / 26.7% / 30.0%，比并行的 DFlash 高 16.3% / 18.4% / 18.3%。</li>
-  <li><b>线上（DeepSeek-V4 真实流量）</b>：相比此前的 MTP-1 生产基线，在相同吞吐下把<b>单用户生成速度提升 60–85%</b>（V4-Flash）/ 57–78%（V4-Pro）；更关键的是——在严格 SLA（如 120 TPS）下，基线吞吐会"塌方"，而 DSpark 仍稳住，<b>把服务系统的 Pareto 前沿整体外推</b>。</li>
+  <li><b>线上（DeepSeek-V4 真实流量）</b>：相比此前的 MTP-1 生产基线，在相同吞吐下把<b>单用户生成速度提升 60–85%</b>（V4-Flash）/ 57–78%（V4-Pro）；更关键的是，在严格 SLA（如 120 TPS）下，基线吞吐会"塌方"，而 DSpark 仍稳住，<b>把服务系统的 Pareto 前沿整体外推</b>。</li>
 </ul>
 <blockquote class="q">
   <span class="en">"Compared to the established production baseline (MTP-1), DSpark accelerates per-user generation speeds by 60%–85% at matched throughput levels… shifting the Pareto frontier of our serving system."</span>
@@ -1028,7 +1028,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
   <span class="zh">相比既有的生产基线（MTP-1），DSpark 在相同吞吐水平下把单用户生成速度提升了 60%–85%……把我们的服务系统的 Pareto 前沿整体外推。</span>
 </blockquote>
 
-<div class="note"><b>一句话点评 DSpark：</b>它标志着投机解码从"单请求、追延迟"的算法研究，正式进入"<b>系统级、负载感知、与推理引擎协同调度</b>"的工程化阶段——这也是业界大规模落地最需要的东西。</div>
+<div class="note"><b>一句话点评 DSpark：</b>它标志着投机解码从"单请求、追延迟"的算法研究，正式进入"<b>系统级、负载感知、与推理引擎协同调度</b>"的工程化阶段，这正是业界大规模落地最需要的东西。</div>
 
 <!-- ===================== 7. LATEST ===================== -->
 <h2 id="future"><span class="num">8</span>未来发展方向</h2>
@@ -1049,7 +1049,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 <div class="barchart">
   <h4>📊 同台对比：同一模型、同一任务集下的端到端加速</h4>
-  <div class="cap">数据来源：DFlash 论文 Table 1（Qwen3-8B，贪心解码 T=0，GSM8K/MATH-500/AIME25/HumanEval/MBPP/LiveCodeBench/MT-Bench 七项平均，Transformers 后端，H200）<span class="cite" title="DFlash, arXiv:2602.06036">[11]</span>——同一测试环境，可直接比较。</div>
+  <div class="cap">数据来源：DFlash 论文 Table 1（Qwen3-8B，贪心解码 T=0，GSM8K/MATH-500/AIME25/HumanEval/MBPP/LiveCodeBench/MT-Bench 七项平均，Transformers 后端，H200）<span class="cite" title="DFlash, arXiv:2602.06036">[11]</span>。同一测试环境，可直接比较。</div>
   <div class="bar-row"><div class="bl">自回归基线（无投机）</div><div class="bt"><div class="bf" style="width:20%"><span class="bv">1.00×</span></div></div></div>
   <div class="bar-row"><div class="bl">EAGLE-3（树=16）</div><div class="bt"><div class="bf" style="width:35.2%"><span class="bv">1.76×</span></div></div></div>
   <div class="bar-row"><div class="bl">EAGLE-3（树=60）</div><div class="bt"><div class="bf" style="width:40.4%"><span class="bv">2.02×</span></div></div></div>
@@ -1101,7 +1101,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </div>
 <div class="card">
 <h4>🤝 从"模仿目标"到"与目标协作"</h4>
-<p>《Beyond the Target》（2026.05）等提出：草稿不必一味模仿大模型分布，而可以与之"协作"，在保持质量下进一步提升接受率——是范式上的新探索。</p>
+<p>《Beyond the Target》（2026.05）等提出：草稿不必一味模仿大模型分布，而可以与之"协作"，在保持质量下进一步提升接受率，是范式上的新探索。</p>
 </div>
 </div>
 
@@ -1109,14 +1109,14 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <p>Cohere 等的工程实践指出：<b>混合专家（MoE）模型从投机解码中获益更大</b>。原因是 MoE 在单 token 解码时只激活少数专家，带宽受限更严重，正好处于投机解码的"带宽受限甜区"；且草稿与目标的专家路由往往高度相关，验证时复用成本低。</p>
 
 <h3>7.2 把"草稿"本身再投机一次</h3>
-<p>Stanford/Princeton/Together AI 的《Speculative Speculative Decoding》（2026.03）把投机思想递归——<b>连草稿生成本身也再加速一层</b>，进一步压缩草稿延迟。</p>
+<p>Stanford/Princeton/Together AI 的《Speculative Speculative Decoding》（2026.03）把投机思想递归：<b>连草稿生成本身也再加速一层</b>，进一步压缩草稿延迟。</p>
 
 <h3>7.3 2026 秋追踪：并行树起草成为新范式，MTP 成"出厂标配"</h3>
 <p class="lead">2026 年 6–10 月，本领域出现三件值得单独记录的事：<b>并行起草从"块"进化到"树"（JetSpec）</b>、<b>DFlash 谱系完成第一次官方扩容（DFlare）</b>、<b>Google 让 Gemma 4 全家族出厂自带 MTP 起草器</b>。</p>
 
 <h4>① JetSpec（2026.06）：一次前向，直接长出一棵草稿树</h4>
-<p><b>动机</b>：EAGLE 式自回归草稿按路径一步步猜，树越深草稿成本越高；DFlash 式块扩散草稿虽然一次前向出整块，但每个位置"各自打分"，拼出来的树可能"单看每条边都合理、合起来互相矛盾"——这正是 §8⑥ 说的"扩展天花板"（大 batch 下并行验证收益饱和）的根源之一。<span class="cite">[17]</span></p>
-<p><b>贡献</b>：UCSD Hao AI Lab 训练了一个<b>因果并行草稿头</b>：读入冻结目标模型的融合隐状态，单次前向直接产出一棵<b>草稿树</b>，且树上每条路径的打分都与目标模型的自回归分解对齐——既保住"一次前向"的起草效率，又恢复了路径之间的条件依赖。目标模型用树注意力一次前向验证整棵树，构造上无损。</p>
+<p><b>动机</b>：EAGLE 式自回归草稿按路径一步步猜，树越深草稿成本越高；DFlash 式块扩散草稿虽然一次前向出整块，但每个位置"各自打分"，拼出来的树可能"单看每条边都合理、合起来互相矛盾"。这正是 §8⑥ 说的"扩展天花板"（大 batch 下并行验证收益饱和）的根源之一。<span class="cite">[17]</span></p>
+<p><b>贡献</b>：UCSD Hao AI Lab 训练了一个<b>因果并行草稿头</b>：读入冻结目标模型的融合隐状态，单次前向直接产出一棵<b>草稿树</b>，且树上每条路径的打分都与目标模型的自回归分解对齐，既保住"一次前向"的起草效率，又恢复了路径之间的条件依赖。目标模型用树注意力一次前向验证整棵树，构造上无损。</p>
 <p><b>收益</b>：Qwen3-8B 与 Qwen3-30B-A3B（覆盖 dense 与 MoE）、H100 上数学任务（MATH-500）最高 <b>9.64×</b>，开放对话 4.58×；平均接受长度最高 10.7 token；vLLM fork 已开源。</p>
 <blockquote class="q">
   <span class="en">"JetSpec trains a causal parallel draft head over fused hidden states from the frozen target model, producing candidate trees whose scores align with the target model's autoregressive factorization."</span>
@@ -1125,7 +1125,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </blockquote>
 
 <h4>② DFlare（2026.06）：给 DFlash 的"窄条件瓶颈"扩容</h4>
-<p><b>动机</b>：DFlash 把所有草稿层都限制为共享<b>单一融合表示</b>（只从少数目标层抽取），表达力受限——想加深草稿、加数据时遇到瓶颈。<span class="cite">[18]</span></p>
+<p><b>动机</b>：DFlash 把所有草稿层都限制为共享<b>单一融合表示</b>（只从少数目标层抽取），表达力受限，想加深草稿、加数据时遇到瓶颈。<span class="cite">[18]</span></p>
 <p><b>贡献</b>：北大+腾讯（代码进 Tencent/AngelSlim 仓库）提出<b>逐层融合</b>：每个草稿层学自己的目标层组合（可学习加权），把窄瓶颈"张开"；同时草稿训练数据扩容 3 倍（80 万 → 240 万条）。</p>
 <p><b>收益</b>：六个基准平均墙钟加速 <b>5.52×</b>（Qwen3-4B）/ <b>5.46×</b>（Qwen3-8B）/ <b>3.91×</b>（gpt-oss-20B），比 DFlash 提升约 11%/8%/5%；SGLang 并发 32 时吞吐接近 DFlash 的 1.7 倍。</p>
 <blockquote class="q">
@@ -1135,7 +1135,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </blockquote>
 
 <h4>③ Gemma 4 出厂自带 MTP（2026.05）：Google 补上最后一块拼图</h4>
-<p><b>动机</b>：此前"出厂即带草稿头"的阵营有 DeepSeek（V3 MTP）、OpenAI（gpt-oss）等，Google 缺席——而端侧模型恰恰是最缺算力、最需要投机解码的。<span class="cite">[19]</span></p>
+<p><b>动机</b>：此前"出厂即带草稿头"的阵营有 DeepSeek（V3 MTP）、OpenAI（gpt-oss）等，Google 缺席，而端侧模型恰恰是最缺算力、最需要投机解码的。<span class="cite">[19]</span></p>
 <p><b>贡献</b>：Google 为 Gemma 4 全家族（E2B/E4B 边缘模型、26B MoE、31B Dense）发布专用 MTP 起草器：复用目标模型激活、<b>共享 KV 缓存</b>（起草不用重算上下文）；端侧型号用嵌入聚类加速最后一步 logits 计算。LiteRT-LM / MLX / vLLM / SGLang / Ollama 全部支持。</p>
 <p><b>收益</b>：最高 <b>3×</b> 无损加速（26B MoE 在 Apple Silicon、batch 4–8 下约 2.2×）。</p>
 <blockquote class="q">
@@ -1151,11 +1151,11 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </div>
 <div class="card">
 <h4>📏 LongSpark：草稿成本与前缀长度无关</h4>
-<p>洞察：草稿只负责"提议"，错误反正会被目标纠正——所以草稿成本<b>不必</b>随上下文变长而增长。从目标验证前向中提取固定尺寸多尺度视图做块扩散起草，长上下文下 TPOT 最优、草稿状态缩小数个数量级，直接补 DFlash 在长上下文的短板。<span class="cite">[21]</span></p>
+<p>洞察：草稿只负责"提议"，错误反正会被目标纠正，所以草稿成本<b>不必</b>随上下文变长而增长。从目标验证前向中提取固定尺寸多尺度视图做块扩散起草，长上下文下 TPOT 最优、草稿状态缩小数个数量级，直接补 DFlash 在长上下文的短板。<span class="cite">[21]</span></p>
 </div>
 <div class="card">
 <h4>🪆 BitNest：位嵌套草稿（2026.10）</h4>
-<p>反向思路：先造强低精度基座、再用残差细化恢复高精度目标——低精度草稿"嵌套"在高精度目标里，<b>共享同一套物理权重</b>；同样的渐进精度思想用于 KV。7B–8B 端侧模型平均接受率 95.2%，比 FP16 自回归快 1.48–1.61×。<span class="cite">[22]</span></p>
+<p>反向思路：先造强低精度基座、再用残差细化恢复高精度目标，让低精度草稿"嵌套"在高精度目标里，<b>共享同一套物理权重</b>；同样的渐进精度思想用于 KV。7B–8B 端侧模型平均接受率 95.2%，比 FP16 自回归快 1.48–1.61×。<span class="cite">[22]</span></p>
 </div>
 <div class="card">
 <h4>⚙️ 工程侧动态</h4>
@@ -1172,7 +1172,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 <h4>① Nemotron 3.5 Super / Lightning（2026-10-14）：MTP 也能"后训练强化"</h4>
 <p><b>动机</b>：MoE + 混合 Mamba-Transformer 的 agentic 模型同样需要"出厂级"投机解码，但原生 MTP 头在训练与推理条件上存在失配。<span class="cite">[25]</span></p>
-<p><b>贡献</b>：NVIDIA 为递归共享式 MTP 头先做 100B token 热身训练（用"隐状态混合"弥合训练/推理条件失配，比测试时训练便宜），再在后训练阶段做 <b>MTP boosting</b>；随 checkpoint 同步发布三套独立草稿器——LiLiCorr（配 Super 120B-A12B，已并入 vLLM PR #57934）与 DFlash、DSpark（配 Lightning 30B-A3B），全部 NVFP4 量化发布。</p>
+<p><b>贡献</b>：NVIDIA 为递归共享式 MTP 头先做 100B token 热身训练（用"隐状态混合"弥合训练/推理条件失配，比测试时训练便宜），再在后训练阶段做 <b>MTP boosting</b>；随 checkpoint 同步发布三套独立草稿器：LiLiCorr（配 Super 120B-A12B，已并入 vLLM PR #57934）与 DFlash、DSpark（配 Lightning 30B-A3B），全部 NVFP4 量化发布。</p>
 <p><b>收益</b>：MTP boosting 把贪心解码平均接受长度从 4.287 提到 4.718（+10.1%）、采样解码 3.787→4.612（+21.8%）；GB200 单卡最高 4,856 output tok/s/GPU；NVFP4 相对 BF16 精度恢复 99.62%。</p>
 <blockquote class="q">
   <span class="en">"Post-training MTP boosting improves average speculative-decoding acceptance length from 4.287 to 4.718 under greedy decoding and from 3.787 to 4.612 under probabilistic draft sampling on SPEED-Bench."</span>
@@ -1181,8 +1181,8 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </blockquote>
 
 <h4>② TreeSpark（2026-10-14）：把 DSpark 长成树，且"训练你所验证的树"</h4>
-<p><b>动机</b>：并行草稿首轮失配就丢弃整个后缀；DSpark 只保留一条续写、排除备选，且其校正头训练用"真值父 token"、部署时却面对"自生成父状态"——训练与部署的树形不一致。<span class="cite">[26]</span></p>
-<p><b>贡献</b>：人大+南大+华为用单次骨干前向构造<b>父条件候选树</b>（B=7、k=4、32 节点预算），训练时<b>回放部署时的展开/剪枝/打包策略</b>；设计两个新目标——survival NLL（按参考路径质量加权保留边）与 capped coverage hinge（在局部选择边界附近提拔目标模型看重的备选），全部复用参考链的目标分布、零额外目标前向。实验跑在昇腾 910B 上，代码 MIT 开源。</p>
+<p><b>动机</b>：并行草稿首轮失配就丢弃整个后缀；DSpark 只保留一条续写、排除备选，且其校正头训练用"真值父 token"、部署时却面对"自生成父状态"，训练与部署的树形不一致。<span class="cite">[26]</span></p>
+<p><b>贡献</b>：人大+南大+华为用单次骨干前向构造<b>父条件候选树</b>（B=7、k=4、32 节点预算），训练时<b>回放部署时的展开/剪枝/打包策略</b>；设计两个新目标：survival NLL（按参考路径质量加权保留边）与 capped coverage hinge（在局部选择边界附近提拔目标模型看重的备选），全部复用参考链的目标分布、零额外目标前向。实验跑在昇腾 910B 上，代码 MIT 开源。</p>
 <p><b>收益</b>：平均接受长度比 DSpark +23.4%–31.6%（Qwen3-4B：4.23→5.25）；单请求吞吐 +15.1%–25.0%，并发系统吞吐 +12.6%–17.2%。</p>
 <blockquote class="q">
   <span class="en">"TreeSpark improves mean acceptance length over DSpark by 23.4% to 31.6%."</span>
@@ -1191,8 +1191,8 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </blockquote>
 
 <h4>③ DPara（2026-09-23）：并行草稿器 × 并行投机解码，回退率结构性归零</h4>
-<p><b>动机</b>：DFlash/DSpark 的起草虽然并行、但仍串在每轮关键路径上（占端到端延迟 24–32%）；已有重叠方案（SSD/PEARL/SpecBranch）必须"猜"接受前缀与 bonus token，猜错整批回退串行——batch 16 时回退率高达 57–96%。<span class="cite">[27]</span></p>
-<p><b>贡献</b>：把 DSpark 的"贵骨干 + 轻 AR 头"拆开：验证进行时，微调出的多锚点骨干（M-DFlash）一次性为<b>所有可能接受边界</b>预计算草稿表示；验证结果揭晓后只跑轻量 AR 头出下一轮草稿——骨干完全藏进验证窗口，<b>回退率结构性为零</b>。一个反直觉细节：DPara 的平均接受长度反而低于 DSpark（4.41 vs 5.36），赢在"藏延迟"而非"草稿更准"。</p>
+<p><b>动机</b>：DFlash/DSpark 的起草虽然并行、但仍串在每轮关键路径上（占端到端延迟 24–32%）；已有重叠方案（SSD/PEARL/SpecBranch）必须"猜"接受前缀与 bonus token，猜错整批回退串行，batch 16 时回退率高达 57–96%。<span class="cite">[27]</span></p>
+<p><b>贡献</b>：把 DSpark 的"贵骨干 + 轻 AR 头"拆开：验证进行时，微调出的多锚点骨干（M-DFlash）一次性为<b>所有可能接受边界</b>预计算草稿表示；验证结果揭晓后只跑轻量 AR 头出下一轮草稿，骨干完全藏进验证窗口，<b>回退率结构性为零</b>。一个反直觉细节：DPara 的平均接受长度反而低于 DSpark（4.41 vs 5.36），赢在"藏延迟"而非"草稿更准"。</p>
 <p><b>收益</b>：Qwen3-8B/14B 七基准平均 3.21×/3.52×（最高 4.53×），比 DSpark 再 +11.1%/5.1%，比 PEARL/SSD +31%/64%；batch 1–16 全区间保持优势。</p>
 <blockquote class="q">
   <span class="en">"DPara, a PSD framework that reuses effective parallel drafters yet guarantees backbone–verification overlap in every round."</span>
@@ -1231,20 +1231,20 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <ul>
 <li><b>EAGLE-4</b>（eagle-hq（Eagle AI Corp），10-20/21）：硬件/负载校准的草稿树；Qwen3.8-27B 3.59×，反超 DFlash2 2.80×、DSpark 2.57×、MTP 2.22×；B300 SGLang 单请求 3.42×→64 并发 1.39×，MI355X 2.07×；无 arXiv（仓库 PDF）。注意：eagle-hq 出品、source-available，与 SafeAILab 的 EAGLE-1~3 无确认关联。<sup class="cite">[32]</sup></li>
 <li><b>DeepInfer 开源</b>（DeepSeek，10-20）：DSpark 的置信度调度+自适应验证长度随生产级推理栈开源；官方 Q&amp;A 称单集群 155T tokens/天。开源日期 10-20 以 GitHub 首次提交为准（tech-insider 10-21、vLLM 官方 10-24 推文同口径，二手信源）。<sup class="cite">[33]</sup></li>
-<li><b>xPress 上游化 vLLM</b>（UIUC SSAIL，10-22）：DFlash 草稿+精化器成为原生 dflash 方法（PR #54448，2026-10-22 合入 main，v0.33 起正式搭载——晚于 v0.32.0，v0.33.0rc0 已于 10-26 发布）；训练配方进 speculators 库，Qwen3-8B-XPress-b16 权重已发。<sup class="cite">[34]</sup></li>
-<li><b>Speculative Acceptance Does Not Decay with Position</b>（Z. Meng，10-22）：500 题 ~178 万轮验证表明接受率不随位置衰减，拒绝集中于 wait/check 反思 token（def2 0.747 vs 数字/算子 ≥0.93）——挑战“位置衰减”叙事，也动摇按位置衰减加权一类训练设计的前提。<sup class="cite">[35]</sup></li>
+<li><b>xPress 上游化 vLLM</b>（UIUC SSAIL，10-22）：DFlash 草稿+精化器成为原生 dflash 方法（PR #54448，2026-10-22 合入 main，v0.33 起正式搭载，晚于 v0.32.0；v0.33.0rc0 已于 10-26 发布）；训练配方进 speculators 库，Qwen3-8B-XPress-b16 权重已发。<sup class="cite">[34]</sup></li>
+<li><b>Speculative Acceptance Does Not Decay with Position</b>（Z. Meng，10-22）：500 题 ~178 万轮验证表明接受率不随位置衰减，拒绝集中于 wait/check 反思 token（def2 0.747 vs 数字/算子 ≥0.93），直接挑战"位置衰减"叙事，也动摇按位置衰减加权一类训练设计的前提。<sup class="cite">[35]</sup></li>
 <li><b>Packed-SS（One Call Ahead）</b>（密歇根大学，10-24）：自投机一次调用，验证与起草同前向、输入长度线性增长；Nemotron 3B/8B 贪心 vs Linear-SS +3.5–9.3%、vs Quadratic-SS +3.4–32.3%。<sup class="cite">[36]</sup></li>
 <li><b>Tale of Two Tradeoffs</b>（UCLA，10-22）：扩散力度 K × 接受宽松度 λ 联合扩展 Pareto 前沿；SDAR 未专训即追平 Uno/DFlash/DSpark 前沿。<sup class="cite">[37]</sup></li>
 </ul>
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/packedss-fig1.svg" loading="lazy" alt="Linear-SS、Quadratic-SS 与 Packed-SS 三种自投机调度对比" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.33379）</b> · Linear-SS 必须等验证完成才能起草（每轮两次模型调用）；Quadratic-SS 塞进一次调用，但要为每个可能停下的位置起草（输入随宽度 W 二次增长）；Packed-SS 同样一次调用、只从已验证前缀起草单一草稿——输入线性增长。（版权归原作者，引用仅作技术说明）</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.33379）</b> · Linear-SS 必须等验证完成才能起草（每轮两次模型调用）；Quadratic-SS 塞进一次调用，但要为每个可能停下的位置起草（输入随宽度 W 二次增长）；Packed-SS 同样一次调用、只从已验证前缀起草单一草稿，输入线性增长。（版权归原作者，引用仅作技术说明）</figcaption>
 </figure>
 
 
 <!-- ===================== 8. FUTURE ===================== -->
 <h4>④ DLite（2026-10-16）：免历史草稿器，面向 Agentic AI<span class="cite">[31]</span></h4>
-<p><b>动机</b>：智能体负载（SWE-Bench 等）是多轮、带超长系统提示的：现有草稿器在 agentic 负载下接受长度掉 80%，且草稿历史 KV 的维护占端到端延迟的 10–20%——"维护草稿自己的记忆"反而成了累赘。</p>
+<p><b>动机</b>：智能体负载（SWE-Bench 等）是多轮、带超长系统提示的：现有草稿器在 agentic 负载下接受长度掉 80%，且草稿历史 KV 的维护占端到端延迟的 10–20%，"维护草稿自己的记忆"反而成了累赘。</p>
 <p><b>贡献</b>：上交大（戴国浩组）+清华+Infinigence 提出<b>不维护草稿 KV</b>：直接复用目标模型隐状态做局部预测，配轻量串行头；两阶段训练（同构 teacher 热身 + 后训练）。Qwen3-4B/8B 上 τ 达 2~6，智能体任务比 DSpark 最高 +70%（SWE-Bench 3.15 vs 1.89，约 2× 端到端加速），代码与权重已开源。</p>
 <blockquote class="q">
   <span class="en">"Draft-history KV maintenance alone accounts for 10–20% of end-to-end latency in agentic workloads, where acceptance length of existing drafters collapses by up to 80%."</span>
@@ -1253,10 +1253,10 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </blockquote>
 
 <h4>⑤ 框架侧（10-18/19）：并行草稿成为 vLLM / SGLang 的一等公民</h4>
-<p><b>vLLM v0.32.0</b>（814 commits/363 贡献者）：DFlash/DSpark 草稿 in-graph metadata（PR #60692）、adaptive block verification（#60945）、GLM-5.3-Flash 官配 DFlash2 草稿（#56983）、Granite 成为 EAGLE3/DFlash 目标（#60855）、DeepSeek-V4 融合 MTP drafting（#58463）、DSpark 草稿的 EPLB（#57549）。<b>SGLang v0.5.22</b>（950 PR）：DSpark 首次跑通 AMD MI350X/MI355X（DeepSeek-V4.1 吞吐 +1.9×，#41308）、DFlash 家族 block verification（#43012）、MiMo-V2.6-Pro + DFlash 1.85×（#41886）。FlashInfer v0.7.2（10-15）让投机验证的多 token 行在 B200/B300 自动路由到 cuDNN 引擎（PR #5508）——验证侧内核开始"感知"投机解码。</p>
+<p><b>vLLM v0.32.0</b>（814 commits/363 贡献者）：DFlash/DSpark 草稿 in-graph metadata（PR #60692）、adaptive block verification（#60945）、GLM-5.3-Flash 官配 DFlash2 草稿（#56983）、Granite 成为 EAGLE3/DFlash 目标（#60855）、DeepSeek-V4 融合 MTP drafting（#58463）、DSpark 草稿的 EPLB（#57549）。<b>SGLang v0.5.22</b>（950 PR）：DSpark 首次跑通 AMD MI350X/MI355X（DeepSeek-V4.1 吞吐 +1.9×，#41308）、DFlash 家族 block verification（#43012）、MiMo-V2.6-Pro + DFlash 1.85×（#41886）。FlashInfer v0.7.2（10-15）让投机验证的多 token 行在 B200/B300 自动路由到 cuDNN 引擎（PR #5508），验证侧内核开始"感知"投机解码。</p>
 
 <h4>⑥ 并行起草谱系补全（10-14 – 10-20）</h4>
-<p><b>FlashMap</b>（Polymathic+Princeton 等，arXiv:2610.24365）把流匹配引入并行起草，绕开块扩散的单步瓶颈；<b>JetSpec++</b>（UCSD+UIUC+NJU+Meta+StepFun，arXiv:2610.19792）在 JetSpec 之上加前瞻并行起草与自我精化；<b>ReAnchor</b>（KAIST+SNU，arXiv:2610.26531）回收"被拒的验证前向"做扩散起草、<b>DStill</b>（Capital One，arXiv:2610.27379）用轨迹一致性蒸馏出一步起草——"浪费掉的验证算力被再利用"成为与 DPara 同轴的新思路。<b>ProVe</b>（NTU+字节，arXiv:2610.27815）则反其道探索"大模型起草、小模型验证"的角色反转。生态侧：DFlash2/DSpark/MTP 已下沉到端侧引擎（AMD Strix Halo、Apple MLX/M3 Ultra、DGX Spark GB10），10 月 GitHub 新增相关仓库约 460 个。</p>
+<p><b>FlashMap</b>（Polymathic+Princeton 等，arXiv:2610.24365）把流匹配引入并行起草，绕开块扩散的单步瓶颈；<b>JetSpec++</b>（UCSD+UIUC+NJU+Meta+StepFun，arXiv:2610.19792）在 JetSpec 之上加前瞻并行起草与自我精化；<b>ReAnchor</b>（KAIST+SNU，arXiv:2610.26531）回收"被拒的验证前向"做扩散起草、<b>DStill</b>（Capital One，arXiv:2610.27379）用轨迹一致性蒸馏出一步起草，"浪费掉的验证算力被再利用"成为与 DPara 同轴的新思路。<b>ProVe</b>（NTU+字节，arXiv:2610.27815）则反其道探索"大模型起草、小模型验证"的角色反转。生态侧：DFlash2/DSpark/MTP 已下沉到端侧引擎（AMD Strix Halo、Apple MLX/M3 Ultra、DGX Spark GB10），10 月 GitHub 新增相关仓库约 460 个。</p>
 
 </section>
 <footer class="foot">
@@ -1303,17 +1303,15 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </ol>
   <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
   <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">
-    🔗 <b>姊妹篇（2026-09 更新）</b>：训练如何让"草稿-验证"越跑越快——草稿蒸馏（DistillSpec）、解码头训练（Medusa / EAGLE）、目标自投机（LayerSkip）、训练时测试（EAGLE-3）、在策蒸馏与 RL 协同训练（Draft-OPD / DSpark / NVIDIA），结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码，见<a href="spec-decoding-post-training.html">《投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）》</a>。
+    🔗 <b>姊妹篇（2026-09 更新）</b>：训练如何让"草稿-验证"越跑越快：草稿蒸馏（DistillSpec）、解码头训练（Medusa / EAGLE）、目标自投机（LayerSkip）、训练时测试（EAGLE-3）、在策蒸馏与 RL 协同训练（Draft-OPD / DSpark / NVIDIA），结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码，见<a href="spec-decoding-post-training.html">《投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）》</a>。
   </p>
 </footer>
 
 </div>
 
 <div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
-  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
-  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数（GitHub 主页与站点共用同一计数器）"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:middle;height:20px"></a>
 </div>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <!-- chapter-reader:start -->
 <style id="chapter-reader-style">

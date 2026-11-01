@@ -120,8 +120,8 @@
 <header class="hero">
   <div class="kicker">Pai's Blog · Tech Surveys</div>
   <h1>大模型效率技术知识全景</h1>
-  <p class="sub">以「一次推理」为线索，自上而下穿过算法、结构、显存、压缩与系统五个层面；
-    再向训练与架构延伸——从阅读路径和可算的例子出发，沿「问题 · 原理 · 工程取舍 · 研究问题」展开，前沿更新可按需查阅，
+  <p class="sub">以"一次推理"为线索，自上而下穿过算法、结构、显存、压缩与系统五个层面；
+    再向训练与架构延伸：从阅读路径和可算的例子出发，沿"问题 · 原理 · 工程取舍 · 研究问题"展开。前沿更新可按需查阅，
     并配有可直接上手的交互式原理动画。</p>
   <div class="meta">
     <span class="chip"><b>16</b> 篇综述</span>
@@ -136,7 +136,7 @@
 <main>
   <p class="section-label">知识地图 · 推理效率栈</p>
   <p class="section-note">六个层面自上而下构成推理优化的完整视图：算法层改变解码方式，结构层改变模型本身，
-    显存层管理 KV Cache，压缩层降低数值精度，系统层负责调度与服务，仿真层在不部署的前提下回答"能跑多快、要多少资源、扛多少 QPS"。</p>
+    显存层管理 KV Cache，压缩层降低数值精度，系统层负责调度与服务；仿真层则不用部署就能回答"能跑多快、要多少资源、扛多少 QPS"。</p>
   <div class="stack-axis">从算法到系统 · 六个层面</div>
   <div class="stack">
 
@@ -145,7 +145,7 @@
       <div class="info">
         <div class="lt">全景层 · 定制化推理引擎（2018–2026）</div>
         <h2>定制化大模型推理引擎全景：从通用框架到 DeepInfer</h2>
-        <p>以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路），含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。</p>
+        <p>以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。</p>
       </div>
       <span class="arrow">阅读 →</span>
     </a>
@@ -175,7 +175,7 @@
       <div class="info">
         <div class="lt">显存层 · 管理 KV Cache</div>
         <h2>KV Cache 技术全景：从原理到前沿（2017–2026）</h2>
-        <p>结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构——七条战线梳理二十余项代表性工作与 2025–2026 最新动态。</p>
+        <p>结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。</p>
       </div>
       <span class="arrow">阅读 →</span>
     </a>
@@ -205,7 +205,7 @@
       <div class="info">
         <div class="lt">仿真层 · 不部署就预估性能</div>
         <h2>大模型性能仿真：从算子账本到请求曲线</h2>
-        <p>从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真——以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。</p>
+        <p>从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。</p>
       </div>
       <span class="arrow">阅读 →</span>
     </a>
@@ -226,21 +226,21 @@
       <a class="card" href="posts/realtime-world-models-2026.html">
         <div class="tags"><span class="tag">世界模型</span><span class="tag">实时交互 · 因果流式 · 神经渲染</span></div>
         <h2>实时交互世界模型全景：从"看视频"到"进世界"（2024–2026）</h2>
-        <p>四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程，深拆 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-27 新开源的 Hy-Nomas）、微软 Code Video Model、Oneira、NVIDIA Cosmos 3；长时一致性、少步蒸馏与动作感知缓存、vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p>
+        <p>四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；深拆 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-27 新开源的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p>
         <div class="foot"><span>2026-10 · 综述 · 源码实测 · 10-30 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/spec-decoding-post-training.html">
         <div class="tags"><span class="tag">推理加速</span><span class="tag">草稿训练 · 蒸馏 · MTP</span></div>
         <h2>投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）</h2>
-        <p>沿"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标、损失设计与 2026 最新进展。</p>
+        <p>沿"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。</p>
         <div class="foot"><span>2026-09 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
       <a class="card" href="posts/moe-survey.html">
         <div class="tags"><span class="tag">模型架构</span><span class="tag">稀疏专家</span></div>
         <h2>混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</h2>
-        <p>从稀疏门控与负载均衡的经典原理出发，系统梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p>
+        <p>从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p>
         <div class="foot"><span>2026-08 · 综述 · 2026-10 增补</span><span class="arrow">阅读全文 →</span></div>
       </a>
 
@@ -280,16 +280,14 @@
     <div class="panel">
       <div class="views-head">
         <div class="views-now">
-          <span><span class="k">总访问量</span><span class="v"><span id="busuanzi_value_site_pv">–</span><small>次</small></span></span>
-          <span><span class="k">访客数</span><span class="v"><span id="busuanzi_value_site_uv">–</span><small>位</small></span></span>
+          <span><span class="k">总浏览量</span><a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:-5px;height:22px"></a></span>
         </div>
-        <span class="views-note">曲线自 2026-10 起累积 · 每日 04:30（北京时间）自动快照 · 计数服务：<a href="https://busuanzi.ibruce.info/" target="_blank" rel="noopener">不蒜子</a></span>
+        <span class="views-note">曲线自 2026-11 起累积 · 每日 04:30（北京时间）自动快照 · 计数服务：<a href="https://komarev.com/ghpvc/" target="_blank" rel="noopener">komarev profile views</a>（与 GitHub 主页共用同一计数器）</span>
       </div>
       <div class="legend">
-        <span><i style="background:#6ea8ff"></i>总浏览量 PV（累计）</span>
-        <span><i style="background:#41d1a7"></i>访客数 UV（累计）</span>
+        <span><i style="background:#6ea8ff"></i>profile views（累计：GitHub 主页 + 本站各页）</span>
       </div>
-      <div id="views-chart"><div class="chart-empty">浏览量曲线数据积累中——部署后每日自动记录一次，次日即可看到第一段曲线。</div></div>
+      <div id="views-chart"><div class="chart-empty">浏览量曲线每日快照一次，积累两天后即可看到第一段曲线。</div></div>
     </div>
   </div>
 </main>
@@ -299,34 +297,17 @@
   <a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a> ·
 </footer>
 
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
 (function(){
   var el = document.getElementById('views-chart');
   if (!el) return;
   fetch('views.json?t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
     var s = (d.series || []).slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
-    // busuanzi 接口故障时的降级：用最近快照回填面板数字（服务恢复后被实时值覆盖）
-    var lastSnap = s[s.length - 1];
-    setTimeout(function(){
-      var pvEl = document.getElementById('busuanzi_value_site_pv');
-      var uvEl = document.getElementById('busuanzi_value_site_uv');
-      var dash = pvEl && (/^[–\s-]*$/.test(pvEl.textContent.trim()));
-      if (lastSnap && dash) {
-        pvEl.textContent = String(lastSnap.pv);
-        if (uvEl) uvEl.textContent = String(lastSnap.uv);
-        var note = document.querySelector('.views-note');
-        if (note && note.textContent.indexOf('暂不可用') === -1) {
-          var md = lastSnap.date.slice(5).replace('-', '/');
-          note.textContent = '实时计数服务暂不可用，以下为最近快照(' + md + ') · 每日 04:30 自动更新 · 计数服务：不蒜子';
-        }
-      }
-    }, 2500);
     if (s.length < 2) return; // 少于两个点时保留占位文案
     var W = 900, H = 300, L = 58, R = 18, T = 18, B = 36;
     var iw = W - L - R, ih = H - T - B;
-    var pvs = s.map(function(p){ return p.pv; }), uvs = s.map(function(p){ return p.uv; });
-    var maxV = Math.max.apply(null, pvs.concat(uvs)) || 1;
+    var pvs = s.map(function(p){ return p.pv; });
+    var maxV = Math.max.apply(null, pvs) || 1;
     var step = Math.pow(10, Math.floor(Math.log(maxV) / Math.LN10));
     var top = [1,2,5,10].map(function(k){ return k*step; }).filter(function(v){ return v >= maxV; })[0] || step*10;
     var x = function(i){ return L + (s.length === 1 ? 0 : i * iw / (s.length - 1)); };
@@ -347,13 +328,9 @@
     area = line + ' L' + x(s.length-1).toFixed(1) + ' ' + (T+ih) + ' L' + L + ' ' + (T+ih) + ' Z';
     svg += '<path d="' + area + '" fill="rgba(110,168,255,.10)"/>';
     svg += '<path d="' + line + '" fill="none" stroke="#6ea8ff" stroke-width="2.2" stroke-linejoin="round"/>';
-    var uline = '';
-    for (var j = 0; j < s.length; j++) uline += (j ? ' L' : 'M') + x(j).toFixed(1) + ' ' + y(uvs[j]).toFixed(1);
-    svg += '<path d="' + uline + '" fill="none" stroke="#41d1a7" stroke-width="2" stroke-linejoin="round" stroke-dasharray="1 0"/>';
     svg += dots;
-    var lx = x(s.length-1), lpv = pvs[s.length-1], luv = uvs[s.length-1];
-    svg += '<text x="' + Math.min(lx+8, W-R-70) + '" y="' + Math.max(y(lpv)-8, 14) + '" fill="#6ea8ff" font-size="12" font-weight="700">PV ' + fmt(lpv) + '</text>';
-    svg += '<text x="' + Math.min(lx+8, W-R-70) + '" y="' + Math.min(y(luv)+16, T+ih-4) + '" fill="#41d1a7" font-size="12" font-weight="700">UV ' + fmt(luv) + '</text>';
+    var lx = x(s.length-1), lpv = pvs[s.length-1];
+    svg += '<text x="' + Math.min(lx+8, W-R-70) + '" y="' + Math.max(y(lpv)-8, 14) + '" fill="#6ea8ff" font-size="12" font-weight="700">' + fmt(lpv) + '</text>';
     var nl = Math.min(5, s.length);
     for (var k = 0; k < nl; k++){
       var idx = nl === 1 ? 0 : Math.round(k * (s.length-1) / (nl-1));
@@ -362,7 +339,7 @@
     }
     svg += '</svg>';
     el.innerHTML = svg;
-  }).catch(function(){ /* 计数服务不可用，保留占位 */ });
+  }).catch(function(){ /* views.json 不可用时保留占位 */ });
 })();
 </script>
 </body>

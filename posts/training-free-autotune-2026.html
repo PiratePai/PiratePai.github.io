@@ -187,31 +187,31 @@
 </style>
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月 · Agent 自动调优方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid">
 <div class="hl-card"><div class="hl-meta"><b>Evolving Agent Teams：监督者动态重组团队写 kernel</b><span class="hl-date">10-27 · UC Berkeley</span></div><p>监督者 agent 诊断平台期并重构 agent 团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 1.21× 均值加速（追加预算实验）（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）。</p><a class="hl-link" href="#s3">→ §3</a></div>
-<div class="hl-card"><div class="hl-meta"><b>ATRL：昇腾 Triton kernel 的 agentic RL 首发</b><span class="hl-date">10-09 · 华为</span></div><p>Qwen3.6-35B 后训练 + 昇腾知识库，KernelBench（昇腾实测）Pass@1 相对 GRPO 66%→73%（L1）、19%→35%（L2）——§5 表中"昇腾尚待复现"的机会点已被补上。</p><a class="hl-link" href="#s5">→ §5</a></div>
-<div class="hl-card"><div class="hl-meta"><b>TensorRT 11.1 Global Performance Tuner</b><span class="hl-date">10-23 · NVIDIA</span></div><p>把 200+ 编译旋钮展开为可搜索的显式 build routes，trtexec 一条命令"构建→端到端测量→精度门过滤→选最快"——厂商版"自动调优 + 精度门"，与本文四站式闭环同构。</p><a class="hl-link" href="#s3">→ §3</a></div>
-<div class="hl-card"><div class="hl-meta"><b>配置错配的安全后果：SGLang KV 隔离披露</b><span class="hl-date">10-26 · Cloudflare × LMSYS</span></div><p>1M 上下文窗口配 681K prefill KV 池 + 被拒请求占位符交接，导致跨请求 KV 泄露（155 条响应受影响）；修复随 v0.5.21/22 发布——印证"支持矩阵先于动手、质量门只读"的规程设计。</p><a class="hl-link" href="#s2-1">→ L1</a></div>
+<div class="hl-card"><div class="hl-meta"><b>ATRL：昇腾 Triton kernel 的 agentic RL 首发</b><span class="hl-date">10-09 · 华为</span></div><p>Qwen3.6-35B 后训练 + 昇腾知识库，KernelBench（昇腾实测）Pass@1 相对 GRPO 66%→73%（L1）、19%→35%（L2）。§5 表中“昇腾尚待复现”的机会点已被补上。</p><a class="hl-link" href="#s5">→ §5</a></div>
+<div class="hl-card"><div class="hl-meta"><b>TensorRT 11.1 Global Performance Tuner</b><span class="hl-date">10-23 · NVIDIA</span></div><p>把 200+ 编译旋钮展开为可搜索的显式 build routes，trtexec 一条命令跑“构建→端到端测量→精度门过滤→选最快”整个流程，等于厂商版“自动调优 + 精度门”，与本文四站式闭环同构。</p><a class="hl-link" href="#s3">→ §3</a></div>
+<div class="hl-card"><div class="hl-meta"><b>配置错配的安全后果：SGLang KV 隔离披露</b><span class="hl-date">10-26 · Cloudflare × LMSYS</span></div><p>1M 上下文窗口配 681K prefill KV 池 + 被拒请求占位符交接，导致跨请求 KV 泄露（155 条响应受影响）；修复随 v0.5.21/22 发布。这也印证了“支持矩阵先于动手、质量门只读”的规程设计。</p><a class="hl-link" href="#s2-1">→ L1</a></div>
 </div></div></details>
 
 <h2 id="s0"><span class="no">0.</span>TL;DR</h2>
 <div class="tldr">
-<b>一句话：</b>大模型推理优化正在从"手艺活"变成"Agent 工程"——2026 年，字节/英伟达/Red Hat 的论文证明了
+<b>一句话：</b>大模型推理优化正在从“手艺活”变成“Agent 工程”——2026 年，字节/英伟达/Red Hat 的论文证明了
 <b>Agent 能以远超 torch.compile 的质量自动生成和优化 GPU kernel</b>（字节 CUDA Agent 在 KernelBench 上 96.8% 的用例跑赢 torch.compile，几何均值 2.11×
 <small class="cite"><span class="src">[CUDA Agent, ByteDance Seed × 清华 AIR, arXiv:2602.24286, 2026-02-27]</span>
 原文：“CUDA Agent achieves state-of-the-art results on KernelBench, delivering 100%, 100%, and 92% faster rate over torch.compile on KernelBench Level-1/2/3 splits.” 译：在 KernelBench 三个难度级上，分别有 100%/100%/92% 的用例快于 torch.compile。</small>），
 而以 ZCode 为代表的编码 Agent 配上一份<b>操作手册（AGENTS.md）+ 基准脚本 + 质量门</b>，可以尝试形成免目标模型训练的调优闭环；可靠性与收益仍需在指定模型、硬件、预算及质量约束下验证，本文是可执行方案而非作者已完成的通用实跑结论：
 <b>度量 → 画像 → 假设 → A/B 验证 → 端到端质量门 → 沉淀报告</b>。<br><br>
 本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 vLLM-Omni 0.28 / SGLang v0.5.22 / TensorRT-LLM 1.3 / Dynamo 1.5 / FlashInfer v0.7 的版本事实，截至 2026-10-30）；
-(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>——目标与基线 → 三层诊断 → 处方循环 → 收口，
+(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>（目标与基线 → 三层诊断 → 处方循环 → 收口），
 每一步都有动机、可直接复制的命令、示例输出与判读规则、明确的反馈信号与阈值，并以官方生产博客的系统级优化（无损 1.445×、DLO/FP8/SageAttention 各 lane 数字）为量级锚点；
 GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路径）分别落地。
-配套脚手架 <code>zcode-autotune/</code>（AGENTS.md 自动模式 + RUNBOOK.md 人在回路手册 + bench/搜索/质量门脚本）——<b>同一份规程，ZCode 能自动跑，人也能照着一步步走</b>。
+配套脚手架 <code>zcode-autotune/</code>（AGENTS.md 自动模式 + RUNBOOK.md 人在回路手册 + bench/搜索/质量门脚本）。<b>同一份规程，ZCode 能自动跑，人也能照着一步步走</b>。
 </div>
 
 <h2 id="s1"><span class="no">1.</span>为什么不动权重也能加速：给本科生的原理课</h2>
-<p>“Training-free（免训练）推理优化”指的是<b>无需额外训练目标模型；量化仍可改变权重数值表示，草稿或优化 Agent 自身也可能经过训练</b>，只改变模型运行时的“环境”——执行哪个算子、数据存哪、按什么顺序算、用什么精度算——来降低延迟和显存、提高吞吐。为什么这能奏效？因为训练得到的权重只决定了“算什么”，而<b>“怎么算”存在巨大的浪费</b>。</p>
+<p>“Training-free（免训练）推理优化”指的是<b>无需额外训练目标模型；量化仍可改变权重数值表示，草稿或优化 Agent 自身也可能经过训练</b>，只改变模型运行时的“环境”：执行哪个算子、数据存哪、按什么顺序算、用什么精度算，来降低延迟和显存、提高吞吐。为什么这能奏效？因为训练得到的权重只决定了“算什么”，而<b>“怎么算”存在巨大的浪费</b>。</p>
 
 <h3 id="s1-1">1.1 一分钟硬件经济课：卡在哪</h3>
-<p>把 GPU 想成一家中央厨房：<b>算力（FLOPS）是灶台数量，显存带宽（GB/s）是传菜电梯</b>。做一道菜（一个算子）既要用灶台（计算）也要电梯送原料（读写显存）。算子的<b>算术强度 AI = FLOPs / 实际搬运字节</b>；硬件峰值算力/带宽则给出 Roofline 的分界值。只有把这两个比值比较，才能判断理想瓶颈。如果一道菜只需要来回运一次料却只炒一勺（比如逐元素加法），电梯先忙不过来——这叫<b>访存受限（memory-bound）</b>；如果像矩阵乘法那样一次进料能炒一大桌，灶台先满载——这叫<b>计算受限（compute-bound）</b>。</p>
+<p>把 GPU 想成一家中央厨房：<b>算力（FLOPS）是灶台数量，显存带宽（GB/s）是传菜电梯</b>。做一道菜（一个算子）既要用灶台（计算）也要电梯送原料（读写显存）。算子的<b>算术强度 AI = FLOPs / 实际搬运字节</b>；硬件峰值算力/带宽则给出 Roofline 的分界值。只有把这两个比值比较，才能判断理想瓶颈。如果一道菜只需要来回运一次料却只炒一勺（比如逐元素加法），电梯先忙不过来，这叫<b>访存受限（memory-bound）</b>；如果像矩阵乘法那样一次进料能炒一大桌，灶台先满载，这叫<b>计算受限（compute-bound）</b>。</p>
 <p>关键事实：<b>大模型自回归解码（一个 token 一个 token往外蹦）是极端 memory-bound 的</b>。每生成一个 token，都要把全部权重从显存搬一遍，却只做一点点乘法。所以解码阶段的提速秘诀几乎全在“少搬东西”：权重少搬（量化）、KV 少存（KV cache 压缩）、一次搬多个 token 的活儿（投机解码）、让电梯尽量满载（batching）。而<b>视频生成这类扩散模型的去噪阶段通常是 compute-bound 的</b>，秘诀则是“少算几步/少算几份”（步数削减、缓存复用、注意力量化）。</p>
 
 <h3 id="s1-2">1.2 六个加速杠杆（无需额外训练目标模型；量化会改变权重表示）</h3>
@@ -222,7 +222,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
   <small class="cite"><span class="src">[Efficient Memory Management for LLM Serving with PagedAttention (vLLM), SOSP 2023]</span>译要点：把 KV cache 切成固定大小的块（block）按需分配，显存利用率显著提升、吞吐翻倍级。</small></li>
   <li><b>量化（换成小包装）</b>：权重/激活从 16 比特压到 8/4 比特，电梯每次运的“份数”翻倍。GPTQ（2022）/AWQ（2023）证明 4 比特权重量化几乎不掉精度；2024–2025 的 FP8（Hopper 起）与 NVFP4/MXFP4（Blackwell 起）把它做进了硬件张量核。
   <small class="cite"><span class="src">[AWQ: Activation-aware Weight Quantization, MLSys 2024; GPTQ, ICLR 2023]</span>AWQ 原文要点：“activation-aware” —— 依据激活分布保护少量关键权重通道即可保住精度。</small></li>
-  <li><b>投机解码（先草稿后校对）</b>：让小模型/草稿头连写 k 个 token，大模型一次并行校对，接受其中对的——数学上证明与直接采样<b>同分布</b>（无损）。EAGLE/MTP 是训练草稿头的代表；训练-free 的变体则用模型自身浅层或检索来起草。
+  <li><b>投机解码（先草稿后校对）</b>：让小模型/草稿头连写 k 个 token，大模型一次并行校对，接受其中对的，数学上证明与直接采样<b>同分布</b>（无损）。EAGLE/MTP 是训练草稿头的代表；训练-free 的变体则用模型自身浅层或检索来起草。
   <small class="cite"><span class="src">[Fast Inference from Transformers via Speculative Decoding, ICML 2023]</span>原文要点：rejective sampling 保证了输出分布与目标模型一致。</small></li>
   <li><b>算子与图优化（改菜谱）</b>：FlashAttention（2022–2024）把注意力改成分块计算避免物化巨大注意力矩阵，从算法上把 memory-bound 的 softmax 注意力变成接近 compute-bound；torch.compile/CUDA Graph 消除 Python 与 kernel 启动开销。这是“写更快代码”的杠杆，也是 Agent 最擅长介入的杠杆。
   <small class="cite"><span class="src">[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness, NeurIPS 2022]</span>译要点：以 IO 复杂度为目标重新组织注意力计算，精确（非近似）但更快更省显存。</small></li>
@@ -243,22 +243,22 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 
 <h3 id="s2-1">L1 服务与调度层：引擎大战进入“PD 分离 + 全栈”时代</h3>
 <ul>
-  <li><b>vLLM</b>（加州大学等，2023 开源）：截至 2026-10-30 最新 <b>v0.32.0</b>（2026-10-18 发布，814 commits/363 贡献者；NVFP4 KV 扩展到 SM8x–SM12x，GLM-5.x 默认 FP8 KV）；2026 Q2 官方 Roadmap 把重心压在 <b>RL rollout</b>（权重同步、KV cache 重置、易改性）——推理引擎正在同时成为训练系统的"执行器"。
+  <li><b>vLLM</b>（加州大学等，2023 开源）：截至 2026-10-30 最新 <b>v0.32.0</b>（2026-10-18 发布，814 commits/363 贡献者；NVFP4 KV 扩展到 SM8x–SM12x，GLM-5.x 默认 FP8 KV）；2026 Q2 官方 Roadmap 把重心压在 <b>RL rollout</b>（权重同步、KV cache 重置、易改性）。推理引擎正在同时成为训练系统的“执行器”。
   <small class="cite"><span class="src">[vLLM Releases / Roadmap Issue #39749, 2026]</span>译要点：路线图三条主线——为 RL 服务的权重同步与 KV 复位、易修改性。</small></li>
   <li><b>SGLang</b>（2023 论文，LMSYS/社区）：以 RadixAttention（基数树组织的跨请求 KV 复用）著称，2026 年迭代极快：v0.5.17（2026-08-08）<b>day-0 支持 MiniMax-H3</b>（"video generation with synchronized stereo audio track in one request"，在 B200/H100/MI300X/2×RTX5090 验证）与 Kimi K3（2.8T 参数、1M 上下文）；v0.5.20 增加统一基数树 + SWA 分支点缓存（TTFT 1.57s→1.07s）；v0.5.21（2026-10-02）实现 <b>PD 实例动态切换（prefill/decode 免重启互转）</b>与 Rust 前缀缓存内核；<b>v0.5.22（2026-10-19）</b>载入 MORI 生成标记 ack 等 KV 隔离加固（Cloudflare 披露的跨请求 KV 泄露修复链，官方建议所有运营方升级至 v0.5.22+）。
   <small class="cite"><span class="src">[SGLang GitHub Releases, 2026-08 ~ 2026-10]</span>原文（v0.5.17）：“MiniMax-H3 day-0: video generation with synchronized stereo audio track in one request, verified on B200, H100, MI300X/MI355X, 2x RTX 5090.”</small></li>
-  <li><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）→ <b>Dynamo 1.0</b>（GTC 2026-03-16 "production ready"）：数据中心级分布式推理编排层——把 prefill 与 decode 拆成独立 worker 池（PD 分离）、跨节点调度，底下可以挂 TensorRT-LLM/vLLM/SGLang，也支持 <b>vLLM-Omni 后端</b>（多模态生成）。截至 2026-10-30 已迭代到 <b>v1.5.1</b>（原生 FastVideo + SGLang Diffusion，单卡 B200 实时 1080p；兼容矩阵对齐 SGLang 0.5.18 / TRT-LLM 1.3.0rc25 / vLLM 0.28.0）。<b>TensorRT-LLM</b> 则从 1.0（2025-09-25 全面开源化重写"Easier. Faster. Open."）走到 2026-10 的 <b>1.3.0rc25 / 1.4.0 dev 构建</b>，并把原生 Mooncake Store 连接器合入 KV Cache Manager v2（10-10）。</li>
-  <li><b>vLLM-Omni</b>（vllm-project，2025-11 首发）：面向任意模态生成（文/语音/图/视频）的服务框架——阶段图（stage-graph）编排器+worker、阶段间流水重叠、基于 OmniConnector 的<b>全分解服务</b>；版本线与 vLLM 对齐（0.14→0.28.0），<b>0.26.0（2026-08）day-0 支持 MiniMax-H3 联合音视频生成，0.28.0 宣布 H3 在 GPU 与 NPU 生产就绪</b>，还实验性支持全双工实时模式与 DLO 分层卸载。
+  <li><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）→ <b>Dynamo 1.0</b>（GTC 2026-03-16 "production ready"）：数据中心级分布式推理编排层：把 prefill 与 decode 拆成独立 worker 池（PD 分离）、跨节点调度，底下可以挂 TensorRT-LLM/vLLM/SGLang，也支持 <b>vLLM-Omni 后端</b>（多模态生成）。截至 2026-10-30 已迭代到 <b>v1.5.1</b>（原生 FastVideo + SGLang Diffusion，单卡 B200 实时 1080p；兼容矩阵对齐 SGLang 0.5.18 / TRT-LLM 1.3.0rc25 / vLLM 0.28.0）。<b>TensorRT-LLM</b> 则从 1.0（2025-09-25 全面开源化重写"Easier. Faster. Open."）走到 2026-10 的 <b>1.3.0rc25 / 1.4.0 dev 构建</b>，并把原生 Mooncake Store 连接器合入 KV Cache Manager v2（10-10）。</li>
+  <li><b>vLLM-Omni</b>（vllm-project，2025-11 首发）：面向任意模态生成（文/语音/图/视频）的服务框架：阶段图（stage-graph）编排器+worker、阶段间流水重叠、基于 OmniConnector 的<b>全分解服务</b>；版本线与 vLLM 对齐（0.14→0.28.0），<b>0.26.0（2026-08）day-0 支持 MiniMax-H3 联合音视频生成，0.28.0 宣布 H3 在 GPU 与 NPU 生产就绪</b>，还实验性支持全双工实时模式与 DLO 分层卸载。
   <small class="cite"><span class="src">[vllm-project/vllm-omni, 2025-11~2026-08；vLLM-Omni: Fully Disaggregated Serving for Any-to-Any Multimodal Models, arXiv:2602.02204, 2026-02]</span>README 原文：“vLLM-Omni 0.28.0 ... production-ready MiniMax H3 serving on GPU and NPU, unified AR/DiT paged KV cache runtime.”</small></li>
-  <li><b>腾讯</b>在此层的代表是 xDiT（视频 DiT 分布式推理，配合混元视频系）与 ncnn/TNN（端侧）;<b>字节</b>则是 FlashInfer（见 L2）与 veRL/AReaL 等 RL 训推一体设施。Mooncake（月之暗面，2024 开源）把 KVCache 做成全局池化存储，是"缓存即服务"的代表。</li>
+  <li><b>腾讯</b>在此层的代表是 xDiT（视频 DiT 分布式推理，配合混元视频系）与 ncnn/TNN（端侧）;<b>字节</b>则是 FlashInfer（见 L2）与 veRL/AReaL 等 RL 训推一体设施。Mooncake（月之暗面，2024 开源）把 KVCache 做成全局池化存储，是“缓存即服务”的代表。</li>
 </ul>
 
 <h3 id="s2-2">L2 注意力与 KV 层：FlashAttention 之后是“量化注意力 + 一次写对”</h3>
 <ul>
   <li><b>FlashAttention 1→3</b>（2022/2023/2024）：IO-aware 精确注意力的三次迭代，FA3 用 Hopper 的异步 warp 特化到接近硬件极限。</li>
-  <li><b>SageAttention 1/2/3</b>（清华 thu-ml，2024-10 起）：训练-free 的<b>量化注意力</b>——QK 用 INT8、PV 用 FP16（v3 在 Blackwell 上用 FP4 张量核），初代论文相对 FlashAttention2 的注意力运算约 <b>2.1×</b>；2–5× 属系列仓库跨版本口径，非初代整模型加速，质量须按具体任务检验，已成为 vLLM/ComfyUI 中视频模型（Wan/CogVideoX/HunyuanVideo）的常用后端。
+  <li><b>SageAttention 1/2/3</b>（清华 thu-ml，2024-10 起）：训练-free 的<b>量化注意力</b>：QK 用 INT8、PV 用 FP16（v3 在 Blackwell 上用 FP4 张量核），初代论文相对 FlashAttention2 的注意力运算约 <b>2.1×</b>；2–5× 属系列仓库跨版本口径，非初代整模型加速，质量须按具体任务检验，已成为 vLLM/ComfyUI 中视频模型（Wan/CogVideoX/HunyuanVideo）的常用后端。
   <small class="cite"><span class="src">[SageAttention, arXiv:2410.02367, 2024-10; SageAttention3, 2025]</span>原文：“Quantized Attention achieves speedup of 2-5x compared to FlashAttention, without losing end-to-end metrics across language, image, and video models.”</small></li>
-  <li><b>KV cache 压缩</b>：老三样（H2O 2023、SnapKV 2024、KIVI 量化 2024）之后，2026 年的新方向是“查询无关”（Google TaskPress：pruning 决策与 query 解耦，2026-08）与“残差锚点”（Technion AnchorKV，2026-08）等更鲁棒的设计；DeepSeek 的 MLA（2024-12，KV 压到 1/10 以下）与 NSA（2025-02，原生稀疏注意力）则是“训练时就把 KV 压进架构”的路线——H3 模型卡也预告了其原生稀疏注意力“训而未放”（见 §4.1）。</li>
+  <li><b>KV cache 压缩</b>：老三样（H2O 2023、SnapKV 2024、KIVI 量化 2024）之后，2026 年的新方向是“查询无关”（Google TaskPress：pruning 决策与 query 解耦，2026-08）与“残差锚点”（Technion AnchorKV，2026-08）等更鲁棒的设计；DeepSeek 的 MLA（2024-12，KV 压到 1/10 以下）与 NSA（2025-02，原生稀疏注意力）则是“训练时就把 KV 压进架构”的路线。H3 模型卡也预告了其原生稀疏注意力“训而未放”（见 §4.1）。</li>
 </ul>
 
 <h3 id="s2-3">L3 量化层：从“权重 4bit”到“全栈低精度”</h3>
@@ -287,7 +287,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
   <tr><td>CFG 优化</td><td>RA-CFGCache（清华+京东, 2026-09）</td><td>按风险控制决定 CFG 双分支何时可省</td></tr>
   <tr><td>VLM 视觉 token 削减</td><td>FastV（ECCV 2024）/ VisionZip（2024-12）/ ToMe（ICLR 2023）/ VPRune（2026-09）</td><td>注意力存在后，深层视觉 token 大量冗余，剪掉即可（理解侧的对应物）</td></tr>
 </table>
-<p>工程侧，<b>ParaAttention（2025）</b>把 cache/并行去噪做成可组合的 attention 后端，SGLang/vLLM 的 diffusion serving 原生吸收这些能力；NVIDIA 侧 vLLM 的“Diffusers/多模态生成 recipes”与 TensorRT-LLM 的多模态后端同途。H3 官方与社区（FastH3、VDN-H3 蒸馏变体，SGLang v0.5.20 起）同时走“蒸馏出少步版”的<b>训练路线</b>作对照——但那超出 training-free 范畴，本文只作基线参考。</p>
+<p>工程侧，<b>ParaAttention（2025）</b>把 cache/并行去噪做成可组合的 attention 后端，SGLang/vLLM 的 diffusion serving 原生吸收这些能力；NVIDIA 侧 vLLM 的“Diffusers/多模态生成 recipes”与 TensorRT-LLM 的多模态后端同途。H3 官方与社区（FastH3、VDN-H3 蒸馏变体，SGLang v0.5.20 起）同时走“蒸馏出少步版”的<b>训练路线</b>作对照；但那超出 training-free 范畴，本文只作基线参考。</p>
 
 <h3 id="s2-6">L6 ★ Agent 自动优化层：2026 年最陡的成长曲线</h3>
 <p>这是本文主题，单独成章（§3）。先给一个坐标系：<b>谁</b>（通用编码 Agent / 专门 RL 训出的模型 / 多 Agent 系统）×<b>优化什么</b>（kernel / 框架配置 / 编译器本身）×<b>怎么保证不坏</b>（验证门）。</p>
@@ -341,9 +341,9 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 
 <h4>线 B：Agent 优化“整模型/框架配置”（与部署最近）</h4>
 <ul>
-  <li><b>KernelOPT</b>（Red Hat × PyTorch 团队, arXiv 2609.30059, 2026-09-24）：<b>dispatch-aware</b> 的多 Agent 搜索——torch.compile 后的模型是“结构化工件”，cuBLAS/cuDNN 调用（已近极限）保留不动，只让 5 个 Agent 优化 Triton 子 kernel，然后<b>四道验证门</b>（静态检查→多种子正确性→模型级 float64 回退比对→性能门 γ=1.03）收口，失败即回退编译器基线。KernelBench 250 题上整体几何均值 1.40×/1.15×/1.07×（L1/L2/L3），成功优化子集 2.54×/1.84×/1.37×。
+  <li><b>KernelOPT</b>（Red Hat × PyTorch 团队, arXiv 2609.30059, 2026-09-24）：<b>dispatch-aware</b> 的多 Agent 搜索：torch.compile 后的模型是“结构化工件”，cuBLAS/cuDNN 调用（已近极限）保留不动，只让 5 个 Agent 优化 Triton 子 kernel，然后<b>四道验证门</b>（静态检查→多种子正确性→模型级 float64 回退比对→性能门 γ=1.03）收口，失败即回退编译器基线。KernelBench 250 题上整体几何均值 1.40×/1.15×/1.07×（L1/L2/L3），成功优化子集 2.54×/1.84×/1.37×。
   <small class="cite"><span class="src">[KernelOPT, 2026-09-24]</span>原文：“...treats compiled models as structured artifacts. It preserves vendor library calls (cuBLAS, cuDNN) and exclusively targets generated Triton sub-kernels... A four-gate verification cascade...” 译：把编译产物当结构化工件，保留厂商库调用，只攻 Triton 子核，四道门验证。</small></li>
-  <li><b>AccelOpt</b>（2026，AWS）：同样的 planner–executor–summarizer 闭环，但目标是 <b>Trainium 的 NKI kernel</b>——证明该范式不绑定 CUDA。</li>
+  <li><b>AccelOpt</b>（2026，AWS）：同样的 planner–executor–summarizer 闭环，但目标是 <b>Trainium 的 NKI kernel</b>，证明该范式不绑定 CUDA。</li>
   <li><b>FlashInfer v0.7</b>（2026，源自字节、NVIDIA 支持）与 <b>FlashInfer Bench @ MLSys 2026</b>：把"smarter autotuning"做进生产 kernel 库本身，并为 AI 生成 kernel 提供统一评测场。GPU Forecasters（2026-05）进一步用语言模型当“代理评测器”减少上机测量次数。</li>
 </ul>
 
@@ -363,7 +363,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 <h2 id="s4"><span class="no">4.</span>案例方案：MiniMax-H3 × ZCode 自动调优（官方基准＋待执行流程）</h2>
 
 <h3 id="s4-1">4.1 H3 架构与 vLLM-Omni 运行形态（v2 勘误与深化）</h3>
-<div class="warn"><b>v2 勘误：</b>本文 v1 以 SGLang 作为 H3 的主运行框架示例，不准确。H3 的 <b>vLLM 系运行框架是 vLLM-Omni</b>（vllm-project 官方，2025-11 首发，<code>vllm serve --omni</code>）：0.26.0（2026-08）起 day-0 支持 H3 视频+音频联合生成，<b>0.28.0（2026-08）宣布 H3 在 GPU 与 NPU 上生产就绪</b>；架构是"阶段图（stage-graph）+ 各阶段流水重叠 + 基于 OmniConnector 的全分解"。
+<div class="warn"><b>v2 勘误：</b>本文 v1 以 SGLang 作为 H3 的主运行框架示例，不准确。H3 的 <b>vLLM 系运行框架是 vLLM-Omni</b>（vllm-project 官方，2025-11 首发，<code>vllm serve --omni</code>）：0.26.0（2026-08）起 day-0 支持 H3 视频+音频联合生成，<b>0.28.0（2026-08）宣布 H3 在 GPU 与 NPU 上生产就绪</b>；架构是“阶段图（stage-graph）+ 各阶段流水重叠 + 基于 OmniConnector 的全分解”。
 <small class="cite"><span class="src">[vllm-project/vllm-omni README；vLLM-Omni: Fully Disaggregated Serving for Any-to-Any Multimodal Models, arXiv:2602.02204, 2026]</span>README 原文：“0.26.0 ... featuring MiniMax H3 joint video/audio generation”；“0.28.0 ... production-ready MiniMax H3 serving on GPU and NPU”。</small>SGLang v0.5.17 亦是 day-0 支持（本文保留其版本事实，但实战流程以 vLLM-Omni 为主轴）。</div>
 <p>MiniMax-H3 于 2026-08-09 前后发布，是“理解全模态、生成视频（含原生立体声，最高 2K/15s/24fps/32kHz）”的通用全模态生成系统。架构事实与对应的优化抓手：</p>
 <table>
@@ -377,8 +377,8 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 </table>
 <small class="cite"><span class="src">[MiniMax-H3 Model Card, 2026-08-09；vLLM Blog: MiniMax H3 on vLLM-Omni, 2026-09-01]</span>博客原文：“MiniMax H3 serving is a system problem ... a Qwen3-VL encoder (~51.5 GB BF16), a long-sequence joint audio-video DiT, separate video/audio VAEs, device/process boundaries, and H.264/AAC muxing — optimizing only the DiT leaves substantial latency elsewhere.” 译：H3 服务是系统问题，只优化 DiT 会漏掉大量延迟。</small>
 
-<h4>官方范本：什么才算"深层结构优化"</h4>
-<p>vLLM-Omni 官方博客（2026-09-01，8×B300、10s、1344×768/24fps）给出的两阶段优化，正是"结构性优化分析"的标尺——<b>阶段一全部是无损系统级改动</b>：</p>
+<h4>官方范本：什么才算“深层结构优化”</h4>
+<p>vLLM-Omni 官方博客（2026-09-01，8×B300、10s、1344×768/24fps）给出的两阶段优化，正是“结构性优化分析”的标尺。<b>阶段一全部是无损系统级改动</b>：</p>
 <table>
   <tr><th>#</th><th>结构级改动（无损 lane）</th><th>机理</th></tr>
   <tr><td>1</td><td>TRTLLM_ATTN 后端 + 有效长度打包</td><td>剔除 padding 空转：典型负载 58,816 token 缓冲里只有 58,758 个有效</td></tr>
@@ -389,7 +389,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
   <tr><td>6</td><td>输出通路重构</td><td>FP32 BCTHW→uint8 BTHWC 在 GPU 完成（载荷 -75%）+ pinned D2H + 进程间直传 + direct-planar H.264</td></tr>
   <tr><td colspan=3><b>结果：E2E 56.917s vs diffusers 82.239s（-30.8%，1.445×），峰值 HBM 128.2 vs 151.7 GiB——零量化、零稀疏、零缓存、零减步</b></td></tr>
 </table>
-<p>阶段二 FastH3（四步 DMD2 蒸馏学生，SHA 固定的 drop-in 产物）属<b>训练路线</b>，这里只作对照：10s 请求 8.68s 出片（RTF≈0.857，快于实时）；但它与 DLO、量化、缓存、编码器分解<b>互不兼容</b>——这就是"训练路线收益大、灵活性差"的典型。此外官方还标定了三个 training-free 扩展 lane：<b>DLO 分层卸载</b>（r=35：HBM -37.5%、延迟 +5.1%）、<b>编码器分解</b>、<b>在线 FP8</b>（stage 时间 -5.3%、峰值 HBM -38.9%）；有损 lane：SAGE FP8 注意力 1.211×、Skip-Softmax 1.084×、组合 1.237×（LPIPS 0.375）。</p>
+<p>阶段二 FastH3（四步 DMD2 蒸馏学生，SHA 固定的 drop-in 产物）属<b>训练路线</b>，这里只作对照：10s 请求 8.68s 出片（RTF≈0.857，快于实时）；但它与 DLO、量化、缓存、编码器分解<b>互不兼容</b>，这正是“训练路线收益大、灵活性差”的典型。此外官方还标定了三个 training-free 扩展 lane：<b>DLO 分层卸载</b>（r=35：HBM -37.5%、延迟 +5.1%）、<b>编码器分解</b>、<b>在线 FP8</b>（stage 时间 -5.3%、峰值 HBM -38.9%）；有损 lane：SAGE FP8 注意力 1.211×、Skip-Softmax 1.084×、组合 1.237×（LPIPS 0.375）。</p>
 <pre><code># 官方满配命令（结构优化后的已知答案，自动流程的校准点）
 vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8 \
   --usp 8 --ring 1 --ulysses-a2a-permute --text-encoder-tp-size 8 \
@@ -398,11 +398,11 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 <small class="cite"><span class="src">[vLLM Blog: MiniMax H3 on vLLM-Omni, 2026-09-01]</span>原文：“lowers complete-response latency by 30.8% compared to Diffusers, a 1.445x speedup”（无损）；“DLO lowers reported HBM by 37.5% for a 5.1% latency cost”；“online FP8: 5.3% lower stage time, 38.9% lower peak HBM”。</small>
 
 <h3 id="s4-2">4.2 流程是怎么长出来的：四站式闭环</h3>
-<p>先想清楚三个物理事实，流程的形状就自然浮现了。<b>事实一</b>：H3 服务是系统问题——encoder、DiT 步循环、VAE、传输封装各有各的病，端到端数字根本没法指导下一步，所以第一件事必须是"分段看清基线"。<b>事实二</b>：不同病要用不同的药，吃错药不只是无效，还会浪费数周（官方端到端改动报告降低 30.8% 延迟，其中也含 DiT kernel 与通信优化，不能据此预设单算子优化上限），所以诊断必须产出一纸"按预期收益除以风险排序"的处方清单，纯参数的排前面、有损的排在无损后、自写 kernel 永远垫底。<b>事实三</b>：视频生成的耗时测量噪声在 3% 量级，而 Agent/人都天然想"看见自己想看的提升"（Sakana 事件的教训），所以每副药必须走一个很小的六拍循环——预期→只改一个变量→复测→对比→过门→判决（接受/回滚/噪声），并记入台账。</p>
+<p>先想清楚三个物理事实，流程的形状就自然浮现了。<b>事实一</b>：H3 服务是系统问题。encoder、DiT 步循环、VAE、传输封装各有各的病，端到端数字根本没法指导下一步，所以第一件事必须是“分段看清基线”。<b>事实二</b>：不同病要用不同的药，吃错药不只是无效，还会浪费数周（官方端到端改动报告降低 30.8% 延迟，其中也含 DiT kernel 与通信优化，不能据此预设单算子优化上限），所以诊断必须产出一纸“按预期收益除以风险排序”的处方清单，纯参数的排前面、有损的排在无损后、自写 kernel 永远垫底。<b>事实三</b>：视频生成的耗时测量噪声在 3% 量级，而 Agent/人都天然想“看见自己想看的提升”（Sakana 事件的教训），所以每副药必须走一个很小的六拍循环，即预期→只改一个变量→复测→对比→过门→判决（接受/回滚/噪声），并记入台账。</p>
 <div class="flow">
-  <div class="step"><div class="n">1</div><div><b>目标与基线</b>：把"更快"翻译成三个数字（RTF 目标、显存上限、精度红线——红线决定有损处方是否入列）；冒烟→钉版本→三次分阶段基线→台账开张。</div></div>
+  <div class="step"><div class="n">1</div><div><b>目标与基线</b>：把“更快”翻译成三个数字（RTF 目标、显存上限、精度红线；红线决定有损处方是否入列）；冒烟→钉版本→三次分阶段基线→台账开张。</div></div>
   <div class="step"><div class="n">2</div><div><b>三层诊断</b>：时间轴（设备 busy 覆盖率 / underfeed / 空隙位置）→ 算子四桶（注意力/矩阵乘/逐元素/通信，DiT 与 VAE 分开看）→ 通信暴露比。产出处方清单。</div></div>
-  <div class="step"><div class="n">3</div><div><b>处方循环</b>：七张处方笺（并行形态 / 注意力逐级加深 / 在线 FP8 / DLO 卸载 / 缓存标定 / host 侧 / 自写 kernel），每副走六拍循环；每并入两三副药回诊断站快扫一次——时间分布变了，处方要重排。</div></div>
+  <div class="step"><div class="n">3</div><div><b>处方循环</b>：七张处方笺（并行形态 / 注意力逐级加深 / 在线 FP8 / DLO 卸载 / 缓存标定 / host 侧 / 自写 kernel），每副走六拍循环；每并入两三副药回诊断站快扫一次，因为时间分布变了，处方要重排。</div></div>
   <div class="step"><div class="n">4</div><div><b>收口</b>：四个停机信号（目标达成 / 连续两副&lt;3% / 病根在驱动或硬件 / 触显存带宽顶）任一命中→终验（全量+双门）→归因报告→归档。</div></div>
 </div>
 <p>诊断的判读规则直接内建在流程里，不靠经验直觉：</p>
@@ -423,15 +423,15 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 
 <h3 id="s4-3">4.3 GPU 实战（vLLM-Omni @ 8×B300/H100）：四站走一遍是什么样</h3>
 <p>环境：8×B300（或 H100），<code>uv pip install "vllm-omni"</code>（≥0.26，推荐 0.28+），模型 <code>MiniMaxAI/MiniMax-H3</code>。这里给每一站的关键动作与判读方式；逐条命令、示例输出与勾选清单在配套 <code>zcode-autotune/RUNBOOK.md</code>（人）与 <code>AGENTS.md</code>（ZCode）。</p>
-<p><b>第一站</b>半天：写三个数字（RTF≤1.0、HBM 上限、精度红线）→ 保守配置冒烟（最低步数、1 条 prompt，只验"没坏"）→ 钉版本与权重 revision → 三次分阶段基线。判读三条：最大段即本轮主战场；各段之和与端到端的差是"看不见的损耗"（喂给第三站 host 处方）；三次极差 &gt;3% 可提示继续检查，但三次样本不足以刻画稳定性，应交错 A/B、多次重复并估计置信区间，先修环境。锚点：官方同规模的优化后 vLLM-Omni 结果为 56.917s，对照 Diffusers 为 82.239s；不能把 56.9s 当“无优化”，差数倍先怀疑配置。</p>
-<p><b>第二站</b>两小时，自上而下三层：时间轴回答"设备在忙还是在等"（busy&lt;85% 时空隙成片 = host 病，kernel 处方直接降权）；算子四桶回答"DiT 的时间在哪类操作上"（注意力/矩阵乘/逐元素/通信，按 §4.2 表开出处方）；暴露比回答"通信是否被计算盖住"（&gt;30% 才值得动并行形态）。产出一纸按收益/风险排序的处方清单——清单之外的事，这一轮不做。</p>
-<p><b>第三站</b>是主战场，每副药六拍循环（预期→单变量→复测→对比→过门→判决）。第一副几乎永远是并行形态（无需改算子代码、仍需验证内存与通信风险）：从保守配置逐组加 <code>--usp 8 --ring 1 --ulysses-a2a-permute</code> → <code>--text-encoder-tp-size 8</code> → <code>--vae-patch-parallel-size 8 --vae-parallel-mode tile --vae-use-tiling</code> → <code>--diffusion-attention-backend TRTLLM_ATTN</code>，四组各自记账，再组合收益最大者。之后按诊断信号走：注意力高→量化注意力逐级加深（每级单独过有损门，损失会叠乘）；矩阵乘高或显存紧→在线 FP8（官方 -5.3%/-38.9%）；显存超线→DLO 换血（用延迟买显存，台账两个数字都记）；步数多且允许有损→缓存三点标定。每并入两三副药回第二站快扫——时间分布变了，处方重排（打地鼠的节奏控制）。</p>
-<p><b>第四站</b>：四个停机信号任一命中即收口——全量终验 + 双质量门 + 诊断复扫（前后两张时间分布表是报告里最有说服力的一页）+ 台账全文 + 每行一句归因（"时间省在了哪"）。两个容易踩的判断：FastH3 四步版（RTF≈0.857）是训练路线且与 DLO/量化/缓存互斥，只作对照；自写 kernel 永远最后，且必须端到端 ≥1.03× 收口——子算子的收益在拼回整模型后消失的比例高得超出直觉（该现象依任务与调度而变，此处不保留未定位分母的 29%）。</p>
+<p><b>第一站</b>半天：写三个数字（RTF≤1.0、HBM 上限、精度红线）→ 保守配置冒烟（最低步数、1 条 prompt，只验“没坏”）→ 钉版本与权重 revision → 三次分阶段基线。判读三条：最大段即本轮主战场；各段之和与端到端的差是“看不见的损耗”（喂给第三站 host 处方）；三次极差 &gt;3% 可提示继续检查，但三次样本不足以刻画稳定性，应交错 A/B、多次重复并估计置信区间，先修环境。锚点：官方同规模的优化后 vLLM-Omni 结果为 56.917s，对照 Diffusers 为 82.239s；不能把 56.9s 当“无优化”，差数倍先怀疑配置。</p>
+<p><b>第二站</b>两小时，自上而下三层：时间轴回答“设备在忙还是在等”（busy&lt;85% 时空隙成片 = host 病，kernel 处方直接降权）；算子四桶回答“DiT 的时间在哪类操作上”（注意力/矩阵乘/逐元素/通信，按 §4.2 表开出处方）；暴露比回答“通信是否被计算盖住”（&gt;30% 才值得动并行形态）。产出一纸按收益/风险排序的处方清单；清单之外的事，这一轮不做。</p>
+<p><b>第三站</b>是主战场，每副药六拍循环（预期→单变量→复测→对比→过门→判决）。第一副几乎永远是并行形态（无需改算子代码、仍需验证内存与通信风险）：从保守配置逐组加 <code>--usp 8 --ring 1 --ulysses-a2a-permute</code> → <code>--text-encoder-tp-size 8</code> → <code>--vae-patch-parallel-size 8 --vae-parallel-mode tile --vae-use-tiling</code> → <code>--diffusion-attention-backend TRTLLM_ATTN</code>，四组各自记账，再组合收益最大者。之后按诊断信号走：注意力高→量化注意力逐级加深（每级单独过有损门，损失会叠乘）；矩阵乘高或显存紧→在线 FP8（官方 -5.3%/-38.9%）；显存超线→DLO 换血（用延迟买显存，台账两个数字都记）；步数多且允许有损→缓存三点标定。每并入两三副药回第二站快扫，时间分布变了就重排处方（打地鼠的节奏控制）。</p>
+<p><b>第四站</b>：四个停机信号任一命中即收口，做全量终验 + 双质量门 + 诊断复扫（前后两张时间分布表是报告里最有说服力的一页）+ 台账全文 + 每行一句归因（“时间省在了哪”）。两个容易踩的判断：FastH3 四步版（RTF≈0.857）是训练路线且与 DLO/量化/缓存互斥，只作对照；自写 kernel 永远最后，且必须端到端 ≥1.03× 收口：子算子的收益在拼回整模型后消失的比例高得超出直觉（该现象依任务与调度而变，此处不保留未定位分母的 29%）。</p>
 
 <h3 id="s4-4">4.4 NPU 实战（昇腾）：vLLM-Omni NPU 后端 + MindIE-SD 双路径</h3>
-<p><b>v2 事实修正</b>：vLLM-Omni 0.28.0 已官方宣布 H3 在 <b>GPU 与 NPU</b> 上生产就绪（其支持矩阵覆盖 CUDA/ROCm/XPU/NPU/MUSA）。因此 NPU 流程不再是"从零移植"，而是双路径选择：</p>
+<p><b>v2 事实修正</b>：vLLM-Omni 0.28.0 已官方宣布 H3 在 <b>GPU 与 NPU</b> 上生产就绪（其支持矩阵覆盖 CUDA/ROCm/XPU/NPU/MUSA）。因此 NPU 流程不再是“从零移植”，而是双路径选择：</p>
 <ul>
-  <li><b>路径① vLLM-Omni NPU 后端</b>：与 GPU 同一套 <code>vllm serve --omni</code> 命令面，底层经 vllm-ascend/torch_npu/CANN 落到昇腾——四站流程与 §4.3 完全同构，只是诊断站的采集与分析换 msprof/MindIE-SD 脚本、量化换 W8A8、通信换 HCCL；</li>
+  <li><b>路径① vLLM-Omni NPU 后端</b>：与 GPU 同一套 <code>vllm serve --omni</code> 命令面，底层经 vllm-ascend/torch_npu/CANN 落到昇腾，四站流程与 §4.3 完全同构，只是诊断站的采集与分析换 msprof/MindIE-SD 脚本、量化换 W8A8、通信换 HCCL；</li>
   <li><b>路径② MindIE-SD 原生引擎</b>：当 vLLM-Omni NPU 后端未覆盖某能力（某 Pattern/量化形态/调度特性）时，MindIE-SD 是昇腾原生的 DiT 引擎（cache_agent / compilation / quantization / eplb 四大模块，2025-12-31 起支持稀疏 Attention；2025-12-25 已实现 vLLM Omni × MindIE-SD 在昇腾上原生跑 Qwen-Image-Edit 系）。</li>
 </ul>
 <p><b>NPU 流程的王牌：MindIE-SD 已把整套闭环开源成 <code>.agents</code> 技能</b>，ZCode（或人）直接复用现成脚本而不必重写：</p>
@@ -444,10 +444,10 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <tr><td>performance-optimization</td><td>P5</td><td>mindiesd-features.md 唯一真相源（API/硬件约束映射表）+ refresh_features.py 自动刷新</td></tr>
   <tr><td>auto-optimization</td><td>P3→P6 全链</td><td>端到端闭环 + artifact-layout 产物规范（runs/YYYYMMDD_.../manifest+patches+报告）</td></tr>
 </table>
-<p><b>H3 上昇腾的推荐次序</b>（把"移植"与"调优"解耦，风险分段释放）：① MindIE-SD §A Dummy Run 用随机权重验证 H3 架构（MM-RoPE/AdaLN/双 VAE）在 CANN 栈可跑通——不用先下 51.5GB 权重；② 逐 stage 移植并 §B 验证（encoder 以 LLM 形态先通 → DiT 注册 Pattern → VAE tile 并行）；③ 全链路跑通后进入与 GPU 完全相同的四站闭环。差异只剩"器材表"：msprof / ACL Graph（版本相关开关）/ W8A8+per-channel 缩放 / AscendC 算子 / TP 贴 8 卡 HCCS 拓扑——总表见 §5。</p>
+<p><b>H3 上昇腾的推荐次序</b>（把“移植”与“调优”解耦，风险分段释放）：① MindIE-SD §A Dummy Run 用随机权重验证 H3 架构（MM-RoPE/AdaLN/双 VAE）在 CANN 栈可跑通，不必先下 51.5GB 权重；② 逐 stage 移植并 §B 验证（encoder 以 LLM 形态先通 → DiT 注册 Pattern → VAE tile 并行）；③ 全链路跑通后进入与 GPU 完全相同的四站闭环。差异只剩“器材表”：msprof / ACL Graph（版本相关开关）/ W8A8+per-channel 缩放 / AscendC 算子 / TP 贴 8 卡 HCCS 拓扑，总表见 §5。</p>
 
 <h3 id="s4-5">4.5 双模式执行：ZCode 自动 ↔ 人在回路（同一份规程）</h3>
-<p>满足"既能自动跑、也能人照着走"的关键设计是：<b>流程写成一份，角色只改执行者</b>。配套 <code>zcode-autotune/</code> 里，<code>AGENTS.md</code> 是给 ZCode 的机器风格规约——状态机（S0 目标→S1 基线→S2 诊断→S3 处方循环→S4 收口）、六拍循环、信号→处方映射表、台账 schema、停机规则、必须停下等人的介入点；<code>RUNBOOK.md</code> 是给人看的自然语言手册——同样的四站，每步先讲为什么现在做这件事、再给可复制的命令、然后教你怎么读输出（含示例格式和判读规则），最后以检查点收束。两份文档面向同一套 <code>bench_gen.py</code>/<code>quality_gate.py</code> 裁判脚本：</p>
+<p>满足“既能自动跑、也能人照着走”的关键设计是：<b>流程写成一份，角色只改执行者</b>。配套 <code>zcode-autotune/</code> 里，<code>AGENTS.md</code> 是给 ZCode 的机器风格规约：状态机（S0 目标→S1 基线→S2 诊断→S3 处方循环→S4 收口）、六拍循环、信号→处方映射表、台账 schema、停机规则、必须停下等人的介入点；<code>RUNBOOK.md</code> 是给人看的自然语言手册：同样的四站，每步先讲为什么现在做这件事、再给可复制的命令、然后教你怎么读输出（含示例格式和判读规则），最后以检查点收束。两份文档面向同一套 <code>bench_gen.py</code>/<code>quality_gate.py</code> 裁判脚本：</p>
 <table>
   <tr><th>站</th><th>ZCode 在做什么（AGENTS.md 视角）</th><th>人在做什么（RUNBOOK.md 视角）</th></tr>
   <tr><td>目标与基线</td><td>读/写 goals.md；冒烟、钉版本、三 reps 基线，校验极差&lt;3% 才放行进 S2</td><td>写下三个数字并想清精度红线；跑冒烟和基线，对照官方 56.9s 锚点检查合理性，台账开张</td></tr>
@@ -455,18 +455,18 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <tr><td>处方循环</td><td>逐副药六拍循环自动执行；verdict=accept 后写一句人类可读归因；有损处方停下来等抽检确认</td><td>按清单试药，一次一个变量；有损药亲自看两条视频（戴耳机，验音频）；每副药在台账记一行</td></tr>
   <tr><td>收口</td><td>停机信号命中→终验→生成 REPORT 与归档</td><td>核对四个停机信号；看前后两张时间分布表；给每行台账补一句"时间省在了哪"</td></tr>
 </table>
-<p>人可以在任何一步接管（精度红线、有损抽检、kernel 方案评审是最典型的三个介入点），也可以把任何一站交回 ZCode——两边跑的是同一套裁判脚本，结论可互相复核。<b>规程即文档，文档即执行体</b>。</p>
+<p>人可以在任何一步接管（精度红线、有损抽检、kernel 方案评审是最典型的三个介入点），也可以把任何一站交回 ZCode。两边跑的是同一套裁判脚本，结论可互相复核。<b>规程即文档，文档即执行体</b>。</p>
 
 <h3 id="s4-6">4.6 每一步"为什么"——方法论的根源</h3>
 <ol>
-  <li><b>为什么"系统问题"优先于"DiT 问题"</b>：官方博客的量化答案——官方完整响应 82.239s→56.917s（−30.8%），优化后 DiT 仍耗 51.800s、约占 91%，因此 DiT 仍可能是主战场；不能从整系统收益推出该段优化天花板低（encoder 51.5GB、VAE 与传输通路都是可结构化的延迟源）。</li>
-  <li><b>为什么处方按"收益/风险"排序、自写 kernel 永远垫底</b>：八层框架的反模式警告（"花两周融算子拿 8%，开个结构开关直接 2×，前功尽弃"）+ KernelOPT 的 61/85（约 72%）厂商库主导回退案例（硬碰近峰算子）。无需改算子代码、仍需验证内存与通信风险的并行形态永远第一副。</li>
-  <li><b>为什么诊断第一问是"设备忙还是等"</b>：busy 低可能来自 host、通信、依赖或并行度不足，须结合 CPU/GPU/网络时间轴归因，不能由单一利用率直接开处方；busy 高才往下分桶——用信号代替直觉。</li>
+  <li><b>为什么“系统问题”优先于“DiT 问题”</b>：官方博客的量化答案。官方完整响应 82.239s→56.917s（−30.8%），优化后 DiT 仍耗 51.800s、约占 91%，因此 DiT 仍可能是主战场；不能从整系统收益推出该段优化天花板低（encoder 51.5GB、VAE 与传输通路都是可结构化的延迟源）。</li>
+  <li><b>为什么处方按“收益/风险”排序、自写 kernel 永远垫底</b>：八层框架的反模式警告（“花两周融算子拿 8%，开个结构开关直接 2×，前功尽弃”）+ KernelOPT 的 61/85（约 72%）厂商库主导回退案例（硬碰近峰算子）。无需改算子代码、仍需验证内存与通信风险的并行形态永远第一副。</li>
+  <li><b>为什么诊断第一问是“设备忙还是等”</b>：busy 低可能来自 host、通信、依赖或并行度不足，须结合 CPU/GPU/网络时间轴归因，不能由单一利用率直接开处方；busy 高才往下分桶，用信号代替直觉。</li>
   <li><b>为什么 3% 噪声线与只读裁判</b>：MindIE-SD 与 KernelOPT 双重背书（<3% 不宣称有效；评测脚本防篡改防 reward hacking）。</li>
-  <li><b>为什么"支持矩阵"要先于动手</b>：框架能力随版本漂移，任何 flag/量化形态先对当版 <code>--help</code>（NPU 侧对 MindIE-SD 的 features 矩阵）验存在性——把"教训 3"制度化。</li>
+  <li><b>为什么“支持矩阵”要先于动手</b>：框架能力随版本漂移，任何 flag/量化形态先对当版 <code>--help</code>（NPU 侧对 MindIE-SD 的 features 矩阵）验存在性，把“教训 3”制度化。</li>
   <li><b>为什么 NPU 先 Dummy Run 再下权重</b>：51.5GB 级权重下载昂贵；§A 用 KB 级配置+随机权重即可验证架构兼容（MindIE-SD model-verification 的核心价值）。</li>
   <li><b>为什么质量门分无损/有损两档、端到端门定 1.03</b>：两类声明两类证据（数值验收→指定测试集与容差下 allclose/PSNR；感知质量验收→CLIP/LPIPS 与抽检；这些有限测试不证明一般数值或语义等价）；3% 仅是待标定的工程阈值；使用交错 A/B、足够重复与置信区间，避免搜索挑中偶然快的配置。</li>
-  <li><b>为什么"每并入两三副药要回诊断快扫"</b>：每副药都改变时间分布，注意力压下去后矩阵乘就是新的头号——打地鼠要有节奏控制，否则处方清单会过期。</li>
+  <li><b>为什么“每并入两三副药要回诊断快扫”</b>：每副药都改变时间分布，注意力压下去后矩阵乘就是新的头号。打地鼠要有节奏控制，否则处方清单会过期。</li>
 </ol>
 
 <h2 id="s5"><span class="no">5.</span>GPU vs NPU 对照总表</h2>
@@ -488,11 +488,11 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 
 <section id="research-updates" class="note" data-research-updates><h2>更新附录 · 发布与论文记录</h2><h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
 <ul>
-<li><b>Evolving Agent Teams</b>（UC Berkeley，10-27，arXiv:2610.36848）：监督者 agent 诊断平台期并动态重构团队——从零写出达生产版 FlashInfer MLA paged decode kernel 的 <b>1.21× 均值加速（追加预算实验）</b>（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）；KDA prefill 在 AMD MI350X 上 3.01×（vs vLLM 生产 HIP kernel）、B200 上 3.44×（vs FlashKDA）。"固定团队会卡死"有了第一个量化证据。</li>
-<li><b>ATRL：Compaction-Aware RL for Ascend Triton</b>（华为，10-09，arXiv:2610.23950）：首个面向昇腾 NPU Triton 的 agentic RL——Qwen3.6-35B 后训练，KernelBench（昇腾实测）Pass@1 相对 GRPO <b>66%→73%（L1）、19%→35%（L2）</b>，配昇腾知识库 + 结构化轨迹压缩检查点。</li>
-<li><b>TensorRT 11.1 Global Performance Tuner</b>（NVIDIA 开发者博客两部曲，10-23）：200+ 编译旋钮显式化为可搜索 build routes，accuracy 作为约束过滤候选、端到端性能作为排序——厂商版"自动调优 + 精度门"。</li>
-<li><b>vLLM-TorchTPU / SGLang-TorchTPU</b>（Google ×Inferact ×RadixArk，10-20）：原生 PyTorch TPU 后端 + 开源 C++ 库 TPU Sync（直读设备缓冲做 KV 迁移、无 host staging）——"多后端 serving"再添一极，自动调优的目标矩阵随之扩大。</li>
-<li><b>SGLang v0.5.22 与 KV 隔离披露</b>（Cloudflare × LMSYS，10-26）：155 条 GLM-5.3 响应跨请求泄露（prompt &gt; 681,280 tokens 的"KV 池 &lt; 上下文窗口"配置错配）；官方建议升级 v0.5.22+——本文 §4 流程"先核对支持矩阵、质量门只读"的规程价值被生产事故反向验证。</li>
+<li><b>Evolving Agent Teams</b>（UC Berkeley，10-27，arXiv:2610.36848）：监督者 agent 诊断平台期并动态重构团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 <b>1.21× 均值加速（追加预算实验）</b>（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）；KDA prefill 在 AMD MI350X 上 3.01×（vs vLLM 生产 HIP kernel）、B200 上 3.44×（vs FlashKDA）。“固定团队会卡死”有了第一个量化证据。</li>
+<li><b>ATRL：Compaction-Aware RL for Ascend Triton</b>（华为，10-09，arXiv:2610.23950）：首个面向昇腾 NPU Triton 的 agentic RL：Qwen3.6-35B 后训练，KernelBench（昇腾实测）Pass@1 相对 GRPO <b>66%→73%（L1）、19%→35%（L2）</b>，配昇腾知识库 + 结构化轨迹压缩检查点。</li>
+<li><b>TensorRT 11.1 Global Performance Tuner</b>（NVIDIA 开发者博客两部曲，10-23）：200+ 编译旋钮显式化为可搜索 build routes，accuracy 作为约束过滤候选、端到端性能作为排序，等于厂商版“自动调优 + 精度门”。</li>
+<li><b>vLLM-TorchTPU / SGLang-TorchTPU</b>（Google ×Inferact ×RadixArk，10-20）：原生 PyTorch TPU 后端 + 开源 C++ 库 TPU Sync（直读设备缓冲做 KV 迁移、无 host staging）。“多后端 serving”再添一极，自动调优的目标矩阵随之扩大。</li>
+<li><b>SGLang v0.5.22 与 KV 隔离披露</b>（Cloudflare × LMSYS，10-26）：155 条 GLM-5.3 响应跨请求泄露（prompt &gt; 681,280 tokens 的“KV 池 &lt; 上下文窗口”配置错配）；官方建议升级 v0.5.22+。本文 §4 流程“先核对支持矩阵、质量门只读”的规程价值被生产事故反向验证。</li>
 </ul>
 
 </section>
@@ -535,7 +535,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 </ol>
 
 <footer>
-  <p>本文由 ZCode（GLM-5.3）基于 2026-10-12 可核实的开源仓库、模型卡、arXiv 论文与框架 Release Notes 整理；
+  <p>本文基于 2026-10-12 可核实的开源仓库、模型卡、arXiv 论文与框架 Release Notes 整理；
   关键数字均附原文小字引用。v3（2026-10-12）：H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环（目标与基线→三层诊断→处方循环→收口），RUNBOOK 面向人、AGENTS.md 面向 ZCode，双模式共用同一套裁判脚本。
   配套脚手架 <code>zcode-autotune/</code>（AGENTS.md / RUNBOOK.md / bench_gen.py / knob_search.py / quality_gate.py）随文章发布。
   引用本文请注明出处与日期。</p>
@@ -544,10 +544,8 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 </div>
 
 <div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
-  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
-  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数（GitHub 主页与站点共用同一计数器）"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:middle;height:20px"></a>
 </div>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <!-- chapter-reader:start -->
 <style id="chapter-reader-style">

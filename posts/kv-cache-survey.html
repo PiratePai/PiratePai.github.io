@@ -230,13 +230,13 @@
   <div class="meta"><span class="chip">调研日期：<b>2026-08-23</b> · 增补：<b>2026-10-30</b></span><span class="chip">七条路线 <b>少存 / 管好 / 别重算 / 存粗 / 扔掉 / 分层 / 不用</b></span></div>
 </header>
 
-<p class="lead">大模型（LLM）生成文字的方式是"一次写一个词"。为了让第 1000 个词能"回看"前 999 个词，Transformer 的注意力机制必须保留每个历史 token 的两份小向量——Key（键）与 Value（值）。这些向量随上下文线性增长、随模型规模巨大，被统称为 <strong> KV Cache</strong>。它既是长上下文能力的基石，也是显存、带宽和成本的头号瓶颈：今天几乎所有推理系统的核心设计，本质上都在回答一个问题——<strong>"这份缓存，我们能不能少存一点、管好一点、直接别重算、存粗一点、扔掉一点、分层放、或者干脆不用？"</strong> 本文按这七条路线梳理二十余项代表性工作，讲解原理到可以动手复现的程度，并盘点 2025–2026 年的最新动态与未来方向。</p>
+<p class="lead">大模型（LLM）生成文字的方式是"一次写一个词"。为了让第 1000 个词能"回看"前 999 个词，Transformer 的注意力机制必须保留每个历史 token 的两份小向量：Key（键）与 Value（值）。这些向量随上下文线性增长、随模型规模急剧膨胀，被统称为 <strong> KV Cache</strong>。它既是长上下文能力的基石，也是显存、带宽和成本的头号瓶颈：今天几乎所有推理系统的核心设计，本质上都在回答一个问题：<strong>"这份缓存，我们能不能少存一点、管好一点、直接别重算、存粗一点、扔掉一点、分层放、或者干脆不用？"</strong> 本文按这七条路线梳理二十余项代表性工作，讲解原理到可以动手复现的程度，并盘点 2025–2026 年的最新动态与未来方向。</p>
 
 <p><em>文中每个关键论点旁都标注了出处与发表时间，并以小字附上论文摘要原文或中文译文；所有代码片段若非注明"简化自源码"，均为便于理解的等价伪代码。检索与成文时间：2026 年 8 月。</em></p>
 
 <!-- ================================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
 <div class="note"><b>从这里读起 · 沿 KV 的生成、复用与释放理解七条路线</b><p><a href="#s1">缓存账本</a> → <a href="#s3">结构与共享</a> → <a href="#s4">放在哪里</a> → <a href="#s5">哪些可以复用</a> → <a href="#s6">用多少位</a> → <a href="#s7">读哪些位置</a> → <a href="#s8">放到哪级存储</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>一条请求到达后先查前缀，命中块增引用、缺失部分分配新块；每步新增 KV，结束后释放或留作复用。结构压缩改每 token 的维度，量化改每元素字节，驱逐改保留内容，稀疏访问改本轮读取集合，卸载改驻留位置，误差与成本来源并不相同。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>B=1、N=4096、L=32、8 个 KV 头、头维 128、BF16：2×1×4096×32×8×128×2=512MiB。KV 变为 4-bit 的数据载荷理想约 128MiB，仍须另加 scale、零点、残差与对齐；这还不是模型总显存。</div>
@@ -247,7 +247,7 @@
 </section>
 <h2 id="s0"><span class="no">0</span>太长不看版（TL;DR）</h2>
 
-<p>先用一张表建立全局地图。七条技术路线解决的是 KV Cache 的不同侧面，且<strong>优化目标互补、但组合须检验算法与实现兼容性</strong>——例如今天的生产系统常常同时使用 GQA/MLA（结构压缩）+ 分页管理 + 前缀缓存 + FP8 量化，而新一代模型再叠加混合线性注意力层。</p>
+<p>先用一张表建立全局地图。七条技术路线解决的是 KV Cache 的不同侧面，且<strong>优化目标互补、但组合须检验算法与实现兼容性</strong>。例如今天的生产系统常常同时使用 GQA/MLA（结构压缩）+ 分页管理 + 前缀缓存 + FP8 量化，而新一代模型再叠加混合线性注意力层。</p>
 
 <table>
 <tr><th style="width:110px">路线</th><th>一句话原理</th><th style="width:220px">代表工作</th><th>代价 / 风险</th></tr>
@@ -268,7 +268,7 @@
 <li><b>Llama-3-70B</b>（GQA 8 个 KV 头）：≈ 320 KB/token → 128K 约 <b>40 GB</b>，勉强一两并发；</li>
 <li><b>DeepSeek-V3</b>（MLA，每层每 token 只缓存 512 维 latent + 64 维 RoPE 键）：≈ 70 KB/token → 128K 仅 <b>约 8.7 GB</b>。</li>
 </ul>
-同一个 128K 上下文，从 340 GB 到 8.7 GB，差约 40 倍——这就是各条路线叠加后能到达的地方。KVQuant 论文给出的对照：LLaMA-7B 存 128K 上下文的 KV 需要 64GB（FP16），量化到 2 bit 后单张 A100-80G 可服务 1M 上下文<sup class="c"><a href="#ref-26">[26]</a></sup>。
+同一个 128K 上下文，从 340 GB 到 8.7 GB，差约 40 倍。这就是各条路线叠加后能到达的地方。KVQuant 论文给出的对照：LLaMA-7B 存 128K 上下文的 KV 需要 64GB（FP16），量化到 2 bit 后单张 A100-80G 可服务 1M 上下文<sup class="c"><a href="#ref-26">[26]</a></sup>。
 </div>
 
 <!-- ================================================================ -->
@@ -289,7 +289,7 @@
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换——latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换：latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div></details>
 
@@ -303,18 +303,18 @@ score_i = dot(q_t, k_i)                 # 当前问题 vs 每条历史索引
 a_i     = softmax(score)[i]             # 归一化成权重，和为 1
 out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pre>
 
-<p>关键在"历史所有 token"这六个字。语言模型逐词生成（自回归），写第 1000 个词时，需要用 <code>q_1000</code> 去比对 <code>k_1 … k_999</code>。如果没有缓存，每写一个词都要把前文 999 个词重新过一遍整个网络算出各自的 k、v——生成一个 1000 词的回答要重复上千次 O(N) 甚至 O(N²) 的计算，代价无法接受。</p>
+<p>关键在"历史所有 token"这六个字。语言模型逐词生成（自回归），写第 1000 个词时，需要用 <code>q_1000</code> 去比对 <code>k_1 … k_999</code>。如果没有缓存，每写一个词都要把前文 999 个词重新过一遍整个网络算出各自的 k、v。生成一个 1000 词的回答，就要重复上千次 O(N) 甚至 O(N²) 的计算，代价无法接受。</p>
 
 <p><strong>KV Cache 的定义：把已经算好的历史 token 的 k、v 向量存起来（不存 q，因为 q 只在当前步用到），下一步直接读取。</strong>这就是典型的"空间换时间"：显存开销线性增长，换来每步解码只需 O(N) 的注意力计算而不必重算整个前缀。</p>
 
 <div class="box ana"><b class="t">一个直观比喻</b>
-把生成过程想象成开卷考试：上下文是一本书，<b>K</b> 是每页书脊上的<b>索引标签</b>（"这页讲什么"），<b>V</b> 是页内的<b>实际内容</b>。每写一个字，你都要拿着当前的问题（q）扫一遍所有标签（算注意力分数），再去翻相关页（加权取内容）。KV Cache 就是你边读边做的<b>笔记</b>——标签和摘录都抄下来，之后不需要回头重读原书。代价：这本书越长，你的笔记本越厚。本文讲的七条路线分别是：换更小的笔记本（压缩/量化）、给笔记本做活页索引（分页）、别人抄过的直接借来用（前缀复用）、只抄重点（稀疏驱逐）、把旧笔记放进书包和储物柜（分层卸载）、以及训练自己"过目不忘"少记笔记（混合架构）。</div>
+把生成过程想象成开卷考试：上下文是一本书，<b>K</b> 是每页书脊上的<b>索引标签</b>（"这页讲什么"），<b>V</b> 是页内的<b>实际内容</b>。每写一个字，你都要拿着当前的问题（q）扫一遍所有标签（算注意力分数），再去翻相关页（加权取内容）。KV Cache 就是你边读边做的<b>笔记</b>：标签和摘录都抄下来，之后不需要回头重读原书。代价：这本书越长，你的笔记本越厚。本文讲的七条路线分别是：换更小的笔记本（压缩/量化）、给笔记本做活页索引（分页）、别人抄过的直接借来用（前缀复用）、只抄重点（稀疏驱逐）、把旧笔记放进书包和储物柜（分层卸载）、以及训练自己"过目不忘"少记笔记（混合架构）。</div>
 
 <h3>1.2 两个阶段：Prefill 算力受限，Decode 带宽受限</h3>
-<p>推理分为两个阶段，理解它们的瓶颈差异是理解全部后续技术的前提：</p>
+<p>推理分为两个阶段，两者的瓶颈差异是理解后续所有技术的前提：</p>
 <ul>
 <li><strong>Prefill（预填充）</strong>：读入整段 prompt，所有 token 并行计算。矩阵很大、算术强度（计算量/访存量）高，GPU 算力是瓶颈（compute-bound）。KV cache 在此阶段被一次性写入。</li>
-<li><strong>Decode（解码）</strong>：每次只生成一个 token。每一步都要把整份 KV cache 从显存搬到计算单元——数据搬运远多于计算，显存带宽是瓶颈（memory-bound）。Quest 论文给出实测：Llama-7B 在 32K 上下文下 KV cache 达 16GB，仅读取就 ≥11ms，占单步解码延迟的 50% 以上<sup class="c"><a href="#ref-35">[35]</a></sup>。</li>
+<li><strong>Decode（解码）</strong>：每次只生成一个 token。每一步都要把整份 KV cache 从显存搬到计算单元，数据搬运远多于计算，显存带宽是瓶颈（memory-bound）。Quest 论文给出实测：Llama-7B 在 32K 上下文下 KV cache 达 16GB，仅读取就 ≥11ms，占单步解码延迟的 50% 以上<sup class="c"><a href="#ref-35">[35]</a></sup>。</li>
 </ul>
 <div class="quote">
   <span class="en">"LLM inference... for relatively small batch sizes, the computation is memory bound... KV cache loading is therefore always memory-bandwidth bound."</span>
@@ -327,9 +327,9 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
 <p>对标准的多头注意力（MHA）模型，KV cache 大小的经典公式（PagedAttention 论文中亦给出）为：</p>
 <pre><code>KV_bytes = 2 × batch × seq_len × n_layers × n_kv_heads × head_dim × dtype_bytes
            └K,V┘   └── 每条请求 ──┘ └────── 每 token 每层 ──────┘</code></pre>
-<p>代入第 0 节表格中的三个模型即可感受到量级差异：70B 级 MHA 模型每 token 约 2.6MB，128K 上下文单请求约 340GB——这意味着<strong>不经任何优化，长上下文服务在物理上不可能</strong>。而每 token 70KB 的 MLA 模型，只看 KV 字节数可容纳多条 128K 的缓存；能否实际部署还须扣除全量权重、工作区与运行时显存，不能据此声称 671B MoE 单卡可部署。七条技术路线，就是从公式中的每一个因子下手：<code>n_kv_heads</code>（结构压缩）、<code>dtype_bytes</code>（量化）、有效 <code>seq_len</code>（稀疏/驱逐）、被同时保留的 <code>batch × seq_len</code>（分页/复用/卸载）、乃至"还要不要这个公式"（混合架构）。</p>
+<p>代入第 0 节表格中的三个模型即可感受到量级差异：70B 级 MHA 模型每 token 约 2.6MB，128K 上下文单请求约 340GB。这意味着<strong>不经任何优化，长上下文服务在物理上不可能</strong>。而每 token 70KB 的 MLA 模型，只看 KV 字节数可容纳多条 128K 的缓存；能否实际部署还须扣除全量权重、工作区与运行时显存，不能据此声称 671B MoE 单卡可部署。七条技术路线，就是从公式中的每一个因子下手：<code>n_kv_heads</code>（结构压缩）、<code>dtype_bytes</code>（量化）、有效 <code>seq_len</code>（稀疏/驱逐）、被同时保留的 <code>batch × seq_len</code>（分页/复用/卸载）、乃至"还要不要这个公式"（混合架构）。</p>
 
-<p>最后补一个系统视角：vLLM 论文实测，服务 13B 模型时显存里权重占约 65%，KV cache 可占 30% 以上，且随批大小增长——<strong>KV cache 的管理方式直接决定最大批大小，从而决定吞吐</strong><sup class="c"><a href="#ref-12">[12]</a></sup>。</p>
+<p>最后补一个系统视角：vLLM 论文实测，服务 13B 模型时显存里权重占约 65%，KV cache 可占 30% 以上，且随批大小增长。<strong>KV cache 的管理方式直接决定最大批大小，从而决定吞吐</strong><sup class="c"><a href="#ref-12">[12]</a></sup>。</p>
 
 <!-- ================================================================ -->
 <h2 id="s2"><span class="no">2</span>发展时间线（2017–2026）</h2>
@@ -361,16 +361,16 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
 <li><span class="yr">2025-04</span> <b>Llama 4</b> 采用 iRoPE（间隔 NoPE/RoPE 层）；<b>LMCache</b> 成为 vLLM V1 首个官方 KV 缓存层（NIXL P/D 分离）；EuroSys'25 <b>HCache</b>、OSDI'25 <b>Strata</b> 等分层缓存系统发表。<span class="tag t-offload">分层卸载</span> <sup class="c"><a href="#ref-56">[56]</a></sup><sup class="c"><a href="#ref-46">[46]</a></sup><sup class="c"><a href="#ref-43">[43]</a></sup><sup class="c"><a href="#ref-44">[44]</a></sup></li>
 <li><span class="yr">2025-08</span> <b>gpt-oss</b>（OpenAI 开源 120B/20B）：滑窗/全局交替 + 可学习 attention sink 偏置，宣告主流前沿模型正式采用混合局部注意力。<span class="tag t-struct">结构压缩</span> <sup class="c"><a href="#ref-55">[55]</a></sup></li>
 <li><span class="yr">2025-09</span> <b>Qwen3-Next</b>（Gated DeltaNet : 门控注意力 = 3:1 + MoE，原生 256K）；<b>DeepSeek-V3.2-Exp</b> 上线 <b>DSA 稀疏注意力</b>，API 价格再降 50%+，vLLM day-0 支持。<span class="tag t-hybrid">混合架构</span> <span class="tag t-sparse">训练时稀疏</span> <sup class="c"><a href="#ref-54">[54]</a></sup><sup class="c"><a href="#ref-39">[39]</a></sup></li>
-<li><span class="yr">2025-10/11</span> <b>Kimi Linear</b>（KDA:MLA = 3:1，48B-A3B）：首个在公平对比下全面胜过全注意力的混合线性架构，KV 省最多 75%、1M 上下文解码吞吐最高 6×；<b>MiniMax-M2</b> 却公开解释"为何回到全注意力"——路线之争白热化。<span class="tag t-hybrid">混合架构</span> <sup class="c"><a href="#ref-58">[58]</a></sup><sup class="c"><a href="#ref-57">[57]</a></sup></li>
+<li><span class="yr">2025-10/11</span> <b>Kimi Linear</b>（KDA:MLA = 3:1，48B-A3B）：首个在公平对比下全面胜过全注意力的混合线性架构，KV 省最多 75%、1M 上下文解码吞吐最高 6×；<b>MiniMax-M2</b> 却公开解释"为何回到全注意力"，路线之争就此白热化。<span class="tag t-hybrid">混合架构</span> <sup class="c"><a href="#ref-58">[58]</a></sup><sup class="c"><a href="#ref-57">[57]</a></sup></li>
 <li><span class="yr">2026</span> <b>混合与稀疏成为新常态</b>：Qwen3.5 延续 3:1 混合、DeepSeek-V4 据报告采用 128:1 高压缩注意力 + 稀疏索引；学界出现 Gated DeltaNet-2（2026-05）、面向 agent 的 CommitKV（2026-08）、自适应比特量化（2026-04）、系统视角新综述（2026-07）等；工程侧 NVIDIA Dynamo 1.0（2026-03）与 LMCache 深度整合、vLLM v0.27 支持 Kimi K3。<sup class="c"><a href="#ref-59">[59]</a></sup><sup class="c"><a href="#ref-61">[61]</a></sup><sup class="c"><a href="#ref-60">[60]</a></sup><sup class="c"><a href="#ref-67">[67]</a></sup><sup class="c"><a href="#ref-29">[29]</a></sup><sup class="c"><a href="#ref-63">[63]</a></sup></li>
 </ul>
 
 <div class="box ana"><b class="t">时间线里的三条暗线</b>
-① <b>算法 → 系统 → 算法系统的闭环</b>：2023 年系统侧（分页/复用）先行爆发，2024–2025 年算法侧（量化/稀疏/结构）跟上，2025 年后两者在"原生稀疏注意力 + 分离式缓存池"里汇合。② <b>KV cache 的"身份"在升级</b>：从引擎内部的一块显存（2023），到跨请求共享的缓存对象（2024），到有定价、有分层、有全局调度的"一等公民资源"（2025–2026，Mooncake/Dynamo/API 计费）。③ <b>模型结构本身开始为 KV 而设计</b>：MLA、滑窗交替、原生稀疏、混合线性层——缓存开销成为预训练时的显式优化目标。</div>
+① <b>算法 → 系统 → 算法系统的闭环</b>：2023 年系统侧（分页/复用）先行爆发，2024–2025 年算法侧（量化/稀疏/结构）跟上，2025 年后两者在"原生稀疏注意力 + 分离式缓存池"里汇合。② <b>KV cache 的"身份"在升级</b>：从引擎内部的一块显存（2023），到跨请求共享的缓存对象（2024），到有定价、有分层、有全局调度的"一等公民资源"（2025–2026，Mooncake/Dynamo/API 计费）。③ <b>模型结构本身开始为 KV 而设计</b>：MLA、滑窗交替、原生稀疏、混合线性层纷纷落地，缓存开销成为预训练时的显式优化目标。</div>
 
 <!-- ================================================================ -->
 <h2 id="s3"><span class="no">3</span>结构压缩：让每个 token 少存一点</h2>
-<p class="lead">这条路线直接修改注意力结构，从公式 <code>n_kv_heads × head_dim</code> 入手。它需要（重新）训练模型，但收益是一次性的、永久性的，且对上层系统完全透明——所以它是"性价比最高的第一步"。</p>
+<p class="lead">这条路线直接修改注意力结构，从公式 <code>n_kv_heads × head_dim</code> 入手。它需要（重新）训练模型，但收益是一次性的、永久性的，且对上层系统完全透明，所以它是"性价比最高的第一步"。</p>
 
 <h3 id="s3-1">3.1 MHA → MQA → GQA：共享 KV 头</h3>
 <p><b>问题</b>：标准 MHA 中每个注意力头都有自己的一套 K/V。假设 64 个头，KV cache 就有 64 份。但 K、V 的作用只是"索引"和"内容"，不同头之间真的需要 64 套完全不同的索引吗？</p>
@@ -380,7 +380,7 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
   <span class="zh">我们提出一种称为多查询注意力的变体：键和值在所有注意力"头"之间共享，大幅缩小这两个张量，从而降低增量解码的显存带宽需求。</span>
   <span class="src">—— Shazeer, "Fast Transformer Decoding: One Write-Head is All You Need" · arXiv:1911.02150 · 2019-11<sup class="c"><a href="#ref-3">[3]</a></sup></span>
 </div>
-<p><b>GQA（Grouped-Query Attention，2023）</b>：谷歌发现 MQA 走得太远——把 64 头分成 G 组（例如 8 组），组内共享一套 K/V。GQA-1 等价于 MQA，GQA-H 等价于 MHA，中间任意档位可调。更有工程价值的是<b>升级配方</b>：把已有 MHA 检查点每组的 K/V 权重做平均池化合并，再只用原预训练 5% 的算力继续训练，就能得到一个几乎不掉点的 GQA 模型。</p>
+<p><b>GQA（Grouped-Query Attention，2023）</b>：谷歌发现 MQA 走得太远，于是把 64 头分成 G 组（例如 8 组），组内共享一套 K/V。GQA-1 等价于 MQA，GQA-H 等价于 MHA，中间任意档位可调。更有工程价值的是<b>升级配方</b>：把已有 MHA 检查点每组的 K/V 权重做平均池化合并，再只用原预训练 5% 的算力继续训练，就能得到一个几乎不掉点的 GQA 模型。</p>
 <div class="quote">
   <span class="en">"We (1) propose a recipe for uptraining existing multi-head language model checkpoints into models with MQA using 5% of original pre-training compute, and (2) introduce grouped-query attention (GQA)... We show that uptrained GQA achieves quality close to multi-head attention with comparable speed to MQA."</span>
   <span class="zh">我们（1）提出一种只用原预训练 5% 算力、将现有多头检查点升级为 MQA 的再训练配方，并（2）提出分组查询注意力（GQA）……升级后的 GQA 质量接近多头注意力，速度接近 MQA。</span>
@@ -402,7 +402,7 @@ out_t   = sum_i(a_i * v_i)              # 按权重混合历史内容</code></pr
 </div>
 
 <h3 id="s3-2">3.2 MLA（Multi-head Latent Attention）：把 KV 压进"潜在向量"</h3>
-<p>DeepSeek-V2（2024-05）给出另一种压缩思路：不共享头，而是<b>低秩压缩</b>。注意力的 K、V 都由同一个输入 <code>h_t</code> 经过两个大矩阵 <code>W^K</code>、<code>W^V</code> 投影而来——模型通过训练学习受低秩约束的联合投影，不能仅由输入相同推出投影结果天然低秩。MLA 干脆先算一个低维的"潜在向量" <code>c_t</code>，把 <code>c_t</code> 存进缓存；概念上可上投影为各头 K/V；高效 decode 将 K 的上投影吸收到 query，将 V 的上投影合并进输出投影，从而避免显式展开所有历史 K/V。</p>
+<p>DeepSeek-V2（2024-05）给出另一种压缩思路：不共享头，而是<b>低秩压缩</b>。注意力的 K、V 都由同一个输入 <code>h_t</code> 经过两个大矩阵 <code>W^K</code>、<code>W^V</code> 投影而来。模型通过训练学习受低秩约束的联合投影，不能仅由输入相同推出投影结果天然低秩。MLA 干脆先算一个低维的"潜在向量" <code>c_t</code>，把 <code>c_t</code> 存进缓存；概念上可上投影为各头 K/V；高效 decode 将 K 的上投影吸收到 query，将 V 的上投影合并进输出投影，从而避免显式展开所有历史 K/V。</p>
 
 <pre><code># MLA 简化伪代码（依据 DeepSeek-V2/V3 论文与开源实现整理）
 c_kv = W_dkv @ h_t          # 下投影：d_model → kv_lora_rank(=512)，所有头共享！
@@ -418,7 +418,7 @@ k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
 
 <p>这里有个绕不开的细节：<b>为什么位置编码部分要单独拎出来？</b>主流模型用 RoPE（旋转位置编码），它把位置信息乘进 K 向量。如果对带 RoPE 的 K 做低秩压缩，还原时的矩阵乘法会与旋转操作"打架"（旋转依赖 token 位置，而缓存的对端是任意位置的 query）。DeepSeek 的解法是<b>解耦</b>：无位置信息的部分走低秩 latent（512 维），带 RoPE 的键单独小份缓存（64 维），两头拼接后参与注意力。这就是论文中"Decoupled RoPE"一节的内容。</p>
 
-<p><b>收益与代价</b>：DeepSeek-V2 相对其前代 67B 模型，KV cache 减少 93.3%、最大生成吞吐提升 5.76×，这是整模型比较，包含 MoE 等设计变化；MLA 的质量和吞吐独立贡献需看受控消融<sup class="c"><a href="#ref-5">[5]</a></sup>。代价在系统侧：显式重建和矩阵吸收是不同执行路径，后者避免完整历史 K/V 展开；瓶颈由实际形状、batch、核与并行布局决定，不能从“必须还原”推导；KV 头只有"1 个 latent"，张量并行（TP）无法像 GQA 那样沿 KV 头切分，这对多卡部署是个长期痛点（2025–2026 年出现 FastDecode、MLA-TP 等专门优化）。即便如此，MLA 已被 DeepSeek-V2/V3/R1/K2、Kimi K2、Kimi Linear 等旗舰模型采用，是结构压缩路线目前的天花板。</p>
+<p><b>收益与代价</b>：DeepSeek-V2 相对其前代 67B 模型，KV cache 减少 93.3%、最大生成吞吐提升 5.76×，这是整模型比较，包含 MoE 等设计变化；MLA 的质量和吞吐独立贡献需看受控消融<sup class="c"><a href="#ref-5">[5]</a></sup>。代价在系统侧：显式重建和矩阵吸收是不同执行路径，后者避免完整历史 K/V 展开；瓶颈由实际形状、batch、核与并行布局决定，不能从"必须还原"推导。另外，KV 头只有"1 个 latent"，张量并行（TP）无法像 GQA 那样沿 KV 头切分，这对多卡部署是个长期痛点（2025–2026 年出现 FastDecode、MLA-TP 等专门优化）。即便如此，MLA 已被 DeepSeek-V2/V3/R1/K2、Kimi K2、Kimi Linear 等旗舰模型采用，是结构压缩路线目前的天花板。</p>
 <div class="quote">
   <span class="en">机制与结果转述（非原文直引）：MLA 缓存压缩 latent 与解耦位置键；DeepSeek-V2 摘要的模型级比较还包含 MoE 等变化。</span>
   <span class="zh">42.5% / 93.3% / 5.76× 是 DeepSeek-V2 整模型相对 DeepSeek 67B 的报告结果，不作为 MLA 的独立贡献。</span>
@@ -426,18 +426,18 @@ k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
 </div>
 
 <h3 id="s3-3">3.3 跨层共享与滑动窗口：另外两个"结构因子"</h3>
-<p><b>跨层共享（depth 方向）</b>。既然相邻层语义相近，KV 能不能隔层存一份？两条 2024-05 的工作给出肯定答案：<b>YOCO</b>（You Only Cache Once，微软）由 self-decoder 输出构造全局 KV，供上层 cross-decoder 通过 cross-attention 共享；self-decoder 使用固定窗口或递归状态，缓存复杂度 O(N+CL)，而标准 Transformer 为 O(NL)（N 为长度、L 为层数、C 为固定状态/窗口常数），并非固定减半；<b>CLA</b>（Cross-Layer Attention）让相邻层共享 KV，在 T5/LLaMA 上换得近半压缩且基本不掉点<sup class="c"><a href="#ref-7">[7]</a></sup><sup class="c"><a href="#ref-8">[8]</a></sup>。免训练的版本是 NeurIPS 2024 的 <b>MiniCache</b>：推理时把相邻层高度相似的 KV 状态合并，沿"深度维"压缩最高 8×<sup class="c"><a href="#ref-9">[9]</a></sup>。这条线的工业化程度不及 GQA/MLA（调度复杂），但可与部分压缩路线组合，但需验证训练目标、位置编码及实现布局是否兼容。</p>
-<p><b>滑动窗口（序列方向）</b>。Mistral 7B（2023-10）把滑动窗口注意力（SWA）带入主流：每个 token 只看最近 W 个 token（如 4096），于是 KV 也只需保留最近 W 个——缓存不再随长度无限增长，变成 O(W)<sup class="c"><a href="#ref-10">[10]</a></sup>。窗口注意力的隐患在 2023 年被 StreamingLLM 揭示：把开头几个 token 驱逐后会"雪崩"（详见第 7.2 节的 attention sink）。2025 年起，工业界把 SWA 与全局注意力<b>交替</b>使用来兼得两边好处：Gemma 3（2025-03）按 5:1 混合局部滑窗（窗口 1024）与全局层<sup class="c"><a href="#ref-11">[11]</a></sup>；OpenAI 的 gpt-oss（2025-08）同样采用"滑窗层 + 全局层交替"，只是把"保住开头的 sink token"改成了更优雅的"每个头学一个加在 softmax 分母上的偏置"，等价于把 sink 内建进了模型<sup class="c"><a href="#ref-55">[55]</a></sup>。Llama 4（2025-04）则用 iRoPE（部分层去掉 RoPE）配合注意力层交替来支撑超长上下文<sup class="c"><a href="#ref-56">[56]</a></sup>。注意：交替滑窗模型的 KV 管理更复杂——全局层要全量缓存、滑窗层只需窗口内的，vLLM V1 为此专门引入了"混合 KV 组"调度（见 4.2 节源码）。</p>
+<p><b>跨层共享（depth 方向）</b>。既然相邻层语义相近，KV 能不能隔层存一份？两条 2024-05 的工作给出肯定答案：<b>YOCO</b>（You Only Cache Once，微软）由 self-decoder 输出构造全局 KV，供上层 cross-decoder 通过 cross-attention 共享；self-decoder 使用固定窗口或递归状态，缓存复杂度 O(N+CL)，而标准 Transformer 为 O(NL)（N 为长度、L 为层数、C 为固定状态/窗口常数），并非固定减半。<b>CLA</b>（Cross-Layer Attention）让相邻层共享 KV，在 T5/LLaMA 上换得近半压缩且基本不掉点<sup class="c"><a href="#ref-7">[7]</a></sup><sup class="c"><a href="#ref-8">[8]</a></sup>。免训练的版本是 NeurIPS 2024 的 <b>MiniCache</b>：推理时把相邻层高度相似的 KV 状态合并，沿"深度维"压缩最高 8×<sup class="c"><a href="#ref-9">[9]</a></sup>。这条线的工业化程度不及 GQA/MLA（调度复杂），但可与部分压缩路线组合，但需验证训练目标、位置编码及实现布局是否兼容。</p>
+<p><b>滑动窗口（序列方向）</b>。Mistral 7B（2023-10）把滑动窗口注意力（SWA）带入主流：每个 token 只看最近 W 个 token（如 4096），于是 KV 也只需保留最近 W 个，缓存不再随长度无限增长，变成 O(W)<sup class="c"><a href="#ref-10">[10]</a></sup>。窗口注意力的隐患在 2023 年被 StreamingLLM 揭示：把开头几个 token 驱逐后会"雪崩"（详见第 7.2 节的 attention sink）。2025 年起，工业界把 SWA 与全局注意力<b>交替</b>使用来兼得两边好处：Gemma 3（2025-03）按 5:1 混合局部滑窗（窗口 1024）与全局层<sup class="c"><a href="#ref-11">[11]</a></sup>；OpenAI 的 gpt-oss（2025-08）同样采用"滑窗层 + 全局层交替"，只是把"保住开头的 sink token"改成了更优雅的"每个头学一个加在 softmax 分母上的偏置"，等价于把 sink 内建进了模型<sup class="c"><a href="#ref-55">[55]</a></sup>。Llama 4（2025-04）则用 iRoPE（部分层去掉 RoPE）配合注意力层交替来支撑超长上下文<sup class="c"><a href="#ref-56">[56]</a></sup>。注意：交替滑窗模型的 KV 管理更复杂，全局层要全量缓存、滑窗层只需窗口内的，vLLM V1 为此专门引入了"混合 KV 组"调度（见 4.2 节源码）。</p>
 
 <div class="box ana"><b class="t">结构压缩小结</b>
-压缩因子从何而来？共享 KV 头（GQA，8×）、低秩 latent（MLA，~10–90× 视基线）、跨层共享（CLA 按组共享；YOCO 为 O(N+CL)，收益随层数和序列长变化）、限窗（SWA，封顶 W）。原生 GQA/MLA/YOCO/CLA 通常需要训练或适配；MiniCache 则是推理时压缩，不能归为全部需要再训练，因此演进节奏由预训练周期决定——这也是为什么 2023 年的系统技术（分页/复用）能立刻部署，而结构红利要到 2024–2025 年的模型换代才兑现。</div>
+压缩因子从何而来？共享 KV 头（GQA，8×）、低秩 latent（MLA，~10–90× 视基线）、跨层共享（CLA 按组共享；YOCO 为 O(N+CL)，收益随层数和序列长变化）、限窗（SWA，封顶 W）。原生 GQA/MLA/YOCO/CLA 通常需要训练或适配；MiniCache 则是推理时压缩，不能归为全部需要再训练，因此演进节奏由预训练周期决定。这也是为什么 2023 年的系统技术（分页/复用）能立刻部署，而结构红利要到 2024–2025 年的模型换代才兑现。</div>
 
 <!-- ================================================================ -->
 <h2 id="s4"><span class="no">4</span>分页管理：把操作系统搬进 GPU 显存</h2>
-<p class="lead">结构决定"存多少"，系统决定"怎么存"。2023 年之前，推理框架为每条请求预分配一段<b>连续</b>显存存放 KV——问题与早期操作系统遇到的内存碎片一模一样，vLLM 的贡献就是把"虚拟内存 + 分页"这套 60 年前的方案完整搬进了 LLM 推理。</p>
+<p class="lead">结构决定"存多少"，系统决定"怎么存"。2023 年之前，推理框架为每条请求预分配一段<b>连续</b>显存存放 KV，问题与早期操作系统遇到的内存碎片一模一样，vLLM 的贡献就是把"虚拟内存 + 分页"这套 60 年前的方案完整搬进了 LLM 推理。</p>
 
 <h3 id="s4-1">4.1 PagedAttention / vLLM（SOSP 2023）</h3>
-<p><b>旧方案的两种浪费</b>：① <b>内部碎片</b>——输出长度事先未知，只能按最大长度预留（按 2048 预留、实际生成 200，浪费 90%）；② <b>外部碎片</b>——各请求预留长度不一，反复分配释放后显存被切碎。vLLM 实测当时主流系统（FasterTransformer/Orca）中，<b>真正存着 token 状态的显存只占 20.4%–38.2%</b>；此外 beam search 等多条序列共享前缀时只能各存一份（冗余复制）<sup class="c"><a href="#ref-12">[12]</a></sup>。</p>
+<p><b>旧方案的两种浪费</b>：① <b>内部碎片</b>：输出长度事先未知，只能按最大长度预留（按 2048 预留、实际生成 200，浪费 90%）；② <b>外部碎片</b>：各请求预留长度不一，反复分配释放后显存被切碎。vLLM 实测当时主流系统（FasterTransformer/Orca）中，<b>真正存着 token 状态的显存只占 20.4%–38.2%</b>；此外 beam search 等多条序列共享前缀时只能各存一份（冗余复制）<sup class="c"><a href="#ref-12">[12]</a></sup>。</p>
 <div class="quote">
   <span class="en">"We propose PagedAttention, an attention algorithm inspired by the classical virtual memory and paging techniques in operating systems. On top of it, we build vLLM... achieves (1) near-zero waste in KV cache memory and (2) flexible sharing of KV cache within and across requests... vLLM improves the throughput of popular LLMs by 2-4× with the same level of latency."</span>
   <span class="zh">我们提出 PagedAttention——一种受操作系统经典虚拟内存与分页技术启发的注意力算法，并在此基础上构建 vLLM……实现（1）KV cache 显存近零浪费，（2）请求内与跨请求的灵活 KV 共享……在论文 2023 年评测、同等延迟下相对 FasterTransformer/Orca 的吞吐提升 2–4 倍。</span>
@@ -447,7 +447,7 @@ k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
 <ul>
 <li>把每条请求的逻辑 KV 序列切成固定大小的 <b>block</b>（页，vLLM 默认 16 token/块），按需分配（ demand paging）；</li>
 <li>每个请求维护一张 <b>block table</b>（页表）：逻辑块号 → 物理块号。逻辑连续、物理可以不连续；</li>
-<li>注意力内核按块取数计算，块内连续、块间跳转——这正是 FlashAttention 的分块计算天然支持的形状；</li>
+<li>注意力内核按块取数计算，块内连续、块间跳转，这正是 FlashAttention 的分块计算天然支持的形状；</li>
 <li>块粒度的<b>引用计数</b>与 <b>copy-on-write</b>（写时复制）：并行采样/beam search 的多条序列先共享同一物理块，真要写时才复制，解决冗余；</li>
 <li>显存不足时按请求粒度换出（swap）或重算（recompute）作为"抢占式调度"的恢复手段。</li>
 </ul>
@@ -472,7 +472,7 @@ k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
   <div class="cap">图 4-1 分页 KV：请求 A 的逻辑块映射到分散的物理块；请求 B 与 A 前缀相同时可直接共享物理块（引用计数 ≥ 2，写时复制）。显著减少外部碎片与预留浪费，仍可能有最后一个未满块及元数据开销。</div>
 </div>
 
-<p><b>后续演进</b>：PagedAttention 已是全行业事实标准（SGLang、TensorRT-LLM、LMDeploy 等均采用分页 KV）。与它配套的两个调度技术值得知道：<b>chunked prefill</b>（Sarathi-Serve，OSDI 2024）把长 prompt 切成小块逐块预填充，插入解码批次中，避免一个 100K prompt 独占 GPU 拖垮所有人的 token 间隔<sup class="c"><a href="#ref-14">[14]</a></sup>；<b>P/D 分离</b>（DistServe，OSDI 2024）把预填充和解码放到不同 GPU 池，消除两阶段互相干扰<sup class="c"><a href="#ref-15">[15]</a></sup>——P/D 分离后 KV 必须跨卡搬运，这直接催生了第 8 节的整条"以 KV 为中心"的系统线。</p>
+<p><b>后续演进</b>：PagedAttention 已是全行业事实标准（SGLang、TensorRT-LLM、LMDeploy 等均采用分页 KV）。与它配套的两个调度技术值得知道：<b>chunked prefill</b>（Sarathi-Serve，OSDI 2024）把长 prompt 切成小块逐块预填充，插入解码批次中，避免一个 100K prompt 独占 GPU 拖垮所有人的 token 间隔<sup class="c"><a href="#ref-14">[14]</a></sup>；<b>P/D 分离</b>（DistServe，OSDI 2024）把预填充和解码放到不同 GPU 池，消除两阶段互相干扰<sup class="c"><a href="#ref-15">[15]</a></sup>。P/D 分离后 KV 必须跨卡搬运，这直接催生了第 8 节的整条"以 KV 为中心"的系统线。</p>
 
 <h3 id="s4-2">4.2 源码走读：今天的 vLLM V1 是怎么管理 KV 的</h3>
 <p>2025-01 vLLM 发布 V1 引擎重构：前缀缓存<b>默认开启</b>且做到近零开销，整体提速 1.7×<sup class="c"><a href="#ref-13">[13]</a></sup>。其核心是 <code>vllm/v1/core/</code> 下的三件套：<code>BlockPool</code>（物理块池+缓存索引）、<code>KVCacheCoordinator</code>（按注意力类型分组调度）、<code>KVCacheManager</code>（对调度器暴露的统一门面）。下面是简化后的主干（保留真实注释结构，有删减）：</p>
@@ -507,7 +507,7 @@ class KVCacheManager:
         ...</code></pre>
 <p class="code-note">完整文件约千行，还包括：写时复制块收集（<code>take_kv_cache_block_copies</code>）、为外置缓存连接器（LMCache 等 KVConnector）保留的接口、混合模型（Mamba 状态 + 全注意力块）的分组对齐逻辑等。</p>
 
-<p>几个值得注意的工程细节：① 前缀缓存以<strong>块哈希</strong>为单位（token 序列 + 模型/LoRA 等命名空间信息一起哈希），命中即免 prefill；② 滑窗模型中"滑出窗口"的块会被立即回收（<code>remove_skipped_blocks</code>），这就是 3.3 节说的交替滑窗模型的 KV 管理方式；③ 2025 年后的 vLLM 已原生支持 Mamba/混合层——RNN 状态作为一种新的"块类型"参与同一套池子，这为第 9 节的混合架构铺平了系统侧道路。</p>
+<p>几个值得注意的工程细节：① 前缀缓存以<strong>块哈希</strong>为单位（token 序列 + 模型/LoRA 等命名空间信息一起哈希），命中即免 prefill；② 滑窗模型中"滑出窗口"的块会被立即回收（<code>remove_skipped_blocks</code>），这就是 3.3 节说的交替滑窗模型的 KV 管理方式；③ 2025 年后的 vLLM 已原生支持 Mamba/混合层：RNN 状态作为一种新的"块类型"参与同一套池子，这为第 9 节的混合架构铺平了系统侧道路。</p>
 
 <!-- ================================================================ -->
 <!-- WIDGET:w3 KV Cache 分页管理 · kv-cache-survey.html -->
@@ -683,7 +683,7 @@ root.querySelector('.ppx-reset').addEventListener('click',reset);
 <!-- /WIDGET:w3 -->
 
 <h2 id="s5"><span class="no">5</span>前缀复用：能不算，就不算</h2>
-<p class="lead">因果注意力有个美妙性质：第 t 个 token 的 K/V 只取决于它前面的 token（<b>前缀</b>），与后面的内容无关。因此两条请求只要开头相同，在相同模型权重、token、位置、适配器和执行语义下可复用前缀 KV；不同浮点 kernel 或 batch 不保证逐比特一致——可以直接借。这条路线不省单条请求的显存，而是省掉<strong>重复的预填充计算</strong>，并大幅降低首 token 延迟（TTFT）。</p>
+<p class="lead">因果注意力有个美妙性质：第 t 个 token 的 K/V 只取决于它前面的 token（<b>前缀</b>），与后面的内容无关。因此两条请求只要开头相同，且在相同模型权重、token、位置、适配器和执行语义下，前缀 KV 就可以直接借用；换了浮点 kernel 或 batch，逐比特一致并不保证。这条路线不省单条请求的显存，而是省掉<strong>重复的预填充计算</strong>，并大幅降低首 token 延迟（TTFT）。</p>
 
 <h3 id="s5-1">5.1 RadixAttention 与 vLLM 的自动前缀缓存</h3>
 <p>哪里来的重复？处处都是：系统提示词（几 KB 的固定开头）、few-shot 示例、多轮对话的历史、Agent 每轮带上的完整轨迹、RAG 检索到的同一批文档……SGLang 论文在 Chatbot Arena 生产环境实测：Vicuna-33B 的请求前缀缓存命中率 74.1%，多模态 LLaVA-Next-34B 为 52.4%，命中使 TTFT 平均改善 1.7×<sup class="c"><a href="#ref-16">[16]</a></sup>。</p>
@@ -723,7 +723,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
         delete_leaf(leaf)                # 父节点变叶子后继续可驱逐</code></pre>
 <p class="code-note">真实代码还有分页对齐（page_size）、Eagle 投机解码的双字键、跨存储 host_value 备份、优先级驱逐等；但骨架就是上面 60 行。</p>
 
-<p><b>vLLM 侧</b>的对应功能叫 Automatic Prefix Caching（APC），在 V0 时代是可选项（命中率高才有收益，低时 CPU 开销反而拖慢）；2025-01 的 V1 重构后<strong>默认开启且近零开销</strong>——块哈希的计算被摊薄进调度主循环，这也是 V1 宣称 1.7× 提速的来源之一<sup class="c"><a href="#ref-13">[13]</a></sup>。4.2 节源码里的 <code>find_longest_cache_hit</code> 干的就是与上面 <code>match_prefix</code> 同样的事。</p>
+<p><b>vLLM 侧</b>的对应功能叫 Automatic Prefix Caching（APC），在 V0 时代是可选项（命中率高才有收益，低时 CPU 开销反而拖慢）；2025-01 的 V1 重构后<strong>默认开启且近零开销</strong>：块哈希的计算被摊薄进调度主循环，这也是 V1 宣称 1.7× 提速的来源之一<sup class="c"><a href="#ref-13">[13]</a></sup>。4.2 节源码里的 <code>find_longest_cache_hit</code> 干的就是与上面 <code>match_prefix</code> 同样的事。</p>
 
 <p>同一路线还有一个"batch 内"变体：Hydragen（2024-02）发现共享系统提示的一批请求在<b>解码阶段</b>也可以把共享前缀的 K/V 只从显存读一次、供全批使用（共享部分相当于一个"大 KV"矩阵），在高并发同前缀负载下把解码算力开销降到接近 1/n<sup class="c"><a href="#ref-17">[17]</a></sup>；FlashInfer 的 cascade inference 内核是其工程化版本。PromptCache（2023-11）则把"可复用单元"从任意前缀推广到提示词中的可复用模块（系统段、示例段）<sup class="c"><a href="#ref-18">[18]</a></sup>。</p>
 
@@ -736,7 +736,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
 <tr><td><b>AttentionStore</b> / <b>HCache</b> / <b>Strata</b></td><td>arXiv 2024-12 / EuroSys 2025 / OSDI 2025<sup class="c"><a href="#ref-42">[42]</a></sup><sup class="c"><a href="#ref-43">[43]</a></sup><sup class="c"><a href="#ref-44">[44]</a></sup></td><td>多级存储（CPU/SSD）上的全局 KV 仓库与恢复策略（详见 8.1）</td></tr>
 <tr><td><b>Mooncake</b></td><td>FAST 2025 最佳论文（arXiv 2024-06）<sup class="c"><a href="#ref-45">[45]</a></sup></td><td>生产级全局 KVCache 池 + 以缓存为中心的调度器（详见 8.2）</td></tr>
 </table>
-<p>值得注意的是 Mooncake 论文披露的真实数据：<strong>线上负载的理论前缀复用率上限约 55%（"up to only 55%"），但在特定场景（如 Kimi 的论文问答服务）可高达 90%</strong>——复用率高度依赖业务形态，多轮 Agent 类负载是天然的高命中场景<sup class="c"><a href="#ref-45">[45]</a></sup>。2026 年的学术前沿正把"复用"推进到 Agent 生命周期内部：例如 CommitKV（arXiv:2608.07855，2026-08）为多轮 ReAct Agent 设计"事务级"的 KV 提交/回滚语义，让失败的推理分支不污染缓存<sup class="c"><a href="#ref-67">[67]</a></sup>。</p>
+<p>Mooncake 论文披露的真实数据是：<strong>线上负载的理论前缀复用率上限约 55%（"up to only 55%"），但在特定场景（如 Kimi 的论文问答服务）可高达 90%</strong>。复用率高度依赖业务形态，多轮 Agent 类负载是天然的高命中场景<sup class="c"><a href="#ref-45">[45]</a></sup>。2026 年的学术前沿正把"复用"推进到 Agent 生命周期内部：例如 CommitKV（arXiv:2608.07855，2026-08）为多轮 ReAct Agent 设计"事务级"的 KV 提交/回滚语义，让失败的推理分支不污染缓存<sup class="c"><a href="#ref-67">[67]</a></sup>。</p>
 
 <h3 id="s5-3">5.3 商业 API 的缓存定价：前缀复用"货币化"</h3>
 <p>当"你的前缀我上次算过"变成一种可计费的商品，说明这条路线已经彻底成熟。主要厂商的时间线与定价语义：</p>
@@ -751,7 +751,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
   <span class="en">"DeepSeek API 创新采用硬盘缓存，价格再降一个数量级……缓存命中价格：0.1 元/百万 tokens。"</span>
   <span class="src">—— DeepSeek API 官方公告 · 2024-08-02<sup class="c"><a href="#ref-23">[23]</a></sup>（原文即中文）</span>
 </div>
-<div class="box tip"><b class="t">应用侧启示</b>把不变的内容（系统提示、工具定义、参考文档、历史轨迹）放在 prompt <b>最前面</b>且保持逐字节稳定，把变化的内容放最后——这是免费获得数倍降本与 TTFT 改善的第一杠杆。各家命中判定都是"前缀逐字节相同"（DeepSeek 以 64 token 为最小落盘单位）。</div>
+<div class="box tip"><b class="t">应用侧启示</b>把不变的内容（系统提示、工具定义、参考文档、历史轨迹）放在 prompt <b>最前面</b>且保持逐字节稳定，把变化的内容放最后。这是免费获得数倍降本与 TTFT 改善的第一杠杆。各家命中判定都是"前缀逐字节相同"（DeepSeek 以 64 token 为最小落盘单位）。</div>
 
 <!-- ================================================================ -->
 <h2 id="s6"><span class="no">6</span>量化：把 16 比特的笔记抄成 2 比特的速记</h2>
@@ -768,7 +768,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
   <span class="zh">我们的发现表明，Key cache 应按通道量化……相反，Value cache 应按 token 量化。基于该分析，我们提出了免调参的 2 bit KV cache 量化算法 KIVI。</span>
   <span class="src">—— Liu et al., KIVI · ICML 2024 · arXiv:2402.02750 · 2024-02<sup class="c"><a href="#ref-25">[25]</a></sup></span>
 </div>
-<p><b>流式难题与解法</b>：按通道量化要求"跨 token 聚合统计"，但解码时 token 是一个一个来的——KIVI 的方案是把缓存切成两段：凑满一组的旧 token 做通道量化存储；最近 R 个 token（R≤128）保留 FP16 作为"残差窗口"，读写都按块对齐的矩阵分块完成。效果：Llama/Falcon/Mistral 上 2 bit 几乎不掉点，含权重的峰值显存降 2.6×，批大小最大 4×，吞吐提升 2.35–3.47×。量化伪代码：</p>
+<p><b>流式难题与解法</b>：按通道量化要求"跨 token 聚合统计"，但解码时 token 是一个一个来的。KIVI 的方案是把缓存切成两段：凑满一组的旧 token 做通道量化存储；最近 R 个 token（R≤128）保留 FP16 作为"残差窗口"，读写都按块对齐的矩阵分块完成。效果：Llama/Falcon/Mistral 上 2 bit 几乎不掉点，含权重的峰值显存降 2.6×，批大小最大 4×，吞吐提升 2.35–3.47×。量化伪代码：</p>
 <pre><code># KIVI 风格的量化/反量化（示意）
 def quantize_group(x, scale, zero_point, bits=2):        # 非对称量化
     return min(2**bits - 1, max(0, round(x / scale) + zero_point))  # 标量示意；scale&gt;0，无符号 b-bit 裁剪
@@ -794,9 +794,9 @@ def dequant(q, scale, zero_point):
 
 <h3 id="s6-3">6.3 工程现状（FP8 成为默认）与 2026 前沿（自适应比特）</h3>
 <p><b>生产环境的第一个落点是 8 bit</b>：vLLM 的一条命令 <code>--kv-cache-dtype fp8</code> 即可将 KV 减半，显存翻倍地装 token，数据载荷约减半；实际质量取决于 scale 校准、模型、任务和敏感层，不能普遍称无损<sup class="c"><a href="#ref-27">[27]</a></sup>；TensorRT-LLM 同期支持 INT8/FP8。NVIDIA 进一步在 Blackwell 上推出 <b>NVFP4</b>（4 bit 浮点）KV cache，面向长上下文与大批量场景<sup class="c"><a href="#ref-28">[28]</a></sup>。到 2025 年，"FP8 KV + GQA/MLA + 分页 + 前缀缓存"是部分引擎支持的可选组合，是否默认与可兼容须按具体版本/模型核对。</p>
-<p><b>2026 年学界方向：从"统一比特"走向"按重要性分配比特"</b>。"Don't Waste Bits!"（arXiv:2604.04722，2026-04）按注意力显著性给不同 token 自适应分配比特数——重要 token 高精度、次要 token 激进压缩<sup class="c"><a href="#ref-29">[29]</a></sup>；同期的变换编码视角（arXiv:2608.14191，2026-08）把 KV 量化统一到信号压缩的变换编码框架下重新设计<sup class="c"><a href="#ref-70">[70]</a></sup>；多模态 KV（视频 token 爆炸）的量化也开始出现专门工作。另一个现实问题被 NVIDIA Research 点破：<b>实验室压缩率与生产系统之间存在鸿沟</b>——量化 KV 与分页、驱逐、重排、稀疏内核的组合工程才是量产瓶颈<sup class="c"><a href="#ref-74">[74]</a></sup>。</p>
+<p><b>2026 年学界方向：从"统一比特"走向"按重要性分配比特"</b>。"Don't Waste Bits!"（arXiv:2604.04722，2026-04）按注意力显著性给不同 token 自适应分配比特数：重要 token 高精度、次要 token 激进压缩<sup class="c"><a href="#ref-29">[29]</a></sup>；同期的变换编码视角（arXiv:2608.14191，2026-08）把 KV 量化统一到信号压缩的变换编码框架下重新设计<sup class="c"><a href="#ref-70">[70]</a></sup>；多模态 KV（视频 token 爆炸）的量化也开始出现专门工作。另一个现实问题被 NVIDIA Research 点破：<b>实验室压缩率与生产系统之间存在鸿沟</b>，量化 KV 与分页、驱逐、重排、稀疏内核的组合工程才是量产瓶颈<sup class="c"><a href="#ref-74">[74]</a></sup>。</p>
 <div class="box warn"><b class="t">量化的边界</b>
-超低比特（≤2 bit）下长上下文检索类任务的精度衰减仍是公开难题；离群通道/sink token 必须特殊照顾；与驱逐策略叠加时"重要 token 高精度"与"驱逐不重要 token"需要联合设计——这正是 2026 年自适应比特与"分辨率-覆盖度联合分配"（arXiv:2608.07001）等工作的出发点<sup class="c"><a href="#ref-66">[66]</a></sup>。</div>
+超低比特（≤2 bit）下长上下文检索类任务的精度衰减仍是公开难题；离群通道/sink token 必须特殊照顾；与驱逐策略叠加时"重要 token 高精度"与"驱逐不重要 token"需要联合设计。这正是 2026 年自适应比特与"分辨率-覆盖度联合分配"（arXiv:2608.07001）等工作的出发点<sup class="c"><a href="#ref-66">[66]</a></sup>。</div>
 
 <!-- ================================================================ -->
 <h2 id="s7"><span class="no">7</span>稀疏与驱逐：注意力本来就"偏心"</h2>
@@ -809,7 +809,7 @@ def dequant(q, scale, zero_point):
   <span class="zh">我们的方法基于一个值得注意的观察：计算注意力分数时，一小部分 token 贡献了大部分价值。我们称这些 token 为"重击者"（H2）。</span>
   <span class="src">—— Zhang et al., H2O · NeurIPS 2023 · arXiv:2306.14048 · 2023-06<sup class="c"><a href="#ref-30">[30]</a></sup></span>
 </div>
-<p><b>观察二：attention sink——开头的几个 token 会"吸走"海量注意力</b>。StreamingLLM（ICLR 2024）发现朴素滑窗注意力（只留最近 L 个 token）会在文本超过窗口长度时突然崩溃（困惑度从 5 飙到 5000+），而把<b>最初 4 个 token 的 KV 加回来</b>就恢复正常——哪怕把这 4 个 token 换成无意义的换行符也一样。解释：softmax 要求权重和为 1，当 query 与谁都"不搭"时，模型需要有个地方"倾倒"多余注意力；开头的 token 因为被所有后续 token 看到过，最容易被训练成这种"排水口"。据此 StreamingLLM = 4 个 sink token + 滑动窗口，让 Llama-2/MPT/Falcon 稳定处理 400 万+ token 流式输入，比"滑窗重算"方案快 22.2×<sup class="c"><a href="#ref-32">[32]</a></sup>。</p>
+<p><b>观察二：attention sink，开头的几个 token 会"吸走"海量注意力</b>。StreamingLLM（ICLR 2024）发现朴素滑窗注意力（只留最近 L 个 token）会在文本超过窗口长度时突然崩溃（困惑度从 5 飙到 5000+），而把<b>最初 4 个 token 的 KV 加回来</b>就恢复正常，哪怕把这 4 个 token 换成无意义的换行符也一样。解释：softmax 要求权重和为 1，当 query 与谁都"不搭"时，模型需要有个地方"倾倒"多余注意力；开头的 token 因为被所有后续 token 看到过，最容易被训练成这种"排水口"。据此 StreamingLLM = 4 个 sink token + 滑动窗口，让 Llama-2/MPT/Falcon 稳定处理 400 万+ token 流式输入，比"滑窗重算"方案快 22.2×<sup class="c"><a href="#ref-32">[32]</a></sup>。</p>
 <div class="quote">
   <span class="en">"We observe an interesting phenomenon, namely attention sink, that keeping the KV of initial tokens will largely recover the performance of window attention... StreamingLLM can enable Llama-2, MPT, Falcon, and Pythia to perform stable and efficient language modeling with up to 4 million tokens and more."</span>
   <span class="zh">我们观察到一个有趣的现象——attention sink：保留最初几个 token 的 KV 能大幅恢复窗口注意力的性能……StreamingLLM 可使 Llama-2、MPT、Falcon、Pythia 稳定高效地建模高达 400 万甚至更长的 token。</span>
@@ -828,7 +828,7 @@ def dequant(q, scale, zero_point):
 <tr><td><b>SnapKV</b><sup class="c"><a href="#ref-33">[33]</a></sup></td><td>2024-04</td><td>prompt 末尾"观察窗"的注意力投票</td><td><b>prefill 后一次性压缩</b></td><td>针对"prompt 远长于输出"的真实负载；16K 输入下 3.6× 生成提速、8.2× 显存效率，单卡跑 380K 上下文</td></tr>
 <tr><td>PyramidKV / PyramidInfer<sup class="c"><a href="#ref-34">[34]</a></sup></td><td>2024-06</td><td>层间金字塔预算分配（浅层多留、深层少留）</td><td>prefill 后</td><td>观察到深层注意力本就更集中，预算不必层层层均分</td></tr>
 </table>
-<p>SnapKV 的洞察值得一句话：<b>模型在生成开始之前就知道你要找什么</b>——每个注意力头在 prompt 末尾观察窗（如 32 token）上的注意力分布，与之后生成时高度一致，因此可以"提前投票"选出每头重要的 prompt KV，prefill 结束即完成压缩。其伪代码（摘自论文）核心只有几行：</p>
+<p>SnapKV 的洞察值得一句话：<b>模型在生成开始之前就知道你要找什么</b>：每个注意力头在 prompt 末尾观察窗（如 32 token）上的注意力分布，与之后生成时高度一致，因此可以"提前投票"选出每头重要的 prompt KV，prefill 结束即完成压缩。其伪代码（摘自论文）核心只有几行：</p>
 <pre><code># SnapKV（论文 Listing 1 节选，有删减）
 attn = attention(q_obs_window, all_prompt_keys)     # 观察窗 query × 全 prompt key
 vote = pool1d(attn.sum(over_window), kernel=7)      # 聚合 + 一维池化做“聚类”
@@ -842,7 +842,7 @@ cache = concat(k_past, k_obs_window)                # 重要前缀 + 完整观�
 </div>
 
 <h3 id="s7-3">7.3 Quest：不驱逐，改成"按 query 按需取用"</h3>
-<p>驱逐类方法有个致命弱点：<b>扔掉的是不可逆的</b>，而"哪个 token 重要"其实取决于未来要问什么。Quest（ICML 2024）改成"全部保留、按需取用"——KV 照常分页存储在显存（或更大存储）中，每页维护一个极小的元数据：Key 每个维度的 min/max。解码时用当前 query 与每页的 min/max 做一次保守估计（区间上界），只把得分 Top-K 的页真正读进注意力计算。页大小 16 时访存约为全量的 1/16 + K/页数；32K 上下文自注意力提速 7.03×，配合 4 bit 权重端到端 2.23×，且在 passkey 检索等长依赖任务上几乎无损——而 H2O/TOVA/StreamingLLM 在"先给材料后提问题"的设定下接近全错，因为答案 token 早被扔了<sup class="c"><a href="#ref-35">[35]</a></sup>。</p>
+<p>驱逐类方法有个致命弱点：<b>扔掉的是不可逆的</b>，而"哪个 token 重要"其实取决于未来要问什么。Quest（ICML 2024）改成"全部保留、按需取用"：KV 照常分页存储在显存（或更大存储）中，每页维护一个极小的元数据：Key 每个维度的 min/max。解码时用当前 query 与每页的 min/max 做一次保守估计（区间上界），只把得分 Top-K 的页真正读进注意力计算。页大小 16 时访存约为全量的 1/16 + K/页数；32K 上下文自注意力提速 7.03×，配合 4 bit 权重端到端 2.23×，且在 passkey 检索等长依赖任务上几乎无损。反观 H2O/TOVA/StreamingLLM，在"先给材料后提问题"的设定下接近全错，因为答案 token 早被扔了<sup class="c"><a href="#ref-35">[35]</a></sup>。</p>
 <div class="quote">
   <span class="en">"However, we observe the criticality of a token highly depends on the query. To this end, we propose Quest, a query-aware KV cache selection algorithm. Quest keeps track of the minimal and maximal Key values in KV cache pages and estimates the criticality of a given page using Query vectors."</span>
   <span class="zh">然而我们观察到，一个 token 是否关键高度依赖于当前 query。为此我们提出 Quest——一种 query 感知的 KV cache 选取算法：为每页维护 Key 的最小/最大值元数据，用 Query 向量估计每页的关键程度。</span>
@@ -851,19 +851,19 @@ cache = concat(k_past, k_obs_window)                # 重要前缀 + 完整观�
 <p>这条"页级元数据 + query 感知选取"的思路后来被 NSA/MoBA 的原生稀疏设计吸收（见下节），也是 2026 年稀疏注意力索引化的雏形。另一支 MInference（2024-07）专注 <b>prefill 稀疏</b>：长 prompt 预填充时注意力呈"星形/竖线"等固定稀疏模式，按模式跳过计算即可给 1M 上下文的首 token 提速数倍<sup class="c"><a href="#ref-36">[36]</a></sup>。</p>
 
 <h3 id="s7-4">7.4 训练时就稀疏：NSA、MoBA 与 DeepSeek DSA</h3>
-<p>以上方法都作用于"训练好的全注意力模型"，NSA（DeepSeek，2025-02）批评这种"事后稀疏"：理论计算降了、墙上时钟没降（不连续访存、prefill 与 decode 只稀疏了一半、与 GQA 组合时各头选块的并集使访存并不省），且模型没有学过怎么稀疏地看。NSA 把稀疏<b>做进预训练</b>：注意力分成三条并联支路——<b>压缩支路</b>（把历史 KV 块粗粒度压缩成代表 token，捕捉全局）、<b>选取支路</b>（块级 Top-n 精细选取）、<b>滑窗支路</b>（局部细节），门控加权求和。27B 骨干 + 260B token 预训练后，通用/长文/推理基准<b>不掉点甚至更好</b>，64K 序列上解码、前向、反向分别提速 11.6×、9×、6×<sup class="c"><a href="#ref-37">[37]</a></sup>。</p>
+<p>以上方法都作用于"训练好的全注意力模型"，NSA（DeepSeek，2025-02）批评这种"事后稀疏"：理论计算降了、墙上时钟没降（不连续访存、prefill 与 decode 只稀疏了一半、与 GQA 组合时各头选块的并集使访存并不省），且模型没有学过怎么稀疏地看。NSA 把稀疏<b>做进预训练</b>，注意力分成三条并联支路：<b>压缩支路</b>（把历史 KV 块粗粒度压缩成代表 token，捕捉全局）、<b>选取支路</b>（块级 Top-n 精细选取）、<b>滑窗支路</b>（局部细节），门控加权求和。27B 骨干 + 260B token 预训练后，通用/长文/推理基准<b>不掉点甚至更好</b>，64K 序列上解码、前向、反向分别提速 11.6×、9×、6×<sup class="c"><a href="#ref-37">[37]</a></sup>。</p>
 <div class="quote">
   <span class="en">"NSA employs a dynamic hierarchical sparse strategy, combining coarse-grained token compression with fine-grained token selection... (1) We achieve substantial speedups through arithmetic intensity-balanced algorithm design... (2) We enable end-to-end training, reducing pretraining computation without sacrificing model performance."</span>
   <span class="zh">NSA 采用动态分层稀疏策略，把粗粒度 token 压缩与细粒度 token 选取相结合……（1）通过算术强度均衡的算法设计获得实质加速；（2）支持端到端训练，在不牺牲模型性能的前提下降低预训练计算量。</span>
   <span class="src">—— Yuan et al., Native Sparse Attention · arXiv:2502.11089 · 2025-02<sup class="c"><a href="#ref-37">[37]</a></sup></span>
 </div>
-<p>几乎同时，Moonshot 的 <b>MoBA</b>（2025-02）把 MoE 的门控思想搬进注意力：上下文切块，每个 query 用门控网络选取最相关的少数块参与注意力——滑窗、sink 等静态稀疏都是它的特例。MoBA 已在 Kimi 线上服务长上下文请求，10M token 预填充下注意力比 FlashAttention 快 16×<sup class="c"><a href="#ref-38">[38]</a></sup>。</p>
+<p>几乎同时，Moonshot 的 <b>MoBA</b>（2025-02）把 MoE 的门控思想搬进注意力：上下文切块，每个 query 用门控网络选取最相关的少数块参与注意力。滑窗、sink 等静态稀疏都是它的特例。MoBA 已在 Kimi 线上服务长上下文请求，10M token 预填充下注意力比 FlashAttention 快 16×<sup class="c"><a href="#ref-38">[38]</a></sup>。</p>
 <div class="quote">
   <span class="en">"We introduce Mixture of Block Attention (MoBA), an innovative approach that applies the principles of Mixture of Experts (MoE) to the attention mechanism... MoBA has already been deployed to support Kimi's long-context requests."</span>
   <span class="zh">我们提出块注意力混合（MoBA），把混合专家（MoE）的原理应用于注意力机制……MoBA 已部署用于支撑 Kimi 的长上下文请求。</span>
   <span class="src">—— Lu et al., MoBA · arXiv:2502.13189 · 2025-02<sup class="c"><a href="#ref-38">[38]</a></sup></span>
 </div>
-<p>2025-09，DeepSeek 把这条线推进到产品：<b>DeepSeek-V3.2-Exp</b> 引入 <b>DSA（DeepSeek Sparse Attention）</b>——一种算子级支持的"闪电式"稀疏索引，以极低成本为每个 query 动态选定少量重要 token 做注意力，官方称在长上下文上兼顾训练与推理效率，上线同时 <b>API 价格下调 50% 以上</b>，vLLM 提供 day-0 支持<sup class="c"><a href="#ref-39">[39]</a></sup>。DSA 与 NSA/MoBA 一起，标志着"稀疏注意力"从推理 trick 变成了<b>被预训练内化的模型能力</b>——KV cache 问题的解法重心，开始从系统侧移回模型结构侧。</p>
+<p>2025-09，DeepSeek 把这条线推进到产品：<b>DeepSeek-V3.2-Exp</b> 引入 <b>DSA（DeepSeek Sparse Attention）</b>：一种算子级支持的"闪电式"稀疏索引，以极低成本为每个 query 动态选定少量重要 token 做注意力，官方称在长上下文上兼顾训练与推理效率，上线同时 <b>API 价格下调 50% 以上</b>，vLLM 提供 day-0 支持<sup class="c"><a href="#ref-39">[39]</a></sup>。DSA 与 NSA/MoBA 一起，标志着"稀疏注意力"从推理 trick 变成了<b>被预训练内化的模型能力</b>，KV cache 问题的解法重心开始从系统侧移回模型结构侧。</p>
 <div class="box warn"><b class="t">驱逐/稀疏的适用边界（2026 年的再评价）</b>
 RULER 等长上下文基准（arXiv:2404.06654）反复表明：免训练驱逐在预算激进时会伤及多跳检索与长推理<sup class="c"><a href="#ref-40">[40]</a></sup>。2026 年出现一批"反思"工作：RestoreKV（2026-08）研究查询无关驱逐在紧预算下的性能塌陷与修复<sup class="c"><a href="#ref-66">[66]</a></sup>；"准确率=证据吗"（2026-08）发现压缩后即使答对了、支撑答案的推理链也可能已受损<sup class="c"><a href="#ref-68">[68]</a></sup>；DistillCache（2026-08）用 KL 引导的自适应驱逐缓解长推理轨迹下的退化<sup class="c"><a href="#ref-69">[69]</a></sup>。结论倾向于：对"长推理/Agent"负载，优先用原生稀疏或按需取用（Quest/DSA 类），慎用激进免训练驱逐。</div>
 
@@ -873,14 +873,14 @@ RULER 等长上下文基准（arXiv:2404.06654）反复表明：免训练驱逐�
 
 <h3 id="s8-1">8.1 从单机卸载到多级缓存</h3>
 <p><b>InfiniGen（OSDI 2024）</b>把完整 KV 放在 CPU，通过轻量预演提前预取下一层需要的 KV：利用当前层输入、下一层部分 query 权重和 key cache 估计注意力重要性。它的重点是跨层预演与传输重叠，<b>不是历史 query 外推，也不是 Quest 的页级 min/max 筛选</b>。预测失误、预取预算、PCIe 带宽与质量之间仍有取舍。<sup class="c"><a href="#ref-41">[41]</a></sup></p>
-<p>随后系统开始把 KV 当作有生命周期的缓存对象管理：<b>AttentionStore</b>（2024-12）构建 CPU/SSD 两级全局 KV 存储，支撑跨请求复用与 P/D 分离<sup class="c"><a href="#ref-42">[42]</a></sup>；<b>HCache</b>（EuroSys 2025）研究状态恢复时的数据布局——以 KV 张量原格式（而非 token 重算）高效换入，恢复延迟比"卸载 token、重新 prefill"低数倍<sup class="c"><a href="#ref-43">[43]</a></sup>；<b>Strata</b>（OSDI 2025）给出缓存感知的层级管理与预取调度，面向企业级多租户复用<sup class="c"><a href="#ref-44">[44]</a></sup>。这些工作的共同洞察：<b>同一份上下文，"算一次到处存"远比"到处算"便宜</b>——尤其是 Agent/多轮场景里同一前缀会被访问几十次。</p>
+<p>随后系统开始把 KV 当作有生命周期的缓存对象管理：<b>AttentionStore</b>（2024-12）构建 CPU/SSD 两级全局 KV 存储，支撑跨请求复用与 P/D 分离<sup class="c"><a href="#ref-42">[42]</a></sup>；<b>HCache</b>（EuroSys 2025）研究状态恢复时的数据布局：以 KV 张量原格式（而非 token 重算）高效换入，恢复延迟比"卸载 token、重新 prefill"低数倍<sup class="c"><a href="#ref-43">[43]</a></sup>；<b>Strata</b>（OSDI 2025）给出缓存感知的层级管理与预取调度，面向企业级多租户复用<sup class="c"><a href="#ref-44">[44]</a></sup>。这些工作的共同洞察：<b>同一份上下文，"算一次到处存"远比"到处算"便宜</b>，尤其是 Agent/多轮场景里同一前缀会被访问几十次。</p>
 
 <h3 id="s8-2">8.2 Mooncake：以 KVCache 为中心的分离式架构（FAST 2025 最佳论文）</h3>
 <p>Moonshot AI 的 Kimi 是长上下文重负载的典型（大量 128K+ 请求、经常过载）。其服务系统 <b>Mooncake</b> 的设计哲学是"一切调度围绕 KVCache 展开"：</p>
 <ul>
 <li><b>预填充/解码集群分离</b>（P/D 分离），各自独立扩缩；</li>
 <li><b>全局 KVCache 池</b>：把 GPU 集群里闲置的 CPU DRAM/SSD 聚合成分布式缓存，分页存储、按块索引；</li>
-<li><b>Conductor 全局调度器</b>：请求到来时先看 KV 分布——把请求调度到"已有其前缀缓存"的预填充节点（而非反过来），热块复制多份防拥塞，冷块换出；预填充按层流式产出 KV，边算边通过 RDMA 传给解码节点，与计算重叠；</li>
+<li><b>Conductor 全局调度器</b>：请求到来时先看 KV 分布，把请求调度到"已有其前缀缓存"的预填充节点（而非反过来），热块复制多份防拥塞，冷块换出；预填充按层流式产出 KV，边算边通过 RDMA 传给解码节点，与计算重叠；</li>
 <li><b>面向过载的早拒绝</b>：预测解码侧将无配额时提前拒绝请求，避免白白预填充。</li>
 </ul>
 <div class="quote">
@@ -892,22 +892,22 @@ RULER 等长上下文基准（arXiv:2404.06654）反复表明：免训练驱逐�
 
 <h3 id="s8-3">8.3 开源生态：LMCache、NVIDIA Dynamo 与标准化接口</h3>
 <p><b>LMCache</b>（UCSD 等团队，arXiv:2510.09665，2025-10）把自己定位为"推理引擎外挂的 KV 缓存层"：以 vLLM V1 的 KVConnector 接口为切入点，提供 CPU 内存/本地盘/分布式存储的分层缓存与跨引擎 KV 传输（P/D 分离），内置 CacheGen 式编码压缩与 CacheBlend 式选择性重算，论文报告企业负载下约 3× 的无损吞吐提升<sup class="c"><a href="#ref-46">[46]</a></sup>。时间线：2025-04 成为 vLLM V1 首个官方 KV 层集成（含 NIXL P/D 分离），2025-05 与 Mooncake 生态宣布合作互通，2025-07 支持多模态 KV 复用<sup class="c"><a href="#ref-46">[46]</a></sup><sup class="c"><a href="#ref-48">[48]</a></sup>。</p>
-<p><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）是数据中心级的推理编排层：在 vLLM/SGLang/TensorRT-LLM 等引擎之上做智能路由、P/D 分离与 <b>KVBM（KV cache 管理器）</b>——把 GPU HBM、主机内存、二级存储统一成跨引擎的 KV 地址空间，2026-03 的 Dynamo 1.0 加入缓存钉扎（pinned cache 抗驱逐）等生产特性；官方报告在 GB200 NVL72 上对 DeepSeek-R1 类推理负载取得最高 30× 吞吐提升<sup class="c"><a href="#ref-47">[47]</a></sup>。加上 vLLM 的 OffloadingConnector/KVConnector API、Kubernetes 原生的 llm-d 等项目，"KV 缓存层"正在成为独立的基础设施软件品类——就像数据库之下的存储引擎。</p>
-<p>DeepSeek 的"硬盘缓存"（5.3 节）可以视为这条路线在商业 API 上的最简形态：KV 落盘、命中计费 1/10 价格。从 vLLM 的块池，到 Mooncake 的全局池，再到 Dynamo 的跨引擎池——<b>缓存的作用域在一步步扩大，而每一次扩大都要求更强的哈希、传输与一致性设计</b>。</p>
+<p><b>NVIDIA Dynamo</b>（GTC 2025-03 开源）是数据中心级的推理编排层：在 vLLM/SGLang/TensorRT-LLM 等引擎之上做智能路由、P/D 分离与 <b>KVBM（KV cache 管理器）</b>：把 GPU HBM、主机内存、二级存储统一成跨引擎的 KV 地址空间，2026-03 的 Dynamo 1.0 加入缓存钉扎（pinned cache 抗驱逐）等生产特性；官方报告在 GB200 NVL72 上对 DeepSeek-R1 类推理负载取得最高 30× 吞吐提升<sup class="c"><a href="#ref-47">[47]</a></sup>。加上 vLLM 的 OffloadingConnector/KVConnector API、Kubernetes 原生的 llm-d 等项目，"KV 缓存层"正在成为独立的基础设施软件品类，地位就像数据库之下的存储引擎。</p>
+<p>DeepSeek 的"硬盘缓存"（5.3 节）可以视为这条路线在商业 API 上的最简形态：KV 落盘、命中计费 1/10 价格。从 vLLM 的块池，到 Mooncake 的全局池，再到 Dynamo 的跨引擎池：<b>缓存的作用域在一步步扩大，而每一次扩大都要求更强的哈希、传输与一致性设计</b>。</p>
 
 <!-- ================================================================ -->
 <h2 id="s9"><span class="no">9</span>混合架构：大部分层干脆不要 KV Cache</h2>
 <p class="lead">前面六条路线都在"优化 KV cache"，最后这条问的是：能不能让大部分层根本不产生随长度增长的缓存？答案来自被 Transformer 打败多年的老朋友——RNN。</p>
 
 <h3 id="s9-1">9.1 线性注意力 = 固定大小的"记忆"</h3>
-<p>回忆注意力公式 <code>softmax(qKᵀ)V</code>。将 softmax attention 替换为核化算子（并非与原 softmax 数学等价）；使用特征映射 φ，把 <code>φ(q)(φ(k)ᵀv)</code> 括起来看，会发现它等价于维护一个<b>固定大小的外积记忆矩阵 S</b>，每个 token 到来时做一次递归更新——这就是线性注意力（Katharopoulos et al., 2020）：</p>
+<p>回忆注意力公式 <code>softmax(qKᵀ)V</code>。将 softmax attention 替换为核化算子（并非与原 softmax 数学等价）；使用特征映射 φ，把 <code>φ(q)(φ(k)ᵀv)</code> 括起来看，会发现它等价于维护一个<b>固定大小的外积记忆矩阵 S</b>，每个 token 到来时做一次递归更新。这就是线性注意力（Katharopoulos et al., 2020）：</p>
 <pre><code># 未归一化内积累积的教学示意；完整核化形式还维护 z=sum(phi(k))，输出除以 phi(q)^T z
 # 可运行完整例子见 ../scripts/verify-mechanisms.py；S 维度固定但数值/关联干扰可增长
 S_t = S_{t-1} + k_t ⊗ v_t      # 写入：新 token 的 (k,v) 外积累加进记忆
 o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 # 训练时可并行展开（chunkwise），推理时每 token O(d²)，缓存恒为 S ∈ R^{d×d}</code></pre>
 <p>裸的累加记忆会把所有历史无差别混在一起，检索能力差。近年的两大改进撑起了这条路线的复兴：<b>门控</b>（给 S 乘衰减因子 α，允许遗忘，Mamba/RetNet/GLA）与 <b>delta 规则</b>（写入前先减去旧关联，"先擦后写"，DeltaNet）。Mamba（2023-12）以选择性状态空间模型的形式证明这类结构可以规模化到 LLM 且吞吐数倍于 Transformer<sup class="c"><a href="#ref-49">[49]</a></sup>；Griffin（DeepMind，ICML 2024）直接给出了"门控线性循环 + 局部注意力"混合配方的系统研究<sup class="c"><a href="#ref-50">[50]</a></sup>；Gated DeltaNet（2024-12）则把门控与 delta 规则结合，成为 2025 年混合模型最常用的线性层积木<sup class="c"><a href="#ref-52">[52]</a></sup>。</p>
-<p><b>但纯线性模型有个理论天花板</b>：S 的大小固定，能记住的 (key→value) 关联数量有限——精确检索（"把第 3 页那个电话号码报出来"）天然吃亏。于是工业界收敛到<b>混合</b>：大部分层用线性注意力（省 KV、解码快），穿插少量全注意力层（负责精确检索）。</p>
+<p><b>但纯线性模型有个理论天花板</b>：S 的大小固定，能记住的 (key→value) 关联数量有限，精确检索（"把第 3 页那个电话号码报出来"）天然吃亏。于是工业界收敛到<b>混合</b>：大部分层用线性注意力（省 KV、解码快），穿插少量全注意力层（负责精确检索）。</p>
 
 <h3 id="s9-2">9.2 工业界混战：从 Jamba 到 Kimi Linear，"3:1"是若干模型采用的设计点，最优比例依任务、训练预算和状态容量而变</h3>
 <table>
@@ -926,7 +926,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
   <span class="zh">我们提出 Kimi Linear——首个在公平对比下于各类场景（短上下文、长上下文、RL 扩展）全面超过全注意力的混合线性注意力架构……Kimi Linear 以显著优势胜过全 MLA，同时 KV cache 用量最多降低 75%，1M 上下文解码吞吐最高 6×。</span>
   <span class="src">—— Kimi Team, Kimi Linear · arXiv:2510.26692 · 2025-10<sup class="c"><a href="#ref-58">[58]</a></sup></span>
 </div>
-<p>直观解释"为什么 3:1 有效"：线性层解决"吞吐与显存"（占 75% 的层没有增长型缓存），全注意力层解决"精确回忆"（每 4 层一次的检索机会足够模型把关键事实锚定住——研究表明只需少数"检索头"就能承载长程回忆）。系统侧也要跟上：vLLM/SGLang 已把 Mamba/线性层状态作为新的"块类型"纳入分页管理（见 4.2 节），2026 年的 Gated DeltaNet-2（arXiv:2605.22791）等继续改进"擦除/写入"的解耦，让固定记忆更聪明<sup class="c"><a href="#ref-60">[60]</a></sup>。</p>
+<p>直观解释"为什么 3:1 有效"：线性层解决"吞吐与显存"（占 75% 的层没有增长型缓存），全注意力层解决"精确回忆"（每 4 层一次的检索机会足够模型把关键事实锚定住，研究表明只需少数"检索头"就能承载长程回忆）。系统侧也要跟上：vLLM/SGLang 已把 Mamba/线性层状态作为新的"块类型"纳入分页管理（见 4.2 节），2026 年的 Gated DeltaNet-2（arXiv:2605.22791）等继续改进"擦除/写入"的解耦，让固定记忆更聪明<sup class="c"><a href="#ref-60">[60]</a></sup>。</p>
 
 <h3 id="s9-3">9.3 一个重要反例：MiniMax-M2 为什么退回全注意力</h3>
 <p>混合路线并非共识。MiniMax 曾是最激进的推手（MiniMax-01 的 7:1 线性混合），但 2025-10 的 <b>MiniMax-M2</b> 回归了纯全注意力（GQA），并公开复盘原因<sup class="c"><a href="#ref-57">[57]</a></sup>：</p>
@@ -935,7 +935,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
   <span class="zh">（要点归纳）混合注意力在公开榜单上表现良好，但规模化后在高阶多跳推理上出现退化；线性注意力目前对数值精度远比全注意力敏感；此外线性状态给前缀缓存带来了实现上的麻烦（缓存复用需要保存/恢复 RNN 状态，与成熟的 KV 前缀树生态不兼容）。</span>
   <span class="src">—— MiniMax-AI, "Why Did MiniMax M2 End Up as a Full Attention Model?" · Hugging Face Blog · 2025-11<sup class="c"><a href="#ref-57">[57]</a></sup>（英文字句为博客原文节选，中文为归纳译文）</span>
 </div>
-<p>这场"3:1 vs 全注意力"的路线之争是 2025–2026 年模型架构最大的分歧点：Kimi Linear 与 Qwen 系押注混合，MiniMax 与部分前沿闭源模型押注全注意力 + 原生稀疏（DSA 方向）。两条路线共享同一个判断——<b>朴素的"每层全量 KV"正在退出历史舞台</b>；分歧只在于用"固定记忆"还是"稀疏索引"来替代它。2026 年的 DeepSeek-V4 据公开技术报告描述走得更远：128:1 的高压缩注意力（HCA）层 + 可训练稀疏索引（CSA/Lightning Indexer），并催生了 Lookahead Sparse Attention 一类"按需取块"的后续研究（arXiv:2606.09079，2026-06）<sup class="c"><a href="#ref-61">[61]</a></sup>。</p>
+<p>这场"3:1 vs 全注意力"的路线之争是 2025–2026 年模型架构最大的分歧点：Kimi Linear 与 Qwen 系押注混合，MiniMax 与部分前沿闭源模型押注全注意力 + 原生稀疏（DSA 方向）。两条路线共享同一个判断：<b>朴素的"每层全量 KV"正在退出历史舞台</b>；分歧只在于用"固定记忆"还是"稀疏索引"来替代它。2026 年的 DeepSeek-V4 据公开技术报告描述走得更远：128:1 的高压缩注意力（HCA）层 + 可训练稀疏索引（CSA/Lightning Indexer），并催生了 Lookahead Sparse Attention 一类"按需取块"的后续研究（arXiv:2606.09079，2026-06）<sup class="c"><a href="#ref-61">[61]</a></sup>。</p>
 
 <div class="fig">
   <div class="lbl">一个 32 层混合模型的自底向上堆叠示意（3:1）</div>
@@ -958,7 +958,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <li><b>长上下文的经济学：百万到千万 token。</b>KVQuant 的 10M 愿景、Llama-4 的 10M 宣称、Kimi Linear 的 1M 实测吞吐优势，都指向"上下文长度成为定价维度"。多模态（视频 token 动辄数十万）会进一步放大需求；多模态 KV 的压缩与量化刚起步。</li>
 <li><b>存储与网络硬件的入场。</b>Mooncake 未来工作点名：带宽/美元与带宽/瓦特上，GDDR/LPDDR/存算一体/混合键合内存可能比旗舰 GPU 高一个数量级，解码这类访存受限阶段值得搬到"内存导向"的专用设备；CXL、NVL 互联、以太网 RDMA 上的 KV 传输正在成为新基准测试对象。</li>
 <li><b>量化与驱逐的联合理论。</b>"分辨率（每 token 比特）× 覆盖度（保留多少 token）"的二维联合优化刚被形式化（arXiv:2608.07001，2026-08）<sup class="c"><a href="#ref-66">[66]</a></sup>；离群值、sink、检索头的联合保护策略，以及与调度器水位联动的动态预算，都缺统一理论。</li>
-<li><b>安全与正确性：缓存污染、侧信道与"忠实性"。</b>跨租户共享前缀缓存引入新的攻击面（缓存侧信道、提示注入的持久化）；压缩后"答案对但推理链断"的忠实性问题需要新的评测与修复手段<sup class="c"><a href="#ref-68">[68]</a></sup>。10-26 的 SGLang×Cloudflare 安全披露让这一条从理论风险变成公开事件：P/D 分离部署下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 随后被别的请求读走——155 条响应泄漏了他人 prompt 内容；修复分两步落在 v0.5.21（Mooncake/NIXL 默认隔离）与 v0.5.22（MORI 标记 ack），其余 #43719（deferred release，吞吐代价约 −0.38%）将随 v0.5.23 发布（截至 2026-10-30 未发 tag）<sup class="c"><a href="#ref-95">[95]</a></sup>。随着缓存成为计费与合规对象，这一支会越来越重要。</li>
+<li><b>安全与正确性：缓存污染、侧信道与"忠实性"。</b>跨租户共享前缀缓存引入新的攻击面（缓存侧信道、提示注入的持久化）；压缩后"答案对但推理链断"的忠实性问题需要新的评测与修复手段<sup class="c"><a href="#ref-68">[68]</a></sup>。10-26 的 SGLang×Cloudflare 安全披露让这一条从理论风险变成公开事件：P/D 分离部署下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 随后被别的请求读走，155 条响应泄漏了他人 prompt 内容；修复分两步落在 v0.5.21（Mooncake/NIXL 默认隔离）与 v0.5.22（MORI 标记 ack），其余 #43719（deferred release，吞吐代价约 −0.38%）将随 v0.5.23 发布（截至 2026-10-30 未发 tag）<sup class="c"><a href="#ref-95">[95]</a></sup>。随着缓存成为计费与合规对象，这一支会越来越重要。</li>
 </ol>
 
 <!-- ================================================================ -->
@@ -976,7 +976,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 # 3) 观察指标：访问 http://localhost:8000/metrics 并搜索
 #    vllm:gpu_cache_usage_percents   ← KV 块池占用（分页管理的效果）
 #    vllm:prefix_cache_queries / hits ← 前缀缓存命中率（复用是否生效）</code></pre>
-<p>把同一个长 prompt 发两次，第二次的 TTFT 会显著下降——这就是前缀缓存。想体验基数树复用，可改用 SGLang（<code>uv pip install "sglang[all]"</code> 后 <code>python -m sglang.launch_server --model ... </code>，RadixAttention 默认开启）；想体验分层卸载，可安装 <code>lmcache</code> 并按其文档配置 CPU offload。若想读代码，本文引用的两段真实源码位于：vLLM 的 <code>vllm/v1/core/kv_cache_manager.py</code> 与 SGLang 的 <code>python/sglang/srt/mem_cache/radix_cache.py</code>（均为主线分支，2026-08）。</p>
+<p>把同一个长 prompt 发两次，第二次的 TTFT 会显著下降，这就是前缀缓存。想体验基数树复用，可改用 SGLang（<code>uv pip install "sglang[all]"</code> 后 <code>python -m sglang.launch_server --model ... </code>，RadixAttention 默认开启）；想体验分层卸载，可安装 <code>lmcache</code> 并按其文档配置 CPU offload。若想读代码，本文引用的两段真实源码位于：vLLM 的 <code>vllm/v1/core/kv_cache_manager.py</code> 与 SGLang 的 <code>python/sglang/srt/mem_cache/radix_cache.py</code>（均为主线分支，2026-08）。</p>
 
 <!-- ================================================================ -->
 
@@ -986,11 +986,11 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 
 <h3>10.1 学界：从"压缩缓存"到"重识缓存"</h3>
 <ul>
-<li><b>综述走向系统视角</b>：TMLR 2025 的 KV cache 管理综述（arXiv:2412.19442，2024-12）确立了 token 级 / 层级 / 模型级的三层分类法<sup class="c"><a href="#ref-62">[62]</a></sup>；2026-07 的新综述（arXiv:2607.08057）则强调"系统感知"的 KV 优化——把压缩算法与调度、分层存储联合设计<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
-<li><b>重要性度量升级</b>：从"历史注意力分数"走向"预期注意力"——NVIDIA 等的 Expected Attention（arXiv:2510.00636，2025-10）从未来 query 分布出发估计 token 重要性，避免"现在不重要≠将来不重要"的错误<sup class="c"><a href="#ref-64">[64]</a></sup>；KeepKV（arXiv:2504.09936，2025-04）等研究无损化的周期压缩。</li>
+<li><b>综述走向系统视角</b>：TMLR 2025 的 KV cache 管理综述（arXiv:2412.19442，2024-12）确立了 token 级 / 层级 / 模型级的三层分类法<sup class="c"><a href="#ref-62">[62]</a></sup>；2026-07 的新综述（arXiv:2607.08057）则强调"系统感知"的 KV 优化：把压缩算法与调度、分层存储联合设计<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
+<li><b>重要性度量升级</b>：从"历史注意力分数"走向"预期注意力"。NVIDIA 等的 Expected Attention（arXiv:2510.00636，2025-10）从未来 query 分布出发估计 token 重要性，避免"现在不重要≠将来不重要"的错误<sup class="c"><a href="#ref-64">[64]</a></sup>；KeepKV（arXiv:2504.09936，2025-04）等研究无损化的周期压缩。</li>
 <li><b>语义化/检索化 KV</b>：SeKV（2026-06）把 KV 组织成层次化"语义记忆"按分辨率自适应访问<sup class="c"><a href="#ref-71">[71]</a></sup>；CompressKV（2026-06）用语义检索指导压缩<sup class="c"><a href="#ref-72">[72]</a></sup>。KV cache 越来越像一个"为注意力定制的向量数据库"。</li>
-<li><b>Agent 场景成为主战场</b>：CommitKV（2026-08）的多轮事务语义<sup class="c"><a href="#ref-67">[67]</a></sup>、"Learning Agent Execution for KV-Cache Management"（2026-07）学习 Agent 执行流来预测缓存价值<sup class="c"><a href="#ref-73">[73]</a></sup>——RL 训练与 Agent 服务的 rollout 复用把前缀缓存命中率推到 90%+ 的量级，KV 管理成为 RL 基础设施的核心成本项。</li>
-<li><b>可靠性反思</b>：RestoreKV（2026-08，激进驱逐下的恢复）<sup class="c"><a href="#ref-66">[66]</a></sup>、KV-Rescue（2026-08，长推理链驱逐损失的步进修复）、推理忠实性检验（2026-08）<sup class="c"><a href="#ref-68">[68]</a></sup>、KL 引导驱逐 DistillCache（2026-08）<sup class="c"><a href="#ref-69">[69]</a></sup>——"压缩后答对了但推理坏了"成为新的研究对象。</li>
+<li><b>Agent 场景成为主战场</b>：CommitKV（2026-08）的多轮事务语义<sup class="c"><a href="#ref-67">[67]</a></sup>、"Learning Agent Execution for KV-Cache Management"（2026-07）学习 Agent 执行流来预测缓存价值<sup class="c"><a href="#ref-73">[73]</a></sup>。RL 训练与 Agent 服务的 rollout 复用把前缀缓存命中率推到 90%+ 的量级，KV 管理成为 RL 基础设施的核心成本项。</li>
+<li><b>可靠性反思</b>：RestoreKV（2026-08，激进驱逐下的恢复）<sup class="c"><a href="#ref-66">[66]</a></sup>、KV-Rescue（2026-08，长推理链驱逐损失的步进修复）、推理忠实性检验（2026-08）<sup class="c"><a href="#ref-68">[68]</a></sup>、KL 引导驱逐 DistillCache（2026-08）<sup class="c"><a href="#ref-69">[69]</a></sup>。"压缩后答对了但推理坏了"成为新的研究对象。</li>
 <li><b>量化进入自适应时代</b>：显著性驱动的自适应比特分配（arXiv:2604.04722，2026-04）<sup class="c"><a href="#ref-29">[29]</a></sup>、变换编码理论框架（arXiv:2608.14191，2026-08）<sup class="c"><a href="#ref-70">[70]</a></sup>、多模态 KV 量化（IEEE Computer，2026）。</li>
 <li><b>线性注意力继续内卷</b>：Gated DeltaNet-2（2026-05，关注度（不作为技术证据））解耦擦除与写入地址<sup class="c"><a href="#ref-60">[60]</a></sup>；同期还有稀疏状态扩展、核化线性注意力等一批工作冲击"固定状态的容量墙"。</li>
 </ul>
@@ -1013,8 +1013,8 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <p class="lead">这一波新工作的共同气质是<b>反思与收敛</b>：有人证明"随机驱逐就能打平 SOTA"，有人用 roofline 模型统一了全部五个技术家族，也有人让模型自己"声明"要读哪段缓存。</p>
 
 <h4>① Random Attention：一场"负结果"冲击（Salesforce+UIUC，2026.09）</h4>
-<p><b>动机</b>：所有驱逐方法共享同一范式——给每个缓存 token 估计"将来重要性"再保 top。但推理负载下这个信号可能根本没用。</p>
-<p><b>做法与结论</b>：完全不打分——保留 prompt、对每头已生成部分做<b>均匀随机驱逐</b>。结果：4 个模型 × 6 项推理任务上与最强已有驱逐器打平，vLLM 部署吞吐反而高 <b>32–43%</b>（因为省掉了打分开销）。更重要的发现：<b>prompt 才是脆弱部分</b>，选择器之间的差距大多来自 prompt 处理而非历史 token 选择——对整个"重要性度量军备竞赛"（§7）构成方法论挑战。</p>
+<p><b>动机</b>：所有驱逐方法共享同一范式：给每个缓存 token 估计"将来重要性"再保 top。但推理负载下这个信号可能根本没用。</p>
+<p><b>做法与结论</b>：完全不打分，保留 prompt、对每头已生成部分做<b>均匀随机驱逐</b>。结果：4 个模型 × 6 项推理任务上与最强已有驱逐器打平，vLLM 部署吞吐反而高 <b>32–43%</b>（因为省掉了打分开销）。更重要的发现：<b>prompt 才是脆弱部分</b>，选择器之间的差距大多来自 prompt 处理而非历史 token 选择，这对整个"重要性度量军备竞赛"（§7）构成方法论挑战。</p>
 <div class="quote">
   <span class="en">"Existing KV cache compression methods share one paradigm: score each cached token by some estimate of how much it will matter later, and keep the top-scoring ones."</span>
   <span class="zh">现有 KV 缓存压缩方法共享同一范式：用某种对"将来重要性"的估计给每个缓存 token 打分，然后保留得分最高的一批。</span>
@@ -1022,7 +1022,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </div>
 
 <h4>② The KV Cache Is the New Memory Wall：统一理论（2026.09）</h4>
-<p>这篇 28 页立场文用 <b>roofline 模型</b>统一量化五大家族（量化、驱逐、分页、前缀共享、分层卸载），给出可检验的结论：低于特定上下文长度时压缩 KV 几乎没有端到端收益；分页/前缀共享<b>无损但只解决"容量"</b>，量化/驱逐才真正降<b>带宽</b>；并提出统一 KV 表示（单一分页布局同时携带 per-block 精度与保留掩码）与拓扑感知放置（B200 上最高 2×、MI300X 上 8× 的恢复空间）——把本文 §11"量化与驱逐的联合理论"方向形式化了<sup class="c"><a href="#ref-78">[78]</a></sup>。</p>
+<p>这篇 28 页立场文用 <b>roofline 模型</b>统一量化五大家族（量化、驱逐、分页、前缀共享、分层卸载），给出可检验的结论：低于特定上下文长度时压缩 KV 几乎没有端到端收益；分页/前缀共享<b>无损但只解决"容量"</b>，量化/驱逐才真正降<b>带宽</b>；并提出统一 KV 表示（单一分页布局同时携带 per-block 精度与保留掩码）与拓扑感知放置（B200 上最高 2×、MI300X 上 8× 的恢复空间），把本文 §11"量化与驱逐的联合理论"方向形式化了<sup class="c"><a href="#ref-78">[78]</a></sup>。</p>
 
 <h4>③ xKV：跨层共享低秩子空间（ICML 2026）</h4>
 <p>各层 KV 的主奇异向量高度对齐（CKA 验证）→ prefill 时对分组层做联合 SVD，共享一套 token 基 + 每层小重构矩阵；免训练、兼容 MLA。<b>收益</b>：最高 <b>8×</b> KV 压缩；叠加 4-bit 量化达 <b>25.6×</b>；端到端最高 4.23× 加速<sup class="c"><a href="#ref-80">[80]</a></sup>。与 CLA（§3.3"层间共享"）同一思想的后训练版本。同期 <b>OSCAR</b>（2026.05）用离线谱协方差旋转让 <b>INT2</b> KV 在长上下文可用<sup class="c"><a href="#ref-81">[81]</a></sup>；<b>QuantMLA</b>（2026.09）沿 SnapMLA 指出的"MLA×低位量化不兼容"问题做函数对齐的双路量化<sup class="c"><a href="#ref-84">[84]</a></sup>。</p>
@@ -1031,9 +1031,9 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <p>稀疏 KV 卸载把瓶颈从"GPU 显存容量"转移到"CPU–GPU 召回 I/O"：头级稀疏把召回打碎成大量小 PCIe 传输，同步系统 GPU 利用率仅 ~35%。PulseInfer（华中科大等）按召回量的层间/请求间波动动态组织传输、聚合碎片化召回，让"按需取块"（Quest 式）与"分层卸载"（§8）真正吃到容量收益<sup class="c"><a href="#ref-82">[82]</a></sup>。</p>
 
 <h4>⑤ Declarative Attention：让模型自己声明读哪段 KV（2026.09）</h4>
-<p>零训练、纯提示协议：模型在思维链里用 <code class="inl">&lt;global&gt;/&lt;focus&gt;/&lt;local&gt;</code> 标签<b>声明</b>自己的注意力范围，推理引擎（vLLM）像解析工具调用一样解析标签、重写 KV 块表，让 FlashAttention 内核直接跳过被掩块——"KV 是数据库，模型来发查询"的具象化；由此提出<b>可逆上下文压缩</b>（只掩不删、可恢复）。<b>收益</b>：Gemma-4-31B 平均注意 token <b>−52.0%</b>，精度仅降 1.27 点；roofline 估计 B200 解码墙钟降到 0.71×<sup class="c"><a href="#ref-83">[83]</a></sup>。</p>
+<p>零训练、纯提示协议：模型在思维链里用 <code class="inl">&lt;global&gt;/&lt;focus&gt;/&lt;local&gt;</code> 标签<b>声明</b>自己的注意力范围，推理引擎（vLLM）像解析工具调用一样解析标签、重写 KV 块表，让 FlashAttention 内核直接跳过被掩块，把"KV 是数据库，模型来发查询"变成了现实；由此提出<b>可逆上下文压缩</b>（只掩不删、可恢复）。<b>收益</b>：Gemma-4-31B 平均注意 token <b>−52.0%</b>，精度仅降 1.27 点；roofline 估计 B200 解码墙钟降到 0.71×<sup class="c"><a href="#ref-83">[83]</a></sup>。</p>
 
-<div class="box tip"><b class="t">2026 秋的三个信号</b>① <b>重要性打分可能被高估</b>（Random Attention）——驱逐研究的评测方法需要重新设计；② <b>KV 研究从"各自为战"走向统一理论</b>（Memory Wall 的 roofline 框架 + 联合优化目标）；③ <b>模型与缓存的交互成为新界面</b>（Declarative Attention、CommitKV 的事务语义）——"面向 Agent 的缓存语义"正在成型。</div>
+<div class="box tip"><b class="t">2026 秋的三个信号</b>① <b>重要性打分可能被高估</b>（Random Attention），驱逐研究的评测方法需要重新设计；② <b>KV 研究从"各自为战"走向统一理论</b>（Memory Wall 的 roofline 框架 + 联合优化目标）；③ <b>模型与缓存的交互成为新界面</b>（Declarative Attention、CommitKV 的事务语义），"面向 Agent 的缓存语义"正在成型。</div>
 
 <div class="box tip"><b class="t">2026 年的一条主线判断</b>如果 2023 年的关键词是"分页"，2024 年是"复用与压缩"，2025 年是"分层与混合"，那么 2026 年的关键词是<b>"以 KV 为中心的算力经济学"</b>：模型结构（MLA/稀疏/混合）决定 KV 的"产量"，缓存系统（Mooncake/LMCache/Dynamo）决定 KV 的"周转率"，而 API 计费（写贵读廉）把这一切翻译成价格信号反馈给应用开发者。学界与业界的努力正在这三层之间打通接口。</div>
 
@@ -1063,7 +1063,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </div>
 
 <h4>② Lachesis（SNU/KAIST/UIUC，2026-10-06）：按"数据活多久"决定放哪层</h4>
-<p>高带宽闪存（HBF）容量约为 HBM 一个数量级、读带宽同级，但<b>写入寿命有限</b>。Lachesis 指出 Agent KV 的生命周期由 harness 决定且大多可在写入前知晓（reasoning 段 66–83% 的写入只活一轮；lead-agent 段寿命为 sub-agent 的 4.0–6.1×），于是沿时间/结构/worker 三条轴预测寿命、在写入前决定 HBM 或 HBF。<b>收益</b>：HBF 寿命较 HBM-first 延长 1.19–3.13×（紧 SLO 24×7 满载仍超 5 年保修），HBM 吸收 8.2–19.5× 写入量<sup class="c"><a href="#ref-86">[86]</a></sup>。同期的 <b>HBF 系统表征</b>（UC Berkeley + FuriosaAI）给出 HBM–HBF–host 三级层级与缓冲式缓存感知调度：相对纯 HBM 完成时间 −36.1–87.7%，调度使 HBF 预估写入寿命从 1.21 年延至 14.82 年<sup class="c"><a href="#ref-87">[87]</a></sup>——§11 方向六"存储硬件入场"落到了具体介质。</p>
+<p>高带宽闪存（HBF）容量约为 HBM 一个数量级、读带宽同级，但<b>写入寿命有限</b>。Lachesis 指出 Agent KV 的生命周期由 harness 决定且大多可在写入前知晓（reasoning 段 66–83% 的写入只活一轮；lead-agent 段寿命为 sub-agent 的 4.0–6.1×），于是沿时间/结构/worker 三条轴预测寿命、在写入前决定 HBM 或 HBF。<b>收益</b>：HBF 寿命较 HBM-first 延长 1.19–3.13×（紧 SLO 24×7 满载仍超 5 年保修），HBM 吸收 8.2–19.5× 写入量<sup class="c"><a href="#ref-86">[86]</a></sup>。同期的 <b>HBF 系统表征</b>（UC Berkeley + FuriosaAI）给出 HBM–HBF–host 三级层级与缓冲式缓存感知调度：相对纯 HBM 完成时间 −36.1–87.7%，调度使 HBF 预估写入寿命从 1.21 年延至 14.82 年<sup class="c"><a href="#ref-87">[87]</a></sup>。§11 方向六"存储硬件入场"落到了具体介质。</p>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/lachesis-fig1.svg" loading="lazy" alt="左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
@@ -1071,37 +1071,37 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </figure>
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/gandalf-fig1.svg" loading="lazy" alt="缓存命中率与 SSD 写入寿命的权衡散点及 Gandalf 的帕累托边界" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.30791）</b> · 按历史访问模式做 KV 准入时，命中率与 SSD 写入寿命构成权衡（重负载把寿命从“年”打到“月”）；Gandalf 按注意力类型准入——全注意力 KV 优先入 SSD——在几乎不损命中率的前提下把寿命拉长 7.3×，与 Lachesis 构成“存储介质寿命”双联。（版权归原作者，引用仅作技术说明）</figcaption>
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.30791）</b> · 按历史访问模式做 KV 准入时，命中率与 SSD 写入寿命构成权衡（重负载把寿命从"年"打到"月"）；Gandalf 按注意力类型准入：全注意力 KV 优先入 SSD，在几乎不损命中率的前提下把寿命拉长 7.3×，与 Lachesis 构成"存储介质寿命"双联。（版权归原作者，引用仅作技术说明）</figcaption>
 </figure>
 
 
 
 <h4>③ LORE-KV（2026-10-06）：驱逐该用"未来的 query"打分</h4>
-<p>对 Random Attention（§10.3①）的正面回应：驱逐发生在未来 query 未知时——与其问"读 prompt 时什么重要"，不如<b>采样 M 条短自回归续写作为"未来轨迹"</b>，按投影 leave-one-out 注意力输出删除代价打分、按轨迹可靠性加权。等精度下缓存效率 1.50–1.63×（128K 领先 AnDPro 达 +11.65 点）；代价是一次性压缩开销 1.46–2.77× 墙钟<sup class="c"><a href="#ref-88">[88]</a></sup>。问题不在"要不要打分"，而在"用哪组 query 打分"。</p>
+<p>对 Random Attention（§10.3①）的正面回应：驱逐发生在未来 query 未知时。与其问"读 prompt 时什么重要"，不如<b>采样 M 条短自回归续写作为"未来轨迹"</b>，按投影 leave-one-out 注意力输出删除代价打分、按轨迹可靠性加权。等精度下缓存效率 1.50–1.63×（128K 领先 AnDPro 达 +11.65 点）；代价是一次性压缩开销 1.46–2.77× 墙钟<sup class="c"><a href="#ref-88">[88]</a></sup>。问题不在"要不要打分"，而在"用哪组 query 打分"。</p>
 
 <h4>④ 商业化：Tensormesh Platform（LMCache 母公司，2026-10-14）</h4>
-<p>LMCache 团队（CEO 为共同作者 Junchen Jiang，累计融资 $28.5M，投资方含 NVentures / AMD Ventures / CoreWeave）推出首个企业级 KV 缓存管理平台：多级缓存（HBM/CPU/存储）、前缀与非前缀缓存（CacheBlend）、P2P KV 传输、缓存全生命周期控制，vLLM 与 NVIDIA Dynamo 已验证——"KV 是数据"完成<b>开源 → 商业化</b>闭环<sup class="c"><a href="#ref-89">[89]</a></sup>。窗口内另见 Kioxia 的 KV-Repurpose 非前缀复用测试床（arXiv:2610.13060）与 Apple 的 KV-Kaizen（arXiv:2609.37988）：存储厂商与端侧厂商相继入场。</p>
+<p>LMCache 团队（CEO 为共同作者 Junchen Jiang，累计融资 $28.5M，投资方含 NVentures / AMD Ventures / CoreWeave）推出首个企业级 KV 缓存管理平台：多级缓存（HBM/CPU/存储）、前缀与非前缀缓存（CacheBlend）、P2P KV 传输、缓存全生命周期控制，vLLM 与 NVIDIA Dynamo 已验证，"KV 是数据"完成了<b>开源 → 商业化</b>闭环<sup class="c"><a href="#ref-89">[89]</a></sup>。窗口内另见 Kioxia 的 KV-Repurpose 非前缀复用测试床（arXiv:2610.13060）与 Apple 的 KV-Kaizen（arXiv:2609.37988）：存储厂商与端侧厂商相继入场。</p>
 
 <!-- ================================================================ -->
 <h4>① 前缀缓存上互联网：KVCompass（10-16，UC Santa Cruz）</h4>
-<p>当 provider 在多个地理集群部署同一模型时，KV 复用收益此前被锁死在单集群内。KVCompass 提出<b>发现平面（discovery plane）</b>：跨地理集群共享前缀缓存（arXiv:2610.24179）——前缀复用从"跨机器"升级到"互联网尺度"，也为 §5.3 的缓存定价提供了跨区域基础。</p>
+<p>当 provider 在多个地理集群部署同一模型时，KV 复用收益此前被锁死在单集群内。KVCompass 提出<b>发现平面（discovery plane）</b>：跨地理集群共享前缀缓存（arXiv:2610.24179），前缀复用从"跨机器"升级到"互联网尺度"，也为 §5.3 的缓存定价提供了跨区域基础。</p>
 
 <h4>② Agent 负载的 KV 常驻实测（10-16，IISc + Microsoft M365 Research）与缓存工程（10-20，清华）</h4>
-<p>首个<b>生产级 Agent 负载</b>的 KV 常驻（residency）行为刻画（arXiv:2610.22863）：多轮长轨迹下哪些前缀真正被复用、常驻多久——为 Dynamo 的"会话感知"路线补上实证地基。同期清华提出 <b>Cache Engineering for Agents</b>（arXiv:2610.28577）：把 Agent 长轨迹的 KV I/O 与存储当作独立的缓存工程问题系统化。两者共同指向本节判断的落点：<b>面向 Agent 的缓存语义</b>（会话、工具调用、多轮复用）正成为一等研究对象。</p>
+<p>首个<b>生产级 Agent 负载</b>的 KV 常驻（residency）行为刻画（arXiv:2610.22863）：多轮长轨迹下哪些前缀真正被复用、常驻多久，为 Dynamo 的"会话感知"路线补上实证地基。同期清华提出 <b>Cache Engineering for Agents</b>（arXiv:2610.28577）：把 Agent 长轨迹的 KV I/O 与存储当作独立的缓存工程问题系统化。两者共同指向本节判断的落点：<b>面向 Agent 的缓存语义</b>（会话、工具调用、多轮复用）正成为一等研究对象。</p>
 
 <h4>③ 低比特 KV 成为出厂默认（10-18/19，vLLM / SGLang）</h4>
 <p>vLLM v0.32.0：NVFP4 KV cache 从 Blackwell 铺满到 SM8x/SM12x/SM90（含 XQA decode），并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3–5.5%，TTFT 代价 7–11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）。SGLang v0.5.22：FP8 KV 融合进 prefix-valid commit kernel（B200 上该 kernel 2.99×）。§6.3 的"自适应比特"愿景之前，工程界先把<b>统一低比特</b>做成了默认值。</p>
 
 <h4>④ 存储/传输生态与多模态（10-11 – 10-21）</h4>
-<p><b>Mooncake</b> 主线合入 KV 跨 TP/PP/host 布局的 reshard 重用规划（#4762，跨并行度布局直接复用而不重算）、自适应 RDMA 拥塞控制（#4197）、Intel XPU GPUDirect dma-buf RDMA（#4378）与 Store 多租户配额（#4809）——KV 池向"跨并行度、跨硬件、多租户"演进。<b>LMCache v0.5.6</b>（10-14）：修复 MP 模式 pickle IPC 的 RCE（安全编号待复核）、admin 端口收敛，新增 SGLang MP 统一 radix cache、原生 NIXL、3FS L2、Kafka 缓存事件流与 Multi-L1。<b>TempoKV</b>（上交+阿里，arXiv:2610.15324，19 票）面向自回归视频扩散做预测式 KV 量化——§6.3"多模态 KV 量化刚起步"的最新例证。另：SGLang 修复了混合线性模型在"投机解码 + 结构化输出"同开时 Mamba 状态恢复错误（Baseten 发现）——混合架构的 KV/状态管理仍是大意不得的深水区。</p>
+<p><b>Mooncake</b> 主线合入 KV 跨 TP/PP/host 布局的 reshard 重用规划（#4762，跨并行度布局直接复用而不重算）、自适应 RDMA 拥塞控制（#4197）、Intel XPU GPUDirect dma-buf RDMA（#4378）与 Store 多租户配额（#4809），KV 池正朝"跨并行度、跨硬件、多租户"演进。<b>LMCache v0.5.6</b>（10-14）：修复 MP 模式 pickle IPC 的 RCE（安全编号待复核）、admin 端口收敛，新增 SGLang MP 统一 radix cache、原生 NIXL、3FS L2、Kafka 缓存事件流与 Multi-L1。<b>TempoKV</b>（上交+阿里，arXiv:2610.15324，19 票）面向自回归视频扩散做预测式 KV 量化，是 §6.3"多模态 KV 量化刚起步"的最新例证。另：SGLang 修复了混合线性模型在"投机解码 + 结构化输出"同开时 Mamba 状态恢复错误（Baseten 发现）。混合架构的 KV/状态管理仍是大意不得的深水区。</p>
 
 <h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
 <ul>
 <li><b>KVStream</b>（Argonne+RIT+IIT，10-22）：分层 KV 聚合的带宽调度，检索达到带宽界 95%，比 LMCache 高 1.49×、突发负载 TTFT −6.1×<sup class="c"><a href="#ref-93">[93]</a></sup>。</li>
 <li><b>GLM-5.3 破 1M KV 墙</b>（vLLM×Z.ai，10-23）：1M 上下文的 FP8 KV 需 53.4GiB，而单张 H200 权重外仅剩 15GiB；组合 PCP/DCP 上下文并行（DCP 把 KV 轮转切到 8 卡、每卡 6.7GiB）与 Hybrid HiSparse 稀疏注意力后，16×H200 吞吐 1.7–3.2×、TTFT 1.5–5.2s→0.8–0.9s<sup class="c"><a href="#ref-90">[90]</a></sup>。</li>
-<li><b>RAQ-MLA</b>（中科院自动化所+腾讯，10-24）：把 MLA 缓存（含 RoPE 键）整体量化到 ~2.5bit——latent 供 value、RoPE 键主导打分，按"角色"分别变换；推理/代码汇总指标损失 &lt;0.5pp，理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，不可泛化为所有长文任务无损，H20 上 decode kernel 1.38×<sup class="c"><a href="#ref-91">[91]</a></sup>。</li>
+<li><b>RAQ-MLA</b>（中科院自动化所+腾讯，10-24）：把 MLA 缓存（含 RoPE 键）整体量化到 ~2.5bit：latent 供 value、RoPE 键主导打分，按"角色"分别变换；推理/代码汇总指标损失 &lt;0.5pp，理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，不能据此说所有长文任务都无损，H20 上 decode kernel 1.38×<sup class="c"><a href="#ref-91">[91]</a></sup>。</li>
 <li><b>ZipFusion</b>（10-24）：无损 KV 解压不再单走一遍 kernel，而是以寄存器位运算融进注意力计算重建 value；H100 decode 比 FlashInfer 快 1.25×，同显存 8K 上下文吞吐 +26.3%<sup class="c"><a href="#ref-92">[92]</a></sup>。</li>
-<li><b>KV 跨请求泄露披露</b>（Cloudflare×SGLang，10-26）：P/D 分离下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 被后续请求读出——155 条响应泄漏他人 prompt 内容；修复落在 v0.5.21（Mooncake/NIXL 默认防护）与 v0.5.22（MORI 标记 ack），官方建议运营方升级 v0.5.22+<sup class="c"><a href="#ref-95">[95]</a></sup>。</li>
+<li><b>KV 跨请求泄露披露</b>（Cloudflare×SGLang，10-26）：P/D 分离下 KV 池容量小于上下文长度、失败请求的 KV 又被提前释放，残留 KV 被后续请求读出，155 条响应泄漏他人 prompt 内容；修复落在 v0.5.21（Mooncake/NIXL 默认防护）与 v0.5.22（MORI 标记 ack），官方建议运营方升级 v0.5.22+<sup class="c"><a href="#ref-95">[95]</a></sup>。</li>
 <li><b>偏置折进 Keys</b>（Kanwat，10-27）：把注意力偏置折进 K，不改 FlashAttention/vLLM 内核即可直接服务压缩缓存，14 组对照中 13 组与注意力矩阵方案无差<sup class="c"><a href="#ref-94">[94]</a></sup>。</li>
 </ul>
 
@@ -1214,10 +1214,8 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </div>
 
 <div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
-  <span id="busuanzi_container_site_pv" style="display:none">本站总访问 <span id="busuanzi_value_site_pv"></span> 次</span> ·
-  <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数（GitHub 主页与站点共用同一计数器）"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:middle;height:20px"></a>
 </div>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 <!-- chapter-reader:start -->
 <style id="chapter-reader-style">

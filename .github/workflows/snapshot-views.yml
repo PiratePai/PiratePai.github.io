@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Snapshot busuanzi counters
+      - name: Snapshot komarev profile-views counter
         run: node scripts/snapshot-views.mjs
       - name: Commit and push if changed
         run: |

@@ -12,10 +12,10 @@
 
 | 位置 | 内容 |
 |---|---|
-| `index.html` | 首页：推理效率栈 L1–L6 分层卡 + "延伸·训练与架构"卡片网格 + 浏览量曲线（views.json + 不蒜子） |
+| `index.html` | 首页：推理效率栈 L1–L6 分层卡 + "延伸·训练与架构"卡片网格 + 浏览量曲线（views.json + komarev profile views） |
 | `posts/*.html` | 文章正文，全部为**自包含 HTML**（无外部 CSS/JS 依赖，暗色主题，移动端适配） |
 | `posts/img/` | 论文原图/手绘图 SVG（部分文章图片以内嵌 base64 或相对路径引用） |
-| `views.json` / `scripts/` | 每日 04:30 自动快照的 PV/UV 数据与脚本 |
+| `views.json` / `scripts/` | 每日 04:30 自动快照的 profile views 数据与脚本 |
 | `AGENTS.md` | 本文件 |
 
 **发布流程（github.com:443 不通时用 API 通道）**：
@@ -43,7 +43,7 @@
   h2#s2+ 发展历程/深拆 按"题目"归队，不按论文逐篇复述
   …每章末尾 .summary3 "本章小结（记住三句话）" 三条 ol
   h2#refs 参考文献    ol.refs，尾部加小字"注："说明信源口径与快照日期
-页脚 不蒜子计数 + busuanzi script
+页脚 komarev profile views 徽章
 ```
 
 **命名**：文件名英文小写连字符（如 `realtime-world-models-2026.html`）；
