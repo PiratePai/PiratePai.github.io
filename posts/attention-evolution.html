@@ -112,6 +112,10 @@
   tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 </style>
 
+<style>
+#reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
+#reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
+</style>
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -146,6 +150,16 @@
 </nav>
 
 <!-- ============================================================ -->
+
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 分开“算什么”“存什么”“怎样执行”</b><p><a href="#s2">Q/K/V</a> → <a href="#s3">KV 头共享</a> → <a href="#s4">学习压缩</a> → <a href="#s5">精确 IO 优化</a> → <a href="#s6">稀疏连接</a> → <a href="#s7">核化与固定状态</a> → <a href="#s8">状态更新</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>Q 是当前查询、K 是检索标签、V 是被读取的内容。RoPE 对 Q/K 做位置相关旋转，改变二者内积的相对位置关系；V 保持内容语义。MLA 改参数化与缓存；FlashAttention 精确计算相同 softmax；稀疏/核化/递推则改变连接或算子，不能把三类都叫同一种“线性化”。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>查询头 h=32、KV 头 g=8 时，GQA 的 KV 数据为 MHA 的 8/32=1/4；MQA 的 g=1 才是 1/32。固定状态 S 的维度不会随长度增加，但数值尺度和关联干扰可能增加，二者与缓存容量增长不同。</div>
+<h3>用同一组问题比较路线</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>局部窗口</td><td>Mistral 用局部连接限制每层可读历史</td><td>跨层传播不等于任意远距离精确检索</td></tr><tr><td>核近似</td><td>Performer 等近似 softmax 核；ELU 线性注意力直接替换核</td><td>要检查近似误差、归一化与状态容量</td></tr><tr><td>精确分布式</td><td>Ring Attention 跨设备分块计算全局注意力</td><td>节省单卡容量，不消除二次总计算</td></tr></tbody></table></div>
+<p><b>值得做的研究：</b>同训练 token、参数与推理 FLOPs 下，混合比例怎样影响检索、推理、稳定性和实际时延？不能由若干模型都选 3:1 推出普遍最优。WY/Gram/预条件与复杂度类属于进阶材料，可最后阅读。</p>
+<details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Albert Q. Jiang  et al.</b> <i>Mistral 7B</i>（Mistral 7B）；arXiv:2310.06825，v1 2023-10-10。<a href="https://arxiv.org/abs/2310.06825">原始论文与版本记录</a></li><li><b>Krzysztof Choromanski  et al.</b> <i>Rethinking Attention with Performers</i>（Performer）；arXiv:2009.14794，v1 2020-09-30。<a href="https://arxiv.org/abs/2009.14794">原始论文与版本记录</a></li><li><b>Hao Liu  et al.</b> <i>Ring Attention with Blockwise Transformers for Near-Infinite Context</i>（Ring Attention）；arXiv:2310.01889，v1 2023-10-03。<a href="https://arxiv.org/abs/2310.01889">原始论文与版本记录</a></li><li><b>MiniMax : Aili Chen  et al.</b> <i>MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention</i>（MiniMax-M1（与 MiniMax-01 区分））；arXiv:2506.13585，v1 2025-06-16。<a href="https://arxiv.org/abs/2506.13585">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
+</section>
 <h2 id="s0"><span class="no">0</span>总览：一张时间线看懂注意力结构的十年演进</h2>
 
 <p>「注意力机制」的发展史，本质上是一部<b>与两个物理约束作斗争</b>的历史：注意力矩阵带来的
@@ -158,10 +172,10 @@ MHA、MQA、GQA、MLA、FlashAttention、稀疏注意力、线性注意力、Mam
   <li><span class="yr">2019.04</span><b>Sparse Transformer</b>：O(n√n) 稀疏分解，长序列生成首次可行 <span class="cite">[Child et al., 2019]</span></li>
   <li><span class="yr">2019.11</span><b>MQA</b>：所有查询头共享 1 个 KV 头，解码快 ~12 倍，KV 缓存除以头数 <span class="cite">[Shazeer, 2019]</span></li>
   <li><span class="yr">2020</span><b>稀疏/低秩/核化三板斧</b>：Longformer、BigBird、Linformer、Reformer、Performer；<b>线性注意力</b>诞生：softmax→φ(q)φ(k)ᵀ，注意力即 RNN <span class="cite">[Katharopoulos et al., 2020]</span></li>
-  <li><span class="yr">2022.05</span><b>FlashAttention</b>：不改数学，用 IO 感知的分块 kernel 让精确注意力快 2–4 倍、省 10 倍显存 <span class="cite">[Dao et al., 2022]</span></li>
+  <li><span class="yr">2022.05</span><b>FlashAttention</b>：不改数学，用 IO 感知的分块 kernel 让精确注意力减少中间矩阵读写与存储；加速及显存收益依长度、硬件、基线实现而变 <span class="cite">[Dao et al., 2022]</span></li>
   <li><span class="yr">2023</span><b>GQA</b>（MHA↔MQA 折中，Llama 2/3 采用）；<b>PagedAttention/vLLM</b>（操作系统式 KV 显存管理）；<b>RetNet</b>（并行/分块/递推三形态）；<b>Mamba</b>（选择性 SSM，推理 5× 吞吐）；<b>StreamingLLM</b>（注意力汇聚头）</li>
-  <li><span class="yr">2024</span><b>MLA</b>（DeepSeek-V2：KV 低秩压缩 93%，解码吞吐 5.76×）；<b>Mamba-2/SSD</b>（SSM 与线性注意力统一理论）；<b>GLA</b>、<b>DeltaNet 并行化</b>、<b>Gated DeltaNet</b>；混合架构 <b>Jamba/Griffin</b> 上线；<b>SnapKV/Quest/KIVI</b> 等 KV 压缩爆发</li>
-  <li><span class="yr">2025</span><b>可训练稀疏注意力</b>：DeepSeek <b>NSA</b>、月之暗面 <b>MoBA</b>（已部署于 Kimi）、<b>SeerAttention</b>；<b>Qwen3-Next</b>（Gated DeltaNet + 门控注意力 3:1 混合，80B-A3B）；<b>Kimi Linear / KDA</b>（3:1 混合，首次全面超越全注意力）；<b>MiniMax-M1</b> 闪电注意力；<b>Llama 4 iRoPE</b>、<b>Gemma 3</b> 局部:全局 5:1；DeepSeek-V3.2-Exp 落地 <b>DSA</b> 稀疏注意力（O(L²)→O(Lk)）</li>
+  <li><span class="yr">2024</span><b>MLA</b>（DeepSeek-V2 报告整模型相对 DeepSeek 67B：KV −93.3%、最大生成吞吐 5.76×；非 MLA 独立消融）；<b>Mamba-2/SSD</b>（SSM 与线性注意力统一理论）；<b>GLA</b>、<b>DeltaNet 并行化</b>、<b>Gated DeltaNet</b>；混合架构 <b>Jamba/Griffin</b> 上线；<b>SnapKV/Quest/KIVI</b> 等 KV 压缩爆发</li>
+  <li><span class="yr">2025</span><b>可训练稀疏注意力</b>：DeepSeek <b>NSA</b>、月之暗面 <b>MoBA</b>（已部署于 Kimi）、<b>SeerAttention</b>；<b>Qwen3-Next</b>（Gated DeltaNet + 门控注意力 3:1 混合，80B-A3B）；<b>Kimi Linear / KDA</b>（3:1 混合，在论文所评测的模型、训练预算与任务下优于所选全注意力基线）；<b>MiniMax-M1</b> 闪电注意力；<b>Llama 4 iRoPE</b>、<b>Gemma 3</b> 局部:全局 5:1；DeepSeek-V3.2-Exp 落地 <b>DSA</b> 稀疏注意力（O(L²)→O(Lk)）</li>
   <li><span class="yr">2026</span><b>Mamba-3</b>（复数态 SSM + MIMO）、<b>Gated DeltaNet-2</b>（擦除/写入门解耦）、<b>预条件 DeltaNet</b>（二阶曲率）、<b>Parallax</b>（局部线性注意力 + Muon 协同）、<b>FlashAttention-4</b>（Blackwell）；
   <b>DeepSeek-V4</b> 换装 CSA+HCA 压缩稀疏注意力（1M 上下文 FLOPs 仅 27%）、<b>Kimi K3</b>（2.8T，KDA+注意力残差）、<b>GLM-5</b>（MLA+DSA）；而 <b>MiniMax-M2.5</b> 逆势回归全注意力 MHA <span class="tag hot">最新</span></li>
 </ul>
@@ -174,7 +188,7 @@ MHA、MQA、GQA、MLA、FlashAttention、稀疏注意力、线性注意力、Mam
 </div>
 
 <!-- ============================================================ -->
-<div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -193,7 +207,7 @@ MHA、MQA、GQA、MLA、FlashAttention、稀疏注意力、线性注意力、Mam
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>全层 MSA 旗舰</b><span class="hl-date">10-22 · MiniMax</span></div><p>M3.1-Flash（428B-A23B、1M）把 MSA 块稀疏铺满全部注意力层：128-token 块 + NVFP4 KV QAT，GB300 单用户 418.9 tok/s。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>2.3B token 转混合线性</b><span class="hl-date">10-24 · 清华 THUNLP</span></div><p>HypeNet/HALO 入选 EMNLP 2026 主会：不足预训练 0.01% 的 token 把 Qwen3 全系转混合线性，HyPE 位置编码，已开源。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>SWA 对线性的公开论战</b><span class="hl-date">10-17 · NVIDIA/Meta</span></div><p>「三家前沿实验室生产用 KDA 跑 1M+ RL」——Pavlichenko 与 Hatamizadeh 隔空交锋，Beyer 看好 SWA、Catanzaro 转发。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>46+16 混合注意力</b><span class="hl-date">10-15 · Meta</span></div><p>Muse Spark Open：62 层中 46 层 SWA（2048/RoPE）+16 层全局 NoPE、GQA 128/16，KV 缩 3.7×、1M 上下文。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div>
+<div class="hl-card"><div class="hl-meta"><b>46+16 混合注意力</b><span class="hl-date">10-15 · Meta</span></div><p>Muse Spark Open：62 层中 46 层 SWA（2048/RoPE）+16 层全局 NoPE、GQA 128/16，KV 缩 3.7×、1M 上下文。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>前史：注意力是怎么被发明的（2014–2017）</h2>
 
@@ -548,12 +562,12 @@ root.querySelector('.ppx-temp').addEventListener('input',function(){temp=+this.v
 <h3>4.1 思路：KV 缓存的"内容"其实是低秩的</h3>
 <p>GQA 靠"少存几个头"省显存，是<b>拍脑袋砍结构</b>；DeepSeek-V2 提出的 <b>MLA（Multi-head Latent Attention）</b>
 则问了一个更本质的问题：真的有必要为每个头存完整的 K、V 吗？
-答案是否定的——K 和 V 都是同一个输入 x 的线性投影，它们天然近似居住在一个低维子空间里。
+答案是否定的——K 和 V 都是同一个输入 x 的线性投影，模型可通过训练学习低秩约束下的联合表示；仅由输入相同不能推出 K/V 必然近似低秩。
 MLA 干脆<b>只缓存一个低维"潜向量"</b>，要用时再投影回各头<span class="cite">[DeepSeek-AI, arXiv:2405.04434, 2024-05]</span>：</p>
 
 <div class="quote">
-原文："MLA guarantees efficient inference through significantly compressing the Key-Value (KV) cache into a latent vector… saves 42.5% of training costs, reduces the KV cache by 93.3%, and boosts the maximum generation throughput to 5.76 times."<br>
-译：MLA 通过把 KV 缓存显著压缩为一个潜在向量来保证高效推理……节省 42.5% 训练成本，KV 缓存减少 93.3%，最大生成吞吐提升至 5.76 倍。
+要点转述（非拼接原文）：MLA 压缩潜变量；摘要中的成本、KV 与吞吐数字比较的是 DeepSeek-V2 整模型与 DeepSeek 67B，非单独替换注意力的收益。<br>
+译：MLA 缓存联合压缩的潜变量。42.5% / 93.3% / 5.76× 是 DeepSeek-V2 整模型相对 DeepSeek 67B 的报告结果，含 MoE 等结构变化；不能作为 MLA 单独收益。
 </div>
 
 <p>具体分两步（图示为单头，实际多头共享同一潜向量）：</p>
@@ -565,7 +579,7 @@ MLA 干脆<b>只缓存一个低维"潜向量"</b>，要用时再投影回各头<
 
 <p>这样每 token 每层只需缓存 576 维（512 潜空间 + 64 RoPE 键），
 而 64 头 MHA 需要 2×64×128 = 16384 个元素——<b>元素数约为 1/28</b>；
-论文口径则是对整个模型与 MHA/GQA 基线比较："KV 缓存减少 93.3%、等效于只带 2.25 个 KV 组的 GQA"。
+93.3% 是 DeepSeek-V2 整模型相对 DeepSeek 67B 的报告结果；与等效 GQA 组数的结构计算是另一种比较："KV 缓存减少 93.3%、等效于只带 2.25 个 KV 组的 GQA"。
 上表实算：DeepSeek-V3（61 层）每 token 约 70 KB（MLA 每层只缓存单一共享潜向量 576 元素，不再有独立的 K、V 两份），约为 Llama-3-70B GQA（320 KB）的 22%，却能支撑 128K 上下文。</p>
 
 <h3>4.2 两个关键工程技巧</h3>
@@ -573,7 +587,7 @@ MLA 干脆<b>只缓存一个低维"潜向量"</b>，要用时再投影回各头<
 MLA 的妙招是把 W<sup>UK</sup>/W<sup>UV</sup> 反向吸收进 W<sub>Q</sub> 和 W<sub>O</sub>：
 因为 k<sub>t,i</sub><sup>⊤</sup>q<sub>t,i</sub> = (W<sup>UK</sup><sub>i</sub>c<sub>t</sub>)<sup>⊤</sup>q = c<sub>t</sub><sup>⊤</sup>(W<sup>UK⊤</sup><sub>i</sub>q)，
 解码时可以直接用"吸收后的查询"对<b>潜向量</b>打分、再用潜向量聚合，<b>全程不物化 K/V</b>——训练时用朴素形式（并行高效），解码时用吸收形式（缓存最小）。</p>
-<p><b>(2) 解耦 RoPE（decoupled RoPE）。</b>位置编码 RoPE 是在 K、V 上做旋转，而旋转会破坏"先压缩再升维"的线性结构（不同头的旋转不同，无法提前压进共享潜向量）。
+<p><b>(2) 解耦 RoPE（decoupled RoPE）。</b>位置编码 RoPE 是在 Q、K 上做旋转（标准 RoPE 不旋转 V），而旋转会破坏"先压缩再升维"的线性结构（不同头的旋转不同，无法提前压进共享潜向量）。
 MLA 的处理：把键拆成"内容部分"（低秩压缩，不带位置）和"位置部分"（一个所有头共享的 64 维 k<sup>R</sup>，带 RoPE），
 两部分分数相加。代价是缓存多 64 维（512+64=576）。</p>
 
@@ -652,7 +666,7 @@ Kimi K2（arXiv:2507.20534, 2025-07）也采用 MLA，说明 MLA 已成为国产
 <tr><td>FlashAttention-1</td><td>2022-05</td><td>IO 感知 tiling + 在线 softmax + 反向重计算</td><td>省 10× 显存；GPT-2 训练 3×；BERT-large 比 MLPerf 纪录快 15%</td></tr>
 <tr><td>FlashAttention-2</td><td>2023-07<br><span class="cite">[Dao, arXiv:2307.08691]</span></td><td>减少非矩阵乘 FLOPs、序列维并行、warp 分工</td><td>比 FA1 快 ~2×，A100 上 225 TFLOPs/s（72% 利用率），"reaching 50-73% of the theoretical maximum FLOPs/s on A100"</td></tr>
 <tr><td>FlashAttention-3</td><td>2024-07<br><span class="cite">[Shah et al., arXiv:2407.08608]</span></td><td>Hopper 架构：warp 特化+异步流水（WGMMA）、FP8</td><td>"achieves speedup on H100 GPUs by 1.5-2.0× with FP16 reaching up to 740 TFLOPs/s (75% utilization), and with FP8 reaching close to 1.2 PFLOPs/s"</td></tr>
-<tr><td>FlashAttention-4</td><td>2025-08 官方博客预告<br><span class="cite">[Zadouri et al., FlashAttention-4 Blog]（截至 2026-10 未见正式论文，本行数字为博客口径）</span></td><td>首个纯 Python（CuTeDSL）实现；面向 Blackwell 的全异步 MMA 流水、软件模拟 exp</td><td>B200 BF16 上比 cuDNN 9.13 最高快 1.3×、比 Triton 快 2.7×，峰值约 1613 TFLOPs/s（71% 利用率）</td></tr>
+<tr><td>FlashAttention-4</td><td>2025-08 官方博客预告<br><span class="cite">[Zadouri et al., FlashAttention-4 Blog]（已有 arXiv:2603.05451，2026-03-05 首发；预印本公开不等于同行评审录用，本行博客数据需与论文实验设置分开）</span></td><td>首个纯 Python（CuTeDSL）实现；面向 Blackwell 的全异步 MMA 流水、软件模拟 exp</td><td>B200 BF16 上比 cuDNN 9.13 最高快 1.3×、比 Triton 快 2.7×，峰值约 1613 TFLOPs/s（71% 利用率）</td></tr>
 </table>
 <div class="tbl-cap">FlashAttention 系列时间线。FA3 引文译：在 H100 上 FP16 提速 1.5–2.0×、高达 740 TFLOPs/s（75% 利用率），FP8 接近 1.2 PFLOPs/s。</div>
 
@@ -660,7 +674,7 @@ Kimi K2（arXiv:2507.20534, 2025-07）也采用 MLA，说明 MLA 已成为国产
 <p>注意力算得再快，KV 缓存的管理还是粗放的"按最大长度预留连续显存"。vLLM 借用操作系统<b>虚拟内存分页</b>思想：
 KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注意力内核支持在非连续显存上计算<span class="cite">[Kwon et al., SOSP 2023, arXiv:2309.06180]</span>：</p>
 <div class="quote">
-原文："our profiling results… show that only 20.4% - 38.2% of the KV cache memory is used to store the actual token states in the existing systems."（即既有系统浪费约 60–80% KV 显存；vLLM 将浪费压到 4% 以内，服务吞吐提升 2–4×）<br>
+原文："our profiling results… show that only 20.4% - 38.2% of the KV cache memory is used to store the actual token states in the existing systems."（即既有系统浪费约 60–80% KV 显存；vLLM 将浪费压到 4% 以内，论文在相同延迟水平下相对 FasterTransformer/Orca 的服务吞吐提升 2–4×（2023 年评测配置））<br>
 译：我们的剖析结果显示，现有系统的 KV 缓存显存中只有 20.4%–38.2% 真正用于存储 token 状态。
 </div>
 <p>PyTorch 2.5 的 <b>FlexAttention</b>（2024）则把"允许研究者用几行 Python 定义注意力变体、自动编译成接近手写内核"变成现实，
@@ -724,7 +738,7 @@ KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注�
 <h3>7.1 核心技巧：用结合律交换乘法顺序</h3>
 <p>softmax 注意力 O(n²) 的根源是必须先算出完整的 n×n 打分矩阵。Katharopoulos 等人 2020 年的观察是：
 softmax(qᵀk) 本质是指数核，任何核都能写成特征映射的内积 <span class="f">k(x,y)=⟨φ(x),φ(y)⟩</span>；
-把 softmax 换成正定的特征映射后，<b>矩阵乘法的结合律</b>就救场了<span class="cite">[Katharopoulos et al., ICML 2020, arXiv:2006.16236；v1 原题 Linear Transformers Are Secretly Fast Weight Programmers，2020-10 v2 起改为现题]</span>：</p>
+将 softmax 核替换为非负特征映射内积（需配分母归一化）后，<b>矩阵乘法的结合律</b>就救场了<span class="cite">[Katharopoulos et al., ICML 2020, arXiv:2006.16236；题名为 Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention，v1 2020-06-29、v2 2020-06-30；Linear Transformers Are Secretly Fast Weight Programmers 是另一篇 2021 年工作]</span>：</p>
 
 <div class="formula">
 (φ(Q) φ(K)<sup>⊤</sup>) · V &nbsp;=&nbsp; φ(Q) · (φ(K)<sup>⊤</sup> V) &nbsp;&nbsp;&nbsp;
@@ -764,15 +778,15 @@ o<sub>t</sub> = φ(q<sub>t</sub>)<sup>⊤</sup> S<sub>t</sub> / (φ(q<sub>t</sub
     inter = q @ kv_shifted                          <span class="cm"># 跨块贡献: 走过去的历史</span>
     intra = ((q @ k<sup>†</sup>).tril()) @ v                       <span class="cm"># 块内贡献: 小的 C×C 注意力</span>
     <span class="kw">return</span> inter + intra                              <span class="cm"># 与逐步递推数学等价</span></pre>
-<p class="tbl-cap">†为按块重排后的张量，此处略去 rearrange 细节；完整代码见仓库。</p>
+<p class="tbl-cap">†为按块重排后的张量，此处略去 rearrange 细节；本节是省略形状变换的教学伪代码，展示未归一化内积累积；不能直接代替上一节含 φ 与 z 的完整核化注意力。可运行的完整对照见本文配套 scripts/verify-mechanisms.py。</p>
 
 <div class="box good">
 我们用 numpy 实际验证过两种形式的等价性（<code>attention_notes/verify.py</code>，
-B=2,T=128,H=4,K=16,V=32，φ=elu+1）：递推输出与并行输出最大误差 <b>6.8×10⁻¹³</b>——机器精度内完全一致。读者可以自己跑一遍建立直觉。
+B=2,T=128,H=4,K=16,V=32，φ=elu+1）：递推输出与并行输出最大误差 <b>6.8×10⁻¹³</b>——该本地实验在所列 dtype、形状及简化算子下接近数值精度；它不验证 softmax attention 等价，也不验证论文性能。完整核化形式还需特征映射、分母归一化及一致的因果掩码。
 </div>
 
 <h3>7.3 给线性注意力加"遗忘"：RetNet 与 GLA（2023）</h3>
-<p>朴素的 S 只加不减，记忆会无限膨胀、旧信息相互干扰。2023 年两个工作给出修复：</p>
+<p>朴素的 S 只加不减，状态维度固定，但数值尺度可能增大、旧信息可能相互干扰。2023 年两个工作给出修复：</p>
 <ul>
 <li><b>RetNet</b>（微软, arXiv:2307.08621, 2023-07）：状态乘以衰减因子 γ∈(0,1)，
 S<sub>n</sub> = γS<sub>n−1</sub> + K<sub>n</sub><sup>⊤</sup>V<sub>n</sub>。论文卖点是把"训练并行 / 推理 O(1) / 性能好"这个"不可能三角"一次全占：
@@ -823,7 +837,7 @@ RWKV-7（arXiv:2503.14456, 2025-03）则把状态转移做成动态演化的低�
 <h3>8.1 换一个目标函数：从"只写不擦"到"写前先擦"</h3>
 <p>Schlag 等人 2021 年的"Linear Transformers are Secretly Fast Weight Programmers"（ICML 2021, arXiv:2102.11174）
 给出了决定性的解释视角：线性注意力的状态更新 S<sub>t</sub> = S<sub>t−1</sub> + k<sub>t</sub>v<sub>t</sub><sup>⊤</sup>
-等价于对目标 L(S)=−⟨S<sup>⊤</sup>k<sub>t</sub>, v<sub>t</sub⟩ 做梯度上升——<b>只强化、不遗忘</b>，旧关联无限堆积；
+等价于对目标 L(S)=−⟨S<sup>⊤</sup>k<sub>t</sub>, v<sub>t</sub>⟩ 做梯度下降（等价于对正内积做梯度上升）——<b>只强化、不遗忘</b>，旧关联无限堆积；
 而如果换成<b>重建损失</b> L(S)=½‖S<sup>⊤</sup>k<sub>t</sub> − v<sub>t</sub>‖²，一步梯度下降会得到（Kimi Linear 论文 §2.2 的记号）：</p>
 
 <div class="formula">
@@ -863,8 +877,8 @@ S<sub>t</sub> = α<sub>t</sub>(I − β<sub>t</sub> k<sub>t</sub>k<sub>t</sub><s
 <h3>8.4 2025–2026：门控越来越细、越来越"二阶"</h3>
 <table>
 <tr><th>模型</th><th>时间 / 出处</th><th>状态更新（简式）</th><th>一句话改进</th></tr>
-<tr><td>线性注意力</td><td>2020</td><td>S = S + kv<sup>⊤</sup></td><td>只写不擦，记忆溢出</td></tr>
-<tr><td>RetNet / Mamba-2</td><td>2023 / 2024</td><td>S = α<sub>t</sub>S + kv<sup>⊤</sup></td><td>数据依赖的<b>标量</b>遗忘</td></tr>
+<tr><td>线性注意力</td><td>2020</td><td>S = S + kv<sup>⊤</sup></td><td>只写不擦，固定维度状态中的关联干扰可能增加</td></tr>
+<tr><td>RetNet / Mamba-2</td><td>2023 / 2024</td><td>S = α<sub>t</sub>S + kv<sup>⊤</sup></td><td>RetNet：各头固定衰减；Mamba-2：数据依赖的标量遗忘</td></tr>
 <tr><td>GLA</td><td>2024</td><td>S = Diag(α<sub>t</sub>)S + kv<sup>⊤</sup></td><td>遗忘升级为<b>逐通道</b></td></tr>
 <tr><td>DeltaNet</td><td>2021→2024 并行化</td><td>S = (I−βkk<sup>⊤</sup>)S + βkv<sup>⊤</sup></td><td>写前<b>定点擦除</b>（纠错）</td></tr>
 <tr><td>Gated DeltaNet</td><td>2024-12, ICLR 2025</td><td>S = α<sub>t</sub>(I−βkk<sup>⊤</sup>)S + βkv<sup>⊤</sup></td><td>遗忘 + 擦除双机制；被 Qwen3-Next 采用</td></tr>
@@ -915,11 +929,11 @@ Mamba-3 论文对这一趋势的概括可以当作本节的题眼<span class="ci
 <tr><th>模型 / 时间</th><th>组织</th><th>配比（线性 : 注意力）</th><th>线性层用什么</th><th>备注</th></tr>
 <tr><td>Griffin / RecurrentGemma（2024-02/04）<span class="cite">[De et al., arXiv:2402.19427]</span></td><td>DeepMind</td><td>约 2:1（递推:局部注意力）</td><td>RG-LRU（门控线性递推）</td><td>局部（滑窗）注意力即可，无需全局</td></tr>
 <tr><td>Jamba（2024-03）<span class="cite">[AI21, arXiv:2403.19887]</span></td><td>AI21</td><td>注意力:Mamba ≈ 1:7</td><td>Mamba</td><td>52B 总参 MoE，首批生产级混合大模型</td></tr>
-<tr><td>MiniMax-M1（2025-01）<span class="cite">[arXiv:2501.08313]</span></td><td>MiniMax</td><td>softmax:lightning ≈ 1:7</td><td>闪电注意力（Lightning/Transnormer 系）</td><td>456B-A45.9B，1M 上下文</td></tr>
+<tr><td>MiniMax-M1（2025-06-16）<span class="cite">[<a href="https://arxiv.org/abs/2506.13585">arXiv:2506.13585</a>]</span></td><td>MiniMax</td><td>softmax:lightning ≈ 1:7</td><td>Lightning Attention 混合架构</td><td>456B-A45.9B，1M 上下文；MiniMax-01 是另一份 2025-01 报告</td></tr>
 <tr><td>Hunyuan-TurboS（2025-05）<span class="cite">[arXiv:2505.15431]</span></td><td>腾讯</td><td>Mamba:注意力 ≈ 7:1（生产部署）</td><td>Mamba-2</td><td>混元旗舰线上服务</td></tr>
 <tr><td>Falcon-H1（2025-07）<span class="cite">[arXiv:2507.22448]</span></td><td>TII</td><td>层内并行（每层同时做注意力+SSM）</td><td>Mamba-2（层内混合）</td><td>高频基可近似 NoPE，利于长上下文</td></tr>
 <tr><td><b>Qwen3-Next</b>（2025-09-11）</td><td>阿里 Qwen</td><td><b>3:1</b>（Gated DeltaNet : 门控注意力），256K 上下文</td><td><b>Gated DeltaNet</b>（FLA 库内核）</td><td>80B-A3B；注意力层加输出门控、head dim 128→256、partial RoPE（前 25% 维）；官方："the model consistently outperforms any monolithic architecture"（译：稳定优于任何单一架构）</td></tr>
-<tr><td><b>Kimi Linear</b>（2025-10）<span class="cite">[arXiv:2510.26692]</span></td><td>月之暗面</td><td><b>3:1</b>（KDA : MLA）</td><td><b>KDA</b>（逐通道门控 Delta）</td><td>48B-A3B；全注意力层用 NoPE；公平对比下首次全面超越全注意力</td></tr>
+<tr><td><b>Kimi Linear</b>（2025-10）<span class="cite">[arXiv:2510.26692]</span></td><td>月之暗面</td><td><b>3:1</b>（KDA : MLA）</td><td><b>KDA</b>（逐通道门控 Delta）</td><td>48B-A3B；全注意力层用 NoPE；公平对比下在论文所评测的模型、训练预算与任务下优于所选全注意力基线</td></tr>
 <tr><td>Mamba-3 混合实验（2026-03）<span class="cite">[arXiv:2603.15569]</span></td><td>CMU/Princeton 等</td><td>5:1（线性:NoPE 注意力）</td><td>Mamba-3</td><td>混合设置下超过 Transformer 基线</td></tr>
 </table>
 <div class="tbl-cap">注意还有"注意力侧的混合"：Llama 4（2025-04）的 iRoPE 交错"局部滑窗层 + 无 RoPE 全局层"；
@@ -938,8 +952,8 @@ Gemma 3（2025-03）以 5:1 的局部:全局滑窗比例大幅削减 KV 缓存�
 
 <table>
 <tr><th>类别</th><th>代表工作（时间）</th><th>机制一句话 / 关键数字</th></tr>
-<tr><td rowspan="3"><b>结构压缩</b><br>（改模型）</td><td>MQA（2019）/ GQA（2023）</td><td>共享 KV 头：缓存 ÷ 头数 / ÷ 组数（见第 3 节）</td></tr>
-<tr><td>MLA（DeepSeek-V2, 2024-05）</td><td>低秩潜向量缓存，−93.3%，吞吐 5.76×（见第 4 节）</td></tr>
+<tr><td rowspan="3"><b>结构压缩</b><br>（改模型）</td><td>MQA（2019）/ GQA（2023）</td><td>共享 KV 头：设查询头数 h、KV 头数 g：MQA 缓存为 MHA 的 1/h，GQA 为 g/h（压缩 h/g 倍，见第 3 节）</td></tr>
+<tr><td>MLA（DeepSeek-V2, 2024-05）</td><td>低秩潜向量缓存；−93.3% / 5.76× 是 DeepSeek-V2 整模型相对 DeepSeek 67B 的报告结果，含 MoE 等变化，非 MLA 独立消融（见第 4 节）</td></tr>
 <tr><td>YOCO（2024-05, arXiv:2405.05254）</td><td>"You Only Cache Once"：KV 只在底层算一次、层间共享</td></tr>
 <tr><td rowspan="2"><b>量化</b></td><td>KIVI（ICML 2024, arXiv:2402.02750）</td><td>2-bit KV：K 按通道、V 按 token 分组量化 + 全精度近窗；
 "2.6× less peak memory… up to 4× larger batch size, bringing 2.35×∼3.47× throughput"（译：峰值显存省 2.6×……批大小最多 4×，吞吐 2.35–3.47×）</td></tr>
@@ -1000,7 +1014,59 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 <li><b>④ 位置编码全面精细化</b>：partial RoPE（Qwen3-Next 25%、GLM、DeepSeek-V4 末 64 维）、p-RoPE（Gemma 4）、NoPE 全局层（Llama 4、Kimi Linear、Mamba-3 混合）——注意力结构与位置编码正在耦合设计。</li>
 </ul>
 
-<h3>11.2 2026 年 6–10 月最新动态：稀疏注意力进入旗舰，"写侧稀疏"开辟新战场</h3>
+<h2 id="s12"><span class="no">12</span>未来发展方向</h2>
+
+<h3>方向一：推理优先（Inference-first）成为第一性设计原则</h3>
+<p>测试时计算（长思维链、agent 轨迹、RL 训练）让"解码"从模型的配角变成成本主角。Mamba-3 论文开篇即以此立论<span class="cite">[arXiv:2603.15569, 2026-03]</span>：
+"Scaling inference-time compute has emerged as an important driver of LLM performance, making inference efficiency a central focus of model design alongside model quality."
+（译：推理时算力的扩展已成为 LLM 性能的重要驱动力，使推理效率与模型质量并列为模型设计的核心焦点。）
+Kimi Linear 的立项动机同理——agentic 负载"解码重、上下文长"，KV 缓存与二次注意力是首要瓶颈。
+<b>可预期的趋势：注意力结构的选择将由"每 token 解码成本/每比特上下文成本"直接驱动（DSA/CSA/HCA/IndexShare 只是开始），而非仅仅由困惑度驱动。</b></p>
+
+<h3>方向二：线性注意力的"记忆编辑"军备竞赛</h3>
+<p>过去三年的主线是给固定状态装上越来越精细的"编辑工具"：遗忘门（标量→通道级）、纠错写入（Delta 规则）、擦/写解耦（GDN-2）、复数态旋转与 MIMO（Mamba-3）、二阶预条件（PGDN/PKDA）。
+理论上，状态跟踪能力（奇偶性、群组合）需要非交换/负特征值/复数转移（Grazzi et al. 2025; DeltaProduct, arXiv:2502.10297），
+检索能力受有限状态容量约束（Wen et al. 2025）。<b>下一步的开放问题：在硬件可并行（WY/UT 表示、块状算法）的约束下，
+状态更新规则的表现力上限在哪里？"在线学习视角"（测试时回归）是否会收敛出一个标准更新式？</b></p>
+
+<h3>方向三：统一理论继续收敛</h3>
+<p>SSD 把 SSM 与线性注意力统一为结构化矩阵；测试时回归（TTR, arXiv:2501.12352）把各种递推统一为在线最小二乘；
+Parallax 更进一步用非参数统计解释 softmax 本身（局部常数估计），并展示"softmax + 协方差修正"可以同时优于纯 softmax 与线性注意力；
+Google 的 Titans 系列将记忆、注意力、在线优化纳入同一框架（"It's all connected", ICLR 2026）。
+<b>趋势：注意力设计正从"经验拼装"走向"有原理的设计空间"——带宽、探针构造、仿射结构、预条件子这些统计学术语正在进入架构论文的标题。</b></p>
+
+<h3>方向四：架构 × 优化器 × 位置编码的协同设计</h3>
+<p>Parallax 首次实证"架构优势依赖优化器几何"（Muon 下显著、AdamW 下消失）；DeepSeek-V4 与 GLM-5 都需要为 MLA/Muon 组合做专门适配（GLM 的 "Muon Split"）；
+混合模型对 RoPE 基频敏感、NoPE 全局层成为流行解。<b>未来架构搜索空间将包含优化器与位置编码两个维度；"DSA 是否无损"这类问题会与训练配方深度绑定。</b></p>
+
+<h3>方向五：系统-算法协同只会更紧</h3>
+<p>FlashAttention-4 用纯 Python（CuTeDSL）写内核、编译快 20–30×；cuDNN 已原生提供 NSA 稀疏内核；FlexAttention 让自定义掩码达到 FA2 的 85–90%；
+FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SGLang/vLLM 为 DeepSeek-V4、Qwen3-Next 做 day-0 支持。
+<b>判断一个新注意力能否存活的标准问题清单：块状访存？GEMM 占比？可写 Triton/TileLang/CuTeDSL 内核？反向传播重计算代价？跨硬件可移植？——算法创新与内核创新已不可分离。</b></p>
+
+<h3>方向六：KV 缓存进入"多层叠加"时代</h3>
+<p>单一手段（GQA 或量化）已不够，生产栈正在叠乘：低秩（MLA）× 稀疏（DSA/NSA）× 压缩（CSA/HCA、YOCO）× 量化（KIVI 2-bit、FP8）× 分页共享（PagedAttention）。
+随之而来的是<b>数值稳定性与可靠性的新问题</b>（SnapMLA 指出 MLA 与低位量化的天然冲突；GDN-2 论文专门处理 gate-aware 反向传播）。
+上下文经济学：当 1M token 的 KV 缓存从 TB 级降到 GB 级，"图书馆式全局记忆"与"压缩记忆"的边界会被重画。</p>
+
+<h3>方向七：留白与争议（诚实的未知）</h3>
+<ul>
+<li><b>softmax 是否必要？</b> MiniMax M2.5 回归 MHA"为了可靠性"；Parallax 又证明 softmax 可以被更强的估计器超越——争论远未结束。</li>
+<li><b>混合比例的原理</b>：3:1 是 2025-2026 的经验共识，但为什么？哪些层必须全注意力（GLM-5 用 beam search 挑层）？缺乏理论。</li>
+<li><b>超长上下文的评测</b>：RULER/HELMET 等基准与真实 agent 负载的差距；线性模型在"跨百万 token 精确引用"上的天花板。</li>
+<li><b>多模态与新模态</b>：视觉/音频/基因组的注意力选型可能与文本不同（Mamba 系在音频、基因上的优势由来已久；Kimi K3 的原生视觉）。</li>
+<li><b>闭源黑箱</b>：GPT-5.x/Gemini 3/Claude 的注意力结构完全未披露，公开研究的"前沿"与真实前沿可能有代差。</li>
+</ul>
+
+<div class="box good">
+<b>学习路径建议：</b>① 用 nanoGPT 手写一遍 MHA 前向/反向；② 跑通 <code>attention_notes/verify.py</code>，
+亲手验证线性注意力"递推=并行"；③ 读 FLA 库 <code>fla/ops/*/naive.py</code> 系列的教学实现（每个变体 20 行）；
+④ 读 DeepSeek-V3 的 MLA 前向（本文第 4.3 节代码）理解"权重吸收"；⑤ 跟踪 FLA News 与 vLLM/SGLang 博客——
+这个领域的重要进展有一半是先出现在内核仓库 README 里的。
+</div>
+
+<!-- ============================================================ -->
+<details id="research-updates" class="note" data-research-updates><summary>更新附录 · 发布与论文记录（展开选读）</summary><h3>11.2 2026 年 6–10 月最新动态：稀疏注意力进入旗舰，"写侧稀疏"开辟新战场</h3>
 <p class="lead">这一波更新的三个关键词：<b>块稀疏注意力被 MiniMax / Qwen 两家旗舰采纳</b>（此前只有 DeepSeek NSA / GLM DSA 路线）；<b>KV 压缩与注意力结构彻底合流</b>（DeepSeek-V4.1 把 KV 压到 890 字节/token）；<b>线性注意力的"写侧稀疏"</b>成为学术新热点。</p>
 
 <h4>① MiniMax-M3 / MSA（2026.06）：给 GQA 装上"索引支路"</h4>
@@ -1100,60 +1166,9 @@ OpenAI 最佳公开参照是 gpt-oss：128 窗口滑窗 + 局部/全局层交错
 <li><b>GLM-5.3 的 PCP/DCP</b>（vLLM×Z.ai，10-23）：indexer 做 TP8 切分后通信开销反超不切分——改用 PCP（算术强度 26→191 FLOPs/byte）+ DCP 组合，规模拐点在 32K→256K 之间<span class="cite"><a href="#ref-glmpcp">[GLM-PCP]</a></span>。</li>
 </ul>
 
-<h2 id="s12"><span class="no">12</span>未来发展方向</h2>
-
-<h3>方向一：推理优先（Inference-first）成为第一性设计原则</h3>
-<p>测试时计算（长思维链、agent 轨迹、RL 训练）让"解码"从模型的配角变成成本主角。Mamba-3 论文开篇即以此立论<span class="cite">[arXiv:2603.15569, 2026-03]</span>：
-"Scaling inference-time compute has emerged as an important driver of LLM performance, making inference efficiency a central focus of model design alongside model quality."
-（译：推理时算力的扩展已成为 LLM 性能的重要驱动力，使推理效率与模型质量并列为模型设计的核心焦点。）
-Kimi Linear 的立项动机同理——agentic 负载"解码重、上下文长"，KV 缓存与二次注意力是首要瓶颈。
-<b>可预期的趋势：注意力结构的选择将由"每 token 解码成本/每比特上下文成本"直接驱动（DSA/CSA/HCA/IndexShare 只是开始），而非仅仅由困惑度驱动。</b></p>
-
-<h3>方向二：线性注意力的"记忆编辑"军备竞赛</h3>
-<p>过去三年的主线是给固定状态装上越来越精细的"编辑工具"：遗忘门（标量→通道级）、纠错写入（Delta 规则）、擦/写解耦（GDN-2）、复数态旋转与 MIMO（Mamba-3）、二阶预条件（PGDN/PKDA）。
-理论上，状态跟踪能力（奇偶性、群组合）需要非交换/负特征值/复数转移（Grazzi et al. 2025; DeltaProduct, arXiv:2502.10297），
-检索能力受有限状态容量约束（Wen et al. 2025）。<b>下一步的开放问题：在硬件可并行（WY/UT 表示、块状算法）的约束下，
-状态更新规则的表现力上限在哪里？"在线学习视角"（测试时回归）是否会收敛出一个标准更新式？</b></p>
-
-<h3>方向三：统一理论继续收敛</h3>
-<p>SSD 把 SSM 与线性注意力统一为结构化矩阵；测试时回归（TTR, arXiv:2501.12352）把各种递推统一为在线最小二乘；
-Parallax 更进一步用非参数统计解释 softmax 本身（局部常数估计），并展示"softmax + 协方差修正"可以同时优于纯 softmax 与线性注意力；
-Google 的 Titans 系列将记忆、注意力、在线优化纳入同一框架（"It's all connected", ICLR 2026）。
-<b>趋势：注意力设计正从"经验拼装"走向"有原理的设计空间"——带宽、探针构造、仿射结构、预条件子这些统计学术语正在进入架构论文的标题。</b></p>
-
-<h3>方向四：架构 × 优化器 × 位置编码的协同设计</h3>
-<p>Parallax 首次实证"架构优势依赖优化器几何"（Muon 下显著、AdamW 下消失）；DeepSeek-V4 与 GLM-5 都需要为 MLA/Muon 组合做专门适配（GLM 的 "Muon Split"）；
-混合模型对 RoPE 基频敏感、NoPE 全局层成为流行解。<b>未来架构搜索空间将包含优化器与位置编码两个维度；"DSA 是否无损"这类问题会与训练配方深度绑定。</b></p>
-
-<h3>方向五：系统-算法协同只会更紧</h3>
-<p>FlashAttention-4 用纯 Python（CuTeDSL）写内核、编译快 20–30×；cuDNN 已原生提供 NSA 稀疏内核；FlexAttention 让自定义掩码达到 FA2 的 85–90%；
-FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SGLang/vLLM 为 DeepSeek-V4、Qwen3-Next 做 day-0 支持。
-<b>判断一个新注意力能否存活的标准问题清单：块状访存？GEMM 占比？可写 Triton/TileLang/CuTeDSL 内核？反向传播重计算代价？跨硬件可移植？——算法创新与内核创新已不可分离。</b></p>
-
-<h3>方向六：KV 缓存进入"多层叠加"时代</h3>
-<p>单一手段（GQA 或量化）已不够，生产栈正在叠乘：低秩（MLA）× 稀疏（DSA/NSA）× 压缩（CSA/HCA、YOCO）× 量化（KIVI 2-bit、FP8）× 分页共享（PagedAttention）。
-随之而来的是<b>数值稳定性与可靠性的新问题</b>（SnapMLA 指出 MLA 与低位量化的天然冲突；GDN-2 论文专门处理 gate-aware 反向传播）。
-上下文经济学：当 1M token 的 KV 缓存从 TB 级降到 GB 级，"图书馆式全局记忆"与"压缩记忆"的边界会被重画。</p>
-
-<h3>方向七：留白与争议（诚实的未知）</h3>
-<ul>
-<li><b>softmax 是否必要？</b> MiniMax M2.5 回归 MHA"为了可靠性"；Parallax 又证明 softmax 可以被更强的估计器超越——争论远未结束。</li>
-<li><b>混合比例的原理</b>：3:1 是 2025-2026 的经验共识，但为什么？哪些层必须全注意力（GLM-5 用 beam search 挑层）？缺乏理论。</li>
-<li><b>超长上下文的评测</b>：RULER/HELMET 等基准与真实 agent 负载的差距；线性模型在"跨百万 token 精确引用"上的天花板。</li>
-<li><b>多模态与新模态</b>：视觉/音频/基因组的注意力选型可能与文本不同（Mamba 系在音频、基因上的优势由来已久；Kimi K3 的原生视觉）。</li>
-<li><b>闭源黑箱</b>：GPT-5.x/Gemini 3/Claude 的注意力结构完全未披露，公开研究的"前沿"与真实前沿可能有代差。</li>
-</ul>
-
-<div class="box good">
-<b>学习路径建议：</b>① 用 nanoGPT 手写一遍 MHA 前向/反向；② 跑通 <code>attention_notes/verify.py</code>，
-亲手验证线性注意力"递推=并行"；③ 读 FLA 库 <code>fla/ops/*/naive.py</code> 系列的教学实现（每个变体 20 行）；
-④ 读 DeepSeek-V3 的 MLA 前向（本文第 4.3 节代码）理解"权重吸收"；⑤ 跟踪 FLA News 与 vLLM/SGLang 博客——
-这个领域的重要进展有一半是先出现在内核仓库 README 里的。
-</div>
-
-<!-- ============================================================ -->
+</details>
 <h2 id="refs">参考文献总表</h2>
-<p style="font-size:.88em; color:#aeb4bd;">（按主题分组；日期为 arXiv v1 或官方发布日期。所有正文引文均可在对应文献中逐字找到。）</p>
+<p style="font-size:.88em; color:#aeb4bd;">（按主题分组；日期为 arXiv v1 或官方发布日期。机制转述与直接引文分别标注，具体结论按所引版本和实验设置阅读。）</p>
 
 <h4>奠基与结构演进</h4>
 <ol>
@@ -1278,7 +1293,7 @@ FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SG
 
 <footer>
   本页所有引文均逐字核对自论文原文 / 官方仓库；关键数字经 <code>attention_notes/verify.py</code>（numpy）数值验证。
-  
+
 </footer>
 </div>
 
@@ -1287,5 +1302,8 @@ FLA 库覆盖 40+ 线性注意力变体并在 NVIDIA/AMD/Intel 三家验证；SG
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+</script>
 </body>
 </html>

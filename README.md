@@ -1,6 +1,8 @@
 # PiratePai's Blog
 
-大模型效率技术知识全景 —— 10 篇技术综述，在线阅读：**https://piratepai.github.io**
+大模型效率技术知识全景 —— 16 篇技术综述，在线阅读：[piratepai.github.io](https://piratepai.github.io)。
+
+2026-11-01 根据全站审阅报告修订机制、性能口径与引文，增加每篇的阅读路径、手算例子和研究取舍；发布快讯按需展开。修订范围与证据边界见 [修订说明](docs/research-quality-review.md)。
 
 ## 知识地图 · 推理效率栈
 
@@ -22,3 +24,15 @@
 - ViT 稀疏化技术梳理
 
 文章源文件在 `posts/` 目录，均为自包含 HTML（暗色主题、移动端适配）。
+
+补充专题：定制推理引擎、性能仿真、Loop Transformer、实时世界模型、免训练自动调优。
+
+本地检查（Python 标准库；站点检查另需 Node.js）：
+
+```text
+python scripts/verify-mechanisms.py
+python scripts/check-site.py
+python -m http.server 8000
+```
+
+数值示例只核对文中明确的机制与教学账本，不复现论文训练和 GPU 性能。

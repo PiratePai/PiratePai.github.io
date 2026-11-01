@@ -105,6 +105,10 @@
   tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 </style>
 
+<style>
+#reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
+#reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
+</style>
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -129,15 +133,25 @@
   <li><a href="#s6">E-P-D 分离：多模态三段式</a></li>
   <li><a href="#s7">采样与结构化输出</a></li>
   <li><a href="#s8">图编译与执行优化</a></li>
-  <li><a href="#s9">2024–2026 最新进展盘点</a></li>
+  <li><a href="#s9">更新附录（展开选读）</a></li>
   <li><a href="#s10">未来发展方向</a></li>
   <li><a href="#refs">参考文献</a></li>
 </ol>
 </div>
 
 <!-- ============================================================ -->
+
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 先追踪一条请求，再选择调度与部署</b><p><a href="#s1">请求与指标</a> → <a href="#s2">迭代组批</a> → <a href="#s3">KV 生命周期</a> → <a href="#s4">分块</a> → <a href="#s5">阶段分离</a> → <a href="#s7">采样与语法</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>token 是分词器的计量单位。Prefill 处理提示，decode 逐步生成；TTFT 从请求到首个输出（本文含排队），TPOT 约为首末输出间隔除以输出 token 数减一。TP 切一层矩阵，PP 切层，DP 复制模型处理不同请求，EP 分布专家。先懂这些，再看引擎名。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>假设 KV 迁移 1GB、有效网络 25GB/s，仅理想传输就需 40ms。P/D 分离若只省 20ms 干扰，通信已超过节省；若命中远端前缀缓存、节省数百 ms prefill，则可能划算。这是教学算例，不是部署测量。</div>
+<h3>用同一组问题比较路线</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>组批/分块</td><td>摊薄权重读取、限制长 prompt 干扰</td><td>batch/块过大增加 TPOT，过小浪费算力</td></tr><tr><td>分离/混部</td><td>独立资源配比或共享闲置资源</td><td>迁移、排队与低负载利用率必须一起计账</td></tr><tr><td>量化/卸载</td><td>减少字节或扩大容量</td><td>质量、PCIe 带宽与反量化开销</td></tr></tbody></table></div>
+<p><b>值得做的研究：</b>固定硬件预算与 TTFT/TPOT 的 p99 SLO，流量从短问答换成长 Agent 会话时，哪一种策略的 goodput（满足 SLO 的完成请求率）真正提高？</p>
+<details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Ji Lin  et al.</b> <i>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration</i>（AWQ）；arXiv:2306.00978，v1 2023-06-01。<a href="https://arxiv.org/abs/2306.00978">原始论文与版本记录</a></li><li><b>Zirui Liu  et al.</b> <i>KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache</i>（KIVI）；arXiv:2402.02750，v1 2024-02-05。<a href="https://arxiv.org/abs/2402.02750">原始论文与版本记录</a></li><li><b>Ying Sheng  et al.</b> <i>FlexGen: High-Throughput Generative Inference of Large Language Models with a Single GPU</i>（FlexGen）；arXiv:2303.06865，v1 2023-03-13。<a href="https://arxiv.org/abs/2303.06865">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
+</section>
 <h2 id="s0"><span class="no">0</span>导读与大事记</h2>
-<p>这份报告回答三个问题：<b>推理服务优化为什么难、每一项关键技术解决什么问题、这个领域正在往哪走。</b>所有技术都沿着同一条主线展开——<b>自回归生成的两个阶段（Prefill 与 Decode）有着截然不同的资源画像，而所有优化本质上都是在"填饱 GPU"与"守住延迟承诺"之间做调度</b>。建议先读第 1 节预备知识，再按顺序阅读。</p>
+<p>这份报告回答三个问题：<b>推理服务优化为什么难、每一项关键技术解决什么问题、这个领域正在往哪走。</b>所有技术都沿着同一条主线展开——<b>自回归生成的两个阶段（Prefill 与 Decode）有着截然不同的资源画像，而优化分别减少计算与数据搬运、提高资源利用率，并在吞吐、延迟和质量约束之间取舍</b>。建议先读第 1 节预备知识，再按顺序阅读。</p>
 
 <p>下表是一张"一页纸"的技术地图，后续章节逐个展开：</p>
 <div class="card">
@@ -152,7 +166,7 @@
 <tr><td>采样策略</td><td>贪心解码重复乏味，纯随机胡言乱语</td><td>top-k (2018) / top-p (2019) / min-p (2024)</td><td>在概率分布上动态划定候选集再抽样</td></tr>
 <tr><td>投机采样</td><td>每步只生成 1 个 token，GPU 大量闲置</td><td>Leviathan/Chen，2022–2023</td><td>小模型草拟多个 token，大模型一次验证，分布无损</td></tr>
 <tr><td>结构化输出</td><td>自由文本不保证合法 JSON/语法</td><td>Outlines 2023-07；XGrammar 2024-11</td><td>把语法编译成状态机，每步屏蔽非法 token</td></tr>
-<tr><td>图编译</td><td>Decode 阶段算子小而多，启动开销占大头</td><td>CUDA Graphs 2018；torch.compile 2023；vLLM 分段图 2025</td><td>把整张计算图一次性捕获/编译，之后零开销重放</td></tr>
+<tr><td>图编译</td><td>Decode 阶段算子小而多，启动开销占大头</td><td>CUDA Graphs 2018；torch.compile 2023；vLLM 分段图 2025</td><td>把整张计算图一次性捕获/编译，之后用一次图启动重放，显著降低逐 kernel 提交开销，仍有非零启动成本</td></tr>
 </table>
 </div>
 
@@ -172,7 +186,7 @@
 </ul>
 
 <!-- ============================================================ -->
-<div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -191,12 +205,12 @@
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>生产推理框架开源：单集群 155T tokens/天、波谷 $38/卡/小时，SM100+昇腾 950 双后端；开源一周 star 超 1.7 万。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>GB300 NVL72 追平 DeepInfer</b><span class="hl-date">10-23 · vLLM</span></div><p>P/D + Wide-EP：AgentX 每 GPU 954K tokens/s；decode 与 DeepInfer 差距 batch 8–256 全程 ≤6%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>P/D 分离 KV 跨请求泄露</b><span class="hl-date">10-26 · SGLang×Cloudflare</span></div><p>155 个响应串入他人 prompt：修复随 v0.5.21/22 落地，运营方应升级 v0.5.22+。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>TAO 工具感知调度</b><span class="hl-date">10-27 · 上交+斯坦福</span></div><p>工具执行下放分布式 CPU、GPU 聚簇推理：延迟最多 −26.8%、TTFT −36.3%、吞吐 +29.5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
+<div class="hl-card"><div class="hl-meta"><b>TAO 工具感知调度</b><span class="hl-date">10-27 · 上交+斯坦福</span></div><p>工具执行下放分布式 CPU、GPU 聚簇推理：延迟最多 −26.8%、TTFT −36.3%、吞吐 +29.5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>预备知识：一次推理到底发生了什么</h2>
 
 <h3>1.1 自回归：模型是一个字一个字往外蹦的</h3>
-<p>大语言模型（LLM）生成文本的方式叫<b>自回归（autoregressive）</b>：把前文（prompt + 已生成的部分）喂给模型，模型输出一个关于"下一个 token 是什么"的概率分布，从中选一个 token 拼到末尾，再重复整个过程，直到输出结束符或达到长度上限。所以"生成 1000 个字"并不是一次计算，而是<b>1000 次前向传播</b>。</p>
+<p>大语言模型（LLM）生成文本的方式叫<b>自回归（autoregressive）</b>：把前文（prompt + 已生成的部分）喂给模型，模型输出一个关于"下一个 token 是什么"的概率分布，从中选一个 token 拼到末尾，再重复整个过程，直到输出结束符或达到长度上限。所以生成 1000 个新 token 的普通自回归解码约需 1000 次完整前向；token 是分词单位，与汉字或英文词不一一对应。</p>
 <p>这一个 token 一个 token 的特性，决定了推理服务的一切矛盾：单次计算又小又快（相对训练），但<b>串行依赖</b>无法压缩——你不知道第 100 个字，就没法算第 101 个字。</p>
 
 <h3>1.2 Prefill 与 Decode：性格迥异的两个阶段</h3>
@@ -216,7 +230,7 @@
 <tr><td>每步处理的 token 数</td><td>整条 prompt（几百~几万）</td><td>每请求 1 个</td></tr>
 <tr><td>瓶颈类型</td><td><b>计算受限（compute-bound）</b>：矩阵都很大，GPU 算力打满</td><td><b>访存受限（memory-bound）</b>：每生成 1 个 token 都要把模型权重和 KV Cache 从显存搬一遍，计算只是"顺带"</td></tr>
 <tr><td>用户关心的指标</td><td><b>TTFT</b>（Time To First Token，首 token 延迟）</td><td><b>TPOT / ITL</b>（Time Per Output Token / Inter-Token Latency，字间延迟）</td></tr>
-<tr><td>加大 batch 的效果</td><td>几乎无效（本来就饱和）</td><td><b>极其显著</b>：更多人摊薄权重搬运成本，吞吐近线性提升</td></tr>
+<tr><td>加大 batch 的效果</td><td>已饱和时收益有限；短 prompt / 小分块仍可能受益</td><td><b>极其显著</b>：更多人摊薄权重搬运成本，在权重带宽主导且未达计算、KV 或通信瓶颈前吞吐可明显提升</td></tr>
 </table>
 <div class="analogy">把 GPU 想象成一家只做两种菜的餐厅：<b>Prefill 是一桌 200 人的大型宴会</b>（厨房火力全开），<b>Decode 是每个客人每分钟点一根薯条</b>（厨师大部分时间在走来走去，锅只热一下）。把很多份薯条<b>拼在同一口锅里炸</b>（批处理）是唯一省钱的方法——这就是后面所有批处理技术的出发点。</div>
 
@@ -261,7 +275,7 @@
 
 <h3>2.2 Orca（OSDI 2022）：把调度粒度从"请求"降到"迭代"</h3>
 <p>首尔国立大学（SNU）的 Orca 团队提出了两个此后成为所有引擎标配的概念<sup class="cite">[ORCA22]</sup>：</p>
-<p><b>① 迭代级调度（iteration-level scheduling）</b>：调度的最小单位不再是"一整条请求"，而是<b>一次解码迭代（一层前向传播）</b>。每次迭代结束后重新组批：完成的请求立刻退出、释放显存，等待的请求立刻插入。这就是后来广泛流传的名字——<b>Continuous Batching</b>（NVIDIA 称 in-flight batching）。</p>
+<p><b>① 迭代级调度（iteration-level scheduling）</b>：调度的最小单位不再是"一整条请求"，而是<b>一次解码迭代（经过全部模型层的一次完整前向）</b>。每次迭代结束后重新组批：完成的请求立刻退出、释放显存，等待的请求立刻插入。这就是后来广泛流传的名字——<b>Continuous Batching</b>（NVIDIA 称 in-flight batching）。</p>
 <p><b>② 选择性批处理（selective batching）</b>：迭代级组批后，batch 里各请求长度不同。有些算子（注意力）必须按各自长度单独算，有些算子（MLP、LayerNorm）可以拼起来算。Orca 对"能拼的拼、不能拼的循环"，避免了统一 padding 造成的浪费。</p>
 <div class="fig">
 <pre style="margin:0;background:#0f1b2a;color:#d7e3f0;">
@@ -527,7 +541,7 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 </div>
 <ul>
 <li>KV Cache 被切成固定大小的<b>块（block，GPU 上通常 16 个 token/块）</b>，逻辑连续、物理离散；</li>
-<li>按需分配：生成到哪，块分到哪；请求结束，块立刻归还池子——配合迭代级调度，进出 batch 零成本；</li>
+<li>按需分配：生成到哪，块分到哪；请求结束，块立刻归还池子——配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销；</li>
 <li>分页带来一个意外礼物：<b>共享</b>。多条请求若前缀相同，物理块可以直接<b>引用计数共享</b>，写时才复制。这就是 vLLM copy-on-write 的来源。</li>
 </ul>
 <p>效果：vLLM 论文报告，相比 FasterTransformer 和 Orca 吞吐最高提升 <b>2–4×</b>（对长复用前缀场景更多），相同显存下可支撑的并发序列数成倍增长；官方博客称对比 HuggingFace Transformers 最高 <b>24×</b> 吞吐<sup class="cite">[VLLM23]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
@@ -597,19 +611,19 @@ decode... decode... [■■■■ 32K prefill：450ms ■■■■] decode... de
 
 <h3>4.2 Sarathi / Sarathi-Serve（2023-08 / OSDI 2024）</h3>
 <p>印度理工 + Microsoft Research + Georgia Tech 的 Sarathi 系列给出方案<sup class="cite">[SARATHI23][SARATHISERVE24]</sup>：</p>
-<p><b>① Chunked prefill</b>：把一条长 prompt 切成近似等大的块（如每块 512/2048 token），每步只算一块。一条 32K 的请求分 16 步消化，每步的耗时就与 decode 相当。</p>
+<p><b>① Chunked prefill</b>：把一条长 prompt 切成近似等大的块（如每块 512/2048 token），每步只算一块。一条 32K 的请求分 16 步消化，每步 prefill 工作量被限制，但实际耗时还随上下文、batch 与 kernel 变化，不保证等于 decode。</p>
 <p><b>② Piggybacking / 混合批（stall-free batching）</b>：每一步的 batch = <b>一个 prefill 块 + 尽量多的 decode 请求</b>。decode 每步都照常进行，不再有长停顿；prefill 块则把 decode 喂不饱的算力填满。Sarathi-Serve 又加入准入控制（admission control），用 token budget 平衡 TTFT 与 TPOT。</p>
 <div class="fig">
 <pre style="margin:0;background:#0f1b2a;color:#d7e3f0;">
 chunked prefill（每步 token budget = 2048）：
 step:  [decode×2000 + prefill块1(48)]  [decode×2000 + prefill块2(48)] ...
-       ↑ 每步耗时恒定 ≈ decode-only batch，打字机丝滑不卡
+       ↑ 固定 token budget 限制每步工作量；实际耗时仍随上下文、batch 构成和 kernel 效率变化
        ↑ prefill 用剩余预算慢慢"分期付款"付清
 </pre>
-<div class="cap">图 4-2 token budget 下的混合批：解码永不饥饿，prefill 分期推进。</div>
+<div class="cap">图 4-2 token budget 下的混合批：优先保障 decode 的调度机会，prefill 分期推进；尾延迟仍须实测验收。</div>
 </div>
 <p>效果：Sarathi（2023）在单模型场景靠"piggyback"提升 decode 吞吐最高 <b>10×</b>、端到端 <b>1.33×</b>；Sarathi-Serve（OSDI 2024）在多请求负载下同时守住 TTFT 与 TPOT，显著抬高满足 SLO 的吞吐上限<sup class="cite">[SARATHISERVE24]</sup>。该技术随后进入所有主流引擎（vLLM 2024 年默认开启、TensorRT-LLM、SGLang、TGI…），今天你用任何 vLLM 部署，<code>--max-num-batched-tokens</code> 这个参数就是 token budget 的化身。</p>
-<div class="note"><b>[SARATHISERVE24]</b> Agrawal, Kesarwani, Panwar, Modugula, Kwon, Gao, Tumanov, Ramjee. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. USENIX OSDI 2024（arXiv 2024-03-04）。USENIX 官方摘要原文："Sarathi-Serve introduces <b>chunked-prefills which splits a prefill request into near equal sized chunks and creates stall-free schedules</b> that add new requests to ongoing batches."（译文：Sarathi-Serve 引入 chunked prefill——把 prefill 请求切分为近似等大的块，构造无停顿的调度，使新请求可加入进行中的批次。）链接：<a href="https://www.usenix.org/conference/osdi24/presentation/agrawal">usenix.org/conference/osdi24/presentation/agrawal</a></div>
+<div class="note"><b>[SARATHISERVE24]</b> Agrawal, Kedia, Panwar, Mohan, Kwatra, Gulavani, Tumanov, Ramjee. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. USENIX OSDI 2024（arXiv 2024-03-04）。USENIX 官方摘要原文："Sarathi-Serve introduces <b>chunked-prefills which splits a prefill request into near equal sized chunks and creates stall-free schedules</b> that add new requests to ongoing batches."（译文：Sarathi-Serve 引入 chunked prefill——把 prefill 请求切分为近似等大的块，构造无停顿的调度，使新请求可加入进行中的批次。）链接：<a href="https://www.usenix.org/conference/osdi24/presentation/agrawal">usenix.org/conference/osdi24/presentation/agrawal</a></div>
 
 <h3>4.3 代码里的 chunked prefill</h3>
 <p>在 vLLM V1 里它已经"溶解"进调度器——没有任何显式的"prefill 处理器"，只是给每条请求的每步分配不超过预算的 token 数：</p>
@@ -629,7 +643,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <h3>5.1 动机：混部的天花板</h3>
 <p>Chunked prefill 是"缓解"干扰，不是"消除"干扰：prefill 块仍然与 decode 抢同一块 GPU 的时间片、同一份 L2 cache、同一个 batch 名额。DistServe 论文（北大 + 阿里，OSDI 2024）把这个矛盾表述得非常清楚<sup class="cite">[DISTSERVE24]</sup>：</p>
 <ul>
-<li><b>资源画像冲突</b>：prefill 想要大算力小显存（可配大 TP 切分计算），decode 想要大显存带宽高并发（更适合小 TP / 复制多份）。混部时二者被迫共用一套并行策略与机器配置，两头不讨好。</li>
+<li><b>资源画像冲突</b>：prefill 常需要更高计算吞吐，也须容纳权重、激活与新增 KV，不能归纳为小显存（可配大 TP 切分计算），decode 想要大显存带宽高并发（更适合小 TP / 复制多份）。混部时二者被迫共用一套并行策略与机器配置，两头不讨好。</li>
 <li><b>SLO 耦合</b>：想压 TTFT 就多排 prefill，TPOT 立刻抖；想保 TPOT 就压制 prefill，TTFT 排队爆。两个指标在混部下无法同时逼近极限。</li>
 </ul>
 <p><b>Prefill/Decode 分离（P/D Disaggregation，也称 disaggregated serving）</b>干脆把两个阶段放到<b>不同的 GPU/机器池</b>：请求先到 prefill 实例算完 prompt，产生的 KV Cache 通过高速网络（RDMA/IB/RoCE）传给 decode 实例，decode 从第一个 token 开始接力，边生成边流式吐给用户。</p>
@@ -646,7 +660,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <h3>5.2 三篇奠基工作（2024 年）</h3>
 <table>
 <tr><th style="width:14%">工作</th><th style="width:15%">发表</th><th>关键贡献</th></tr>
-<tr><td><b>DistServe</b></td><td>OSDI 2024（arXiv 2024-01）</td><td>提出以 <b>goodput</b> 为目标的分离架构，并给出"搜索最优并行度/副本配比"的自动规划器；KV 传输开销实测 &lt;0.1%。效果：比 vLLM 多服务 <b>7.4×</b> 请求，或守住 <b>12.6×</b> 更严的 SLO（OSDI 2024 正式版数字；2024-01 的 arXiv v1 曾报 4.48×/10.2×）<sup class="cite">[DISTSERVE24]</sup></td></tr>
+<tr><td><b>DistServe</b></td><td>OSDI 2024（arXiv 2024-01）</td><td>提出以 <b>goodput</b> 为目标的分离架构，并给出"搜索最优并行度/副本配比"的自动规划器；KV 传输在论文特定实验中占端到端总延迟 &lt;0.1%（非 TTFT 比例）。效果：对 DeepSpeed-MII 的请求率最高 <b>7.4×</b>；对 vLLM 的 SLO 最高可收紧 <b>12.6×</b>，是不同实验点（OSDI 2024 正式版数字；2024-01 的 arXiv v1 曾报 4.48×/10.2×）<sup class="cite">[DISTSERVE24]</sup></td></tr>
 <tr><td><b>Splitwise</b></td><td>ISCA 2024（微软，arXiv 2023-11）</td><td>强调<b>异构硬件</b>：prefill 用高 TDP 大算力节点，decode 可用低 TDP/上代卡；引入基于 prompt 长度与负载的集群级路由，提升整体机房效率<sup class="cite">[SPLITWISE24]</sup></td></tr>
 <tr><td><b>Mooncake</b></td><td>arXiv 2024-06 / FAST 2025（月之暗面 + 清华）</td><td>把分离架构升级为 <b>KVCache 为中心</b>：全局分布式 KV 池（CPU DRAM + SSD），提前调度让"长前缀复用 + 分离"共存；生产服务 Kimi：真实负载下同等 SLO 可多承接 <b>75%</b> 请求，模拟长上下文场景吞吐最高 +525%<sup class="cite">[MOONCAKE25]</sup></td></tr>
 </table>
@@ -684,7 +698,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>把 E 与 P 混在一起时，视觉编码的大计算量会像超长 prefill 一样造成尖刺，且推理引擎主循环被"等图"阻塞。</p>
 
 <h3>6.2 EPD 框架（ICML 2025）与工业界落地</h3>
-<p>华为（加拿大）+ 西蒙弗雷泽大学团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；对计算繁重的视觉负载报告吞吐最高 <b>2.4×</b>、时延最高降 <b>69%</b>（以 CPU 承载视觉编码器的混部系统为基线）<sup class="cite">[EPD25]</sup>。工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
+<p>华为（加拿大）+ 西蒙弗雷泽大学团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；其 v4 的 GPU/NPU 视频实验相对 vLLM 报告 TTFT 最高降低 <b>69.2%</b>；此处不再并列缺少同设置定位的 2.4×，也不将其描述为 CPU 编码器基线<sup class="cite">[EPD25]</sup>。工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
 <div class="fig">
 <div class="flowrow">
   <div class="fbox">图像/视频</div><div class="arr">→</div>
@@ -695,7 +709,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 </div>
 <div class="cap">图 6-1 E-P-D 三段分离。llm-d 的路由术语将"编码分离"细分为 E/PD（P 与 D 同机）与 E/P/D（全分离）两种部署粒度。</div>
 </div>
-<div class="note"><b>[EPD25]</b> Singh et al. (Huawei Canada & Simon Fraser University). <i>Efficiently Serving Large Multimodal Models Using EPD Disaggregation</i>. ICML 2025（arXiv 2501.05460，2025-01-10）。原文："We introduce <b>Encode-Prefill-Decode (EPD) Disaggregation</b>, a novel framework that separates the encoding, prefill, and decode stages onto dedicated resources"（译文：我们提出 EPD 分离——把编码、预填充与解码三个阶段放到专用资源上的新框架）；报告"up to <b>2.4×</b> higher throughput and <b>69%</b> lower latency"。链接：<a href="https://arxiv.org/abs/2501.05460">arxiv.org/abs/2501.05460</a> · 代码 <a href="https://github.com/vbdi/epdserve">github.com/vbdi/epdserve</a></div>
+<div class="note"><b>[EPD25]</b> Singh et al. (Huawei Canada & Simon Fraser University). <i>Efficiently Serving Large Multimodal Models Using EPD Disaggregation</i>. ICML 2025（arXiv 2501.05460，2025-01-10）。原文："We introduce <b>Encode-Prefill-Decode (EPD) Disaggregation</b>, a novel framework that separates the encoding, prefill, and decode stages onto dedicated resources"（译文：我们提出 EPD 分离——把编码、预填充与解码三个阶段放到专用资源上的新框架）；性能转述：v4 视频实验相对 vLLM 的 TTFT 最高下降 69.2%；吞吐与延迟须按对应图表分别阅读，不能拼成同一配置的收益。链接：<a href="https://arxiv.org/abs/2501.05460">arxiv.org/abs/2501.05460</a> · 代码 <a href="https://github.com/vbdi/epdserve">github.com/vbdi/epdserve</a></div>
 <div class="note"><b>[VLLMEPD]</b> vLLM Team. <i>Encoder Disaggregation for Scalable Multimodal Model Serving</i>. vLLM 博客，2025-12-15（功能于 2025-11 合入，v0.11.1 可用）。博客对 EPD 的动机表述："How vLLM EPD <b>separates visual encoders from text prefill and decode</b>, covering LMM serving, GPU resource scaling, multimodal interference, and pipelined execution."（译文：vLLM EPD 如何把视觉编码器从文本 prefill/decode 中分离，涵盖多模态服务、GPU 资源伸缩、多模态干扰与流水线执行。）链接：<a href="https://vllm.ai/blog/2025-12-15-vllm-epd">vllm.ai/blog/2025-12-15-vllm-epd</a></div>
 <div class="note"><b>[LLMD]</b> Zhang, Yao et al. (Intel / llm-d). <i>Scaling Vision-Heavy Kimi-VL with Heterogeneous E/PD on llm-d and SGLang</i>. llm-d 博客，2026。原文："We place vision encoding stage in 4 Intel Arc Pro B60 GPUs while keeping prefill and decode stage on 1 NVIDIA H200 GPU……achieved <b>2.4x-2.8x higher throughput</b> and reduced mean Time To First Token (TTFT) by roughly <b>69%-80%</b> under load."（译文：把视觉编码放在 4 张 Intel B60、语言 P/D 放在 1 张 H200，负载下吞吐提升 2.4–2.8×，平均 TTFT 降低约 69–80%。）链接：<a href="https://llm-d.ai/blog">llm-d.ai/blog</a></div>
 
@@ -715,7 +729,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <tr><td>温度 / 重复惩罚等（2019–）</td><td>temperature 重整分布；repetition/frequency/presence penalty 压制已出现 token</td><td>控制随机度与重复；惩罚家族源自 GPT-2/CTRL 时代实践</td></tr>
 <tr><td><b>min-p</b>（ICLR 2025）<sup class="cite">[MINP25]</sup></td><td>候选 = 概率 ≥ p·(最大概率) 的 token</td><td>对高置信分布比 top-p 更稳，推理/代码任务常用</td></tr>
 </table>
-<p>直觉理解 top-p 与 min-p 的区别：top-p 的门槛是<b>绝对概率质量</b>（累计到 p 为止），min-p 的门槛是<b>相对冠军的比例</b>（至少是第一名的 p 倍）。当模型非常确定（第一名 0.95）时，top-p 仍可能放进一堆 0.001 的杂音，min-p 则会果断砍掉——所以 2024 年后讲究的推理服务默认参数常是 <code>temperature=0.6, top_p=0.95</code>（DeepSeek-R1 风格）或直接 min-p。</p>
+<p>用具体分布比较：p=[0.80,0.10,0.06,0.03,0.01]。top_p=0.9 保留前两项（累计 0.90）；min_p=0.1 以 0.08 为阈值，也保留前两项；min_p=0.05 则保留前三项（阈值 0.04）。若最大概率为 0.95 且 top_p=0.95，通常只需第一项，不能说一定混入大量尾部 token。截断后的候选需重新归一化，参数应按任务与目标质量设置。</p>
 <div class="note"><b>[FAN18]</b> Fan, Lewis, Dauphin. <i>Hierarchical Neural Story Generation and Hierarchical Writing Evaluation</i>. ACL 2018（arXiv 2018-05）。提出 top-k 采样："sampling from the <b>k most likely next words</b> at each step"（译文：每步仅从最可能的 k 个词中采样），以在开放域生成中替代束搜索。</div>
 <div class="note"><b>[HOLTZMAN20]</b> Holtzman, Buys, Du, Forbes, Choi. <i>The Curious Case of Neural Text Degeneration</i>. ICLR 2020（arXiv 1904.09751，2019-04）。提出 nucleus sampling："we propose sampling from the <b>nucleus</b> — the smallest set of tokens whose cumulative probability exceeds a threshold p"（译文：我们提出从"核"中采样——累计概率超过阈值 p 的最小 token 集合）。链接：<a href="https://arxiv.org/abs/1904.09751">arxiv.org/abs/1904.09751</a></div>
 <div class="note"><b>[MINP25]</b> Nguyen et al. <i>Turning Up the Heat: Min-p Sampling for Creative and Coherent LLM Outputs</i>. ICLR 2025（arXiv 2407.01082，2024-07）。核心思想（译文大意）：min-p 依据<b>当前最高概率 token</b> 动态设定截断线，在高置信时收窄候选集、低置信时放宽，从而兼顾连贯与创造性。</div>
@@ -760,12 +774,13 @@ target(大模型): 一次前向并行算 5 个位置的分布，逐个校验：
 <div class="note"><b>[LINKEDIN26]</b> LinkedIn Engineering（ZenML LLMOps 案例收录）。<i>Accelerating LLM Inference with Speculative Decoding for AI Agent Applications</i>，2026。原文："4× higher throughput at the same QPS and SLA ceiling……<b>66% reduction in P90 end-to-end latency</b>……<b>Zero quality degradation</b>, as verified by their internal evaluation pipelines."（译文：相同 QPS 与 SLA 下 4× 吞吐，P90 时延降 66%，内部评测确认质量零损失。）链接：<a href="https://www.zenml.io/llmops-database">zenml.io/llmops-database</a></div>
 
 <h3>7.4 结构化输出：把语法编进解码循环</h3>
-<p>让 LLM 输出<b>严格合法</b>的 JSON、正则匹配文本、SQL、函数调用参数——这不是 prompt 工程能保证的（模型总会在第 512 个 token 多写一个引号），而是要在<b>解码的每一步</b>强制合规。方法叫<b>约束解码（constrained decoding）</b>：把目标结构（JSON Schema / 正则 / CFG）编译成一个<b>状态机</b>，每生成一个 token，状态机告诉你"当前状态下哪些 token 是合法的"，把非法 token 的概率<b>置零</b>，再交给采样器。</p>
+<p>让 LLM 输出<b>严格合法</b>的 JSON、正则匹配文本、SQL、函数调用参数——这不是 prompt 工程能保证的（模型总会在第 512 个 token 多写一个引号），而是要在<b>解码的每一步</b>强制合规。方法叫<b>约束解码（constrained decoding）</b>：把目标结构（JSON Schema / 正则 / CFG）编译成解析器：正则可用有限状态机，任意嵌套 CFG 通常需要带栈的下推自动机，每生成一个 token，状态机告诉你"当前状态下哪些 token 是合法的"，把非法 token 的概率<b>置零</b>，再交给采样器。</p>
 <div class="fig">
 <pre style="margin:0;background:#0f1b2a;color:#d7e3f0;">
 约束解码一步（以 JSON 为例）：
 已生成:  {"name": "A           状态机(自动机)当前状态: 字符串内部
-合法下一个 token: 'lice', 'my', 'Z' ...   非法: '}', ':', ',' ...
+合法片段可含: 'lice', '}', ':', ','；字符串内这些标点是普通字符。
+非法示例: 未转义的控制字符；token 合法性须按完整字节片段与 JSON 转义状态判断。
 采样前: logit["}"] = -inf,  logit[","] = -inf, ...   ← token bitmask
 </pre>
 <div class="cap">图 7-2 每步用位掩码（bitmask）屏蔽非法 token——词表 15 万，掩码就是 15 万个比特（约 18 KB），可以高效批量作用到 logits 上。</div>
@@ -775,7 +790,7 @@ target(大模型): 一次前向并行算 5 个位置的分布，逐个校验：
 <tr><th style="width:20%">方案（时间）</th><th>思路</th><th>开销</th></tr>
 <tr><td><b>Outlines</b>（2023-07）<sup class="cite">[OUTLINES23]</sup></td><td>把正则→NFA→token 级 FSM 离线编译；运行时按状态查表</td><td>编译慢（大语法几分钟）；FSM 状态数爆炸；逐步 Python 开销仍高</td></tr>
 <tr><td><b>SGLang 压缩 FSM</b>（2023-12）<sup class="cite">[SGLANG24]</sup></td><td>把多个 FSM 状态压缩合并，减少状态数；配合 RadixAttention 复用</td><td>结构化任务吞吐显著提升（论文报告端到端 6.4×，含缓存功劳）</td></tr>
-<tr><td><b>XGrammar</b>（2024-11，MLSys 2025）<sup class="cite">[XGRAMMAR25]</sup></td><td>① 上下文无关文法分层：先算"自适应部分"的 token 掩码缓存，剩下少量"上下文相关部分"运行时算；② 排除静态非法 token；③ GPU 友好的位掩码算子</td><td>JSON 场景掩码生成开销接近零（官方数据：掩码生成最高 100×、语法编译最高 10× 加速；对 llama.cpp 等端到端最高 80×）；成为 vLLM/SGLang/TensorRT-LLM 默认后端</td></tr>
+<tr><td><b>XGrammar</b>（2024-11，MLSys 2025）<sup class="cite">[XGRAMMAR25]</sup></td><td>① 上下文无关文法分层：缓存可预计算的上下文无关 token 判断，只有依赖完整解析栈的部分在运行时计算；② 排除静态非法 token；③ GPU 友好的位掩码算子</td><td>JSON 场景掩码生成开销接近零（官方数据：掩码生成最高 100×、语法编译最高 10× 加速；对 llama.cpp 等端到端最高 80×）；成为 vLLM/SGLang/TensorRT-LLM 默认后端</td></tr>
 </table>
 <pre><code># repos/vllm/vllm/v1/structured_output/backend_xgrammar.py (main @ 2026-08-23)
 def fill_bitmask(self, bitmask: torch.Tensor, idx: int) -> None:
@@ -802,7 +817,7 @@ def fill_bitmask(self, bitmask: torch.Tensor, idx: int) -> None:
 <div class="note"><b>[DAO22]</b> Dao, Fu, Ermon, Rudra, Ré. <i>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</i>. NeurIPS 2022（arXiv 2205.14135，2022-05）。原文（摘要大意译文）："我们计算精确注意力，同时<b>感知 GPU 显存层级中数据的读写（IO-aware）</b>，通过分块在片上 SRAM 中完成计算，减少高带宽显存（HBM）的访问。" 链接：<a href="https://arxiv.org/abs/2205.14135">arxiv.org/abs/2205.14135</a></div>
 
 <h3>8.2 图捕获：CUDA Graphs</h3>
-<p>消除发射开销的直接办法：<b>把整个前向的所有 kernel 调用录制成一张 CUDA Graph，之后每步一次重放（replay）</b>——CPU 只发一条指令。NVIDIA 自 CUDA 10（2018-09）提供该机制，TensorRT 用了多年；难点在于录制时<b>形状必须固定</b>，而推理引擎的 batch 与序列长度每步都在变。</p>
+<p>消除发射开销的直接办法：<b>把整个前向的所有 kernel 调用录制成一张 CUDA Graph，之后每步一次重放（replay）</b>——CPU 用一次图启动 API 提交，仍有驱动与启动成本。NVIDIA 自 CUDA 10（2018-09）提供该机制，TensorRT 用了多年；难点在于录制时<b>形状必须固定</b>，而推理引擎的 batch 与序列长度每步都在变。</p>
 <p>通用解法是"形状分桶 + padding"：把 batch 归一到若干档位（如 1,2,4,8,…,256），每档录一张图，执行时 padding 到档位。decode 阶段计算量小、kernel 数又多，收益最大——vLLM/SGLang 对 decode 默认开 CUDA Graph，端到端可提速约 1.2–2×（小 batch 时更明显）。</p>
 
 <h3>8.3 编译器：从手写图到自动编译</h3>
@@ -823,7 +838,37 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <p class="codecap"><b>代码 8-1</b> vLLM 的编译子系统目录。当前主干中 CUDA Graph 已与 torch.compile 深度整合，并被"可断图"进一步泛化。</p>
 <div class="card"><b>小结：</b>算子层（融合/IO 感知/分块）决定单次计算多快；图层（捕获/编译）决定<b>调度开销趋近于零</b>。二者叠加上前文的批处理与显存管理，构成现代推理引擎的完整执行栈。</div>
 <!-- ============================================================ -->
-<h2 id="s9"><span class="no">9</span>2024–2026 最新进展盘点</h2>
+<h2 id="s10"><span class="no">10</span>未来发展方向</h2>
+<p>综合上述脉络，给出六个可判断的方向（带依据，非占卜）：</p>
+
+<h3>10.1 分离粒度继续下沉：从"按阶段"到"按算子"</h3>
+<p>E/P/D 已把"阶段"拆开，AFD（注意力-FFN 分离，2026-07）已开始拆"算子类别"。终点形态是<b>组件化的推理云</b>：注意力、FFN/专家、采样、结构化约束都成为可独立伸缩、独立选硬件的"微服务"，KV Cache 是它们之间流动的"通用货币"。Mooncake 的"存储换计算"哲学（FAST 2025）会从 KV 扩展到中间激活等更多状态的池化<sup class="cite">[MOONCAKE25][VLLMAFD]</sup>。</p>
+
+<h3>10.2 以 KV / 会话为中心的服务架构</h3>
+<p>Agent 时代的请求不再是独立的一次调用，而是<b>长会话中的第 N 轮</b>。KV 会话保持、跨实例会话迁移、会话亲和路由（llm-d/Dynamo 已落地）将从优化项变成架构基石；集群级 radix 索引、跨请求 KV 共享（多用户共用同一段"世界知识"前缀）是活跃的研究与工程方向。</p>
+
+<h3>10.3 SLO 优先的智能调度与自治系统</h3>
+<p>goodput 指标（DistServe，OSDI 2024）把"体验"纳入目标函数；下一步是<b>让系统自动寻找配置</b>：并行度、P/D 配比、batch 上限、投机长度都由在线规划器根据 SLO 与负载实时调整，并在负载变化时<b>快速重配置</b>（分离架构研究者明确把 fast reconfiguration 列为首要开放问题<sup class="cite">[DISAGGLECTURE]</sup>）。语义路由/模型混合（9.3 节）则把"调度哪个模型"也纳入决策。</p>
+
+<h3>10.4 训推一体的"为服务而设计"</h3>
+<p>MLA、MTP、NSA/DSA 证明了模型结构对服务成本的杠杆率最高。可以预期：训练侧会继续内置<b>推理友好</b>特性（更多压缩 KV 的注意力、原生投机头、可编译友好的结构），"训练时多花 1% 算力换推理时省 30%"会成为标配设计原则<sup class="cite">[DSV3][LMSYSEP]</sup>。</p>
+
+<h3>10.5 投机采样全面默认化与混合化</h3>
+<p>EAGLE-3/MTP 在部分设置中可加速 2–4×，但必须支付草稿与验证成本，吞吐受限场景可能负收益，n-gram 草稿在 Agent 负载上意外有效；未来的引擎会把"草稿来源"做成运行时策略（小模型/自身头/n-gram 按上下文切换），并与批处理、EP、分离架构深度耦合（vLLM 2026-07 博客《Parallel All the Way Down》讨论的正是批处理×投机解码的联合设计）<sup class="cite">[EAGLE][LINKEDIN26]</sup>。</p>
+
+<h3>10.6 图编译走向"全自动、全动态"</h3>
+<p>从分段 CUDA Graph 到"可断图"，编译系统正学会与动态形状共存。方向：符号形状编译（一次编译、任意 batch 复用）、按硬件自动调参（DeepGEMM 式 JIT 常态化）、以及把 P/D 传输与计算也纳入统一图调度——让"跨机分离流水线"获得今天单机 CUDA Graph 同量级的确定性开销<sup class="cite">[VLLMRFC]</sup>。</p>
+
+<div class="card">
+<h4>结语</h4>
+<p>回看 2022→2026：Orca 重新定义了调度粒度，vLLM 重新定义了显存管理，Sarathi 与 DistServe/Splitwise/Mooncake 把"干扰"问题以分块或分离缓解干扰，同时引入新的调度、通信与资源配比成本，XGrammar 系把"生成可控性"做到近零开销，图编译把"执行开销"逼近物理极限，而 DeepSeek 系模型证明<b>模型本身可以是最大的系统优化</b>。下一步的故事大概率发生在"集群即计算机"的层面：KV 为中心的数据面、SLO 为中心的控制面、Agent 为中心的负载面。这是操作系统、体系结构与机器学习三门课在工业界最热的交汇点——欢迎上车。</p>
+</div>
+
+<!-- ============================================================ -->
+
+<details id="s9" class="note" data-research-updates><summary>更新附录 · 研究进展与发布记录（展开选读）</summary>
+<p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
+<h2 id="s9-content">更新附录 · 研究进展与发布记录</h2>
 <p>前八节是"教科书"，本节是"新闻联播"：按引擎/系统、模型-系统协同、新负载、学界动态四个板块，梳理最近两年多值得知道的进展（均标注出处与时间）。</p>
 
 <h3>9.0 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
@@ -854,7 +899,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <h3>9.2 模型-系统协同设计（co-design）成为主旋律</h3>
 <p>2024 年后最重要的观念转变：<b>推理效率不再只是引擎的事，模型结构本身开始"为服务而设计"</b>。</p>
 <ul>
-<li><b>MLA（Multi-head Latent Attention）</b>，DeepSeek-V2（2024-05）提出、V3（2024-12）沿用：把 KV 压缩为低秩 latent，KV Cache 缩小约 <b>93.3%</b>（DeepSeek-V2 报告数字），直接改写了第 3 节的显存经济学，也让长上下文 decode 的批量上限大增。</li>
+<li><b>MLA（Multi-head Latent Attention）</b>，DeepSeek-V2（2024-05）提出、V3（2024-12）沿用：把 KV 压缩为低秩 latent，KV Cache 缩小约 <b>93.3%</b>（DeepSeek-V2 整模型相对 DeepSeek 67B，包含 MoE 等变化，非 MLA 单独消融），直接改写了第 3 节的显存经济学，也让长上下文 decode 的批量上限大增。</li>
 <li><b>MTP 投机头</b>：训练自带 draft 模块（第 7.3 节），GLM、Kimi K2/K3、GLM-5.2 等新一代模型出厂即配；生产实践（GLM-5.2 on 24×B300，2026-07）报告 TPOT 从 40 ms 降到 17 ms（P/D + MTP + NVFP4 组合）<sup class="cite">[VLLMGLM]</sup>。</li>
 <li><b>稀疏注意力</b>：DeepSeek NSA/DSA（2025）把长上下文注意力的 KV 读取量再降一个量级，V3.2（2025-09/12）量产验证；vLLM 2026-04 博客"DeepSeek V4 in vLLM: Efficient Long-context Attention"表明该路线已进入第四代。</li>
 <li><b>MoE 服务化</b>：专家并行（EP）+ DeepEP（低时延 all-to-all，2025-02 开源）+ EPLB 负载均衡（1.49×/2.54× prefill/decode 提速，见 5.4）+ 弹性专家并行（vLLM 2026-05 博客）<sup class="cite">[LMSYSEP]</sup>。MoE 的"按专家切分"与 P/D 分离正交叠加，构成当前超大模型部署的标准形态。</li>
@@ -864,7 +909,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 
 <h3>9.3 新工作负载：推理模型与 Agent</h3>
 <ul>
-<li><b>长思考流（reasoning）</b>：o1/R1 类模型动辄输出上万 token 思考过程，decode 量占比暴涨 → 投机采样与 P/D 从"可选"变"必选"；Dynamo 即以"scaling reasoning AI"为副标题立项<sup class="cite">[DYNAMO25]</sup>。</li>
+<li><b>长思考流（reasoning）</b>：o1/R1 类模型动辄输出上万 token 思考过程，decode 量占比暴涨 → 投机采样与 P/D 值得重新评估，但是否启用仍取决于草稿/验证、网络、负载与资源配比；Dynamo 即以"scaling reasoning AI"为副标题立项<sup class="cite">[DYNAMO25]</sup>。</li>
 <li><b>Agent 工作负载</b>：多轮、短输出、高并发、前缀重复率极高（系统提示 + 工具清单每轮都在）、输出高度结构化（工具调用 JSON）。系统响应：会话亲和路由与 KV 会话保持（llm-d 的 session-history 保持、Dynamo KV 路由）、XGrammar-2 的动态结构<sup class="cite">[XGRAMMAR2]</sup>、语义路由/多模型混合（vLLM Semantic Router：按语义相似度把请求路由到最合适的模型，2026-07）<sup class="cite">[VLLMSEM]</sup>。</li>
 <li><b>多模态规模化</b>：视频/多图负载推动 E-P/D 异构部署（6.2 节）与编码缓存。</li>
 </ul>
@@ -918,39 +963,13 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <h4>④ 弹性与多极化（10-19/20）与 agentic 负载研究</h4>
 <p>vLLM <b>Elastic EP</b> 近零停机扩缩容（对应 v0.32.0 MRV2 特性）与 <b>TorchTPU</b> 后端回归——服务化"可伸缩性"与硬件多极化两条支线并行。学界：<b>DLite</b>（上交大，10-16）证明 agentic 负载需要免草稿历史的投机解码；<b>Prorsa</b>（PKU+小米，10-12）把 P/D 分离引入 agentic RL rollout；SNU（10-19）探索 GPU + 存算一体的混合 P/D。<b>When the KV Cache Is Slower Than the GPU</b>（Multiverse，10-15）用远程 KV 层 × 上下文并行 prefill 回答"当 KV 比算力更慢怎么办"。</p>
 
-<h2 id="s10"><span class="no">10</span>未来发展方向</h2>
-<p>综合上述脉络，给出六个可判断的方向（带依据，非占卜）：</p>
-
-<h3>10.1 分离粒度继续下沉：从"按阶段"到"按算子"</h3>
-<p>E/P/D 已把"阶段"拆开，AFD（注意力-FFN 分离，2026-07）已开始拆"算子类别"。终点形态是<b>组件化的推理云</b>：注意力、FFN/专家、采样、结构化约束都成为可独立伸缩、独立选硬件的"微服务"，KV Cache 是它们之间流动的"通用货币"。Mooncake 的"存储换计算"哲学（FAST 2025）会从 KV 扩展到中间激活等更多状态的池化<sup class="cite">[MOONCAKE25][VLLMAFD]</sup>。</p>
-
-<h3>10.2 以 KV / 会话为中心的服务架构</h3>
-<p>Agent 时代的请求不再是独立的一次调用，而是<b>长会话中的第 N 轮</b>。KV 会话保持、跨实例会话迁移、会话亲和路由（llm-d/Dynamo 已落地）将从优化项变成架构基石；集群级 radix 索引、跨请求 KV 共享（多用户共用同一段"世界知识"前缀）是活跃的研究与工程方向。</p>
-
-<h3>10.3 SLO 优先的智能调度与自治系统</h3>
-<p>goodput 指标（DistServe，OSDI 2024）把"体验"纳入目标函数；下一步是<b>让系统自动寻找配置</b>：并行度、P/D 配比、batch 上限、投机长度都由在线规划器根据 SLO 与负载实时调整，并在负载变化时<b>快速重配置</b>（分离架构研究者明确把 fast reconfiguration 列为首要开放问题<sup class="cite">[DISAGGLECTURE]</sup>）。语义路由/模型混合（9.3 节）则把"调度哪个模型"也纳入决策。</p>
-
-<h3>10.4 训推一体的"为服务而设计"</h3>
-<p>MLA、MTP、NSA/DSA 证明了模型结构对服务成本的杠杆率最高。可以预期：训练侧会继续内置<b>推理友好</b>特性（更多压缩 KV 的注意力、原生投机头、可编译友好的结构），"训练时多花 1% 算力换推理时省 30%"会成为标配设计原则<sup class="cite">[DSV3][LMSYSEP]</sup>。</p>
-
-<h3>10.5 投机采样全面默认化与混合化</h3>
-<p>EAGLE-3/MTP 让加速 2–4× 成为"免费午餐"，n-gram 草稿在 Agent 负载上意外有效；未来的引擎会把"草稿来源"做成运行时策略（小模型/自身头/n-gram 按上下文切换），并与批处理、EP、分离架构深度耦合（vLLM 2026-07 博客《Parallel All the Way Down》讨论的正是批处理×投机解码的联合设计）<sup class="cite">[EAGLE][LINKEDIN26]</sup>。</p>
-
-<h3>10.6 图编译走向"全自动、全动态"</h3>
-<p>从分段 CUDA Graph 到"可断图"，编译系统正学会与动态形状共存。方向：符号形状编译（一次编译、任意 batch 复用）、按硬件自动调参（DeepGEMM 式 JIT 常态化）、以及把 P/D 传输与计算也纳入统一图调度——让"跨机分离流水线"获得今天单机 CUDA Graph 同量级的确定性开销<sup class="cite">[VLLMRFC]</sup>。</p>
-
-<div class="card">
-<h4>结语</h4>
-<p>回看 2022→2026：Orca 重新定义了调度粒度，vLLM 重新定义了显存管理，Sarathi 与 DistServe/Splitwise/Mooncake 把"干扰"问题从缓解走向根治，XGrammar 系把"生成可控性"做到近零开销，图编译把"执行开销"逼近物理极限，而 DeepSeek 系模型证明<b>模型本身可以是最大的系统优化</b>。下一步的故事大概率发生在"集群即计算机"的层面：KV 为中心的数据面、SLO 为中心的控制面、Agent 为中心的负载面。这是操作系统、体系结构与机器学习三门课在工业界最热的交汇点——欢迎上车。</p>
-</div>
-
-<!-- ============================================================ -->
+</details>
 <h2 id="refs">参考文献</h2>
 <ol class="refs">
 <li id="ORCA22">Yu, Jeong, Kim, Kim, Chun. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. <b>OSDI 2022</b>. <a href="https://www.usenix.org/conference/osdi22/presentation/yu">链接</a></li>
 <li id="VLLM23">Kwon et al. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. <b>SOSP 2023</b>（vLLM 2023-06 开源）. <a href="https://arxiv.org/abs/2309.06180">arXiv:2309.06180</a></li>
 <li id="SARATHI23">Agrawal et al. <i>SARATHI: Efficient LLM Inference on GPUs via Piggybacking Decodes with Chunked Prefills</i>. arXiv 2023-08. <a href="https://arxiv.org/abs/2308.16369">arXiv:2308.16369</a></li>
-<li id="SARATHISERVE24">Agrawal, Kesarwani, Panwar, Modugula, Kwon, Gao, Tumanov, Ramjee. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. <b>OSDI 2024</b>. <a href="https://www.usenix.org/conference/osdi24/presentation/agrawal">链接</a>（arXiv 2024-03-04, 2403.02310）</li>
+<li id="SARATHISERVE24">Agrawal, Kedia, Panwar, Mohan, Kwatra, Gulavani, Tumanov, Ramjee. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. <b>OSDI 2024</b>. <a href="https://www.usenix.org/conference/osdi24/presentation/agrawal">链接</a>（arXiv 2024-03-04, 2403.02310）</li>
 <li id="DISTSERVE24">Zhong et al. <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized LLM Serving</i>. <b>OSDI 2024</b>. <a href="https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin">链接</a>（arXiv 2024-01-18, 2401.09670）</li>
 <li id="SPLITWISE24">Choukse et al. <i>Splitwise: Efficient Generative LLM Inference Using Phase Splitting</i>. <b>ISCA 2024</b>（arXiv 2023-11-30）. <a href="https://arxiv.org/abs/2311.18677">arXiv:2311.18677</a> · <a href="https://www.microsoft.com/en-us/research/blog/splitwise-improves-gpu-usage-by-splitting-llm-inference-phases/">微软博客</a></li>
 <li id="MOONCAKE25">Qin et al. <i>Mooncake: Trading More Storage for Less Computation — A KVCache-centric Disaggregated Architecture for LLM Serving</i>. <b>FAST 2025</b>（arXiv 2024-06-29, 2407.00079）. <a href="https://arxiv.org/abs/2407.00079">arXiv:2407.00079</a> · <a href="https://github.com/kvcache-ai/Mooncake">GitHub</a></li>
@@ -1014,5 +1033,8 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+</script>
 </body>
 </html>

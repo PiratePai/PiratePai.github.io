@@ -102,6 +102,10 @@
   @media (max-width:760px){ .toc ol{columns:1} }
 </style>
 <style id="mobile-patch">@media (max-width:768px){img,svg{max-width:100%;height:auto}pre{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}code{overflow-wrap:anywhere}*{min-width:0}html,body{overflow-x:hidden}}</style>
+<style>
+#reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
+#reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
+</style>
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -134,6 +138,16 @@
 </nav>
 
 <!-- ============================================================ -->
+
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 用一次工具任务串起算法、环境和系统</b><p><a href="#s1">奖励与优势</a> → <a href="#s2">数据与环境</a> → <a href="#s3">生成引擎</a> → <a href="#s4">异步与旧度</a> → <a href="#s5">多模态</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>轨迹是“观察→动作→工具反馈”的序列；奖励评价结果，优势衡量相对基线的好坏。rollout 是执行这些轨迹，训练则用轨迹更新策略。部署是否同卡、调用是否服务化、调度是否异步是三个独立轴，不是一条替代阶梯。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>同题三个奖励 [0,1,1]，组均值为 2/3；GRPO 用均值/标准差形成相对优势，不是给第一二三名发固定分。RLOO 则对每条样本用其他样本的平均奖励作基线，不能与组内标准化直接混称。</div>
+<h3>用同一组问题比较路线</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>PPO / GRPO / RLOO</td><td>比较价值模型、组内标准化与留一基线</td><td>方差、长度偏置、奖励分布与资源成本</td></tr><tr><td>Search-R1</td><td>把检索调用纳入可交互训练</td><td>检索环境成本与评测泄漏控制</td></tr><tr><td>异步系统</td><td>降低长尾等待、提高设备利用</td><td>行为策略旧度与重要性修正，优化采样速度不等于样本效率</td></tr></tbody></table></div>
+<p><b>值得做的研究：</b>固定总 GPU 小时和环境调用预算，算法获得多少成功任务？同时画 reward 对训练步与 wall-clock 的曲线，并区分 R1-Zero 的无 SFT 实验与 R1 的冷启动多阶段训练。生成侧奖励微调与 GUI 多轮决策共享部分 RL 形式，但其环境/轨迹与错误传播不同。</p>
+<details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Arash Ahmadian  et al.</b> <i>Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs</i>（RLOO / Back to Basics）；arXiv:2402.14740，v1 2024-02-22。<a href="https://arxiv.org/abs/2402.14740">原始论文与版本记录</a></li><li><b>Bowen Jin  et al.</b> <i>Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning</i>（Search-R1）；arXiv:2503.09516，v1 2025-03-12。<a href="https://arxiv.org/abs/2503.09516">原始论文与版本记录</a></li><li><b>Guangming Sheng  et al.</b> <i>HybridFlow: A Flexible and Efficient RLHF Framework</i>（HybridFlow）；arXiv:2409.19256，v1 2024-09-28。<a href="https://arxiv.org/abs/2409.19256">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
+</section>
 <h2 class="sec" id="s0"><span class="num">0</span>全景导览:一条时间线看懂<span class="roadmap">RLHF(2022)→ RLVR/R1(2025)→ Agent RL 与系统军备竞赛(2025–2026)</span></h2>
 
 <p class="lead">这份综述回答四个问题:<b>Agent 是怎么用强化学习练出来的</b>(§1–§2)、<b>RL 训练里的"采样引擎"是什么、为什么它成了瓶颈</b>(§3)、<b>为什么大家都在做异步化</b>(§4)、<b>RL 怎么从文本扩展到图像/视频/音乐</b>(§5)。如果你只有 10 分钟,看下面这张时间线 + 每节开头的"太长不看"即可。</p>
@@ -234,7 +248,7 @@
 <div class="note"><b>一个直觉性的总结:</b>2022 年 RLHF 让模型学会"说人话";2025 年初 DeepSeek-R1 证明<b>可验证奖励 + 大规模 RL</b> 能让模型自己"学会思考";2025 下半年开始,大家把同样的配方搬到 <b>Agent</b>(会调工具、会上网、会写代码的模型)上,发现训练的瓶颈从"算法"变成了"<b>系统</b>"——一条训练轨迹要和环境(浏览器、终端、API)来回交互几十轮,采样(rollout)比更新参数慢一个数量级,于是 rollout 引擎、异步化、数据飞轮成了 2025–2026 最热的工程话题;与此同时,同一套免价值模型的 RL 算法(GRPO)被搬到图像/视频/音乐生成上,引发了多模态生成的 RL 浪潮。</div>
 
 <!-- ============================================================ -->
-<div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -253,7 +267,7 @@
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro</b><span class="hl-date">10-23 · Moonshot</span></div><p>不改架构、加 RL 算力：GDPval-AA +312 Elo，权重 11-04 前开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Harness Scaling</b><span class="hl-date">10-21 · 人大等</span></div><p>46 票窗口最高热度：243 配置正交精选 18 个，胜过全量网格。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>FlashNext-RL</b><span class="hl-date">10-20 · Snowflake</span></div><p>prime-rl 底座上 8×B200 rollout 吞吐 11×（395→4438 tok/s/GPU）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Hy-Memory-30B-A3B 开源</b><span class="hl-date">10-15 · 腾讯混元</span></div><p>首个专做 agent 长期记忆写入的开源模型，token 开销 −39.3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div>
+<div class="hl-card"><div class="hl-meta"><b>Hy-Memory-30B-A3B 开源</b><span class="hl-date">10-15 · 腾讯混元</span></div><p>首个专做 agent 长期记忆写入的开源模型，token 开销 −39.3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
 <h2 class="sec" id="s1"><span class="num">1</span>预备知识:读懂 RL for LLM 所需的全部基础<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
 
@@ -272,7 +286,7 @@
 <p><b>目标</b>:调整策略的参数 θ(即 LLM 的权重),让期望回报 J(θ) = E[∑ r] 最大。直接对它求导就得到<b>策略梯度</b>:直觉上,把"拿到高奖励的轨迹"的每一步动作概率都调高一点,低奖励的调低一点,模型就会越来越好。问题在于奖励信号是稀疏的——整条轨迹可能只在最后拿一个分,我们不知道<b>哪个动作有功</b>,这就是 RL 里著名的 <b>credit assignment(功劳分配)问题</b>。PPO、GAE、GRPO 都是在回答"怎么把最终奖励合理地摊到每个 token 上"。</p>
 
 <h3>1.2 LLM 生成即"动作":自回归、采样与 KV Cache</h3>
-<p>LLM 生成文本的方式是<b>自回归</b>(autoregressive):每一步根据前文预测下一个 token 的概率分布,按温度采样挑一个,拼回上下文,再预测下一个,循环直到结束符。从 RL 视角看,这天然就是一个马尔可夫决策过程(MDP):每生成一个 token 就是做一次动作。<b>KV Cache</b> 是让这个过程不慢到无法忍受的关键——已生成前文的注意力键值缓存下来,新 token 只需增量计算。但要命的是:训练框架(如 Megatron/FSDP)为了放下百亿千亿参数,把权重<b>切片</b>存放(TP/PP/DP 并行);而推理引擎要的是<b>完整、连续</b>的权重和高吞吐 batch 调度。训练态权重不能直接拿来推理——这个"形态不匹配"正是 §3 rollout 引擎要解决的头号问题。</p>
+<p>LLM 生成文本的方式是<b>自回归</b>(autoregressive):每一步根据前文预测下一个 token 的概率分布,按温度采样挑一个,拼回上下文,再预测下一个,循环直到结束符。从 RL 视角看,这天然就是一个马尔可夫决策过程(MDP):每生成一个 token 就是做一次动作。<b>KV Cache</b> 是让这个过程不慢到无法忍受的关键——已生成前文的注意力键值缓存下来,新 token 只需增量计算。但要命的是:训练框架(如 Megatron/FSDP)为了放下百亿千亿参数,把权重<b>切片</b>存放(TP/PP/DP 并行);推理同样可用 TP/PP 权重分片；两阶段的并行布局、数值格式、驻留与调度可能不同，因此需要按配置重分片或转换，而非推理必须在单卡持有完整连续权重——这个"形态不匹配"正是 §3 rollout 引擎要解决的头号问题。</p>
 
 <h3>1.3 从 RLHF 到 RLVR:三次范式转移</h3>
 
@@ -282,7 +296,7 @@
 <span class="zh">要点概述(非原文直引):论文提出 SFT → 奖励模型 → PPO 的三阶段对齐流程,使 1.3B 参数的 InstructGPT 在人类偏好评测中胜过 175B 的 GPT-3。这是 RLHF 的奠基性工作。</span></small></div>
 
 <h4>第二幕 · RLVR + GRPO(2024–2025):让模型自己学会思考</h4>
-<p>2024 年 DeepSeekMath 提出 <b>GRPO</b>(Group Relative Policy Optimization)<span class="cite">[6]</span>:把 PPO 里那个又大又难训的<b>价值网络(critic)扔掉</b>,改为对同一个问题<b>采样一组回答(比如 16 条)</b>,用组内奖励的<b>相对排名</b>计算优势——比组平均好的回答整体加分,差的减分。这个改动让 RL 训练显存减半、稳定性大增,成为后来一切工作的默认算法。2025 年 1 月,DeepSeek-R1<span class="cite">[7]</span> 展示了极端版本:base 模型<b>不做任何 SFT 冷启动</b>,只用<b>可验证奖励</b>(RLVR,Reinforcement Learning with Verifiable Rewards:数学答案对不对、代码测试过不过,规则自动判定,完全不需要奖励模型)直接做大规模 RL,模型自发涌现出长链思考、自我反思、验证回溯等行为。这就是著名的"R1 时刻",它把"推理能力"从"蒸馏教师模型"的路线,扳到了"RL 自我进化"的路线上。</p>
+<p>2024 年 DeepSeekMath 提出 <b>GRPO</b>(Group Relative Policy Optimization)<span class="cite">[6]</span>:把 PPO 里那个又大又难训的<b>价值网络(critic)扔掉</b>,改为对同一个问题<b>采样一组回答(比如 16 条)</b>,用组内奖励的<b>组内均值与标准差归一化后的相对奖励</b>计算优势——比组平均好的回答整体加分,差的减分。省去 critic 可降低资源开销，但总显存比例依优化器、参考模型、激活和 rollout 配置而变；GRPO 是重要路线，RLOO、PPO 等仍有不同权衡。2025 年 1 月,DeepSeek-R1-Zero<span class="cite">[7]</span> 展示了无 SFT 冷启动实验；R1 本身使用冷启动与多阶段训练。R1-Zero 从 base 模型出发，<b>不做任何 SFT 冷启动</b>,只用<b>可验证奖励</b>(RLVR,Reinforcement Learning with Verifiable Rewards:数学答案对不对、代码测试过不过,规则自动判定,完全不需要奖励模型)直接做大规模 RL,模型自发涌现出长链思考、自我反思、验证回溯等行为。这就是著名的"R1 时刻",它把"推理能力"从"蒸馏教师模型"的路线,扳到了"RL 自我进化"的路线上。</p>
 <div class="srcnote"><small><b>[6] Shao et al. (DeepSeek), "DeepSeekMath: Pushing the Limits of Mathematical Reasoning", arXiv:2402.03300, 2024-02。</b><br>
 <span class="zh">要点概述(非原文直引):GRPO 舍弃 PPO 的价值模型,对同一问题的一组采样回答计算组内相对优势作为基线,大幅降低训练资源开销,并首次在 7B 模型上接近同级闭源模型数学能力。</span><br>
 <b>[7] DeepSeek-AI, "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning", arXiv:2501.12948, 2025-01。</b><br>
@@ -441,7 +455,7 @@ slime/
   </div>
   <div class="card">
     <h5>GLM-4.5(355B MoE, 2025-08)</h5>
-    <p><b>配方:</b>以 slime 为基础设施做"长程 agentic RL",聚焦<b>网页搜索与代码生成</b>两个可自动判分的场景;采用 Qwen 提出的 GSPO 序列级目标（见 §1.3[9]）稳定长序列训练。<b>飞轮特征:</b>奖励全部来自环境终局判定,无需人类偏好标注。<span class="cite">[17]</span></p>
+    <p><b>配方:</b>以 slime 为基础设施做"长程 agentic RL",聚焦<b>网页搜索与代码生成</b>两个可自动判分的场景;报告的整体 RL 算法基于 GRPO，并移除 KL loss（GLM-4.5 §3.2）；GSPO 是另一项 Qwen 工作，不能归因于此。<b>飞轮特征:</b>Agentic RL 主要使用环境结果奖励，并包含工具调用格式的过程惩罚；General RL 还组合其他反馈，不能统称全是终局规则。<span class="cite">[17]</span></p>
   </div>
   <div class="card">
     <h5>AgentGym-RL / ASearcher(2025)</h5>
@@ -486,7 +500,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 <span class="k">with</span> marked_timer(<span class="s">"update_actor"</span>, timing_raw, color=<span class="s">"red"</span>):
     actor_output = self._update_actor(batch)            <span class="c"># ④ 训练引擎更新权重,随后广播回 rollout 引擎,进入下一步</span></code></pre>
 <p class="path">完整实现见本地 <code>verl/verl/trainer/ppo/ray_trainer.py:1513</code>(generate)、<code>:1690</code>(update_actor)。</p>
-<div class="srcnote"><small><b>[20] Sheng et al. (字节 Seed), "HybridFlow: A Flexible and Efficient RLHF Framework"(verl), arXiv:2501.14224, 2025-01(EuroSys 2025)。</b><br>
+<div class="srcnote"><small><b>[20] Sheng et al. (字节 Seed), "HybridFlow: A Flexible and Efficient RLHF Framework"(verl), arXiv:2409.19256, 2024-09-28(EuroSys 2025)。</b><br>
 <span class="zh">要点概述(非原文直引):HybridFlow 用"单控制器"编程模型描述 RLHF 数据流,并把训练与推理计算灵活映射到可重叠的 GPU 资源池上,是开源 RL 框架的事实标准之一;上述 verl 源码中的 async_rollout_manager / replica sleep 是其 2025–2026 演进后的服务化形态。</span></small></div>
 
 <h3>3.4 第二派:服务化解耦(disaggregated)与"权重同步"问题</h3>
@@ -625,7 +639,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 <p>全异步系统中,rollout worker 流式地产出轨迹,训练器凑够一批就更新,两者<b>完全不看对方脸色</b>。此时数据的"年龄"(由第 v 版权重生成、被第 v+k 版权重消费,称 staleness = k)成为必须显式管理的资源。核心机制有四个,且都能在本地源码里看到对应实现:</p>
 
 <h4>(1) Staleness 容量控制——AReaL 的"限流阀门"</h4>
-<p>AReaL 的做法是给 rollout 派发加一个<b>背压阀门</b>:允许的最大在途样本数 = (最大容忍旧度 + 当前版本号 + 1) × 训练批大小,再与并发上限取 min。直观解释:<b>如果 rollout 跑得比训练快,就少派点活,免得数据攒到"过期"</b>。本地源码:</p>
+<p>AReaL 的做法是给 rollout 派发加一个<b>背压阀门</b>:可派发余量 = max(0, min(并发上限−running, (最大容忍旧度+当前版本号+1)×训练批大小−accepted−running))；accepted 与版本采用源码累计计数口径，不能把累计上限叫作当前在途量。直观解释:<b>如果 rollout 跑得比训练快,就少派点活,免得数据攒到"过期"</b>。本地源码:</p>
 <pre><code><span class="c"># 仓库:AReaL(inclusionAI / Ant,本地 clone)— areal/infra/staleness_manager.py(核心逻辑节选)</span>
 <span class="k">class</span> <span class="f">StalenessManager</span>:
     <span class="s">"""Manages rollout capacity based on staleness and concurrency constraints…"""</span>
@@ -639,7 +653,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 <p class="path">完整文件见本地 <code>AReaL/areal/infra/staleness_manager.py:79-113</code>;训练器侧配套有版本化权重管理(<code>AReaL/areal/trainer/rl_trainer.py:887-897</code>,<code>set_version</code>)与多版本 LoRA 保留(<code>lora_keep_versions = max_head_offpolicyness + 2</code>)以便对旧数据做精确的重要性修正。</p>
 
 <h4>(2) Staleness 增强的策略梯度——算法侧的补偿</h4>
-<p>系统控旧度,算法侧则把"重要性比率"的参照系从"生成时权重 π_prox"改为"行为策略 π_behav"(即真正生成这条数据的那个版本),并收紧信任域。AReaL 的目标函数(论文公式)即为此设计,并报告了核心结果<span class="cite">[25]</span>:</p>
+<p>AReaL 区分三个策略：当前训练策略 πθ、近端参考策略 πprox、实际采样的行为策略 πbehav。裁剪比率 πθ/πprox 控制相对近端策略的更新，另用 πprox/πbehav 修正旧数据的分布偏移。两种比率分工不同，不是把一个分母简单替换成另一个。系统的旧度控制与算法的离策略修正仍须共同工作。<a href="https://arxiv.org/html/2505.24298">AReaL 算法</a>。论文报告在数学/代码实验中最高 2.77× 训练加速，不可直接外推全部 Agent 负载。</p>
 <div class="srcnote"><small><b>[25] AReaL(NeurIPS 2025),关键结果。</b><br>
 <span class="en">"AReaL runs LLM generation in a streaming manner, where each rollout worker continuously generates new outputs without waiting, leading to high GPU utilization… AReaL achieves up to 2.77x training speedup compared to synchronous systems with the same number of GPUs and matched or even improved final performance."</span><br>
 <span class="zh">译:"AReaL 以流式方式运行 LLM 生成:每个 rollout worker 持续不断地产出新输出而无需等待,从而获得高 GPU 利用率……同等 GPU 数量下,AReaL 相比同步系统取得最高 2.77 倍训练加速,最终性能持平甚至更优。"</span></small></div>
@@ -787,10 +801,10 @@ in-flight sample to finish."""</span>
 <p>可微分支的代表是 AlignProp(奖励梯度端到端反传整条去噪链,NeurIPS 2023)与 DRaFT(只需反传最后 K 步即可,ICLR 2024)<span class="cite">[44]</span>;离线分支代表是 Diffusion-DPO(把 DPO 的似然用 ELBO 改造,arXiv:2311.12908, 2023-11)<span class="cite">[45]</span>。<b>注意:可微反传是扩散 RL 独有的捷径</b>——LLM 的离散 token 没有这条路。</p>
 
 <h4>2025 年引爆点:GRPO 进入 flow matching 时代</h4>
-<p>2024–2025 年主流生成模型转向 flow matching(SD3、FLUX、视频模型普遍采用),其采样是<b>确定性 ODE</b>——没有随机性就没有探索,RL 无法直接套用。上海 AI Lab 的 <b>Flow-GRPO</b><span class="cite">[46]</span> 给出钥匙:把确定性 ODE 采样等价转换为带噪 SDE 采样,探索有了,GRPO 直接可用;字节 Seed 的 <b>DanceGRPO</b><span class="cite">[47]</span> 则把该范式统一扩展到文生图/文生视频/图生视频的任意分辨率与时长,并总结出"共享噪声初始化"等防 reward hacking 的工程细节。</p>
+<p>2024–2025 年主流生成模型转向 flow matching(SD3、FLUX、视频模型普遍采用),其采样是<b>确定性 ODE</b>——随机初始噪声仍可带来探索，但确定性逐步转移缺少常规 PPO/GRPO 所需的随机转移密度，不能直接照搬逐步似然比目标。上海 AI Lab 的 <b>Flow-GRPO</b><span class="cite">[46]</span> 给出钥匙:把确定性 ODE 采样等价转换为带噪 SDE 采样,探索有了,GRPO 直接可用;字节 Seed 的 <b>DanceGRPO</b><span class="cite">[47]</span> 则把该范式统一扩展到文生图/文生视频/图生视频的任意分辨率与时长,并总结出"共享噪声初始化"等防 reward hacking 的工程细节。</p>
 <div class="srcnote"><small><b>[46] Liu et al. (上海 AI Lab), "Flow-GRPO: Training Flow Matching Models via Online RL", arXiv:2505.05470, 2025-05。</b><br>
 <span class="en">"We are the first to introduce GRPO to flow matching models by converting deterministic ODE sampling into SDE sampling… Flow-GRPO improves SD3.5-M accuracy from 63% to 95% without noticeably compromising image quality."</span><br>
-<span class="zh">译:"我们通过把确定性 ODE 采样转换为 SDE 采样,首次将 GRPO 引入 flow matching 模型……Flow-GRPO 将 SD3.5-M 的(文生图准确性)从 63% 提升到 95%,且画质无明显损失。"</span><br><br>
+<span class="zh">译:"我们通过把确定性 ODE 采样转换为 SDE 采样,首次将 GRPO 引入 flow matching 模型……Flow-GRPO 将 SD3.5-M 的GenEval 指标从 63% 提升到 95%（非所有生成任务的通用准确率）,且画质无明显损失。"</span><br><br>
 <b>[47] Jiang et al. (ByteDance Seed &amp; NTU), "DanceGRPO: Unleashing GRPO on Visual Generation", arXiv:2505.07818, 2025-05。</b><br>
 <span class="zh">DanceGRPO 将该范式统一推广到 T2I/T2V/I2V 各类视觉生成任务、任意分辨率与宽高比,并扩展到数十亿参数模型;后续综述(CVPR 2026 Neighbor-GRPO)强调其"共享噪声初始化以防 reward hacking"等关键实现细节。</span></small></div>
 
@@ -822,7 +836,24 @@ in-flight sample to finish."""</span>
 <!-- ============================================================ -->
 <h2 class="sec" id="s6"><span class="num">6</span>2025–2026 最新进展盘点与未来方向<span class="roadmap">系统 · 算法 · 数据环境 · 多模态 四条主线的收敛点</span></h2>
 
-<h3>6.1 四条主线的 2026 快照</h3>
+<h3>6.2 未来发展方向研判(附依据)</h3>
+<ol style="font-size:15px;line-height:2">
+  <li><b>异步/解耦将成为 RL 系统的默认形态,同步模式退居小规模调试用途。</b>依据:AReaL 2.77×、StreamRL 2.66×、Agent Lightning v1.0 2× 的加速证据链,以及 vLLM 把异步支持内置于引擎本身(2026-05)——当推理引擎原生支持 pause/resume,同步模式的"省事"优势不复存在。</li>
+  <li><b>Rollout 引擎与 RL 框架的边界重组:推理引擎吃掉框架的 infra 层。</b>依据:vLLM 原生 RL API、SGLang 深度绑定 slime、vime 的出现——未来框架的核心价值将只剩"算法与数据流编排",权重同步/调度等沉入引擎层。</li>
+  <li><b>staleness/off-policyness 将被形式化为可优化的资源分配问题。</b>依据:AReaL 的容量公式、ROLL Flash 的"异步比例"超参、经验回放研究(2026-04)的"stale 方差-样本效率"权衡理论化——从工程 trick 走向有理论的自动调参。</li>
+  <li><b>Agent RL 的瓶颈继续从模型转向环境:环境合成、环境并行、环境课程成为独立研究方向。</b>依据:EnvScaling 定律、Agent-World 自进化闭环、ProRL Agent 的 rootless sandbox、AgentGym-RL 的 27 环境统一框架,以及 2025-11 起的环境规模化系列综述。</li>
+  <li><b>"数据飞轮"从营销词变为可审计的工程系统。</b>依据:Tongyi DeepResearch 公开全配方(CPT↔后训练数据互通)、K2 的自评 rubric、Agent-World 的弱点诊断闭环——飞轮的每个环节(出题、判分、课程、回流)都有了开源参照实现。</li>
+  <li><b>可验证奖励从"数学/代码"扩展到"物理/几何/一致性/体验"。</b>依据:World-R1 的 3D 约束、4D Latent Reward(2026-03)、多模态 rubric 奖励(RubricRL, 2025-11)、零样本 MLLM 打分器(SpectraReward, 2026-07)——"什么都能自动判分"的边界在快速外扩。</li>
+  <li><b>RL 与蒸馏/量化的融合训练("一次训练,既对齐又加速")。</b>依据:RL-Native Distillation(2026-08)、Flow-Map GRPO 少步一致性模型 RL(2026-07)、Qwen-Image-2.0-RL 的在策略蒸馏——在线 rollout 昂贵,能省一步蒸馏就省一步。</li>
+  <li><b>去中心化与异构化 RL:训练不再囿于单一集群。</b>依据:INTELLECT-2/PRIME-RL 的全球分布式 rollout + TOPLOC 验证、AReaL-Hex 异构调度、StreamRL 跨机房异构、BiDiRL 时空复用(2026)——算力来源多元化倒逼架构解耦,解耦架构反过来使能多元化。</li>
+  <li><b>理解与生成的统一 RL 仍是待填补的空白。</b>依据:Janus-Pro/BAGEL 靠预训练,RL 主要各自为战(理解侧 GLM-4.1V-Thinking,生成侧 DanceGRPO);跨双通路的联合奖励设计尚无成熟工作——这是今天入场仍能做出原创贡献的方向。</li>
+  <li><b>对 RLVR 本身的反思将持续:增益的鲁棒性、可迁移性与持续学习。</b>依据:多模态 RLVR 换模板即失效(2608.08802)、correct-set 周转(2606.03087)、以及 Magistral/AReaL 系列对 off-policy 负奖励塌缩的观察——"RL 学到的是能力还是过拟合验证器"将是 2026–2027 的核心议题。</li>
+</ol>
+
+<div class="note"><b>学习路径建议:</b>① 用 <code>verl</code> + 单卡跑通一个 GRPO 数学任务(官方有 notebook),读懂 <code>ray_trainer.py</code> 的 fit 循环;② 换成多轮 tool-use 任务,体会环境交互对同步模式的毒害;③ 切到 slime 的全异步模式(v0.4.0 起同步/异步统一走 <code>train.py</code>,已移除 train_async.py)或 AReaL,对比 GPU 利用率曲线;④ 把奖励函数换成自己的"可验证"任务(比如让你写的小游戏可判胜负)——走完这四步,你就把本文 §1–§4 亲手摸了一遍。多模态生成侧则推荐从 Flow-GRPO 的开源实现入手。</div>
+
+<!-- ============================================================ -->
+<details class="note" id="research-updates" data-research-updates><summary>更新附录 · Agent RL 发布与论文记录</summary><h3>6.1 四条主线的 2026 快照</h3>
 <div class="grid two">
   <div class="card"><h5>① 系统线:异步成为默认,服务化成为共识</h5>
     <p><b>已发生:</b>verl 演进为 LLM-Server 服务化 rollout;vLLM 内置原生 RL API(权重同步 + pause/resume,2026-05);vime(vLLM 生态的 Megatron+vLLM 训练框架,2026-06);AReaL 转型"Agent RL 桥梁";Agent Lightning v1.0(2026-08)给出 collocated async 的轻量方案;ProRL Agent(2026-03)提出 Rollout-as-a-Service。<b>信号:</b>框架竞争从"谁的吞吐高"转向"谁对 Agent 工作负载的抽象更对"。</p></div>
@@ -886,23 +917,7 @@ in-flight sample to finish."""</span>
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.28998）</b> · 8 层模型上 16 项优化把 REAL tokens/s/GPU 从 2,391 一路抬到 17,678（7.4×）——“通用 RL 框架不够、要按模型架构定制内核”的军备竞赛画在一张图里。（版权归原作者，引用仅作技术说明）</figcaption>
 </figure>
 
-<h3>6.2 未来发展方向研判(附依据)</h3>
-<ol style="font-size:15px;line-height:2">
-  <li><b>异步/解耦将成为 RL 系统的默认形态,同步模式退居小规模调试用途。</b>依据:AReaL 2.77×、StreamRL 2.66×、Agent Lightning v1.0 2× 的加速证据链,以及 vLLM 把异步支持内置于引擎本身(2026-05)——当推理引擎原生支持 pause/resume,同步模式的"省事"优势不复存在。</li>
-  <li><b>Rollout 引擎与 RL 框架的边界重组:推理引擎吃掉框架的 infra 层。</b>依据:vLLM 原生 RL API、SGLang 深度绑定 slime、vime 的出现——未来框架的核心价值将只剩"算法与数据流编排",权重同步/调度等沉入引擎层。</li>
-  <li><b>staleness/off-policyness 将被形式化为可优化的资源分配问题。</b>依据:AReaL 的容量公式、ROLL Flash 的"异步比例"超参、经验回放研究(2026-04)的"stale 方差-样本效率"权衡理论化——从工程 trick 走向有理论的自动调参。</li>
-  <li><b>Agent RL 的瓶颈继续从模型转向环境:环境合成、环境并行、环境课程成为独立研究方向。</b>依据:EnvScaling 定律、Agent-World 自进化闭环、ProRL Agent 的 rootless sandbox、AgentGym-RL 的 27 环境统一框架,以及 2025-11 起的环境规模化系列综述。</li>
-  <li><b>"数据飞轮"从营销词变为可审计的工程系统。</b>依据:Tongyi DeepResearch 公开全配方(CPT↔后训练数据互通)、K2 的自评 rubric、Agent-World 的弱点诊断闭环——飞轮的每个环节(出题、判分、课程、回流)都有了开源参照实现。</li>
-  <li><b>可验证奖励从"数学/代码"扩展到"物理/几何/一致性/体验"。</b>依据:World-R1 的 3D 约束、4D Latent Reward(2026-03)、多模态 rubric 奖励(RubricRL, 2025-11)、零样本 MLLM 打分器(SpectraReward, 2026-07)——"什么都能自动判分"的边界在快速外扩。</li>
-  <li><b>RL 与蒸馏/量化的融合训练("一次训练,既对齐又加速")。</b>依据:RL-Native Distillation(2026-08)、Flow-Map GRPO 少步一致性模型 RL(2026-07)、Qwen-Image-2.0-RL 的在策略蒸馏——在线 rollout 昂贵,能省一步蒸馏就省一步。</li>
-  <li><b>去中心化与异构化 RL:训练不再囿于单一集群。</b>依据:INTELLECT-2/PRIME-RL 的全球分布式 rollout + TOPLOC 验证、AReaL-Hex 异构调度、StreamRL 跨机房异构、BiDiRL 时空复用(2026)——算力来源多元化倒逼架构解耦,解耦架构反过来使能多元化。</li>
-  <li><b>理解与生成的统一 RL 仍是待填补的空白。</b>依据:Janus-Pro/BAGEL 靠预训练,RL 主要各自为战(理解侧 GLM-4.1V-Thinking,生成侧 DanceGRPO);跨双通路的联合奖励设计尚无成熟工作——这是今天入场仍能做出原创贡献的方向。</li>
-  <li><b>对 RLVR 本身的反思将持续:增益的鲁棒性、可迁移性与持续学习。</b>依据:多模态 RLVR 换模板即失效(2608.08802)、correct-set 周转(2606.03087)、以及 Magistral/AReaL 系列对 off-policy 负奖励塌缩的观察——"RL 学到的是能力还是过拟合验证器"将是 2026–2027 的核心议题。</li>
-</ol>
-
-<div class="note"><b>学习路径建议:</b>① 用 <code>verl</code> + 单卡跑通一个 GRPO 数学任务(官方有 notebook),读懂 <code>ray_trainer.py</code> 的 fit 循环;② 换成多轮 tool-use 任务,体会环境交互对同步模式的毒害;③ 切到 slime 的全异步模式(v0.4.0 起同步/异步统一走 <code>train.py</code>,已移除 train_async.py)或 AReaL,对比 GPU 利用率曲线;④ 把奖励函数换成自己的"可验证"任务(比如让你写的小游戏可判胜负)——走完这四步,你就把本文 §1–§4 亲手摸了一遍。多模态生成侧则推荐从 Flow-GRPO 的开源实现入手。</div>
-
-<!-- ============================================================ -->
+</details>
 <h2 class="sec" id="s7"><span class="num">7</span>参考文献<span class="roadmap">全部标注发表时间;引文处已附原文与译文</span></h2>
 <div class="refs">
 <ol>
@@ -925,7 +940,7 @@ in-flight sample to finish."""</span>
   <li>GLM Team (Z.ai). <i>GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models</i>. arXiv:2508.06471, 2025-08.</li>
   <li>Kwon et al. <i>Efficient Memory Management for LLM Serving with PagedAttention</i>(vLLM). SOSP 2023 / arXiv:2309.06180, 2023-09.</li>
   <li>Zheng et al. <i>SGLang: Efficient Controlled Generation</i>(RadixAttention). NeurIPS 2024 / arXiv:2312.07104, 2023-12.</li>
-  <li>Sheng et al. <i>HybridFlow: A Flexible and Efficient RLHF Framework</i>(verl). arXiv:2501.14224, 2025-01(EuroSys 2025).</li>
+  <li>Sheng et al. <i>HybridFlow: A Flexible and Efficient RLHF Framework</i>(verl). arXiv:2409.19256, 2024-09-28(EuroSys 2025).</li>
   <li><i>ProRL Agent: Rollout-as-a-Service for RL Training of Multi-Turn LLM Agents</i>. arXiv:2603.18815, 2026-03.</li>
   <li>Luo et al. <i>Agent Lightning: Train ANY AI Agents with Reinforcement Learning</i>. arXiv:2508.03680, 2025-08;<i>Agent Lightning v1.0: Towards Harnessed Agentic RL</i>, arXiv:2608.17528, 2026-08.</li>
   <li>Together AI. <i>Distribution-aware speculative decoding for RL rollouts</i>. 官方博客, 2026.</li>
@@ -993,5 +1008,8 @@ in-flight sample to finish."""</span>
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+</script>
 </body>
 </html>

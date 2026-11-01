@@ -73,6 +73,10 @@
   .summary3 ol{margin:6px 0 2px;}
   @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
 </style>
+<style>
+#reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
+#reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
+</style>
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -103,7 +107,17 @@
     </ol>
   </div>
 
-<div class="hl-wrap" id="hl"><style>
+
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 用一次冷启动与一次续聊分清容量、流量和延迟</b><p><a href="#s1">存储层级与指标</a> → <a href="#s2">模型结构</a> → <a href="#s3">搬权重/激活与同步</a> → <a href="#s4">性能口径</a> → <a href="#s5">路线比较</a> → <a href="#s6">近似开关</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>VRAM、RAM、SSD 是容量与访问代价不同的层级；热专家缓存是驻留策略，CPU 算冷专家是执行策略，预测预取是调度策略，单模型特化是适配范围，四者可交叉。prompt tok/s、生成 tok/s、TTFT 和整次请求耗时要分开，早期 engine 0.1.x 与当前版本也要分表。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>262K 输入若按 500 prompt tok/s 处理，光 prefill 就约 524s；即使后续生成达到 95 tok/s，也不能称整次交互“瞬时”。第二轮复用会话状态可能很快，但不能用它代表冷启动。</div>
+<h3>用同一组问题比较路线</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>搬权重</td><td>MoE-Lightning 用 CPU/GPU/I/O 流水与层级模型</td><td>PCIe、缓冲与预取不足会暴露等待</td></tr><tr><td>算冷专家</td><td>CPU 算专家、只移动较小激活</td><td>CPU 算力、RAM 带宽与同步协议可能是瓶颈</td></tr><tr><td>投机/复用</td><td>MoE-Spec 关注验证专家并集膨胀</td><td>需列量化、专家裁减、residency 等近似开关；投机相对同配置正确不代表相对全精度无损</td></tr></tbody></table></div>
+<p><b>值得做的研究：</b>对同一机器、模型与量化格式，分别测冷启动、热缓存、续聊与历史编辑，记录 TTFT、TPOT、CPU/GPU 关键路径与质量。没有这些对照，不由单个 95 tok/s 数字给所有硬件排序。</p>
+<details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Shiyi Cao  et al.</b> <i>MoE-Lightning: High-Throughput MoE Inference on Memory-constrained GPUs</i>（MoE-Lightning）；arXiv:2411.11217，v1 2024-11-18。<a href="https://arxiv.org/abs/2411.11217">原始论文与版本记录</a></li><li><b>Bradley McDanel  et al.</b> <i>MoE-Spec: Expert Budgeting for Efficient Speculative Decoding</i>（MoE-Spec）；arXiv:2602.16052，v1 2026-02-17。<a href="https://arxiv.org/abs/2602.16052">原始论文与版本记录</a></li><li><b>Songlin Yang  et al.</b> <i>Gated Delta Networks: Improving Mamba2 with Delta Rule</i>（Gated DeltaNet）；arXiv:2412.06464，v1 2024-12-09。<a href="https://arxiv.org/abs/2412.06464">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
+</section>
+<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
@@ -123,8 +137,8 @@
 <div class="hl-card"><div class="hl-meta"><b>Strata 0.2.7：单模型引擎跑通 125B MoE</b><span class="hl-date">10-28 · Niko1221/Strata</span></div><p>12 GB 显卡 + 64 GB 内存跑 Qwen3.8-Flash-Next 达 95 tok/s（4K）；三个模型家族、一台引擎、一篇自证论文——"单模型特化"从流派变成产品。</p><a class="hl-link" href="#s3">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>llama.cpp v0.8.0 原生专家缓存</b><span class="hl-date">10-28 · ggml-org</span></div><p><code>--moe-cache-mib</code> 把留 CPU 的 MoE 专家做进 GPU 缓存（策略升级为 50/50 SLRU）——特化引擎的核心机制正被通用引擎吸收，两者差距在缩小。</p><a class="hl-link" href="#s5">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Qwen3.8-Flash-Next 成全行业目标模型</b><span class="hl-date">08-26 起 · Qwen/多方</span></div><p>125B 总参 / 6B 激活 + GDN 混合架构：vLLM、SGLang、LM Studio、Splash、ninfer、Strata 全部 day-0/near-day-0 支持——单模型引擎流派随之成型。</p><a class="hl-link" href="#s2">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>CPU-GPU 混合推理学术主线收敛</b><span class="hl-date">2024–2025 · 顶会</span></div><p>PowerInfer（SOSP'24）、MoE-Infinity（ASPLOS'24）、Pre-gated MoE（ISCA'24）、Fiddler（ICLR'25）、KTransformers（SOSP'25）、T-MAC（EuroSys'25）——Strata 论文把这条线全部引作谱系。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
-</div></div>
+<div class="hl-card"><div class="hl-meta"><b>CPU-GPU 混合推理学术主线收敛</b><span class="hl-date">2024–2025 · 顶会</span></div><p>PowerInfer（SOSP'24）、MoE-Infinity（arXiv:2401.14361）、Pre-gated MoE（ISCA'24）、Fiddler（ICLR'25）、KTransformers（SOSP'25）、T-MAC（EuroSys'25）——Strata 论文把这条线全部引作谱系。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
+</div></div></details>
 
 <h2 id="s0"><span class="no">0</span>导读与大事记：混合推理是什么、为什么现在</h2>
 
@@ -140,7 +154,7 @@
 <tr><th>流派</th><th>代表（时间）</th><th>一句话原理</th><th>代表数字</th></tr>
 <tr><td><b>搬权重派</b><span class="tag sys">系统</span></td><td>ZeRO-Infinity（SC 2021）[ZEROINF21]；FlexGen（ICML 2023）[FLEXGEN23]；Eliseev &amp; Mazur（2023-12）[ELISEEV23]</td><td>权重放 RAM/SSD，算到谁把谁搬上 GPU——瓶颈是 PCIe</td><td>FlexGen：OPT-175B 单张 T4 跑出 1 tok/s 量级（batch 144，比当时方案高约两个数量级）</td></tr>
 <tr><td><b>搬激活派</b><span class="tag sys">系统</span></td><td>Fiddler（ICLR 2025）[FIDDLER25]；KTransformers（SOSP 2025）[KTRANS25]</td><td>batch=1 时激活远小于专家权重——把激活搬给 CPU、直接在 CPU 算专家</td><td>KTransformers：671B DeepSeek-V3 相对既有系统 prefill 4.62–19.74×、decode 1.25–4.09×</td></tr>
-<tr><td><b>缓存派</b><span class="tag sys">系统</span></td><td>MoE-Infinity（ASPLOS 2024）[MOEINF24]；PowerInfer（SOSP 2024）[POWERINFER24]；llama.cpp <code>--moe-cache-mib</code>（2026-10）[LLAMACPP80]</td><td>路由有局部性——热专家常驻 VRAM，冷专家留在下一层</td><td>PowerInfer：RTX 4090 上最高比 llama.cpp 快 11.69×，达 A100 的 82%</td></tr>
+<tr><td><b>缓存派</b><span class="tag sys">系统</span></td><td>MoE-Infinity（arXiv:2401.14361）[MOEINF24]；PowerInfer（SOSP 2024）[POWERINFER24]；llama.cpp <code>--moe-cache-mib</code>（2026-10）[LLAMACPP80]</td><td>路由有局部性——热专家常驻 VRAM，冷专家留在下一层</td><td>PowerInfer：RTX 4090 上最高比 llama.cpp 快 11.69×，达 A100 的 82%</td></tr>
 <tr><td><b>预测派</b><span class="tag paper">论文</span></td><td>Pre-gated MoE（ISCA 2024）[PREGATED24]；Speculating Experts（2026-03）[SPECEXPERT26]</td><td>用当前层隐藏态预测下一层专家，提前搬运与计算重叠</td><td>Pre-gated：达到 GPU-only 方案的 81%，峰值显存仅其 23%</td></tr>
 <tr><td><b>单模型特化派</b><span class="tag ind">工程</span></td><td>Splash（2026-09）[SPLASH26]；ninfer（2026-06）[NINFER26]；HyperQwen（2026-08）[HYPERQWEN26]；<b>Strata（2026-09）</b></td><td>只为一个模型 + 一类硬件写引擎，上面四派的招全用上</td><td>Strata：Q2_0 @4K 95 tok/s / 262K 全上下文 56 tok/s（RTX 5070 12 GB）</td></tr>
 </table>
@@ -151,7 +165,7 @@
 <li><span class="t">2021-04</span><b>ZeRO-Infinity</b>（SC 2021）把 GPU+CPU+NVMe 三级内存做进训练：单节点 NVMe 卸载吞吐近峰值 ~28 GB/s——"三级存储"的思想源头[ZEROINF21]。</li>
 <li><span class="t">2022-11</span>Leviathan 等提出<b>投机解码</b>（ICML 2023）：小模型起草、大模型并行验证，输出分布与目标模型完全一致——后来一切 MTP/n-gram 起草的数学基础[LEVIATHAN23]。llama.cpp 同期（2022 年起）成为本地推理的事实基座。</li>
 <li><span class="t">2023</span><b>FlexGen</b>（ICML 2023）用线性规划搜索单卡卸载策略[FLEXGEN23]；<b>Eliseev &amp; Mazur</b>（2023-12）给出 LRU 专家缓存 + 投机预取（mixtral-offloading，arXiv 2312.17238）[ELISEEV23]；<b>PowerInfer</b> 首次挂 arXiv（2312.12456，SOSP 2024 发表）[POWERINFER24]。</li>
-<li><span class="t">2024</span>混合推理的"论文丰收年"：<b>MoE-Infinity</b>（ASPLOS 2024，请求级专家激活矩阵）[MOEINF24]、<b>Pre-gated MoE</b>（ISCA 2024，预门控）[PREGATED24]、<b>Gloeckle 等 MTP 头</b>（ICML 2024，自投机 3×）[MTP24]、<b>Fiddler</b> 首挂 arXiv（2402.07033）[FIDDLER25]；工程侧 ik_llama.cpp 从 llama.cpp 分叉（2024-06），专攻 CPU/混合量化。</li>
+<li><span class="t">2024</span>混合推理的"论文丰收年"：<b>MoE-Infinity</b>（arXiv:2401.14361，请求级专家激活矩阵）[MOEINF24]、<b>Pre-gated MoE</b>（ISCA 2024，预门控）[PREGATED24]、<b>Gloeckle 等 MTP 头</b>（ICML 2024，自投机 3×）[MTP24]、<b>Fiddler</b> 首挂 arXiv（2402.07033）[FIDDLER25]；工程侧 ik_llama.cpp 从 llama.cpp 分叉（2024-06），专攻 CPU/混合量化。</li>
 <li><span class="t">2025</span><b>PowerInfer</b> 发表于 SOSP 2024（2024-11 开会）[POWERINFER24]；<b>KTransformers</b> 登陆 SOSP 2025（AMX 内核 21.3 TFLOPS + 单 CUDA Graph + 专家延迟）[KTRANS25]；<b>T-MAC</b>（EuroSys 2025）证明查表法让 CPU 低位推理最高快 4×[TMAC25]；<b>MARLIN</b>（PPoPP 2025）成为低显存 MoE 的标准 GPU 内核[MARLIN25]；Fiddler 正式发表于 ICLR 2025。</li>
 <li><span class="t">2026-08</span><b>Qwen3.8-Flash-Next</b> 发布（08-26）并挂出架构报告（08-31）：125B/A6B、36×GDN + 12×QSA、512 专家取 10、262K 上下文——一台"天生适合卸载"的模型[QWEN38NEXT26]。vLLM/SGLang/LM Studio 相继支持。</li>
 <li><span class="t">2026-09</span><b>单模型引擎流派成型</b>：Splash（Inco AI，09-17，Apple Silicon 专属，27B decode 74 tok/s 宣称 2×）[SPLASH26]；<b>Strata</b> 开源（09-24，MIT，C++/CUDA/HIP/SYCL/Metal），随后一月内发布 0.1→0.2.7 共 9 个版本；ninfer（06-26）、HyperQwen（08-15）同期活跃。</li>
@@ -172,9 +186,9 @@
 
 <h3>1.1 MoE：每个 token 只见 2% 的专家</h3>
 
-<p>普通 Transformer 的每一层是一个完整的"前馈网络"（FFN），任何 token 都要读它的全部权重。MoE（Mixture of Experts，混合专家）把这一层换成<b>一个路由器（router）加几百个并列的小 FFN（专家）</b>：token 到来时路由器打分，只挑分数最高的几个专家来算它。Qwen3.8-Flash-Next 每层有 512 个专家、每 token 激活 10 个再加 1 个共享专家——也就是说，<b>每个 token 只需要读约 2% 的专家权重</b>[QWEN38NEXT26]。</p>
+<p>普通 Transformer 层通常包含注意力/token mixing 与前馈网络（FFN）两部分；MoE 通常替换其中的 FFN，任何 token 都要读它的全部权重。MoE（Mixture of Experts，混合专家）把这一层换成<b>一个路由器（router）加几百个并列的小 FFN（专家）</b>：token 到来时路由器打分，只挑分数最高的几个专家来算它。Qwen3.8-Flash-Next 每层有 512 个专家、每 token 激活 10 个再加 1 个共享专家——也就是说，<b>每个 token 只需要读约 2% 的专家权重</b>[QWEN38NEXT26]。</p>
 
-<div class="analogy">把模型想成一家大医院：MoE 的路由器是分诊台，病人（token）来了先分诊，只挂 10 个科室的号，而不是让全院 512 个科室都为他上班。医院养得起 512 个科室（参数多、能力强），但每个病人实际只惊动 2% 的医生——这就是"125B 总参、6B 激活"的含义。</div>
+<div class="analogy">把模型想成一家大医院：MoE 的路由器是分诊台，病人（token）来了先分诊，只挂 10 个科室的号，而不是让全院 512 个科室都为他上班。医院养得起 512 个科室（参数多、能力强），但每个病人实际只惊动 2% 的医生——10/512≈1.95% 是路由专家的选择比例；6B/125B≈4.8% 是整模型激活参数比例，还含稠密部分与共享专家，二者分母不同。</div>
 
 <p>这个"2%"是整个混合推理流派的前提：<b>如果一个 token 要读全部权重，卸载就没有意义；正因为只读 2%，我们才有资格谈"把热的那部分放进显存"。</b></p>
 
@@ -197,7 +211,7 @@
 
 <h3>1.4 投机解码：一次搬运，多写几个字</h3>
 
-<p>自回归解码每步只产 1 个 token，却要把常驻权重全部读一遍——极端浪费。投机解码的解法：让一个便宜的手段（小模型或模型自带的 MTP 头）先"猜"接下来 γ 个 token，大模型把它们<b>当成一个 batch 一次并行验证</b>，接受猜对的、修正第一个猜错的。Leviathan 等证明了这样做输出分布与逐 token 解码<b>完全一致</b>（无损），且每轮期望产出 E = (1−α^(γ+1))/(1−α) 个 token（α 为单 token 接受率）[LEVIATHAN23]。Qwen3.8-Flash-Next 官方就带一个 4B 参数的 MTP（多 token 预测）模块，四步投机平均接受长度约 4.06[QWEN38NEXT26][MTP24]——Strata 直接把它当"免费的草稿模型"用。</p>
+<p>自回归解码每步只产 1 个 token，却要把常驻权重全部读一遍——极端浪费。投机解码的解法：让一个便宜的手段（小模型或模型自带的 MTP 头）先"猜"接下来 γ 个 token，大模型把它们<b>当成一个 batch 一次并行验证</b>，接受猜对的、修正第一个猜错的。标准随机投机采样须按 min(1,p/q) 接受、拒绝后按归一化 (p−q)⁺ 修正，才保持同一目标采样分布；贪心验证则比较目标 argmax，不能混用两套规则，且每轮期望产出 E = (1−α^(γ+1))/(1−α) 个 token（仅在逐位置条件接受率独立同分布的简化假设下使用；α 为条件接受率，E 含修正/bonus token；α=1 时取极限 γ+1）[LEVIATHAN23]。Qwen3.8-Flash-Next 官方就带一个 4B 参数的 MTP（多 token 预测）模块，四步投机平均接受长度约 4.06[QWEN38NEXT26][MTP24]——Strata 直接把它当"免费的草稿模型"用。</p>
 
 <div class="citebox"><b>[LEVIATHAN23]</b> Leviathan, Kalman, Matias. <i>Fast Inference from Transformers via Speculative Decoding.</i> ICML 2023（arXiv 2022-11-22）。原文："a decoding strategy … that generates … several tokens in each step … <span class="q">with the same output distribution as decoding with the target model itself</span>"（译文：每步产出多个 token，且输出分布与用目标模型本身解码完全相同）；T5-XXL 配小草稿在 TPU-v4 上 2–3×。链接：<a href="https://arxiv.org/abs/2211.17192">arXiv:2211.17192</a></div>
 
@@ -205,7 +219,7 @@
 <ol>
 <li>MoE 每 token 只读 2% 专家权重——<b>"读不完"从致命伤变成可调度的局部性问题</b>。</li>
 <li>VRAM/RAM/SSD 带宽差两个数量级，PCIe 是第四条通道——<b>混合推理本质是给字节选路</b>。</li>
-<li>投机解码把"读一遍权重"摊到多个 token 上——<b>权重读取是 decode 的主要成本，而它几乎不随 batch 变大而变贵</b>。</li>
+<li>投机解码把"读一遍权重"摊到多个 token 上——<b>权重读取是 decode 的主要成本，而稠密部分可被小 batch 摊薄；MoE 的实际专家读取量随各 token 专家集合的并集变化</b>。</li>
 </ol>
 </div>
 
@@ -214,13 +228,13 @@
 <p>Strata 的第一篇文章叫 <i>Running a 125-Billion-Parameter Model on a Normal PC</i>（2026-09）。要理解引擎，先看它伺候的模型长什么样。Qwen3.8-Flash-Next 的设计者明确按"每 token 搬运字节数"给每个结构定价[STRATAPAPER26][QWEN38NEXT26]：</p>
 
 <ul>
-<li><b>48 层 = 36 层 Gated DeltaNet + 12 层稀疏注意力</b>。GDN 是线性注意力家族：它的"记忆"是一个固定大小的递归状态，不随上下文增长——长上下文下既省显存又省读写；12 层 QSA 只保留 2 个 KV 头、只注意至多约 2048 个被索引器选中的位置，上下文再长注意力成本也有界[QWEN38NEXT26][GDN24]。</li>
+<li><b>48 层 = 36 层 Gated DeltaNet + 12 层稀疏注意力</b>。GDN 是线性注意力家族：它的"记忆"是一个固定大小的递归状态，不随上下文增长——长上下文下既省显存又省读写；12 层 QSA 只保留 2 个 KV 头、只注意至多约 2048 个被索引器选中的位置，约 2048 限制核心注意力的选取预算；索引器仍对随上下文增长的压缩块打分，prefill 索引 O(n²/r)、decode 索引仍随历史增长[QWEN38NEXT26][GDN24]。</li>
 <li><b>每层 512 个专家取 10 + 1 共享</b>：24,576 个路由专家，2% 激活率。</li>
 <li><b>51B 参数的 n-gram 嵌入表</b>：由最后 3 个 token 的 id 直接寻址——地址提前已知，所以可以放 SSD、提前一步预取，每 token 只读约 23 KB。</li>
 <li><b>4B 参数 MTP 模块</b>：官方投机解码头，权重不在 GGUF 里（Strata 从 BF16 原始检查点单独拉取其张量）。</li>
 </ul>
 
-<div class="citebox"><b>[GDN24]</b> Yang, Kautz, Hatamizadeh. <i>Gated Delta Networks: Improving Mamba2 with Delta Rule.</i> ICLR 2025（arXiv 2024-12）。要点：把 Mamba2 的门控衰减与 DeltaNet 的 delta 规则统一为 S_t = α_t(I − β_t k_t k_tᵀ)S_{t−1} + β_t v_t k_tᵀ，状态固定大小、可并行训练——即 Qwen3.8-Flash-Next 中 GDN 层的直接来源（一作工作完成于 NVIDIA 实习期间）。链接：<a href="https://arxiv.org/abs/2412.06464">arXiv:2412.06464</a></div>
+<div class="citebox"><b>[GDN24]</b> Yang, Kautz, Hatamizadeh. <i>Gated Delta Networks: Improving Mamba2 with Delta Rule.</i> ICLR 2025（arXiv 2024-12）。要点：把 Mamba2 的门控衰减与 DeltaNet 的 delta 规则统一为 S_t = α_t S_{t−1}(I − β_t k_t k_tᵀ) + β_t v_t k_tᵀ（S 为 d_v×d_k，右乘更新键方向，见原论文式 8），状态固定大小、可并行训练——即 Qwen3.8-Flash-Next 中 GDN 层的直接来源（一作工作完成于 NVIDIA 实习期间）。链接：<a href="https://arxiv.org/abs/2412.06464">arXiv:2412.06464</a></div>
 
 <h3>2.1 字节账本：Q2_0 文件的每一部分放哪</h3>
 
@@ -236,7 +250,7 @@
 <tr><td>MTP 草稿层（来自 BF16 检查点）</td><td>0.8 GB</td><td>每次起草</td><td>VRAM</td></tr>
 </table>
 
-<p>读法：<b>右数第二列是每 token 必须流动的字节</b>。稠密部分约 3.5 GB 全在 VRAM（672 GB/s 读一遍约 5 ms）；专家部分每 token 0.66 GB——如果全走 RAM（~45 GB/s）要 15 ms，这就是引擎要优化的主要数字。注意 n-gram 表虽然占 28.8 GB 存储，但每 token 只读 23 KB，放 SSD 完全无压力——<b>容量与带宽是两本账，这正是三级存储的意义</b>。</p>
+<p>读法：<b>右数第二列是每 token 必须流动的字节</b>。稠密部分约 3.5 GB 全在 VRAM（672 GB/s 读一遍约 5 ms）；专家部分每 token 0.66 GB——如果全走 RAM（~45 GB/s）要 15 ms，这就是引擎要优化的主要数字。注意 n-gram 表虽然占 28.8 GB 存储，但每 token 只读 23 KB，95 tok/s 下逻辑带宽约 2.2 MB/s，但 SSD 随机延迟、页粒度放大、OS 缓存命中与预取时机仍可能影响关键路径，须分别测冷热缓存——<b>容量与带宽是两本账，这正是三级存储的意义</b>。</p>
 
 <div class="fig">
 <div class="flowrow">
@@ -251,7 +265,7 @@
 
 <div class="summary3"><b>本章小结（记住三句话）</b>
 <ol>
-<li>"为推理设计"的结构（GDN 固定状态、QSA 有界注意力、2% 专家激活、确定性寻址的 n-gram 表）<b>让每个部件都能找到最便宜的存放层级</b>。</li>
+<li>"为推理设计"的结构（GDN 固定状态、QSA 有限核心预算与随长度增长的索引、2% 专家激活、确定性寻址的 n-gram 表）<b>让每个部件都能找到最便宜的存放层级</b>。</li>
 <li>每 token 的账：稠密 3.5 GB（VRAM 内）+ 专家 0.66 GB（三级分流）+ n-gram 23 KB（SSD）——<b>混合推理优化的全部对象就是中间那 0.66 GB</b>。</li>
 <li>MTP 模块是官方送的草稿器——<b>模型设计者已经把投机解码的接口预留好了</b>，引擎只差把它用起来。</li>
 </ol>
@@ -286,7 +300,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <ul>
 <li><b>门铃（doorbell）</b>：GPU 跑完路由器后把专家 id 写进一小块锁页（pinned）主机内存；CPU 线程自旋盯这块内存，而不是调用 CUDA 同步 API——省掉每次微秒级的驱动往返，这是 batch=1 小内核流水线的命门（论文引用 NVIDIA CUDA Programming Guide 的 mapped pinned memory 与 CUDA Graphs 机制；引擎侧对应 <code>src/core/graph.cpp</code> 的捕获图注册表）。</li>
 <li><b>复制引擎分工（<code>--pcie-frac</code>）</b>：缺失专家的一部分不用 CPU 算，直接由 GPU 的 copy engine 经 PCIe 从 RAM 拉过来算。比例是调出来的：i-quants 文件 CPU 算力是瓶颈、内存带宽有富余，55% 的缺失走 PCIe（IQ2_XS @4K 从 70 → 78 tok/s，IQ3_XXS 56 → 65）；Q2_0 的 CPU 自己就在吃满 RAM 带宽，只留 20%[STRATAPAPER26]。</li>
-<li><b>CPU 结果回收</b>：CPU 把专家输出写进 GPU 可映射的内存，GPU 在自己的流上取走求和——两边全程不同步握手。</li>
+<li><b>CPU 结果回收</b>：CPU 把专家输出写进 GPU 可映射的内存，GPU 在自己的流上取走求和——通过门铃/完成标志协调读写顺序与可见性；自旋也是同步协议，只是避免逐层调用驱动同步 API。</li>
 <li><b>整层循环一张图</b>：48 层每层的"稠密 + 三方专家"被捕获成按窗口大小分桶的 CUDA Graph，消除逐 kernel 启动开销。</li>
 </ul>
 
@@ -298,15 +312,15 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 
 <p>这条路是学术谱系的集大成：LRU 专家缓存源自 Eliseev &amp; Mazur[ELISEEV23]；按"请求级激活矩阵"预测的缓存是 MoE-Infinity[MOEINF24]；热专家常驻的思想与 PowerInfer 的幂律神经元一脉相承[POWERINFER24]。Strata 的增量在于<b>档案预填 + 会话内换页 + 字节级槽位</b>（不同层的专家大小差近 2 倍，按层定槽而不是按最大专家定槽，多塞下 3,556 而不是 2,673 个，1K 解码 +13%）。顺带一提，llama.cpp v0.8.0 的 <code>--moe-cache-mib</code>（SLRU 策略）说明"专家缓存进 VRAM"正在变成通用引擎的标配[LLAMACPP80]。</p>
 
-<div class="citebox"><b>[MOEINF24]</b> Xue, Fu, Lu, Sun, Mai, Marina. <i>MoE-Infinity: Efficient MoE Inference on Personal Machines with Sparsity-Aware Expert Cache.</i> ASPLOS 2024（arXiv 2024-01-25）。要点：单请求解码时专家激活高度稀疏、跨请求趋于均匀，LRU/纯计数都会失效；在线追踪"专家激活矩阵"，用最相似历史请求预测未来激活。单张 A5000 24 GB 上 DeepSeek-V2-Lite 每 token 延迟 155 ms（vLLM 485 / DeepSpeed 737 / Ollama 2590）。链接：<a href="https://arxiv.org/abs/2401.14361">arXiv:2401.14361</a></div>
+<div class="citebox"><b>[MOEINF24]</b> Xue, Fu, Lu, Mai, Marina. <i>MoE-Infinity: Efficient MoE Inference on Personal Machines with Sparsity-Aware Expert Cache.</i> arXiv:2401.14361（2024-01-25；此处不保留未获论文记录支持的 ASPLOS 2024 归属）。要点：单请求解码时专家激活高度稀疏、跨请求趋于均匀，LRU/纯计数都会失效；在线追踪"专家激活矩阵"，用最相似历史请求预测未来激活。单张 A5000 24 GB 上 DeepSeek-V2-Lite 每 token 延迟 155 ms（vLLM 485 / DeepSpeed 737 / Ollama 2590）。链接：<a href="https://arxiv.org/abs/2401.14361">arXiv:2401.14361</a></div>
 
 <h3>3.3 Prefill：2,048-token 大块与 PCIe 预取</h3>
 
-<p>读 prompt 与解码的资源画像相反：一次 2,048 个 token 进来，<b>每个专家都会被用很多次</b>，此时正确的做法是"把专家搬到 GPU 算"而不是"在 CPU 算"。Strata 按层流水：上一层的专家在 GPU 计算时，下一层缺失的专家正从 pinned 内存经 PCIe 流入，落到 GPU 后反量化成 FP16 交给 cuBLAS——缓冲区从专家缓存借、用完归还。结果是 prompt 速度几乎不随长度衰减：<b>4K 时 539 tok/s，262K 全上下文仍有 496 tok/s</b>（Q2_0）——因为 QSA 每层只注意有界的位置集合[STRATAPAPER26]。这解释了第 1 节的伏笔：稀疏注意力让"长文档"从算力灾难变成纯容量问题。</p>
+<p>读 prompt 与解码的资源画像相反：一次 2,048 个 token 进来，<b>每个专家都会被用很多次</b>，此时正确的做法是"把专家搬到 GPU 算"而不是"在 CPU 算"。Strata 按层流水：上一层的专家在 GPU 计算时，下一层缺失的专家正从 pinned 内存经 PCIe 流入，落到 GPU 后反量化成 FP16 交给 cuBLAS——缓冲区从专家缓存借、用完归还。结果是 prompt 速度几乎不随长度衰减：<b>4K 时 539 tok/s，262K 全上下文仍有 496 tok/s</b>（Q2_0）——因为 QSA 每层只注意有界的位置集合[STRATAPAPER26]。这解释了第 1 节的伏笔：稀疏注意力让"长文档"同时受到索引计算、状态容量、带宽和核效率约束；测试区间内吞吐相近不证明任意长上下文成本固定。</p>
 
 <h3>3.4 投机解码：模型自己的 MTP 层 + 上下文查表</h3>
 
-<p>权重读取不随 batch 变贵——这是投机的物理依据：一次验证 4 个 token，稠密权重只读一遍。Strata 的做法[STRATAPAPER26]：</p>
+<p>稠密权重可在小 batch 验证中复用，而 MoE 专家并集仍可能增大——这是投机收益与成本的共同起点：一次验证 4 个 token，稠密权重只读一遍。Strata 的做法[STRATAPAPER26]：</p>
 <ul>
 <li><b>GGUF 不带 MTP？自己拉。</b>从 BF16 原始检查点取 MTP 层张量（5 GB，其专家以 2-bit 形式、输出头裁到 40,525 个常用 token）常驻 VRAM。</li>
 <li><b>每轮：最后接受的 token + 至多 3 个草稿一起过全部 48 层</b>；草稿只有在 MTP 层置信度 ≥50% 时才进窗口（<code>--spec-min-p</code>）。平均每窗口产出 2.4–3.2 个 token。</li>
@@ -316,7 +330,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 
 <div class="citebox"><b>[STRATAPAPER26]</b> Strata Team. <i>Running a 125-Billion-Parameter Model on a Normal PC.</i> 2026-09（仓库内 docs/paper/Strata-Paper.pdf）。原文："Speculation with the model's own MTP layer is worth <span class="q">1.6–1.8×</span>. Plain decoding reached 47–57 tokens per second at 4K; with the verify window it is 82–92. … <span class="q">The speculative output is identical to plain greedy decoding token for token</span>"（译文：用模型自带 MTP 层投机价值 1.6–1.8 倍；无投机 4K 下 47–57 tok/s，验证窗口后 82–92；投机输出与纯贪婪解码逐 token 完全一致）。链接：<a href="https://github.com/Niko1221/Strata/blob/main/docs/paper/Strata-Paper.pdf">仓库 PDF</a></div>
 
-<p>为什么只有 1.6–1.8× 而不是全 VRAM 引擎常见的 2.5–3×？<b>验证窗口里每个额外 token 都会路由到自己的 CPU 专家</b>——窗口越长，CPU 那一半越重。这是混合架构下投机解码的独有代价，论文如实算了这笔账[STRATAPAPER26]。</p>
+<p>为什么只有 1.6–1.8× 而不是全 VRAM 引擎常见的 2.5–3×？<b>验证窗口里每个额外 token 都会路由到自己的 CPU 专家</b>——窗口越长，CPU 那一半越重。全 GPU MoE 同样可能多激活专家；混合执行进一步叠加 RAM、PCIe 和 CPU 的关键路径成本，论文如实算了这笔账[STRATAPAPER26]。</p>
 
 <h3>3.5 CPU 内核：Q2_0 重排 + AVX-512 VNNI 到达内存带宽</h3>
 
@@ -332,7 +346,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <ol>
 <li>一层之内三方并发：GPU 算稠密+缓存专家、DMA 拉 PCIe 份额、CPU 就地算剩余——<b>门铃 + CUDA Graph 让三者真正并行</b>。</li>
 <li>专家缓存 = 档案预填（冷启动）+ 会话自适应（0.50→0.72）+ 字节级槽位——<b>缓存派学术成果的工程完全体</b>。</li>
-<li>投机解码 1.6–1.8× 且严格无损，但混合架构下验证窗口会放大 CPU 负载——<b>免费的加速也有物理代价</b>。</li>
+<li>投机解码 1.6–1.8× 且严格无损，但混合架构下验证窗口会放大 CPU 负载——<b>加速须支付草稿与验证成本</b>。</li>
 </ol>
 </div>
 
@@ -383,7 +397,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <div class="summary3"><b>本章小结（记住三句话）</b>
 <ol>
 <li>速度表的两个规律：<b>prompt 速度几乎不随长度掉</b>（稀疏注意力有界），<b>生成速度随上下文温和下降</b>（KV 挤占专家缓存，95→56 tok/s）。</li>
-<li>窗口时间账：GPU 一半、CPU 一半——<b>单边升级最多提速三分之一</b>；Q2_0 卡内存带宽、i-quants 卡 CPU 算力。</li>
+<li>窗口时间账：GPU 一半、CPU 一半——<b>若两部分串行且各占一半、只把一边速度翻倍，总加速约 4/3；若一边耗时趋零，上限约 2×。有并发时应以关键路径重算，不能由活动时间直接相加</b>；Q2_0 卡内存带宽、i-quants 卡 CPU 算力。</li>
 <li>跨机型看：<b>显存容量 &gt; GPU 算力，内存通道 &gt; CPU 核数</b>；统一内存机器（Strix Halo）与多卡 R9700 是两类"表现意外好"的极端样本。</li>
 </ol>
 </div>
@@ -411,9 +425,9 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 
 <p><b>vs llama.cpp（通用 vs 特化的正面战场）。</b>llama.cpp 的 <code>-ot "exps=CPU"</code> + <code>--moe-cache-mib</code> 组合与 Strata 的机制骨架已高度同构：专家留内存、热专家进 VRAM。差别在完成度与假设：Strata 的并发流水（门铃 + 三方并发 + 层级 PCIe 预取 + Q2_0 重排内核）是围绕一个模型的形状手写的，且配齐了档案预填、字节级槽位、会话缓存、8-bit KV 流式这些"最后一公里"；llama.cpp 胜在<b>一切模型、一切后端、一切精度</b>，以及多年积累的生态。公平地说：为三个模型家族维护一个 20 万行引擎是重投入，Strata 用 MIT + 55 位外部贡献者的合入速度对冲；而 llama.cpp 每个版本都在吸收同类机制（SLRU 专家缓存、DFlash2 草稿）——<b>这条差距曲线的斜率，比两条曲线的位置更值得关注</b>。</p>
 
-<p><b>vs KTransformers（学术谱系的两个端点）。</b>两者同属"CPU 算专家"流派，但取向不同：KTransformers 服务"本地跑 671B DeepSeek"的研究与极客场景，敢用<b>专家延迟</b>（跳过部分专家、与下层重叠，精度 -0.5%）换 1.45×；Strata 坚持<b>严格无损</b>（拒绝任何近似，唯一例外见 6.2 的 residency 路由）并面向"下载即用"的普通用户。内核上 KTransformers 押 Intel AMX（21.3 TFLOPS/路），Strata 押 AVX-512 VNNI + 内存带宽——前者吃 CPU 算力、后者吃内存通道，其实各押了一种未来桌面[KTRANS25][STRATAPAPER26]。</p>
+<p><b>vs KTransformers（学术谱系的两个端点）。</b>两者同属"CPU 算专家"流派，但取向不同：KTransformers 服务"本地跑 671B DeepSeek"的研究与极客场景，敢用<b>专家延迟</b>（跳过部分专家、与下层重叠，精度 -0.5%）换 1.45×；Strata 坚持<b>严格无损</b>（仅指投机验证相对同一配置的正确性；量化、residency 路由及默认专家裁减另有近似误差，0.2.7 的 DeepSeek 默认 5 而非 6 专家也须单列）并面向"下载即用"的普通用户。内核上 KTransformers 押 Intel AMX（21.3 TFLOPS/路），Strata 押 AVX-512 VNNI + 内存带宽——前者吃 CPU 算力、后者吃内存通道，其实各押了一种未来桌面[KTRANS25][STRATAPAPER26]。</p>
 
-<p><b>vs Splash/ninfer/HyperQwen（单模型流派内部）。</b>Splash 统一内存一把梭（Apple 专属、无需卸载），HyperQwen 站在 vLLM 肩膀上（重量化 + 服务器生态，但要求模型基本塞进 VRAM），ninfer 与 Strata 最像（自写引擎、选定模型×选定卡）。Strata 的差异化是<b>跨平台（CUDA/HIP/SYCL/Metal + Windows/Linux/macOS）+ CPU-GPU 混合 + 免费模型自带文档化论文</b>——在"没有 Mac、显存 12 GB、想跑最大模型"这个格子里，它目前没有直接对手。</p>
+<p><b>vs Splash/ninfer/HyperQwen（单模型流派内部）。</b>Splash 统一内存一把梭（Apple 专属、无需卸载），HyperQwen 站在 vLLM 肩膀上（重量化 + 服务器生态，但要求模型基本塞进 VRAM），ninfer 与 Strata 最像（自写引擎、选定模型×选定卡）。Strata 的差异化是<b>跨平台（CUDA/HIP/SYCL/Metal + Windows/Linux/macOS）+ CPU-GPU 混合 + 免费模型自带文档化论文</b>——在"没有 Mac、显存 12 GB、想跑最大模型"这个格子里，本文只比较已列系统，未作穷尽检索，不能据此断言没有直接对手。</p>
 
 <div class="citebox"><b>[KTRANS25]</b> Chen, Xie, Zhang, Tang, …, Wu, Zhang. <i>KTransformers: Unleashing the Full Potential of CPU/GPU Hybrid Inference for MoE Models.</i> SOSP 2025（2025-10，DOI 10.1145/3731569.3764843；无 arXiv 版）。原文要点：Fiddler 式方案在 A100+双路 Xeon 上 prefill 70.02 / decode 4.68 tok/s、GPU 利用率 &lt;30%；三项改进——<span class="q">AMX 专用内核单路 CPU 达 21.3 TFLOPS（PyTorch/oneDNN 的 3.98×）、整个动态形状 decode 塞进单个 CUDA Graph、专家延迟（Expert Deferral）将 CPU/GPU 利用率提至 ~100%/37%</span>；总体 prefill 4.62–19.74×、decode 1.25–4.09×。链接：<a href="https://github.com/kvcache-ai/ktransformers">kvcache-ai/ktransformers</a></div>
 
@@ -431,8 +445,8 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <div class="summary3"><b>本章小结（记住三句话）</b>
 <ol>
 <li>混合推理的机制（专家缓存、CPU 专家、PCIe 分流）<b>正在从论文下沉为通用引擎的正式参数</b>——特化引擎的护城河是"为形状手写的并发流水"，不是单点机制。</li>
-<li>Strata 的生态位：<b>非 Mac、小显存、大内存、锁定 Qwen/DeepSeek 三家族</b>——这个格子暂无对手；代价是每支持一个新模型都要重写引擎假设。</li>
-<li>大厂（NVIDIA TensorRT-LLM、字节 FlashInfer、腾讯 Hunyuan 部署栈）的主战场在数据中心；<b>消费级混合推理至今是社区与高校的领地</b>——清华、上交、爱丁堡、华盛顿大学的论文构成了它的全部谱系。</li>
+<li>Strata 的生态位：<b>非 Mac、小显存、大内存、锁定 Qwen/DeepSeek 三家族</b>——这是本文选择的比较范围，不代表市场或学术上没有其他方案；代价是每支持一个新模型都要重写引擎假设。</li>
+<li>大厂（NVIDIA TensorRT-LLM、字节 FlashInfer、腾讯 Hunyuan 部署栈）的主战场在数据中心；<b>消费级混合推理至今是社区与高校的领地</b>——清华、上交、爱丁堡、华盛顿大学的论文是其中部分重要前史；MoE-Lightning、MoE-Spec 等还提供流水与验证预算视角。</li>
 </ol>
 </div>
 
@@ -494,7 +508,7 @@ curl http://127.0.0.1:8080/v1/chat/completions -H "Content-Type: application/jso
 <li><b>融合 8-bit 分组 prefill 内核</b>：prompt 路径瓶颈在逐专家 kernel 启动与 FP16 反量化（只用了 26 GB/s PCIe 中的 7 GB/s），Marlin 式混合精度内核是现成参照[MARLIN25]。</li>
 <li><b>采样</b>：目前只支持贪婪解码，温度采样需要在验证窗口里加拒绝采样——投机解码的标准配法[LEVIATHAN23]。</li>
 <li><b>硬件走向</b>：统一内存桌面（Strix Halo、M4 系）在消解"PCIe 分流"这道题本身；若下一代消费卡标配 32 GB+，单模型引擎的生存空间会向"更大的 MoE + SSD 三级"迁移——Strata 的 DeepSeek 引擎（Project Maya 系）已经是这条路的前哨。</li>
-<li><b>通用引擎的追赶</b>：llama.cpp 已把专家缓存做成一等参数、Jan 做进了 UI——预测：<b>12 个月内"专家缓存 + CPU-moe"会成为所有本地引擎的默认行为</b>，届时单模型引擎必须靠"会话智能 + 模型特化流水"维持代差。</li>
+<li><b>通用引擎的追赶</b>：llama.cpp 已把专家缓存做成一等参数、Jan 做进了 UI——预测：<b>在显存受限、专家具有复用局部性且 CPU/RAM 性能合适的 MoE 场景中，专家缓存与 CPU 专家执行可能被更多引擎采用；不是所有模型/设备的默认最优解</b>，届时单模型引擎必须靠"会话智能 + 模型特化流水"维持代差。</li>
 </ul>
 
 <h2 id="refs">参考文献</h2>
@@ -505,7 +519,7 @@ curl http://127.0.0.1:8080/v1/chat/completions -H "Content-Type: application/jso
 <li><b>Qwen Team.</b> <i>On the Design of Qwen3.8-Next Architecture: Evaluation, Efficiency, and Training Stability.</i> arXiv, <b>2026-08-31</b>. <a href="https://arxiv.org/abs/2608.30320">arXiv:2608.30320</a></li>
 <li><b>Eliseev A., Mazur D.</b> <i>Fast Inference of Mixture-of-Experts Language Models with Offloading.</i> arXiv, <b>2023-12</b>. <a href="https://arxiv.org/abs/2312.17238">arXiv:2312.17238</a>（mixtral-offloading）</li>
 <li><b>Kamahori K., et al.</b> <i>Fiddler: CPU-GPU Orchestration for Fast Inference of Mixture-of-Experts Models.</i> ICLR 2025（arXiv 2024-02-14）. <a href="https://arxiv.org/abs/2402.07033">arXiv:2402.07033</a></li>
-<li><b>Xue L., et al.</b> <i>MoE-Infinity: Efficient MoE Inference on Personal Machines with Sparsity-Aware Expert Cache.</i> ASPLOS 2024（arXiv 2024-01-25）. <a href="https://arxiv.org/abs/2401.14361">arXiv:2401.14361</a></li>
+<li><b>Xue L., et al.</b> <i>MoE-Infinity: Efficient MoE Inference on Personal Machines with Sparsity-Aware Expert Cache.</i> arXiv:2401.14361（2024-01-25；此处不保留未获论文记录支持的 ASPLOS 2024 归属）. <a href="https://arxiv.org/abs/2401.14361">arXiv:2401.14361</a></li>
 <li><b>Hwang R., et al.</b> <i>Pre-gated MoE: An Algorithm-System Co-Design for Fast and Scalable Mixture-of-Expert Inference.</i> ISCA 2024（arXiv 2023-08-22）. <a href="https://arxiv.org/abs/2308.12066">arXiv:2308.12066</a></li>
 <li><b>Song Y., Mi Z., Xie H., Chen H.</b> <i>PowerInfer: Fast Large Language Model Serving with a Consumer-grade GPU.</i> SOSP 2024（arXiv 2023-12-19）. <a href="https://arxiv.org/abs/2312.12456">arXiv:2312.12456</a></li>
 <li><b>Chen H., et al.</b> <i>KTransformers: Unleashing the Full Potential of CPU/GPU Hybrid Inference for MoE Models.</i> SOSP 2025. DOI 10.1145/3731569.3764843. <a href="https://github.com/kvcache-ai/ktransformers">GitHub</a>（v0.7.2，2026-10-15）</li>
@@ -534,5 +548,8 @@ curl http://127.0.0.1:8080/v1/chat/completions -H "Content-Type: application/jso
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+</script>
 </body>
 </html>

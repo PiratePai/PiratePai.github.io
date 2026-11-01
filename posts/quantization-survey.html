@@ -147,6 +147,10 @@
   tr:nth-child(even) td{background:rgba(255,255,255,.015)}
 </style>
 
+<style>
+#reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
+#reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
+</style>
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -179,7 +183,7 @@
     <li><a href="#s6">VLM 的量化：多模态的新难题</a></li>
     <li><a href="#s7">DiT 的量化：扩散模型与众不同</a></li>
     <li><a href="#s8">部署生态与工具链</a></li>
-    <li><a href="#s9">最新进展（2024–2026）速览</a></li>
+    <li><a href="#s9">更新附录（展开选读）</a></li>
     <li><a href="#s10">未来发展方向</a></li>
     <li><a href="#s11">术语速查表</a></li>
     <li><a href="#refs">参考文献</a></li>
@@ -192,7 +196,17 @@
 </div>
 
 <!-- ============================================================ -->
-<div class="hl-wrap" id="hl"><style>
+
+<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 先固定编码约定，再问误差落在什么地方</b><p><a href="#s2">scale、零点与裁剪</a> → <a href="#s4">权重与激活</a> → <a href="#s5">KV</a> → <a href="#s6">多模态</a> → <a href="#s7">扩散模型</a> → <a href="#s8">部署</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>量化把连续数映射到有限格点：q=clip(round(x/s)+z,qmin,qmax)，反量化 x̂=s(q−z)。有符号对称编码通常 z=0，无符号中心编码则需偏移。GPTQ/AWQ 的目标是减少层输出重构误差，而非让所有权重数值误差一样小。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>用有符号 2-bit、q∈[−2,1]、s=1、z=0，输入 [−2,−0.8,0.2,1.6] 得 q=[−2,−1,0,1]，反量化相同；最后一个数因裁剪产生 0.6 误差。浮点低位格式还用指数负责范围、尾数负责局部精度，块 scale 再调动态范围。</div>
+<h3>用同一组问题比较路线</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>GPTQ / AWQ</td><td>利用输入相关性做误差补偿或通道缩放</td><td>需要代表性校准；公式须固定 XW 或 PyTorch Wᵀ 约定</td></tr><tr><td>QuIP / QuIP#</td><td>不相干处理、Hadamard 与格码本提供极低位路线</td><td>转换与专用 kernel 成本须算进端到端</td></tr><tr><td>QLoRA / QAT</td><td>QLoRA 冻结量化基座训练适配器；QAT 训练适应量化</td><td>NF4 并非普遍最佳部署格式，适配器训练不等于全参 QAT</td></tr></tbody></table></div>
+<p><b>值得做的研究：</b>在相同质量红线下，比较真实 bytes（含元数据/高精度保留）、校准或训练成本及端到端延迟。Δacc 用百分点，ppl 越低越好；FID 越低通常越好，但都不足以单独覆盖生成质量。</p>
+<details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Jerry Chee  et al.</b> <i>QuIP: 2-Bit Quantization of Large Language Models With Guarantees</i>（QuIP）；arXiv:2307.13304，v1 2023-07-25。<a href="https://arxiv.org/abs/2307.13304">原始论文与版本记录</a></li><li><b>Albert Tseng  et al.</b> <i>QuIP#: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks</i>（QuIP#）；arXiv:2402.04396，v1 2024-02-06。<a href="https://arxiv.org/abs/2402.04396">原始论文与版本记录</a></li><li><b>Tim Dettmers  et al.</b> <i>QLoRA: Efficient Finetuning of Quantized LLMs</i>（QLoRA / NF4）；arXiv:2305.14314，v1 2023-05-23。<a href="https://arxiv.org/abs/2305.14314">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
+</section>
+<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -211,7 +225,7 @@
 <div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>RAQ-MLA：缓存整体 2.5 bit</b><span class="hl-date">10-24 · 中科院自动化所+腾讯</span></div><p>MLA 潜在 KV 缓存（含 kR）整体量化到约 2.5 bit，四模型掉点 &lt;0.5pp，KV 容量 6.5×。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>ALTO：MXFP4 预训练跑通</b><span class="hl-date">10-26 · AMD</span></div><p>GPT-OSS-20B 从零 MXFP4 预训练：C4 3.3350 vs BF16 3.3283，步数开销 +20%→+5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Muse Spark Open 多格式发行</b><span class="hl-date">10-15 · Meta</span></div><p>NVFP4 只量化专家（1.65TB→537GB），day-one 覆盖四引擎，另有 FP8/MXFP4、INT4、GGUF。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>BiLoCo：±1 符号修正</b><span class="hl-date">10-23 · MIT · NeurIPS 2026</span></div><p>用 ±1 符号向量存高精度修正：存储省 16×，batch-1 推理仅慢 6–11%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div>
+<div class="hl-card"><div class="hl-meta"><b>BiLoCo：±1 符号修正</b><span class="hl-date">10-23 · MIT · NeurIPS 2026</span></div><p>用 ±1 符号向量存高精度修正：存储省 16×，batch-1 推理仅慢 6–11%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>为什么需要量化：一张账单讲清楚</h2>
 
@@ -223,7 +237,7 @@
   <li><strong>FP16 存储</strong>：70 × 10⁹ 参数 × 2 字节 = <strong>140 GB</strong>——单张 80GB 的 A100 都放不下；</li>
   <li><strong>4-bit 量化后</strong>：≈ 70 × 0.5 字节 = <strong>35 GB</strong>——一张 A100 就能装下，还能留出 KV Cache 的空间。</li>
 </ul>
-<p>再看<strong>生成速度</strong>。解码（decode）阶段每生成一个 token，都要把全部权重从显存读一遍，因此速度的上限约等于"显存带宽 ÷ 权重大小"。A100 的 HBM 带宽约 2 TB/s：</p>
+<p>再看<strong>生成速度</strong>。在稠密模型、小 batch、权重流量主导且无特殊缓存的 decode 近似中，每步需读入大量权重；MoE 激活专家、KV、反量化和通信会改变此账本，因此速度的上限约等于"显存带宽 ÷ 权重大小"。A100 的 HBM 带宽约 2 TB/s：</p>
 <div class="math">FP16：140 GB ÷ 2039 GB/s ≈ 68.7 ms/token（≈ 15 tok/s）　→　INT4：35 GB ÷ 2039 GB/s ≈ 17.2 ms/token（≈ 58 tok/s）</div>
 <p>仅仅是"把数字变矮"，batch size = 1 的解码速度理论上限就提高了约 4 倍——这就是量化最朴素的收益。此外，低精度整数/浮点矩阵乘（INT8、FP8、FP4）在 GPU Tensor Core 上吞吐量更高、能耗更低，对<strong>预填充（prefill）</strong>这类计算密集阶段还有额外的加速。</p>
 
@@ -254,7 +268,7 @@
 <p>其中 s 由这一组数的动态范围决定：</p>
 <div class="math">s = ( x<sub>max</sub> − x<sub>min</sub> ) / ( 2<sup>b</sup> − 1 )，&nbsp;&nbsp;&nbsp;z = −round( x<sub>min</sub> / s )</div>
 <ul>
-  <li><strong>对称量化（symmetric）</strong>：假定 x<sub>min</sub> = −x<sub>max</sub>，零点固定 z = 2<sup>b−1</sup>，整数区间是 [−2<sup>b−1</sup>, 2<sup>b−1</sup>−1]。少存一个零点、乘法更简单，适合近似零对称分布的权重。</li>
+  <li><strong>对称量化（symmetric）</strong>：假定 x<sub>min</sub> = −x<sub>max</sub>，采用有符号编码 q∈[−2<sup>b−1</sup>, 2<sup>b−1</sup>−1] 时 z=0；若使用无符号存储编码 q∈[0,2<sup>b</sup>−1]，则以 z=2<sup>b−1</sup> 表示中心偏移。两种约定不能混用。少存一个零点、乘法更简单，适合近似零对称分布的权重。</li>
   <li><strong>非对称量化（asymmetric）</strong>：像上面公式那样分别记录 min/max。适合分布偏向一侧的激活值。</li>
 </ul>
 <p>下面是 GPTQ 官方仓库里的实现，可以看到上面的公式原样落进了代码（<code>repos/gptq/quant.py</code>，节选，中文注释为本文所加）：</p>
@@ -270,7 +284,7 @@
 <pre><code>if self.mse:
     best = torch.full([x.shape[0]], float('inf'), device=dev)
     for i in range(int(self.maxshrink * self.grid)):   # maxshrink=0.8, grid=100
-        p = 1 - i / self.grid                          # 依次尝试收缩到 80%~100%
+        p = 1 - i / self.grid                          # maxshrink=0.8、grid=100 时，p 从 1.00 到 0.21（i=0..79），不是 80%~100%
         xmin1 = p * xmin; xmax1 = p * xmax
         scale1 = (xmax1 - xmin1) / self.maxq
         ...
@@ -486,7 +500,7 @@ root.querySelector('.ppx-resample').addEventListener('click',sample);
   <li><span class="era">2024 · KV Cache 量化元年 + W4A4 + FP8 训练</span>
     <div class="desc">KIVI（2-bit KV，K 按通道/V 按 token）<sup class="cite"><a href="#ref32">[32]</a></sup>、KVQuant（10M 上下文）<sup class="cite"><a href="#ref33">[33]</a></sup>；旋转法 QuaRot/SpinQuant 打开 W4A4<sup class="cite"><a href="#ref16">[16]</a></sup><sup class="cite"><a href="#ref17">[17]</a></sup>；QServe 提出 W4A8KV4 系统协同<sup class="cite"><a href="#ref15">[15]</a></sup>；AQLM/VPTQ/QTIP 冲击 2-bit<sup class="cite"><a href="#ref19">[19]</a></sup><sup class="cite"><a href="#ref20">[20]</a></sup><sup class="cite"><a href="#ref21">[21]</a></sup>；DeepSeek-V3 首次在 671B 超大规模上验证 FP8 训练<sup class="cite"><a href="#ref12">[12]</a></sup>。</div></li>
   <li><span class="era">2024.06–10 · 扩散 Transformer 量化起步</span>
-    <div class="desc">ViDiT-Q 针对 FLUX/视频 DiT 提出"静态-动态"量化，W8A8 无损<sup class="cite"><a href="#ref45">[45]</a></sup>；city96 的 ComfyUI-GGUF 让 FLUX 跑进 GGUF 世界<sup class="cite"><a href="#ref49">[49]</a></sup>；SageAttention 用 INT8/FP8 attention 核加速<sup class="cite"><a href="#ref48">[48]</a></sup>。</div></li>
+    <div class="desc">ViDiT-Q 在 OpenSORA / PixArt-α 等评估静态—动态通道平衡、动态量化与混合精度，报告所测设置下 W8A8 质量近似保持<sup class="cite"><a href="#ref45">[45]</a></sup>；city96 的 ComfyUI-GGUF 让 FLUX 跑进 GGUF 世界<sup class="cite"><a href="#ref49">[49]</a></sup>；SageAttention 用 INT8/FP8 attention 核加速<sup class="cite"><a href="#ref48">[48]</a></sup>。</div></li>
   <li><span class="era">2024.10–12 · VLM 量化专项研究出现</span>
     <div class="desc">Q-VLM（跨层依赖）<sup class="cite"><a href="#ref50">[50]</a></sup>、MBQ（模态平衡）<sup class="cite"><a href="#ref51">[51]</a></sup>——直接照搬 LLM 量化到 VLM 会明显掉点成为共识。</div></li>
   <li><span class="era">2025 · QAT 复兴 + FP4 硬件 + 极低比特</span>
@@ -564,7 +578,7 @@ for i1 in range(0, self.columns, blocksize):     # 分块（128 列）处理，�
 
 <p>GPTQ 要跑校准数据做逐层重构。MIT 韩松团队观察到两个现象：①权重本身看不出谁重要，但<strong>激活幅度大的输入通道</strong>对应的权重很重要——量化这些"关键通道"（约 1%）会大幅掉点；②让这 1% 权重保持 FP16（混合精度）kernel 效率低。AWQ 的解法很优雅：<strong>给关键通道乘一个略大于 1 的缩放 s，等价地在激活侧除回去</strong>——乘过之后这些权重在量化网格里"占的格子变多了"，等效精度提高，而整个矩阵仍是统一的 INT4：</p>
 
-<div class="math">Y = (X · diag(s)<sup>−1</sup>) · Q(W · diag(s)) ≈ X · W</div>
+<div class="math">Y = (X · diag(s)<sup>−1</sup>) · Q(diag(s) · W) ≈ X · W（X: T×Cin，W: Cin×Cout）</div>
 
 <div class="quote">
   <span class="en">"We propose AWQ, a hardware-friendly approach for LLM low-bit weight-only quantization… Protecting only 1% salient weights can greatly reduce quantization error… scales are searched from offline activation statistics…"</span>
@@ -582,7 +596,7 @@ for ratio in range(n_grid):
     scales = (x_mean.pow(ratio) / (w_mean.pow(1 - ratio) + 1e-4)).clamp(min=1e-4)
     scales = scales / (scales.max() * scales.min()).sqrt()  # 归一化，避免 scale 本身过大
     for fc in linears2scale:
-        fc.weight.mul_(scales.view(1, -1))                # W·diag(s)
+        fc.weight.mul_(scales.view(1, -1))                # PyTorch 存储 W_pt: Cout×Cin；按列缩放 W_pt·D，对应数学约定 D·W
         fc.weight.data = self.pseudo_quantize_tensor(fc.weight.data)[0] / scales_view  # 量化再除回
     int_w_output = self._module_forward(x, module2inspect, kwargs)
     ...                                                  # 比较与 FP16 输出的误差，保留最优 scales</code></pre>
@@ -625,7 +639,7 @@ def scale_ln_fcs(ln, fcs, scales):
 
 <h3>4.3 权重 + 激活一起压：从 W8A8 到 W4A4</h3>
 
-<p>weight-only 量化只加速解码。要加速预填充（以及让 attention/FFN 全链路吃低精度算力），必须把<strong>激活也量化</strong>。难点还是 §4.1 的老问题：激活有离群值，而且激活是逐 token 在线产生的，<strong>不能离线慢慢优化</strong>。</p>
+<p>weight-only 量化通常更利于权重带宽主导的解码，短输入/小 batch 的预填充也可能受益。要利用低精度矩阵乘的计算吞吐，还需对应 kernel 支持，并常将<strong>激活也量化</strong>。难点还是 §4.1 的老问题：激活有离群值，而且激活是逐 token 在线产生的，<strong>不能离线慢慢优化</strong>。</p>
 
 <h4>4.3.1 SmoothQuant：把难度从激活搬到权重 <span class="tag">2022.11 · ICML 2023</span></h4>
 
@@ -676,7 +690,7 @@ def smooth_ln_fcs(ln, fcs, act_scales, alpha=0.5):
   <li><strong>细粒度分块</strong>：激活按 <strong>1×128 tile</strong>（每 token 128 通道）共享 scale，权重按 <strong>128×128 block</strong> 共享 scale——比 per-tensor 细得多，离群值只影响自己的小块；</li>
   <li><strong>在线量化</strong>：scale 不靠历史统计，前向时就地算 absmax；</li>
   <li><strong>高精度累加</strong>：每累乘 128 个元素就"晋升"到 CUDA Core 的 FP32 寄存器做精累加（规避 Tensor Core 14-bit 累加精度问题）；</li>
-  <li>所有张量统一用 <strong>E4M3</strong>（因为分块细，不缺动态范围）、优化器状态用 BF16、激活缓存 FP8、MoE 通信也走 FP8。</li>
+  <li>主要 FP8 GEMM 输入使用 <strong>E4M3</strong>；整体是混合精度训练，embedding、输出头、路由、归一化和注意力等保留较高精度，主权重与梯度累积用 FP32，AdamW 矩状态用 BF16；不能概括为所有张量都用 FP8。</li>
 </ul>
 
 <div class="quote">
@@ -703,7 +717,7 @@ def smooth_ln_fcs(ln, fcs, act_scales, alpha=0.5):
 
 <h3>4.5 原生低位训练：BitNet 与 1.58-bit <span class="tag">2023–2025</span></h3>
 
-<p>前面所有方法都是"训完再压"（PTQ）。微软的 BitNet 反其道而行：<strong>从第一行代码起就用低精度</strong>。BitNet b1.58 把每个权重限制为三值 {−1, 0, +1}（信息量 log₂3 ≈ 1.58 bit），激活 8-bit。矩阵乘退化为"加减法"，理论上能效高一个数量级：</p>
+<p>GPTQ/AWQ 等属于训练后量化（PTQ），上一节 FP8 则属于混合精度训练。微软的 BitNet 反其道而行：<strong>从第一行代码起就用低精度</strong>。BitNet b1.58 把每个权重限制为三值 {−1, 0, +1}（信息量 log₂3 ≈ 1.58 bit），激活 8-bit。矩阵乘退化为"加减法"，理论上能效高一个数量级：</p>
 
 <div class="quote">
   <span class="en">"…a 1-bit LLM variant, namely BitNet b1.58, in which every single parameter (or weight) of the LLM is ternary {-1, 0, 1}… [it] matches the full-precision (i.e., FP16 or BF16) Transformer LLM with the same model size and training tokens… opens the door for designing specific hardware optimized for 1-bit LLMs."</span>
@@ -764,7 +778,7 @@ def smooth_ln_fcs(ln, fcs, act_scales, alpha=0.5):
 <p><strong>代码走读</strong>（<code>repos/KIVI/models/llama_kivi.py</code> + <code>models/utils_quant.py</code>）。配置里 k_bits/v_bits=2、group_size=32、residual_length=32（示例值；论文常用更大的组）：</p>
 
 <div class="codecap">repos/KIVI/models/llama_kivi.py — 注意力中的 KV 量化（节选）</div>
-<pre><code># Key：转置后按最后一维（通道）分组量化 ⇒ per-channel
+<pre><code># Key：转置为 [B,H,channel,token] 后，在固定通道内沿最后的 token 维分组量化 ⇒ per-channel
 key_states_quant_trans, key_scale_trans, key_mn_trans = \
     triton_quantize_and_pack_along_last_dim(
         key_states_quant.transpose(2, 3).contiguous(), self.group_size, self.k_bits)
@@ -831,7 +845,7 @@ dequantized = input_in_groups * scale + mn</code></pre>
   <li><strong>投影层与视觉编码器更敏感</strong>：它们是跨模态对齐的咽喉，低位量化这里最容易伤（常见做法是保持 FP16 或用更高比特）；</li>
   <li><strong>细粒度感知敏感性</strong>：文本里一个小误差只影响一个词；视觉 token 的误差会以空间方式扩散，导致幻觉物体、OCR 错字等"看得见的"退化。</li>
 </ol>
-<p>所以 2024 年起的共识是：<strong>直接把 LLM 的 GPTQ/AWQ/SmoothQuant 无损搬到 VLM 上会明显掉点</strong>，需要模态感知的专门设计。</p>
+<p>所以 2024 年起的共识是：<strong>LLM 量化方法向 VLM 迁移的质量取决于对象、位宽、校准数据和任务</strong>；AWQ 的部分 weight-only 4-bit 实验可保持质量，更低位宽或联合激活量化仍需检验模态敏感性。</p>
 
 <h3>6.2 代表工作</h3>
 <table>
@@ -883,10 +897,10 @@ dequantized = input_in_groups * scale + mn</code></pre>
 </div>
 
 <h3>7.3 ViDiT-Q：为 DiT 设计的"静态-动态"量化 <span class="tag">2024.06 · ICLR 2025</span></h3>
-<p>当骨干从 UNet 换成 Transformer（DiT），量化策略也随之升级。清华团队的 ViDiT-Q 针对 FLUX、CogVideoX、HunyuanVideo 等提出两条设计：</p>
+<p>当骨干从 UNet 换成 Transformer（DiT），量化策略也随之升级。ViDiT-Q 在 OpenSORA、PixArt-α 等模型上评估动态量化、静态—动态通道平衡和指标解耦混合精度：</p>
 <ul>
   <li><strong>权重量化用"静态"参数</strong>：权重离线确定 scale（按通道，结合通道显著度校准）；</li>
-  <li><strong>激活动态量化</strong>：激活随 timestep 剧烈变化，干脆<strong>每次前向在线计算 scale</strong>（per-token/per-group absmax），不做静态校准——用少量在线开销换取对分布漂移的完全免疫。这后来被称为 static-dynamic 策略。</li>
+  <li><strong>激活动态量化</strong>：激活随 timestep 剧烈变化，干脆<strong>每次前向在线计算 scale</strong>（per-token/per-group absmax），不做静态校准——在线 scale 能适应范围变化，但仍有舍入误差。Static-Dynamic Channel Balancing 另指结合缩放与旋转来处理静态及随 timestep 变化的通道不平衡，并非“静态权重＋动态激活”的别名。</li>
 </ul>
 
 <div class="quote">
@@ -915,7 +929,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <p>后续 <strong>ViDiT-Q-fast</strong>（2025）进一步做分辨率自适应的维度量化与 kernel 优化；<strong>Q-VDiT</strong>（ICML 2025）在 ViDiT-Q 的静态-动态框架上叠加蒸馏，专攻视频 DiT<sup class="cite"><a href="#ref46">[46]</a></sup>。</p>
 
 <h3>7.4 SVDQuant：用低秩分支"吸收"离群值 <span class="tag">2024.11 · ICLR 2025 Spotlight</span></h3>
-<p>要压到 <strong>W4A4</strong>（权重激活都 4-bit），平滑和旋转都不够。NVIDIA/ MIT 韩松团队的 SVDQuant 给出了一个漂亮的构造：<strong>把权重（和激活）的离群部分用 SVD 分解成一个小秩的旁路</strong>——旁路以 FP16 精度计算（参数量只有百分之几），主干残差因此变得"平坦"、可以放心 4-bit：</p>
+<p>要压到 <strong>W4A4</strong>（权重激活都 4-bit），平滑和旋转都不够。NVIDIA/ MIT 韩松团队的 SVDQuant 给出了一个漂亮的构造：<strong>先平滑、把激活离群的量化难度迁移到权重，再对变换后的权重矩阵做低秩分解，以高精度低秩旁路处理主要误差、4-bit 分支处理残差</strong>——旁路以 FP16 精度计算（参数量只有百分之几），主干残差因此变得"平坦"、可以放心 4-bit：</p>
 
 <div class="quote">
   <span class="en">"…we use a high-precision, low-rank branch to take in the weight outliers with Singular Value Decomposition (SVD), while a low-bit quantized branch handles the residuals… [Nunchaku] fuses the kernels of the low-rank branch into those of the low-bit branch to cut off redundant memory access… We reduce the memory usage for the 12B FLUX.1 models by 3.5×, achieving 3.0× speedup over the 4-bit weight-only quantization (W4A16) baseline on the 16GB laptop 4090 GPU with INT4 precision."</span>
@@ -940,7 +954,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 
 <div class="box key">
   <div class="t">📌 DiT 量化方法谱系小结</div>
-  <p style="margin:4px 0">时间步感知校准（Q-Diffusion）→ 静态权重+动态激活（ViDiT-Q）→ 低秩旁路吸收离群（SVDQuant）＋ 量化注意力核（SageAttention）＋ 端侧 GGUF（ComfyUI 社区）。共同主题：<strong>离群值处理 × 时间步分布漂移 × kernel 融合</strong>。</p>
+  <p style="margin:4px 0">时间步感知校准（Q-Diffusion）→ 静态—动态通道平衡与指标解耦混合精度（ViDiT-Q）→ 低秩旁路吸收离群（SVDQuant）＋ 量化注意力核（SageAttention）＋ 端侧 GGUF（ComfyUI 社区）。共同主题：<strong>离群值处理 × 时间步分布漂移 × kernel 融合</strong>。</p>
 </div>
 
 <!-- ============================================================ -->
@@ -957,75 +971,6 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <p><strong>要点（编译）</strong>：2023 年用户还要自己跑脚本产量化模型；2025–2026 年，"官方预量化发布（AWQ/GPTQ/QAT/NVFP4）+ 框架自动加载"已成默认，量化的竞争重心从"算法精度"转向"<strong>格式标准化 + kernel 吞吐 + 服务系统协同</strong>"。</p>
 
 <!-- ============================================================ -->
-<h2 id="s9"><span class="no">9</span>最新进展（2024–2026）速览</h2>
-<p>按主题浓缩一版"这两年最重要的变化"（详细出处见前文各节与文末参考文献）：</p>
-<table>
-  <tr><th>主题</th><th>代表性进展</th><th>意味着什么</th></tr>
-  <tr><td><strong>硬件格式</strong></td><td>OCP MX 标准落地（2023.09）<sup class="cite"><a href="#ref13">[13]</a></sup>；Blackwell 原生 FP4：MXFP4 / NVFP4（2025）<sup class="cite"><a href="#ref14">[14]</a></sup>；NVFP4 KV Cache（2025）<sup class="cite"><a href="#ref41">[41]</a></sup></td><td>块缩放从软件技巧变成硬件数据通路；4-bit 推理无需自己写 kernel</td></tr>
-  <tr><td><strong>低精度训练</strong></td><td>DeepSeek-V3 的 FP8 分块训练（2024.12）<sup class="cite"><a href="#ref12">[12]</a></sup>；Kimi K2 等跟进；FP4 训练开源实验（vuiseng9/fp4-training）</td><td>训练成本断崖式下降；"为低精度而训练"成为旗舰模型标配</td></tr>
-  <tr><td><strong>QAT 回归</strong></td><td>Llama 3.2 QAT（2024.10）<sup class="cite"><a href="#ref29">[29]</a></sup>、Gemma 3 QAT（2025.04）<sup class="cite"><a href="#ref31">[31]</a></sup>、TorchAO QAT 工具链<sup class="cite"><a href="#ref30">[30]</a></sup></td><td>官方"预量化发行"成趋势：4-bit 精度逼近 FP16</td></tr>
-  <tr><td><strong>极低比特</strong></td><td>QTIP 格码量化（2024.06）<sup class="cite"><a href="#ref21">[21]</a></sup>、TesseraQ（ICML 2025）<sup class="cite"><a href="#ref22">[22]</a></sup>、PTQ1.61（ACL 2025）<sup class="cite"><a href="#ref23">[23]</a></sup>、LittleBit 0.1 bpw（NeurIPS 2025）<sup class="cite"><a href="#ref24">[24]</a></sup></td><td>均匀网格让位于码本/格/因子分解；2-bit 以下开始实用</td></tr>
-  <tr><td><strong>原生 1-bit</strong></td><td>BitNet b1.58-2B-4T 开源（2025.04）<sup class="cite"><a href="#ref27">[27]</a></sup>；BitNet a4.8 激活 4-bit（2025）<sup class="cite"><a href="#ref28">[28]</a></sup></td><td>三值权重+低位激活的完整技术栈雏形；等专用硬件</td></tr>
-  <tr><td><strong>W4A4 推理</strong></td><td>QuaRot/SpinQuant 旋转（2024）<sup class="cite"><a href="#ref16">[16]</a></sup><sup class="cite"><a href="#ref17">[17]</a></sup>；QServe 系统（2024.05）<sup class="cite"><a href="#ref15">[15]</a></sup></td><td>激活 4-bit 的精度障碍基本扫清，进入 kernel/系统优化期</td></tr>
-  <tr><td><strong>KV 量化</strong></td><td>KIVI/KVQuant（2024）<sup class="cite"><a href="#ref32">[32]</a></sup><sup class="cite"><a href="#ref33">[33]</a></sup> → LogQuant/RotateKV/KVTuner（2025）<sup class="cite"><a href="#ref34">[34]</a></sup>–<sup class="cite"><a href="#ref36">[36]</a></sup> → MixKVQ（ACL 2026）<sup class="cite"><a href="#ref37">[37]</a></sup>、OSCAR 2-bit@128K（2026.05）<sup class="cite"><a href="#ref39">[39]</a></sup>；vLLm/SGLang FP8 KV 默认化<sup class="cite"><a href="#ref40">[40]</a></sup></td><td>2-bit KV 稳定化；量化与剪枝/缓存策略融合</td></tr>
-  <tr><td><strong>DiT 量化</strong></td><td>ViDiT-Q（ICLR 2025）<sup class="cite"><a href="#ref45">[45]</a></sup>、SVDQuant+Nunchaku（ICLR 2025 Spotlight）<sup class="cite"><a href="#ref47">[47]</a></sup>、SageAttention 广泛集成<sup class="cite"><a href="#ref48">[48]</a></sup>、Q-VDiT（ICML 2025）<sup class="cite"><a href="#ref46">[46]</a></sup>、ComfyUI-GGUF 社区化<sup class="cite"><a href="#ref49">[49]</a></sup></td><td>图像/视频生成在消费级 GPU 上 4-bit 运行成为日常</td></tr>
-  <tr><td><strong>VLM 量化</strong></td><td>Q-VLM（NeurIPS 2024）<sup class="cite"><a href="#ref50">[50]</a></sup>、MBQ（CVPR 2025）<sup class="cite"><a href="#ref51">[51]</a></sup>、Bi-VLM（AAAI 2025）<sup class="cite"><a href="#ref52">[52]</a></sup></td><td>模态感知校准成为 VLM 压缩的独立研究方向</td></tr>
-</table>
-
-<h3>9.1 2026 年 6–10 月新动态：三值 PTQ 落地、量化走进 P/D 与 MoE RL</h3>
-<p>这一波的四条线索：<b>三值量化的 PTQ 路线打通</b>（TWLA / CAT-Q，双双入选 ICML 2026）；<b>量化开始按推理阶段分工</b>（Mix-Quant）；<b>KV 量化研究转向"系统感知"</b>（SAW-INT4）；<b>视频扩散的 KV 量化</b>成为新热点（Quant VideoGen）。</p>
-<ul>
-<li><b>TWLA</b>（后摩智能，ICML 2026，arXiv:2606.13054）：首个把权重压到 1.58-bit、激活压到 4-bit 的<b>纯 PTQ</b> 流程——BitNet 类三值模型本来要从零训练，TWLA 用校准就能把现成 FP16 模型变成"类 BitNet"模型。LLaMA2-13B 权重 23.7GB → 3.34GB，吞吐 3.64×；Qwen3-32B 的 W1.58A4 下基线（GPTQ 等）近乎随机（MMLU≈25%）而 TWLA 保持约 90%<sup class="cite"><a href="#ref57">[57]</a></sup>。</li>
-<li><b>CAT-Q</b>（Intel，ICML 2026 Oral，arXiv:2606.26650）：只用 <b>512 条校准样本</b>把 14B–235B 模型三值化（对比 BitNet 家族约省 10 万倍训练 token）；显存降 10×+；llama.cpp 上 Qwen3-4B CPU 37.35 vs 19.31 tok/s。论文自认数学/代码任务退化明显（MATH-500 出现 0.00），改进版 CAT-Q+ 待发布——"便宜但局限"的诚实样本<sup class="cite"><a href="#ref58">[58]</a></sup>。</li>
-<li><b>Mix-Quant</b>（arXiv:2605.20315，2026-05）：<b>按阶段分工量化</b>——prefill 走 NVFP4 W4A4 低精度通路（吃 compute-bound 加速），decode 切回高精度通路（避免 token 选择被扰动、长思维链误差累积），相当于"同一模型两种精度的 P/D 分离"，prefill 最高 3×<sup class="cite"><a href="#ref59">[59]</a></sup>。</li>
-<li><b>SAW-INT4</b>（Together AI，arXiv:2604.19157）：在 SGLang 内实现<b>旋转-量化融合 kernel</b>，INT4 KV 端到端零可测开销；并发现考虑服务兼容性后，复杂旋转方案的增益其实有限——"论文精度 ≠ 服务收益"的又一证据<sup class="cite"><a href="#ref60">[60]</a></sup>。</li>
-<li><b>Quant VideoGen</b>（MIT 韩松组等，ICML 2026，arXiv:2602.02958）：自回归视频扩散的相邻帧 token 高度重复——"近重复分组 + 存组内残差"让数据对量化友好，残差做 2-bit 渐进量化，免重训压缩 <b>7×</b>、延迟开销 &lt;4%<sup class="cite"><a href="#ref61">[61]</a></sup>。</li>
-<li><b>SplitQ</b>（KAUST，arXiv:2605.19929）：揭示 VLM 量化的新难点——文本与视觉激活的离群值落在<b>不同通道</b>，旋转类 PTQ 直接搬用会失效；按模态分解通道再做 W4A4/W3A3<sup class="cite"><a href="#ref62">[62]</a></sup>。另有"Why Gated DeltaNet Survives 4-Bit Quantization"（arXiv:2609.04098）首次系统研究混合线性注意力模型的 NVFP4 量化机理。</li>
-</ul>
-
-<h3>9.2 2026-10 中下旬速览：NVFP4 KV 成为出厂默认，训练与格式的低精度合流</h3>
-<p>五件新事的共同主题是<b>量化与训练/服务系统的边界继续溶解</b>：训练侧把推理引擎的数值语义当作规范来对齐（QATFactory / TRACE），工具链把 KV cache 纳入自动混精搜索（ModelOpt），极低比特有了统一"坐标系"（CanonQ），视频生成的 KV 量化从分组走向"预测"（TempoKV）。</p>
-<ul>
-<li><b>QATFactory</b>（Together AI + UIUC/UT Austin，arXiv:2609.39223）：现有 QAT 工具链的 fake quantizer 与 vLLM/SGLang/llama.cpp 的数值语义不一致，"训出来的 checkpoint 装不进目标引擎"。QATFactory 把<b>推理引擎当作"数值规范"</b>——在 BF16 中精确模拟 NVFP4/MXFP4/Q4_K 的可表示值集、两级块缩放与舍入行为，训练后无损导出可直接部署的 checkpoint，无需 FP4 硬件即可在 H100 上做 NVFP4 QAT。Qwen3.5-9B NVFP4 平均 68.9% vs 最优 PTQ 65.4%；QARL（量化感知 RL）平均精度再 +2.7 点<sup class="cite"><a href="#ref63">[63]</a></sup>。论文还预告 NVIDIA Rubin 下一代将引入"3-bit 索引 + 共享非均匀码本"的可编程查表 Tensor Core 格式——§10①"焊进硬件"的下一步。</li>
-<li><b>TRACE</b>（阿里 Token Hub + OSU，arXiv:2610.07767，本窗口 alphaXiv 最高热度）：FP4 RL 的已有方法（QaRL/QUADS/Rollout-ResQ）各自降低训练/rollout 两条通路的量化误差，但"每条路都准 ≠ 两条路一致"——FP4 舍入跨界会让 MoE 路由错位、策略发散。TRACE 用 <b>rollout 侧 FP4 量化结果直接引导训练侧舍入方向</b>（rollout-guided QAT），并发现 99% 的不一致仅差一个相邻码字——只需缓存深层一半层数的尾数+scale（每 token 约 7.5KB），通信量降 6×。联合 NVFP4 W/A+KV rollout 下 Qwen3.5-35B-A3B 平均 75.3 分 vs BF16 的 74.9，最大 5.4× rollout 解码加速；验证至 Qwen3.8-2.4T-A95B<sup class="cite"><a href="#ref64">[64]</a></sup>。</li>
-<li><b>ModelOpt AutoQuant KV</b>（NVIDIA，2026-10-08 公告；0.48 版本线 10-08 rc0 → 10-17 rc1）：把逐层敏感度搜索扩展到 KV cache——在 FP8 K/V、NVFP4 K/V、FP8-K+NVFP4-V 候集中按存储预算自动分配混精，权重与 KV 可各设独立预算联合搜索。Qwen3-8B 上 AQ 5.76 有效 bit 时 KV 负载较 BF16 降 64.0%，RULER-128K 仅 −1.04（全域 NVFP4 为 −6.54）<sup class="cite"><a href="#ref65">[65]</a></sup>——KVTuner（§6）的层间混精思想进入官方工具链。</li>
-<li><b>CanonQ</b>（Meta AI，arXiv:2610.09202）：同时压到 W2A4KV2 时任何单点 PTQ 都崩溃、码本类方法又绑定校准数据。CanonQ"先规范化、再让模型学会用固定编解码器"——固定 Hadamard-对角-置换变换 + 能量归一把 W/A/K/V 映射到同一规范坐标，一套<b>冻结的高斯参考码本</b>跨层跨模型复用，再联合 QAT 适应耦合误差。LLaMA3-8B W2A4KV2：WikiText-2 PPL 9.41 vs ParetoQ 的 134.36（低 14.28×），8 任务均值 59.81% vs 37.87%<sup class="cite"><a href="#ref66">[66]</a></sup>。</li>
-<li><b>TempoKV</b>（上交大 + 华南理工 + 阿里，arXiv:2610.15324，2026-10-11）：把 LLM 的 KV 量化搬到自回归视频模型会失效——它从<b>时间可预测性</b>切入：K 沿潜帧平滑演化（自身历史线性预测余弦 0.877）、V 强烈依赖当前对齐的 K（加入对齐 K 后 0.881）。免训练的"预测 + 低位残差"框架在 Self-Forcing / Causal Forcing / LongCat-Video-13B 上最高 <b>6.71× KV 压缩</b>（超 Quant VideoGen 的 6.61×）且 PSNR 从 18.34 提到 19.85；INT4 档 KV 从 48.18GB 降到 13.2GB，生成延迟开销仅 11.9%<sup class="cite"><a href="#ref67">[67]</a></sup>。同期 <b>PulseQuant</b>（arXiv:2609.33384，视频 DiT 4-bit PTQ）用三联散点证明"局部块重建误差与最终 latent 误差几乎无关（ρ=−0.08）"、误差要到 4 步传播后才相关（ρ=+0.70）——为 §10⑧"困惑度已不足以刻画量化伤害"补上视频版证据；RTX 5080 上 packed NVFP4 使 DiT 峰值显存 7.86→3.63 GiB<sup class="cite"><a href="#ref68">[68]</a></sup>。</li>
-
-<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
-<img src="img/tempokv-fig3.svg" loading="lazy" alt="视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 3（arXiv:2610.15324）</b> · K 可由时间历史预测、V 依赖对齐 K：视频 KV 的不对称可预测性</figcaption>
-</figure>
-
-</ul>
-
-<!-- ============================================================ -->
-<h4>① 低比特 KV 与 W4A4 的版图再扩（10-14 – 10-19，三大引擎）</h4>
-<p><b>vLLM v0.32.0</b>（10-18）：NVFP4 KV cache 从 Blackwell 扩到 SM8x/SM12x/SM90（SM12x 配 XQA decode）并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3~5.5%、TTFT 代价 7~11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）；MXFP4 MoE W4A4（CUTLASS）+ FP8 激活。<b>SGLang v0.5.22</b>（10-19）：FP8 KV 融合进 prefix-valid commit kernel；<b>ConvRot：扩散 Transformer 的在线 INT8 W8A8</b>；MiniMax-H3 与 Qwen-Image 2.1 经 SGLang Diffusion 跑 ComfyUI 且<b>直接加载社区 GGUF 检查点与 LoRA</b>——量化生态与创作工具链正式打通。安全注记：SGLang × Cloudflare 于 <b>10-26 联合披露 P/D 分离下的 KV cache 跨请求泄漏</b>（GLM-5.3 上实测污染 155 个响应，复现需 prompt &gt;681,280 tokens）——修复分两步落在 v0.5.21（Mooncake/NIXL 传输默认防护）与 v0.5.22（MORI 标记 ack），运营方应升级至 v0.5.22+<sup class="cite"><a href="#ref75">[75]</a></sup>，低精度 KV 与分离式传输的部署需先过安全关。<b>TensorRT-LLM v1.4.0rc0</b>（10-14）：MiniMax-M3 NVFP4 KV（含 P128 draft KV 视图）、Qwen-Image-Layered FP8 + Cache-DiT、块稀疏 FMHA + 更新版 SM90 SageAttention——"量化 × 稀疏 × 跨步缓存"打进同一引擎。</p>
-
-<h4>② FP4 也有训练配方了（10-17，NVIDIA + ISTA + Red Hat AI）</h4>
-<p><b>What Matters for NVFP4 Training?</b>（arXiv:2610.24343）：首份 FP4 <b>预训练</b>配方的系统性对比研究——各设计选择（scale 格式、随机舍入、混合精度边界等）逐一实证校验。§10③"训练全链路低精度化"方向的第一份系统参照。对照组随后就到：AMD <b>ALTO</b>（arXiv:2610.32229，10-26）把 <b>GPT-OSS-20B 从零 MXFP4 预训练</b>跑通——C4 loss 3.3350 vs BF16 的 3.3283，额外步数开销从 +20% 降到 +5%<sup class="cite"><a href="#ref70">[70]</a></sup>（详见 §9.3），FP4 训练自此有了 NVIDIA 配方研究之外的跨厂商实证。</p>
-
-<h4>③ 旋转 PTQ 与格点量化的新进展（10-14 – 10-20）</h4>
-<p><b>SpectrumQuant</b>（IISc，arXiv:2610.20303，本窗口量化类最高热度）：对 QuaRot/SpinQuant 一系旋转 PTQ 做"频谱对齐"改进，重塑激活分布。<b>E8-QAT</b>（北大+城大+腾讯，arXiv:2610.27699）：隐式格码本（implicit lattice）的 2-bit QAT——QTIP/CanonQ 的"格量化"与 QAT 两条线正式合流。<b>MultiAlloc</b>（南大+HKUST，arXiv:2610.18642）：预算感知的 KV 逐层精度分配。跨界新交叉点：<b>Q-CRL</b>（汉阳+LG，10-11）用 RL 恢复 VLA 低比特量化掉点；<b>LoopQuant</b>（北大+后摩，10-12）量化循环 Transformer；<b>Beyond 4 bits</b>（Microsoft，10-20）以数据为中心修复 2-bit PTQ。</p>
-
-<h3>9.3 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
-<p>六件新事的共同关键词是<b>"更低比特 × 更贴近部署"</b>：MLA 的低秩缓存首次被整体压到 2.5 bit，MXFP4 预训练有了 NVIDIA 之外的跨厂商实证，官方发行把多格式量化做成"出厂工序"，格量化与符号修正继续把存储推往新低，免训练残差补偿则为 W4A4 兜底。</p>
-<ul>
-<li><b>RAQ-MLA</b>（中科院自动化所 + 腾讯，10-24，arXiv:2610.33625）：MLA 架构的潜在 KV 缓存（含吸收后的 kR 部分）<b>整体量化到约 2.5 bit</b>——四个模型平均掉点 &lt;0.5pp，同样显存可放的 KV 容量 6.5×，H20 上 decode kernel 1.38×<sup class="cite"><a href="#ref69">[69]</a></sup>。§5 的 KV 量化主线第一次把 MLA"一个潜在向量顶一整套 KV"的架构红利与极低位表示叠在一起。</li>
-<li><b>ALTO</b>（AMD，10-26，arXiv:2610.32229）：<b>GPT-OSS-20B 从零 MXFP4 预训练</b>跑通——C4 loss 3.3350 vs BF16 的 3.3283，额外训练步数开销从 +20% 压到 +5%<sup class="cite"><a href="#ref70">[70]</a></sup>，为 §9.2 ② 的 NVIDIA 配方研究补上跨厂商对照组。</li>
-<li><b>Muse Spark Open 官方多格式量化</b>（Meta，10-15）：BF16 1.65TB → NVFP4 537GB（<b>只量化专家权重</b>，共享部分保高精度），day-one 覆盖 vLLM / SGLang / TensorRT-LLM / llama.cpp 四引擎，另有 AMD FP8/MXFP4、Intel INT4 与社区 GGUF 版本<sup class="cite"><a href="#ref71">[71]</a></sup>——"量化发行"从单套 QAT 权重扩成多硬件多格式矩阵（§10② 预判的加速兑现）。</li>
-<li><b>BiLoCo</b>（MIT，NeurIPS 2026，10-23，arXiv:2610.32243）：低比特权重之外挂一组 <b>±1 符号向量</b>存高精度修正——存储省 16×，batch-1 推理仅慢 6–11%<sup class="cite"><a href="#ref72">[72]</a></sup>，"修一个向量比存全套高精度权重便宜得多"的极低比特新范式。</li>
-<li><b>SQuAT</b>（哥本哈根大学 + Qualcomm，10-22，arXiv:2610.31412）：<b>格向量量化 QAT</b>——2.25 bpw 全面超过 INT-QAT 基线（MMLU 最高 +7.9%），VQ-QAT 训练成本 62.5 → 4.9 s/it<sup class="cite"><a href="#ref73">[73]</a></sup>，§9.2 ③"格量化 × QAT 合流"再添一员。</li>
-<li><b>ResCom</b>（中科院自动化所 + 复旦 + 港中文，10-25，arXiv:2610.35955）：W4A4 推理后加 <b>rank-32 低秩残差补偿、免训练</b>修复——GSM8K 从 23.96% 拉回 36.16%<sup class="cite"><a href="#ref74">[74]</a></sup>，SVDQuant"低秩吸收离群值"思想（§7.4）在 LLM 侧的轻量化回响。</li>
-</ul>
-<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
-<img src="img/biloco-fig1.svg" loading="lazy" alt="BiLoCo 推理：FP4 GEMM 在 tensor core、±1 符号修正在 CUDA core 异构并行" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
-<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.32243）</b> · BiLoCo 推理执行 y = xR + xVUᵀ：原生 FP4 残差 GEMM 跑在 tensor core，同时 CUDA core 上做 ±1 加/减符号修正，两路在 epilogue 相加——低精度主计算与高精度修正第一次塞进同一个 kernel 的异构流水。（版权归原作者，引用仅作技术说明）</figcaption>
-</figure>
-
-<p class="small muted">同窗口一句话带过：AGQ（Monash，10-21，arXiv:2610.33074）VLA 的动作引导量化——4 bpw 成功率 96.8%（超 AWQ 2.3pp），2-bit AWQ/GPTQ 全崩而 AGQ 3 bpw 仍 91.3%；MPQ（arXiv:2610.32127）；扩散 LM 的"任务 × 时间步"量化（arXiv:2610.31198）；DCKV（arXiv:2610.36950）。另：DeepInfer 10-20 开源的推理栈目前仅含 BF16，量化支持标注"待更新"。</p>
-
 <h2 id="s10"><span class="no">10</span>未来发展方向</h2>
 <p>综合学界论文与业界动向，以下八条线值得持续关注（序号不代表优先级）：</p>
 
@@ -1082,8 +1027,81 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 </table>
 
 <!-- ============================================================ -->
+
+<details id="s9" class="note" data-research-updates><summary>更新附录 · 研究进展与发布记录（展开选读）</summary>
+<p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
+<h2 id="s9-content">更新附录 · 研究进展与发布记录</h2>
+<p>按主题浓缩一版"这两年最重要的变化"（详细出处见前文各节与文末参考文献）：</p>
+<table>
+  <tr><th>主题</th><th>代表性进展</th><th>意味着什么</th></tr>
+  <tr><td><strong>硬件格式</strong></td><td>OCP MX 标准落地（2023.09）<sup class="cite"><a href="#ref13">[13]</a></sup>；Blackwell 原生 FP4：MXFP4 / NVFP4（2025）<sup class="cite"><a href="#ref14">[14]</a></sup>；NVFP4 KV Cache（2025）<sup class="cite"><a href="#ref41">[41]</a></sup></td><td>块缩放从软件技巧变成硬件数据通路；4-bit 推理无需自己写 kernel</td></tr>
+  <tr><td><strong>低精度训练</strong></td><td>DeepSeek-V3 的 FP8 分块训练（2024.12）<sup class="cite"><a href="#ref12">[12]</a></sup>；Kimi K2 等跟进；FP4 训练开源实验（vuiseng9/fp4-training）</td><td>训练成本断崖式下降；"为低精度而训练"成为旗舰模型标配</td></tr>
+  <tr><td><strong>QAT 回归</strong></td><td>Llama 3.2 QAT（2024.10）<sup class="cite"><a href="#ref29">[29]</a></sup>、Gemma 3 QAT（2025.04）<sup class="cite"><a href="#ref31">[31]</a></sup>、TorchAO QAT 工具链<sup class="cite"><a href="#ref30">[30]</a></sup></td><td>官方"预量化发行"成趋势：4-bit 精度逼近 FP16</td></tr>
+  <tr><td><strong>极低比特</strong></td><td>QTIP 格码量化（2024.06）<sup class="cite"><a href="#ref21">[21]</a></sup>、TesseraQ（ICML 2025）<sup class="cite"><a href="#ref22">[22]</a></sup>、PTQ1.61（ACL 2025）<sup class="cite"><a href="#ref23">[23]</a></sup>、LittleBit 0.1 bpw（NeurIPS 2025）<sup class="cite"><a href="#ref24">[24]</a></sup></td><td>均匀网格让位于码本/格/因子分解；2-bit 以下开始实用</td></tr>
+  <tr><td><strong>原生 1-bit</strong></td><td>BitNet b1.58-2B-4T 开源（2025.04）<sup class="cite"><a href="#ref27">[27]</a></sup>；BitNet a4.8 激活 4-bit（2025）<sup class="cite"><a href="#ref28">[28]</a></sup></td><td>三值权重+低位激活的完整技术栈雏形；等专用硬件</td></tr>
+  <tr><td><strong>W4A4 推理</strong></td><td>QuaRot/SpinQuant 旋转（2024）<sup class="cite"><a href="#ref16">[16]</a></sup><sup class="cite"><a href="#ref17">[17]</a></sup>；QServe 系统（2024.05）<sup class="cite"><a href="#ref15">[15]</a></sup></td><td>部分模型/任务的 W4A4 质量得到改善，仍需核对高精度保留、校准分布和长上下文/生成任务的退化</td></tr>
+  <tr><td><strong>KV 量化</strong></td><td>KIVI/KVQuant（2024）<sup class="cite"><a href="#ref32">[32]</a></sup><sup class="cite"><a href="#ref33">[33]</a></sup> → LogQuant/RotateKV/KVTuner（2025）<sup class="cite"><a href="#ref34">[34]</a></sup>–<sup class="cite"><a href="#ref36">[36]</a></sup> → MixKVQ（ACL 2026）<sup class="cite"><a href="#ref37">[37]</a></sup>、OSCAR 2-bit@128K（2026.05）<sup class="cite"><a href="#ref39">[39]</a></sup>；vLLm/SGLang FP8 KV 默认化<sup class="cite"><a href="#ref40">[40]</a></sup></td><td>2-bit KV 稳定化；量化与剪枝/缓存策略融合</td></tr>
+  <tr><td><strong>DiT 量化</strong></td><td>ViDiT-Q（ICLR 2025）<sup class="cite"><a href="#ref45">[45]</a></sup>、SVDQuant+Nunchaku（ICLR 2025 Spotlight）<sup class="cite"><a href="#ref47">[47]</a></sup>、SageAttention 广泛集成<sup class="cite"><a href="#ref48">[48]</a></sup>、Q-VDiT（ICML 2025）<sup class="cite"><a href="#ref46">[46]</a></sup>、ComfyUI-GGUF 社区化<sup class="cite"><a href="#ref49">[49]</a></sup></td><td>图像/视频生成在消费级 GPU 上 4-bit 运行成为日常</td></tr>
+  <tr><td><strong>VLM 量化</strong></td><td>Q-VLM（NeurIPS 2024）<sup class="cite"><a href="#ref50">[50]</a></sup>、MBQ（CVPR 2025）<sup class="cite"><a href="#ref51">[51]</a></sup>、Bi-VLM（AAAI 2025）<sup class="cite"><a href="#ref52">[52]</a></sup></td><td>模态感知校准成为 VLM 压缩的独立研究方向</td></tr>
+</table>
+
+<h3>9.1 2026 年 6–10 月新动态：三值 PTQ 落地、量化走进 P/D 与 MoE RL</h3>
+<p>这一波的四条线索：<b>三值量化的 PTQ 路线打通</b>（TWLA / CAT-Q，双双入选 ICML 2026）；<b>量化开始按推理阶段分工</b>（Mix-Quant）；<b>KV 量化研究转向"系统感知"</b>（SAW-INT4）；<b>视频扩散的 KV 量化</b>成为新热点（Quant VideoGen）。</p>
+<ul>
+<li><b>TWLA</b>（后摩智能，ICML 2026，arXiv:2606.13054）：首个把权重压到 1.58-bit、激活压到 4-bit 的<b>纯 PTQ</b> 流程——BitNet 类三值模型本来要从零训练，TWLA 用校准就能把现成 FP16 模型变成"类 BitNet"模型。LLaMA2-13B 权重 23.7GB → 3.34GB，吞吐 3.64×；Qwen3-32B 的 W1.58A4 下基线（GPTQ 等）近乎随机（文中原引 MMLU≈25%）；原“TWLA 约 90%”未定位其绝对准确率或性能保留率口径，此处撤回该数字比较<sup class="cite"><a href="#ref57">[57]</a></sup>。</li>
+<li><b>CAT-Q</b>（Intel，ICML 2026 Oral，arXiv:2606.26650）：只用 <b>512 条校准样本</b>把 14B–235B 模型三值化（对比 BitNet 家族约省 10 万倍训练 token）；显存降 10×+；llama.cpp 上 Qwen3-4B CPU 37.35 vs 19.31 tok/s。论文自认数学/代码任务退化明显（MATH-500 出现 0.00），改进版 CAT-Q+ 待发布——"便宜但局限"的诚实样本<sup class="cite"><a href="#ref58">[58]</a></sup>。</li>
+<li><b>Mix-Quant</b>（arXiv:2605.20315，2026-05）：<b>按阶段分工量化</b>——prefill 走 NVFP4 W4A4 低精度通路（吃 compute-bound 加速），decode 切回高精度通路（避免 token 选择被扰动、长思维链误差累积），相当于"同一模型两种精度的 P/D 分离"，prefill 最高 3×<sup class="cite"><a href="#ref59">[59]</a></sup>。</li>
+<li><b>SAW-INT4</b>（Together AI，arXiv:2604.19157）：在 SGLang 内实现<b>旋转-量化融合 kernel</b>，INT4 KV 端到端零可测开销；并发现考虑服务兼容性后，复杂旋转方案的增益其实有限——"论文精度 ≠ 服务收益"的又一证据<sup class="cite"><a href="#ref60">[60]</a></sup>。</li>
+<li><b>Quant VideoGen</b>（MIT 韩松组等，ICML 2026，arXiv:2602.02958）：自回归视频扩散的相邻帧 token 高度重复——"近重复分组 + 存组内残差"让数据对量化友好，残差做 2-bit 渐进量化，免重训压缩 <b>7×</b>、延迟开销 &lt;4%<sup class="cite"><a href="#ref61">[61]</a></sup>。</li>
+<li><b>SplitQ</b>（KAUST，arXiv:2605.19929）：揭示 VLM 量化的新难点——文本与视觉激活的离群值落在<b>不同通道</b>，旋转类 PTQ 直接搬用会失效；按模态分解通道再做 W4A4/W3A3<sup class="cite"><a href="#ref62">[62]</a></sup>。另有"Why Gated DeltaNet Survives 4-Bit Quantization"（arXiv:2609.04098）首次系统研究混合线性注意力模型的 NVFP4 量化机理。</li>
+</ul>
+
+<h3>9.2 2026-10 中下旬速览：NVFP4 KV 成为出厂默认，训练与格式的低精度合流</h3>
+<p>五件新事的共同主题是<b>量化与训练/服务系统的边界继续溶解</b>：训练侧把推理引擎的数值语义当作规范来对齐（QATFactory / TRACE），工具链把 KV cache 纳入自动混精搜索（ModelOpt），极低比特有了统一"坐标系"（CanonQ），视频生成的 KV 量化从分组走向"预测"（TempoKV）。</p>
+<ul>
+<li><b>QATFactory</b>（Together AI + UIUC/UT Austin，arXiv:2609.39223）：现有 QAT 工具链的 fake quantizer 与 vLLM/SGLang/llama.cpp 的数值语义不一致，"训出来的 checkpoint 装不进目标引擎"。QATFactory 把<b>推理引擎当作"数值规范"</b>——在 BF16 中精确模拟 NVFP4/MXFP4/Q4_K 的可表示值集、两级块缩放与舍入行为，训练后无损导出可直接部署的 checkpoint，无需 FP4 硬件即可在 H100 上做 NVFP4 QAT。Qwen3.5-9B NVFP4 平均 68.9% vs 最优 PTQ 65.4%；QARL（量化感知 RL）平均精度再 +2.7 点<sup class="cite"><a href="#ref63">[63]</a></sup>。论文还预告 NVIDIA Rubin 下一代将引入"3-bit 索引 + 共享非均匀码本"的可编程查表 Tensor Core 格式——§10①"焊进硬件"的下一步。</li>
+<li><b>TRACE</b>（阿里 Token Hub + OSU，arXiv:2610.07767，本窗口 alphaXiv 最高热度）：FP4 RL 的已有方法（QaRL/QUADS/Rollout-ResQ）各自降低训练/rollout 两条通路的量化误差，但"每条路都准 ≠ 两条路一致"——FP4 舍入跨界会让 MoE 路由错位、策略发散。TRACE 用 <b>rollout 侧 FP4 量化结果直接引导训练侧舍入方向</b>（rollout-guided QAT），并发现 99% 的不一致仅差一个相邻码字——只需缓存深层一半层数的尾数+scale（每 token 约 7.5KB），通信量降 6×。联合 NVFP4 W/A+KV rollout 下 Qwen3.5-35B-A3B 平均 75.3 分 vs BF16 的 74.9，最大 5.4× rollout 解码加速；验证至 Qwen3.8-2.4T-A95B<sup class="cite"><a href="#ref64">[64]</a></sup>。</li>
+<li><b>ModelOpt AutoQuant KV</b>（NVIDIA，2026-10-08 公告；0.48 版本线 10-08 rc0 → 10-17 rc1）：把逐层敏感度搜索扩展到 KV cache——在 FP8 K/V、NVFP4 K/V、FP8-K+NVFP4-V 候集中按存储预算自动分配混精，权重与 KV 可各设独立预算联合搜索。Qwen3-8B 上 AQ 5.76 有效 bit 时 KV 负载较 BF16 降 64.0%，RULER-128K 仅 −1.04（全域 NVFP4 为 −6.54）<sup class="cite"><a href="#ref65">[65]</a></sup>——KVTuner（§6）的层间混精思想进入官方工具链。</li>
+<li><b>CanonQ</b>（Meta AI，arXiv:2610.09202）：同时压到 W2A4KV2 时任何单点 PTQ 都崩溃、码本类方法又绑定校准数据。CanonQ"先规范化、再让模型学会用固定编解码器"——固定 Hadamard-对角-置换变换 + 能量归一把 W/A/K/V 映射到同一规范坐标，一套<b>冻结的高斯参考码本</b>跨层跨模型复用，再联合 QAT 适应耦合误差。LLaMA3-8B W2A4KV2：WikiText-2 PPL 9.41 vs ParetoQ 的 134.36（低 14.28×），8 任务均值 59.81% vs 37.87%<sup class="cite"><a href="#ref66">[66]</a></sup>。</li>
+<li><b>TempoKV</b>（上交大 + 华南理工 + 阿里，arXiv:2610.15324，2026-10-11）：把 LLM 的 KV 量化搬到自回归视频模型会失效——它从<b>时间可预测性</b>切入：K 沿潜帧平滑演化（自身历史线性预测余弦 0.877）、V 强烈依赖当前对齐的 K（加入对齐 K 后 0.881）。免训练的"预测 + 低位残差"框架在 Self-Forcing / Causal Forcing / LongCat-Video-13B 上最高 <b>6.71× KV 压缩</b>（超 Quant VideoGen 的 6.61×）且 PSNR 从 18.34 提到 19.85；INT4 档 KV 从 48.18GB 降到 13.2GB，生成延迟开销仅 11.9%<sup class="cite"><a href="#ref67">[67]</a></sup>。同期 <b>PulseQuant</b>（arXiv:2609.33384，视频 DiT 4-bit PTQ）用三联散点证明"局部块重建误差与最终 latent 误差几乎无关（ρ=−0.08）"、误差要到 4 步传播后才相关（ρ=+0.70）——为 §10⑧"困惑度已不足以刻画量化伤害"补上视频版证据；RTX 5080 上 packed NVFP4 使 DiT 峰值显存 7.86→3.63 GiB<sup class="cite"><a href="#ref68">[68]</a></sup>。</li>
+
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/tempokv-fig3.svg" loading="lazy" alt="视频 KV cache 的不对称可预测性：(a) 时间历史即可较好预测 K（余弦" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 3（arXiv:2610.15324）</b> · K 可由时间历史预测、V 依赖对齐 K：视频 KV 的不对称可预测性</figcaption>
+</figure>
+
+</ul>
+
+<!-- ============================================================ -->
+<h4>① 低比特 KV 与 W4A4 的版图再扩（10-14 – 10-19，三大引擎）</h4>
+<p><b>vLLM v0.32.0</b>（10-18）：NVFP4 KV cache 从 Blackwell 扩到 SM8x/SM12x/SM90（SM12x 配 XQA decode）并覆盖 MiniMax-M3 稀疏注意力；GLM-5.x 在 SM100 <b>默认 FP8 KV</b>（每 rank KV 减半、吞吐 +2.3~5.5%、TTFT 代价 7~11%）；ROCm 新增 4-bit ultraquant KV（密度约 FP8 两倍）；MXFP4 MoE W4A4（CUTLASS）+ FP8 激活。<b>SGLang v0.5.22</b>（10-19）：FP8 KV 融合进 prefix-valid commit kernel；<b>ConvRot：扩散 Transformer 的在线 INT8 W8A8</b>；MiniMax-H3 与 Qwen-Image 2.1 经 SGLang Diffusion 跑 ComfyUI 且<b>直接加载社区 GGUF 检查点与 LoRA</b>——量化生态与创作工具链正式打通。安全注记：SGLang × Cloudflare 于 <b>10-26 联合披露 P/D 分离下的 KV cache 跨请求泄漏</b>（GLM-5.3 上实测污染 155 个响应，复现需 prompt &gt;681,280 tokens）——修复分两步落在 v0.5.21（Mooncake/NIXL 传输默认防护）与 v0.5.22（MORI 标记 ack），运营方应升级至 v0.5.22+<sup class="cite"><a href="#ref75">[75]</a></sup>，低精度 KV 与分离式传输的部署需先过安全关。<b>TensorRT-LLM v1.4.0rc0</b>（10-14）：MiniMax-M3 NVFP4 KV（含 P128 draft KV 视图）、Qwen-Image-Layered FP8 + Cache-DiT、块稀疏 FMHA + 更新版 SM90 SageAttention——"量化 × 稀疏 × 跨步缓存"打进同一引擎。</p>
+
+<h4>② FP4 也有训练配方了（10-17，NVIDIA + ISTA + Red Hat AI）</h4>
+<p><b>What Matters for NVFP4 Training?</b>（arXiv:2610.24343）：首份 FP4 <b>预训练</b>配方的系统性对比研究——各设计选择（scale 格式、随机舍入、混合精度边界等）逐一实证校验。§10③"训练全链路低精度化"方向的第一份系统参照。对照组随后就到：AMD <b>ALTO</b>（arXiv:2610.32229，10-26）把 <b>GPT-OSS-20B 从零 MXFP4 预训练</b>跑通——C4 loss 3.3350 vs BF16 的 3.3283，额外步数开销从 +20% 降到 +5%<sup class="cite"><a href="#ref70">[70]</a></sup>（详见 §9.3），FP4 训练自此有了 NVIDIA 配方研究之外的跨厂商实证。</p>
+
+<h4>③ 旋转 PTQ 与格点量化的新进展（10-14 – 10-20）</h4>
+<p><b>SpectrumQuant</b>（IISc，arXiv:2610.20303，本窗口量化类最高热度）：对 QuaRot/SpinQuant 一系旋转 PTQ 做"频谱对齐"改进，重塑激活分布。<b>E8-QAT</b>（北大+城大+腾讯，arXiv:2610.27699）：隐式格码本（implicit lattice）的 2-bit QAT——QTIP/CanonQ 的"格量化"与 QAT 两条线正式合流。<b>MultiAlloc</b>（南大+HKUST，arXiv:2610.18642）：预算感知的 KV 逐层精度分配。跨界新交叉点：<b>Q-CRL</b>（汉阳+LG，10-11）用 RL 恢复 VLA 低比特量化掉点；<b>LoopQuant</b>（北大+后摩，10-12）量化循环 Transformer；<b>Beyond 4 bits</b>（Microsoft，10-20）以数据为中心修复 2-bit PTQ。</p>
+
+<h3>9.3 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<p>六件新事的共同关键词是<b>"更低比特 × 更贴近部署"</b>：MLA 的低秩缓存首次被整体压到 2.5 bit，MXFP4 预训练有了 NVIDIA 之外的跨厂商实证，官方发行把多格式量化做成"出厂工序"，格量化与符号修正继续把存储推往新低，免训练残差补偿则为 W4A4 兜底。</p>
+<ul>
+<li><b>RAQ-MLA</b>（中科院自动化所 + 腾讯，10-24，arXiv:2610.33625）：MLA 架构的潜在 KV 缓存（含吸收后的 kR 部分）<b>整体量化到约 2.5 bit</b>——四个模型平均掉点 &lt;0.5pp，同样显存可放的 KV 容量 6.5×，H20 上 decode kernel 1.38×<sup class="cite"><a href="#ref69">[69]</a></sup>。§5 的 KV 量化主线第一次把 MLA"一个潜在向量顶一整套 KV"的架构红利与极低位表示叠在一起。</li>
+<li><b>ALTO</b>（AMD，10-26，arXiv:2610.32229）：<b>GPT-OSS-20B 从零 MXFP4 预训练</b>跑通——C4 loss 3.3350 vs BF16 的 3.3283，额外训练步数开销从 +20% 压到 +5%<sup class="cite"><a href="#ref70">[70]</a></sup>，为 §9.2 ② 的 NVIDIA 配方研究补上跨厂商对照组。</li>
+<li><b>Muse Spark Open 官方多格式量化</b>（Meta，10-15）：BF16 1.65TB → NVFP4 537GB（<b>只量化专家权重</b>，共享部分保高精度），day-one 覆盖 vLLM / SGLang / TensorRT-LLM / llama.cpp 四引擎，另有 AMD FP8/MXFP4、Intel INT4 与社区 GGUF 版本<sup class="cite"><a href="#ref71">[71]</a></sup>——"量化发行"从单套 QAT 权重扩成多硬件多格式矩阵（§10② 预判的加速兑现）。</li>
+<li><b>BiLoCo</b>（MIT，NeurIPS 2026，10-23，arXiv:2610.32243）：低比特权重之外挂一组 <b>±1 符号向量</b>存高精度修正——存储省 16×，batch-1 推理仅慢 6–11%<sup class="cite"><a href="#ref72">[72]</a></sup>，"修一个向量比存全套高精度权重便宜得多"的极低比特新范式。</li>
+<li><b>SQuAT</b>（哥本哈根大学 + Qualcomm，10-22，arXiv:2610.31412）：<b>格向量量化 QAT</b>——2.25 bpw 全面超过 INT-QAT 基线（MMLU 最高 +7.9%），VQ-QAT 训练成本 62.5 → 4.9 s/it<sup class="cite"><a href="#ref73">[73]</a></sup>，§9.2 ③"格量化 × QAT 合流"再添一员。</li>
+<li><b>ResCom</b>（中科院自动化所 + 复旦 + 港中文，10-25，arXiv:2610.35955）：W4A4 推理后加 <b>rank-32 低秩残差补偿、免训练</b>修复——GSM8K 从 23.96% 拉回 36.16%<sup class="cite"><a href="#ref74">[74]</a></sup>，SVDQuant"低秩吸收离群值"思想（§7.4）在 LLM 侧的轻量化回响。</li>
+</ul>
+<figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
+<img src="img/biloco-fig1.svg" loading="lazy" alt="BiLoCo 推理：FP4 GEMM 在 tensor core、±1 符号修正在 CUDA core 异构并行" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.32243）</b> · BiLoCo 推理执行 y = xR + xVUᵀ：原生 FP4 残差 GEMM 跑在 tensor core，同时 CUDA core 上做 ±1 加/减符号修正，两路在 epilogue 相加——低精度主计算与高精度修正第一次塞进同一个 kernel 的异构流水。（版权归原作者，引用仅作技术说明）</figcaption>
+</figure>
+
+<p class="small muted">同窗口一句话带过：AGQ（Monash，10-21，arXiv:2610.33074）VLA 的动作引导量化——4 bpw 成功率 96.8%（超 AWQ 2.3pp），2-bit AWQ/GPTQ 全崩而 AGQ 3 bpw 仍 91.3%；MPQ（arXiv:2610.32127）；扩散 LM 的"任务 × 时间步"量化（arXiv:2610.31198）；DCKV（arXiv:2610.36950）。另：DeepInfer 10-20 开源的推理栈目前仅含 BF16，量化支持标注"待更新"。</p>
+
+</details>
 <h2 id="refs">参考文献</h2>
-<p class="small muted">格式：编号. 作者/机构，《标题》，发表 venue 与时间，链接。（访问日期：2026-08-18）</p>
+<p class="small muted">格式：编号. 作者/机构，《标题》，发表 venue 与时间，链接。（资料快照：初稿 2026-08-18，增补至 2026-10-30；2026-11-01 复核本文标出的承重机制与引文，非全部条目重验）</p>
 <ol class="reflist">
   <li id="ref1">Dettmers, T., Lewis, M., Belkada, Y., Zettlemoyer, L. <b>LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale</b>. NeurIPS 2022（arXiv:2208.07339，2022-08-15 提交）. <a href="https://arxiv.org/abs/2208.07339">arxiv.org/abs/2208.07339</a></li>
   <li id="ref2">Frantar, E., Ashkboos, S., Hoefler, T., Alistarh, D. <b>GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers</b>. ICLR 2023（arXiv:2210.17323，2022-10-31 提交）. <a href="https://arxiv.org/abs/2210.17323">arxiv.org/abs/2210.17323</a> · 代码 <a href="https://github.com/IST-DASLab/gptq">github.com/IST-DASLab/gptq</a>（本文克隆于 repos/gptq）</li>
@@ -1147,7 +1165,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
   <li id="ref60">Together AI（Tri Dao、Xiaoxia Wu 等）. <b>SAW-INT4: System-Aware 4-Bit KV-Cache Quantization for Real-World LLM Serving</b>. arXiv:2604.19157（2026-04-21 提交）. <a href="https://arxiv.org/abs/2604.19157">arxiv.org/abs/2604.19157</a></li>
   <li id="ref61">MIT &amp; UC Berkeley &amp; Together AI. <b>Quant VideoGen: Auto-Regressive Long Video Generation via 2-Bit KV-Cache Quantization</b>. ICML 2026（arXiv:2602.02958，2026-02-03 提交）. <a href="https://arxiv.org/abs/2602.02958">arxiv.org/abs/2602.02958</a></li>
   <li id="ref62">KAUST. <b>Breaking Modality Heterogeneity in Low-Bit Quantization for Large Vision-Language Models (SplitQ)</b>. arXiv:2605.19929（2026-05-19 提交）. <a href="https://arxiv.org/abs/2605.19929">arxiv.org/abs/2605.19929</a></li>
-  <li id="ref63">Together AI &amp; UIUC &amp; UT Austin. <b>QATFactory: Treat the Inference Engine as the Numerical Specification</b>. arXiv:2609.39223（2026-10-01 v2）. <a href="https://arxiv.org/abs/2609.39223">arxiv.org/abs/2609.39223</a> · 代码 github.com/QATFactory/QATFactory</li>
+  <li id="ref63">Together AI &amp; UIUC &amp; UT Austin. <b>QATFactory: A Versatile, Deployment-Aligned Framework for Quantization-aware Training and Distillation of LLMs</b>. arXiv:2609.39223（2026-10-01 v2）. <a href="https://arxiv.org/abs/2609.39223">arxiv.org/abs/2609.39223</a> · 代码 github.com/QATFactory/QATFactory</li>
   <li id="ref64">Alibaba Token Hub &amp; Ohio State University. <b>TRACE: Rollout-Guided QAT for FP4 RL</b>. arXiv:2610.07767（2026-10-06）. <a href="https://arxiv.org/abs/2610.07767">arxiv.org/abs/2610.07767</a></li>
   <li id="ref65">NVIDIA. <b>ModelOpt AutoQuant KV: Automatic Mixed-Precision KV Cache Quantization</b>. 官方公告（2026-10-08）. <a href="https://nvidia.github.io/Model-Optimizer/announcements/autoquant-kv.html">nvidia.github.io/Model-Optimizer</a></li>
   <li id="ref66">Meta AI. <b>Few Bits, One Law: Toward W2A4KV2 (CanonQ)</b>. arXiv:2610.09202（2026-10-06）. <a href="https://arxiv.org/abs/2610.09202">arxiv.org/abs/2610.09202</a></li>
@@ -1177,5 +1195,8 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
   <span id="busuanzi_container_page_pv" style="display:none">本页阅读 <span id="busuanzi_value_page_pv"></span> 次</span>
 </div>
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script>
+(function(){function reveal(){if(!location.hash)return;let id;try{id=decodeURIComponent(location.hash.slice(1));}catch(e){return;}const t=document.getElementById(id);if(!t)return;let p=t;while(p){if(p.tagName==='DETAILS')p.open=true;p=p.parentElement;}requestAnimationFrame(function(){t.scrollIntoView();});}window.addEventListener('hashchange',reveal);document.addEventListener('DOMContentLoaded',reveal);})();
+</script>
 </body>
 </html>
