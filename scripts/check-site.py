@@ -10,6 +10,7 @@ from collections import Counter
 import subprocess
 import tempfile
 import sys
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,6 +59,12 @@ def main():
                 errors.append(f'{path.name}: missing local target {link}')
             elif u.fragment and target in pages and unquote(u.fragment) not in pages[target].ids:
                 errors.append(f'{path.name}: missing anchor {link}')
+            elif target.suffix.lower() == '.svg':
+                try:
+                    if ET.parse(target).getroot().tag != '{http://www.w3.org/2000/svg}svg':
+                        errors.append(f'{path.name}: missing SVG namespace in {link}')
+                except ET.ParseError as error:
+                    errors.append(f'{path.name}: invalid SVG {link}: {error}')
         for source in page.scripts:
             if not source.strip():
                 continue

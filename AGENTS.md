@@ -36,7 +36,7 @@
 返回首页悬浮按钮（position:fixed 左下）
 <header class="hero">  kicker（绿色小字：领域 · 年份）/ h1 / p.sub（一条主线）/ .meta chips（调研日期、对象与版本、源码实测对象）
 <div class="wrap">
-  .toc 目录          ★ 前沿亮点 永远第一条，其后 0..N 章，最后"参考文献"
+  .toc 原始目录      作为无 JavaScript 全文阅读的回退；增强阅读器统一生成左侧可收起目录
   #hl 前沿亮点区     2×3 张 .hl-card（日期 + 一句话事件 + → 章节锚点），内嵌自己的 <style>
   h2#s0  导读与大事记  开篇回答"本文回答哪四个问题"；一页纸地图（范式/流派对照表）；ul.timeline 大事记
   h2#s1  预备知识     写给本科生：只用矩阵乘法级常识；每个概念配 .analogy 类比框
@@ -66,7 +66,7 @@
 
 配色变量：`--ink:#6ea8ff`（主蓝）`--muted:#aeb4bd` `--bg:#1b2128` `--card:#171a21`
 `--ok:#41d1a7`（绿=亮点/正确）`--warn:#ffb454`（橙=引用框标题/警示）`--accent2:#9d7bff`。
-表格奇偶行交替（`tr:nth-child(even)`）。移动端 `@media(max-width:760px)` 单列目录。
+表格奇偶行交替（`tr:nth-child(even)`）。统一阅读器在桌面端使用左侧可收起目录，移动端使用抽屉；章节内部按小节和完整图文单元分页。共享实现位于 `scripts/chapter-reader.js/css`，修改后运行 `python scripts/build-reader.py` 内嵌到文章，保持 HTML 自包含。不得将论文配图藏在默认关闭的更新附录里。
 
 ## 四、引用规范（最硬的一条）
 
@@ -104,6 +104,7 @@
 - [ ] 每个 `[KEY]` 上标在 refs 或邻近 citebox 有对应出处；日期精确；二手信源已标注
 - [ ] 图表编号连续、图注含来源与位置；代码块有 codecap
 - [ ] 移动端单列正常（浏览器 375px 宽过一遍）；文章无外部资源依赖
+- [ ] `python scripts/build-reader.py --check` 与站点检查通过；章内分页、左侧目录、旧锚点和论文配图直达正常
 - [ ] `index.html`：卡片 tags/h2/p/foot 更新，综述篇数 chip +1，日期 chip 更新
 - [ ] 本地预览：`cd D:\Github\spec && node serve-posts.mjs` → http://localhost:8931/<文件名>
 - [ ] 在 **main** 分支 commit；确认无 gate 相关文件混入；`node push-via-api.mjs` 推送；线上验证
