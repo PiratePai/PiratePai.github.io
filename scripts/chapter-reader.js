@@ -6,10 +6,15 @@
   if (!guide || !originalTOC) return;
   const root = guide.parentElement;
   const html = document.documentElement;
+  root.classList.add('reader-content');
+  let theme = 'dark';
+  try { theme = localStorage.getItem('reader-theme') === 'paper' ? 'paper' : 'dark'; } catch (_) {}
+  html.dataset.readerTheme = theme;
   document.querySelectorAll('a[href="../index.html"]').forEach(a => {
     if (a.parentElement.style.position === 'fixed') a.parentElement.classList.add('reader-legacy-home');
   });
   const chapters = [], pages = [], flows = [];
+  let pageSerial = 0;
   const mobile = matchMedia('(max-width:980px)');
   const clean = node => node.textContent.replace(/\s+/g, ' ').trim();
   function label(node) {
@@ -74,12 +79,12 @@
   // Split long reference/update lists between complete items; retain OL numbering.
   function splitLists(parent) {
     for (const list of Array.from(parent.children)) {
-      if (!list.matches('ol,ul') || weight(list) < 2600 || list.children.length < 4) continue;
+      if (!list.matches('ol,ul') || weight(list) < 5000 || list.children.length < 4) continue;
       const items = Array.from(list.children);
       let chunk = list, used = 0, index = Number(list.getAttribute('start') || 1);
       for (const item of items) {
         const size = weight(item);
-        if (used > 1100 && used + size > 1900) {
+        if (used > 2400 && used + size > 3400) {
           const next = list.cloneNode(false); next.removeAttribute('id');
           if (list.tagName === 'OL') next.start = index;
           chunk.after(next); chunk = next; used = 0;
@@ -92,12 +97,12 @@
   function splitReferenceTables(parent, owner) {
     if (!/参考|引用出处/.test(owner.title)) return;
     for (const table of Array.from(parent.children)) {
-      if (table.tagName !== 'TABLE' || weight(table) < 2600) continue;
+      if (table.tagName !== 'TABLE' || weight(table) < 5000) continue;
       const rows = Array.from(table.rows), headers = rows.filter(r => r.querySelector('th'));
       let chunk = table, used = 0;
       for (const row of rows.filter(r => !headers.includes(r))) {
         const size = weight(row);
-        if (used > 1000 && used + size > 1700) {
+        if (used > 2400 && used + size > 3400) {
           const next = table.cloneNode(false); next.removeAttribute('id');
           const head = next.createTHead();
           headers.forEach(r => {
@@ -119,7 +124,7 @@
     for (const node of nodes) {
       const isElement = node.nodeType === 1;
       // Recurse through structural sections, keeping their IDs and styling intact.
-      if (isElement && node.matches('section,footer.foot,div.grid2') && node.querySelector('h2,h3') && weight(node) > 2300) {
+      if (!owner.keepWhole && isElement && node.matches('section,footer.foot,div.grid2,div.refs,div.reflist') && node.querySelector('h2,h3,ol,ul') && weight(node) > 4800) {
         page = null; used = 0;
         paginate(node, owner);
         continue;
@@ -128,7 +133,7 @@
       const heading = isElement && node.matches('h2,h3,h4');
       const attached = isElement && node.matches('figure,.fig,.citebox,.codecap,.cap,script,style');
       if (heading) { title = label(node); part = 0; }
-      const boundary = page && ((heading && used > 450) || (!heading && !attached && used > 1100 && used + size > 2100));
+      const boundary = !owner.keepWhole && page && ((heading && used >= 2800) || (!heading && !attached && used >= 2600 && used + size > 5000));
       if (boundary) { page = null; used = 0; }
       if (!page) {
         // Ignore whitespace-only tails instead of creating empty pages.
@@ -138,7 +143,7 @@
           continue;
         }
         const wrapper = element('div', 'reader-page');
-        wrapper.id = 'reader-page-' + (pages.length + 1);
+        wrapper.id = 'reader-page-' + (++pageSerial);
         parent.insertBefore(wrapper, node);
         leading.forEach(n => wrapper.append(n)); leading = [];
         part += 1;
@@ -148,7 +153,29 @@
       page.node.append(node); used += size;
     }
   }
-  chapters.forEach(c => paginate(c.node, c));
+  chapters.forEach(c => {
+    c.keepWhole = weight(c.node) <= 4800;
+    paginate(c.node, c);
+    // A short remainder should stay with its context, rather than cost a click.
+    for (let i = 0; i < c.pages.length - 1;) {
+      const previous = c.pages[i], next = c.pages[i + 1];
+      const a = weight(previous.node), b = weight(next.node);
+      const siblings = previous.node.parentElement === next.node.parentElement;
+      const prefix = a < 1000 && previous.node.parentElement.contains(next.node);
+      const suffix = b < 1000 && next.node.parentElement.contains(previous.node);
+      if ((siblings || prefix || suffix) && Math.min(a, b) < 1400 && a + b <= 7000) {
+        if (prefix && !siblings) {
+          const alias = element('span'); alias.id = previous.id;
+          next.node.prepend(alias, ...Array.from(previous.node.childNodes));
+          previous.node.remove(); c.pages.splice(i, 1); pages.splice(pages.indexOf(previous), 1);
+          continue;
+        }
+        const alias = element('span'); alias.id = next.id;
+        previous.node.append(alias, ...Array.from(next.node.childNodes));
+        next.node.remove(); c.pages.splice(i + 1, 1); pages.splice(pages.indexOf(next), 1);
+      } else i += 1;
+    }
+  });
   if (!pages.length) return;
 
   // Figures stay expanded with their surrounding explanation, including no-JS HTML.
@@ -172,6 +199,10 @@
   const navLinks = [];
   for (const c of chapters) {
     if (!c.pages.length) continue;
+    if (c.pages.length === 1) {
+      const p = c.pages[0]; p.link = link(c.title, p.id, 'reader-chapter-link');
+      navLinks.push(p.link); nav.append(p.link); continue;
+    }
     const details = element('details');
     const summary = element('summary', '', c.title + ' · ' + c.pages.length + ' 页');
     details.append(summary); c.nav = details;
@@ -198,14 +229,27 @@
   const previousButton = element('a', 'reader-arrow', '←'); previousButton.setAttribute('aria-label', '上一页');
   const nextButton = element('a', 'reader-arrow', '→'); nextButton.setAttribute('aria-label', '下一页'); nextButton.setAttribute('data-reader-next', '');
   const mode = element('button'); mode.type = 'button';
-  toolbar.append(toggle, previousButton, status, nextButton, mode);
+  const themeButton = element('button', 'reader-theme-toggle'); themeButton.type = 'button';
+  function showTheme() {
+    html.dataset.readerTheme = theme;
+    themeButton.textContent = theme === 'dark' ? '☀' : '☾';
+    themeButton.setAttribute('aria-label', theme === 'dark' ? '切换为浅色主题' : '切换为深色主题');
+    themeButton.title = themeButton.getAttribute('aria-label');
+    themeButton.setAttribute('aria-pressed', String(theme === 'paper'));
+  }
+  themeButton.addEventListener('click', () => {
+    theme = theme === 'dark' ? 'paper' : 'dark'; showTheme();
+    try { localStorage.setItem('reader-theme', theme); } catch (_) {}
+  });
+  showTheme();
+  toolbar.append(toggle, previousButton, status, nextButton, themeButton, mode);
   const backdrop = element('button', 'reader-ui reader-backdrop'); backdrop.type = 'button'; backdrop.setAttribute('aria-label', '关闭目录'); backdrop.tabIndex = -1;
   const skip = link('跳到正文', pages[0].id, 'reader-ui reader-skip');
   document.body.append(skip, backdrop, sidebar, toolbar);
 
-  const pagers = [element('nav', 'reader-ui reader-pager reader-pager-top'), element('nav', 'reader-ui reader-pager')];
+  const pagers = [element('nav', 'reader-ui reader-pager')];
   pagers.forEach(p => p.setAttribute('aria-label', '阅读翻页'));
-  root.insertBefore(pagers[0], chapters[0].node); root.append(pagers[1]);
+  root.append(pagers[0]);
   let current = pages[0], collapsed = true, full = false;
   function setCollapsed(value, remember, focus) {
     collapsed = value; html.classList.toggle('reader-collapsed', value); sidebar.hidden = value;
@@ -246,7 +290,7 @@
     navLinks.forEach(a => a.removeAttribute('aria-current')); current.link.setAttribute('aria-current', 'page');
     const localIndex = current.chapter.pages.indexOf(current);
     currentTitle.textContent = current.chapter.title + ' · ';
-    counter.textContent = full ? '全文' : '第 ' + (localIndex + 1) + '/' + current.chapter.pages.length + ' 页';
+    counter.textContent = full ? '全文' : (localIndex + 1) + ' / ' + current.chapter.pages.length;
     status.title = current.title;
     mode.textContent = full ? '分页阅读' : '全文阅读'; mode.setAttribute('aria-pressed', String(full));
     skip.href = '#' + current.id;

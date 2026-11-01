@@ -35,14 +35,17 @@ if (out) fs.mkdirSync(out, {recursive:true});
           const duplicateIDs = [...document.querySelectorAll('[id]')].map(n=>n.id).filter((id,i,a)=>a.indexOf(id)!==i);
           const allPages = [...document.querySelectorAll('.reader-page')];
           const allChapters = [...document.querySelectorAll('.reader-chapter')];
-          const oversized = [], brokenPages = [], overflows = [];
+          const oversized = [], brokenPages = [], overflows = [], shortFragments = [];
           const setHash = id => { history.replaceState(null,'','#'+encodeURIComponent(id)); dispatchEvent(new HashChangeEvent('hashchange')); };
           for (const p of allPages) {
             setHash(p.id);
             const visible = allPages.filter(n=>n.getClientRects().length);
             if (visible.length !== 1 || visible[0] !== p) brokenPages.push(p.id);
-            if (p.scrollHeight > 5600) oversized.push({id:p.id,height:p.scrollHeight,text:p.textContent.trim().slice(0,80)});
+            if (p.scrollHeight > 12000) oversized.push({id:p.id,height:p.scrollHeight,text:p.textContent.trim().slice(0,80)});
             if (document.documentElement.scrollWidth > innerWidth+2) overflows.push(p.id);
+            const clone=p.cloneNode(true);
+            clone.querySelectorAll('script,style,details:not([open]) > :not(summary)').forEach(n=>n.remove());
+            if(p.closest('.reader-chapter').querySelectorAll('.reader-page').length>1&&!clone.querySelector('img,svg,canvas,pre')&&clone.textContent.replace(/\s+/g,' ').trim().length<900)shortFragments.push(p.id);
           }
           const hiddenFigures = [];
           for (const img of document.images) {
@@ -56,11 +59,11 @@ if (out) fs.mkdirSync(out, {recursive:true});
             setHash(id);
             if (t.closest('.reader-chapter') && !t.getClientRects().length && !t.matches('style,script')) brokenAnchors.push(id);
           }
-          return {pages:allPages.length, chapters:allChapters.length, chapterPageCounts:allChapters.map(c=>c.querySelectorAll('.reader-page').length),textPreserved:content(raw)===content(document),missingIDs,duplicateIDs,brokenPages,overflows,hiddenFigures,brokenAnchors,oversized,images:[...document.images].map(i=>i.getAttribute('src'))};
+          return {pages:allPages.length, chapters:allChapters.length, chapterPageCounts:allChapters.map(c=>c.querySelectorAll('.reader-page').length),textPreserved:content(raw)===content(document),missingIDs,duplicateIDs,brokenPages,overflows,shortFragments,hiddenFigures,brokenAnchors,oversized,images:[...document.images].map(i=>i.getAttribute('src'))};
         });
         assert(audit.textPreserved, file+': lost or reordered article text');
-        for (const key of ['missingIDs','duplicateIDs','brokenPages','overflows','hiddenFigures','brokenAnchors']) assert.deepEqual(audit[key],[],file+': '+key);
-        assert(audit.chapterPageCounts.some(n=>n>1),file+': expected pagination inside chapters');
+        for (const key of ['missingIDs','duplicateIDs','brokenPages','overflows','shortFragments','hiddenFigures','brokenAnchors']) assert.deepEqual(audit[key],[],file+': '+key);
+        assert(audit.pages >= audit.chapters,file+': every chapter remains readable');
         // Start at the first page, follow Next, and exercise browser Back.
         await page.goto(base+'/posts/'+file+'#reader-page-1');
         const first = await page.locator('.reader-page:visible').getAttribute('id');
@@ -84,8 +87,9 @@ if (out) fs.mkdirSync(out, {recursive:true});
           await page.keyboard.press('Escape');
           assert.equal(await page.locator('#reader-sidebar').isVisible(),false);
           await page.getByRole('button',{name:'☰ 目录',exact:true}).click();
-          const destination=page.locator('.reader-page-link').nth(1);
-          await destination.locator('..').locator('summary').click();
+          const destination=page.locator('.reader-page-link,.reader-chapter-link').nth(1);
+          const summary=destination.locator('..').locator(':scope > summary');
+          if (await summary.count()) await summary.click();
           await destination.click();
           assert.equal(await page.locator('#reader-sidebar').isVisible(),false);
         } else {
