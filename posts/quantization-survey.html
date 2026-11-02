@@ -174,7 +174,7 @@
 <div class="toc">
   <h2>目录</h2>
   <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
     <li><a href="#s1">为什么需要量化：一张账单讲清楚</a></li>
     <li><a href="#s2">五分钟补齐基础：定点数与量化公式</a></li>
     <li><a href="#s3">发展历程总览（时间线）</a></li>
@@ -197,16 +197,16 @@
 
 <!-- ============================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先固定编码约定，再问误差落在什么地方</b><p><a href="#s2">scale、零点与裁剪</a> → <a href="#s4">权重与激活</a> → <a href="#s5">KV</a> → <a href="#s6">多模态</a> → <a href="#s7">扩散模型</a> → <a href="#s8">部署</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>量化把连续数映射到有限格点：q=clip(round(x/s)+z,qmin,qmax)，反量化 x̂=s(q−z)。有符号对称编码通常 z=0，无符号中心编码则需偏移。GPTQ/AWQ 的目标是减少层输出重构误差，而非让所有权重数值误差一样小。</p></div>
+<div class="note"><b>从这里读起 · 先固定编码约定，再问误差落在什么地方</b><p><a href="#s2">scale、零点与裁剪</a> → <a href="#s4">权重与激活</a> → <a href="#s5">KV</a> → <a href="#s6">多模态</a> → <a href="#s7">扩散模型</a> → <a href="#s8">部署</a>。相关发布记录见“近期进展”。</p><p>量化把连续数映射到有限格点：q=clip(round(x/s)+z,qmin,qmax)，反量化 x̂=s(q−z)。有符号对称编码通常 z=0，无符号中心编码则需偏移。GPTQ/AWQ 的目标是减少层输出重构误差，而非让所有权重数值误差一样小。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>用有符号 2-bit、q∈[−2,1]、s=1、z=0，输入 [−2,−0.8,0.2,1.6] 得 q=[−2,−1,0,1]，反量化相同；最后一个数因裁剪产生 0.6 误差。浮点低位格式还用指数负责范围、尾数负责局部精度，块 scale 再调动态范围。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>GPTQ / AWQ</td><td>利用输入相关性做误差补偿或通道缩放</td><td>需要代表性校准；公式须固定 XW 或 PyTorch Wᵀ 约定</td></tr><tr><td>QuIP / QuIP#</td><td>不相干处理、Hadamard 与格码本提供极低位路线</td><td>转换与专用 kernel 成本须算进端到端</td></tr><tr><td>QLoRA / QAT</td><td>QLoRA 冻结量化基座训练适配器；QAT 训练适应量化</td><td>NF4 并非普遍最佳部署格式，适配器训练不等于全参 QAT</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>在相同质量红线下，比较真实 bytes（含元数据/高精度保留）、校准或训练成本及端到端延迟。Δacc 用百分点，ppl 越低越好；FID 越低通常越好，但都不足以单独覆盖生成质量。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Jerry Chee  et al.</b> <i>QuIP: 2-Bit Quantization of Large Language Models With Guarantees</i>（QuIP）；arXiv:2307.13304，v1 2023-07-25。<a href="https://arxiv.org/abs/2307.13304">原始论文与版本记录</a></li><li><b>Albert Tseng  et al.</b> <i>QuIP#: Even Better LLM Quantization with Hadamard Incoherence and Lattice Codebooks</i>（QuIP#）；arXiv:2402.04396，v1 2024-02-06。<a href="https://arxiv.org/abs/2402.04396">原始论文与版本记录</a></li><li><b>Tim Dettmers  et al.</b> <i>QLoRA: Efficient Finetuning of Quantized LLMs</i>（QLoRA / NF4）；arXiv:2305.14314，v1 2023-05-23。<a href="https://arxiv.org/abs/2305.14314">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -222,7 +222,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>RAQ-MLA：缓存整体 2.5 bit</b><span class="hl-date">10-24 · 中科院自动化所+腾讯</span></div><p>MLA 潜在 KV 缓存（含 kR）整体量化到约 2.5 bit，四模型掉点 &lt;0.5pp，KV 容量 6.5×。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>RAQ-MLA：缓存整体 2.5 bit</b><span class="hl-date">10-24 · 中科院自动化所+腾讯</span></div><p>MLA 潜在 KV 缓存（含 kR）整体量化到约 2.5 bit，四模型掉点 &lt;0.5pp，KV 容量 6.5×。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>ALTO：MXFP4 预训练跑通</b><span class="hl-date">10-26 · AMD</span></div><p>GPT-OSS-20B 从零 MXFP4 预训练：C4 3.3350 vs BF16 3.3283，步数开销 +20%→+5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Muse Spark Open 多格式发行</b><span class="hl-date">10-15 · Meta</span></div><p>NVFP4 只量化专家（1.65TB→537GB），day-one 覆盖四引擎，另有 FP8/MXFP4、INT4、GGUF。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>BiLoCo：±1 符号修正</b><span class="hl-date">10-23 · MIT · NeurIPS 2026</span></div><p>用 ±1 符号向量存高精度修正：存储省 16×，batch-1 推理仅慢 6–11%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
@@ -572,7 +572,7 @@ for i1 in range(0, self.columns, blocksize):     # 分块（128 列）处理，�
         err1 = (w - q) / d
         W1[:, i:] -= err1.unsqueeze(1).matmul(Hinv1[i, i:].unsqueeze(0))  # ★误差补偿</code></pre>
 
-<p>三个工程细节值得注意：<strong>①groupsize</strong>（常用 128）：每 128 列共享一组 scale/zero，即分组量化；<strong>②actorder</strong>：按 Hessian 对角元从大到小的顺序量化（重要列先量化，误差更可控）；<strong>③静态分组/块处理</strong>：纯为省显存的实现技巧。GPTQ 量化完后权重被打包成 3/4-bit 整数矩阵，推理时用定制的反量化-矩阵乘 kernel（老仓库里的 <code>vecquant4matmul</code>，如今已由 llama.cpp、ExLlama、Marlin 等更快的 kernel 取代）。</p>
+<p>实现中有三个细节：<strong>①groupsize</strong>（常用 128）：每 128 列共享一组 scale/zero，即分组量化；<strong>②actorder</strong>：按 Hessian 对角元从大到小的顺序量化（重要列先量化，误差更可控）；<strong>③静态分组/块处理</strong>：纯为省显存的实现技巧。GPTQ 量化完后权重被打包成 3/4-bit 整数矩阵，推理时用定制的反量化-矩阵乘 kernel（老仓库里的 <code>vecquant4matmul</code>，如今已由 llama.cpp、ExLlama、Marlin 等更快的 kernel 取代）。</p>
 
 <h4>4.2.2 AWQ：不训练、不重构，靠"缩放"保护关键权重 <span class="tag">2023.06 · MLSys 2024 最佳论文</span></h4>
 
@@ -1049,7 +1049,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <p>这一波的四条线索：<b>三值量化的 PTQ 路线打通</b>（TWLA / CAT-Q，双双入选 ICML 2026）；<b>量化开始按推理阶段分工</b>（Mix-Quant）；<b>KV 量化研究转向"系统感知"</b>（SAW-INT4）；<b>视频扩散的 KV 量化</b>成为新热点（Quant VideoGen）。</p>
 <ul>
 <li><b>TWLA</b>（后摩智能，ICML 2026，arXiv:2606.13054）：首个把权重压到 1.58-bit、激活压到 4-bit 的<b>纯 PTQ</b> 流程。BitNet 类三值模型本来要从零训练，TWLA 用校准就能把现成 FP16 模型变成"类 BitNet"模型。LLaMA2-13B 权重 23.7GB → 3.34GB，吞吐 3.64×；Qwen3-32B 的 W1.58A4 下基线（GPTQ 等）近乎随机（文中原引 MMLU≈25%）；原"TWLA 约 90%"未定位其绝对准确率或性能保留率口径，此处撤回该数字比较<sup class="cite"><a href="#ref57">[57]</a></sup>。</li>
-<li><b>CAT-Q</b>（Intel，ICML 2026 Oral，arXiv:2606.26650）：只用 <b>512 条校准样本</b>把 14B–235B 模型三值化（对比 BitNet 家族约省 10 万倍训练 token）；显存降 10×+；llama.cpp 上 Qwen3-4B CPU 37.35 vs 19.31 tok/s。论文自认数学/代码任务退化明显（MATH-500 出现 0.00），改进版 CAT-Q+ 待发布，是"便宜但局限"的诚实样本<sup class="cite"><a href="#ref58">[58]</a></sup>。</li>
+<li><b>CAT-Q</b>（Intel，ICML 2026 Oral，arXiv:2606.26650）：只用 <b>512 条校准样本</b>把 14B–235B 模型三值化（对比 BitNet 家族约省 10 万倍训练 token）；显存降 10×+；llama.cpp 上 Qwen3-4B CPU 37.35 vs 19.31 tok/s。论文自认数学/代码任务退化明显（MATH-500 出现 0.00），改进版 CAT-Q+ 待发布，展示了低成本方案的质量局限<sup class="cite"><a href="#ref58">[58]</a></sup>。</li>
 <li><b>Mix-Quant</b>（arXiv:2605.20315，2026-05）：<b>按阶段分工量化</b>：prefill 走 NVFP4 W4A4 低精度通路（吃 compute-bound 加速），decode 切回高精度通路（避免 token 选择被扰动、长思维链误差累积），相当于"同一模型两种精度的 P/D 分离"，prefill 最高 3×<sup class="cite"><a href="#ref59">[59]</a></sup>。</li>
 <li><b>SAW-INT4</b>（Together AI，arXiv:2604.19157）：在 SGLang 内实现<b>旋转-量化融合 kernel</b>，INT4 KV 端到端零可测开销；并发现考虑服务兼容性后，复杂旋转方案的增益其实有限，是"论文精度 ≠ 服务收益"的又一证据<sup class="cite"><a href="#ref60">[60]</a></sup>。</li>
 <li><b>Quant VideoGen</b>（MIT 韩松组等，ICML 2026，arXiv:2602.02958）：自回归视频扩散的相邻帧 token 高度重复，"近重复分组 + 存组内残差"让数据对量化友好，残差做 2-bit 渐进量化，免重训压缩 <b>7×</b>、延迟开销 &lt;4%<sup class="cite"><a href="#ref61">[61]</a></sup>。</li>
@@ -1097,7 +1097,7 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2610.32243）</b> · BiLoCo 推理执行 y = xR + xVUᵀ：原生 FP4 残差 GEMM 跑在 tensor core，同时 CUDA core 上做 ±1 加/减符号修正，两路在 epilogue 相加，低精度主计算与高精度修正第一次塞进同一个 kernel 的异构流水。（版权归原作者，引用仅作技术说明）</figcaption>
 </figure>
 
-<p class="small muted">同窗口一句话带过：AGQ（Monash，10-21，arXiv:2610.33074）VLA 的动作引导量化：4 bpw 成功率 96.8%（超 AWQ 2.3pp），2-bit AWQ/GPTQ 全崩而 AGQ 3 bpw 仍 91.3%；MPQ（arXiv:2610.32127）；扩散 LM 的"任务 × 时间步"量化（arXiv:2610.31198）；DCKV（arXiv:2610.36950）。另：DeepInfer 10-20 开源的推理栈目前仅含 BF16，量化支持标注"待更新"。</p>
+<p class="small muted">同期工作：AGQ（Monash，10-21，arXiv:2610.33074）VLA 的动作引导量化：4 bpw 成功率 96.8%（超 AWQ 2.3pp），2-bit AWQ/GPTQ 全崩而 AGQ 3 bpw 仍 91.3%；MPQ（arXiv:2610.32127）；扩散 LM 的"任务 × 时间步"量化（arXiv:2610.31198）；DCKV（arXiv:2610.36950）。另：DeepInfer 10-20 开源的推理栈目前仅含 BF16，量化支持标注"待更新"。</p>
 
 </section>
 <h2 id="refs">参考文献</h2>
@@ -1245,7 +1245,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1397,6 +1398,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1433,7 +1435,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1590,7 +1592,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

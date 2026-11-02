@@ -147,7 +147,7 @@
 
 <nav class="toc">
   <div class="in">
-    <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
+    <a href="#hl" style="color:#41d1a7;font-weight:600">近期进展</a>
      <a href="#s0">导读</a>
     <a href="#s1">① 原理入门</a>
     <a href="#s2">② 发展历程</a>
@@ -164,19 +164,19 @@
 <!-- ===================== 导读 ===================== -->
 <span class="anchor" id="s0"></span>
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按「问题→机制→工程取舍」阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 把容量、激活计算与路由负载分开</b><p><a href="#ch1">路由与均衡</a> → <a href="#ch2">历史</a> → <a href="#ch3">LLM</a> → <a href="#ch4">VLM</a> → <a href="#ch5">DiT</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>MoE 通常替换 Transformer 的 FFN，让每 token 选择少量专家。总参数决定容量与驻留，激活参数决定该 token 的部分计算；通信和路由负载又是另一笔账。选中后归一化的 top-1 权重恒为 1，而 Switch 保留原 softmax 门控概率，两者梯度不同。</p></div>
+<div class="note"><b>从这里读起 · 把容量、激活计算与路由负载分开</b><p><a href="#ch1">路由与均衡</a> → <a href="#ch2">历史</a> → <a href="#ch3">LLM</a> → <a href="#ch4">VLM</a> → <a href="#ch5">DiT</a>。相关发布记录见“近期进展”。</p><p>MoE 通常替换 Transformer 的 FFN，让每 token 选择少量专家。总参数决定容量与驻留，激活参数决定该 token 的部分计算；通信和路由负载又是另一笔账。选中后归一化的 top-1 权重恒为 1，而 Switch 保留原 softmax 门控概率，两者梯度不同。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>8 个专家、每 token 选 2，不代表全模型只激活 25% 参数：共享注意力和共享专家仍执行。两个验证 token 若分别选择 {1,2} 与 {3,4}，专家并集有 4 个；若都选 {1,2} 才更易复用权重。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>Token-Choice</td><td>每 token 选固定数量专家</td><td>负载可能偏斜，容量限制可能丢 token</td></tr><tr><td>Expert-Choice</td><td>每专家沿 token 维选 Top-K，softmax 仍可沿专家维</td><td>每 token 专家数可变，因果训练需防未来泄漏</td></tr><tr><td>控制与执行</td><td>辅助损失/偏置控制与 dropless kernel 是不同层面</td><td>MegaBlocks 的块稀疏执行缓解 padding/丢弃代价；路由仍需质量验证</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>同训练 FLOPs、通信预算与质量下，专家数与粒度怎样改变有效容量？均衡代理损失下降不保证质量提高；CogVideoX 的「expert」指模态专属 AdaLN，不能由名称推定是稀疏 FFN MoE。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>An Yang  et al.</b> <i>Qwen3 Technical Report</i>（Qwen3 Technical Report）；arXiv:2505.09388，v1 2025-05-14。<a href="https://arxiv.org/abs/2505.09388">原始论文与版本记录</a></li><li><b>Trevor Gale  et al.</b> <i>MegaBlocks: Efficient Sparse Training with Mixture-of-Experts</i>（MegaBlocks）；arXiv:2211.15841，v1 2022-11-29。<a href="https://arxiv.org/abs/2211.15841">原始论文与版本记录</a></li><li><b>Zhuoyi Yang  et al.</b> <i>CogVideoX: Text-to-Video Diffusion Models with An Expert Transformer</i>（CogVideoX）；arXiv:2408.06072，v1 2024-08-12。<a href="https://arxiv.org/abs/2408.06072">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<h2 class="sec" id="ch0"><span class="num">0</span>导读：一句话理解 MoE<span class="roadmap">为什么需要 MoE → 它如何工作 → 三大架构各自怎么用 → 还有哪些没解决的问题</span></h2>
+<h2 class="sec" id="ch0"><span class="num">0</span>导读：MoE 的收益与代价<span class="roadmap">为什么需要 MoE → 它如何工作 → 三大架构各自怎么用 → 还有哪些没解决的问题</span></h2>
 <p class="lead">普通的神经网络是「一个学生应付所有题」，而 <b>混合专家（Mixture of Experts, MoE）</b> 是「一群各有专长的老师，每来一道题，先由一个<b>门控路由器（router）</b>判断该找哪几位老师来答，其余老师休息」。结果是：<b>总参数量变得巨大（知识面广），但每次推理只激活其中一小部分（算得快）</b>。这正是 DeepSeek-V3（671B 总参数 / 37B 激活）、Mixtral 8x7B（47B / 13B）、Kimi K2（约 1T / 32B）等当今顶尖模型能又大又快的核心秘密。</p>
 
-<div class="note ok"><b>核心权衡（贯穿全文的一句话）</b>：MoE 把「参数量」和「计算量」<b>解耦</b>。专家数 <span class="i">n</span> 增大时总参数线性增长；只要每 token 激活的专家数 <span class="i">k</span> 不变，单 token 计算量几乎不变。代价是<b>显存要装下全部专家</b>、以及<b>路由带来的系统复杂度</b>（§1.5）。</div>
+<div class="note ok"><b>核心权衡</b>：MoE 把「参数量」和「计算量」<b>解耦</b>。专家数 <span class="i">n</span> 增大时总参数线性增长；只要每 token 激活的专家数 <span class="i">k</span> 不变，单 token 计算量几乎不变。代价是<b>显存要装下全部专家</b>、以及<b>路由带来的系统复杂度</b>（§1.5）。</div>
 
 <p><b>本报告的阅读逻辑</b>：§1 先把 MoE 的 4 块基石讲透（稀疏激活、路由器、负载均衡、系统并行），<b>后面所有应用都只是在这 4 块基石上做变奏</b>；§2 用时间线建立全局图景；§3–§5 分别讲 LLM / VLM / DiT 三个战场，每章统一按「<b>该领域有什么独特问题 → 谁用什么创新解决 → 代码怎么写 → 效果数据</b>」展开；§6 汇总前沿与未来。</p>
 
@@ -188,7 +188,7 @@
 </div>
 
 <!-- ===================== 第一章 原理 ===================== -->
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -204,7 +204,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepSeek 开源生产推理框架</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 把 EP+EPLB 带进生产推理，SM100 与昇腾 950 双后端，开源一周即超 1.7 万 star。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepSeek 开源生产推理框架</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 把 EP+EPLB 带进生产推理，SM100 与昇腾 950 双后端，开源一周即超 1.7 万 star。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro 性价比再进阶</b><span class="hl-date">10-23 · Moonshot</span></div><p>AA Index 44→55（升至第 4），Terminal-Bench 4.0 65.7%；API 降价 33%，权重 11-04 开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>免校准通道选择</b><span class="hl-date">10-27 · KAIST 等</span></div><p>只读 17.8% 专家权重即保留 98.1% 精度，MoE 块比调优 vLLM 快 1.60–1.90×（大 batch 2.69×）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>动态冗余专家成 EP 新范式</b><span class="hl-date">10-20 · Moonshot</span></div><p>MoonEP「完美均衡」通信库：失衡加剧时通信时间几乎平坦，与 DeepEP V2.5 原语互相成就。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
@@ -810,7 +810,7 @@ root.querySelector('.ppx-play').addEventListener('click',function(){playing=!pla
 </tbody>
 </table>
 
-<h3>3.2 DeepSeek-V3：当代 MoE 的集大成者（含真实代码）</h3>
+<h3>3.2 DeepSeek-V3：细粒度专家与负载均衡（含代码）</h3>
 <p>DeepSeek-V3 是理解「现代 MoE 怎么做」的最佳样本。它在 DeepSeek-V2 验证过的 <b>MLA</b> 与 <b>DeepSeekMoE</b> 两项架构之上，叠加上 <b>无辅助损失负载均衡</b> 和 <b>MTP</b> 两大新策略<sup class="ref"><a href="#r4">[4]</a></sup>。以下按四项创新逐一拆解。</p>
 
 <h4>① 结构革新：细粒度专家 + 共享专家（源自 DeepSeekMoE，2024.01）</h4>
@@ -1335,7 +1335,7 @@ aux_loss = (Pi * fi).sum() * <span class="self">self</span>.alpha      <span cla
 <p>阿里 Wan 2.2（A14B）把「不同 timestep 难度不同」做到了最粗粒度：<b>只有两个专家</b>：高噪声专家负责全局结构、低噪声专家负责细节精修，以某个 timestep 阈值为界硬切换<sup class="ref"><a href="#r13">[13]</a></sup><sup class="ref"><a href="#r14">[14]</a></sup>。无路由器、天然负载均衡、零额外通信；代价是粒度极粗（仅 2 档），本质是 §4.3 的「硬路由」思想在时间维度的应用。</p>
 
 <h4>第二代：Mamoda 2.5，token 级路由 + 稠密初始化（字节跳动）</h4>
-<p>字节 Mamoda 2.5（统一多模态生成/编辑模型）的 DiT 骨干用 <b>「E128A8」</b>配置：128 个路由专家 top-8 + 1 个共享专家，25B 总参 / 约 3B 激活（约 12%）<sup class="ref"><a href="#r13">[13]</a></sup>。三个工程细节尤其值得注意：</p>
+<p>字节 Mamoda 2.5（统一多模态生成/编辑模型）的 DiT 骨干用 <b>「E128A8」</b>配置：128 个路由专家 top-8 + 1 个共享专家，25B 总参 / 约 3B 激活（约 12%）<sup class="ref"><a href="#r13">[13]</a></sup>。实现中有三个细节：</p>
 <ul class="tight">
 <li><b>路由与 DeepSeek-V3 完全同构</b>：sigmoid 亲和 + 无损偏置：「Top-8(s+b)，但门控权重仍用原始亲和度归一化 g = s/Σs」<sup class="ref"><a href="#r13">[13]</a></sup>；</li>
 <li><b>稠密权重上采样初始化</b>：从 Wan2.2-5B 稠密权重「三步上采样」初始化专家，与 MoE-LLaVA 的「复制 FFN 初始化专家」（图 8、§4.2）思路同源，都是「先密后疏」；</li>
@@ -1714,7 +1714,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1866,6 +1867,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1902,7 +1904,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -2059,7 +2061,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

@@ -165,9 +165,9 @@
 <nav class="toc">
   <b>目录</b>
   <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
     <li><a href="#why">为什么投机解码需要"后训练"？—— 一个公式讲清全部动机</a></li>
-    <li><a href="#prereq">预备知识：本科生也能懂的投机采样原理</a></li>
+    <li><a href="#prereq">预备知识：投机采样原理</a></li>
     <li><a href="#timeline">发展时间线一览（2018–2026）</a></li>
     <li><a href="#phase1">阶段一（2018–2023）：训练的种子 —— 从块并行解码到免训练范式</a></li>
     <li><a href="#phase2">阶段二（2023–2024）：草稿的后训练 —— 蒸馏、解码头与自适应停止</a></li>
@@ -181,16 +181,16 @@
 </nav>
 
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先定义草稿要匹配哪种部署分布</b><p><a href="#prereq">接受与成本</a> → <a href="#phase2">蒸馏与自投机</a> → <a href="#phase3">训练时测试</a> → <a href="#phase4">并行/在策训练</a> → <a href="#code">实现对应</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>单位置接受率为 Σmin(p,q)=1−TV(p,q)，但优化一轮产出还要考虑前缀存活和继续价值。条件接受率恒定时，第 k 个候选被实际提交的概率仍会因前面拒绝而下降；“位置接受率不衰减”与“联合存活下降”并不矛盾。</p></div>
+<div class="note"><b>从这里读起 · 先定义草稿要匹配哪种部署分布</b><p><a href="#prereq">接受与成本</a> → <a href="#phase2">蒸馏与自投机</a> → <a href="#phase3">训练时测试</a> → <a href="#phase4">并行/在策训练</a> → <a href="#code">实现对应</a>。相关发布记录见“近期进展”。</p><p>单位置接受率为 Σmin(p,q)=1−TV(p,q)，但优化一轮产出还要考虑前缀存活和继续价值。条件接受率恒定时，第 k 个候选被实际提交的概率仍会因前面拒绝而下降；“位置接受率不衰减”与“联合存活下降”并不矛盾。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>α=0.9、γ=7，在 i.i.d. 教学模型中 E≈5.695；草稿每步成本为 AR 的 0.1、验证成本为 1，则速度约 5.695/1.7=3.35×。更强草稿若把成本也翻倍，必须重算净收益和训练摊销。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>数据对齐</td><td>DistillSpec 学生 on-policy，HASS 对齐训练/解码上下文</td><td>区分教师生成、学生自采样与特征反馈</td></tr><tr><td>结构与目标</td><td>早期 MTP 并列预测；DeepSeek-V3 顺序式 MTP</td><td>共享头、训练目标、草稿开销不可混同</td></tr><tr><td>部署调度</td><td>DSpark 条件置信度→前缀连乘→长度决策</td><td>静态阈值只是基线；非前瞻条件防选择偏差</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>在相同训练和推理预算下，收益究竟来自数据、草稿容量、目标函数还是 kernel？报告达到盈亏平衡所需服务 token 数，而非只列最高加速比。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Lefan Zhang  et al.</b> <i>Learning Harmonized Representations for Speculative Sampling</i>（HASS）；arXiv:2408.15766，v1 2024-08-28。<a href="https://arxiv.org/abs/2408.15766">原始论文与版本记录</a></li><li><b>Fabian Gloeckle  et al.</b> <i>Better &amp; Faster Large Language Models via Multi-token Prediction</i>（Better & Faster LLMs via MTP）；arXiv:2404.19737，v1 2024-04-30。<a href="https://arxiv.org/abs/2404.19737">原始论文与版本记录</a></li><li><b>Yongchao Zhou  et al.</b> <i>DistillSpec: Improving Speculative Decoding via Knowledge Distillation</i>（DistillSpec）；arXiv:2310.08461，v1 2023-10-12。<a href="https://arxiv.org/abs/2310.08461">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -206,7 +206,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>目标再生成让 KD 收益塌缩</b><span class="hl-date">10-21 · 韩国大学+延世</span></div><p>外部语料上的蒸馏收益 +14.4%/+18.0%，换成目标模型再生成语料后只剩 +3.7%/+3.6%、gate 归零，“草稿语料必须目标自生成”再添实证。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>T2D：剪枝造草稿</b><span class="hl-date">10-25 · USF+ASU+UC Davis</span></div><p>延迟感知的结构化剪枝+蒸馏，直接从目标模型剪出草稿，最高剪掉 92%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
@@ -243,7 +243,7 @@
 
 <p>有趣的是，奠基论文在"未来工作"里预言的两件事（蒸馏草稿、直接优化接受率）分别在 2023 年（DistillSpec<span class="cite">[6]</span>）和 2026 年（LK Losses<span class="cite">[24]</span> 等）成为了现实。本文就沿着这条"从免训练到深度后训练"的路线，讲清每个阶段的核心思想、数学原理与代码实现。</p>
 
-<h2 id="prereq">2 · 预备知识：本科生也能懂的投机采样原理</h2>
+<h2 id="prereq">2 · 预备知识：投机采样原理</h2>
 
 <h3>2.1 为什么大模型解码是"内存墙"问题</h3>
 <p>自回归解码时，生成每个 token 都要做一次完整前向。对于 70B 模型，即使一次前向只算一个 token 的矩阵乘（几乎不费算力），也<b>必须把 140GB 的权重从 HBM 显存读一遍</b>。现代 GPU 算力冗余、带宽紧张，解码阶段 GPU 的利用率常常只有个位数百分比。投机解码的本质，就是用这些闲置算力去"提前算好"未来几个位置的条件分布，从而把"读一遍权重"的产出从一个 token 变成多个。</p>
@@ -409,7 +409,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 <h3>5.6 MTP（2024-12）：把投机解码写进预训练目标</h3>
 <p><span class="pill o">训练对象：主模型的 MTP 模块（预训练时联合训练）</span><span class="pill b">优化目标：多 token 交叉熵</span></p>
 
-<p>2024 年底，DeepSeek-V3<span class="cite">[13]</span> 给这个故事添了决定性的一笔：<b>多 token 预测（MTP）首先是"让模型变强"的训练目标</b>，其次才是推理加速的草稿。它在主模型之后串联 D=1 个 MTP 模块（各含一个 Transformer 块，与主模型共享 embedding 与输出头），训练目标 <code>L<sub>MTP</sub> = (λ/D)·Σ L<sub>k</sub></code>：</p>
+<p>2024 年底，DeepSeek-V3<span class="cite">[13]</span> 将 MTP 引入大规模模型训练：<b>多 token 预测（MTP）首先是"让模型变强"的训练目标</b>，其次才是推理加速的草稿。它在主模型之后串联 D=1 个 MTP 模块（各含一个 Transformer 块，与主模型共享 embedding 与输出头），训练目标 <code>L<sub>MTP</sub> = (λ/D)·Σ L<sub>k</sub></code>：</p>
 
 <div class="formula">
   h′<sup>k</sup><sub>i</sub> = M<sub>k</sub> [ RMSNorm(h<sup>k−1</sup><sub>i</sub>) ; RMSNorm(Emb(t<sub>i+k</sub>)) ] &nbsp;→&nbsp; TRM<sub>k</sub> → 共享输出头
@@ -481,7 +481,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Chen, Liang &amp; Liu,《DFlash: Block Diffusion for Flash Speculative Decoding》, ICML 2026 · arXiv:2602.06036（2026-02-05）[17]</span>
 </blockquote>
 
-<p>消融印证了后训练范式的核心信条：去掉目标特征注入、只训一个普通块扩散草稿，加速从 4.9× 掉到 2–3×——<b>草稿的价值主要不是来自它自己会写，而是来自它读懂了目标</b>。DFlash 官方一口气发布了 20+ 个目标模型的草稿权重（Qwen3.5 全系、Kimi-K2.5/2.6、MiniMax-M2.5、gpt-oss-20b/120b 等），vLLM 与 SGLang 均已原生支持。</p>
+<p>消融结果显示：去掉目标特征注入、只训一个普通块扩散草稿，加速从 4.9× 掉到 2–3×——<b>草稿的价值主要不是来自它自己会写，而是来自它读懂了目标</b>。DFlash 官方一口气发布了 20+ 个目标模型的草稿权重（Qwen3.5 全系、Kimi-K2.5/2.6、MiniMax-M2.5、gpt-oss-20b/120b 等），vLLM 与 SGLang 均已原生支持。</p>
 
 <h3>7.2 DSpark（2026-07）：半自回归 + 置信度调度，DeepSeek-V4 的生产答案</h3>
 <p><span class="pill g">训练对象：并行主干 + Markov 顺序头 + 置信度头</span><span class="pill b">优化目标：CE + L1 分布蒸馏 + 接受率回归</span></p>
@@ -648,7 +648,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <div class="callout"><b>四个仓库，四种"后训练"</b>：EAGLE-3 展示<b>训练目标如何塑造草稿能力</b>（删一项损失换来规模定律）；DeepSpec 展示<b>数据与基建</b>（目标再生数据 + 特征缓存 + 可复现全流程）；Medusa 展示<b>参数高效外挂</b>（冻结主干、单卡训练）；LayerSkip 展示<b>反向思路</b>（改造目标模型自己当草稿）。它们的公共信条只有一个：草稿不需要"会写作"，只需要"像目标"。</div>
 <h2 id="future">10 · 未来发展方向</h2>
 
-<p>综合发展脉络与 2026 年最新动态，我们认为以下七个方向最值得关注：</p>
+<p>以下七个方向仍有待进一步研究：</p>
 
 <ol>
   <li><b>训练目标与真实目标的彻底对齐。</b>加速比的真实目标是 <code>τ / (T<sub>draft</sub> + T<sub>verify</sub>)</code>，而现有损失仍是它的各种代理（CE、KL、L1）。LK Losses<span class="cite">[24]</span>、Variational SD<span class="cite">[25]</span>、Verification-Aware<span class="cite">[26]</span> 刚刚破题：可微地建模"验证与拒绝"、把位置衰减与接受概率显式写进损失，仍有大量理论空间，特别是把"验证算力成本"作为损失项（训练时就学会在会拒的位置提前停笔）。</li>
@@ -660,7 +660,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <li><b>验证侧与"可控有损"的再思考。</b>严格无损的拒绝采样也许不必永远严格：typical acceptance<span class="cite">[7]</span>、Fuzzy SD<span class="cite">[34]</span>、Judge Decoding 展示了"分布稍偏、质量不降、速度大涨"的中间地带。如何给出有理论保证的质量-速度边界（而非经验阈值），是把这条线从"技巧"提升为"方法"的关键。</li>
 </ol>
 
-<div class="warn"><b>给入门者的一句话总结</b>：投机解码的后训练，本质上是在 <code>α = Σ min(p, q)</code> 这个公式的三个变量上做文章：蒸馏与特征融合抬 <b>α</b>，并行与自投机压 <b>c</b>，置信度调度学 <b>γ</b>；而 2023 → 2026 的全部进化，是把这些旋钮从"手工调"变成"模型自己学"，再变成"跟着策略一起学"。</div>
+<div class="warn"><b>后训练的三个变量</b>：投机解码的后训练可以围绕 <code>α = Σ min(p, q)</code> 这三个变量展开：蒸馏与特征融合抬 <b>α</b>，并行与自投机压 <b>c</b>，置信度调度学 <b>γ</b>。不同训练方法分别优化这些变量，还需计入草稿训练和部署成本。</div>
 
 
 <section id="latest" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
@@ -718,7 +718,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p><b>Attention Drift</b>（2026.05，已被 NeurIPS 2026 接收）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解，为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>，再次印证 §5.3 的"草稿训练规模定律"。
 
 <table>
-  <tr><th>主线</th><th>代表工作（年份）</th><th>一句话概括</th></tr>
+  <tr><th>主线</th><th>代表工作（年份）</th><th>主要贡献</th></tr>
   <tr><td>训练目标</td><td>LK Losses、Variational SD、Verification-Aware、Bebop（2026）</td><td>直接优化"序列接受"而非 token 概率</td></tr>
   <tr><td>训练范式</td><td>Draft-OPD、AdaFlash、SpecForge、NVIDIA 协同训练（2026）</td><td>离线 SFT → 在策蒸馏 → RL 循环内在线训练</td></tr>
   <tr><td>草稿架构</td><td>DFlash、DSpark、P-EAGLE、Domino、xPress/DDTree/DFlow（2026）</td><td>并行起草 + 块内依赖建模 + 置信度调度</td></tr>
@@ -901,7 +901,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1053,6 +1054,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1089,7 +1091,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1246,7 +1248,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

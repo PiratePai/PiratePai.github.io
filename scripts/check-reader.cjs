@@ -74,7 +74,9 @@ if (out) fs.mkdirSync(out, {recursive:true});
         await page.getByRole('button',{name:'全文阅读',exact:true}).click();
         assert.equal(await page.locator('.reader-page:visible').count(),audit.pages,file+': full view');
         const brokenImages = await page.evaluate(async () => {
-          const images = [...document.images]; images.forEach(i => i.loading = 'eager');
+          // External view counters are blocked by the offline route above.
+          const images = [...document.images].filter(i => new URL(i.src, location.href).origin === location.origin);
+          images.forEach(i => i.loading = 'eager');
           await Promise.all(images.map(i => i.decode().catch(() => {})));
           return images.filter(i => !i.naturalWidth).map(i => i.getAttribute('src'));
         });

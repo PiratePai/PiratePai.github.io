@@ -116,31 +116,31 @@
 <div class="toc">
 <h3>目录</h3>
 <ol>
-  <li><a href="#hl">★ 前沿亮点（2024–2026）</a></li>
+  <li><a href="#hl">近期进展（2024–2026）</a></li>
   <li><a href="#s0">0. 导读与大事记：本文回答哪四个问题</a></li>
   <li><a href="#s1">1. 预备知识：一次推理到底在算什么</a></li>
   <li><a href="#s2">2. 发展历程：从通用框架到定制引擎</a></li>
   <li><a href="#s3">3. 定制化引擎的十层技术栈</a></li>
-  <li><a href="#s4">4. DeepInfer 深拆：一台被做到极致的推理引擎</a></li>
+  <li><a href="#s4">4. DeepInfer 的架构与实现</a></li>
   <li><a href="#s5">5. 横向比较：谁在什么条件下更快</a></li>
   <li><a href="#s6">6. 前沿进展与开放问题（2025–2026）</a></li>
-  <li><a href="#s7">7. 总结与展望：未来三到五年</a></li>
+  <li><a href="#s7">7. 总结与展望：后续方向</a></li>
   <li><a href="#s8">8. 术语表</a></li>
   <li><a href="#refs">参考文献</a></li>
 </ol>
 </div>
 
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 从通用成本模型走到专用引擎</b><p><a href="#s1">计算与字节</a> → <a href="#s2">问题如何演进</a> → <a href="#s3">通用技术栈</a> → <a href="#s4">DeepInfer 案例</a> → <a href="#s5">同条件比较</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>先分清"计算多少""搬运多少""等待多久"。Roofline 只给理想上界；调度、网络和软件开销决定距离上界还有多远。pinned buffer 是设备能直接访问和传输的锁页内存；SASS 是 GPU 机器指令；这些是实现细节，可在理解数据路径后再读。</p></div>
+<div class="note"><b>从这里读起 · 从通用成本模型走到专用引擎</b><p><a href="#s1">计算与字节</a> → <a href="#s2">问题如何演进</a> → <a href="#s3">通用技术栈</a> → <a href="#s4">DeepInfer 案例</a> → <a href="#s5">同条件比较</a>。相关发布记录见“近期进展”。</p><p>先分清"计算多少""搬运多少""等待多久"。Roofline 只给理想上界；调度、网络和软件开销决定距离上界还有多远。pinned buffer 是设备能直接访问和传输的锁页内存；SASS 是 GPU 机器指令；这些是实现细节，可在理解数据路径后再读。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>普通解码若 10ms/token，某投机轮草稿 4ms、验证 12ms、平均产出 3 token，则每 token 约 5.33ms、加速约 1.88×。接受率高却只产出 1 token 时，同样一轮反而要 16ms/token。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>KV 管理</td><td>提高有效缓存容量</td><td>PagedAttention 分块；vAttention 用虚拟内存保留连续虚拟地址，二者皆可支持动态组批</td></tr><tr><td>多租户适配</td><td>共享基座服务多组 LoRA</td><td>Punica / S-LoRA 的异构 batch 与适配器换入是另一类定制</td></tr><tr><td>模型特化</td><td>利用结构、精度和拓扑协同</td><td>须隔离模型改变与引擎改变的贡献</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>在同模型、同硬件、同精度与同 SLO 下，特化收益有多少来自通用框架尚未采用的实现，多少必须依赖模型结构？需要逐项消融来回答。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Ramya Prabhu  et al.</b> <i>vAttention: Dynamic Memory Management for Serving LLMs without PagedAttention</i>（vAttention）；arXiv:2405.04437，v1 2024-05-07。<a href="https://arxiv.org/abs/2405.04437">原始论文与版本记录</a></li><li><b>Lequn Chen (1) et al.</b> <i>Punica: Multi-Tenant LoRA Serving</i>（Punica）；arXiv:2310.18547，v1 2023-10-28。<a href="https://arxiv.org/abs/2310.18547">原始论文与版本记录</a></li><li><b>Ying Sheng  et al.</b> <i>S-LoRA: Serving Thousands of Concurrent LoRA Adapters</i>（S-LoRA）；arXiv:2311.03285，v1 2023-11-06。<a href="https://arxiv.org/abs/2311.03285">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读）</summary><h2 id="hl"><span class="no">★</span>前沿亮点</h2>
+<details class="note" data-highlights><summary>近期进展（进阶选读）</summary><h2 id="hl">前沿亮点</h2>
 <div class="hl-grid">
   <div class="hl-card"><div class="d">2026-10-20</div><b>DeepSeek 开源生产推理引擎 DeepInfer</b>：支撑单集群 <b>155 万亿 tokens/日</b>、每 GPU 小时营收 38 美元（谷电价）的引擎本体；开源版含内核、调度、投机解码、结构化输出，KV 存储与负载均衡未含。→ <a href="#s4">第 4 章</a></div>
   <div class="hl-card"><div class="d">2026-10</div><b>DeepSeek-V4.1-Flash：为推理而生的模型结构</b>：MLA 压缩 KV + 稀疏 indexer + 滑动窗口 + YOCO 跨层复用 + FP4 KV，让 KV 落 SSD 存 72 小时成为划算生意。模型—系统—芯片协同设计的最新样本。→ <a href="#s4-3">4.3 节</a></div>
@@ -194,7 +194,7 @@
   <li><span class="t">2026-10</span><b>定制引擎本体开源：DeepInfer。</b>DeepSeek 发布 DeepSeek-V4.1-Flash 并开源支撑其大规模生产的推理引擎 DeepInfer（2026-10-20）：单集群 155 万亿 tokens/日、每 GPU 小时营收 38 美元（谷电价）<sup class="cite">[DIQA26]</sup>。同期开源 deepseek-recipe（生产级 token 编解码组件）。通用引擎（vLLM/SGLang/TRT-LLM）与专用引擎（DeepInfer）的分工自此完全显性化。</li>
 </ul>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>推理系统的演进主线是"通用 → 专用"：先有算子库（FasterTransformer），再有调度系统（Orca/vLLM），然后是分离式架构（DistServe/Mooncake），最后是模型厂商自研引擎整体开源（DeepInfer）。</li>
 <li>2023 年的 vLLM + continuous batching + FlashAttention 三件事，定义了之后所有引擎的公共底座；2024–2026 的分化发生在 KV 管理、PD 分离、投机解码与 MoE 并行上。</li>
@@ -267,7 +267,7 @@
 <tr><td>单卡放不下模型 / 单卡吞吐不够</td><td>TP/PP/DP/EP、多机通信、EPLB（3.6、4.9）</td></tr>
 </table>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>LLM 推理 = 一次计算密集的 prefill + N 次访存密集的 decode；前者决定 TTFT、后者决定 TPOT，两者的优化手段几乎相反。</li>
 <li>decode 是访存瓶颈：batch=1 时算术强度约 1 FLOP/Byte，离 GPU 平衡点（数百）差两个数量级。所以"加并发"和"少读字节"是 decode 优化的全部秘密。</li>
@@ -297,7 +297,7 @@
 <div class="citebox">[ORCA22] Yu et al. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. OSDI'22（2022-07；无 arXiv 版本，正式出处为 USENIX 页面）。GPT-3-175B、16×A100-40GB、合成泊松负载：归一化延迟同为 190 ms/token 时 FT+request 级调度 0.185 req/s vs Orca 6.81 req/s = <b>36.9×</b>。<span class="q">"Orca improves the throughput by up to 36.9×"</span>。注意：引擎微基准里 13B 下 Orca 与 FT 相当甚至略慢。<b>收益几乎全部来自调度层</b>，这正是它成为"系统论文"而非"kernel 论文"的原因。</div>
 <p>Orca 的局限：KV 仍按请求 max_tokens 预留连续空间（buddy allocation），这成了 vLLM 论文的直接攻击面。其思想由团队创业公司 FriendliAI 与整个行业继承：TGI 的 "continuous batching"、TRT-LLM 的 "in-flight batching"、vLLM/LightLLM/TurboMind 的调度器全部源于此。</p>
 <h4>2.3.2 vLLM：把操作系统分页搬进 KV 显存</h4>
-<p>vLLM（UC Berkeley Sky Lab，2023-06-20 博客、SOSP'23 论文，2025-05 起由 PyTorch Foundation 托管）攻 KV 显存管理：借<b>虚拟内存分页</b>，把 KV 切成 16-token block，逻辑块经 block table 映射到任意物理块。三重收益：消外部碎片（块等大）、内部碎片只剩最后一块（<b>浪费 &lt;4%</b> vs 现有系统 20.4–38.2% 有效率）、天然支持块级共享（并行采样/beam search 的 copy-on-write、前缀共享）。论文数字：对 Orca(Oracle) 1.7–2.7×、对 FT 最高 22×（OPT 系、A100）<sup class="cite">[VLLM23]</sup>；博客口径对 HF 14–24×、对 TGI 2.2–2.5×（LLaMA-7B@A10G/13B@A100，ShareGPT 分布）<sup class="cite">[VLLMBLOG23]</sup>。<b>诚实的代价</b>（论文 §7.1 自述）：PagedAttention 因 block table 间接寻址，attention kernel 本身比 FT 慢 20–26%。<b>收益在系统层而非 kernel 层</b>，这是"内存管理 vs 算子极致"的第一笔公开账。</p>
+<p>vLLM（UC Berkeley Sky Lab，2023-06-20 博客、SOSP'23 论文，2025-05 起由 PyTorch Foundation 托管）攻 KV 显存管理：借<b>虚拟内存分页</b>，把 KV 切成 16-token block，逻辑块经 block table 映射到任意物理块。三重收益：消外部碎片（块等大）、内部碎片只剩最后一块（<b>浪费 &lt;4%</b> vs 现有系统 20.4–38.2% 有效率）、天然支持块级共享（并行采样/beam search 的 copy-on-write、前缀共享）。论文数字：对 Orca(Oracle) 1.7–2.7×、对 FT 最高 22×（OPT 系、A100）<sup class="cite">[VLLM23]</sup>；博客口径对 HF 14–24×、对 TGI 2.2–2.5×（LLaMA-7B@A10G/13B@A100，ShareGPT 分布）<sup class="cite">[VLLMBLOG23]</sup>。<b>实现代价</b>（论文 §7.1 自述）：PagedAttention 因 block table 间接寻址，attention kernel 本身比 FT 慢 20–26%。<b>收益在系统层而非 kernel 层</b>，这是"内存管理 vs 算子极致"的第一笔公开账。</p>
 <div class="note"><b>谱系铁证（官方原文）</b>：vLLM 论文 §5.1 明言其 attention kernel "adapt the attention kernel in FasterTransformer"（改造自 FT）；2025 年 vLLM V1 博客致谢 "the design of vLLM V1 builds upon and enhances several open-source LLM inference engines, including LightLLM, LMDeploy, SGLang, TGI, and TRT-LLM"<sup class="cite">[VLLMV1]</sup>。开源引擎间的继承与反哺，比"谁抄谁"的叙事健康得多。</div>
 <p><b>vLLM V1（2025-01-27 alpha，年内转正）</b>是单引擎历史上最大规模的一次重写：调度器统一（取消 prefill/decode 二分表示，请求即 <code>{id: num_tokens}</code>）、prefix caching 默认开（0% 命中时损失 &lt;1%）、EngineCore 独立进程、piecewise CUDA graph + torch.compile、FlashAttention-3，相对 V0 最高 1.7× 吞吐<sup class="cite">[VLLMV1]</sup>；2025-12 又交付 DeepSeek Wide-EP 部署（2.2k tok/s/H200）、async scheduling、PD 分离<sup class="cite">[VLLMLSC25]</sup>。</p>
 
@@ -305,7 +305,7 @@
 <ol>
 <li>通用框架的三宗罪：launch 开销、request 级批处理、KV 静态分配，分别由三代技术解决：算子融合/CUDA Graph（FT/TRT-LLM）、iteration-level 调度（Orca，36.9×）、分页 KV（vLLM，浪费 60–80%→&lt;4%）。</li>
 <li>关键分水岭在 2023：Orca+vLLM 证明"系统层收益可以远大于 kernel 层收益"，此后所有引擎都是调度系统而不仅是算子集合。</li>
-<li>谱系是继承而非颠覆：vLLM 的 kernel 出自 FT，V1 吸收 LightLLM/LMDeploy/SGLang/TGI/TRT-LLM，TRT-LLM 2025 年全面开源并向 PyTorch 动态架构靠拢。静态编译与动态运行时在互相靠近。</li>
+<li>这些引擎相互借鉴实现：vLLM 的 kernel 出自 FT，V1 吸收 LightLLM/LMDeploy/SGLang/TGI/TRT-LLM，TRT-LLM 2025 年全面开源并向 PyTorch 动态架构靠拢。静态编译与动态运行时在互相靠近。</li>
 </ol>
 </div>
 <h3>2.4 生态爆发：百家争鸣的 2023–2024</h3>
@@ -349,7 +349,7 @@
 </div>
 <h2 id="s3"><span class="no">3</span>定制化推理引擎的十层技术栈</h2>
 
-<p>第 2 章按时间讲"谁做了什么"；本章按栈讲"一块饼图怎么切"：一个定制化推理引擎从上到下共十层技术决策。每一层我们都回答三件事：<b>机制是什么（本科生能懂）、为什么非做不可、去掉它会怎样</b>。</p>
+<p>第 2 章按时间讲"谁做了什么"；本章按栈讲"一块饼图怎么切"：一个定制化推理引擎从上到下共十层技术决策。每一层我们都回答三件事：<b>机制是什么、解决什么问题、有哪些使用条件</b>。</p>
 
 <div class="fig">
 <div class="layers">
@@ -508,19 +508,19 @@ E[每步产出 token] = (1 − α^(γ+1)) / (1 − α)     # α=0.8, γ=4 时 �
 </div>
 <p><b>监控的定制化信号</b>是引擎成熟度的标志：通用引擎给 GPU 利用率与时延分位数；DeepInfer 直接暴露"投机接受置信度误差""专家负载不均衡比"这类引擎内部健康度指标，因为它的优化依赖这些回路（DSpark 用置信度调度、EPLB 用负载统计）。</p>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>十层栈环环相扣：图编译与算子（L1–L2）决定单步多快，调度与 KV（L4–L5）决定 GPU 多满，并行（L6）决定能装多大、算法加速（L7）决定每 token 多便宜。任何一层缺失都会让其他层的收益打折。</li>
 <li>四大算法杠杆各有公式可算：FlashAttention 降低 HBM 搬运并避免二次中间存储，不能概括成线性 HBM 访问，量化乘的是算术强度，稀疏化换的是线性成本，投机解码的期望产出 = (1−α^(γ+1))/(1−α)。</li>
 <li>MoE/长上下文/多模态/异构在 2025 年后已是主战场：专家并行与 all-to-all、KV 稀疏与存储分层、VE 独立部署、TileLang 双后端。定制化引擎的护城河恰恰在这些"通用框架难以同时伺候"的地方。</li>
 </ol>
 </div>
-<h2 id="s4"><span class="no">4</span>DeepInfer 深拆：一台被做到极致的推理引擎</h2>
+<h2 id="s4"><span class="no">4</span>DeepInfer 的架构与实现</h2>
 
 <h3 id="s4-1">4.1 先辨名：本文说的是哪一个 DeepInfer</h3>
 <p>GitHub 上叫 "DeepInfer" 的项目至少有五个以上：医学影像社区 3D Slicer 的插件（2016 年起）、一篇 ICSE 2024 软件工程论文的复现包、若干 2026 年 10 月出现的社区学习复刻（nano-deepinfer / mini-deepinfer / deepinfer-unpacked 等）。<b>本文研究的是 deepseek-ai/DeepInfer：DeepSeek 于 2026-10-20 开源的、支撑其大规模生产服务的高性能推理框架</b>，开源当天即获大量关注（截至 2026-10-31 约 24.5k stars）<sup class="cite">[DI26]</sup>。</p>
 <div class="citebox">[DI26] DeepSeek-AI. <i>DeepInfer: High-performance, large-scale inference framework for DeepSeek models</i>. GitHub README（main 分支 2026-10 快照）。<span class="q">"DeepInfer is the high-performance inference framework that powers DeepSeek's large-scale production services."</span>（DeepInfer 是支撑 DeepSeek 大规模生产服务的高性能推理框架。）链接：<a href="https://github.com/deepseek-ai/DeepInfer">github.com/deepseek-ai/DeepInfer</a>，2026-10-20。</div>
-<p>它的定位一句话讲清：<b>只服务一个模型族（DeepSeek-V4.1-Flash：总参数 763B、上下文 1M、Causal Encoder-Decoder 架构，552B 主干 + 输入侧激活 8B / 输出侧激活 16B<sup class="cite">[DIV4126]</sup>）、两类加速器（NVIDIA SM100 / 华为昇腾 950）的离线推理引擎内核</b>。README 明确列出"组成完整服务还缺什么"：KV cache 系统、VE/Prefill/Decode 分离编排与负载均衡均不在开源范围内（引擎侧接口已实现）<sup class="cite">[DI26]</sup>。代码体量很小：270 个 Python 文件、约 4.6 万行 Python，加上 vendor 目录里的 DeepEP / DeepGEMM / FlashMLA / DeepSelect 内核库子模块；构建要求 Linux + GCC≥13 + Python 3.12 + CUDA 13（或 CANN 9.2）<sup class="cite">[DI26]</sup>。开源方式是"fresh drop"：仅 5 个 commit 一次性放出（非滚动开发），社区复刻与解读在数日内涌现（均属二手信源）。</p>
+<p>它的服务范围是：<b>只服务一个模型族（DeepSeek-V4.1-Flash：总参数 763B、上下文 1M、Causal Encoder-Decoder 架构，552B 主干 + 输入侧激活 8B / 输出侧激活 16B<sup class="cite">[DIV4126]</sup>）、两类加速器（NVIDIA SM100 / 华为昇腾 950）的离线推理引擎内核</b>。README 明确列出"组成完整服务还缺什么"：KV cache 系统、VE/Prefill/Decode 分离编排与负载均衡均不在开源范围内（引擎侧接口已实现）<sup class="cite">[DI26]</sup>。代码体量很小：270 个 Python 文件、约 4.6 万行 Python，加上 vendor 目录里的 DeepEP / DeepGEMM / FlashMLA / DeepSelect 内核库子模块；构建要求 Linux + GCC≥13 + Python 3.12 + CUDA 13（或 CANN 9.2）<sup class="cite">[DI26]</sup>。开源方式是"fresh drop"：仅 5 个 commit 一次性放出（非滚动开发），社区复刻与解读在数日内涌现（均属二手信源）。</p>
 
 <h4>4.1.1 开源边界：给了什么，没给什么</h4>
 <table>
@@ -574,7 +574,7 @@ E[每步产出 token] = (1 − α^(γ+1)) / (1 − α)     # α=0.8, γ=4 时 �
 <h3 id="s4-3">4.3 模型结构：V4.1-Flash 是一台"为推理而生"的模型</h3>
 <p>DeepInfer 最有意思的标本价值在于：<b>模型结构和引擎是同一拨人一起设计的</b>。读 <code>model_executor/models/</code> 的源码会发现，V4.1-Flash 的几乎每个结构组件都直接对应一个推理系统约束。这就是第 3.8 节"模型—系统—芯片协同设计"的全尺寸样本。</p>
 <table>
-<tr><th>结构组件（源码位置）</th><th>解决什么系统问题</th><th>机制一句话</th></tr>
+<tr><th>结构组件（源码位置）</th><th>解决什么系统问题</th><th>机制概要</th></tr>
 <tr><td><b>MLA 压缩 KV</b>（<code>v4_modules/attn.py</code>，继承自 DeepSeek-V2 的 MLA<sup class="cite">[DSV2]</sup>）</td><td>KV 每 token 数百 KB 放不下</td><td>K/V 先压到低秩潜空间（kv_lora_rank + rope 部分）再缓存，注意力时在线解压</td></tr>
 <tr><td><b>压缩 KV Compressor</b>（<code>compress.py</code>：门控低秩压缩）</td><td>进一步压主 KV</td><td>pre-RoPE 潜向量喂给 indexer、post-RoPE 向量进主 KV cache</td></tr>
 <tr><td><b>稀疏 indexer</b>（<code>index_attn.py</code> MQA + <code>deep_select</code> top-k）</td><td>长上下文 attention O(n²) 读不动</td><td>每 query 用轻量 MQA 打分 relu(q·k)·w 选 top-k 块，只对选中块做完整 MLA attention（DSA 路线的工程化）</td></tr>
@@ -825,7 +825,7 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 </table>
 <p class="codecap">表 5-4 · DeepInfer 的五口袋归因（证据均为官方 QA 文档，2026-10）。注意最后两行只占总增益的小头。<b>这就是"系统时代"的特征：最大的钱在内存与调度，不在 kernel</b>；模型侧（MLA/indexer/SWA/YOCO 压小 KV）则是 DeepInfer 相对通用引擎最深的护城河。</p>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>横向比较的第一纪律是口径纪律：基线（vs 谁）、指标（吞吐/容量/goodput）、SLO 定义、硬件与负载四件套不全，数字就不能并列；本文表 5-2 的每行都带全套条件。</li>
 <li>社区共识（第三方，方向性）：唯一 prompt 下 vLLM≈SGLang；共享前缀/多轮/Agent 负载下 SGLang 的 RadixAttention 优势明显；TRT-LLM 编译后稳态吞吐最高但构建最重；DeepInfer 在其专属负载与拓扑下吞吐最高但只服务一个模型族。</li>
@@ -872,16 +872,16 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 <p><b>进展</b>：Splitwise 首次把功率写进推理目标（-15%~-25%）<sup class="cite">[SPLITWISE24]</sup>；DeepInfer 公开"每 GPU 小时营收 38 美元（谷电价）"——<b>推理系统第一次把电价写进 KPI</b><sup class="cite">[DIQA26]</sup>；API 价格战的技术面：DeepSeek V3.2（DSA，−50%+）与 V4.1 的降价曲线背后是"KV 进 SSD + FP4 + Wide-EP"的组合账。</p>
 <p><b>开放问题</b>：主流基准仍无能耗/碳口径；"每 token 成本"缺乏跨厂商可比的公开模型（推理侧碳核算几乎空白）；长尾 P99.9 与成本的联合优化。</p>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>2025–2026 的主旋律是三件事落地：PD 分离成为标配（Dynamo/NIXL/Mooncake 系）、KV 从"显存问题"升级为"存储系统问题"（全局池/TTL/跨引擎复用）、投机解码从"能不能"进入"何时值得"（batch 冲突与置信度调度）。</li>
 <li>负面结果与边界同样关键：大 batch 下投机收益衰减（1.73×→1.21×）、公开基准高估前缀复用率、稀疏注意力与前缀缓存互相打架。工程界正在为这些边界设计自适应机制。</li>
 <li>最大的结构性变化在生态：模型—引擎—芯片三方互相"投影"（MLA→FlashMLA→950PR；MTP→DSpark→SM100 FP4），开源组件（DeepSeek 开源周→TileLang→cuda-tile）第一次让外部可以复现和研究这种协同。</li>
 </ol>
 </div>
-<h2 id="s7"><span class="no">7</span>总结与展望：未来三到五年</h2>
+<h2 id="s7"><span class="no">7</span>总结与展望：后续方向</h2>
 
-<h3>7.1 当前格局一句话版</h3>
+<h3>7.1 当前引擎的定位</h3>
 <div class="card">
 <p><b>通用引擎（vLLM/SGLang/TRT-LLM）</b>吃宽矩阵：多模型、多硬件、开箱即用，吸收一切可泛化的单点技术；<b>定制引擎（DeepInfer 类）</b>打深极限：单模型族、专属拓扑、贴 SASS 与 SSD，把"专"的红利换算成 $38/GPU·h；<b>编排层（Dynamo/Mooncake/Production Stack）</b>负责把两者组装成集群服务。三层分工在 2026 年已稳定，且互相开源反哺（vLLM V1 致谢五个引擎；DeepInfer 自述基于 vLLM）。</p>
 </div>
@@ -914,11 +914,11 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 <li><b>端云一体的推理</b>：3B–30B 端侧模型 + 云端大模型的路由与协同缓存（端侧命中就不上云），把"前缀复用"扩展到设备维度。</li>
 </ul>
 
-<div class="summary3"><b>本章小结（记住三句话）</b>
+<div class="summary3"><b>本章小结</b>
 <ol>
 <li>三年内最确定的四件事：PD 分离商品化、投机解码自适应化、FP4 生产化、算子 DSL 统一化，全部已有生产级证据（Dynamo、DSpark、DeepInfer、TileLang）。</li>
-<li>最不确定也最颠覆的是生成范式：若并行/扩散式生成在质量上追平，KV cache 中心的世界观将被替换，那是推理系统的"下一张白纸"。</li>
-<li>选型建议一句话：<b>多模型/多硬件/快速迭代选 vLLM 或 SGLang；单一 DeepSeek 系模型 + 大规模集群 + 有平台工程能力，参考 DeepInfer 路线；两者都会活的很好，因为它们解决的不是同一个问题。</b></li>
+<li>并行或扩散式生成可能改变 KV cache 的占用和调度方式；其适用范围仍取决于生成质量与端到端成本。</li>
+<li>选型条件：<b>多模型/多硬件/快速迭代选 vLLM 或 SGLang；单一 DeepSeek 系模型 + 大规模集群 + 有平台工程能力，参考 DeepInfer 路线；评估时同时计入运维成本与模型迭代频率。</b></li>
 </ol>
 </div>
 
@@ -1093,7 +1093,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1245,6 +1246,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1281,7 +1283,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1438,7 +1440,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

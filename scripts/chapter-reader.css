@@ -47,7 +47,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }

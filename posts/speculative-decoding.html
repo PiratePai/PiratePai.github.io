@@ -201,7 +201,7 @@
   <div class="toc">
     <b>📁 目录</b>
     <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
       <li><a href="#why">为什么大模型推理"慢"？——一个根本性的瓶颈</a></li>
       <li><a href="#core">核心思想：用"草稿+验证"换并发（含手算实例 / 50 行代码实验 / 常见误区）</a></li>
       <li><a href="#timeline">发展时间线一览</a></li>
@@ -216,16 +216,16 @@
 
 <!-- ===================== 1. WHY ===================== -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 把分布正确性与墙钟收益分别证明</b><p><a href="#why">普通解码</a> → <a href="#core">提议与验证</a> → <a href="#phase1">拒绝修正</a> → <a href="#phase2">多头与树</a> → <a href="#phase3">并行草稿</a> → <a href="#summary">比较</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>目标分布记 p、草稿记 q、条件接受率记 α、草稿数记 γ，含已知锚点的块长另记 B。候选已知时 causal mask 可并行打分各条件分布；自由生成时下一输入尚未采样，因此不能直接等价并行生成。</p></div>
+<div class="note"><b>从这里读起 · 把分布正确性与墙钟收益分别证明</b><p><a href="#why">普通解码</a> → <a href="#core">提议与验证</a> → <a href="#phase1">拒绝修正</a> → <a href="#phase2">多头与树</a> → <a href="#phase3">并行草稿</a> → <a href="#summary">比较</a>。相关发布记录见“近期进展”。</p><p>目标分布记 p、草稿记 q、条件接受率记 α、草稿数记 γ，含已知锚点的块长另记 B。候选已知时 causal mask 可并行打分各条件分布；自由生成时下一输入尚未采样，因此不能直接等价并行生成。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>提出三个候选 a,b,c：若 a 接受、b 拒绝，则保留 a，从归一化正部 (p−q)⁺ 采一个修正 token，丢弃 b、c 的候选及其缓存；若三个全接受，还从目标采 bonus token。该轮最多产出 γ+1 个。分布相同不意味着固定随机种子逐 token 相同。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>标准拒绝采样</td><td>按 min(1,p/q) 接受并做残差修正</td><td>保持目标分布仍需正确缓存回滚及自适应选择协议</td></tr><tr><td>多头/树与自投机</td><td>SpecInfer 树验证；LayerSkip 早退起草</td><td>冻结主干不是无损充分条件；Medusa typical acceptance 是近似质量路线</td></tr><tr><td>负载感知</td><td>SmartSpec 等按负载和准确率选择长度</td><td>高接受率也可能被草稿/验证/排队成本抵消</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>用同一 checkpoint、采样温度、硬件、后端和并发，比 AR 的 TTFT/TPOT 与 goodput，再做接受长度、草稿时间、验证时间消融。一般 E=Σ前缀存活概率，只有 i.i.d. 简化下才化为几何级数。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Xupeng Miao  et al.</b> <i>SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification</i>（SpecInfer）；arXiv:2305.09781，v1 2023-05-16。<a href="https://arxiv.org/abs/2305.09781">原始论文与版本记录</a></li><li><b>Mostafa Elhoushi  et al.</b> <i>LayerSkip: Enabling Early Exit Inference and Self-Speculative Decoding</i>（LayerSkip）；arXiv:2404.16710，v1 2024-04-25。<a href="https://arxiv.org/abs/2404.16710">原始论文与版本记录</a></li><li><b>Xiaoxuan Liu  et al.</b> <i>TurboSpec: Closed-loop Speculation Control System for Optimizing LLM Serving Goodput</i>（SmartSpec）；arXiv:2406.14066，v1 2024-06-20。<a href="https://arxiv.org/abs/2406.14066">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -241,7 +241,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EAGLE-4：负载校准草稿树</b><span class="hl-date">10-20/21 · eagle-hq</span></div><p>硬件/负载校准的草稿树：Qwen3.8-27B 3.59×，反超 DFlash2 2.80× / DSpark 2.57× / MTP 2.22×；B300 单请求 3.42×→64 并发 1.39×。（eagle-hq 出品，source-available，与 SafeAILab EAGLE-1~3 无确认关联）</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EAGLE-4：负载校准草稿树</b><span class="hl-date">10-20/21 · eagle-hq</span></div><p>硬件/负载校准的草稿树：Qwen3.8-27B 3.59×，反超 DFlash2 2.80× / DSpark 2.57× / MTP 2.22×；B300 单请求 3.42×→64 并发 1.39×。（eagle-hq 出品，source-available，与 SafeAILab EAGLE-1~3 无确认关联）</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DSpark 的置信度调度+自适应验证长度随生产级推理栈一起开源（10-20，GitHub 首次提交口径）；官方 Q&amp;A 称单集群 155T tokens/天。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>xPress 进 vLLM</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>DFlash 草稿+精化器成为原生 dflash 方法：2026-10-22 合入 main，v0.33 起正式搭载（晚于 v0.32.0）；训练配方进 speculators 库。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>接受率不随位置衰减</b><span class="hl-date">10-22 · Z. Meng</span></div><p>500 题 ~178 万轮验证：接受率不随位置衰减，拒绝集中于 wait/check 等反思 token，直接挑战"位置衰减（后缀衰减）"叙事。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
@@ -336,7 +336,7 @@ P(X=x) = P(x̂=x)·P(接受|x̂=x)   +   P(被拒绝)·P(X=x | 被拒绝)
 </table>
 <p class="muted">规律很清楚：<b>边际收益递减</b>。γ 从 1 加到 4，期望产出翻了一倍多；从 8 加到无穷也只再多不到 4 个。而草稿成本（自回归时）却在线性上涨。这说明"猜多长"存在一个甜点，且随 α 变化，<b>这正是后来"动态长度/置信度调度"（如 DSpark、SpecDec++等）的理论根源</b>。</p>
 
-<div class="note warn"><b>⚠️ 一句话记住全部：</b> <b>草稿要"快"，目标要"准"，验证要"无损且省"。</b> 任何方法都在权衡这三者。</div>
+<div class="note warn"><b>性能取决于草稿开销、验证成本和每轮接受长度。</b> 保持目标分布还需要正确实现接受与拒绝修正。</div>
 
 <h3 id="lab">2.3 · 动手实验：50 行代码亲眼验证"无损"</h3>
 <p>光看公式不过瘾？下面这段代码<strong>不依赖任何深度学习框架</strong>（纯 Python 标准库），把上面的接受规则原样实现一遍，然后重复 20 万次，统计投机采样产出的每个 token 的频率。如果"无损"成立，频率应当收敛到目标分布 p。</p>
@@ -959,7 +959,7 @@ prev = first_prev_token_ids                        <span class="c"># 锚点 toke
     └──────────────────────────────>        token 不再占用 batch 容量
       0    50   100  150  200  并发请求数
 
- 一句话：轻载时"贪"（多验证多接受），重载时"省"（截前缀保吞吐）——
+ 轻载时可增加验证长度，重载时可截短候选前缀以控制验证成本——
         这正是 DSpark 能在严格 SLA 下不"塌方"的原因。</div>
 
 <p class="codecap">deepspec/modeling/dspark/loss.py：置信度头的监督信号，解析接受率（真实源码，节选）</p>
@@ -1028,11 +1028,11 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
   <span class="zh">相比既有的生产基线（MTP-1），DSpark 在相同吞吐水平下把单用户生成速度提升了 60%–85%……把我们的服务系统的 Pareto 前沿整体外推。</span>
 </blockquote>
 
-<div class="note"><b>一句话点评 DSpark：</b>它标志着投机解码从"单请求、追延迟"的算法研究，正式进入"<b>系统级、负载感知、与推理引擎协同调度</b>"的工程化阶段，这正是业界大规模落地最需要的东西。</div>
+<div class="note"><b>负载与验证调度：</b>DSpark 将验证长度与<b>引擎负载</b>共同纳入调度，评估时需同时报告单请求延迟和服务吞吐。</div>
 
 <!-- ===================== 7. LATEST ===================== -->
 <h2 id="future"><span class="num">8</span>未来发展方向</h2>
-<p>综合各路线与最新工作，未来几年最值得关注的方向：</p>
+<p>各路线仍有以下开放问题：</p>
 
 <div class="tl">
   <div class="ev"><span class="ttl">① 长上下文投机解码</span><div class="d">长 CoT、Agent 场景下，二次方注意力开销 + 跨段上下文丢失成为新瓶颈。TriForce 式分层草稿、SW-SpeedDLM 式滑动窗口正在解决。DFlash 也已展示"4K 训练 + 少量微调适配长上下文"的可行性。<span class="cite">[11,16]</span></div></div>
@@ -1364,7 +1364,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1516,6 +1517,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1552,7 +1554,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1709,7 +1711,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

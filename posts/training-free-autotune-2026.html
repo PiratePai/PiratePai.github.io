@@ -122,9 +122,9 @@
 <div class="layout">
 
 <nav class="toc">
-  <div class="toc-title">🚀 本文导航</div>
+  <div class="toc-title">本文导航</div>
   <a class="back-home" href="../index.html">← 返回首页</a>
-  <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10</a>
+  <a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10</a>
   <h4>原理与地图</h4>
   <a href="#s0">0. TL;DR</a>
   <a href="#s1">1. 为什么不动权重也能加速</a>
@@ -156,20 +156,20 @@
 <header class="hero">
   <div class="kicker">INFERENCE · TRAINING-FREE · AGENT-AUTOTUNE</div>
   <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
-  <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· <b>2026-10-30 增补</b>（版本事实与 Agent 自动优化最新动态，见前沿亮点与 §2 快讯）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华 / UC Berkeley）、arXiv 论文与推理框架版本及 Roadmap · 面向本科生可懂的原理讲解</div>
+  <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· <b>2026-10-30 增补</b>（版本事实与 Agent 自动优化最新动态，见前沿亮点与 §2 快讯）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华 / UC Berkeley）、arXiv 论文与推理框架版本及 Roadmap · 原理与实现</div>
 </header>
 
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 把自动调优写成可检验的实验流程</b><p><a href="#s1">定义与成本</a> → <a href="#s2">优化对象</a> → <a href="#s3">搜索与验证</a> → <a href="#s4">待执行案例方案</a> → <a href="#s5">硬件边界</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>“免训练”指目标模型无需额外训练，并不等于权重表示不变，也不等于草稿或优化 Agent 未经过训练。优化对象可分 kernel、执行图、缓存/精度、部署调度；搜索方法可分人工、传统 autotuning、编码 Agent，两条轴不宜混成六级进步史。</p></div>
+<div class="note"><b>从这里读起 · 把自动调优写成可检验的实验流程</b><p><a href="#s1">定义与成本</a> → <a href="#s2">优化对象</a> → <a href="#s3">搜索与验证</a> → <a href="#s4">待执行案例方案</a> → <a href="#s5">硬件边界</a>。相关发布记录见“近期进展”。</p><p>“免训练”指目标模型无需额外训练，并不等于权重表示不变，也不等于草稿或优化 Agent 未经过训练。优化对象可分 kernel、执行图、缓存/精度、部署调度；搜索方法可分人工、传统 autotuning、编码 Agent，两条轴不宜混成六级进步史。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>若搜索耗 20 GPU 小时，每请求节省 0.2 GPU 秒，则忽略 API/人工成本的盈亏平衡需 20×3600/0.2=360,000 次请求。单个 kernel 快 2×，若只占总延迟 10%，理想端到端最多约 1.053×。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>搜索能力</td><td>AlphaEvolve、CudaForge 等连接候选生成与硬件反馈</td><td>目标模型免训练与优化器受训必须分开</td></tr><tr><td>质量验收</td><td>固定测试集、容差和失效类型，保留独立终验集</td><td>allclose/CLIP 通过不证明一般等价</td></tr><tr><td>实际增益</td><td>同预算人工、传统搜索、通用 Agent 对照</td><td>交错 A/B、多次重复与置信区间，包含失败回滚和搜索成本</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>本文 §4 为官方性能锚点与建议流程，没有作者实跑台账。执行后才可声称 ZCode 提高收益；应公开基线、诊断、一次失败回滚、最终质量与费用，不编造演示记录。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Zijian Zhang  et al.</b> <i>CudaForge: An Agent Framework with Hardware Feedback for CUDA Kernel Optimization</i>（CudaForge）；arXiv:2511.01884，v1 2025-10-23。<a href="https://arxiv.org/abs/2511.01884">原始论文与版本记录</a></li><li><b>Aheli Poddar  et al.</b> <i>KernelOPT: Dispatch-Aware Agentic Search for GPU Kernel Optimization</i>（KernelOPT）；arXiv:2609.30059，v1 2026-09-24。<a href="https://arxiv.org/abs/2609.30059">原始论文与版本记录</a></li><li><b>Shiyi Cao  et al.</b> <i>Evolving Agent Teams</i>（Evolving Agent Teams）；arXiv:2610.36848，v1 2026-10-27。<a href="https://arxiv.org/abs/2610.36848">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details><p><a href="https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/">AlphaEvolve 官方介绍</a>提供算法/生产计算优化的前史；与逐 kernel 基准和整服务自动调参需分别比较。</p>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:26px 0 8px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
@@ -185,29 +185,28 @@
 .hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月 · Agent 自动调优方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid">
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月 · Agent 自动调优的近期研究（详见正文）</i></div><div class="hl-grid">
 <div class="hl-card"><div class="hl-meta"><b>Evolving Agent Teams：监督者动态重组团队写 kernel</b><span class="hl-date">10-27 · UC Berkeley</span></div><p>监督者 agent 诊断平台期并重构 agent 团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 1.21× 均值加速（追加预算实验）（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）。</p><a class="hl-link" href="#s3">→ §3</a></div>
 <div class="hl-card"><div class="hl-meta"><b>ATRL：昇腾 Triton kernel 的 agentic RL 首发</b><span class="hl-date">10-09 · 华为</span></div><p>Qwen3.6-35B 后训练 + 昇腾知识库，KernelBench（昇腾实测）Pass@1 相对 GRPO 66%→73%（L1）、19%→35%（L2）。§5 表中“昇腾尚待复现”的机会点已被补上。</p><a class="hl-link" href="#s5">→ §5</a></div>
 <div class="hl-card"><div class="hl-meta"><b>TensorRT 11.1 Global Performance Tuner</b><span class="hl-date">10-23 · NVIDIA</span></div><p>把 200+ 编译旋钮展开为可搜索的显式 build routes，trtexec 一条命令跑“构建→端到端测量→精度门过滤→选最快”整个流程，等于厂商版“自动调优 + 精度门”，与本文四站式闭环同构。</p><a class="hl-link" href="#s3">→ §3</a></div>
 <div class="hl-card"><div class="hl-meta"><b>配置错配的安全后果：SGLang KV 隔离披露</b><span class="hl-date">10-26 · Cloudflare × LMSYS</span></div><p>1M 上下文窗口配 681K prefill KV 池 + 被拒请求占位符交接，导致跨请求 KV 泄露（155 条响应受影响）；修复随 v0.5.21/22 发布。这也印证了“支持矩阵先于动手、质量门只读”的规程设计。</p><a class="hl-link" href="#s2-1">→ L1</a></div>
 </div></div></details>
 
-<h2 id="s0"><span class="no">0.</span>TL;DR</h2>
+<h2 id="s0"><span class="no">0</span>TL;DR</h2>
 <div class="tldr">
-<b>一句话：</b>大模型推理优化正在从“手艺活”变成“Agent 工程”——2026 年，字节/英伟达/Red Hat 的论文证明了
-<b>Agent 能以远超 torch.compile 的质量自动生成和优化 GPU kernel</b>（字节 CUDA Agent 在 KernelBench 上 96.8% 的用例跑赢 torch.compile，几何均值 2.11×
+近期研究尝试让 Agent 执行内核生成、配置搜索和结果验证。相关论文在指定测试集与计算预算下报告了<b>相对 torch.compile 的性能收益</b>（字节 CUDA Agent 在 KernelBench 上 96.8% 的用例跑赢 torch.compile，几何均值 2.11×
 <small class="cite"><span class="src">[CUDA Agent, ByteDance Seed × 清华 AIR, arXiv:2602.24286, 2026-02-27]</span>
 原文：“CUDA Agent achieves state-of-the-art results on KernelBench, delivering 100%, 100%, and 92% faster rate over torch.compile on KernelBench Level-1/2/3 splits.” 译：在 KernelBench 三个难度级上，分别有 100%/100%/92% 的用例快于 torch.compile。</small>），
 而以 ZCode 为代表的编码 Agent 配上一份<b>操作手册（AGENTS.md）+ 基准脚本 + 质量门</b>，可以尝试形成免目标模型训练的调优闭环；可靠性与收益仍需在指定模型、硬件、预算及质量约束下验证，本文是可执行方案而非作者已完成的通用实跑结论：
 <b>度量 → 画像 → 假设 → A/B 验证 → 端到端质量门 → 沉淀报告</b>。<br><br>
 本文给出：(1) 六层技术地图与 2024–2026 最新动态（含 vLLM-Omni 0.28 / SGLang v0.5.22 / TensorRT-LLM 1.3 / Dynamo 1.5 / FlashInfer v0.7 的版本事实，截至 2026-10-30）；
-(2) Agent 自动优化三条研究线 + 三个血泪教训；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>（目标与基线 → 三层诊断 → 处方循环 → 收口），
+(2) Agent 自动优化三条研究线 + 三个常见问题；(3) 以 <b>MiniMax-H3</b>（2026-08 发布的全模态生成模型，vLLM-Omni 运行）为例的 <b>四站式优化流程</b>（目标与基线 → 三层诊断 → 处方循环 → 收口），
 每一步都有动机、可直接复制的命令、示例输出与判读规则、明确的反馈信号与阈值，并以官方生产博客的系统级优化（无损 1.445×、DLO/FP8/SageAttention 各 lane 数字）为量级锚点；
 GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路径）分别落地。
 配套脚手架 <code>zcode-autotune/</code>（AGENTS.md 自动模式 + RUNBOOK.md 人在回路手册 + bench/搜索/质量门脚本）。<b>同一份规程，ZCode 能自动跑，人也能照着一步步走</b>。
 </div>
 
-<h2 id="s1"><span class="no">1.</span>为什么不动权重也能加速：给本科生的原理课</h2>
+<h2 id="s1"><span class="no">1</span>为什么不动权重也能加速：原理与成本</h2>
 <p>“Training-free（免训练）推理优化”指的是<b>无需额外训练目标模型；量化仍可改变权重数值表示，草稿或优化 Agent 自身也可能经过训练</b>，只改变模型运行时的“环境”：执行哪个算子、数据存哪、按什么顺序算、用什么精度算，来降低延迟和显存、提高吞吐。为什么这能奏效？因为训练得到的权重只决定了“算什么”，而<b>“怎么算”存在巨大的浪费</b>。</p>
 
 <h3 id="s1-1">1.1 一分钟硬件经济课：卡在哪</h3>
@@ -238,7 +237,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
   <li><b>三段流水线</b>：文本编码器（一次）→ DiT 去噪循环（几十步）→ VAE 解码（一次），三段瓶颈特征完全不同（LLM 式 memory-bound / compute-bound / 高分辨率卷积），必须分段画像、分段下药。</li>
 </ul>
 
-<h2 id="s2"><span class="no">2.</span>技术地图与 2024–2026 最新动态（六层栈）</h2>
+<h2 id="s2"><span class="no">2</span>技术地图与 2024–2026 最新动态（六层栈）</h2>
 <p>下面按“离硬件远近”分六层梳理。<span class="tag">★</span>=本文重点。</p>
 
 <h3 id="s2-1">L1 服务与调度层：引擎大战进入“PD 分离 + 全栈”时代</h3>
@@ -275,7 +274,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
   <li>训练-free 方向：中科大的稀疏自投机（“A Sparse Glimpse of the Whole”，2026-07，用模型自身稀疏视图起草）、渐进树起草（2026-07）等，不需要训练任何草稿头。</li>
 </ul>
 
-<h3 id="s2-5">L5 多模态生成专列：DiT 推理优化的“缓存革命”</h3>
+<h3 id="s2-5">L5 多模态生成：DiT 的缓存复用</h3>
 <p>2024 年 TeaCache/FasterCache/T-GATE 打开“步间缓存”方向后，2025–2026 已经演化出一个完整研究族（本地 <code>D:\Github\spec</code> 下的 TeaCache、Sparse-VideoGen、FastV、VisionZip 等仓库即是代表）：</p>
 <table>
   <tr><th>子方向</th><th>代表工作（时间）</th><th>一句话</th></tr>
@@ -289,10 +288,10 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 </table>
 <p>工程侧，<b>ParaAttention（2025）</b>把 cache/并行去噪做成可组合的 attention 后端，SGLang/vLLM 的 diffusion serving 原生吸收这些能力；NVIDIA 侧 vLLM 的“Diffusers/多模态生成 recipes”与 TensorRT-LLM 的多模态后端同途。H3 官方与社区（FastH3、VDN-H3 蒸馏变体，SGLang v0.5.20 起）同时走“蒸馏出少步版”的<b>训练路线</b>作对照；但那超出 training-free 范畴，本文只作基线参考。</p>
 
-<h3 id="s2-6">L6 ★ Agent 自动优化层：2026 年最陡的成长曲线</h3>
+<h3 id="s2-6">L6 Agent 自动优化：生成、搜索与验证</h3>
 <p>这是本文主题，单独成章（§3）。先给一个坐标系：<b>谁</b>（通用编码 Agent / 专门 RL 训出的模型 / 多 Agent 系统）×<b>优化什么</b>（kernel / 框架配置 / 编译器本身）×<b>怎么保证不坏</b>（验证门）。</p>
 
-<h2 id="s3"><span class="no">3.</span>Agent 自动优化：三条研究线与三个教训</h2>
+<h2 id="s3"><span class="no">3</span>Agent 自动优化：三条研究线与三个教训</h2>
 
 <h3 id="s3-1">3.1 三条研究线</h3>
 <h4>线 A：Agent 写 kernel（2024 萌芽 → 2026 爆发）</h4>
@@ -360,7 +359,7 @@ GPU（vLLM-Omni @ B300/H100）与 NPU（vLLM-Omni NPU 后端 + MindIE-SD 双路�
 <div class="warn"><b>教训 3：别跟厂商库硬碰。</b>KernelOPT 的 85 个回退案例中 61 个（约 72%）源于对 cuBLAS/cuDNN 已近峰值的算子强行重写。
 <br><b>对流程的推论：</b>先 profile 找“真热点且可优化”的部分（Inductor 生成物、调度、缓存、精度），把重写算子放在最后且只对 Top-3 热点。</div>
 
-<h2 id="s4"><span class="no">4.</span>案例方案：MiniMax-H3 × ZCode 自动调优（官方基准＋待执行流程）</h2>
+<h2 id="s4"><span class="no">4</span>案例方案：MiniMax-H3 × ZCode 自动调优（官方基准＋待执行流程）</h2>
 
 <h3 id="s4-1">4.1 H3 架构与 vLLM-Omni 运行形态（v2 勘误与深化）</h3>
 <div class="warn"><b>v2 勘误：</b>本文 v1 以 SGLang 作为 H3 的主运行框架示例，不准确。H3 的 <b>vLLM 系运行框架是 vLLM-Omni</b>（vllm-project 官方，2025-11 首发，<code>vllm serve --omni</code>）：0.26.0（2026-08）起 day-0 支持 H3 视频+音频联合生成，<b>0.28.0（2026-08）宣布 H3 在 GPU 与 NPU 上生产就绪</b>；架构是“阶段图（stage-graph）+ 各阶段流水重叠 + 基于 OmniConnector 的全分解”。
@@ -418,7 +417,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <tr><td>单步均匀且步数多、允许有损</td><td>—</td><td>步间缓存三点标定（0.05/0.08/0.12，取过门最高加速点）</td></tr>
   <tr><td>以上都吃完仍有单个非厂商库算子 &gt;15%</td><td>—</td><td>自写 kernel（最后；端到端 ≥1.03× 门收口）</td></tr>
 </table>
-<p>这套流程不是凭空设计的：分层决策的顺序（先场景与框架、后算法与结构、最后才是 kernel 精装修）承自八层推理优化决策框架；闭环的工程细节（warmup 剔除、3% 噪声线、阈值触发表、唯一支持矩阵、产物归档）借鉴 MindIE-SD 的 <code>.agents</code> 技能体系；处方的量级预期则以 vLLM-Omni 官方博客的实测数字为锚。三者在这里被重新组织成一个东西：<b>一个能同时被 Agent 执行和被人照着走的操作规程</b>（配套 <code>zcode-autotune/</code>：AGENTS.md 给 ZCode，RUNBOOK.md 给人，§4.5 详述双模式）。
+<p>这套流程参考了三类已有实践：分层决策的顺序（先场景与框架、后算法与结构、最后才是 kernel 优化）承自八层推理优化决策框架；闭环的工程细节（warmup 剔除、3% 噪声线、阈值触发表、唯一支持矩阵、产物归档）借鉴 MindIE-SD 的 <code>.agents</code> 技能体系；处方的量级预期则以 vLLM-Omni 官方博客的实测数字为锚。三者在这里被重新组织成一个东西：<b>一个能同时被 Agent 执行和被人照着走的操作规程</b>（配套 <code>zcode-autotune/</code>：AGENTS.md 给 ZCode，RUNBOOK.md 给人，§4.5 详述双模式）。
 <small class="cite"><span class="src">[Obsidian Vault《Notion/AI Infra/推理优化/推理优化》（八层框架）；MindIE-SD .agents（gitcode.com/Ascend/MindIE-SD/tree/master/.agents, 2025-11）；vLLM Blog: MiniMax H3 on vLLM-Omni, 2026-09-01]</span>八层框架原话（节译）："自上而下定方向，自下而上抠细节，至少走两遍；反模式：跳过上面几层直接抠 kernel。" MindIE-SD 停止条件（节译）："差距 &lt;3% 视为噪声，不宣称有效。"</small></p>
 
 <h3 id="s4-3">4.3 GPU 实战（vLLM-Omni @ 8×B300/H100）：四站走一遍是什么样</h3>
@@ -469,7 +468,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <li><b>为什么“每并入两三副药要回诊断快扫”</b>：每副药都改变时间分布，注意力压下去后矩阵乘就是新的头号。打地鼠要有节奏控制，否则处方清单会过期。</li>
 </ol>
 
-<h2 id="s5"><span class="no">5.</span>GPU vs NPU 对照总表</h2>
+<h2 id="s5"><span class="no">5</span>GPU vs NPU 对照总表</h2>
 <table>
   <tr><th>维度</th><th>GPU（NVIDIA 栈）</th><th>NPU（昇腾栈）</th></tr>
   <tr><td>推理引擎</td><td><b>vLLM-Omni 0.28（H3 主轴）</b> / SGLang v0.5.22 / vLLM v0.32 / TensorRT-LLM 1.3 + Dynamo 1.5（含 vLLM-Omni backend）</td><td>vLLM-Omni NPU 后端（经 vllm-ascend/torch_npu/CANN）+ MindIE/MindIE Turbo（LLM）、MindIE-SD（DiT/视频）</td></tr>
@@ -488,7 +487,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 
 <section id="research-updates" class="note" data-research-updates><h2>更新附录 · 发布与论文记录</h2><h3>⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
 <ul>
-<li><b>Evolving Agent Teams</b>（UC Berkeley，10-27，arXiv:2610.36848）：监督者 agent 诊断平台期并动态重构团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 <b>1.21× 均值加速（追加预算实验）</b>（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）；KDA prefill 在 AMD MI350X 上 3.01×（vs vLLM 生产 HIP kernel）、B200 上 3.44×（vs FlashKDA）。“固定团队会卡死”有了第一个量化证据。</li>
+<li><b>Evolving Agent Teams</b>（UC Berkeley，10-27，arXiv:2610.36848）：监督者 agent 诊断平台期并动态重构团队，从零写出达生产版 FlashInfer MLA paged decode kernel 的 <b>1.21× 均值加速（追加预算实验）</b>（47 个 DeepSeek-V3 生产负载赢 36 个；匹配预算实验为约 0.74× 对 Claude Code 0.51×；1.21× 属追加预算，不可并作同预算结果）；KDA prefill 在 AMD MI350X 上 3.01×（vs vLLM 生产 HIP kernel）、B200 上 3.44×（vs FlashKDA）。该结果表明团队配置会影响搜索效果，但仍需区分计算预算。</li>
 <li><b>ATRL：Compaction-Aware RL for Ascend Triton</b>（华为，10-09，arXiv:2610.23950）：首个面向昇腾 NPU Triton 的 agentic RL：Qwen3.6-35B 后训练，KernelBench（昇腾实测）Pass@1 相对 GRPO <b>66%→73%（L1）、19%→35%（L2）</b>，配昇腾知识库 + 结构化轨迹压缩检查点。</li>
 <li><b>TensorRT 11.1 Global Performance Tuner</b>（NVIDIA 开发者博客两部曲，10-23）：200+ 编译旋钮显式化为可搜索 build routes，accuracy 作为约束过滤候选、端到端性能作为排序，等于厂商版“自动调优 + 精度门”。</li>
 <li><b>vLLM-TorchTPU / SGLang-TorchTPU</b>（Google ×Inferact ×RadixArk，10-20）：原生 PyTorch TPU 后端 + 开源 C++ 库 TPU Sync（直读设备缓冲做 KV 迁移、无 host staging）。“多后端 serving”再添一极，自动调优的目标矩阵随之扩大。</li>
@@ -496,7 +495,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 </ul>
 
 </section>
-<h2 id="s6"><span class="no">6.</span>参考文献（按出现顺序）</h2>
+<h2 id="s6"><span class="no">6</span>参考文献（按出现顺序）</h2>
 <ol class="ref-list">
   <li>Orca: A Distributed Serving System for Transformer-Based Generative Models. <i>OSDI 2022</i>.（continuous batching）</li>
   <li>Kwon et al. Efficient Memory Management for LLM Serving with PagedAttention. <i>SOSP 2023</i>.（vLLM）</li>
@@ -598,7 +597,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -750,6 +750,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -786,7 +787,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -943,7 +944,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

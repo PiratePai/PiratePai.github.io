@@ -153,7 +153,7 @@
 <nav class="toc">
   <div class="in">
     <a href="#ch0">导读</a>
-     <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
+     <a href="#hl" style="color:#41d1a7;font-weight:600">近期进展</a>
     <a href="#ch1">① 为什么并行</a>
     <a href="#ch2">② 预备知识</a>
     <a href="#ch3">③ 数据并行</a>
@@ -173,9 +173,9 @@
 <div class="wrap">
 
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先画张量归属和依赖，再数通信</b><p><a href="#ch2">集合通信与硬件</a> → <a href="#ch3">DP / 分片</a> → <a href="#ch4">TP / SP</a> → <a href="#ch5">流水线</a> → <a href="#ch6">专家</a> → <a href="#ch7">上下文</a> → <a href="#ch8">组合</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>AllGather 把分片拼齐，ReduceScatter 把求和结果分片，AllReduce 等于二者组合，All-to-All 按目标交换分片。TP 切矩阵，PP 切层；SP 在 TP 组内切局部激活，CP 在注意力中切上下文，二者并非同义词。先定义 b 为 microbatch、s 为长度、h 为隐藏维、t 为 TP 度，再读激活公式。</p></div>
+<div class="note"><b>从这里读起 · 先画张量归属和依赖，再数通信</b><p><a href="#ch2">集合通信与硬件</a> → <a href="#ch3">DP / 分片</a> → <a href="#ch4">TP / SP</a> → <a href="#ch5">流水线</a> → <a href="#ch6">专家</a> → <a href="#ch7">上下文</a> → <a href="#ch8">组合</a>。相关发布记录见“近期进展”。</p><p>AllGather 把分片拼齐，ReduceScatter 把求和结果分片，AllReduce 等于二者组合，All-to-All 按目标交换分片。TP 切矩阵，PP 切层；SP 在 TP 组内切局部激活，CP 在注意力中切上下文，二者并非同义词。先定义 b 为 microbatch、s 为长度、h 为隐藏维、t 为 TP 度，再读激活公式。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>GPipe p=8 段、m=16 微批、各段耗时相同时：气泡/有效时间=7/16，气泡/总时间=7/(16+7)≈30.4%。两种分母不能写在一条等式里。双卡行切 GEMM 的部分输出必须规约后才能送入同一张量的 LayerNorm。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>容量与吞吐</td><td>ZeRO/FSDP 分片状态；DP 扩展请求或样本</td><td>参数 AG 有前向依赖，不能全藏在反向</td></tr><tr><td>精确注意力</td><td>FlashAttention 避免物化完整矩阵，Ring 分布块</td><td>旧激活公式含注意力矩阵时不能直接套新 kernel</td></tr><tr><td>动态专家</td><td>MegaBlocks 等 dropless 执行连接路由与 kernel</td><td>负载、网络与显存要联合优化</td></tr></tbody></table></div>
@@ -208,7 +208,7 @@
 </table>
 </section>
 <section id="ch1">
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -224,7 +224,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EP 进推理成生产标配</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 开源：EP+EPLB 支撑生产服务，SM100 与昇腾 950 双后端；开源版不含 KV cache 池化与 P/D 分离（README 明示待补全）。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>EP 进推理成生产标配</b><span class="hl-date">10-20 · DeepSeek</span></div><p>DeepInfer 开源：EP+EPLB 支撑生产服务，SM100 与昇腾 950 双后端；开源版不含 KV cache 池化与 P/D 分离（README 明示待补全）。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>PyTorch 2.15 定档 NCCL2</b><span class="hl-date">10-28 · PyTorch</span></div><p>NCCL2 成默认后端 + NIXL 单边传输（可 CUDA graph 捕获）；Apple Silicon MoE 解码 1.32–1.34×。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>INC-MoE：EP 通信进交换机</b><span class="hl-date">10-26 · 华为</span></div><p>dispatch/combine 下沉网内 AG/RS，模拟四节点评估（第五个加速器模拟 INC 交换机）中 prefill TTFT −20~33%、吞吐 +25~50%，尚非真实交换机部署验证，vLLM 即插即用。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>通信库跨厂商互认</b><span class="hl-date">10-20 · Moonshot/DeepSeek</span></div><p>MoonEP 与 DeepEP V2.5 原语互相成就，动态冗余专家成 EP 新范式。</p><a class="hl-link" href="#ch10">→ 跳到详情</a></div></div></div></details>
@@ -424,7 +424,7 @@ dist.all_reduce(tensor_to_allreduce, group=self.dp_process_group)</pre>
 ### streams used for overlapping computation with communication
 self.reduce_and_partitions_stream = (
     ... get_accelerator().Stream() if overlap_comm else ...)</pre>
-<p>两个细节值得注意:(1)<b>桶(bucket)</b>是通算掩盖的第一个经典技巧:把"每层一小笔通信"合并成"一大笔",摊薄每次通信的固定延迟 α;(2)ZeRO-3 用的是"参数在要用前一刻才 all-gather、用完立即丢弃"的<strong>按需物化</strong>思想,这与后面所有"切分+临时聚合"的方案(EP 的 token、CP 的 KV)一脉相承。</p>
+<p>两个实现细节:(1)<b>桶(bucket)</b>是通算掩盖的第一个经典技巧:把"每层一小笔通信"合并成"一大笔",摊薄每次通信的固定延迟 α;(2)ZeRO-3 用的是"参数在要用前一刻才 all-gather、用完立即丢弃"的<strong>按需物化</strong>思想,这与后面所有"切分+临时聚合"的方案(EP 的 token、CP 的 KV)一脉相承。</p>
 
 <h3>3.4 FSDP:ZeRO-3 思想的官方化(2023-04 论文)</h3>
 <p>PyTorch 2.x 把 ZeRO-3 的思想吸收为官方 API FSDP(Fully Sharded Data Parallel):把参数、梯度、优化器状态全部按 DP 组切片,前向/反向到某个子模块时先 all-gather 参数,算完立即释放。其论文(VLDB 2023)报告了 1T 参数模型的训练,并总结了混合分片、CPU 卸载等生产经验<sup class="ref">[<a href="#refs">Zhao et al., arXiv 2304.11277, 2023-04</a>]</sup>。今天 HuggingFace Trainer、torchtitan 等默认路径都是 FSDP;DeepSpeed 与 FSDP 的取舍本质上是"功能丰富度 vs 框架耦合度"的取舍。</p>
@@ -1330,7 +1330,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1482,6 +1483,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1518,7 +1520,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1675,7 +1677,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

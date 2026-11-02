@@ -164,9 +164,9 @@
 <nav class="toc">
   <b>目录</b>
   <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
     <li><a href="#why">引子：三个让人困惑的现象，指向同一个答案</a></li>
-    <li><a href="#prereq">预备知识：本科生也能懂的"循环深度"原理</a></li>
+    <li><a href="#prereq">预备知识："循环深度"原理</a></li>
     <li><a href="#timeline">发展时间线一览（2016–2026）</a></li>
     <li><a href="#phase1">阶段一（2016–2022）：从 ACT 到平衡点的思想萌芽</a></li>
     <li><a href="#phase2">阶段二（2023–2024）：理论与可编程性，循环 Transformer 能"算"什么</a></li>
@@ -182,16 +182,16 @@
 </nav>
 
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 区分深度循环与序列中的潜步骤</b><p><a href="#prereq">状态与共享</a> → <a href="#phase1">停止与平衡点</a> → <a href="#phase2">训练与理论</a> → <a href="#phase3">Huginn / Coconut</a> → <a href="#code-huginn">代码</a> → <a href="#ledger">收益与成本</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>深度循环在同一位置反复应用共享块；COCONUT 在序列中加入潜位置，用上一位置隐藏状态作下一输入；自适应停止决定算多久，DEQ 则用求解器找不动点。它们都增加/分配计算，但不是同一架构。</p></div>
+<div class="note"><b>从这里读起 · 区分深度循环与序列中的潜步骤</b><p><a href="#prereq">状态与共享</a> → <a href="#phase1">停止与平衡点</a> → <a href="#phase2">训练与理论</a> → <a href="#phase3">Huginn / Coconut</a> → <a href="#code-huginn">代码</a> → <a href="#ledger">收益与成本</a>。相关发布记录见“近期进展”。</p><p>深度循环在同一位置反复应用共享块；COCONUT 在序列中加入潜位置，用上一位置隐藏状态作下一输入；自适应停止决定算多久，DEQ 则用求解器找不动点。它们都增加/分配计算，但不是同一架构。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>k=4 层循环 L=8 次，核心计算深度是 32 次层应用，独立权重仍只对应 4 层；它通常有 8 轮依赖，不能说等价于任意 32 层独立参数模型，也不能说推理延迟免费。Coconut 的 n 个潜步骤仍需 n+1 次顺序前向。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>参数共享</td><td>ALBERT 提供跨层共享预训练的历史对照</td><td>参数效率不等于 FLOPs 或时延效率</td></tr><tr><td>额外位置</td><td>Pause Tokens 检验额外计算位置，iCoT 逐步内化文字链</td><td>区分额外算力、连续表示与训练课程的贡献</td></tr><tr><td>训练与停止</td><td>Huginn 训练就采样深度并截断反传</td><td>噪声未见帮助；状态变化小未必答案正确，停止需校准</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>固定训练 token 与训练 FLOPs，再比较推理 FLOPs、串行轮数、KV/状态内存和任务质量；显式说明是否用了文字 CoT 数据。理论模拟结论还需检查额外宽度、头数和占位计算位置。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Zhenzhong Lan  et al.</b> <i>ALBERT: A Lite BERT for Self-supervised Learning of Language Representations</i>（ALBERT）；arXiv:1909.11942，v1 2019-09-26。<a href="https://arxiv.org/abs/1909.11942">原始论文与版本记录</a></li><li><b>Sachin Goyal  et al.</b> <i>Think before you speak: Training Language Models With Pause Tokens</i>（Pause Tokens）；arXiv:2310.02226，v1 2023-10-03。<a href="https://arxiv.org/abs/2310.02226">原始论文与版本记录</a></li><li><b>Yuntian Deng  et al.</b> <i>From Explicit CoT to Implicit CoT: Learning to Internalize CoT Step by Step</i>（iCoT）；arXiv:2405.14838，v1 2024-05-23。<a href="https://arxiv.org/abs/2405.14838">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -207,7 +207,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>LoopFold 循环折叠并行</b><span class="hl-date">10-26 · 上交+中山</span></div><p>5 个串行阶段替代 9 环朴素展开，端到端延迟 −46%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>LoopFold 循环折叠并行</b><span class="hl-date">10-26 · 上交+中山</span></div><p>5 个串行阶段替代 9 环朴素展开，端到端延迟 −46%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LSTM-Style 共享 KV</b><span class="hl-date">10-23 · Kirsch</span></div><p>同 FLOPs 参数省 40.4%，持久 KV 缓存 15 份→4 份。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Looped UDLM</b><span class="hl-date">10-21 · MBZUAI 等</span></div><p>同 NLL 训练 FLOPs 省 2.7–3.3×，自适应循环再省 26–35% 环数。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>PAR 进度对齐循环</b><span class="hl-date">10-20</span></div><p>swap-S5 任务 16× 长度外推 95.5%（RLT 55.7%、CoT 0.8%）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
@@ -230,9 +230,9 @@
   <span class="src">— Awesome-Loop-Models 仓库对"循环模型"的范围界定，Huang et al., GitHub, 2026-04-24 发布 [36]</span>
 </blockquote>
 
-<p>本文沿着这条线走完全程：先给本科生补齐原理（第 2 节），再按四个阶段梳理 2016–2026 的发展史（第 3–7 节），然后用两份开源代码把 Huginn 和 COCONUT 拆开看（第 8–9 节），最后盘点收益代价、2026 年最新进展与未来方向（第 10–12 节）。</p>
+<p>本文沿着这条线走完全程：先介绍循环深度的基本原理（第 2 节），再按四个阶段梳理 2016–2026 的发展史（第 3–7 节），然后用两份开源代码把 Huginn 和 COCONUT 拆开看（第 8–9 节），最后盘点收益代价、2026 年最新进展与未来方向（第 10–12 节）。</p>
 
-<h2 id="prereq">2 · 预备知识：本科生也能懂的"循环深度"原理</h2>
+<h2 id="prereq">2 · 预备知识："循环深度"原理</h2>
 
 <h3>2.1 Transformer 的"深度"到底买到了什么</h3>
 <p>一个标准 Transformer 语言模型 = 词嵌入层 + <code>N</code> 个结构相同但<b>权重各自独立</b>的层（每层 = 自注意力 + 前馈网络）+ 输出头。数据流是：<code>x₀ = Embed(词)</code>，然后 <code>xₗ = Blockₗ(xₗ₋₁)</code>，一层层堆上去。<b>深度 N 是"顺序计算步数"</b>：第 3 层能利用的任何信息，都必须已经被前 2 层写进表示里。</p>
@@ -370,7 +370,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
   <li><span class="t">2026 下半年</span> · <b>全面扩散</b>：循环结构进入视觉生成（ELT<span class="cite">[38]</span>）、VAE（LoopVAE<span class="cite">[39]</span>）、推荐（RecRec）、世界模型（Looped World Models<span class="cite">[59]</span>）、扩散语言模型（Thinking with Looped Flows<span class="cite">[35]</span>）、图像恢复与解混（i-DEQ<span class="cite">[55]</span>、DEQ 解混<span class="cite">[58]</span>，见 11.5 专题）；理论工具进入动力系统深处（分形收敛盆<span class="cite">[35]</span>、Jacobian 视角）；SMELT 把 MoE×循环缩放定律合流<span class="cite">[32]</span>。专用论文清单突破 200 篇<span class="cite">[36]</span>。</li>
 </ul>
 
-<div class="callout"><b>一句话概括四个阶段</b>：① 2016–2022 想清楚"能不能循环"（ACT/UT/DEQ/PonderNet）；② 2023–2024 想清楚"循环有什么用"（可编程性、参数效率、学习算法）；③ 2024 末–2025 想清楚"循环能推理"（潜空间思考、从零预训练、小模型打大模型）；④ 2025 末–2026 想清楚"循环能落地"（工业预训练、并行化、缩放定律、全模态扩散）。</div>
+<div class="callout"><b>主要贡献四个阶段</b>：① 2016–2022 想清楚"能不能循环"（ACT/UT/DEQ/PonderNet）；② 2023–2024 想清楚"循环有什么用"（可编程性、参数效率、学习算法）；③ 2024 末–2025 想清楚"循环能推理"（潜空间思考、从零预训练、小模型打大模型）；④ 2025 末–2026 想清楚"循环能落地"（工业预训练、并行化、缩放定律、全模态扩散）。</div>
 <h2 id="phase1">4 · 阶段一（2016–2022）：从 ACT 到平衡点的思想萌芽</h2>
 
 <h3>4.1 ACT（2016）：让网络学会"想多久"</h3>
@@ -440,7 +440,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
 
 <h3>6.2 COCONUT（2024-12，Meta）：连续思维</h3>
 <p>Hao 等（Meta，田渊栋组）的 COCONUT（Chain of Continuous Thought）改动小得惊人：在输入序列里插入若干 <code>&lt;latent&gt;</code> 占位 token，模型跑到这个位置时，<b>不解码、不采样</b>，而是把前一个位置的<b>最后隐藏状态直接回填</b>为这个位置的输入嵌入，继续前向（代码见第 9 节）。也就是说：<b>思考在隐藏状态的连续空间里进行，每步"潜思维"的宽度是整个隐藏维度（GPT-2 下是数 千维浮点），而不是一个词表上的离散选择</b>。</p>
-<p>两个设计值得注意：</p>
+<p>两个设计分别是：</p>
 <ul>
   <li><b>课程训练</b>：先用完整 CoT 训练；然后逐步把 CoT 的前 k 步"替换"成 k 个 latent 位置重训，k 从 1 慢慢加大。模型从"用语言想"平滑过渡到"用潜空间想"，而不是硬切换。</li>
   <li><b>BFS 直觉</b>：语言 CoT 每生成一个词就是一次硬承诺（DFS），走错一步无法回头；而一个连续向量可以<b>同时编码多个候选下一步的叠加</b>，作者用 ProntoQA 等逻辑推理任务上的实验支持这一点：COCONUT 在需要大量搜索的规划任务上超过 CoT，且思考 token 数少于 CoT<span class="cite">[11]</span>。</li>
@@ -552,7 +552,7 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
 <p class="tablecap">表 1 · recurrent-pretraining 仓库导览。Huginn-3.5B 在注册表中的型号名为 <code>nebel-raven-3.5b</code>，评测时用 <code>mean_recurrence=32</code> 复现论文数字<span class="cite">[45]</span>。</p>
 
 <h3>8.2 三明治结构与循环本体（model_dynamic.py:962-1247）</h3>
-<p class="codecap"><b>代码 1</b> · 模型的骨架：三个部件各司其职，核心块被反复调用。为本科生注释版：</p>
+<p class="codecap"><b>代码 1</b> · 模型的骨架：三个部件各司其职，核心块被反复调用。以下注释说明各部件的作用：</p>
 <pre><code>class RecurrentGPT(torch.nn.Module):
     def __init__(self, config, objective, ...):
         # ① prelude：进入锚层 —— 把 token 嵌入变成"值得思考的初始状态"
@@ -771,7 +771,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 </blockquote>
 
 <h2 id="future">12 · 未来发展方向</h2>
-<p class="lead">综合论文脉络与 2026 年的动态，六个方向最值得关注（★ = 未来 1–2 年最可能出成果）。</p>
+<p class="lead">以下六个方向涉及循环模型的扩展与部署问题。</p>
 
 <h3>方向一 ★：循环缩放定律的最终形态（"第三轴"的确立）</h3>
 <p>参数、数据之后，<b>循环深度能否构成一条平滑、可预测、可跨尺寸迁移的缩放轴</b>？Parcae 的 isoFLOPs 曲面、等深度定律、SMELT 的 MoE×循环计算匹配定律已经拼出草图<span class="cite">[23][24][32]</span>，但关键空白仍在：<b>最优循环数与模型尺寸/数据量的联合定标</b>、<b>循环外推的失效边界预测</b>（何时该加参数而不是加循环）、<b>多轮循环的信息瓶颈理论</b>（压缩态 vs 全序列态的内存分离已给出第一定理<span class="cite">[34]</span>）。谁先给出"Chinchilla for Loops"，谁就定义下一代模型的训练预算表。<span style="color:#aeb4bd">（2026-10-16 注：Meta 的 Loop Scaling Laws<span class="cite">[68]</span>已给出第一版：循环映射有界且上界随稀疏度抬高，但"外推失效边界预测"与"多轮信息瓶颈理论"仍空白。）</span></p>
@@ -801,7 +801,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <h3>11.1 架构与规模化</h3>
 <table>
-  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><th>工作</th><th>时间</th><th>主要贡献</th></tr>
   <tr><td><b>Ouro</b> 1.4B/2.6B<span class="cite">[17]</span></td><td>2025-10</td><td>首批把推理内置进预训练的循环 LM：7.7T token，深度分配熵正则，对标最高 12B 模型。</td></tr>
   <tr><td><b>Parcae</b><span class="cite">[23]</span></td><td>2026-04</td><td>注入谱范数约束的稳定循环 LM + isoFLOPs 型训练/测试缩放定律（ICLR 2026 LIT Workshop）。</td></tr>
   <tr><td><b>等深度缩放定律</b><span class="cite">[24]</span></td><td>2026-04</td><td>直接测量"一次循环值多少参数 / 多少训练算力"的兑换率。</td></tr>
@@ -813,7 +813,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <h3>11.2 推理系统与效率</h3>
 <table>
-  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><th>工作</th><th>时间</th><th>主要贡献</th></tr>
   <tr><td><b>并行采样器</b><span class="cite">[19]</span></td><td>2025-10</td><td>扩散强制式调度：生成新 token 同时并行精炼旧 token 的潜状态，对 Huginn-3.5B 免训练最高 5× 加速（ICML 2026）。</td></tr>
   <tr><td><b>PLT</b><span class="cite">[18]</span></td><td>2025-10</td><td>跨循环并行 + KV 共享 + 门控滑窗注意力：循环模型精度、标准 Transformer 延迟。</td></tr>
   <tr><td><b>MELT</b><span class="cite">[30]</span></td><td>2026-05</td><td>每层固定尺寸 KV 缓存跨循环共享（门控更新），循环深度不再吃显存；改造 Ouro 验证。</td></tr>
@@ -825,7 +825,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <h3>11.3 理解、可解释与训练算法</h3>
 <table>
-  <tr><th>工作</th><th>时间</th><th>一句话贡献</th></tr>
+  <tr><th>工作</th><th>时间</th><th>主要贡献</th></tr>
   <tr><td><b>机制分析</b><span class="cite">[25]</span></td><td>2026-04</td><td>多个循环 LM 逼近"逐层特定的循环不动点"，循环块复现前馈式推理阶段——循环不是黑魔法，是可解剖的动力系统。</td></tr>
   <tr><td><b>潜思维解码</b><span class="cite">[26]</span></td><td>2025-07</td><td>对深度循环模型探测"潜思维链"结构：证据有限、可解释性随深度变化（COLM 2025 Workshop）——给热潮泼冷水的健康声音。</td></tr>
   <tr><td><b>分形收敛盆</b><span class="cite">[35]</span></td><td>2026-09</td><td>把循环推理器当动力系统研究：难题产生分形结构的收敛时间盆，鞍点介导的瞬态混沌。</td></tr>
@@ -892,7 +892,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <li><b>LoopVL：循环视觉智能</b>（人大+百度+上交等，arXiv:2609.38426，2026-09-29）。第一篇系统回答"循环 Transformer 能否扩展到 VLM"：Module-Loop（模块内循环）+ Model-Loop（模型级循环）迭代更新统一的视觉-语言状态，优于同尺寸及更大的非循环模型<span class="cite">[65]</span>。</li>
 <li><b>MeSH：记忆即状态高速通路</b>（阿里，arXiv:2510.07739，2025-10-09，ICLR 2026，补录）。为递归 Transformer 加显式记忆缓冲 + 轻量路由器，让不同循环圈走不同的"状态高速通路"：1.4B 尺度平均下游准确率 +1.06% 超过更大的非递归对照、非嵌入参数少 33%，是与 MELT（显存轴）正交的能力轴<span class="cite">[66]</span>。</li>
 </ul>
-<p>同期一句话动态：上万圈外推的 Loop-Native Attention Residuals（2610.11570）、循环模型 CoT 可监控性研究（2610.02741，直接回应第 12.4 节）、vLLM 分页 KV 实现按深度缓存复用（2610.09013，循环模型推理系统化）、Looped Actor（2609.37432，循环深度进 RL）。GPT-6 Astra 发布后的架构归因仍无官方口径，循环深度假说还在等下一个可审计的锚点。</p>
+<p>同期同期工作：上万圈外推的 Loop-Native Attention Residuals（2610.11570）、循环模型 CoT 可监控性研究（2610.02741，直接回应第 12.4 节）、vLLM 分页 KV 实现按深度缓存复用（2610.09013，循环模型推理系统化）、Looped Actor（2609.37432，循环深度进 RL）。GPT-6 Astra 发布后的架构归因仍无官方口径，循环深度假说还在等下一个可审计的锚点。</p>
 
 <h3>11.7 业界动向小结</h3>
 <ul>
@@ -1090,7 +1090,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1242,6 +1243,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1278,7 +1280,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1435,7 +1437,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

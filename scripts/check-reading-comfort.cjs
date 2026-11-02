@@ -47,8 +47,12 @@ const out=process.env.READER_QA_DIR;
               if(el.tagName==='P'&&text.length>60&&!el.closest('blockquote,.quote,.citebox,.q,figcaption,td,th,.codecap,.cap,footer,.footer,.fig,.diagram')&&parseFloat(css.fontSize)<15.5)smallProse.push(text.slice(0,60));
               checked++;
             }
+            const numberIssues=[...document.querySelectorAll('.reader-content h2 .no,.reader-content h2 .num')].filter(n=>{
+              const number=style(n),heading=style(n.closest('h2'));
+              return number.display!=='inline'||number.verticalAlign!=='baseline'||number.fontSize!==heading.fontSize||parseFloat(number.borderTopWidth)!==0;
+            }).map(n=>n.closest('h2').textContent.trim());
             const toolbar=[...document.querySelectorAll('.reader-toolbar button,.reader-toolbar a')].filter(n=>n.getClientRects().length).map(n=>({left:n.getBoundingClientRect().left,right:n.getBoundingClientRect().right}));
-            return {theme:document.documentElement.dataset.readerTheme,checked,lowContrast:lowContrast.slice(0,25),lowContrastCount:lowContrast.length,smallProse,overflow:document.documentElement.scrollWidth>innerWidth+2,toolbarFits:toolbar.every(r=>r.left>=0&&r.right<=innerWidth+1),contentWidth:document.querySelector('.reader-content').clientWidth};
+            return {theme:document.documentElement.dataset.readerTheme,checked,lowContrast:lowContrast.slice(0,25),lowContrastCount:lowContrast.length,smallProse,numberIssues,overflow:document.documentElement.scrollWidth>innerWidth+2,toolbarFits:toolbar.every(r=>r.left>=0&&r.right<=innerWidth+1),contentWidth:document.querySelector('.reader-content').clientWidth};
           });
           results.push({file,width,...audit});
           console.log(JSON.stringify({file,width,...audit}));
@@ -72,7 +76,7 @@ const out=process.env.READER_QA_DIR;
       await context.close();
     }
     if(out)fs.writeFileSync(path.join(out,'comfort-results.json'),JSON.stringify(results,null,2));
-    const failures=results.filter(r=>r.lowContrastCount||r.smallProse.length||r.overflow||!r.toolbarFits);
+    const failures=results.filter(r=>r.lowContrastCount||r.smallProse.length||r.numberIssues.length||r.overflow||!r.toolbarFits);
     assert.deepEqual(failures,[], 'reading style failures (see report above)');
   } finally {await browser.close()}
 })().catch(e=>{console.error(e.message);process.exitCode=1});

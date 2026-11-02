@@ -236,9 +236,9 @@
 
 <!-- ================================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 沿 KV 的生成、复用与释放理解七条路线</b><p><a href="#s1">缓存账本</a> → <a href="#s3">结构与共享</a> → <a href="#s4">放在哪里</a> → <a href="#s5">哪些可以复用</a> → <a href="#s6">用多少位</a> → <a href="#s7">读哪些位置</a> → <a href="#s8">放到哪级存储</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>一条请求到达后先查前缀，命中块增引用、缺失部分分配新块；每步新增 KV，结束后释放或留作复用。结构压缩改每 token 的维度，量化改每元素字节，驱逐改保留内容，稀疏访问改本轮读取集合，卸载改驻留位置，误差与成本来源并不相同。</p></div>
+<div class="note"><b>从这里读起 · 沿 KV 的生成、复用与释放理解七条路线</b><p><a href="#s1">缓存账本</a> → <a href="#s3">结构与共享</a> → <a href="#s4">放在哪里</a> → <a href="#s5">哪些可以复用</a> → <a href="#s6">用多少位</a> → <a href="#s7">读哪些位置</a> → <a href="#s8">放到哪级存储</a>。相关发布记录见“近期进展”。</p><p>一条请求到达后先查前缀，命中块增引用、缺失部分分配新块；每步新增 KV，结束后释放或留作复用。结构压缩改每 token 的维度，量化改每元素字节，驱逐改保留内容，稀疏访问改本轮读取集合，卸载改驻留位置，误差与成本来源并不相同。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>B=1、N=4096、L=32、8 个 KV 头、头维 128、BF16：2×1×4096×32×8×128×2=512MiB。KV 变为 4-bit 的数据载荷理想约 128MiB，仍须另加 scale、零点、残差与对齐；这还不是模型总显存。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>共享/量化</td><td>减少存储字节</td><td>训练兼容与任务质量；MLA 可吸收投影，非必须展开历史 K/V</td></tr><tr><td>驱逐/动态选择</td><td>减少保留量或读取量</td><td>漏检关键证据；FastGen、DuoAttention 提供按头策略</td></tr><tr><td>卸载/预取</td><td>以 RAM 换 HBM</td><td>预测与传输关键路径；ShadowKV 联合低秩 key、value 卸载与稀疏读取</td></tr></tbody></table></div>
@@ -250,7 +250,7 @@
 <p>先用一张表建立全局地图。七条技术路线解决的是 KV Cache 的不同侧面，且<strong>优化目标互补、但组合须检验算法与实现兼容性</strong>。例如今天的生产系统常常同时使用 GQA/MLA（结构压缩）+ 分页管理 + 前缀缓存 + FP8 量化，而新一代模型再叠加混合线性注意力层。</p>
 
 <table>
-<tr><th style="width:110px">路线</th><th>一句话原理</th><th style="width:220px">代表工作</th><th>代价 / 风险</th></tr>
+<tr><th style="width:110px">路线</th><th>原理概要</th><th style="width:220px">代表工作</th><th>代价 / 风险</th></tr>
 <tr><td><b>结构压缩</b></td><td>改注意力结构，让每个 token 需要缓存的向量变少（共享 KV 头 / 低秩压缩 latent）</td><td>MQA (2019)、GQA (2023)、MLA (2024)、YOCO/CLA (2024)</td><td>需要训练或重训；MLA 与张量并行/存量生态兼容性差</td></tr>
 <tr><td><b>分页管理</b></td><td>借鉴操作系统虚拟内存，把连续 KV 切成固定块按需分配，消灭碎片</td><td>PagedAttention/vLLM (SOSP'23)、vLLM V1 (2025)</td><td>块表与不连续访存有少量开销（已被内核优化摊平）</td></tr>
 <tr><td><b>前缀复用</b></td><td>因果注意力下前缀 KV 与后缀无关 → 相同前缀的请求直接复用缓存</td><td>RadixAttention/SGLang (2023)、vLLM APC、Hydragen、CacheGen/CacheBlend</td><td>命中率依赖负载；跨机/跨引擎需要传输与一致性管理</td></tr>
@@ -272,7 +272,7 @@
 </div>
 
 <!-- ================================================================ -->
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -288,7 +288,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换：latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div></details>
@@ -507,7 +507,7 @@ class KVCacheManager:
         ...</code></pre>
 <p class="code-note">完整文件约千行，还包括：写时复制块收集（<code>take_kv_cache_block_copies</code>）、为外置缓存连接器（LMCache 等 KVConnector）保留的接口、混合模型（Mamba 状态 + 全注意力块）的分组对齐逻辑等。</p>
 
-<p>几个值得注意的工程细节：① 前缀缓存以<strong>块哈希</strong>为单位（token 序列 + 模型/LoRA 等命名空间信息一起哈希），命中即免 prefill；② 滑窗模型中"滑出窗口"的块会被立即回收（<code>remove_skipped_blocks</code>），这就是 3.3 节说的交替滑窗模型的 KV 管理方式；③ 2025 年后的 vLLM 已原生支持 Mamba/混合层：RNN 状态作为一种新的"块类型"参与同一套池子，这为第 9 节的混合架构铺平了系统侧道路。</p>
+<p>几个工程细节：① 前缀缓存以<strong>块哈希</strong>为单位（token 序列 + 模型/LoRA 等命名空间信息一起哈希），命中即免 prefill；② 滑窗模型中"滑出窗口"的块会被立即回收（<code>remove_skipped_blocks</code>），这就是 3.3 节说的交替滑窗模型的 KV 管理方式；③ 2025 年后的 vLLM 已原生支持 Mamba/混合层：RNN 状态作为一种新的"块类型"参与同一套池子，这为第 9 节的混合架构铺平了系统侧道路。</p>
 
 <!-- ================================================================ -->
 <!-- WIDGET:w3 KV Cache 分页管理 · kv-cache-survey.html -->
@@ -828,7 +828,7 @@ def dequant(q, scale, zero_point):
 <tr><td><b>SnapKV</b><sup class="c"><a href="#ref-33">[33]</a></sup></td><td>2024-04</td><td>prompt 末尾"观察窗"的注意力投票</td><td><b>prefill 后一次性压缩</b></td><td>针对"prompt 远长于输出"的真实负载；16K 输入下 3.6× 生成提速、8.2× 显存效率，单卡跑 380K 上下文</td></tr>
 <tr><td>PyramidKV / PyramidInfer<sup class="c"><a href="#ref-34">[34]</a></sup></td><td>2024-06</td><td>层间金字塔预算分配（浅层多留、深层少留）</td><td>prefill 后</td><td>观察到深层注意力本就更集中，预算不必层层层均分</td></tr>
 </table>
-<p>SnapKV 的洞察值得一句话：<b>模型在生成开始之前就知道你要找什么</b>：每个注意力头在 prompt 末尾观察窗（如 32 token）上的注意力分布，与之后生成时高度一致，因此可以"提前投票"选出每头重要的 prompt KV，prefill 结束即完成压缩。其伪代码（摘自论文）核心只有几行：</p>
+<p>SnapKV 利用 prompt 末尾的注意力分布选择 KV：每个注意力头在 prompt 末尾观察窗（如 32 token）上的注意力分布，与之后生成时高度一致，因此可以"提前投票"选出每头重要的 prompt KV，prefill 结束即完成压缩。其伪代码（摘自论文）核心只有几行：</p>
 <pre><code># SnapKV（论文 Listing 1 节选，有删减）
 attn = attention(q_obs_window, all_prompt_keys)     # 观察窗 query × 全 prompt key
 vote = pool1d(attn.sum(over_window), kernel=7)      # 聚合 + 一维池化做“聚类”
@@ -950,7 +950,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 <!-- ================================================================ -->
 <h2 id="s11"><span class="no">11</span>未来发展方向</h2>
 <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
 <li><b>算法-系统协同设计（co-design）成为默认方法论。</b>NSA 的教训（理论加速 ≠ 墙上时钟加速）已被广泛接受：未来的稀疏/压缩算法必须带着内存对齐、Tensor Core 友好、与 GQA/MLA 兼容的约束去设计；反过来，调度器要理解模型的稀疏模式（如 DSA 的索引）来做预取。2026 年的系统感知综述已把这条列为首要方向<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
 <li><b>稀疏注意力 + 外部索引：KV 变成"注意力专用数据库"。</b>Quest 的页元数据、DSA 的闪电索引、LSA 的前瞻记忆索引器（2026-06）<sup class="c"><a href="#ref-61">[61]</a></sup>、SeKV 的语义层级<sup class="c"><a href="#ref-71">[71]</a></sup>指向同一个终局：KV cache 不再是被动的张量堆，而是带索引、可检索、可分级存储的存储系统。学习式索引（哪个 query 需要哪块 KV）是核心开放问题。</li>
 <li><b>混合线性架构的"容量墙"攻坚。</b>固定大小状态的精确检索上限是理论约束（associative recall 容量 ∝ 状态维度）。GDN-2 的擦写解耦、稀疏状态扩展（Sparse Delta Memory）、核化线性注意力等都在扩容"固定记忆"；另一条路是 3:1 比例的再优化与蒸馏（把全注意力模型"蒸馏"成混合模型以复用存量算力）。</li>
@@ -1268,7 +1268,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1420,6 +1421,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1456,7 +1458,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1613,7 +1615,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

@@ -123,7 +123,7 @@
 <div class="toc">
 <h3>目录</h3>
 <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
   <li><a href="#s0">导读与大事记</a></li>
   <li><a href="#s1">预备知识：一次推理到底发生了什么</a></li>
   <li><a href="#s2">批处理与调度：Continuous Batching</a></li>
@@ -141,9 +141,9 @@
 
 <!-- ============================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按"问题→机制→工程取舍"阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先追踪一条请求，再选择调度与部署</b><p><a href="#s1">请求与指标</a> → <a href="#s2">迭代组批</a> → <a href="#s3">KV 生命周期</a> → <a href="#s4">分块</a> → <a href="#s5">阶段分离</a> → <a href="#s7">采样与语法</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>token 是分词器的计量单位。Prefill 处理提示，decode 逐步生成；TTFT 从请求到首个输出（本文含排队），TPOT 约为首末输出间隔除以输出 token 数减一。TP 切一层矩阵，PP 切层，DP 复制模型处理不同请求，EP 分布专家。先懂这些，再看引擎名。</p></div>
+<div class="note"><b>从这里读起 · 先追踪一条请求，再选择调度与部署</b><p><a href="#s1">请求与指标</a> → <a href="#s2">迭代组批</a> → <a href="#s3">KV 生命周期</a> → <a href="#s4">分块</a> → <a href="#s5">阶段分离</a> → <a href="#s7">采样与语法</a>。相关发布记录见“近期进展”。</p><p>token 是分词器的计量单位。Prefill 处理提示，decode 逐步生成；TTFT 从请求到首个输出（本文含排队），TPOT 约为首末输出间隔除以输出 token 数减一。TP 切一层矩阵，PP 切层，DP 复制模型处理不同请求，EP 分布专家。先懂这些，再看引擎名。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>假设 KV 迁移 1GB、有效网络 25GB/s，仅理想传输就需 40ms。P/D 分离若只省 20ms 干扰，通信已超过节省；若命中远端前缀缓存、节省数百 ms prefill，则可能划算。这是教学算例，不是部署测量。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>组批/分块</td><td>摊薄权重读取、限制长 prompt 干扰</td><td>batch/块过大增加 TPOT，过小浪费算力</td></tr><tr><td>分离/混部</td><td>独立资源配比或共享闲置资源</td><td>迁移、排队与低负载利用率必须一起计账</td></tr><tr><td>量化/卸载</td><td>减少字节或扩大容量</td><td>质量、PCIe 带宽与反量化开销</td></tr></tbody></table></div>
@@ -156,7 +156,7 @@
 <p>下表是一张"一页纸"的技术地图，后续章节逐个展开：</p>
 <div class="card">
 <table>
-<tr><th style="width:16%">技术</th><th style="width:26%">解决的问题</th><th style="width:22%">起源（时间）</th><th style="width:36%">一句话原理</th></tr>
+<tr><th style="width:16%">技术</th><th style="width:26%">解决的问题</th><th style="width:22%">起源（时间）</th><th style="width:36%">原理概要</th></tr>
 <tr><td>Continuous Batching</td><td>静态批处理"等最慢请求"浪费算力</td><td>Orca，OSDI 2022</td><td>每次前向迭代都允许请求加入/退出批次</td></tr>
 <tr><td>PagedAttention</td><td>KV Cache 显存碎片与预留浪费</td><td>vLLM，SOSP 2023</td><td>把 KV Cache 像操作系统内存页一样分页管理</td></tr>
 <tr><td>前缀缓存 / RadixAttention</td><td>相同前缀反复重算</td><td>vLLM APC / SGLang，2023</td><td>用哈希表/基数树存历史 KV，命中直接复用</td></tr>
@@ -186,7 +186,7 @@
 </ul>
 
 <!-- ============================================================ -->
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -202,7 +202,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>生产推理框架开源：单集群 155T tokens/天、波谷 $38/卡/小时，SM100+昇腾 950 双后端；开源一周 star 超 1.7 万。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>DeepInfer 开源</b><span class="hl-date">10-20 · DeepSeek</span></div><p>生产推理框架开源：单集群 155T tokens/天、波谷 $38/卡/小时，SM100+昇腾 950 双后端；开源一周 star 超 1.7 万。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>GB300 NVL72 追平 DeepInfer</b><span class="hl-date">10-23 · vLLM</span></div><p>P/D + Wide-EP：AgentX 每 GPU 954K tokens/s；decode 与 DeepInfer 差距 batch 8–256 全程 ≤6%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>P/D 分离 KV 跨请求泄露</b><span class="hl-date">10-26 · SGLang×Cloudflare</span></div><p>155 个响应串入他人 prompt：修复随 v0.5.21/22 落地，运营方应升级 v0.5.22+。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>TAO 工具感知调度</b><span class="hl-date">10-27 · 上交+斯坦福</span></div><p>工具执行下放分布式 CPU、GPU 聚簇推理：延迟最多 −26.8%、TTFT −36.3%、吞吐 +29.5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
@@ -249,7 +249,7 @@
 <div class="note"><b>引用说明格式</b>：正文中 <sup class="cite">[名字+年份]</sup> 为引用标记，紧跟的小字框给出原文或译文及出处链接；完整列表见文末参考文献。</div>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>Decode 是访存受限的，<b>批处理是它的命</b>；Prefill 是计算受限的，<b>切块与隔离是它的命</b>。</li>
 <li>KV Cache 是推理系统里最重要的"动态数据结构"，<b>谁管好它谁就赢</b>。</li>
@@ -1083,7 +1083,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1235,6 +1236,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1271,7 +1273,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1428,7 +1430,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

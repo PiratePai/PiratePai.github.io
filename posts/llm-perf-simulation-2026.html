@@ -123,7 +123,7 @@
 <div class="toc">
 <h3>目录</h3>
 <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
   <li><a href="#s0">导读与大事记：性能仿真是什么、为什么现在</a></li>
   <li><a href="#s1">预备知识：一次推理到底在算什么</a></li>
   <li><a href="#s2">案例一：DeepSeek-V4.1-Flash 结构拆解</a></li>
@@ -143,16 +143,16 @@
 
 <!-- ============================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先做可复算小账本，再校准 kernel 与请求模型</b><p><a href="#s1">量纲</a> → <a href="#s4">算子账本</a> → <a href="#s6">硬件参数</a> → <a href="#s9">时间下界与校准</a> → <a href="#s2">复杂 AR 案例</a> → <a href="#s3">DiT 案例</a> → <a href="#s10">排队与调度</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>FLOPs 是运算数，bytes 是数据量，FLOP/s 与 byte/s 才是速率。AI=FLOPs/bytes；理想时间≥max(F/P,bytes/BW)。结构对账、kernel 时延和服务曲线是三层验证，前一层通过不能证明后一层准确。TTFT 含排队，TPOT=(末 token 时间−首 token 时间)/(输出 token 数−1)。</p></div>
+<div class="note"><b>从这里读起 · 先做可复算小账本，再校准 kernel 与请求模型</b><p><a href="#s1">量纲</a> → <a href="#s4">算子账本</a> → <a href="#s6">硬件参数</a> → <a href="#s9">时间下界与校准</a> → <a href="#s2">复杂 AR 案例</a> → <a href="#s3">DiT 案例</a> → <a href="#s10">排队与调度</a>。相关发布记录见“近期进展”。</p><p>FLOPs 是运算数，bytes 是数据量，FLOP/s 与 byte/s 才是速率。AI=FLOPs/bytes；理想时间≥max(F/P,bytes/BW)。结构对账、kernel 时延和服务曲线是三层验证，前一层通过不能证明后一层准确。TTFT 含排队，TPOT=(末 token 时间−首 token 时间)/(输出 token 数−1)。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>Y[1×4096]=X[1×4096]W[4096×4096]，BF16 各张量各读写一次：F=33,554,432，bytes=33,570,816，AI≈1 FLOP/B。只有权重主导时 batch=m 才有 AI≈2m/b；不能在 m≫n,k 时继续套该近似。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>结构/硬件探索</td><td>LLMCompass 建模映射与成本；GenZ 比较架构与平台</td><td>受控解析模型不能直接替代请求排队</td></tr><tr><td>实测画像</td><td>Vidur 用画像与预测驱动事件仿真</td><td>更换 kernel / 引擎版本会造成分布偏移</td></tr><tr><td>跨设备预测</td><td>KernelSight-LM 区分不测目标与目标微基准两档</td><td>kernel 误差与 TTFT/TPOT/吞吐误差须分开</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>先固定参数、精度、scale/对齐与副本布局，再用同配置 trace 校准；留出未参与拟合的 batch、长度与到达流做验证。本文动态图是教学示意，未校准输出不得用于容量承诺。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Hengrui Zhang  et al.</b> <i>A Hardware Evaluation Framework for Large Language Model Inference</i>（LLMCompass）；arXiv:2312.03134，v1 2023-12-05。<a href="https://arxiv.org/abs/2312.03134">原始论文与版本记录</a></li><li><b>Abhimanyu Bambhaniya  et al.</b> <i>Demystifying AI Platform Design for Distributed Inference of Next-Generation LLM models</i>（GenZ）；arXiv:2406.01698，v1 2024-06-03。<a href="https://arxiv.org/abs/2406.01698">原始论文与版本记录</a></li><li><b>Amey Agrawal  et al.</b> <i>Vidur: A Large-Scale Simulation Framework For LLM Inference</i>（Vidur）；arXiv:2405.05465，v1 2024-05-08。<a href="https://arxiv.org/abs/2405.05465">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -168,7 +168,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见正文）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Koi 自校准部署规划器</b><span class="hl-date">10-17 · Tandemn 等</span></div><p>仿真内核包成 engine/router 之上的规划器：104-GPU 三地集群 goodput ×1.18、$/token −20%；反例同样刺眼——校准前 roofline 误差可达 4.7×、LLM 直接预测高估 4–9×。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见正文）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Koi 自校准部署规划器</b><span class="hl-date">10-17 · Tandemn 等</span></div><p>仿真内核包成 engine/router 之上的规划器：104-GPU 三地集群 goodput ×1.18、$/token −20%；反例同样刺眼——校准前 roofline 误差可达 4.7×、LLM 直接预测高估 4–9×。</p><a class="hl-link" href="#s0">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Token-Energy Law</b><span class="hl-date">10-20 · NVIDIA 等</span></div><p>每 token 能耗 = 常数 + 权重项 + KV 项 + 时延项：374 次留出验证误差 ≤3.73%，大批比小批每 token 能耗低 33.2–46.8%，账本从时延扩展到能耗。</p><a class="hl-link" href="#s4">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>HBFSim 闪存层仿真器</b><span class="hl-date">10-16 · MBZUAI</span></div><p>首个 HBM+HBF 闪存层闭环仿真器：HBF 供数比 host DRAM 快 11–19×；70B 峰值负载下 HBF 寿命 2.0–6.9 年，存储层级进了仿真账本。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Waypoint CPU GEMM 解析模型</b><span class="hl-date">10-26 · AMD</span></div><p>纯解析模型预测 CPU 推理 GEMM 误差 1.096×/1.012×，指导 OPAM 库 TTFT 提速 1.36–1.98×，roofline 流派从 GPU 延伸到 CPU。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
@@ -204,7 +204,7 @@
 </ul>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>仿真器 = <b>账本</b>（算子级 FLOPs/字节）× <b>屋顶</b>（算力/带宽上限）× <b>队列</b>（到达/调度）；三者缺一就只能回答一半问题。</li>
 <li>2024 年 Vidur 证明可行，2026 年 KernelSight-LM 证明<b>不实测也能准</b>（数据手册 + 一次微基准）。</li>
@@ -217,7 +217,7 @@
 <p>写给第一次接触推理性能的读者：只需要线性代数里"矩阵乘"的概念就能读完本节。</p>
 
 <h3>1.1 三种"钱"：FLOPs、字节、显存</h3>
-<p>GPU 干活花三种钱，所有性能问题都是这三种钱的分配问题：</p>
+<p>GPU 干活花三种钱，本文先从这三类成本分析性能：</p>
 <table>
 <tr><th>资源</th><th>单位</th><th>由谁决定</th><th>类比</th></tr>
 <tr><td><b>计算量 FLOPs</b></td><td>浮点运算次数（1 GFLOP = 10⁹）</td><td>模型结构 × 序列长度 × batch</td><td>厨师要炒多少勺</td></tr>
@@ -248,7 +248,7 @@ prefill 总 FLOPs      ≈ 2 × 激活参数量 × N + 注意力 O(N²) 项</pre
 <h3>1.4 KV Cache：第三种显存居民</h3>
 <p>自回归生成需要缓存每层的 Key/Value。经典 MHA 的公式是 <code>2 × L × h_kv × d_head × s × B × 字节数</code>；DeepSeek-V2 起的 MLA 把每层压成一个 latent 向量（V3 为 512+64 维）<sup class="cite">[DSV324]</sup>；V4.1-Flash 再叠三层压缩：序列维（每 m 个 token 合成 1 个 entry）、层维（跨层共享）、精度维（FP4），最终 <b>890 字节/token</b>，比初代 DeepSeek 缩小 437 倍<sup class="cite">[DSV41FLASH26]</sup>。第 4 节给出完整分解。</p>
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>GEMM 记账 = <b>2MNK</b>；算术强度 ≈ 2m，<b>batch 就是摊薄权重搬运的手段</b>。</li>
 <li>Prefill 计算受限、Decode 访存受限，<b>同一个模型在 roofline 图上落在两个角落</b>。</li>
@@ -299,7 +299,7 @@ prefill 总 FLOPs      ≈ 2 × 激活参数量 × N + 注意力 O(N²) 项</pre
 </ul>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>CED 让 prefill 只跑一半层（8B 激活）、CSA2 让 KV 与注意力近似常数，<b>结构本身就是性能优化</b>。</li>
 <li>每层三种模式（Full/Reindex/Reuse）成本差一个量级，<b>仿真必须逐层建模而不是"40 层同构"</b>。</li>
@@ -339,7 +339,7 @@ prefill 总 FLOPs      ≈ 2 × 激活参数量 × N + 注意力 O(N²) 项</pre
 <p>单 block 合计 <b>645.6M 参数</b>，其中 AdaLN 投影占 40%，是 DiT 特有的"参数大、FLOPs 小"算子（每个去噪步只对 M 个唯一 timestep 算一次）。50 层主 DiT + 2 层 refiner（无 AdaLN/RoPE）+ 时间嵌入 + 输出头 = <b>33.09B</b>，与 HF 元数据 33.12B 对上（差值为 norm/输出头小项）。加上文本编码器 ~27.7B 与 VAE，全流水 BF16 约 <b>125.6 GB</b>，与 recipe"每个分区 ~134 GiB"一致<sup class="cite">[H3RECIPE]</sup>。</p>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>DiT 的 token 数由<b>几何公式</b>决定（分辨率×时长×VAE 压缩率），先算行数再算 FLOPs。</li>
 <li>H3 单步去噪是<b>计算受限</b>的稠密 GEMM：加大 batch 不摊薄、co-batching 不涨吞吐，与 LLM decode 相反。</li>
@@ -399,7 +399,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 <p>仅为可复算的 dense 教学估算：忽略小项并取 P_token≈20.1B，T=16,400 时约 <b>1.044 PFLOP/步</b>，T=37,800 时约 <b>3.568 PFLOP/步</b>，另加 2×13.0B×M 的条件投影。这不是计时验证。若误把全部 33.1B 参数乘 T，高清公式会得到约 4.55 PFLOP/步，不能再配旧的 3.58 数字。撤回从旧账本反推的 η=1.6–1.8 和 MFU=55–62%；计时需在同一形状、精度、并行和服务模式下校准。<sup class="cite">[H3RECIPE]</sup></p>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>账本能对上官方数字（552B / 16B / 8B / 890B）才算理解了结构，<b>仿真器是结构理解的试金石</b>。</li>
 <li>显存要分<b>三层</b>记：HBM（权重+活跃KV+激活峰值）、主机（SWA 池、Engram 表）、SSD（持久全局 KV）。</li>
@@ -476,7 +476,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 <div class="note"><b>[VLLMOMNI26]</b> Yin, Zhu, Gao, et al. <i>vLLM-Omni: Fully Disaggregated Serving for Any-to-Any Multimodal Models</i>. arXiv 2602.02204（2026-02）+ <i>vLLM-Omni Technical Report: A Unified Serving Runtime for Omni-Modality Generation</i>. arXiv 2610.09307（2026-10）。原文："vLLM-Omni is a framework that extends its support for omni-modality model inference and serving: <b>text, image, audio, video, and action</b> data… non-autoregressive architectures… <b>fully disaggregation based on OmniConnector</b>"（译文：支持文本/图像/音频/视频/动作的全模态推理服务，扩展到 DiT 等非自回归架构，并以 OmniConnector 实现全解耦。）链接：<a href="https://arxiv.org/abs/2602.02204">arXiv:2602.02204</a> · <a href="https://arxiv.org/abs/2610.09307">arXiv:2610.09307</a> · <a href="https://github.com/vllm-project/vllm-omni">GitHub</a></div>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>vLLM 的显存驻留已是<b>多级游戏</b>：HBM 池 / 两级 prefix cache / sleep 释放 / HiSparse 常驻 / Engram 主机共享，峰值账本必须逐项叠加。</li>
 <li>vLLM-Omni 证明 DiT 服务进入工程化：USP、DLO、特征缓存、稀疏注意力、在线量化各有定量收益。</li>
@@ -545,7 +545,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 </div>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>每个算子两个数（FLOPs、字节）决定 roofline 位置；<b>η 是唯一要从真实硬件学的量</b>。</li>
 <li>decode 靠 batch 沿斜线右滑、prefill 天生在平顶、H3 去噪整步都在平顶，<b>三种负载三个角落</b>。</li>
@@ -594,7 +594,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 </div>
 
 <div class="card">
-<h4>本章小结（记住三句话）</h4>
+<h4>本章小结</h4>
 <ol>
 <li>请求级仿真 = 离散事件调度器 + 算子级时间模型；<b>调度策略逐行对齐引擎</b>才有意义。</li>
 <li>输出的是时间序列：TTFT/TPOT 分布、队列、KV 显存，是容量规划与 SLO 验收的原料。</li>
@@ -604,7 +604,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s11"><span class="no">11</span>动手：llsim 原型与自定义模型仿真</h2>
-<p>配套原型 <code>llsim</code>（本文全部数字与图片的来源）已放在 <code>llsim/</code> 目录：纯 Python 标准库、无框架依赖，~700 行，刻意保持"本科生一晚上能读完"的规模。设计与本文一一对应：</p>
+<p>配套原型 <code>llsim</code>（本文全部数字与图片的来源）已放在 <code>llsim/</code> 目录：纯 Python 标准库、无框架依赖，~700 行，用于展示仿真的主要步骤。设计与本文一一对应：</p>
 <div class="card">
 <table>
 <tr><th>模块</th><th>职责</th><th>关键函数/类</th></tr>
@@ -640,7 +640,7 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 }</pre>
 <p class="codecap"><b>代码 11-1</b> 层模式（Full/Reindex/Reuse）由 kv_source_layer_ids / index_source_layer_ids 自动推导，与官方 config 同一套拼写，结构改动零代码。</p>
 
-<h3>11.3 与生产级仿真器的差距（诚实清单）</h3>
+<h3>11.3 与生产级仿真器的差距</h3>
 <ul>
 <li><b>η 是常数默认值</b>而非按 shape 插值的表（KernelSight Tier B 的做法：一次微基准扫出 η(shape) 网格）。</li>
 <li><b>没有 host 开销通道</b>（CPU 调度、launch、TP 同步尾），小 batch decode 会偏乐观。</li>
@@ -855,7 +855,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1007,6 +1008,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1043,7 +1045,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1200,7 +1202,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

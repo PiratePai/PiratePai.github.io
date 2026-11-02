@@ -125,9 +125,9 @@
 <nav class="toc">
   <h3>目录</h3>
   <ol>
-<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点 · 2026-10 下旬</a></li>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
     <li><a href="#s0">§0 全景导览:一条时间线看懂</a></li>
-    <li><a href="#s1">§1 预备知识:读懂 RL for LLM 所需的全部基础</a></li>
+    <li><a href="#s1">§1 预备知识：RL for LLM 的基本概念</a></li>
     <li><a href="#s2">§2 Agent 数据飞轮</a></li>
     <li><a href="#s3">§3 Rollout 引擎:RL 的"油门与车轮"</a></li>
     <li><a href="#s4">§4 异步 Rollout 与异步 RL</a></li>
@@ -139,16 +139,16 @@
 
 <!-- ============================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 用一次工具任务串起算法、环境和系统</b><p><a href="#s1">奖励与优势</a> → <a href="#s2">数据与环境</a> → <a href="#s3">生成引擎</a> → <a href="#s4">异步与旧度</a> → <a href="#s5">多模态</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>轨迹是“观察→动作→工具反馈”的序列；奖励评价结果，优势衡量相对基线的好坏。rollout 是执行这些轨迹，训练则用轨迹更新策略。部署是否同卡、调用是否服务化、调度是否异步是三个独立轴，不是一条替代阶梯。</p></div>
+<div class="note"><b>从这里读起 · 用一次工具任务串起算法、环境和系统</b><p><a href="#s1">奖励与优势</a> → <a href="#s2">数据与环境</a> → <a href="#s3">生成引擎</a> → <a href="#s4">异步与旧度</a> → <a href="#s5">多模态</a>。相关发布记录见“近期进展”。</p><p>轨迹是“观察→动作→工具反馈”的序列；奖励评价结果，优势衡量相对基线的好坏。rollout 是执行这些轨迹，训练则用轨迹更新策略。部署是否同卡、调用是否服务化、调度是否异步是三个独立轴，不是一条替代阶梯。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>同题三个奖励 [0,1,1]，组均值为 2/3；GRPO 用均值/标准差形成相对优势，不是给第一二三名发固定分。RLOO 则对每条样本用其他样本的平均奖励作基线，不能与组内标准化直接混称。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>PPO / GRPO / RLOO</td><td>比较价值模型、组内标准化与留一基线</td><td>方差、长度偏置、奖励分布与资源成本</td></tr><tr><td>Search-R1</td><td>把检索调用纳入可交互训练</td><td>检索环境成本与评测泄漏控制</td></tr><tr><td>异步系统</td><td>降低长尾等待、提高设备利用</td><td>行为策略旧度与重要性修正，优化采样速度不等于样本效率</td></tr></tbody></table></div>
 <p><b>值得做的研究：</b>固定总 GPU 小时和环境调用预算，算法获得多少成功任务？同时画 reward 对训练步与 wall-clock 的曲线，并区分 R1-Zero 的无 SFT 实验与 R1 的冷启动多阶段训练。生成侧奖励微调与 GUI 多轮决策共享部分 RL 形式，但其环境/轨迹与错误传播不同。</p>
 <details><summary>谱系与原始资料（机制转述，非原文直引）</summary><ol class="refs"><li><b>Arash Ahmadian  et al.</b> <i>Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs</i>（RLOO / Back to Basics）；arXiv:2402.14740，v1 2024-02-22。<a href="https://arxiv.org/abs/2402.14740">原始论文与版本记录</a></li><li><b>Bowen Jin  et al.</b> <i>Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning</i>（Search-R1）；arXiv:2503.09516，v1 2025-03-12。<a href="https://arxiv.org/abs/2503.09516">原始论文与版本记录</a></li><li><b>Guangming Sheng  et al.</b> <i>HybridFlow: A Flexible and Efficient RLHF Framework</i>（HybridFlow）；arXiv:2409.19256，v1 2024-09-28。<a href="https://arxiv.org/abs/2409.19256">原始论文与版本记录</a></li></ol><p>以上条目已于 2026-11-01 对照 arXiv 题名、作者与首发日期；比较设计选择，不作跨论文性能排名。</p></details>
 </section>
-<h2 class="sec" id="s0"><span class="num">0</span>全景导览:一条时间线看懂<span class="roadmap">RLHF(2022)→ RLVR/R1(2025)→ Agent RL 与系统军备竞赛(2025–2026)</span></h2>
+<h2 class="sec" id="s0"><span class="num">0</span>全景导览:一条时间线看懂<span class="roadmap">RLHF(2022)→ RLVR/R1(2025)→ Agent RL 与系统研发(2025–2026)</span></h2>
 
 <p class="lead">这份综述回答四个问题:<b>Agent 是怎么用强化学习练出来的</b>(§1–§2)、<b>RL 训练里的"采样引擎"是什么、为什么它成了瓶颈</b>(§3)、<b>为什么大家都在做异步化</b>(§4)、<b>RL 怎么从文本扩展到图像/视频/音乐</b>(§5)。如果你只有 10 分钟,看下面这张时间线 + 每节开头的"太长不看"即可。</p>
 
@@ -248,7 +248,7 @@
 <div class="note"><b>一个直觉性的总结:</b>2022 年 RLHF 让模型学会"说人话";2025 年初 DeepSeek-R1 证明<b>可验证奖励 + 大规模 RL</b> 能让模型自己"学会思考";2025 下半年开始,大家把同样的配方搬到 <b>Agent</b>(会调工具、会上网、会写代码的模型)上,发现训练的瓶颈从"算法"变成了"<b>系统</b>"——一条训练轨迹要和环境(浏览器、终端、API)来回交互几十轮,采样(rollout)比更新参数慢一个数量级,于是 rollout 引擎、异步化、数据飞轮成了 2025–2026 最热的工程话题;与此同时,同一套免价值模型的 RL 算法(GRPO)被搬到图像/视频/音乐生成上,引发了多模态生成的 RL 浪潮。</div>
 
 <!-- ============================================================ -->
-<details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+<details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -264,14 +264,14 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro</b><span class="hl-date">10-23 · Moonshot</span></div><p>不改架构、加 RL 算力：GDPval-AA +312 Elo，权重 11-04 前开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Kimi K3.1 Pro</b><span class="hl-date">10-23 · Moonshot</span></div><p>不改架构、加 RL 算力：GDPval-AA +312 Elo，权重 11-04 前开放。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Harness Scaling</b><span class="hl-date">10-21 · 人大等</span></div><p>46 票窗口最高热度：243 配置正交精选 18 个，胜过全量网格。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>FlashNext-RL</b><span class="hl-date">10-20 · Snowflake</span></div><p>prime-rl 底座上 8×B200 rollout 吞吐 11×（395→4438 tok/s/GPU）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Hy-Memory-30B-A3B 开源</b><span class="hl-date">10-15 · 腾讯混元</span></div><p>首个专做 agent 长期记忆写入的开源模型，token 开销 −39.3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
-<h2 class="sec" id="s1"><span class="num">1</span>预备知识:读懂 RL for LLM 所需的全部基础<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
+<h2 class="sec" id="s1"><span class="num">1</span>预备知识：RL for LLM 的基本概念<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
 
-<h3>1.1 用一句话讲清强化学习</h3>
+<h3>1.1 强化学习的基本过程</h3>
 <p>强化学习(RL)研究的问题是:<b>一个"智能体"(agent)如何通过不断试错,学会在"环境"(environment)里采取让长期回报最大的行为</b>。它由五个要素构成,记住这张对照表就够用了:</p>
 
 <table>
@@ -469,7 +469,7 @@ slime/
 <span class="en">"…we focus on agentic settings—specifically web-search and code-generation agents—where every action or answer can be automatically checked. This built-in verifiability supplies…"</span><br>
 <span class="zh">译:"……我们聚焦智能体场景——具体是网页搜索与代码生成智能体——其中每个动作或答案都能被自动校验。这种内建的可验证性提供了……"</span></small></div>
 
-<div class="note"><b>一句话理解:</b>SFT 时代的炼丹是"老师备课"(人写数据);RLVR/Agent 时代变成了"<b>出题机 + 判分机 + 学生自己刷题</b>":出题机(任务合成器)负责源源不断出有标准答案的题,判分机(环境+规则)负责自动打分,学生(模型)负责刷题(rollout),错题本(失败轨迹与弱点诊断)反过来指导出题机出更针对性的题。整个闭环转起来,就是数据飞轮。</div>
+<div class="note"><b>可以用教学过程类比：</b>SFT 时代的炼丹是"老师备课"(人写数据);RLVR/Agent 时代变成了"<b>出题机 + 判分机 + 学生自己刷题</b>":出题机(任务合成器)负责源源不断出有标准答案的题,判分机(环境+规则)负责自动打分,学生(模型)负责刷题(rollout),错题本(失败轨迹与弱点诊断)反过来指导出题机出更针对性的题。整个闭环转起来,就是数据飞轮。</div>
 
 <!-- ============================================================ -->
 <h2 class="sec" id="s3"><span class="num">3</span>Rollout 引擎:RL 的"油门与车轮"<span class="roadmap">训推形态差异 → 推理引擎三件套 → 混合引擎(colocate)→ 服务化解耦(disaggregated)→ rollout 加速技巧</span></h2>
@@ -817,7 +817,7 @@ in-flight sample to finish."""</span>
 <b>[49] Google DeepMind, "New generative AI tools open the doors of music creation", 官方博客, 2024-10-23。</b><br>
 <span class="en">"Our latest music generation models are trained with a novel reinforcement learning approach to have higher audio quality, while also paying better attention to the nuances of a user's text prompts."</span><br>
 <span class="zh">译:"我们最新的音乐生成模型采用一种新颖的强化学习方法训练,音质更高,同时更细致地响应文本提示的微妙差异。"</span></small></div>
-<div class="warnbox"><b>证据边界(诚实声明):</b>网络调研未能找到 <b>Sora 2 使用 RLHF/RLVR 的官方证据</b>——其系统卡与团队访谈(2025-10)将能力跃升归因于"核心生成建模研究"而非 RL;Veo 3 同样未披露 RL 细节。<b>闭源旗舰的"官方叙事"与开源实证(Flow-GRPO/DanceGRPO/Qwen-Image-2.0-RL)之间存在信息差</b>,引用"某某旗舰视频模型用了 RL"时需谨慎。</div>
+<div class="warnbox"><b>公开资料：</b>网络调研未能找到 <b>Sora 2 使用 RLHF/RLVR 的官方证据</b>——其系统卡与团队访谈(2025-10)将能力跃升归因于"核心生成建模研究"而非 RL;Veo 3 同样未披露 RL 细节。<b>闭源旗舰的"官方叙事"与开源实证(Flow-GRPO/DanceGRPO/Qwen-Image-2.0-RL)之间存在信息差</b>,引用"某某旗舰视频模型用了 RL"时需谨慎。</div>
 <div class="srcnote"><small><b>Sora 2 团队访谈(Sequoia Capital, 2025-10)原话。</b><br>
 <span class="en">"We've spent a long time really just doing, like, core generative modeling research since the Sora 1 launch to really figure out how we get the next step function improvement."</span><br>
 <span class="zh">译:"自 Sora 1 发布以来,我们很长时间只是在做核心的生成建模研究,以弄清如何取得下一个阶跃式提升。"(注:访谈中未讨论 RL/奖励模型。)</span></small></div>
@@ -866,7 +866,7 @@ in-flight sample to finish."""</span>
 </div>
 
 <h3>6.1.5 2026 年秋(9–10 月):环境基础设施与权重同步成为主战场</h3>
-<p>9–10 月单月出现 10+ 篇 Agent RL 系统论文,"系统军备竞赛"的判断被强烈验证。最值得记住的六件:</p>
+<p>9–10 月的 Agent RL 系统工作主要涉及以下六类问题:</p>
 <ul>
 <li><b>DSec:DeepSeek 弹性算力环境</b>(2026-09-19,arXiv:2609.22978):Agent RL 的沙箱环境(仓库、工具、任务服务)以突发方式大规模创建、需长期保持状态,环境基础设施本身成了与训练框架同等级的系统问题。DSec 把<b>沙箱生命周期</b>做成独立基础设施层(agent sandbox + worker container),GPU 作业被抢占后可重连续跑;<b>DeepSeek-V4.1 起生产 rollout 全部跑在其上:日服务约 300 万个沙箱、峰值 38 万+ 并发</b>——"环境即数据、环境规模化"论断的最强工业证据。</li>
 <li><b>FlashREINFORCE:单 Rollout 免 Critic 异步 RL</b>(NVIDIA,2026-09):GRPO 的"组采样"要求同一 prompt 反复 rollout 并等齐,与异步长程 Agent 天性冲突。改成<b>每 prompt 只采 1 条 rollout</b>:批内新鲜奖励中心化 + 序列级信任域 + token 重要性采样加权。数学任务五基准均分 38.0(GRPO 36.3,且只用一半 rollout);同预算超 GRPO +6.8 分(Qwen3-30B-A3B,lag≈8 下稳定)。</li>
@@ -1058,7 +1058,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1210,6 +1211,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1246,7 +1248,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1403,7 +1405,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

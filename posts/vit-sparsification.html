@@ -157,7 +157,7 @@
 <nav class="toc">
   <b>目录</b>
   <a href="#s0">0. 太长不看（TL;DR）</a>
-     <a href="#hl" style="color:#41d1a7;font-weight:600">★ 前沿亮点</a>
+     <a href="#hl" style="color:#41d1a7;font-weight:600">近期进展</a>
   <a href="#s1">1. 预备知识：把图变成序列</a>
   <a href="#s2">2. 概念地图：稀疏化的三大技术族</a>
   <a href="#s3">3. 发展历程时间线</a>
@@ -170,9 +170,9 @@
 
 <!-- ================================================================ -->
 
-<details class="note" id="evidence-scope"><summary>证据与代码口径 · 2026-11-01 修订（展开）</summary><p>正文按“问题→机制→工程取舍”阅读。数学保证以写明的条件为准；论文/官方报告性能是原作者实验，源码核对不等于独立性能复现。旧版本动态按原快照阅读，未定位一手来源的数字不参与选型。跨论文最大值不做排名，不将来源中多个指标的最优点拼成单一配置。</p><details><summary>代码节选如何使用</summary><p>文中历史本地路径与行号不构成永久版本锚点；未绑定提交的节选作为机制示意阅读，含省略项的代码不是完整运行程序。此次新增的 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能数字来自所引论文或官方报告，实验条件随引用标注；源码分析与独立性能复现分别说明。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>未标注提交版本的源码节选用于解释机制，省略项需结合原仓库补全。配套 <a href="../scripts/verify-mechanisms.py">标准库数值示例</a>可用 Python 独立运行，覆盖核化注意力递推、Gated DeltaNet、AWQ、量化编码与单位置拒绝采样；它不验证论文训练结果或 GPU 性能。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先拆总成本，再决定删 token、删连接还是复用计算</b><p><a href="#s1">图像 token 与注意力</a> → <a href="#s2">三种优化对象</a> → <a href="#s4">VLM 任务依赖</a> → <a href="#s5">DiT / 缓存</a> → <a href="#s7">研究问题</a>。前沿亮点可展开选读；先建立机制，再看发布动态。</p><p>总成本含随 N 线性增长的投影/FFN、随 N² 增长的注意力交互，以及去噪步数 T。剪 token、稀疏连接、跨步残差复用改变不同对象，误差会耦合。低注意力是经验信号，不是 token 无因果作用的保证。</p></div>
+<div class="note"><b>从这里读起 · 先拆总成本，再决定删 token、删连接还是复用计算</b><p><a href="#s1">图像 token 与注意力</a> → <a href="#s2">三种优化对象</a> → <a href="#s4">VLM 任务依赖</a> → <a href="#s5">DiT / 缓存</a> → <a href="#s7">研究问题</a>。相关发布记录见“近期进展”。</p><p>总成本含随 N 线性增长的投影/FFN、随 N² 增长的注意力交互，以及去噪步数 T。剪 token、稀疏连接、跨步残差复用改变不同对象，误差会耦合。低注意力是经验信号，不是 token 无因果作用的保证。</p></div>
 <div class="analogy"><b>一个可算的例子：</b>原模型若注意力占 40%、其余占 60%，只把注意力计算减到 1/4，理想总耗时仍为 0.6+0.4/4=0.7，加速上界约 1.43×，尚未计排序/合并开销。FLOPs、kernel 和端到端倍数不能互换。</div>
 <h3>用同一组问题比较路线</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">路线对照 · 窄屏可横向滑动</caption><thead><tr><th>路线</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody><tr><td>局部连接</td><td>Sliding Tile Attention 用硬件友好时空窗口</td><td>窗口形状与布局共同决定墙钟收益</td></tr><tr><td>轨迹复用</td><td>TaylorSeer 从直接缓存扩展到轨迹预测</td><td>多步误差累积与步数削减须联合校准</td></tr><tr><td>选择依据</td><td>DART 从去重/多样性挑战重要性剪枝</td><td>文字、小目标与 grounding 可能被平均指标掩盖</td></tr></tbody></table></div>
@@ -182,7 +182,7 @@
 <section id="s0">
   <h2><span class="num">0</span>太长不看（TL;DR）</h2>
   <div class="box blue">
-    <b>一句话定义：</b>ViT 稀疏化 = 在 Vision Transformer（及以其为骨架的视觉语言模型 VLM、扩散 Transformer DiT）中，<b>只计算"重要的"部分，跳过"冗余的"部分</b>，从而降低计算量与显存占用。它有三个互补的技术族：
+    <b>定义：</b>ViT 稀疏化 = 在 Vision Transformer（及以其为骨架的视觉语言模型 VLM、扩散 Transformer DiT）中，<b>只计算"重要的"部分，跳过"冗余的"部分</b>，从而降低计算量与显存占用。它有三个互补的技术族：
     <span class="badge b-sparse">稀疏 Attention</span>改连接结构（哪些 token 看哪些 token）；
     <span class="badge b-prune">Token 剪枝</span><span class="badge b-merge">/ 合并</span>减序列长度（哪些 token 留下来）；
     <span class="badge b-cache">缓存复用</span>砍时间维度（哪些步/哪些 KV 可以不重算）。
@@ -196,7 +196,7 @@
 
 <!-- ================================================================ -->
 <section id="s1">
-  <details class="note" data-highlights><summary>★ 前沿亮点（进阶选读，先读基础可跳过）</summary><div class="hl-wrap" id="hl"><style>
+  <details class="note" data-highlights><summary>近期进展（展开）</summary><div class="hl-wrap" id="hl"><style>
 .hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
 .hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
 .hl-head b{color:var(--green,#41d1a7);font-size:15px;letter-spacing:.02em}
@@ -212,7 +212,7 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>⚡ 前沿亮点</b><i>2026 年 10 月下旬 · 本方向最值得关注的几件事（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LearnPrunerV2 学习式剪枝</b><span class="hl-date">10-27 · 理想汽车 · ACM MM 2026</span></div><p>剪 77.8% 视觉 token 保留 99.8%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LOWN：扩散 VLM 按需看图</b><span class="hl-date">10-27 · KAIST</span></div><p>去掉图像只改 22.8% 步的决策：0.353× 解码 FLOPs 保留 99.6%，叠 Fast-dLLM 达 5.6–7.0×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8，说明"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
@@ -904,7 +904,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 </figure>
 
 <h2><span class="num">7</span>未来发展方向</h2>
-  <p class="lead">综合发展脉络与 2026 年最新动态，以下七个方向最值得关注（按"距离成熟"从近到远排序）：</p>
+  <p class="lead">以下七个方向涉及稀疏化的质量、运行开销与部署条件：</p>
   <ol>
     <li><b>训练时原生稀疏（Native Sparsity）</b>。当前主流仍是"训练完再加速"，天花板明显。Sparse Forcing（训练-推理一致的原生稀疏自回归扩散）和 Veda（蒸馏适配稀疏）已示范：让模型<b>在训练中就适应稀疏计算</b>，可在同等质量下把稀疏率推到免训练方法不敢碰的水平。预期下一代视频基础模型会把稀疏注意力掩码作为可学习参数端到端训练。</li>
     <li><b>算法-硬件协同设计（Co-design）</b>。SVG 的布局变换、SPADE 的专用引擎、FVAttn 的负载均衡都指向同一结论：<b>稀疏化的下一个数量级来自系统层</b>。块稀疏 BSR 格式、FP8/INT4 低精度、算子融合（QK-Norm/RoPE 定制 kernel）与稀疏模式联合优化；负载不均衡（不同头/不同步稀疏率不同）是头号工程敌人。FlexAttention 类编译基础设施会大幅降低定制 kernel 门槛。</li>
@@ -1120,7 +1120,8 @@ html.reader-ready[data-reader-theme="paper"] {
 .reader-content h3 { font-size:21px!important; font-weight:650!important; margin:38px 0 14px!important; }
 .reader-content h4 { font-size:18px!important; font-weight:600!important; margin:28px 0 10px!important; }
 .reader-content :is(h2,h3,h4):first-child { margin-top:12px!important; }
-.reader-content h2 :is(.no,.num) { display:inline-flex; vertical-align:middle; margin-right:10px; background:var(--r-soft)!important; color:var(--r-link)!important; border:1px solid var(--r-line); border-radius:7px; width:32px; height:32px; font-size:14px; }
+/* Chapter numbers share the heading baseline; legacy badge styles vary by article. */
+.reader-content h2 :is(.no,.num) { display:inline!important; vertical-align:baseline!important; margin:0 .5em 0 0!important; padding:0!important; width:auto!important; height:auto!important; min-width:0!important; background:transparent!important; color:inherit!important; border:0!important; border-radius:0!important; box-shadow:none!important; font:inherit!important; letter-spacing:inherit!important; }
 .reader-content h2 .roadmap { display:block; margin:10px 0 0; max-width:none; text-align:left; font-size:14px; font-weight:400; color:var(--r-muted); }
 .reader-content :is(b,strong) { color:var(--r-heading)!important; font-weight:600; }
 .reader-content a { color:var(--r-link)!important; text-decoration-thickness:1px; text-underline-offset:3px; }
@@ -1272,6 +1273,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
   function label(node) {
     const copy = node.cloneNode(true);
     copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
   function element(tag, className, text) {
@@ -1308,7 +1310,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
         node.id = node.id || 'reader-references'; heading = node.querySelector('h3');
       }
     }
-    if (!chapter) newChapter('reading-path', '阅读导引与证据口径', node);
+    if (!chapter) newChapter('reading-path', '阅读导引', node);
     if (heading) newChapter(node.id || heading.id, label(heading), node);
     chapter.node.append(node);
   }
@@ -1465,7 +1467,7 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('★ 前沿亮点', 'hl'));
+  if (highlights) nav.append(link('近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));
