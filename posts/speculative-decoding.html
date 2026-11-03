@@ -188,7 +188,8 @@
   'use strict';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   window.PaiMotion = {
-    mount(root, step, draw, isPlaying) {
+    mount(root, step, draw, isPlaying, options = {}) {
+      const interval = 1000 / Math.max(1, Math.min(20, options.fps || 20));
       const controls = root.querySelector('.ppx-bar') || root;
       let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
       if (!isPlaying) {
@@ -232,10 +233,10 @@
           raf = requestAnimationFrame(now => {
             raf = 0;
             if (!active()) { stop(); return; }
-            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            const dt = last ? Math.min(interval / 1000 + 0.08, (now - last) / 1000) : interval / 1000;
             last = now; step(dt); paint(); schedule();
           });
-        }, 50);
+        }, interval);
       }
       function refresh() {
         if (queued) return;
@@ -426,6 +427,14 @@ P(X=x) = P(x̂=x)·P(接受|x̂=x)   +   P(被拒绝)·P(X=x | 被拒绝)
        = <span class="n">p(x)</span>   ✅  <span class="c"># 与目标分布完全一致</span></pre>
 <p class="muted">（其中用到了 <code class="inl">1 − Σmin(p,q) = Σmax(0,p−q)</code>，因为 Σp = Σq = 1。）</p>
 </details>
+
+<figure class="core-visual" id="spec-rejection" data-core-visual="spec" aria-label="投机采样：拒绝后怎样补回来">
+<div class="core-title"><strong>投机采样：拒绝后怎样补回来</strong><span>原理拆解</span></div>
+<div class="core-controls ppx-bar"><label for="spec-branch">示例分支 <select id="spec-branch"><option value="reject">A 被拒绝</option><option value="accept">A 被接受</option><option value="accept-b">B 被接受</option></select></label><button class="ppx-play" type="button" aria-pressed="false">播放</button><button type="button" data-core-reset>重置</button></div>
+<div class="core-stage"><ol class="core-steps"><li aria-current="step"><span>01</span>提议</li><li><span>02</span>阈值</li><li><span>03</span>判断</li><li><span>04</span>补采样</li></ol><div class="core-stage-copy"><b>草稿提出候选</b><p>固定一个前缀，草稿分布为 q，目标分布为 p。下面展示可复核的采样分支，随机数是教学设定。</p></div><div class="spec-table" role="table" aria-label="同一前缀下的概率分布"><div role="row"><b role="columnheader">Token</b><b role="columnheader">草稿 q</b><b role="columnheader">目标 p</b></div><div role="row" data-candidate="true"><b role="rowheader">A</b><span role="cell">0.6</span><span role="cell">0.2</span></div><div role="row" data-candidate="false"><b role="rowheader">B</b><span role="cell">0.3</span><span role="cell">0.5</span></div><div role="row" data-candidate="false"><b role="rowheader">C</b><span role="cell">0.1</span><span role="cell">0.3</span></div></div><div class="core-equation">候选 A，u = 0.7</div><div class="spec-mass"><b>全部分支的概率账本</b><p>接受质量 [0.2, 0.3, 0.1]<br>＋拒绝质量 0.4 × [0, 0.5, 0.5]<br>＝最终分布 [0.2, 0.5, 0.3] = p</p></div></div>
+<p>整轮验证遇首次拒绝就丢弃后续草稿；如果所有候选都被接受，再从目标模型最后一个分布补采一个 token。分布相同不要求相同随机种子下逐次输出相同。</p>
+<figcaption>图 2-1 · 本文自绘，机制参照 Leviathan 等（ICML 2023）<a href="https://proceedings.mlr.press/v202/leviathan23a/leviathan23a.pdf#page=2">Algorithm 1</a> 与附录的分布保持证明。固定前缀、三词词表和随机数，仅演示一个位置。<sup class="cite"><a href="#V26-SPEC">[V26:SPEC]</a></sup></figcaption>
+</figure>
 
 <h3>2.2 加速从何而来？一个简洁的公式</h3>
 <p>设每个解码周期里：草稿耗时 <code class="inl">T<sub>draft</sub></code>，验证耗时 <code class="inl">T<sub>verify</sub></code>，平均接受 token 数 <code class="inl">τ</code>。那么每个 token 的平均延迟是<span class="cite" title="DFlash (Chen et al. 2026)">[11]</span>：</p>
@@ -1188,7 +1197,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 
 <section id="latest" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
-<h2 id="latest-content">更新附录 · 研究进展与发布记录</h2>
+<span class="anchor" id="latest-content"></span>
 
 <div class="grid2">
 <div class="card">
@@ -1366,6 +1375,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <footer class="foot">
 
 <h3 style="margin-top:0">📜 参考与引用出处</h3>
+<h3>原理图解来源（2026-11-04 核验）</h3><ol class="refs"><li id="V26-SPEC"><b>Leviathan, Kalman, Matias</b>. <i>Fast Inference from Transformers via Speculative Decoding</i>. ICML 2023，PMLR 202:19274–19286，2023-07-23 至 29。<a href="https://proceedings.mlr.press/v202/leviathan23a.html">会议论文与 Algorithm 1</a>。</li></ol>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-ENERGY"><b>Ma, Bole, Afzal, Ayesha et al.</b>. <i>Only Accepted Tokens Count: An Energy Accounting of Speculative Decoding Under Latency Targets</i>. arXiv:2610.40287v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.40287v1">一手来源</a>。</li></ol>
 
   <ol style="font-size:.86rem; line-height:1.9">
@@ -1419,6 +1429,171 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
   <a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数（GitHub 主页与站点共用同一计数器）"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:middle;height:20px"></a>
 </div>
 
+<!-- core-visuals:start -->
+<style>
+/* Editorial diagrams: native text reflows; color supplements explicit labels. */
+.core-visual { --cv-ink:var(--r-text,#183b50); --cv-muted:var(--r-muted,#506c7b); --cv-line:var(--r-line,#c7d5dc); --cv-soft:var(--r-soft,#e8eef1); --cv-surface:var(--r-surface,#fff); --cv-accent:var(--r-link,#176b67); color:var(--cv-ink); border:1px solid var(--cv-line); border-radius:10px; padding:24px; margin:28px 0; background:var(--cv-surface); font:15px/1.6 var(--font-body,system-ui); }
+.reader-content .core-visual { padding:24px; }
+.core-visual .core-title { display:flex; align-items:baseline; gap:16px; justify-content:space-between; padding-bottom:18px; border-bottom:1px solid var(--cv-line); }
+.core-visual .core-title strong { font-size:20px; font-weight:600; }
+.core-visual .core-title span { color:var(--cv-muted); font-size:12px; letter-spacing:.08em; white-space:nowrap; }
+.core-visual .core-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:18px 0; }
+.core-visual :is(button,select) { font:inherit; color:var(--cv-ink); background:var(--cv-surface); border:1px solid var(--cv-line); border-radius:6px; padding:7px 12px; min-height:44px; cursor:pointer; }
+.core-visual button.ppx-play { background:var(--cv-accent); color:var(--cv-surface); border-color:var(--cv-accent); min-width:70px; }
+.core-visual label { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.core-visual .motion-note { flex-basis:100%; color:var(--cv-muted); font-size:12px; }
+.core-visual .core-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; list-style:none; padding:0!important; margin:22px 0!important; }
+.core-visual .core-steps li { margin:0; padding-top:8px; border-top:2px solid var(--cv-line); font-size:13px; }
+.core-visual .core-steps span { display:block; font:12px/1.7 Consolas,monospace; opacity:.7; }
+.core-visual .core-steps [aria-current] { border-color:var(--cv-accent); font-weight:600; }
+.core-visual .core-stage-copy { min-height:96px; }
+.core-visual .core-stage-copy b { font-size:17px; }
+.reader-content .core-visual p,.core-visual p { margin:6px 0 16px!important; font-size:16px!important; line-height:1.75; }
+.core-visual .core-stage { font-variant-numeric:tabular-nums; }
+.core-visual .core-equation { padding:16px 0; margin:18px 0; border-top:1px solid var(--cv-line); border-bottom:1px solid var(--cv-line); font-size:18px; line-height:1.8; }
+.core-visual figcaption { padding-top:18px; margin-top:20px; border-top:1px solid var(--cv-line); }
+.core-visual .core-legend { display:flex; flex-wrap:wrap; gap:10px 20px; margin:16px 0; font-size:13px; }
+.core-legend i { display:inline-block; width:10px; height:10px; margin-right:6px; border-radius:2px; }
+.core-visual .zero-0 { background:#477cba!important; }
+.core-visual .zero-1 { background:#318f88!important; }
+.core-visual .zero-2 { background:#bd843b!important; }
+.zero-rows { display:grid; gap:22px; }
+.zero-row { display:grid; grid-template-columns:135px minmax(0,1fr) 105px; gap:20px; align-items:center; }
+.zero-label b,.zero-label span { display:block; }
+.zero-label span,.zero-formula { font-size:12px; color:var(--cv-muted); }
+.zero-bar { display:flex; height:22px; width:100%; background:var(--cv-soft)!important; overflow:hidden; border-radius:3px; margin-bottom:5px; }
+.zero-segment { height:100%; flex-shrink:0; }
+.zero-total { text-align:right; font-size:22px; }
+.zero-total small { display:block; font-size:12px; color:var(--cv-muted); }
+.kv-maps { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.kv-map { border-left:3px solid var(--cv-accent); padding-left:12px; }
+.kv-map-entry { display:block; font-size:14px; line-height:1.9; }
+.core-subheading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin:16px 0 10px; font-weight:600; }
+.core-subheading span { font-weight:400; color:var(--cv-muted); font-size:12px; }
+.kv-pool,.moe-experts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.kv-block,.moe-expert { padding:12px; border:1px solid var(--cv-line); border-radius:6px; }
+.kv-block > div:first-child,.moe-expert > div:first-child { display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; }
+.kv-block span,.moe-expert span { font-size:12px; color:var(--cv-muted); }
+.kv-cells { display:flex; gap:4px; margin-top:12px; }
+.kv-cells span { height:16px; flex:1; background:var(--cv-soft)!important; border-radius:2px; }
+.kv-cells [data-filled="true"] { background:#477cba!important; }
+.kv-block[data-used="true"] { border-color:var(--cv-accent); }
+.moe-input { display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin:12px 0 24px; font-size:13px; }
+.core-token { padding:5px 14px; border-radius:4px; background:var(--cv-soft)!important; font-size:16px; }
+.moe-expert[data-selected="true"] { border:2px solid var(--cv-accent); padding:11px; }
+.reader-content .core-visual .moe-expert p { margin:3px 0!important; font-size:14px!important; }
+.spec-table { max-width:100%; }
+.spec-table > div { display:grid; grid-template-columns:1fr 1fr 1fr; padding:10px 12px; border-bottom:1px solid var(--cv-line); font-size:15px; }
+.spec-table > div:first-child { color:var(--cv-muted); font-size:13px; }
+.spec-table [data-candidate="true"] { border-left:3px solid var(--cv-accent); padding-left:9px; }
+.spec-mass { font-size:14px; }
+@media(max-width:620px) {
+ .reader-content .core-visual,.core-visual { padding:18px 14px; }
+ .core-visual .core-title { display:block; }
+ .core-visual .core-title span { display:block; margin-top:5px; }
+ .core-visual .core-title strong { font-size:19px; }
+ .core-visual .core-stage-copy { min-height:130px; }
+ .core-visual select { max-width:100%; font-size:16px; }
+ .core-visual .core-steps { gap:8px; }
+ .kv-pool,.moe-experts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .kv-maps { gap:12px; }
+ .zero-row { grid-template-columns:minmax(0,1fr) 90px; gap:8px 12px; }
+ .zero-label { grid-column:1/-1; display:flex; gap:12px; align-items:baseline; }
+ .zero-total { font-size:20px; }
+ .core-visual .core-equation { font-size:16px; }
+}
+
+html:not(.reader-ready) .core-visual .core-controls { display:none; }
+</style>
+<script>
+/* Deterministic teaching models and DOM diagrams; no network or animation library. */
+(function () {
+  'use strict';
+  const fmt = x => Number(x.toFixed(3)).toString();
+  function zero(p) {
+    return [
+      {name:'DP',detail:'完整副本',formula:'16N',parts:[2,2,12]},
+      {name:'ZeRO-1',detail:'分片优化器状态',formula:'4N + 12N/p',parts:[2,2,12/p]},
+      {name:'ZeRO-2',detail:'再分片梯度',formula:'2N + 14N/p',parts:[2,2/p,12/p]},
+      {name:'ZeRO-3',detail:'再分片参数',formula:'16N/p',parts:[2/p,2/p,12/p]}
+    ].map(x=>({...x,total:x.parts.reduce((a,b)=>a+b,0)}));
+  }
+  function kv(phase) {
+    const a=[{id:5,n:4},{id:1,n:2}];
+    const b=phase===0?[{id:5,n:4},{id:1,n:2}]:[{id:5,n:4},{id:3,n:phase===1?3:4}];
+    if(phase===3)b.push({id:7,n:1});
+    const pool=Array.from({length:8},(_,id)=>({id,n:0,owners:[]}));
+    for(const [name,map] of [['A',a],['B',b]])for(const x of map){pool[x.id].n=x.n;pool[x.id].owners.push(name);}
+    return {a,b,pool};
+  }
+  function moe(logits=[Math.log(3),0,-2,-3],k=2,outputs=[2,6,10,14]) {
+    const selected=logits.map((x,i)=>i).sort((a,b)=>logits[b]-logits[a]).slice(0,k);
+    const max=Math.max(...selected.map(i=>logits[i]));
+    const den=selected.reduce((s,i)=>s+Math.exp(logits[i]-max),0);
+    const weights=logits.map((x,i)=>selected.includes(i)?Math.exp(x-max)/den:0);
+    return {selected,weights,output:weights.reduce((s,w,i)=>s+w*outputs[i],0)};
+  }
+  function spec(p=[.2,.5,.3],q=[.6,.3,.1]) {
+    const accepted=p.map((x,i)=>Math.min(x,q[i]));
+    const deficit=p.map((x,i)=>Math.max(0,x-q[i]));
+    const rejection=deficit.reduce((a,b)=>a+b,0);
+    return {p,q,accepted,rejection,residual:deficit.map(x=>rejection?x/rejection:0),final:accepted.map((x,i)=>x+deficit[i])};
+  }
+  const texts={
+    kv:[['共享前缀','同一请求分出 A、B 两条续写。它们共享 P5 和未写满的 P1，引用计数均为 2。'],['写前复制','B 要写第 7 个 token：先把共享尾块 P1 的两个条目复制到空闲 P3，再追加。A 的缓存保持不变。'],['填满尾块','B 的第 8 个 token 写进 P3 剩余位置。无需重新分配或搬动前面的整条序列。'],['追加物理块','B 的第 9 个 token 分配到 P7。逻辑块连续，物理块 P5 → P3 → P7 可以不连续。']],
+    moe:[['给专家打分','一个 token 的门控 logits 为 [ln 3, 0, −2, −3]。四个专家的参数仍然存在。'],['选出 top-2','保留 E0、E1，再对保留的 logits 做 softmax：权重为 0.75、0.25，另两个为 0。'],['派发并计算','同一个 token 分发给两个选中专家。用标量输出 2 和 6 代替真实向量，便于手算。'],['加权合并','按门控权重合并专家输出：0.75 × 2 + 0.25 × 6 = 3。未选专家不参与本 token 的 FFN 计算。']],
+    spec:[['草稿提出候选','固定一个前缀，草稿分布为 q，目标分布为 p。下面展示可复核的采样分支，随机数是教学设定。'],['计算接受阈值','接受概率为 min(1, p(x)/q(x))。比较同一次采样的随机数 u 与这个阈值。'],['作出接受判断','首次拒绝后，后续草稿的前缀不再成立，必须丢弃；不能跳过坏 token 后继续接收原草稿。'],['恢复目标分布','拒绝时从正残差 normalize(max(p−q,0)) 补采样。不是直接重新从 p 抽一个 token。']]
+  };
+  const steps={kv:['共享','复制','写入','扩容'],moe:['打分','选择','计算','合并'],spec:['提议','阈值','判断','补采样']};
+  function progress(kind,phase){return '<ol class="core-steps">'+steps[kind].map((s,i)=>'<li'+(i===phase?' aria-current="step"':'')+'><span>'+String(i+1).padStart(2,'0')+'</span>'+s+'</li>').join('')+'</ol>';}
+  function render(kind,phase=0,choice='reject') {
+    if(kind==='zero')return '<div class="zero-rows">'+zero(+choice||4).map(row=>'<div class="zero-row"><div class="zero-label"><b>'+row.name+'</b><span>'+row.detail+'</span></div><div class="zero-plot"><div class="zero-bar" role="img" aria-label="参数 '+fmt(row.parts[0])+' GB，梯度 '+fmt(row.parts[1])+' GB，优化器 '+fmt(row.parts[2])+' GB">'+row.parts.map((x,i)=>'<span class="zero-segment zero-'+i+'" style="width:'+x/16*100+'%"></span>').join('')+'</div><span class="zero-formula">'+row.formula+'</span></div><div class="zero-total">'+fmt(row.total)+'<small> GB / 卡</small></div></div>').join('')+'</div>';
+    let body='';
+    if(kind==='kv'){
+      const s=kv(phase);
+      const map=(name,items)=>'<div class="kv-map"><b>分支 '+name+'</b><div>'+Array.from({length:3},(_,i)=>'<span class="kv-map-entry">L'+i+' <span aria-hidden="true">→</span> '+(items[i]?'P'+items[i].id+' · '+items[i].n+'/4':'未分配')+'</span>').join('')+'</div></div>';
+      body='<div class="kv-maps">'+map('A',s.a)+map('B',s.b)+'</div><div class="core-subheading">物理块池 <span>每块容纳 4 个 token 的 K/V</span></div><div class="kv-pool">'+s.pool.map(p=>'<div class="kv-block" data-used="'+!!p.owners.length+'" data-block="'+p.id+'"><div><b>P'+p.id+'</b><span>'+ (p.owners.length?'引用 '+p.owners.length+' · '+p.owners.join(' / '):'空闲')+'</span></div><div class="kv-cells" aria-label="已用 '+p.n+' / 4">'+Array.from({length:4},(_,i)=>'<span data-filled="'+(i<p.n)+'"></span>').join('')+'</div></div>').join('')+'</div>';
+    }else if(kind==='moe'){
+      const s=moe();body='<div class="moe-input"><span class="core-token">token x</span><span>同一个输入，按需送往专家</span></div><div class="moe-experts">'+['ln 3','0','−2','−3'].map((x,i)=>'<div class="moe-expert" data-selected="'+(phase>0&&i<2)+'"><div><b>E'+i+'</b><span>'+(phase===0?'待路由':i<2?'选中':'本次跳过')+'</span></div><p>logit '+x+'</p><p>'+(phase>0?'权重 '+fmt(s.weights[i]):'权重待计算')+'</p><p>'+(phase>=2&&i<2?'输出 '+[2,6][i]:'—')+'</p></div>').join('')+'</div><div class="core-equation">'+(phase===3?'y = 0.75 × 2 + 0.25 × 6 = <strong>3</strong>':'y = Σ gᵢ · Eᵢ(x)')+'</div>';
+    }else{
+      const s=spec(),index=choice==='accept-b'?1:0,u=choice==='reject'?.7:choice==='accept-b'?.8:.2;
+      const threshold=Math.min(1,s.p[index]/s.q[index]),accepted=u<threshold;
+      body='<div class="spec-table" role="table" aria-label="同一前缀下的概率分布"><div role="row"><b role="columnheader">Token</b><b role="columnheader">草稿 q</b><b role="columnheader">目标 p</b></div>'+['A','B','C'].map((x,i)=>'<div role="row" data-candidate="'+(i===index)+'"><b role="rowheader">'+x+'</b><span role="cell">'+fmt(s.q[i])+'</span><span role="cell">'+fmt(s.p[i])+'</span></div>').join('')+'</div><div class="core-equation">'+(phase===0?'候选 '+['A','B','C'][index]+'，u = '+u:phase===1?'接受阈值 = '+fmt(threshold)+'；u = '+u:phase===2?(accepted?'接受候选 '+['A','B'][index]:'0.7 > 1/3，拒绝候选 A'):(accepted?'保留 '+['A','B'][index]+'，继续验证下一位置':'正残差 [0, 0.2, 0.2] → [0, 0.5, 0.5]<br>补采随机数 0.25 → 输出 B'))+'</div><div class="spec-mass"><b>全部分支的概率账本</b><p>接受质量 [0.2, 0.3, 0.1]<br>＋拒绝质量 0.4 × [0, 0.5, 0.5]<br>＝最终分布 [0.2, 0.5, 0.3] = p</p></div>';
+    }
+    return progress(kind,phase)+'<div class="core-stage-copy"><b>'+texts[kind][phase][0]+'</b><p>'+texts[kind][phase][1]+'</p></div>'+body;
+  }
+  const api={zero,kv,moe,spec,render};
+  if(typeof module!=='undefined')module.exports=api;
+  if(typeof document==='undefined')return;
+  window.PaiCore=api;
+  document.querySelectorAll('[data-core-visual]').forEach(root=>{
+    const kind=root.dataset.coreVisual,stage=root.querySelector('.core-stage');
+    const select=root.querySelector('select');
+    if(kind==='zero'){
+      select.addEventListener('change',()=>{stage.innerHTML=render(kind,0,select.value);});return;
+    }
+    let phase=0,elapsed=0,playing=false,last='';
+    const button=root.querySelector('.ppx-play');
+    function reset(){phase=0;elapsed=0;playing=false;button.textContent='播放';}
+    button.addEventListener('click',()=>{if(phase===3){phase=0;elapsed=0;}playing=!playing;button.textContent=playing?'暂停':'播放';});
+    root.querySelector('[data-core-reset]').addEventListener('click',reset);
+    if(select)select.addEventListener('change',reset);
+    function step(dt,manual){
+      elapsed+=dt;
+      if(manual||elapsed>=1.5){phase=Math.min(3,phase+1);elapsed=0;}
+      if(phase===3){playing=false;button.textContent='播放';}
+    }
+    function draw(){
+      const choice=select?select.value:'reject',key=phase+':'+choice;
+      if(key===last)return;
+      stage.innerHTML=render(kind,phase,choice);last=key;root.dataset.corePhase=String(phase);
+      root.dataset.corePaints=String(+(root.dataset.corePaints||0)+1);
+    }
+    PaiMotion.mount(root,step,draw,()=>playing,{fps:4});
+  });
+})();
+</script>
+<!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <style id="chapter-reader-style">
 /* Shared by the homepage and the standalone article reader (inlined at build time). */
@@ -1519,7 +1694,7 @@ html.reader-ready[data-reader-theme="dark"] {
 .reader-content :is(sup.cite,sup.ref,span.cite) { font-size:13px!important; line-height:1.5; color:var(--r-link)!important; background:transparent!important; border:0!important; padding:0!important; }
 .reader-content :is(sup.cite,sup.ref) a { font-size:inherit!important; }
 .reader-content :is(.muted,.small,small,figcaption,.cap,.codecap,.src) { color:var(--r-muted)!important; }
-.reader-content :is(figcaption,.cap,.codecap) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
+.reader-content :is(figcaption,.cap,.codecap):not(svg *) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
 .reader-content .codecap { background:var(--r-soft)!important; }
 .reader-content :is(caption,.hl-date,.hl-title i,.hl-head i) { color:var(--r-muted)!important; }
 .reader-content :is(.hl-card,.hl-wrap) { color:var(--r-text)!important; background:var(--r-surface)!important; border-color:var(--r-line)!important; }
@@ -1557,6 +1732,16 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
 .reader-content img { display:block; height:auto; max-width:100%; margin:18px auto; padding:8px; background:#fff; border:1px solid #cbd1d8; border-radius:6px; box-sizing:border-box; }
 .reader-content svg { background:#202936; border-radius:6px; }
 .reader-content svg,.reader-content .ppx-demo { --ink:#d7dce3; --fg:#d7dce3; --ink-dim:#adb8c6; --muted:#adb8c6; --bg:#202936; --panel:#252d36; --line:#465363; --brand:#9bbfe7; --accent:#9bbfe7; }
+svg[data-handbook-diagram] { --d-surface:var(--r-surface,#fff); --d-line:var(--r-line,#c7d5dc); --d-blue:#4979ad; --d-blue-soft:#e3edf8; --d-green:#347f76; --d-green-soft:#e2f1eb; --d-purple:#7e69a4; --d-purple-soft:#eee8f6; --d-amber:#a27a38; --d-amber-soft:#f6edda; --d-red:#a85c61; --d-red-soft:#f6e6e7; background:var(--r-surface,#fff); border-radius:4px; }
+.reader-ready[data-reader-theme="dark"] svg[data-handbook-diagram] { --d-blue:#9dbde1; --d-blue-soft:#2b3e53; --d-green:#a2cfc1; --d-green-soft:#293f3a; --d-purple:#c0afdd; --d-purple-soft:#3b344b; --d-amber:#d9c393; --d-amber-soft:#443d2d; --d-red:#deb0b4; --d-red-soft:#48363a; }
+svg[data-handbook-diagram] :is(text,tspan) { fill:var(--r-text,#183b50)!important; }
+svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fill:var(--r-muted,#506c7b)!important; }
+.reader-content .reader-diagram-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; }
+.reader-content .reader-diagram-scroll svg { display:block; width:100%!important; min-width:var(--diagram-readable-width)!important; max-width:none!important; height:auto; margin:0; }
+.reader-content .reader-diagram-scroll[data-fit] svg { min-width:0!important; }
+.reader-content .reader-diagram-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:10px 0; font-size:12px; }
+.reader-content .reader-diagram-tools button { min-height:36px; }
+.reader-content .diagram-note { font-size:16px!important; color:var(--r-muted)!important; }
 .reader-content .ppx-demo { --r-text:#d7dce3; --r-heading:#edf0f4; --r-muted:#adb8c6; --r-line:#465363; --r-link:#9bbfe7; --r-surface:#252d36; --r-soft:#222b35; background:#1c2532!important; color:#d7dce3!important; font-size:14px; }
 .reader-flow.grid2 { display:block; }
 .reader-ui { font:14px/1.8 var(--font-body); color:var(--r-text); box-sizing:border-box; }
@@ -1828,6 +2013,27 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     figures.push({id:img.id, title:caption ? clean(caption) : img.alt || '论文配图 ' + (i + 1)});
     let ancestor = img.parentElement;
     while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
+  });
+
+  // Preserve readable labels instead of shrinking a wide diagram into a phone.
+  // Setup and explicit button clicks only: no resize or animation polling.
+  root.querySelectorAll('svg[data-handbook-diagram]').forEach(svg => {
+    const box = svg.viewBox.baseVal;
+    const sizes = [...svg.querySelectorAll('text')].map(t => parseFloat(getComputedStyle(t).fontSize)).filter(n => n > 0);
+    if (!box.width || !sizes.length) return;
+    const readable = Math.ceil(box.width * 12 / Math.min(...sizes));
+    const viewport = element('div', 'reader-diagram-scroll');
+    viewport.style.setProperty('--diagram-readable-width', readable + 'px');
+    viewport.tabIndex = 0; viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', '图解，可横向滚动');
+    const controls = element('div', 'reader-ui reader-diagram-tools');
+    controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
+    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    fit.addEventListener('click', () => {
+      const fitted = viewport.toggleAttribute('data-fit');
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+    });
+    controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
   });
 
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';

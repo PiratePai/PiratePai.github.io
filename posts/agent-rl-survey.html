@@ -153,93 +153,93 @@
 <p class="lead">这份综述回答四个问题:<b>Agent 是怎么用强化学习练出来的</b>(§1–§2)、<b>RL 训练里的"采样引擎"是什么、为什么它成了瓶颈</b>(§3)、<b>为什么大家都在做异步化</b>(§4)、<b>RL 怎么从文本扩展到图像/视频/音乐</b>(§5)。如果你只有 10 分钟,看下面这张时间线 + 每节开头的"太长不看"即可。</p>
 
 <div class="fig">
-<svg viewBox="0 0 1040 430" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-1" viewBox="0 0 1040 430" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif">
   <defs>
     <linearGradient id="tl" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#3a4a68"/><stop offset=".5" stop-color="#6ea8ff"/><stop offset="1" stop-color="#9d7bff"/>
+      <stop offset="0" stop-color="var(--d-blue-soft)"/><stop offset=".5" stop-color="var(--d-blue-soft)"/><stop offset="1" stop-color="var(--d-purple-soft)"/>
     </linearGradient>
   </defs>
   <rect x="30" y="205" width="980" height="8" rx="4" fill="url(#tl)"/>
   <!-- years -->
-  <g font-size="13" fill="#aeb4bd" text-anchor="middle">
+  <g font-size="13" fill="var(--d-surface)" text-anchor="middle">
     <text x="60" y="240">2017</text><text x="185" y="240">2022</text><text x="310" y="240">2023</text>
     <text x="435" y="240">2024</text><text x="560" y="240">2025</text><text x="760" y="240">2026</text>
   </g>
-  <g stroke="#4a5670" stroke-width="1.5">
+  <g stroke="var(--d-line)" stroke-width="1.5">
     <line x1="60" y1="198" x2="60" y2="220"/><line x1="185" y1="198" x2="185" y2="220"/>
     <line x1="310" y1="198" x2="310" y2="220"/><line x1="435" y1="198" x2="435" y2="220"/>
     <line x1="560" y1="198" x2="560" y2="220"/><line x1="760" y1="198" x2="760" y2="220"/>
   </g>
   <!-- above axis: algorithm/model line -->
   <g font-size="12.5">
-    <line x1="60" y1="205" x2="60" y2="175" stroke="#4a5670"/>
-    <rect x="18" y="118" width="100" height="56" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="68" y="140" fill="#e8eaed" text-anchor="middle" font-weight="700">PPO</text>
-    <text x="68" y="158" fill="#aeb4bd" text-anchor="middle">策略梯度算法</text>
+    <line x1="60" y1="205" x2="60" y2="175" stroke="var(--d-line)"/>
+    <rect x="18" y="118" width="100" height="56" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="68" y="140" fill="var(--d-surface)" text-anchor="middle" font-weight="700">PPO</text>
+    <text x="68" y="158" fill="var(--d-surface)" text-anchor="middle">策略梯度算法</text>
 
-    <line x1="185" y1="205" x2="185" y2="175" stroke="#4a5670"/>
-    <rect x="138" y="118" width="112" height="56" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="194" y="140" fill="#e8eaed" text-anchor="middle" font-weight="700">ChatGPT/RLHF</text>
-    <text x="194" y="158" fill="#aeb4bd" text-anchor="middle">InstructGPT 三阶段</text>
+    <line x1="185" y1="205" x2="185" y2="175" stroke="var(--d-line)"/>
+    <rect x="138" y="118" width="112" height="56" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="194" y="140" fill="var(--d-surface)" text-anchor="middle" font-weight="700">ChatGPT/RLHF</text>
+    <text x="194" y="158" fill="var(--d-surface)" text-anchor="middle">InstructGPT 三阶段</text>
 
-    <line x1="310" y1="205" x2="310" y2="175" stroke="#4a5670"/>
-    <rect x="252" y="118" width="120" height="56" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="312" y="140" fill="#e8eaed" text-anchor="middle" font-weight="700">DPO / DDPO</text>
-    <text x="312" y="158" fill="#aeb4bd" text-anchor="middle">免 RM 微调·扩散 RL</text>
+    <line x1="310" y1="205" x2="310" y2="175" stroke="var(--d-line)"/>
+    <rect x="252" y="118" width="120" height="56" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="312" y="140" fill="var(--d-surface)" text-anchor="middle" font-weight="700">DPO / DDPO</text>
+    <text x="312" y="158" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="312">免 RM 微调</tspan><tspan x="312" dy="14">扩散 RL</tspan></text>
 
-    <line x1="435" y1="205" x2="435" y2="175" stroke="#4a5670"/>
-    <rect x="372" y="118" width="128" height="56" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="436" y="140" fill="#e8eaed" text-anchor="middle" font-weight="700">GRPO</text>
-    <text x="436" y="158" fill="#aeb4bd" text-anchor="middle">DeepSeekMath:免价值模型</text>
+    <line x1="435" y1="205" x2="435" y2="175" stroke="var(--d-line)"/>
+    <rect x="372" y="118" width="128" height="56" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="436" y="140" fill="var(--d-surface)" text-anchor="middle" font-weight="700">GRPO</text>
+    <text x="436" y="158" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="436">DeepSeekMath</tspan><tspan x="436" dy="14">免价值模型</tspan></text>
 
-    <line x1="545" y1="205" x2="545" y2="175" stroke="#4a5670"/>
-    <rect x="515" y="112" width="150" height="62" rx="8" fill="#233043" stroke="#6ea8ff"/>
-    <text x="590" y="135" fill="#bcd4ff" text-anchor="middle" font-weight="700">DeepSeek-R1 ★</text>
-    <text x="590" y="153" fill="#aeb4bd" text-anchor="middle">RLVR:纯 RL 涌现推理</text>
-    <text x="590" y="168" fill="#7b879c" text-anchor="middle" font-size="11">2025-01</text>
+    <line x1="545" y1="205" x2="545" y2="175" stroke="var(--d-line)"/>
+    <rect x="515" y="112" width="150" height="62" rx="8" fill="var(--d-blue-soft)" stroke="var(--d-blue)"/>
+    <text x="590" y="135" fill="var(--d-blue-soft)" text-anchor="middle" font-weight="700">DeepSeek-R1 ★</text>
+    <text x="590" y="153" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="590">RLVR：纯 RL</tspan><tspan x="590" dy="14">涌现推理</tspan></text>
+    <text x="590" y="190" fill="var(--d-surface)" text-anchor="middle" font-size="11">2025-01</text>
 
-    <line x1="700" y1="205" x2="700" y2="175" stroke="#4a5670"/>
-    <rect x="628" y="112" width="150" height="62" rx="8" fill="#2a2340" stroke="#9d7bff"/>
-    <text x="703" y="135" fill="#ddd0ff" text-anchor="middle" font-weight="700">Agent RL 元年</text>
-    <text x="703" y="153" fill="#aeb4bd" text-anchor="middle">K2 / GLM-4.5 / DeepResearch</text>
-    <text x="703" y="168" fill="#7b879c" text-anchor="middle" font-size="11">2025 H2</text>
+    <line x1="700" y1="205" x2="700" y2="175" stroke="var(--d-line)"/>
+    <rect x="628" y="112" width="150" height="62" rx="8" fill="var(--d-surface)" stroke="var(--d-purple)"/>
+    <text x="703" y="135" fill="var(--d-purple-soft)" text-anchor="middle" font-weight="700">Agent RL 元年</text>
+    <text x="703" y="153" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="703">K2 / GLM-4.5</tspan><tspan x="703" dy="14">DeepResearch</tspan></text>
+    <text x="703" y="190" fill="var(--d-surface)" text-anchor="middle" font-size="11">2025 H2</text>
 
-    <line x1="900" y1="205" x2="900" y2="175" stroke="#4a5670"/>
-    <rect x="820" y="112" width="170" height="62" rx="8" fill="#1f2b26" stroke="#41d1a7"/>
-    <text x="905" y="135" fill="#b8e8d6" text-anchor="middle" font-weight="700">视频/图像 RL 爆发</text>
-    <text x="905" y="153" fill="#aeb4bd" text-anchor="middle">Flow-GRPO → World-R1</text>
-    <text x="905" y="168" fill="#7b879c" text-anchor="middle" font-size="11">2025–2026</text>
+    <line x1="900" y1="205" x2="900" y2="175" stroke="var(--d-line)"/>
+    <rect x="820" y="112" width="170" height="62" rx="8" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="905" y="135" fill="var(--d-green-soft)" text-anchor="middle" font-weight="700">视频/图像 RL 爆发</text>
+    <text x="905" y="153" fill="var(--d-surface)" text-anchor="middle">Flow-GRPO → World-R1</text>
+    <text x="905" y="168" fill="var(--d-surface)" text-anchor="middle" font-size="11">2025–2026</text>
   </g>
   <!-- below axis: systems line -->
   <g font-size="12.5">
-    <line x1="310" y1="213" x2="310" y2="255" stroke="#4a5670"/>
-    <rect x="255" y="255" width="118" height="58" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="314" y="277" fill="#e8eaed" text-anchor="middle" font-weight="700">vLLM</text>
-    <text x="314" y="295" fill="#aeb4bd" text-anchor="middle">PagedAttention(SOSP'23)</text>
+    <line x1="310" y1="213" x2="310" y2="255" stroke="var(--d-line)"/>
+    <rect x="255" y="255" width="118" height="58" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="314" y="277" fill="var(--d-surface)" text-anchor="middle" font-weight="700">vLLM</text>
+    <text x="314" y="295" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="314">PagedAttention</tspan><tspan x="314" dy="14">SOSP 2023</tspan></text>
 
-    <line x1="390" y1="213" x2="390" y2="255" stroke="#4a5670"/>
-    <rect x="338" y="255" width="106" height="58" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="391" y="277" fill="#e8eaed" text-anchor="middle" font-weight="700">SGLang</text>
-    <text x="391" y="295" fill="#aeb4bd" text-anchor="middle">RadixAttention</text>
+    <line x1="390" y1="213" x2="390" y2="255" stroke="var(--d-line)"/>
+    <rect x="338" y="255" width="106" height="58" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="391" y="277" fill="var(--d-surface)" text-anchor="middle" font-weight="700">SGLang</text>
+    <text x="391" y="295" fill="var(--d-surface)" text-anchor="middle">RadixAttention</text>
 
-    <line x1="500" y1="213" x2="500" y2="255" stroke="#4a5670"/>
-    <rect x="448" y="255" width="112" height="58" rx="8" fill="#1d212b" stroke="#2a2f3a"/>
-    <text x="504" y="277" fill="#e8eaed" text-anchor="middle" font-weight="700">OpenRLHF / verl</text>
-    <text x="504" y="295" fill="#aeb4bd" text-anchor="middle">RLHF 训练框架(2024–25)</text>
+    <line x1="500" y1="213" x2="500" y2="255" stroke="var(--d-line)"/>
+    <rect x="448" y="255" width="112" height="58" rx="8" fill="var(--d-surface)" stroke="var(--d-line)"/>
+    <text x="504" y="277" fill="var(--d-surface)" text-anchor="middle" font-weight="700">OpenRLHF / verl</text>
+    <text x="504" y="295" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="504">RLHF 训练框架</tspan><tspan x="504" dy="14">2024–25</tspan></text>
 
-    <line x1="640" y1="213" x2="640" y2="255" stroke="#4a5670"/>
-    <rect x="565" y="255" width="158" height="58" rx="8" fill="#233043" stroke="#6ea8ff"/>
-    <text x="644" y="277" fill="#bcd4ff" text-anchor="middle" font-weight="700">异步 RL 系统</text>
-    <text x="644" y="295" fill="#aeb4bd" text-anchor="middle">AReaL / StreamRL / slime(2025)</text>
+    <line x1="640" y1="213" x2="640" y2="255" stroke="var(--d-line)"/>
+    <rect x="565" y="255" width="158" height="58" rx="8" fill="var(--d-blue-soft)" stroke="var(--d-blue)"/>
+    <text x="644" y="277" fill="var(--d-blue-soft)" text-anchor="middle" font-weight="700">异步 RL 系统</text>
+    <text x="644" y="295" fill="var(--d-surface)" text-anchor="middle" font-size="11"><tspan x="644">AReaL / StreamRL</tspan><tspan x="644" dy="14">slime (2025)</tspan></text>
 
-    <line x1="860" y1="213" x2="860" y2="255" stroke="#4a5670"/>
-    <rect x="760" y="255" width="200" height="58" rx="8" fill="#1f2b26" stroke="#41d1a7"/>
-    <text x="860" y="277" fill="#b8e8d6" text-anchor="middle" font-weight="700">RL 基础设施成熟化(2026)</text>
-    <text x="860" y="295" fill="#aeb4bd" text-anchor="middle">Rollout-as-a-Service · 原生 RL API · 异构调度</text>
+    <line x1="860" y1="213" x2="860" y2="255" stroke="var(--d-line)"/>
+    <rect x="760" y="255" width="200" height="58" rx="8" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="860" y="277" fill="var(--d-green-soft)" text-anchor="middle" font-weight="700">RL 基础设施成熟化(2026)</text>
+    <text x="860" y="295" fill="var(--d-surface)" text-anchor="middle">Rollout-as-a-Service · 原生 RL API · 异构调度</text>
   </g>
-  <g font-size="12" fill="#7b879c">
-    <text x="30" y="100" fill="#9aa7bd" font-weight="700">算法 / 模型线(上)</text>
-    <text x="30" y="355" fill="#9aa7bd" font-weight="700">系统 / 基础设施线(下)</text>
+  <g font-size="12" fill="var(--d-surface)">
+    <text x="30" y="100" fill="var(--d-surface)" font-weight="700">算法 / 模型线(上)</text>
+    <text x="30" y="355" fill="var(--d-surface)" font-weight="700">系统 / 基础设施线(下)</text>
   </g>
 </svg>
 <div class="cap">图 0-1 · Agent 与 RL 技术 2017–2026 演进时间线(上:算法与模型;下:训练系统与基础设施)</div>
@@ -319,26 +319,26 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 <span class="zh">译:"在单轮 RL 里,一条 rollout 就是一段扁平的 token 序列;而 Agent RL 更复杂:模型要经历多轮的'观察上下文 → 采取动作 → 接收反馈'。"</span></small></div>
 
 <div class="fig">
-<svg viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="13">
-  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6ea8ff"/></marker></defs>
-  <rect x="30" y="60" width="170" height="90" rx="12" fill="#1d212b" stroke="#6ea8ff"/>
-  <text x="115" y="95" fill="#e8eaed" text-anchor="middle" font-weight="700" font-size="15">LLM(策略 π)</text>
-  <text x="115" y="118" fill="#aeb4bd" text-anchor="middle" font-size="12">生成思考/动作 token</text>
-  <rect x="380" y="60" width="180" height="90" rx="12" fill="#1d212b" stroke="#9d7bff"/>
-  <text x="470" y="95" fill="#e8eaed" text-anchor="middle" font-weight="700" font-size="15">环境 Environment</text>
-  <text x="470" y="118" fill="#aeb4bd" text-anchor="middle" font-size="12">浏览器 / 终端 / 搜索 API / 沙箱</text>
-  <rect x="740" y="60" width="220" height="90" rx="12" fill="#1d212b" stroke="#41d1a7"/>
-  <text x="850" y="88" fill="#e8eaed" text-anchor="middle" font-weight="700" font-size="15">奖励 R</text>
-  <text x="850" y="110" fill="#aeb4bd" text-anchor="middle" font-size="12">测试通过?答案正确?(可验证)</text>
-  <line x1="200" y1="85" x2="375" y2="85" stroke="#6ea8ff" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="287" y="75" fill="#bcd4ff" text-anchor="middle" font-size="12">动作 a(工具调用)</text>
-  <line x1="375" y1="125" x2="205" y2="125" stroke="#9d7bff" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="290" y="145" fill="#c9b6ff" text-anchor="middle" font-size="12">观测 o(工具返回,拼回上下文)</text>
-  <line x1="560" y1="105" x2="735" y2="105" stroke="#41d1a7" stroke-width="2" marker-end="url(#ar)"/>
-  <text x="648" y="95" fill="#b8e8d6" text-anchor="middle" font-size="12">终局状态</text>
-  <line x1="850" y1="150" x2="115" y2="150" stroke="#41d1a7" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar)"/>
-  <text x="480" y="170" fill="#b8e8d6" text-anchor="middle" font-size="12">稀疏奖励(只在轨迹结束发放)→ 用 GRPO/PPO 摊到每个 token</text>
-  <text x="500" y="215" fill="#7b879c" text-anchor="middle" font-size="12.5">一条多轮轨迹 = rollout = 「状态 s(prompt+历史) → 动作 a(token/工具调用) → 观测 o → … → 终局奖励 R」</text>
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-2" viewBox="0 0 1000 250" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="13">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--d-blue-soft)"/></marker></defs>
+  <rect x="30" y="60" width="170" height="90" rx="12" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="115" y="95" fill="var(--d-surface)" text-anchor="middle" font-weight="700" font-size="15">LLM(策略 π)</text>
+  <text x="115" y="118" fill="var(--d-surface)" text-anchor="middle" font-size="12">生成思考/动作 token</text>
+  <rect x="380" y="60" width="180" height="90" rx="12" fill="var(--d-surface)" stroke="var(--d-purple)"/>
+  <text x="470" y="95" fill="var(--d-surface)" text-anchor="middle" font-weight="700" font-size="15">环境 Environment</text>
+  <text x="470" y="118" fill="var(--d-surface)" text-anchor="middle" font-size="12">浏览器 / 终端 / 搜索 API / 沙箱</text>
+  <rect x="740" y="60" width="220" height="90" rx="12" fill="var(--d-surface)" stroke="var(--d-green)"/>
+  <text x="850" y="88" fill="var(--d-surface)" text-anchor="middle" font-weight="700" font-size="15">奖励 R</text>
+  <text x="850" y="110" fill="var(--d-surface)" text-anchor="middle" font-size="12">测试通过?答案正确?(可验证)</text>
+  <line x1="200" y1="85" x2="375" y2="85" stroke="var(--d-blue)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="287" y="75" fill="var(--d-blue-soft)" text-anchor="middle" font-size="12">动作 a(工具调用)</text>
+  <line x1="375" y1="125" x2="205" y2="125" stroke="var(--d-purple)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="290" y="145" fill="var(--d-purple-soft)" text-anchor="middle" font-size="12">观测 o(工具返回,拼回上下文)</text>
+  <line x1="560" y1="105" x2="735" y2="105" stroke="var(--d-green)" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="648" y="95" fill="var(--d-green-soft)" text-anchor="middle" font-size="12">终局状态</text>
+  <line x1="850" y1="150" x2="115" y2="150" stroke="var(--d-green)" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+  <text x="480" y="170" fill="var(--d-green-soft)" text-anchor="middle" font-size="12">稀疏奖励(只在轨迹结束发放)→ 用 GRPO/PPO 摊到每个 token</text>
+  <text x="500" y="215" fill="var(--d-surface)" text-anchor="middle" font-size="12.5">一条多轮轨迹 = rollout = 「状态 s(prompt+历史) → 动作 a(token/工具调用) → 观测 o → … → 终局奖励 R」</text>
 </svg>
 <div class="cap">图 1-1 · Agent RL 的循环:与单轮 RL 唯一的本质区别是"环境反馈"作为观测被拼接回上下文,循环几十轮</div>
 </div>
@@ -354,40 +354,40 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 <p>"数据飞轮"(data flywheel)原本是产品圈的词:产品越好用 → 用户越多 → 产生越多数据 → 数据改进产品。它进入 LLM 训练话语体系是在 RLHF 时代(用户偏好数据回流),而在 <b>Agent RL 时代获得了完全不同的形态</b>:因为 Agent 的训练数据不是"人写的问答",而是<b>"模型与环境交互产生的轨迹"</b>。轨迹可以无限免费生成,瓶颈变成了"<b>哪里来足够多、足够难、可自动判分的任务与环境</b>"。于是飞轮的驱动力从"用户"换成了"合成管线 + 模型自身"。</p>
 
 <div class="fig">
-<svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="13">
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-3" viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="13">
   <defs>
-    <marker id="fw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#ffb454"/></marker>
+    <marker id="fw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--d-amber-soft)"/></marker>
   </defs>
-  <circle cx="500" cy="210" r="118" fill="none" stroke="#ffb454" stroke-width="2.5" stroke-dasharray="10 6"/>
+  <circle cx="500" cy="210" r="118" fill="none" stroke="var(--d-amber)" stroke-width="2.5" stroke-dasharray="10 6"/>
   <g>
-    <rect x="405" y="18" width="190" height="72" rx="12" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="500" y="47" fill="#e8eaed" text-anchor="middle" font-weight="700">① 任务合成器</text>
-    <text x="500" y="68" fill="#aeb4bd" text-anchor="middle" font-size="12">自动生成可验证问题(知识图谱/形式化建模)</text>
-    <rect x="740" y="140" width="200" height="72" rx="12" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="840" y="168" fill="#e8eaed" text-anchor="middle" font-weight="700">② 环境规模化</text>
-    <text x="840" y="190" fill="#aeb4bd" text-anchor="middle" font-size="12">可交互环境:沙箱/模拟Web/工具集(EnvScaling)</text>
-    <rect x="640" y="318" width="220" height="72" rx="12" fill="#1d212b" stroke="#41d1a7"/>
-    <text x="750" y="346" fill="#e8eaed" text-anchor="middle" font-weight="700">③ 轨迹采集(rollout)</text>
-    <text x="750" y="368" fill="#aeb4bd" text-anchor="middle" font-size="12">当前策略在环境里跑出完整交互轨迹 → §3/§4 的主角</text>
-    <rect x="140" y="318" width="220" height="72" rx="12" fill="#1d212b" stroke="#41d1a7"/>
-    <text x="250" y="346" fill="#e8eaed" text-anchor="middle" font-weight="700">④ 筛选与课程</text>
-    <text x="250" y="368" fill="#aeb4bd" text-anchor="middle" font-size="12">过滤作弊/零奖励样本;难度分级、逐步升级</text>
-    <rect x="60" y="140" width="200" height="72" rx="12" fill="#1d212b" stroke="#9d7bff"/>
-    <text x="160" y="168" fill="#e8eaed" text-anchor="middle" font-weight="700">⑤ 训练</text>
-    <text x="160" y="190" fill="#aeb4bd" text-anchor="middle" font-size="12">CPT / SFT / RL(把轨迹变成权重更新)</text>
+    <rect x="405" y="18" width="190" height="72" rx="12" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="500" y="47" fill="var(--d-surface)" text-anchor="middle" font-weight="700">① 任务合成器</text>
+    <text x="500" y="68" fill="var(--d-surface)" text-anchor="middle" font-size="12">自动生成可验证问题(知识图谱/形式化建模)</text>
+    <rect x="740" y="140" width="200" height="72" rx="12" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="840" y="168" fill="var(--d-surface)" text-anchor="middle" font-weight="700">② 环境规模化</text>
+    <text x="840" y="190" fill="var(--d-surface)" text-anchor="middle" font-size="12">可交互环境:沙箱/模拟Web/工具集(EnvScaling)</text>
+    <rect x="640" y="318" width="220" height="72" rx="12" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="750" y="346" fill="var(--d-surface)" text-anchor="middle" font-weight="700">③ 轨迹采集(rollout)</text>
+    <text x="750" y="368" fill="var(--d-surface)" text-anchor="middle" font-size="12">当前策略在环境里跑出完整交互轨迹 → §3/§4 的主角</text>
+    <rect x="140" y="318" width="220" height="72" rx="12" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="250" y="346" fill="var(--d-surface)" text-anchor="middle" font-weight="700">④ 筛选与课程</text>
+    <text x="250" y="368" fill="var(--d-surface)" text-anchor="middle" font-size="12">过滤作弊/零奖励样本;难度分级、逐步升级</text>
+    <rect x="60" y="140" width="200" height="72" rx="12" fill="var(--d-surface)" stroke="var(--d-purple)"/>
+    <text x="160" y="168" fill="var(--d-surface)" text-anchor="middle" font-weight="700">⑤ 训练</text>
+    <text x="160" y="190" fill="var(--d-surface)" text-anchor="middle" font-size="12">CPT / SFT / RL(把轨迹变成权重更新)</text>
   </g>
-  <g stroke="#ffb454" stroke-width="2" fill="none">
+  <g stroke="var(--d-amber)" stroke-width="2" fill="none">
     <path d="M 595 70 Q 780 85 840 135" marker-end="url(#fw)"/>
     <path d="M 850 215 Q 870 280 770 315" marker-end="url(#fw)"/>
     <path d="M 635 355 Q 500 385 365 355" marker-end="url(#fw)"/>
     <path d="M 138 355 Q 70 280 105 215 " marker-end="url(#fw)"/>
     <path d="M 108 137 Q 170 90 265 70" marker-end="url(#fw)"/>
   </g>
-  <text x="500" y="200" fill="#ffd9a8" text-anchor="middle" font-weight="800" font-size="16">飞轮中心:</text>
-  <text x="500" y="224" fill="#ffd9a8" text-anchor="middle" font-size="13.5">更强的模型</text>
-  <text x="500" y="245" fill="#ffd9a8" text-anchor="middle" font-size="13.5">(能解更难的任务 →</text>
-  <text x="500" y="266" fill="#ffd9a8" text-anchor="middle" font-size="13.5">能造更难的数据)</text>
-  <text x="500" y="410" fill="#7b879c" text-anchor="middle" font-size="12">注意:③ 采集依赖模型与环境的交互,而环境交互的延迟与吞吐正是 §3–§4 rollout 引擎与异步化的战场</text>
+  <text x="500" y="200" fill="var(--d-amber-soft)" text-anchor="middle" font-weight="800" font-size="16">飞轮中心:</text>
+  <text x="500" y="224" fill="var(--d-amber-soft)" text-anchor="middle" font-size="13.5">更强的模型</text>
+  <text x="500" y="245" fill="var(--d-amber-soft)" text-anchor="middle" font-size="13.5">(能解更难的任务 →</text>
+  <text x="500" y="266" fill="var(--d-amber-soft)" text-anchor="middle" font-size="13.5">能造更难的数据)</text>
+  <text x="500" y="410" fill="var(--d-surface)" text-anchor="middle" font-size="12">注意:③ 采集依赖模型与环境的交互,而环境交互的延迟与吞吐正是 §3–§4 rollout 引擎与异步化的战场</text>
 </svg>
 <div class="cap">图 2-1 · Agent 数据飞轮的六个环节(闭环):任务合成 → 环境规模化 → 轨迹采集 → 筛选/课程 → 训练 → (更强模型)→ 更难任务合成……</div>
 </div>
@@ -528,36 +528,36 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 <span class="zh">译:"Agent Lightning 是首个实现智能体与 RL 训练完全解耦的框架。这种解耦使它可以无缝应用于任何 AI 智能体——无论其实现方式如何——且几乎零代码修改。"</span></small></div>
 
 <div class="fig">
-<svg viewBox="0 0 1000 330" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
-  <text x="270" y="24" fill="#bcd4ff" text-anchor="middle" font-weight="800" font-size="14">(a) 混合引擎 colocate:训推同卡,分时复用</text>
-  <rect x="80" y="45" width="400" height="130" rx="12" fill="#1d212b" stroke="#6ea8ff"/>
-  <text x="280" y="70" fill="#e8eaed" text-anchor="middle" font-weight="700">同一批 GPU</text>
-  <rect x="100" y="85" width="165" height="70" rx="8" fill="#233043"/>
-  <text x="182" y="113" fill="#bcd4ff" text-anchor="middle">训练引擎</text>
-  <text x="182" y="133" fill="#aeb4bd" text-anchor="middle" font-size="11.5">FSDP/Megatron 切分权重</text>
-  <rect x="295" y="85" width="165" height="70" rx="8" fill="#1f2b26"/>
-  <text x="377" y="113" fill="#b8e8d6" text-anchor="middle">推理引擎</text>
-  <text x="377" y="133" fill="#aeb4bd" text-anchor="middle" font-size="11.5">vLLM/SGLang 完整权重</text>
-  <path d="M 182 160 Q 280 200 377 160" stroke="#ffb454" stroke-width="2" fill="none" marker-end="url(#fw)"/>
-  <text x="280" y="192" fill="#ffd9a8" text-anchor="middle" font-size="11.5">权重重分片 + 显存 offload 切换</text>
-  <text x="280" y="205" fill="#ffd9a8" text-anchor="middle" font-size="11.5">(同步节拍:gen → sleep → update)</text>
-  <text x="280" y="250" fill="#aeb4bd" text-anchor="middle" font-size="12">✚ 省卡、参数同步快(同机拷贝)</text>
-  <text x="280" y="272" fill="#aeb4bd" text-anchor="middle" font-size="12">− 切换开销;训推互抢显存;难独立扩容</text>
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-4" viewBox="0 0 1000 330" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
+  <text x="270" y="24" fill="var(--d-blue-soft)" text-anchor="middle" font-weight="800" font-size="14">(a) 混合引擎 colocate:训推同卡,分时复用</text>
+  <rect x="80" y="45" width="400" height="130" rx="12" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="280" y="70" fill="var(--d-surface)" text-anchor="middle" font-weight="700">同一批 GPU</text>
+  <rect x="100" y="85" width="165" height="70" rx="8" fill="var(--d-blue-soft)"/>
+  <text x="182" y="113" fill="var(--d-blue-soft)" text-anchor="middle">训练引擎</text>
+  <text x="182" y="133" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">FSDP/Megatron 切分权重</text>
+  <rect x="295" y="85" width="165" height="70" rx="8" fill="var(--d-surface)"/>
+  <text x="377" y="113" fill="var(--d-green-soft)" text-anchor="middle">推理引擎</text>
+  <text x="377" y="133" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">vLLM/SGLang 完整权重</text>
+  <path d="M 182 160 Q 280 200 377 160" stroke="var(--d-amber)" stroke-width="2" fill="none" marker-end="url(#fw)"/>
+  <text x="280" y="192" fill="var(--d-amber-soft)" text-anchor="middle" font-size="11.5">权重重分片 + 显存 offload 切换</text>
+  <text x="280" y="205" fill="var(--d-amber-soft)" text-anchor="middle" font-size="11.5">(同步节拍:gen → sleep → update)</text>
+  <text x="280" y="250" fill="var(--d-surface)" text-anchor="middle" font-size="12">✚ 省卡、参数同步快(同机拷贝)</text>
+  <text x="280" y="272" fill="var(--d-surface)" text-anchor="middle" font-size="12">− 切换开销;训推互抢显存;难独立扩容</text>
 
-  <text x="755" y="24" fill="#b8e8d6" text-anchor="middle" font-weight="800" font-size="14">(b) 解耦 disaggregated:rollout 独立成服务</text>
-  <rect x="530" y="45" width="450" height="130" rx="12" fill="#1d212b" stroke="#41d1a7"/>
-  <rect x="550" y="80" width="180" height="72" rx="8" fill="#233043"/>
-  <text x="640" y="108" fill="#bcd4ff" text-anchor="middle">训练集群</text>
-  <text x="640" y="128" fill="#aeb4bd" text-anchor="middle" font-size="11.5">只做 update(可异构硬件)</text>
-  <rect x="770" y="80" width="190" height="72" rx="8" fill="#1f2b26"/>
-  <text x="865" y="108" fill="#b8e8d6" text-anchor="middle">Rollout 服务(多副本)</text>
-  <text x="865" y="128" fill="#aeb4bd" text-anchor="middle" font-size="11.5">LLM Server + 环境/沙箱</text>
-  <path d="M 735 100 Q 753 88 768 98" stroke="#41d1a7" stroke-width="2" fill="none" marker-end="url(#fw)"/>
-  <text x="753" y="82" fill="#b8e8d6" text-anchor="middle" font-size="11">轨迹流</text>
-  <path d="M 768 132 Q 750 145 735 135" stroke="#ffb454" stroke-width="2" fill="none" marker-end="url(#fw)"/>
-  <text x="753" y="160" fill="#ffd9a8" text-anchor="middle" font-size="11">新权重广播</text>
-  <text x="755" y="250" fill="#aeb4bd" text-anchor="middle" font-size="12">✚ 独立扩缩容、会话粘滞复用 KV、可跨机房/异构</text>
-  <text x="755" y="272" fill="#aeb4bd" text-anchor="middle" font-size="12">− 跨机权重同步流量大(GB 级/步)→ 需 SHARDCAST 等优化</text>
+  <text x="755" y="24" fill="var(--d-green-soft)" text-anchor="middle" font-weight="800" font-size="14">(b) 解耦 disaggregated:rollout 独立成服务</text>
+  <rect x="530" y="45" width="450" height="130" rx="12" fill="var(--d-surface)" stroke="var(--d-green)"/>
+  <rect x="550" y="80" width="180" height="72" rx="8" fill="var(--d-blue-soft)"/>
+  <text x="640" y="108" fill="var(--d-blue-soft)" text-anchor="middle">训练集群</text>
+  <text x="640" y="128" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">只做 update(可异构硬件)</text>
+  <rect x="770" y="80" width="190" height="72" rx="8" fill="var(--d-surface)"/>
+  <text x="865" y="108" fill="var(--d-green-soft)" text-anchor="middle">Rollout 服务(多副本)</text>
+  <text x="865" y="128" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">LLM Server + 环境/沙箱</text>
+  <path d="M 735 100 Q 753 88 768 98" stroke="var(--d-green)" stroke-width="2" fill="none" marker-end="url(#fw)"/>
+  <text x="753" y="82" fill="var(--d-green-soft)" text-anchor="middle" font-size="11">轨迹流</text>
+  <path d="M 768 132 Q 750 145 735 135" stroke="var(--d-amber)" stroke-width="2" fill="none" marker-end="url(#fw)"/>
+  <text x="753" y="160" fill="var(--d-amber-soft)" text-anchor="middle" font-size="11">新权重广播</text>
+  <text x="755" y="250" fill="var(--d-surface)" text-anchor="middle" font-size="12">✚ 独立扩缩容、会话粘滞复用 KV、可跨机房/异构</text>
+  <text x="755" y="272" fill="var(--d-surface)" text-anchor="middle" font-size="12">− 跨机权重同步流量大(GB 级/步)→ 需 SHARDCAST 等优化</text>
 </svg>
 <div class="cap">图 3-1 · 两大 rollout 架构流派。verl 早期以 (a) 起家(HybridFlow),2025–2026 代码已演进为 (b) 的服务化形态;slime/AReaL/StreamRL 原生支持两种模式</div>
 </div>
@@ -580,47 +580,47 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 <span class="zh">译:"现有大多数 LLM 大规模 RL 系统是同步的……这稳定了训练,却带来严重的系统级低效:必须等批内最长的输出全部生成完才能更新模型,导致 GPU 利用率不足。"</span></small></div>
 
 <div class="fig">
-<svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-5" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
   <g font-weight="800" font-size="13.5">
-    <text x="250" y="26" fill="#ff9d9d" text-anchor="middle">(a) 同步:等最长尾巴 + 阶段间互相闲置</text>
-    <text x="760" y="26" fill="#7de8bd" text-anchor="middle">(b) 异步:生成与训练永不相互等待</text>
+    <text x="250" y="26" fill="var(--d-red-soft)" text-anchor="middle">(a) 同步:等最长尾巴 + 阶段间互相闲置</text>
+    <text x="760" y="26" fill="var(--d-green-soft)" text-anchor="middle">(b) 异步:生成与训练永不相互等待</text>
   </g>
   <!-- sync -->
   <g font-size="12">
-    <text x="60" y="62" fill="#aeb4bd">rollout 池</text>
-    <rect x="130" y="45" width="40" height="22" fill="#2b4a6b" rx="3"/><rect x="175" y="45" width="90" height="22" fill="#2b4a6b" rx="3"/><rect x="270" y="45" width="220" height="22" fill="#2b4a6b" rx="3"/>
-    <rect x="610" y="45" width="40" height="22" fill="#2b4a6b" rx="3"/><rect x="655" y="45" width="110" height="22" fill="#2b4a6b" rx="3"/>
-    <text x="380" y="61" fill="#cde" text-anchor="middle">一条长尾样本拖满 220 单位</text>
-    <rect x="500" y="45" width="100" height="22" fill="none" stroke="#ff6b6b" stroke-dasharray="4 3" rx="3"/>
-    <text x="550" y="40" fill="#ff9d9d" text-anchor="middle" font-size="11">全部 GPU 空等</text>
-    <text x="60" y="102" fill="#aeb4bd">训练池</text>
-    <rect x="130" y="85" width="30" height="22" fill="#4a3a6b" rx="3"/>
-    <rect x="500" y="85" width="120" height="22" fill="#4a3a6b" rx="3"/>
-    <rect x="770" y="85" width="30" height="22" fill="#4a3a6b" rx="3"/>
-    <rect x="160" y="85" width="340" height="22" fill="none" stroke="#ff6b6b" stroke-dasharray="4 3" rx="3"/>
-    <text x="330" y="101" fill="#ff9d9d" text-anchor="middle" font-size="11">训练池等 rollout</text>
-    <rect x="620" y="85" width="150" height="22" fill="none" stroke="#ff6b6b" stroke-dasharray="4 3" rx="3"/>
-    <text x="695" y="101" fill="#ff9d9d" text-anchor="middle" font-size="11">rollout 等训练</text>
+    <text x="60" y="62" fill="var(--d-surface)">rollout 池</text>
+    <rect x="130" y="45" width="40" height="22" fill="var(--d-blue-soft)" rx="3"/><rect x="175" y="45" width="90" height="22" fill="var(--d-blue-soft)" rx="3"/><rect x="270" y="45" width="220" height="22" fill="var(--d-blue-soft)" rx="3"/>
+    <rect x="610" y="45" width="40" height="22" fill="var(--d-blue-soft)" rx="3"/><rect x="655" y="45" width="110" height="22" fill="var(--d-blue-soft)" rx="3"/>
+    <text x="380" y="61" fill="var(--d-blue-soft)" text-anchor="middle">一条长尾样本拖满 220 单位</text>
+    <rect x="500" y="45" width="100" height="22" fill="none" stroke="var(--d-red)" stroke-dasharray="4 3" rx="3"/>
+    <text x="550" y="40" fill="var(--d-red-soft)" text-anchor="middle" font-size="11">全部 GPU 空等</text>
+    <text x="60" y="102" fill="var(--d-surface)">训练池</text>
+    <rect x="130" y="85" width="30" height="22" fill="var(--d-purple-soft)" rx="3"/>
+    <rect x="500" y="85" width="120" height="22" fill="var(--d-purple-soft)" rx="3"/>
+    <rect x="770" y="85" width="30" height="22" fill="var(--d-purple-soft)" rx="3"/>
+    <rect x="160" y="85" width="340" height="22" fill="none" stroke="var(--d-red)" stroke-dasharray="4 3" rx="3"/>
+    <text x="330" y="101" fill="var(--d-red-soft)" text-anchor="middle" font-size="11">训练池等 rollout</text>
+    <rect x="620" y="85" width="150" height="22" fill="none" stroke="var(--d-red)" stroke-dasharray="4 3" rx="3"/>
+    <text x="695" y="101" fill="var(--d-red-soft)" text-anchor="middle" font-size="11">rollout 等训练</text>
     <!-- async -->
-    <text x="590" y="62" fill="#aeb4bd">rollout 池</text>
-    <rect x="665" y="45" width="300" height="22" fill="#2b4a6b" rx="3"/>
-    <text x="815" y="61" fill="#cde" text-anchor="middle">持续生成,从不等待(流式喂数据)</text>
-    <text x="590" y="102" fill="#aeb4bd">训练池</text>
-    <rect x="665" y="85" width="300" height="22" fill="#4a3a6b" rx="3"/>
-    <text x="815" y="101" fill="#cde" text-anchor="middle" font-size="11">凑齐一批就更新,从不等待生成</text>
+    <text x="590" y="62" fill="var(--d-surface)">rollout 池</text>
+    <rect x="665" y="45" width="300" height="22" fill="var(--d-blue-soft)" rx="3"/>
+    <text x="815" y="61" fill="var(--d-blue-soft)" text-anchor="middle">持续生成,从不等待(流式喂数据)</text>
+    <text x="590" y="102" fill="var(--d-surface)">训练池</text>
+    <rect x="665" y="85" width="300" height="22" fill="var(--d-purple-soft)" rx="3"/>
+    <text x="815" y="101" fill="var(--d-blue-soft)" text-anchor="middle" font-size="11">凑齐一批就更新,从不等待生成</text>
   </g>
-  <text x="250" y="150" fill="#7b879c" text-anchor="middle" font-size="12">时间 →(虚线框 = 闲置气泡)</text>
-  <text x="760" y="150" fill="#7b879c" text-anchor="middle" font-size="12">时间 →(代价:训练用的数据来自 N 步前的旧权重)</text>
-  <g font-size="12.5" fill="#aeb4bd">
+  <text x="250" y="150" fill="var(--d-surface)" text-anchor="middle" font-size="12">时间 →(虚线框 = 闲置气泡)</text>
+  <text x="760" y="150" fill="var(--d-surface)" text-anchor="middle" font-size="12">时间 →(代价:训练用的数据来自 N 步前的旧权重)</text>
+  <g font-size="12.5" fill="var(--d-surface)">
     <text x="60" y="200">异步三档谱系:</text>
-    <rect x="190" y="182" width="220" height="34" rx="8" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="300" y="203" text-anchor="middle" fill="#bcd4ff">同步(0 步旧)</text>
-    <rect x="440" y="182" width="250" height="34" rx="8" fill="#1d212b" stroke="#ffb454"/>
-    <text x="565" y="203" text-anchor="middle" fill="#ffd9a8">半异步 / 1-step off-policy(旧 1 步)</text>
-    <rect x="720" y="182" width="240" height="34" rx="8" fill="#1d212b" stroke="#41d1a7"/>
-    <text x="840" y="203" text-anchor="middle" fill="#b8e8d6">全异步(旧 N 步,需 staleness 控制)</text>
+    <rect x="190" y="182" width="220" height="34" rx="8" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="300" y="203" text-anchor="middle" fill="var(--d-blue-soft)">同步(0 步旧)</text>
+    <rect x="440" y="182" width="250" height="34" rx="8" fill="var(--d-surface)" stroke="var(--d-amber)"/>
+    <text x="565" y="203" text-anchor="middle" fill="var(--d-amber-soft)">半异步 / 1-step off-policy(旧 1 步)</text>
+    <rect x="720" y="182" width="240" height="34" rx="8" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="840" y="203" text-anchor="middle" fill="var(--d-green-soft)">全异步(旧 N 步,需 staleness 控制)</text>
     <text x="300" y="245" text-anchor="middle">最稳、最慢</text><text x="565" y="245" text-anchor="middle">OpenRLHF / Asynchronous RLHF</text><text x="840" y="245" text-anchor="middle">AReaL / slime-async / StreamRL-Async</text>
-    <text x="500" y="285" text-anchor="middle" fill="#7b879c">off-policy 程度(数据旧度)↑ = 吞吐 ↑,但训练方差与不稳定风险 ↑ —— 异步 RL 的全部艺术就在这条轴上找平衡点</text>
+    <text x="500" y="285" text-anchor="middle" fill="var(--d-surface)">off-policy 程度(数据旧度)↑ = 吞吐 ↑,但训练方差与不稳定风险 ↑ —— 异步 RL 的全部艺术就在这条轴上找平衡点</text>
   </g>
 </svg>
 <div class="cap">图 4-1 · 同步 RL 的两类气泡,与异步谱系(0 步旧 / 1 步旧 / N 步旧)</div>
@@ -764,36 +764,36 @@ in-flight sample to finish."""</span>
 <span class="zh">译:"我们证明:优化扩散模型图像输出的期望奖励,等价于在多步扩散模型上做策略梯度。"(DPOK 额外引入对预训练模型的逐去噪步 KL 正则,防止奖励作弊与画质崩坏。)"</span></small></div>
 
 <div class="fig">
-<svg viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
+<svg data-handbook-diagram="true" id="diagram-agent-rl-survey-6" viewBox="0 0 1000 300" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif" font-size="12.5">
   <g>
-    <rect x="40" y="60" width="80" height="60" rx="10" fill="#2a2340" stroke="#9d7bff"/>
-    <text x="80" y="85" fill="#ddd0ff" text-anchor="middle" font-weight="700">x_T 纯噪声</text>
-    <text x="80" y="103" fill="#aeb4bd" text-anchor="middle" font-size="11">初始状态 s_0</text>
-    <rect x="180" y="60" width="80" height="60" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="220" y="85" fill="#bcd4ff" text-anchor="middle">x_{T-1}</text>
-    <text x="220" y="103" fill="#aeb4bd" text-anchor="middle" font-size="11">动作 a_0 = 去噪一步</text>
-    <rect x="320" y="60" width="80" height="60" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="360" y="85" fill="#bcd4ff" text-anchor="middle">x_{T-2}</text>
-    <text x="360" y="103" fill="#7b879c" text-anchor="middle" font-size="22">…</text>
-    <rect x="460" y="60" width="80" height="60" rx="10" fill="#1f2b26" stroke="#41d1a7"/>
-    <text x="500" y="85" fill="#b8e8d6" text-anchor="middle">x_0 图像</text>
-    <text x="500" y="103" fill="#aeb4bd" text-anchor="middle" font-size="11">终局奖励 r(图, 提示)</text>
-    <g stroke="#4a5670" stroke-width="2">
+    <rect x="40" y="60" width="80" height="60" rx="10" fill="var(--d-surface)" stroke="var(--d-purple)"/>
+    <text x="80" y="85" fill="var(--d-purple-soft)" text-anchor="middle" font-weight="700">x_T 纯噪声</text>
+    <text x="80" y="103" fill="var(--d-surface)" text-anchor="middle" font-size="11">初始状态 s_0</text>
+    <rect x="180" y="60" width="80" height="60" rx="10" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="220" y="85" fill="var(--d-blue-soft)" text-anchor="middle">x_{T-1}</text>
+    <text x="220" y="103" fill="var(--d-surface)" text-anchor="middle" font-size="11">动作 a_0 = 去噪一步</text>
+    <rect x="320" y="60" width="80" height="60" rx="10" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="360" y="85" fill="var(--d-blue-soft)" text-anchor="middle">x_{T-2}</text>
+    <text x="360" y="106" fill="var(--d-surface)" text-anchor="middle" font-size="14">…</text>
+    <rect x="460" y="60" width="80" height="60" rx="10" fill="var(--d-surface)" stroke="var(--d-green)"/>
+    <text x="500" y="85" fill="var(--d-green-soft)" text-anchor="middle">x_0 图像</text>
+    <text x="500" y="103" fill="var(--d-surface)" text-anchor="middle" font-size="11">终局奖励 r(图, 提示)</text>
+    <g stroke="var(--d-line)" stroke-width="2">
       <line x1="122" y1="90" x2="176" y2="90"/><line x1="262" y1="90" x2="316" y2="90"/><line x1="402" y1="90" x2="456" y2="90"/>
     </g>
-    <text x="290" y="150" fill="#7b879c" text-anchor="middle">一条去噪链 = 一条轨迹(10–50 步);策略 = 去噪网络本身;奖励只在终局发放 → 与 LLM RL 结构同构!</text>
+    <text x="290" y="150" fill="var(--d-surface)" text-anchor="middle">一条去噪链 = 一条轨迹(10–50 步);策略 = 去噪网络本身;奖励只在终局发放 → 与 LLM RL 结构同构!</text>
   </g>
   <g>
-    <text x="60" y="200" fill="#9aa7bd" font-weight="700">三大算法分支(2023 奠基):</text>
-    <rect x="70" y="215" width="270" height="66" rx="10" fill="#1d212b" stroke="#6ea8ff"/>
-    <text x="205" y="240" fill="#bcd4ff" text-anchor="middle" font-weight="700">策略梯度(在线 RL)</text>
-    <text x="205" y="260" fill="#aeb4bd" text-anchor="middle" font-size="11.5">DDPO / DPOK → Flow-GRPO / DanceGRPO(§5.2 下)</text>
-    <rect x="360" y="215" width="270" height="66" rx="10" fill="#1d212b" stroke="#ffb454"/>
-    <text x="495" y="240" fill="#ffd9a8" text-anchor="middle" font-weight="700">可微奖励直接反传(免采样)</text>
-    <text x="495" y="260" fill="#aeb4bd" text-anchor="middle" font-size="11.5">AlignProp / DRaFT / VADER:梯度穿过(部分)去噪链</text>
-    <rect x="650" y="215" width="290" height="66" rx="10" fill="#1d212b" stroke="#9d7bff"/>
-    <text x="795" y="240" fill="#ddd0ff" text-anchor="middle" font-weight="700">偏好优化(离线 DPO 系)</text>
-    <text x="795" y="260" fill="#aeb4bd" text-anchor="middle" font-size="11.5">Diffusion-DPO:用 ELBO 改造似然,免奖励模型</text>
+    <text x="60" y="200" fill="var(--d-surface)" font-weight="700">三大算法分支(2023 奠基):</text>
+    <rect x="70" y="215" width="270" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+    <text x="205" y="240" fill="var(--d-blue-soft)" text-anchor="middle" font-weight="700">策略梯度(在线 RL)</text>
+    <text x="205" y="260" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">DDPO / DPOK → Flow-GRPO / DanceGRPO(§5.2 下)</text>
+    <rect x="360" y="215" width="270" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-amber)"/>
+    <text x="495" y="240" fill="var(--d-amber-soft)" text-anchor="middle" font-weight="700">可微奖励直接反传(免采样)</text>
+    <text x="495" y="260" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">AlignProp / DRaFT / VADER:梯度穿过(部分)去噪链</text>
+    <rect x="650" y="215" width="290" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-purple)"/>
+    <text x="795" y="240" fill="var(--d-purple-soft)" text-anchor="middle" font-weight="700">偏好优化(离线 DPO 系)</text>
+    <text x="795" y="260" fill="var(--d-surface)" text-anchor="middle" font-size="11.5">Diffusion-DPO:用 ELBO 改造似然,免奖励模型</text>
   </g>
 </svg>
 <div class="cap">图 5-1 · 扩散生成 = MDP:去噪链即轨迹。三大分支中,策略梯度分支因 GRPO 的免 critic 特性在 2025 年后成为主流(与 LLM RL 共享同一算法栈)</div>
@@ -1111,7 +1111,7 @@ html.reader-ready[data-reader-theme="dark"] {
 .reader-content :is(sup.cite,sup.ref,span.cite) { font-size:13px!important; line-height:1.5; color:var(--r-link)!important; background:transparent!important; border:0!important; padding:0!important; }
 .reader-content :is(sup.cite,sup.ref) a { font-size:inherit!important; }
 .reader-content :is(.muted,.small,small,figcaption,.cap,.codecap,.src) { color:var(--r-muted)!important; }
-.reader-content :is(figcaption,.cap,.codecap) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
+.reader-content :is(figcaption,.cap,.codecap):not(svg *) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
 .reader-content .codecap { background:var(--r-soft)!important; }
 .reader-content :is(caption,.hl-date,.hl-title i,.hl-head i) { color:var(--r-muted)!important; }
 .reader-content :is(.hl-card,.hl-wrap) { color:var(--r-text)!important; background:var(--r-surface)!important; border-color:var(--r-line)!important; }
@@ -1149,6 +1149,16 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
 .reader-content img { display:block; height:auto; max-width:100%; margin:18px auto; padding:8px; background:#fff; border:1px solid #cbd1d8; border-radius:6px; box-sizing:border-box; }
 .reader-content svg { background:#202936; border-radius:6px; }
 .reader-content svg,.reader-content .ppx-demo { --ink:#d7dce3; --fg:#d7dce3; --ink-dim:#adb8c6; --muted:#adb8c6; --bg:#202936; --panel:#252d36; --line:#465363; --brand:#9bbfe7; --accent:#9bbfe7; }
+svg[data-handbook-diagram] { --d-surface:var(--r-surface,#fff); --d-line:var(--r-line,#c7d5dc); --d-blue:#4979ad; --d-blue-soft:#e3edf8; --d-green:#347f76; --d-green-soft:#e2f1eb; --d-purple:#7e69a4; --d-purple-soft:#eee8f6; --d-amber:#a27a38; --d-amber-soft:#f6edda; --d-red:#a85c61; --d-red-soft:#f6e6e7; background:var(--r-surface,#fff); border-radius:4px; }
+.reader-ready[data-reader-theme="dark"] svg[data-handbook-diagram] { --d-blue:#9dbde1; --d-blue-soft:#2b3e53; --d-green:#a2cfc1; --d-green-soft:#293f3a; --d-purple:#c0afdd; --d-purple-soft:#3b344b; --d-amber:#d9c393; --d-amber-soft:#443d2d; --d-red:#deb0b4; --d-red-soft:#48363a; }
+svg[data-handbook-diagram] :is(text,tspan) { fill:var(--r-text,#183b50)!important; }
+svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fill:var(--r-muted,#506c7b)!important; }
+.reader-content .reader-diagram-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; }
+.reader-content .reader-diagram-scroll svg { display:block; width:100%!important; min-width:var(--diagram-readable-width)!important; max-width:none!important; height:auto; margin:0; }
+.reader-content .reader-diagram-scroll[data-fit] svg { min-width:0!important; }
+.reader-content .reader-diagram-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:10px 0; font-size:12px; }
+.reader-content .reader-diagram-tools button { min-height:36px; }
+.reader-content .diagram-note { font-size:16px!important; color:var(--r-muted)!important; }
 .reader-content .ppx-demo { --r-text:#d7dce3; --r-heading:#edf0f4; --r-muted:#adb8c6; --r-line:#465363; --r-link:#9bbfe7; --r-surface:#252d36; --r-soft:#222b35; background:#1c2532!important; color:#d7dce3!important; font-size:14px; }
 .reader-flow.grid2 { display:block; }
 .reader-ui { font:14px/1.8 var(--font-body); color:var(--r-text); box-sizing:border-box; }
@@ -1420,6 +1430,27 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     figures.push({id:img.id, title:caption ? clean(caption) : img.alt || '论文配图 ' + (i + 1)});
     let ancestor = img.parentElement;
     while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
+  });
+
+  // Preserve readable labels instead of shrinking a wide diagram into a phone.
+  // Setup and explicit button clicks only: no resize or animation polling.
+  root.querySelectorAll('svg[data-handbook-diagram]').forEach(svg => {
+    const box = svg.viewBox.baseVal;
+    const sizes = [...svg.querySelectorAll('text')].map(t => parseFloat(getComputedStyle(t).fontSize)).filter(n => n > 0);
+    if (!box.width || !sizes.length) return;
+    const readable = Math.ceil(box.width * 12 / Math.min(...sizes));
+    const viewport = element('div', 'reader-diagram-scroll');
+    viewport.style.setProperty('--diagram-readable-width', readable + 'px');
+    viewport.tabIndex = 0; viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', '图解，可横向滚动');
+    const controls = element('div', 'reader-ui reader-diagram-tools');
+    controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
+    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    fit.addEventListener('click', () => {
+      const fitted = viewport.toggleAttribute('data-fit');
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+    });
+    controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
   });
 
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';

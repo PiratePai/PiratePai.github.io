@@ -27,7 +27,7 @@ if (out) fs.mkdirSync(out, {recursive:true});
           const raw = new DOMParser().parseFromString(await (await fetch(location.pathname)).text(), 'text/html');
           function content(doc) {
             const container = (doc.querySelector('.reader-chapter')?.parentElement || doc.querySelector('#reading-path').parentElement).cloneNode(true);
-            container.querySelectorAll('script,style,.toc,.reader-ui,[data-reader-repeat],[id^=PPX-],#rl-demo,#q-demo,#overlap-demo').forEach(n => n.remove());
+            container.querySelectorAll('script,style,.toc,.reader-ui,[data-reader-repeat],[id^=PPX-],[data-core-visual],#rl-demo,#q-demo,#overlap-demo').forEach(n => n.remove());
             return container.textContent.replace(/\s+/g,'');
           }
           const originalIDs = [...raw.querySelectorAll('[id]')].map(n=>n.id);

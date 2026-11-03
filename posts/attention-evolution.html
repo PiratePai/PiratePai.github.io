@@ -123,7 +123,8 @@
   'use strict';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   window.PaiMotion = {
-    mount(root, step, draw, isPlaying) {
+    mount(root, step, draw, isPlaying, options = {}) {
+      const interval = 1000 / Math.max(1, Math.min(20, options.fps || 20));
       const controls = root.querySelector('.ppx-bar') || root;
       let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
       if (!isPlaying) {
@@ -167,10 +168,10 @@
           raf = requestAnimationFrame(now => {
             raf = 0;
             if (!active()) { stop(); return; }
-            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            const dt = last ? Math.min(interval / 1000 + 0.08, (now - last) / 1000) : interval / 1000;
             last = now; step(dt); paint(); schedule();
           });
-        }, 50);
+        }, interval);
       }
       function refresh() {
         if (queued) return;
@@ -1508,7 +1509,7 @@ html.reader-ready[data-reader-theme="dark"] {
 .reader-content :is(sup.cite,sup.ref,span.cite) { font-size:13px!important; line-height:1.5; color:var(--r-link)!important; background:transparent!important; border:0!important; padding:0!important; }
 .reader-content :is(sup.cite,sup.ref) a { font-size:inherit!important; }
 .reader-content :is(.muted,.small,small,figcaption,.cap,.codecap,.src) { color:var(--r-muted)!important; }
-.reader-content :is(figcaption,.cap,.codecap) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
+.reader-content :is(figcaption,.cap,.codecap):not(svg *) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
 .reader-content .codecap { background:var(--r-soft)!important; }
 .reader-content :is(caption,.hl-date,.hl-title i,.hl-head i) { color:var(--r-muted)!important; }
 .reader-content :is(.hl-card,.hl-wrap) { color:var(--r-text)!important; background:var(--r-surface)!important; border-color:var(--r-line)!important; }
@@ -1546,6 +1547,16 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
 .reader-content img { display:block; height:auto; max-width:100%; margin:18px auto; padding:8px; background:#fff; border:1px solid #cbd1d8; border-radius:6px; box-sizing:border-box; }
 .reader-content svg { background:#202936; border-radius:6px; }
 .reader-content svg,.reader-content .ppx-demo { --ink:#d7dce3; --fg:#d7dce3; --ink-dim:#adb8c6; --muted:#adb8c6; --bg:#202936; --panel:#252d36; --line:#465363; --brand:#9bbfe7; --accent:#9bbfe7; }
+svg[data-handbook-diagram] { --d-surface:var(--r-surface,#fff); --d-line:var(--r-line,#c7d5dc); --d-blue:#4979ad; --d-blue-soft:#e3edf8; --d-green:#347f76; --d-green-soft:#e2f1eb; --d-purple:#7e69a4; --d-purple-soft:#eee8f6; --d-amber:#a27a38; --d-amber-soft:#f6edda; --d-red:#a85c61; --d-red-soft:#f6e6e7; background:var(--r-surface,#fff); border-radius:4px; }
+.reader-ready[data-reader-theme="dark"] svg[data-handbook-diagram] { --d-blue:#9dbde1; --d-blue-soft:#2b3e53; --d-green:#a2cfc1; --d-green-soft:#293f3a; --d-purple:#c0afdd; --d-purple-soft:#3b344b; --d-amber:#d9c393; --d-amber-soft:#443d2d; --d-red:#deb0b4; --d-red-soft:#48363a; }
+svg[data-handbook-diagram] :is(text,tspan) { fill:var(--r-text,#183b50)!important; }
+svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fill:var(--r-muted,#506c7b)!important; }
+.reader-content .reader-diagram-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; }
+.reader-content .reader-diagram-scroll svg { display:block; width:100%!important; min-width:var(--diagram-readable-width)!important; max-width:none!important; height:auto; margin:0; }
+.reader-content .reader-diagram-scroll[data-fit] svg { min-width:0!important; }
+.reader-content .reader-diagram-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:10px 0; font-size:12px; }
+.reader-content .reader-diagram-tools button { min-height:36px; }
+.reader-content .diagram-note { font-size:16px!important; color:var(--r-muted)!important; }
 .reader-content .ppx-demo { --r-text:#d7dce3; --r-heading:#edf0f4; --r-muted:#adb8c6; --r-line:#465363; --r-link:#9bbfe7; --r-surface:#252d36; --r-soft:#222b35; background:#1c2532!important; color:#d7dce3!important; font-size:14px; }
 .reader-flow.grid2 { display:block; }
 .reader-ui { font:14px/1.8 var(--font-body); color:var(--r-text); box-sizing:border-box; }
@@ -1817,6 +1828,27 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     figures.push({id:img.id, title:caption ? clean(caption) : img.alt || '论文配图 ' + (i + 1)});
     let ancestor = img.parentElement;
     while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
+  });
+
+  // Preserve readable labels instead of shrinking a wide diagram into a phone.
+  // Setup and explicit button clicks only: no resize or animation polling.
+  root.querySelectorAll('svg[data-handbook-diagram]').forEach(svg => {
+    const box = svg.viewBox.baseVal;
+    const sizes = [...svg.querySelectorAll('text')].map(t => parseFloat(getComputedStyle(t).fontSize)).filter(n => n > 0);
+    if (!box.width || !sizes.length) return;
+    const readable = Math.ceil(box.width * 12 / Math.min(...sizes));
+    const viewport = element('div', 'reader-diagram-scroll');
+    viewport.style.setProperty('--diagram-readable-width', readable + 'px');
+    viewport.tabIndex = 0; viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', '图解，可横向滚动');
+    const controls = element('div', 'reader-ui reader-diagram-tools');
+    controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
+    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    fit.addEventListener('click', () => {
+      const fitted = viewport.toggleAttribute('data-fit');
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+    });
+    controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
   });
 
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';

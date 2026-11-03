@@ -299,50 +299,50 @@ logits8 = lm(ids, L=8)                            # "慢思考"：8 次循环，
 <p class="muted">这就是 Huginn 三明治结构的微缩版：<code>prelude（锚）→ core×L（循环）→ coda（锚）</code>。真正的 Huginn-3.5B 用 2+4+2 = 8 个块、平均循环 32 次（第 8 节；1+4+1 只是仓库小模型/代码默认配置）；本文所有"循环深度"变体（HRM 的双尺度循环、Ouro 的深度分配、PLT 的跨循环并行）都是在这 40 行的骨架上做文章。</p>
 
 <figure>
-<svg viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+<svg data-handbook-diagram="true" id="diagram-loop-transformer-survey-1" viewBox="0 0 900 330" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
   <defs>
     <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-      <polygon points="0 0, 8 3.5, 0 7" fill="#8a93a8"/>
+      <polygon points="0 0, 8 3.5, 0 7" fill="var(--d-surface)"/>
     </marker>
     <marker id="arp" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-      <polygon points="0 0, 8 3.5, 0 7" fill="#b9a2ff"/>
+      <polygon points="0 0, 8 3.5, 0 7" fill="var(--d-blue-soft)"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="900" height="330" fill="#12141c" rx="12"/>
-  <text x="450" y="30" fill="#e8eaed" font-size="15" font-weight="700" text-anchor="middle">循环深度语言模型：三明治结构（以 Huginn 为例）</text>
-  <text x="70" y="72" fill="#aeb4bd" font-size="12">输入 token</text>
-  <rect x="60" y="80" width="70" height="34" rx="7" fill="#1d212b" stroke="#6ea8ff"/>
-  <text x="95" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">Embed</text>
-  <line x1="130" y1="97" x2="165" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
-  <rect x="168" y="80" width="92" height="34" rx="7" fill="#1a2733" stroke="#6ea8ff"/>
-  <text x="214" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">prelude ×2</text>
-  <line x1="260" y1="97" x2="298" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="0" y="0" width="900" height="330" fill="var(--d-surface)" rx="12"/>
+  <text x="450" y="30" fill="var(--d-surface)" font-size="15" font-weight="700" text-anchor="middle">循环深度语言模型：三明治结构（以 Huginn 为例）</text>
+  <text x="70" y="72" fill="var(--d-surface)" font-size="12">输入 token</text>
+  <rect x="60" y="80" width="70" height="34" rx="7" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="95" y="102" fill="var(--d-blue-soft)" font-size="12" text-anchor="middle">Embed</text>
+  <line x1="130" y1="97" x2="165" y2="97" stroke="var(--d-line)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="168" y="80" width="92" height="34" rx="7" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="214" y="102" fill="var(--d-blue-soft)" font-size="12" text-anchor="middle">prelude ×2</text>
+  <line x1="260" y1="97" x2="298" y2="97" stroke="var(--d-line)" stroke-width="1.5" marker-end="url(#ar)"/>
   <!-- core loop -->
-  <rect x="300" y="46" width="150" height="102" rx="10" fill="#241d3d" stroke="#b9a2ff" stroke-dasharray="5 3"/>
-  <rect x="316" y="62" width="118" height="30" rx="6" fill="#2c2450" stroke="#b9a2ff"/>
-  <text x="375" y="82" fill="#cdbaff" font-size="12" text-anchor="middle">core_block ×4</text>
-  <text x="375" y="128" fill="#cdbaff" font-size="11.5" text-anchor="middle">同一组权重</text>
-  <path d="M 434 77 L 462 77 Q 472 77 472 92 L 472 103 Q 472 118 458 118 L 340 118 Q 326 118 326 103 L 326 92 Q 326 77 336 77" fill="none" stroke="#b9a2ff" stroke-width="1.8" marker-end="url(#arp)"/>
-  <text x="478" y="100" fill="#b9a2ff" font-size="12">循环 L 次</text>
-  <text x="478" y="116" fill="#8f86b8" font-size="11">训练≈32 · 推理任意</text>
+  <rect x="300" y="46" width="150" height="102" rx="10" fill="var(--d-blue-soft)" stroke="var(--d-blue)" stroke-dasharray="5 3"/>
+  <rect x="316" y="62" width="118" height="30" rx="6" fill="var(--d-blue-soft)" stroke="var(--d-blue)"/>
+  <text x="375" y="82" fill="var(--d-purple-soft)" font-size="12" text-anchor="middle">core_block ×4</text>
+  <text x="375" y="128" fill="var(--d-purple-soft)" font-size="11.5" text-anchor="middle">同一组权重</text>
+  <path d="M 434 77 L 462 77 Q 472 77 472 92 L 472 103 Q 472 118 458 118 L 340 118 Q 326 118 326 103 L 326 92 Q 326 77 336 77" fill="none" stroke="var(--d-blue)" stroke-width="1.8" marker-end="url(#arp)"/>
+  <text x="330" y="171" fill="var(--d-blue-soft)" font-size="12">循环 L 次</text>
+  <text x="330" y="188" fill="var(--d-blue-soft)" font-size="11">训练≈32 · 推理任意</text>
   <!-- injection arrow -->
-  <path d="M 95 114 L 95 210 L 330 210" fill="none" stroke="#ffb454" stroke-width="1.6" stroke-dasharray="4 3"/>
-  <path d="M 330 210 L 352 210" fill="none" stroke="#ffb454" stroke-width="1.6" marker-end="url(#ar)"/>
-  <text x="100" y="205" fill="#ffb454" font-size="11.5">输入注入：每轮把 e 重新加回 x</text>
-  <line x1="450" y1="97" x2="492" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
-  <rect x="495" y="80" width="86" height="34" rx="7" fill="#1a2733" stroke="#6ea8ff"/>
-  <text x="538" y="102" fill="#9cc4ff" font-size="12" text-anchor="middle">coda ×2</text>
-  <line x1="581" y1="97" x2="618" y2="97" stroke="#8a93a8" stroke-width="1.5" marker-end="url(#ar)"/>
-  <rect x="620" y="80" width="96" height="34" rx="7" fill="#1d212b" stroke="#4dd6a8"/>
-  <text x="668" y="102" fill="#7fe6c2" font-size="12" text-anchor="middle">lm_head</text>
-  <text x="726" y="102" fill="#aeb4bd" font-size="12">logits</text>
+  <path d="M 95 114 L 95 210 L 330 210" fill="none" stroke="var(--d-amber)" stroke-width="1.6" stroke-dasharray="4 3"/>
+  <path d="M 330 210 L 352 210" fill="none" stroke="var(--d-amber)" stroke-width="1.6" marker-end="url(#ar)"/>
+  <text x="100" y="205" fill="var(--d-amber-soft)" font-size="11.5">输入注入：每轮把 e 重新加回 x</text>
+  <line x1="450" y1="97" x2="492" y2="97" stroke="var(--d-line)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="495" y="80" width="86" height="34" rx="7" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="538" y="102" fill="var(--d-blue-soft)" font-size="12" text-anchor="middle">coda ×2</text>
+  <line x1="581" y1="97" x2="618" y2="97" stroke="var(--d-line)" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="620" y="80" width="96" height="34" rx="7" fill="var(--d-surface)" stroke="var(--d-green)"/>
+  <text x="668" y="102" fill="var(--d-green-soft)" font-size="12" text-anchor="middle">lm_head</text>
+  <text x="726" y="102" fill="var(--d-surface)" font-size="12">logits</text>
   <!-- bottom annotations -->
-  <rect x="60" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
-  <text x="76" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">参数量：8 个块（2+4+2）</text>
-  <text x="76" y="288" fill="#aeb4bd" font-size="11.5">权重只存一份，循环 32 次 ⇒ 有效深度 = 2+4×32+2 = 132 层</text>
-  <rect x="470" y="240" width="380" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
-  <text x="486" y="264" fill="#e8eaed" font-size="12.5" font-weight="700">推理时：L 不增加独立权重，但增加计算</text>
-  <text x="486" y="288" fill="#aeb4bd" font-size="11.5">同一权重，难题循环 64 次、易题循环 4 次，互不影响</text>
+  <rect x="60" y="240" width="380" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-line)"/>
+  <text x="76" y="264" fill="var(--d-surface)" font-size="12.5" font-weight="700">参数量：8 个块（2+4+2）</text>
+  <text x="76" y="288" fill="var(--d-surface)" font-size="11.5">权重只存一份，循环 32 次 ⇒ 有效深度 = 2+4×32+2 = 132 层</text>
+  <rect x="470" y="240" width="380" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-line)"/>
+  <text x="486" y="264" fill="var(--d-surface)" font-size="12.5" font-weight="700">推理时：L 不增加独立权重，但增加计算</text>
+  <text x="486" y="288" fill="var(--d-surface)" font-size="11.5">同一权重，难题循环 64 次、易题循环 4 次，互不影响</text>
 </svg>
 <figcaption>图 1 · 三明治结构：锚层负责"进入/读出"，核心块负责"思考"；KV 缓存可跨循环复用（第 8.3 节）。结构依据 seal-rg/recurrent-pretraining 默认配置绘制<span class="cite">[12][45]</span>。</figcaption>
 </figure>
@@ -679,45 +679,45 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <p>训练从"完整文字 CoT"（stage 0）开始，每个阶段把 CoT 的<b>前 k 步</b>替换成 k 个 latent 位置，用上一阶段的权重继续训练。模型于是先学会"怎么想"，再逐步学会"不出声地想"。这个从易到难的脚手架与 Huginn 的随机深度训练、Yang 等的循环窗口损失属于不同配方，不能用“中间状态教师强制”一概而论：<b>循环/潜空间推理的训练，本质都是"让模型逐步接管自己的中间状态"</b>。</p>
 
 <figure>
-<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
+<svg data-handbook-diagram="true" id="diagram-loop-transformer-survey-2" viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, PingFang SC, sans-serif">
   <defs>
     <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-      <polygon points="0 0, 8 3.5, 0 7" fill="#8a93a8"/>
+      <polygon points="0 0, 8 3.5, 0 7" fill="var(--d-surface)"/>
     </marker>
     <marker id="arg" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-      <polygon points="0 0, 8 3.5, 0 7" fill="#ffb454"/>
+      <polygon points="0 0, 8 3.5, 0 7" fill="var(--d-amber-soft)"/>
     </marker>
   </defs>
-  <rect x="0" y="0" width="900" height="300" fill="#12141c" rx="12"/>
-  <text x="450" y="30" fill="#e8eaed" font-size="15" font-weight="700" text-anchor="middle">两条"潜空间思考"路线对比</text>
+  <rect x="0" y="0" width="900" height="300" fill="var(--d-surface)" rx="12"/>
+  <text x="450" y="30" fill="var(--d-surface)" font-size="15" font-weight="700" text-anchor="middle">两条"潜空间思考"路线对比</text>
   <!-- COCONUT -->
-  <text x="80" y="70" fill="#ffb454" font-size="13" font-weight="700">COCONUT（2024-12）：序列维潜思维</text>
-  <rect x="60" y="86" width="70" height="30" rx="6" fill="#1d212b" stroke="#6ea8ff"/>
-  <text x="95" y="106" fill="#9cc4ff" font-size="11.5" text-anchor="middle">问题</text>
-  <rect x="146" y="86" width="52" height="30" rx="6" fill="#33251a" stroke="#ffb454"/>
-  <text x="172" y="106" fill="#ffcf8d" font-size="11.5" text-anchor="middle">latent</text>
-  <rect x="214" y="86" width="52" height="30" rx="6" fill="#33251a" stroke="#ffb454"/>
-  <text x="240" y="106" fill="#ffcf8d" font-size="11.5" text-anchor="middle">latent</text>
-  <rect x="282" y="86" width="70" height="30" rx="6" fill="#1d212b" stroke="#4dd6a8"/>
-  <text x="317" y="106" fill="#7fe6c2" font-size="11.5" text-anchor="middle">答案</text>
-  <path d="M 172 120 L 172 146 Q 172 156 182 156 L 226 156 Q 236 156 236 146 L 236 122" fill="none" stroke="#ffb454" stroke-width="1.8" marker-end="url(#arg)"/>
-  <text x="252" y="152" fill="#ffb454" font-size="11">隐藏状态 hᵢ 回填为下一个 latent 的输入嵌入</text>
-  <text x="60" y="182" fill="#aeb4bd" font-size="11.5">不改架构 · KV 前缀复用 · 课程训练 · 每步潜思维 ≈ 1 个位置的算力</text>
+  <text x="80" y="70" fill="var(--d-amber-soft)" font-size="13" font-weight="700">COCONUT（2024-12）：序列维潜思维</text>
+  <rect x="60" y="86" width="70" height="30" rx="6" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="95" y="106" fill="var(--d-blue-soft)" font-size="11.5" text-anchor="middle">问题</text>
+  <rect x="146" y="86" width="52" height="30" rx="6" fill="var(--d-surface)" stroke="var(--d-amber)"/>
+  <text x="172" y="106" fill="var(--d-amber-soft)" font-size="11.5" text-anchor="middle">latent</text>
+  <rect x="214" y="86" width="52" height="30" rx="6" fill="var(--d-surface)" stroke="var(--d-amber)"/>
+  <text x="240" y="106" fill="var(--d-amber-soft)" font-size="11.5" text-anchor="middle">latent</text>
+  <rect x="282" y="86" width="70" height="30" rx="6" fill="var(--d-surface)" stroke="var(--d-green)"/>
+  <text x="317" y="106" fill="var(--d-green-soft)" font-size="11.5" text-anchor="middle">答案</text>
+  <path d="M 172 120 L 172 146 Q 172 156 182 156 L 226 156 Q 236 156 236 146 L 236 122" fill="none" stroke="var(--d-amber)" stroke-width="1.8" marker-end="url(#arg)"/>
+  <text x="252" y="152" fill="var(--d-amber-soft)" font-size="11">隐藏状态 hᵢ 回填为下一个 latent 的输入嵌入</text>
+  <text x="60" y="182" fill="var(--d-surface)" font-size="11.5">不改架构 · KV 前缀复用 · 课程训练 · 每步潜思维 ≈ 1 个位置的算力</text>
   <!-- Loop -->
-  <text x="540" y="70" fill="#b9a2ff" font-size="13" font-weight="700">Loop Transformer（Huginn 路线）：深度维循环</text>
-  <rect x="520" y="86" width="80" height="30" rx="6" fill="#1d212b" stroke="#6ea8ff"/>
-  <text x="560" y="106" fill="#9cc4ff" font-size="11.5" text-anchor="middle">全部 token</text>
-  <rect x="622" y="78" width="120" height="46" rx="9" fill="#241d3d" stroke="#b9a2ff" stroke-dasharray="5 3"/>
-  <rect x="636" y="86" width="92" height="30" rx="6" fill="#2c2450" stroke="#b9a2ff"/>
-  <text x="682" y="106" fill="#cdbaff" font-size="11.5" text-anchor="middle">core ×4 权重</text>
-  <path d="M 742 84 L 766 84 Q 776 84 776 98 L 776 106 Q 776 122 760 122 L 630 122 Q 614 122 614 106 L 614 98 Q 614 84 624 84" fill="none" stroke="#b9a2ff" stroke-width="1.8" marker-end="url(#ar2)"/>
-  <text x="782" y="108" fill="#b9a2ff" font-size="11">×L</text>
-  <text x="520" y="182" fill="#aeb4bd" font-size="11.5">改架构 · 输入注入 · 截断反传 · KV 跨轮复用 · 深度 L 推理时任选</text>
+  <text x="540" y="70" fill="var(--d-blue-soft)" font-size="13" font-weight="700">Loop Transformer（Huginn 路线）：深度维循环</text>
+  <rect x="520" y="86" width="80" height="30" rx="6" fill="var(--d-surface)" stroke="var(--d-blue)"/>
+  <text x="560" y="106" fill="var(--d-blue-soft)" font-size="11.5" text-anchor="middle">全部 token</text>
+  <rect x="622" y="78" width="120" height="46" rx="9" fill="var(--d-blue-soft)" stroke="var(--d-blue)" stroke-dasharray="5 3"/>
+  <rect x="636" y="86" width="92" height="30" rx="6" fill="var(--d-blue-soft)" stroke="var(--d-blue)"/>
+  <text x="682" y="106" fill="var(--d-purple-soft)" font-size="11.5" text-anchor="middle">core ×4 权重</text>
+  <path d="M 742 84 L 766 84 Q 776 84 776 98 L 776 106 Q 776 122 760 122 L 630 122 Q 614 122 614 106 L 614 98 Q 614 84 624 84" fill="none" stroke="var(--d-blue)" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="782" y="108" fill="var(--d-blue-soft)" font-size="11">×L</text>
+  <text x="520" y="182" fill="var(--d-surface)" font-size="11.5">改架构 · 输入注入 · 截断反传 · KV 跨轮复用 · 深度 L 推理时任选</text>
   <!-- bottom -->
-  <rect x="60" y="212" width="780" height="66" rx="10" fill="#171a21" stroke="#2a2f3a"/>
-  <text x="80" y="238" fill="#e8eaed" font-size="12.5" font-weight="700">殊途同归：让"计算"不再需要变成"文字"</text>
-  <text x="80" y="262" fill="#aeb4bd" font-size="11.5">COCONUT 把思考放进序列里的连续占位符（时间维潜空间）；Loop 把思考放进层间循环（深度维潜空间）。2026 年的混合方案（DiscoLoop、RecurTrace、LoopMTP 等）两者兼用。</text>
-</svg>
+  <rect x="60" y="212" width="780" height="66" rx="10" fill="var(--d-surface)" stroke="var(--d-line)"/>
+  <text x="80" y="238" fill="var(--d-surface)" font-size="12.5" font-weight="700">殊途同归：让"计算"不再需要变成"文字"</text>
+
+</svg><p class="diagram-note">COCONUT 把思考放进序列里的连续占位符（时间维潜空间）；Loop 把思考放进层间循环（深度维潜空间）。2026 年的混合方案（DiscoLoop、RecurTrace、LoopMTP 等）两者兼用。</p>
 <figcaption>图 2 · 潜空间推理的两条实现路线与 2026 年的合流趋势。依据 COCONUT<span class="cite">[11]</span> 与 Huginn<span class="cite">[12]</span> 论文及源码绘制。</figcaption>
 </figure>
 
@@ -1145,7 +1145,7 @@ html.reader-ready[data-reader-theme="dark"] {
 .reader-content :is(sup.cite,sup.ref,span.cite) { font-size:13px!important; line-height:1.5; color:var(--r-link)!important; background:transparent!important; border:0!important; padding:0!important; }
 .reader-content :is(sup.cite,sup.ref) a { font-size:inherit!important; }
 .reader-content :is(.muted,.small,small,figcaption,.cap,.codecap,.src) { color:var(--r-muted)!important; }
-.reader-content :is(figcaption,.cap,.codecap) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
+.reader-content :is(figcaption,.cap,.codecap):not(svg *) { font-size:14px!important; line-height:1.8!important; text-align:left!important; }
 .reader-content .codecap { background:var(--r-soft)!important; }
 .reader-content :is(caption,.hl-date,.hl-title i,.hl-head i) { color:var(--r-muted)!important; }
 .reader-content :is(.hl-card,.hl-wrap) { color:var(--r-text)!important; background:var(--r-surface)!important; border-color:var(--r-line)!important; }
@@ -1183,6 +1183,16 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
 .reader-content img { display:block; height:auto; max-width:100%; margin:18px auto; padding:8px; background:#fff; border:1px solid #cbd1d8; border-radius:6px; box-sizing:border-box; }
 .reader-content svg { background:#202936; border-radius:6px; }
 .reader-content svg,.reader-content .ppx-demo { --ink:#d7dce3; --fg:#d7dce3; --ink-dim:#adb8c6; --muted:#adb8c6; --bg:#202936; --panel:#252d36; --line:#465363; --brand:#9bbfe7; --accent:#9bbfe7; }
+svg[data-handbook-diagram] { --d-surface:var(--r-surface,#fff); --d-line:var(--r-line,#c7d5dc); --d-blue:#4979ad; --d-blue-soft:#e3edf8; --d-green:#347f76; --d-green-soft:#e2f1eb; --d-purple:#7e69a4; --d-purple-soft:#eee8f6; --d-amber:#a27a38; --d-amber-soft:#f6edda; --d-red:#a85c61; --d-red-soft:#f6e6e7; background:var(--r-surface,#fff); border-radius:4px; }
+.reader-ready[data-reader-theme="dark"] svg[data-handbook-diagram] { --d-blue:#9dbde1; --d-blue-soft:#2b3e53; --d-green:#a2cfc1; --d-green-soft:#293f3a; --d-purple:#c0afdd; --d-purple-soft:#3b344b; --d-amber:#d9c393; --d-amber-soft:#443d2d; --d-red:#deb0b4; --d-red-soft:#48363a; }
+svg[data-handbook-diagram] :is(text,tspan) { fill:var(--r-text,#183b50)!important; }
+svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fill:var(--r-muted,#506c7b)!important; }
+.reader-content .reader-diagram-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; }
+.reader-content .reader-diagram-scroll svg { display:block; width:100%!important; min-width:var(--diagram-readable-width)!important; max-width:none!important; height:auto; margin:0; }
+.reader-content .reader-diagram-scroll[data-fit] svg { min-width:0!important; }
+.reader-content .reader-diagram-tools { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin:10px 0; font-size:12px; }
+.reader-content .reader-diagram-tools button { min-height:36px; }
+.reader-content .diagram-note { font-size:16px!important; color:var(--r-muted)!important; }
 .reader-content .ppx-demo { --r-text:#d7dce3; --r-heading:#edf0f4; --r-muted:#adb8c6; --r-line:#465363; --r-link:#9bbfe7; --r-surface:#252d36; --r-soft:#222b35; background:#1c2532!important; color:#d7dce3!important; font-size:14px; }
 .reader-flow.grid2 { display:block; }
 .reader-ui { font:14px/1.8 var(--font-body); color:var(--r-text); box-sizing:border-box; }
@@ -1454,6 +1464,27 @@ html.reader-ready[data-reader-theme="paper"] .reader-content .bad { color:#96443
     figures.push({id:img.id, title:caption ? clean(caption) : img.alt || '论文配图 ' + (i + 1)});
     let ancestor = img.parentElement;
     while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
+  });
+
+  // Preserve readable labels instead of shrinking a wide diagram into a phone.
+  // Setup and explicit button clicks only: no resize or animation polling.
+  root.querySelectorAll('svg[data-handbook-diagram]').forEach(svg => {
+    const box = svg.viewBox.baseVal;
+    const sizes = [...svg.querySelectorAll('text')].map(t => parseFloat(getComputedStyle(t).fontSize)).filter(n => n > 0);
+    if (!box.width || !sizes.length) return;
+    const readable = Math.ceil(box.width * 12 / Math.min(...sizes));
+    const viewport = element('div', 'reader-diagram-scroll');
+    viewport.style.setProperty('--diagram-readable-width', readable + 'px');
+    viewport.tabIndex = 0; viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', '图解，可横向滚动');
+    const controls = element('div', 'reader-ui reader-diagram-tools');
+    controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
+    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    fit.addEventListener('click', () => {
+      const fitted = viewport.toggleAttribute('data-fit');
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+    });
+    controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
   });
 
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';
