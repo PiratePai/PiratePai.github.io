@@ -73,3 +73,20 @@ test('transparently decoded gzip is accepted and an abort does not start a fallb
   await assert.rejects(readIndex(async () => { calls++; throw new Error('aborted'); }, {gzip:'index.json.gz',plain:'index.json'}, controller.signal, DecompressionStream));
   assert.equal(calls, 1);
 });
+
+test('valid JSON with invalid index data falls back from gzip to the ordinary index', async () => {
+  const {gzipSync} = require('node:zlib');
+  const invalid = [null, {}, {version:99,documents:[]}, {version:1,documents:[]},
+    {version:1,documents:[{title:'Bad URL',url:'https://example.org/',sections:[]}]},
+    {version:1,documents:[{title:'Bad section',url:'posts/example.html',sections:[null]}]}];
+  for (const data of invalid) {
+    const calls = [];
+    const loaded = await readIndex(async url => {
+      calls.push(url);
+      return url.endsWith('.gz') ? new Response(gzipSync(JSON.stringify(data))) : Response.json(index);
+    }, {plain:'index.json',gzip:'index.json.gz'}, undefined, DecompressionStream);
+    assert.deepEqual(loaded, index);
+    assert.deepEqual(calls, ['index.json.gz','index.json']);
+  }
+  await assert.rejects(readIndex(async () => Response.json({version:1,documents:[]}), {plain:'index.json'}), /Invalid index/);
+});

@@ -1,4 +1,5 @@
 /* Shared long-form typography and reader chrome; versioned by build-reader.py. */
+.hero :is(.pill,.chip,.tag) { box-sizing: border-box; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .article-maintenance { margin-top: 24px; font-size: 13px; line-height: 1.8; }
 .article-dates { display: flex; flex-wrap: wrap; gap: 4px 8px; }
 .article-dates > span { white-space: nowrap; }

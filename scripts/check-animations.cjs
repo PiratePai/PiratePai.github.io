@@ -8,6 +8,8 @@ const path=require('node:path');
 const vm=require('node:vm');
 const base=process.argv[2]||'http://127.0.0.1:8946';
 const root=path.resolve(__dirname,'..');
+const metadata=JSON.parse(fs.readFileSync(path.join(root,'data/articles.json'),'utf8'));
+const researchFiles=Object.entries(metadata.articles).filter(([,article])=>article.changes.some(change=>change.anchor==='research-20261103')).map(([slug])=>slug+'.html');
 const demos=[['attention-evolution','PPX-W2'],['kv-cache-survey','PPX-W3'],['quantization-survey','PPX-W4'],['speculative-decoding','PPX-W1'],['inference-serving','PPX-W5'],['moe-survey','PPX-W6'],['parallelism-survey','PPX-W7'],['vit-sparsification','PPX-W8'],['llm-perf-simulation-2026','q-demo'],['parallelism-survey','overlap-demo']];
 // Check the actual causal-softmax function used in the visual, including early rows.
 const source=fs.readFileSync(path.join(root,'posts/attention-evolution.html'),'utf8');
@@ -72,7 +74,7 @@ for(let i=0;i<8;i++){
   assert.notEqual(await d.getAttribute('data-motion-frames'),before,'reduced motion retains single step');
   // New source anchors and licensed figures are visible and fit a phone screen.
   await page.setViewportSize({width:375,height:900});
-  for(const file of fs.readdirSync(path.join(root,'posts')).filter(f=>f.endsWith('.html'))){
+  for(const file of researchFiles){
    await page.goto(base+'/posts/'+file+'#research-20261103');
    assert(await page.locator('#research-20261103').isVisible(),file+' new content deep link');
    assert(await page.locator('#research-20261103').evaluate(n=>!n.closest('[data-research-updates]')),file+' research belongs in the main chapters');
@@ -89,7 +91,7 @@ for(let i=0;i<8;i++){
     }
    }
   }
-  console.log('PASS causal softmax, reduced motion, 16 new mobile anchors, source figures');
+  console.log('PASS causal softmax, reduced motion, '+researchFiles.length+' research mobile anchors, source figures');
   await context.close();
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
