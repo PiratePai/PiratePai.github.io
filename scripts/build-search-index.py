@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import gzip
 from html.parser import HTMLParser
 import json
 from pathlib import Path
@@ -105,5 +106,24 @@ if __name__ == '__main__':
             raise SystemExit('Search index is stale; run python scripts/build-search-index.py')
     else:
         OUTPUT.write_text(output, encoding='utf-8', newline='\n')
+    # Explicit compressed artifact: GitHub Pages cannot configure per-file headers.
+    packed = gzip.compress(output.encode('utf-8'), compresslevel=9, mtime=0)
+    compressed_path = OUTPUT.with_suffix('.json.gz')
+    if args.check:
+        if not compressed_path.exists() or gzip.decompress(compressed_path.read_bytes()) != output.encode('utf-8'):
+            raise SystemExit('Compressed search index is stale')
+    else:
+        compressed_path.write_bytes(packed)
+    # Version both URLs so a newly published page cannot use an old cached index.
+    home_path = ROOT / 'index.html'
+    home = home_path.read_text(encoding='utf-8')
+    version = hashlib.sha256(output.encode('utf-8')).hexdigest()[:12]
+    attrs = f' data-index-url="search-index.json?v={version}" data-index-gzip-url="search-index.json.gz?v={version}"'
+    updated = re.sub(r'(<form\b[^>]*\bid="site-search")([^>]*)(>)',
+                     lambda m: m[1] + re.sub(r'\s+data-index-(?:gzip-)?url="[^"]*"', '', m[2]) + attrs + m[3], home)
+    if args.check and updated != home:
+        raise SystemExit('Homepage index version is stale')
+    if not args.check and updated != home:
+        home_path.write_text(updated, encoding='utf-8', newline='\n')
     count = len(json.loads(output)['documents'])
-    print(f'PASS search index: {count} articles, {len(output.encode("utf-8")):,} bytes')
+    print(f'PASS search index: {count} articles, {len(output.encode("utf-8")):,} bytes / {len(packed):,} gzip bytes')

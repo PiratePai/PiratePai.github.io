@@ -1,4 +1,4 @@
-/* Shared by the homepage and the standalone article reader (inlined at build time). */
+/* Shared by the homepage and article reader; the font is cached across pages. */
 @font-face {
   font-family: "Pai Headings";
   src: url("fonts/noto-sans-sc-headings.woff2") format("woff2");

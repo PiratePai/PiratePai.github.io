@@ -1,4 +1,19 @@
-/* Inlined by build-reader.py. Shared long-form typography and reader chrome. */
+/* Shared long-form typography and reader chrome; versioned by build-reader.py. */
+.article-maintenance { margin-top: 24px; font-size: 13px; line-height: 1.8; }
+.article-dates { display: flex; flex-wrap: wrap; gap: 4px 8px; }
+.article-dates > span { white-space: nowrap; }
+.article-maintenance time { font-variant-numeric: tabular-nums; }
+.article-maintenance details { margin-top: 8px; }
+.article-maintenance summary { cursor: pointer; padding-block: 6px; }
+.article-maintenance p { margin: 10px 0; }
+.article-maintenance ul { padding-left: 20px; }
+.article-maintenance li { margin-block: 12px; }
+.reader-ready .hero .article-maintenance { color: var(--r-muted) !important; }
+.reader-ready .hero .article-maintenance :is(summary,a) { color: var(--r-link) !important; }
+@media (max-width: 540px) {
+  .article-dates { display: grid; gap: 2px; }
+  .article-dates > [aria-hidden] { display: none; }
+}
 html.reader-ready {
   --r-bg:var(--paper); --r-surface:var(--surface); --r-soft:var(--rail); --r-rail:var(--rail);
   --r-text:var(--handbook-ink); --r-heading:var(--handbook-ink); --r-muted:var(--handbook-muted);

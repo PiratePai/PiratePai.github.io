@@ -30,6 +30,8 @@ class Page(HTMLParser):
             self.links.append(a['href'])
         if a.get('src'):
             self.assets.append(a['src'])
+        if tag == 'link' and a.get('rel') in ('stylesheet', 'preload', 'icon'):
+            self.assets.append(a['href'])
         if tag == 'script' and not a.get('src') and a.get('type', '') not in ('application/json', 'application/ld+json'):
             self.script = ''
 
@@ -78,7 +80,12 @@ def main():
     if errors:
         print('\n'.join(errors))
         return 1
-    print(f'PASS {len(pages)} pages: local links/assets, unique anchors, {script_count} inline JavaScript blocks')
+    for js in sorted((ROOT / 'scripts').glob('*.js')):
+        result = subprocess.run(['node', '--check', str(js)], capture_output=True, text=True, encoding='utf-8')
+        if result.returncode:
+            print(result.stderr)
+            return 1
+    print(f'PASS {len(pages)} pages: local links/assets, unique anchors, {script_count} inline blocks and shared JavaScript syntax')
     return 0
 
 

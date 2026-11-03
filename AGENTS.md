@@ -13,19 +13,19 @@
 | 位置 | 内容 |
 |---|---|
 | `index.html` | 首页：模型基础→推理优化→系统执行→性能验证→研究延伸的五部分知识目录（第1–16篇）、主线/支线阅读指引、站内搜索与浏览量曲线 |
-| `posts/*.html` | 文章正文，全部为**自包含 HTML**（无外部 CSS/JS 依赖，默认冷白阅读手册、可切深色，移动端适配） |
+| `posts/*.html` | 完整静态正文；复用本站 CSS、字体和阅读器脚本，无第三方运行时依赖，默认冷白、可切深色 |
+| `data/articles.json` | 首次发布、内容更新、局部核验日期及变更记录的唯一维护入口 |
 | `posts/img/` | 论文原图/手绘图 SVG（部分文章图片以内嵌 base64 或相对路径引用） |
 | `views.json` / `scripts/` | 每日 04:30 自动快照的 profile views 数据与脚本 |
 | `AGENTS.md` | 本文件 |
 
-**发布流程（github.com:443 不通时用 API 通道）**：
-1. 本地仓库改文件 → `git add` + `git commit`（在 **main** 分支；不要动 `feature/gate`）。
-2. 在 `D:\Github\spec\` 下执行 `node push-via-api.mjs D:/Github/PiratePai.github.io`——
-   它按 blob sha 对比本地与远端 main，只把**内容有差异的文件**经 Git Data API 推上去。
-3. 发布后 `WebFetch https://piratepai.github.io/` 验证首页与文章可达。
+**发布流程**：
+1. 从最新 main 建工作分支，完成修改与 `python scripts/build-site.py`；不要动 `feature/gate`。
+2. 提交 PR，运行站点检查；按用户授权合入 main，由 GitHub Pages 发布。
+3. 发布后验证首页、文章、共享资源与 sitemap 可达。当前推荐 Git/gh 流程；旧 API 推送脚本会直接同步 main，不用于 PR 提交流程。
 - ⚠️ **门禁警告**：`feature/gate` 分支上的 `gate.js` 与密文版 `llm-perf-simulation-2026.html`
   是邀请码加密试点，**未获用户明确指示不得推送**（push-via-api 会无差别推送所有差异文件，
-  所以务必先确认当前分支是 main、且工作区没有 gate 改动）。
+  所以务必确认本次提交没有 gate 改动）。
 
 ---
 
@@ -64,9 +64,9 @@
 | `pre` `code` `.codecap` | 代码块 + 图注式说明（编号 代码 X-Y） |
 | `details/summary` | 长表格、长清单折叠 |
 
-配色变量：`--ink:#6ea8ff`（主蓝）`--muted:#aeb4bd` `--bg:#1b2128` `--card:#171a21`
+历史文章配色变量：`--ink:#6ea8ff`（主蓝）`--muted:#aeb4bd` `--bg:#1b2128` `--card:#171a21`
 `--ok:#41d1a7`（绿=亮点/正确）`--warn:#ffb454`（橙=引用框标题/警示）`--accent2:#9d7bff`。
-表格奇偶行交替（`tr:nth-child(even)`）。统一阅读器在桌面端使用左侧可收起目录，移动端使用抽屉。短章节整章阅读，长章节才按完整图文单元分页；不得把每个小节机械拆成独立短页，须合并过短尾页。首页与阅读器共享 `assets/reading-theme.css` 的冷白、蓝灰、深青及字体；阅读器排版和可选深色由 `scripts/chapter-reader.css` 控制，文章内不要再叠加配色覆盖。共享逻辑位于 `scripts/chapter-reader.js`；修改主题、字体或阅读器后，运行 `python scripts/build-reader.py`，将主题、WOFF2 字体及阅读器内嵌到文章，保持 HTML 自包含，再重建搜索索引。保留用户明确选择的深色偏好。不得将论文配图藏在默认关闭的更新附录里。
+表格奇偶行交替（`tr:nth-child(even)`）。统一阅读器在桌面端使用左侧可收起目录，移动端使用抽屉。短章节整章阅读，长章节才按完整图文单元分页；不得把每个小节机械拆成独立短页，须合并过短尾页。首页与阅读器共享 `assets/reading-theme.css` 的冷白、蓝灰、深青及字体；阅读器排版和可选深色由 `scripts/chapter-reader.css` 控制，文章内不要再叠加配色覆盖。共享逻辑位于 `scripts/chapter-reader.js`；修改主题、字体或阅读器后，运行 `python scripts/build-site.py`，更新同源资源版本、页面元数据与搜索索引。保留用户明确选择的深色偏好。不得将论文配图藏在默认关闭的更新附录里。
 
 ## 四、引用规范（最硬的一条）
 
@@ -104,8 +104,18 @@
 - [ ] 结构完整：hero / toc(★+章+refs) / hl 前沿亮点 / 每章 summary3 / refs+注 / 页脚计数
 - [ ] 每个 `[KEY]` 上标在 refs 或邻近 citebox 有对应出处；日期精确；二手信源已标注
 - [ ] 图表编号连续、图注含来源与位置；代码块有 codecap
-- [ ] 移动端单列正常（浏览器 375px 宽过一遍）；文章无外部资源依赖
+- [ ] 移动端单列正常（浏览器 375px 宽过一遍）；公共 CSS/JS 均为同源、带内容版本的链接
 - [ ] `python scripts/build-reader.py --check` 与站点检查通过；章内分页、左侧目录、旧锚点和论文配图直达正常
 - [ ] `index.html`：卡片 tags/h2/p/foot 更新，综述篇数 chip +1，日期 chip 更新
 - [ ] 本地预览：`cd D:\Github\spec && node serve-posts.mjs` → http://localhost:8931/<文件名>
-- [ ] 在 **main** 分支 commit；确认无 gate 相关文件混入；`node push-via-api.mjs` 推送；线上验证
+- [ ] 工作分支提交 PR，确认无 gate 相关文件混入；检查通过后按授权合入并线上验证
+
+## 七、日期、元数据与共享资源（2026-11-04 更新）
+
+用户明确要求统一更新信息、精简首页、补齐 SEO 并抽取公共资源；此节替代早期的单文件自包含构建要求。
+
+- 编辑 `data/articles.json` 维护标题摘要、首次发布（仓库首次收录）、内容更新、最近局部核验及对应章节/证据。界面维护不得自动推进资料核验日期，不把论文报告与独立复现混为一谈。
+- 运行 `python scripts/build-site.py`，按顺序更新动画、图解、阅读器、页面元数据和压缩搜索索引。不要手改生成区。`python scripts/build-site.py --check` 为完整生成一致性检查。
+- CSS/JS 通过内容摘要查询参数更新版本，文本摘要按 LF 规范化，确保 Windows 与 CI 一致。字体在首页和文章间共享缓存；保留完整 HTML 正文与无脚本目录。离线使用需保留 `posts/`、`scripts/` 与 `assets/` 的相对目录结构。
+- `search-index.json.gz` 是可选压缩通道；普通 JSON、标题摘要回退与重试入口必须保留。修改文章或索引后重新构建首页索引版本。
+- 检查 `python scripts/check-site.py`、Python 单元测试及 Node 搜索/原理图测试。CI `site-checks` 验证同源资源、元数据、索引与机制示例。
