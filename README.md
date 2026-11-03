@@ -2,6 +2,10 @@
 
 大模型效率技术知识全景 —— 16 篇技术综述，在线阅读：[piratepai.github.io](https://piratepai.github.io)。
 
+首页采用分阶段阅读手册：从引擎全景开始，按问题选择核心优化，再进入性能仿真；页边提示连接草稿训练、MoE、并行与视觉专题。顶部搜索覆盖 16 篇文章的标题、章节与正文，支持中英文关键词、高亮摘要和章节直达。搜索在浏览器中运行，首次聚焦搜索框时加载静态索引，不依赖外部搜索服务。
+
+按 `/` 或 `Ctrl` / `⌘` + `K` 聚焦搜索，`Esc` 清空；搜索词保留在 URL 的 `q` 参数中。索引加载失败时仍可搜索首页标题与摘要，并提供重试。关闭 JavaScript 时保留完整目录与阅读指引。
+
 2026-11-01 根据全站审阅报告修订机制、性能口径与引文，增加每篇的阅读路径、手算例子和研究取舍；发布快讯按需展开。修订范围与证据边界见 [修订说明](docs/research-quality-review.md)。
 
 ## 知识地图 · 推理效率栈
@@ -39,7 +43,11 @@
 python scripts/verify-mechanisms.py
 python scripts/build-reader.py --check
 python scripts/check-site.py
+python scripts/build-search-index.py --check
+node --test scripts/test-site-search.cjs
 python -m http.server 8000
 ```
 
 数值示例只核对文中明确的机制与教学账本，不复现论文训练和 GPU 性能。
+
+修改文章后执行 `python scripts/build-search-index.py` 更新 `search-index.json`；该索引仅从已有文章提取文本与有效章节锚点，`--check` 检查索引是否过期。它按需加载，不阻塞首页阅读。首页样式与搜索逻辑分别位于 `assets/site.css` 和 `scripts/site-search.js`。

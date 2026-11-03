@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T12:15:01.655901+00:00",
+  "title": "Design System: Pai's Blog",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0.0009 219.53)",
+          "oklch(27% 0.0021 219.53)",
+          "oklch(39% 0.0030 219.53)",
+          "oklch(51% 0.0035 219.53)",
+          "oklch(63% 0.0035 219.53)",
+          "oklch(75% 0.0028 219.53)",
+          "oklch(87% 0.0016 219.53)",
+          "oklch(95% 0.0005 219.53)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "rail": {
+        "role": "neutral",
+        "displayName": "Rail",
+        "tonalRamp": [
+          "oklch(15% 0.0019 228.86)",
+          "oklch(27% 0.0046 228.86)",
+          "oklch(39% 0.0065 228.86)",
+          "oklch(51% 0.0076 228.86)",
+          "oklch(63% 0.0076 228.86)",
+          "oklch(75% 0.0061 228.86)",
+          "oklch(87% 0.0034 228.86)",
+          "oklch(95% 0.0011 228.86)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0137 237.79)",
+          "oklch(27% 0.0328 237.79)",
+          "oklch(39% 0.0465 237.79)",
+          "oklch(51% 0.0547 237.79)",
+          "oklch(63% 0.0547 237.79)",
+          "oklch(75% 0.0438 237.79)",
+          "oklch(87% 0.0246 237.79)",
+          "oklch(95% 0.0082 237.79)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.0125 231.86)",
+          "oklch(27% 0.0301 231.86)",
+          "oklch(39% 0.0426 231.86)",
+          "oklch(51% 0.0501 231.86)",
+          "oklch(63% 0.0501 231.86)",
+          "oklch(75% 0.0401 231.86)",
+          "oklch(87% 0.0226 231.86)",
+          "oklch(95% 0.0075 231.86)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0101 231.93)",
+          "oklch(27% 0.0243 231.93)",
+          "oklch(39% 0.0344 231.93)",
+          "oklch(51% 0.0405 231.93)",
+          "oklch(63% 0.0405 231.93)",
+          "oklch(75% 0.0324 231.93)",
+          "oklch(87% 0.0182 231.93)",
+          "oklch(95% 0.0061 231.93)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Accent",
+        "tonalRamp": [
+          "oklch(15% 0.0190 190.08)",
+          "oklch(27% 0.0456 190.08)",
+          "oklch(39% 0.0646 190.08)",
+          "oklch(51% 0.0760 190.08)",
+          "oklch(63% 0.0760 190.08)",
+          "oklch(75% 0.0608 190.08)",
+          "oklch(87% 0.0342 190.08)",
+          "oklch(95% 0.0114 190.08)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "tonalRamp": [
+          "oklch(15% 0.0045 229.04)",
+          "oklch(27% 0.0108 229.04)",
+          "oklch(39% 0.0153 229.04)",
+          "oklch(51% 0.0180 229.04)",
+          "oklch(63% 0.0180 229.04)",
+          "oklch(75% 0.0144 229.04)",
+          "oklch(87% 0.0081 229.04)",
+          "oklch(95% 0.0027 229.04)"
+        ]
+      },
+      "selected": {
+        "role": "neutral",
+        "displayName": "Selected",
+        "tonalRamp": [
+          "oklch(15% 0.0051 189.19)",
+          "oklch(27% 0.0122 189.19)",
+          "oklch(39% 0.0173 189.19)",
+          "oklch(51% 0.0204 189.19)",
+          "oklch(63% 0.0204 189.19)",
+          "oklch(75% 0.0163 189.19)",
+          "oklch(87% 0.0092 189.19)",
+          "oklch(95% 0.0031 189.19)"
+        ]
+      },
+      "link-hover": {
+        "role": "primary",
+        "displayName": "Link Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0149 190.05)",
+          "oklch(27% 0.0357 190.05)",
+          "oklch(39% 0.0506 190.05)",
+          "oklch(51% 0.0595 190.05)",
+          "oklch(63% 0.0595 190.05)",
+          "oklch(75% 0.0476 190.05)",
+          "oklch(87% 0.0268 190.05)",
+          "oklch(95% 0.0089 190.05)"
+        ]
+      },
+      "selected-ink": {
+        "role": "primary",
+        "displayName": "Selected Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0170 192.18)",
+          "oklch(27% 0.0408 192.18)",
+          "oklch(39% 0.0578 192.18)",
+          "oklch(51% 0.0680 192.18)",
+          "oklch(63% 0.0680 192.18)",
+          "oklch(75% 0.0544 192.18)",
+          "oklch(87% 0.0306 192.18)",
+          "oklch(95% 0.0102 192.18)"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control Border",
+        "tonalRamp": [
+          "oklch(15% 0.0068 231.74)",
+          "oklch(27% 0.0163 231.74)",
+          "oklch(39% 0.0230 231.74)",
+          "oklch(51% 0.0271 231.74)",
+          "oklch(63% 0.0271 231.74)",
+          "oklch(75% 0.0217 231.74)",
+          "oklch(87% 0.0122 231.74)",
+          "oklch(95% 0.0041 231.74)"
+        ]
+      },
+      "highlight": {
+        "role": "neutral",
+        "displayName": "Highlight",
+        "tonalRamp": [
+          "oklch(15% 0.0057 168.71)",
+          "oklch(27% 0.0137 168.71)",
+          "oklch(39% 0.0194 168.71)",
+          "oklch(51% 0.0228 168.71)",
+          "oklch(63% 0.0228 168.71)",
+          "oklch(75% 0.0182 168.71)",
+          "oklch(87% 0.0103 168.71)",
+          "oklch(95% 0.0034 168.71)"
+        ]
+      },
+      "highlight-ink": {
+        "role": "neutral",
+        "displayName": "Highlight Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0122 180.67)",
+          "oklch(27% 0.0293 180.67)",
+          "oklch(39% 0.0415 180.67)",
+          "oklch(51% 0.0488 180.67)",
+          "oklch(63% 0.0488 180.67)",
+          "oklch(75% 0.0391 180.67)",
+          "oklch(87% 0.0220 180.67)",
+          "oklch(95% 0.0073 180.67)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Page heading",
+        "purpose": "Homepage h1, responsive down to 26px."
+      },
+      "headline": {
+        "displayName": "Section heading",
+        "purpose": "Main h2 hierarchy."
+      },
+      "title": {
+        "displayName": "Article title",
+        "purpose": "Archive and result h3 headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Platform Chinese-friendly prose."
+      },
+      "label": {
+        "displayName": "Supporting label",
+        "purpose": "Metadata and quiet navigation annotations."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "link-button-color",
+        "value": "color 160ms ease-out, background-color 160ms ease-out",
+        "purpose": "Links and buttons only under prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-workspace",
+        "value": "1500px"
+      },
+      {
+        "name": "inline-relationships",
+        "value": "1150px"
+      },
+      {
+        "name": "mobile-navigation",
+        "value": "860px"
+      },
+      {
+        "name": "single-column-topics",
+        "value": "540px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Search field",
+      "kind": "input",
+      "refersTo": "search-field",
+      "description": "Inline field with form-level focus and a clear action.",
+      "html": "<form class=\"ds-search\" role=\"search\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"/><path d=\"m16 16 4.5 4.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"/></svg><input type=\"search\" aria-label=\"站内搜索\" placeholder=\"搜索专题、术语或章节\"><button type=\"button\">清空</button></form>",
+      "css": ".ds-search{display:flex;align-items:center;gap:8px;border:1px solid var(--control-border,#a5b9c4);border-radius:6px;padding:0 4px 0 12px;width:min(400px,100%);background:var(--surface,#fff);color:var(--ink,#183b50);font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif}.ds-search:focus-within{outline:2px solid var(--accent,#176b67);outline-offset:2px}.ds-search svg{width:18px;height:18px;flex:none;color:var(--muted,#506c7b)}.ds-search input{font:inherit;min-width:0;width:100%;height:42px;border:0;outline:none;background:transparent;color:inherit}.ds-search input::placeholder{color:var(--muted,#506c7b);opacity:1}.ds-search button{border:0;background:transparent;color:var(--accent,#176b67);font:13px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;padding:8px;min-height:40px;cursor:pointer}.ds-search button:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
+    },
+    {
+      "name": "Text action",
+      "kind": "button",
+      "refersTo": "text-button",
+      "description": "Transparent clear action.",
+      "html": "<button class=\"ds-text-action\" type=\"button\">清空</button>",
+      "css": ".ds-text-action{background:transparent;border:0;color:var(--accent,#176b67);padding:8px;min-height:40px;font:13px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;cursor:pointer}.ds-text-action:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
+    },
+    {
+      "name": "More results",
+      "kind": "button",
+      "refersTo": "more-button",
+      "description": "Reveals the remaining article matches.",
+      "html": "<button class=\"ds-more\" type=\"button\">显示其余 4 篇</button>",
+      "css": ".ds-more{background:var(--surface,#fff);border:1px solid var(--control-border,#a5b9c4);border-radius:6px;padding:8px 20px;color:var(--accent,#176b67);font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;cursor:pointer}.ds-more:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
+    },
+    {
+      "name": "Stage navigation",
+      "kind": "nav",
+      "refersTo": "stage-navigation",
+      "description": "Sidebar stage links with current-location treatment.",
+      "html": "<nav class=\"ds-stage-nav\" aria-label=\"阅读阶段\"><a href=\"#start\" aria-current=\"location\">全景起点<span>L0</span></a><a href=\"#core\">核心优化<span>L1–L5</span></a></nav>",
+      "css": ".ds-stage-nav{display:grid;gap:4px;background:var(--rail,#e8eef1);padding:12px;font:15px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif}.ds-stage-nav a{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:4px;color:var(--secondary,#36596b);text-decoration:none}.ds-stage-nav span{font-size:12px;align-self:center}.ds-stage-nav a:hover,.ds-stage-nav a[aria-current]{background:var(--selected,#d4e7e5);color:var(--selected-ink,#145d5b)}.ds-stage-nav a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
+    },
+    {
+      "name": "Reading stage",
+      "kind": "custom",
+      "refersTo": "reading-stage",
+      "description": "Unboxed label and explanatory content separated by a rule.",
+      "html": "<section class=\"ds-stage\"><div class=\"ds-stage-label\">全景起点<span>建立系统视角</span></div><div><a href=\"#article\">L0 · 定制推理引擎</a><p>从一次请求的执行过程出发，理解计算、数据搬运与调度如何配合。</p></div></section>",
+      "css": ".ds-stage{display:grid;grid-template-columns:108px minmax(0,1fr);gap:20px;border-top:1px solid var(--line,#c7d5dc);padding:20px 0;font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;color:var(--ink,#183b50)}.ds-stage-label{font-weight:600;line-height:1.6}.ds-stage-label span{display:block;font-size:13px;font-weight:400;color:var(--muted,#506c7b);margin-top:4px}.ds-stage a{color:var(--accent,#176b67);font-family:\"Pai Headings\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-weight:600;text-underline-offset:4px;text-decoration-thickness:1px}.ds-stage a:hover{color:var(--link-hover,#104d4a)}.ds-stage a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}.ds-stage p{margin:8px 0 0;color:var(--secondary,#36596b)}@media(max-width:540px){.ds-stage{grid-template-columns:1fr;gap:12px}.ds-stage-label{font-size:18px}.ds-stage-label span{display:inline;margin-left:12px}}"
+    },
+    {
+      "name": "Relationship note",
+      "kind": "custom",
+      "refersTo": "margin-note",
+      "description": "Muted contextual reading note with a top rule.",
+      "html": "<section class=\"ds-margin\"><h2>主题之间，怎样连接？</h2><p>沿着同一个问题，把主线与延伸文章连起来读。</p><a href=\"#draft\">草稿后训练</a></section>",
+      "css": ".ds-margin{border-top:1px solid #93afba;padding-top:16px;font:14px/1.85 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;color:var(--muted,#506c7b)}.ds-margin h2{font:600 16px/1.5 \"Pai Headings\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;margin:0 0 12px;color:var(--ink,#183b50)}.ds-margin p{margin:0 0 16px}.ds-margin a{color:var(--accent,#176b67);text-underline-offset:4px}.ds-margin a:hover{color:var(--link-hover,#104d4a)}.ds-margin a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
+    },
+    {
+      "name": "Archive entry",
+      "kind": "custom",
+      "refersTo": "archive-entry",
+      "description": "Divided article row with explanatory summary and metadata.",
+      "html": "<article class=\"ds-article\"><h3><a href=\"#kv\">KV Cache 技术全景：从原理到前沿</a></h3><p>结构压缩、分页管理、前缀复用、量化与分层卸载。</p><small>显存层 · 管理 KV Cache</small></article>",
+      "css": ".ds-article{padding:24px 0;border-top:1px solid var(--line,#c7d5dc);font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;color:var(--secondary,#36596b)}.ds-article h3{font:600 20px/1.6 \"Pai Headings\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;margin:0 0 8px}.ds-article a{color:var(--accent,#176b67);text-underline-offset:4px;text-decoration-thickness:1px}.ds-article a:hover{color:var(--link-hover,#104d4a)}.ds-article a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}.ds-article p{margin:0 0 8px;overflow-wrap:anywhere}.ds-article small{font-size:13px;color:var(--muted,#506c7b)}@media(max-width:540px){.ds-article h3{font-size:18px}}"
+    },
+    {
+      "name": "Data panel",
+      "kind": "card",
+      "refersTo": "data-panel",
+      "description": "White bordered container for site-view context.",
+      "html": "<section class=\"ds-panel\"><p>站点数据 · 浏览量曲线</p><small>浏览量曲线每日快照一次，积累两天后即可看到第一段曲线。</small></section>",
+      "css": ".ds-panel{padding:20px;background:var(--surface,#fff);border:1px solid var(--line,#c7d5dc);border-radius:12px;color:var(--ink,#183b50);font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif}.ds-panel p{margin:0 0 16px}.ds-panel small{font-size:14px;color:var(--muted,#506c7b)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Reading handbook",
+    "overview": "A calm Chinese technical reference built from cool paper, a blue-gray navigation rail, deep blue text and deep teal links. Headings establish hierarchy without a promotional hero; compact controls use familiar document syntax.\n\nThe implemented visual language is flat and text-led. Rules, spacing and restrained tonal changes distinguish regions; explanatory relationships stay close to the material they qualify. This records the current homepage system; its reading stages and Read mode remain surface decisions in .impeccable/surfaces/index-html.md.",
+    "keyCharacteristics": [
+      "Cool paper and blue-gray support surfaces.",
+      "Self-hosted Chinese headings paired with platform body text.",
+      "Flat document rows, fine separators and restrained controls.",
+      "Visible keyboard focus and inline search feedback."
+    ],
+    "rules": [
+      {
+        "name": "The Teal Action Rule",
+        "body": "Use deep teal for links, focus and actionable text; keep prose in the blue text hierarchy.",
+        "section": "colors"
+      },
+      {
+        "name": "The Real Heading Rule",
+        "body": "Use the bundled heading face for the brand and semantic headings. Keep headings as ordinary document titles without decorative eyebrows.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Reading Rule",
+        "body": "Separate content with fine rules, whitespace and paper tones; the implemented components use no box shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the bundled heading face and retain readable platform fallbacks for glyphs outside the subset.",
+      "Do preserve the distinction between ink, secondary prose and muted supporting text.",
+      "Do keep navigation, fields and buttons keyboard reachable with visible teal focus.",
+      "Do retain semantic source order when columns collapse; relationship notes follow the guide before the archive on this homepage.",
+      "Do present search loading, fallback, no-match and retry messages inside the main content."
+    ],
+    "donts": [
+      "Don't add decorative eyebrows above normal headings.",
+      "Don't turn document rows into shadowed promotional cards.",
+      "Don't treat the homepage reading sequence or Read mode as a requirement for every product surface.",
+      "Don't assume the bundled heading subset covers newly added Chinese copy; extend its licensed subset or allow the declared fallbacks."
+    ]
+  }
+}
