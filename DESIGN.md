@@ -142,7 +142,7 @@ The palette reads as cool paper with blue text and a reserved teal action color.
 **Display Font:** Pai Headings, the self-hosted Noto Sans SC weight-600 subset, with PingFang SC, Microsoft YaHei and sans-serif fallbacks.
 **Body Font:** Segoe UI, PingFang SC, Microsoft YaHei, sans-serif.
 
-**Character:** Direct, compact Chinese technical prose. The bundled heading file covers 252 glyphs (34,564 bytes), uses `font-display: swap`, and carries its OFL and source in `assets/fonts/`. It is a subset rather than a full Chinese font.
+**Character:** Direct, compact Chinese technical prose. The bundled heading file covers 253 glyphs (35,036 bytes), uses `font-display: swap`, and carries its OFL and source in `assets/fonts/`. It is a subset rather than a full Chinese font.
 
 ### Hierarchy
 

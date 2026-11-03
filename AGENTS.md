@@ -12,7 +12,7 @@
 
 | 位置 | 内容 |
 |---|---|
-| `index.html` | 首页：推理效率栈 L1–L6 分层卡 + "延伸·训练与架构"卡片网格 + 浏览量曲线（views.json + komarev profile views） |
+| `index.html` | 首页：模型基础→推理优化→系统执行→性能验证→研究延伸的五部分知识目录（第1–16篇）、主线/支线阅读指引、站内搜索与浏览量曲线 |
 | `posts/*.html` | 文章正文，全部为**自包含 HTML**（无外部 CSS/JS 依赖，暗色主题，移动端适配） |
 | `posts/img/` | 论文原图/手绘图 SVG（部分文章图片以内嵌 base64 或相对路径引用） |
 | `views.json` / `scripts/` | 每日 04:30 自动快照的 profile views 数据与脚本 |

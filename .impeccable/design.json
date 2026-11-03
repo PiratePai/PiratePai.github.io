@@ -280,7 +280,7 @@
       "kind": "nav",
       "refersTo": "stage-navigation",
       "description": "Sidebar stage links with current-location treatment.",
-      "html": "<nav class=\"ds-stage-nav\" aria-label=\"阅读阶段\"><a href=\"#start\" aria-current=\"location\">全景起点<span>L0</span></a><a href=\"#core\">核心优化<span>L1–L5</span></a></nav>",
+      "html": "<nav class=\"ds-stage-nav\" aria-label=\"阅读阶段\"><a href=\"#start\" aria-current=\"location\">模型基础<span>1–2</span></a><a href=\"#core\">推理优化<span>3–6</span></a></nav>",
       "css": ".ds-stage-nav{display:grid;gap:4px;background:var(--rail,#e8eef1);padding:12px;font:15px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif}.ds-stage-nav a{display:flex;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:4px;color:var(--secondary,#36596b);text-decoration:none}.ds-stage-nav span{font-size:12px;align-self:center}.ds-stage-nav a:hover,.ds-stage-nav a[aria-current]{background:var(--selected,#d4e7e5);color:var(--selected-ink,#145d5b)}.ds-stage-nav a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}"
     },
     {
@@ -288,7 +288,7 @@
       "kind": "custom",
       "refersTo": "reading-stage",
       "description": "Unboxed label and explanatory content separated by a rule.",
-      "html": "<section class=\"ds-stage\"><div class=\"ds-stage-label\">全景起点<span>建立系统视角</span></div><div><a href=\"#article\">L0 · 定制推理引擎</a><p>从一次请求的执行过程出发，理解计算、数据搬运与调度如何配合。</p></div></section>",
+      "html": "<section class=\"ds-stage\"><div class=\"ds-stage-label\">模型基础<span>第1–2篇</span></div><div><a href=\"#article\">1. 注意力结构</a><p>先理解注意力如何组织计算与状态，再进入缓存与压缩。</p></div></section>",
       "css": ".ds-stage{display:grid;grid-template-columns:108px minmax(0,1fr);gap:20px;border-top:1px solid var(--line,#c7d5dc);padding:20px 0;font:16px/1.8 \"Segoe UI\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;color:var(--ink,#183b50)}.ds-stage-label{font-weight:600;line-height:1.6}.ds-stage-label span{display:block;font-size:13px;font-weight:400;color:var(--muted,#506c7b);margin-top:4px}.ds-stage a{color:var(--accent,#176b67);font-family:\"Pai Headings\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif;font-weight:600;text-underline-offset:4px;text-decoration-thickness:1px}.ds-stage a:hover{color:var(--link-hover,#104d4a)}.ds-stage a:focus-visible{outline:2px solid var(--accent,#176b67);outline-offset:4px;}.ds-stage p{margin:8px 0 0;color:var(--secondary,#36596b)}@media(max-width:540px){.ds-stage{grid-template-columns:1fr;gap:12px}.ds-stage-label{font-size:18px}.ds-stage-label span{display:inline;margin-left:12px}}"
     },
     {

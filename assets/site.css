@@ -90,6 +90,8 @@ p { margin: 0 0 16px; }
 .archive > p { color: var(--muted); font-size: 14px; }
 .archive-group { margin-top: 36px; }
 .archive-group > h3 { margin-bottom: 8px; }
+.group-range { margin: 0 0 12px; color: var(--muted); font-size: 13px; }
+.chapter-number { margin-inline-end: .5em; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
 .article-entry { padding: 24px 0; border-top: 1px solid var(--line); }
 .article-entry .article-meta { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 .article-entry h3 { margin: 0 0 8px; }
