@@ -103,7 +103,7 @@ components:
 
 A calm Chinese technical reference built from cool paper, a blue-gray navigation rail, deep blue text and deep teal links. Headings establish hierarchy without a promotional hero; compact controls use familiar document syntax.
 
-The implemented visual language is flat and text-led. Rules, spacing and restrained tonal changes distinguish regions; explanatory relationships stay close to the material they qualify. This records the current homepage system; its reading stages and Read mode remain surface decisions in .impeccable/surfaces/index-html.md.
+The implemented visual language is flat and text-led. Rules, spacing and restrained tonal changes distinguish regions; explanatory relationships stay close to the material they qualify. The homepage and article reader share the palette and heading face from `assets/reading-theme.css`; their reading layouts remain surface decisions in `.impeccable/surfaces/`.
 
 **Key Characteristics:**
 
@@ -187,6 +187,12 @@ The search form is a white bordered control with an inline SVG magnifier. Its in
 ### Navigation
 
 The rail uses compact links with a tonal wash for hover and `aria-current`. Topic links are quieter and underline on hover. On narrow screens, native details/summary exposes a wrapping link list. The skip link appears on focus. Ordinary links use a (1px) underline with (4px) offset.
+
+### Article Reader
+
+First visits use the same cool paper, blue-gray rail, blue text, teal links and selected wash as the homepage. Pai's Blog appears above the article contents; a persistent Home link remains accessible when the contents are closed. Long chapter labels retain a wider (280px) rail, and long-form prose retains (17px/1.95) on desktop and (16px/1.95) on mobile. The desktop toolbar shares the homepage's (80px) height; mobile uses a compact (60px) toolbar. Controls use (6px) radii and contents links (4px), without shadows. Headings use the same bundled face and (32/25/20px) hierarchy, with existing mobile reductions.
+
+The optional dark theme preserves an explicit saved choice. Notes, summaries, citations, tables and code use theme-aware surfaces; code keywords, strings and comments have readable colors in both modes. Paper figures, authored SVGs and interactive diagrams retain their original graphics palettes. `build-reader.py` embeds the shared theme and licensed WOFF2 font as a data URL, preserving standalone HTML without runtime font/CSS dependencies.
 
 ### Reading Stages and Relationship Notes
 

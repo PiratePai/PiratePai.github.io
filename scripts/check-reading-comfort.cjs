@@ -15,6 +15,31 @@ const out=process.env.READER_QA_DIR;
       const context=await browser.newContext({viewport:{width,height:950}});
       await context.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
       const page=await context.newPage();
+      // A first visit continues the homepage palette; only an explicit choice enables dark mode.
+      await page.goto(base+'/');
+      const homeStyle=await page.evaluate(()=>({
+        paper:getComputedStyle(document.body).backgroundColor,
+        ink:getComputedStyle(document.body).color,
+        rail:getComputedStyle(document.querySelector('.sidebar')).backgroundColor,
+        accent:getComputedStyle(document.querySelector('.topbar-links a')).color,
+        headingFont:getComputedStyle(document.querySelector('h1')).fontFamily
+      }));
+      await page.goto(base+'/posts/attention-evolution.html');
+      assert.equal(await page.locator('html').getAttribute('data-reader-theme'),'paper');
+      const readerStyle=await page.evaluate(()=>({
+        paper:getComputedStyle(document.body).backgroundColor,
+        ink:getComputedStyle(document.body).color,
+        rail:getComputedStyle(document.querySelector('.reader-sidebar')).backgroundColor,
+        accent:getComputedStyle(document.querySelector('.reader-home')).color,
+        headingFont:getComputedStyle(document.querySelector('.hero h1')).fontFamily
+      }));
+      for(const key of ['paper','ink','rail','accent','headingFont'])assert.equal(readerStyle[key],homeStyle[key],key+': homepage/reader mismatch');
+      assert.equal(await page.locator('.reader-brand').getAttribute('href'),'../index.html');
+      await page.locator('.reader-theme-toggle').click();
+      await page.reload();
+      assert.equal(await page.locator('html').getAttribute('data-reader-theme'),'dark');
+      await page.goto(base+'/posts/kv-cache-survey.html');
+      assert.equal(await page.locator('html').getAttribute('data-reader-theme'),'dark');
       for(const file of files) {
         await page.goto(base+'/posts/'+file+'?view=all');
         for(const theme of ['dark','paper']) {
@@ -46,6 +71,12 @@ const out=process.env.READER_QA_DIR;
               if(contrast<(large?3:4.5)-.05)lowContrast.push({tag:el.tagName,cls:el.className,color:css.color,bg:background(el),ratio:Math.round(contrast*100)/100,text:text.slice(0,70)});
               if(el.tagName==='P'&&text.length>60&&!el.closest('blockquote,.quote,.citebox,.q,figcaption,td,th,.codecap,.cap,footer,.footer,.fig,.diagram')&&parseFloat(css.fontSize)<15.5)smallProse.push(text.slice(0,60));
               checked++;
+            }
+            for(const el of document.querySelectorAll('.reader-content pre,.reader-content pre span')) {
+              if(!el.textContent.trim()||!el.getClientRects().length)continue;
+              const a=luminance(rgb(style(el).color)),b=luminance(background(el));
+              const contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+              if(contrast<4.45)lowContrast.push({tag:el.tagName,cls:el.className,color:style(el).color,bg:background(el),ratio:Math.round(contrast*100)/100,text:el.textContent.slice(0,70)});
             }
             const numberIssues=[...document.querySelectorAll('.reader-content h2 .no,.reader-content h2 .num')].filter(n=>{
               const number=style(n),heading=style(n.closest('h2'));

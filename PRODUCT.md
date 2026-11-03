@@ -20,11 +20,11 @@ Pai's Blog 提供中文大模型效率技术综述；首页是技术专题的阅
 
 ## Capabilities and Constraints
 
-现有仓库采用静态 HTML/CSS/JavaScript，通过 GitHub Pages 托管。本轮只重做首页，保留已有文章、链接、中文内容与事实口径。文章阅读器和正文不在本轮修改范围。发布通过 PR 合入 main，由 GitHub Pages 构建。
+现有仓库采用静态 HTML/CSS/JavaScript，通过 GitHub Pages 托管。首页已采用阅读手册风格；2026-11-03 用户指出文章内部风格不一致，要求统一阅读体验。共享阅读器沿用首页的颜色、标题字体、站点标识和导航语法，保留长文行宽、分页与全文模式。已有文章正文、链接、中文内容与事实口径保持不变，文章仍自包含。发布通过 PR 合入 main，由 GitHub Pages 构建。
 
 ## Brand Commitments
 
-保留 Pai's Blog / PiratePai 名称。中文为主，技术术语保留英文。首页采用已确认的浅色阅读手册风格，使用标准文档导航。
+保留 Pai's Blog / PiratePai 名称。中文为主，技术术语保留英文。首页与文章阅读器默认采用已确认的冷白阅读手册风格，使用标准文档导航；文章保留用户主动选择的深色模式。
 
 ## Evidence on Hand
 

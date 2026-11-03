@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 import argparse
 import difflib
 import re
+import base64
 
 ROOT = Path(__file__).resolve().parents[1]
 START = '<!-- chapter-reader:start -->'
@@ -70,7 +71,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    css = (ROOT/'scripts/chapter-reader.css').read_text(encoding='utf-8').strip()
+    theme = (ROOT/'assets/reading-theme.css').read_text(encoding='utf-8').strip()
+    font = base64.b64encode((ROOT/'assets/fonts/noto-sans-sc-headings.woff2').read_bytes()).decode('ascii')
+    theme = theme.replace('url("fonts/noto-sans-sc-headings.woff2")', f'url("data:font/woff2;base64,{font}")')
+    css = theme + '\n' + (ROOT/'scripts/chapter-reader.css').read_text(encoding='utf-8').strip()
     js = (ROOT/'scripts/chapter-reader.js').read_text(encoding='utf-8').strip()
     block = f'{START}\n<style id="chapter-reader-style">\n{css}\n</style>\n<script id="chapter-reader-script">\n{js}\n</script>\n{END}'
     changed = []

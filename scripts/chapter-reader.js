@@ -7,8 +7,8 @@
   const root = guide.parentElement;
   const html = document.documentElement;
   root.classList.add('reader-content');
-  let theme = 'dark';
-  try { theme = localStorage.getItem('reader-theme') === 'paper' ? 'paper' : 'dark'; } catch (_) {}
+  let theme = 'paper';
+  try { theme = localStorage.getItem('reader-theme') === 'dark' ? 'dark' : 'paper'; } catch (_) {}
   html.dataset.readerTheme = theme;
   document.querySelectorAll('a[href="../index.html"]').forEach(a => {
     if (a.parentElement.style.position === 'fixed') a.parentElement.classList.add('reader-legacy-home');
@@ -192,9 +192,12 @@
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';
   sidebar.setAttribute('aria-label', '文章目录');
   const head = element('div', 'reader-sidebar-head');
-  const home = element('a', '', '← 推理效率与架构'); home.href = '../index.html';
+  const identity = element('div', 'reader-identity');
+  const home = element('a', 'reader-brand', "Pai's Blog"); home.href = '../index.html';
+  home.setAttribute('aria-label', "Pai's Blog · 返回首页");
+  identity.append(home, element('p', 'reader-brand-note', '大模型效率技术综述'));
   const close = element('button', '', '收起'); close.type = 'button'; close.setAttribute('aria-label', '收起目录');
-  head.append(home, close);
+  head.append(identity, close);
   const scroll = element('div', 'reader-sidebar-scroll');
   const nav = element('nav'); nav.setAttribute('aria-label', '章节与章内分页');
   const navLinks = [];
@@ -220,10 +223,11 @@
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));
     nav.append(gallery);
   }
-  scroll.append(element('small', '', '按章展开，选择章内各页。原有引用链接仍可直达。'), nav);
+  scroll.append(element('p', 'reader-nav-label', '文章目录'), nav);
   sidebar.append(head, scroll);
   const toolbar = element('div', 'reader-ui reader-toolbar');
   const toggle = element('button', '', '☰ 目录'); toggle.type = 'button'; toggle.setAttribute('aria-controls', sidebar.id);
+  const toolbarHome = element('a', 'reader-home', '首页'); toolbarHome.href = '../index.html';
   const status = element('span', 'reader-toolbar-label'); status.setAttribute('aria-live', 'polite');
   const currentTitle = element('span', 'reader-current-title');
   const counter = element('span'); status.append(currentTitle, counter);
@@ -243,7 +247,7 @@
     try { localStorage.setItem('reader-theme', theme); } catch (_) {}
   });
   showTheme();
-  toolbar.append(toggle, previousButton, status, nextButton, themeButton, mode);
+  toolbar.append(toolbarHome, toggle, previousButton, status, nextButton, themeButton, mode);
   const backdrop = element('button', 'reader-ui reader-backdrop'); backdrop.type = 'button'; backdrop.setAttribute('aria-label', '关闭目录'); backdrop.tabIndex = -1;
   const skip = link('跳到正文', pages[0].id, 'reader-ui reader-skip');
   document.body.append(skip, backdrop, sidebar, toolbar);

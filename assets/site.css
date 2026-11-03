@@ -1,25 +1,6 @@
-@font-face {
-  font-family: "Pai Headings";
-  src: url("fonts/noto-sans-sc-headings.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-:root {
-  color-scheme: light;
-  --paper: #f4f7f8;
-  --surface: #fff;
-  --rail: #e8eef1;
-  --ink: #183b50;
-  --secondary: #36596b;
-  --muted: #506c7b;
-  --accent: #176b67;
-  --line: #c7d5dc;
-  --selected: #d4e7e5;
-}
 * { box-sizing: border-box; }
 html { scroll-padding-top: 96px; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.8 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.8 var(--font-body); }
 ::selection { background: #c9e3df; color: var(--ink); }
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 4px; }
 a:hover { color: #104d4a; }
@@ -34,7 +15,7 @@ button { cursor: pointer; }
 .page { display: grid; grid-template-columns: 224px minmax(0, 1fr); max-width: 1640px; margin: auto; }
 .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 28px 24px; background: var(--rail); border-right: 1px solid var(--line); scrollbar-color: #829eab var(--rail); scrollbar-width: thin; }
 .brand { color: var(--ink); text-decoration: none; font-size: 26px; font-weight: 650; letter-spacing: -.02em; }
-.brand, .mobile-brand, h1, h2, h3 { font-family: "Pai Headings", "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 600; }
+.brand, .mobile-brand, h1, h2, h3 { font-family: var(--font-heading); font-weight: 600; }
 .brand-note { color: var(--muted); font-size: 13px; margin: 4px 0 40px; }
 .nav-label { color: var(--muted); font-size: 13px; margin: 28px 0 8px; }
 .stage-nav { display: grid; gap: 4px; }
