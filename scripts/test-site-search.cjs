@@ -2,7 +2,7 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const {prepare, search} = require('./site-search.js');
+const {prepare, search, readIndex} = require('./site-search.js');
 const index = JSON.parse(fs.readFileSync(path.join(__dirname, '../search-index.json'), 'utf8'));
 const docs = prepare(index.documents);
 
@@ -34,4 +34,36 @@ test('blank, punctuation and absent terms have no bogus results', () => {
 test('style and JavaScript implementation text is excluded from the index', () => {
   assert.deepEqual(search(docs, 'function updateReader'), []);
   assert.deepEqual(search(docs, 'grid-template-columns'), []);
+});
+
+test('compressed index expands to the complete JSON index without changing search results', async () => {
+  const packed = fs.readFileSync(path.join(__dirname, '../search-index.json.gz'));
+  const loaded = await readIndex(async () => new Response(packed), {plain:'index.json',gzip:'index.json.gz'}, undefined, DecompressionStream);
+  assert.deepEqual(loaded, index);
+  assert.deepEqual(search(prepare(loaded.documents), '分页管理'), search(docs, '分页管理'));
+});
+
+test('missing or corrupt gzip falls back to JSON; browsers without a decoder skip gzip', async () => {
+  for (const failure of [new Response('', {status:404}), new Response('invalid gzip')]) {
+    const calls = [];
+    const loaded = await readIndex(async url => {
+      calls.push(url);
+      return url.endsWith('.gz') ? failure : Response.json(index);
+    }, {plain:'index.json',gzip:'index.json.gz'}, undefined, DecompressionStream);
+    assert.deepEqual(loaded, index);
+    assert.deepEqual(calls, ['index.json.gz','index.json']);
+  }
+  const calls = [];
+  await readIndex(async url => { calls.push(url); return Response.json(index); }, {plain:'index.json',gzip:'index.json.gz'});
+  assert.deepEqual(calls, ['index.json']);
+});
+
+test('transparently decoded gzip is accepted and an abort does not start a fallback request', async () => {
+  const loaded = await readIndex(async () => Response.json(index), {gzip:'index.json.gz'}, undefined, DecompressionStream);
+  assert.deepEqual(loaded, index);
+  const controller = new AbortController();
+  controller.abort();
+  let calls = 0;
+  await assert.rejects(readIndex(async () => { calls++; throw new Error('aborted'); }, {gzip:'index.json.gz',plain:'index.json'}, controller.signal, DecompressionStream));
+  assert.equal(calls, 1);
 });

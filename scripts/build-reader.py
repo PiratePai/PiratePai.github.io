@@ -1,14 +1,13 @@
-"""Inline the shared reader into all articles; no runtime dependencies.
+"""Reference the versioned, same-origin reader from all articles.
 
 Run after editing chapter-reader.css/js. --check verifies generated files.
 """
 from pathlib import Path
 from html.parser import HTMLParser
 import argparse
-import difflib
 import re
-import base64
 import colorsys
+from site_assets import asset_url, preserve_line_endings
 
 ROOT = Path(__file__).resolve().parents[1]
 START = '<!-- chapter-reader:start -->'
@@ -90,29 +89,14 @@ class Updates(HTMLParser):
                 return
 
 
-def preserve_lines(before, after, raw):
-    """Retain mixed historical line endings in untouched source lines."""
-    old, new, original = before.splitlines(True), after.splitlines(True), raw.splitlines(True)
-    ending = '\r\n' if raw.count('\r\n') > raw.count('\n') / 2 else '\n'
-    result = []
-    for op, a, b, c, d in difflib.SequenceMatcher(None, old, new, autojunk=False).get_opcodes():
-        if op == 'equal':
-            result.extend(original[a:b])
-        else:
-            result.extend(line.replace('\n', ending) for line in new[c:d])
-    return ''.join(result)
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
-    theme = (ROOT/'assets/reading-theme.css').read_text(encoding='utf-8').strip()
-    font = base64.b64encode((ROOT/'assets/fonts/noto-sans-sc-headings.woff2').read_bytes()).decode('ascii')
-    theme = theme.replace('url("fonts/noto-sans-sc-headings.woff2")', f'url("data:font/woff2;base64,{font}")')
-    css = theme + '\n' + (ROOT/'scripts/chapter-reader.css').read_text(encoding='utf-8').strip()
-    js = (ROOT/'scripts/chapter-reader.js').read_text(encoding='utf-8').strip()
-    block = f'{START}\n<style id="chapter-reader-style">\n{css}\n</style>\n<script id="chapter-reader-script">\n{js}\n</script>\n{END}'
+    block = (f'{START}\n'
+             f'<link rel="stylesheet" href="{asset_url("assets/reading-theme.css")}">\n'
+             f'<link rel="stylesheet" id="chapter-reader-style" href="{asset_url("scripts/chapter-reader.css")}">\n'
+             f'<script id="chapter-reader-script" src="{asset_url("scripts/chapter-reader.js")}"></script>\n{END}')
     changed = []
     articles = sorted((ROOT/'posts').glob('*.html'))
     for path in articles:
@@ -132,10 +116,10 @@ def main():
         if source != before:
             changed.append(path.name)
             if not args.check:
-                path.write_bytes(preserve_lines(before, source, raw).encode('utf-8'))
+                path.write_bytes(preserve_line_endings(raw, source).encode('utf-8'))
     if args.check and changed:
         raise SystemExit('Reader is out of date: ' + ', '.join(changed))
-    print(f'{"CHECK" if args.check else "BUILD"}: {len(articles)} standalone articles; {len(changed)} changed')
+    print(f'{"CHECK" if args.check else "BUILD"}: {len(articles)} articles with shared reader; {len(changed)} changed')
 
 
 if __name__ == '__main__':

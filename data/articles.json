@@ -1,0 +1,327 @@
+{
+  "siteUrl": "https://piratepai.github.io",
+  "siteUpdated": "2026-11-04",
+  "articles": {
+    "agent-rl-survey": {
+      "title": "Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL",
+      "description": "沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。",
+      "published": "2026-08-23",
+      "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解排版",
+          "summary": "调整手绘图的字号、布局与主题，不扩大原资料的核验范围。",
+          "anchor": "diagram-agent-rl-survey-1",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "attention-evolution": {
+      "title": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）",
+      "description": "沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。",
+      "published": "2026-08-23",
+      "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "custom-inference-engines-2026": {
+      "title": "定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）",
+      "description": "以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。",
+      "published": "2026-10-31",
+      "publicationCommit": "1b68d9a3375a51832f61128e94ef6165e87989d4",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "inference-serving": {
+      "title": "大模型推理服务优化：技术发展史、原理与前沿展望",
+      "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。",
+      "published": "2026-08-23",
+      "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "kv-cache-survey": {
+      "title": "KV Cache 技术全景：从原理到前沿（2017–2026）",
+      "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。",
+      "published": "2026-08-23",
+      "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解与来源",
+          "summary": "重绘KV 分页与写时复制，核对图示机制与来源。",
+          "anchor": "kv-block-map",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "llm-perf-simulation-2026": {
+      "title": "大模型性能仿真：从算子账本到请求曲线",
+      "description": "从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。",
+      "published": "2026-10-26",
+      "publicationCommit": "b497668aea429d7e7c77cac64cfffacc1147571f",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解排版",
+          "summary": "调整手绘图的字号、布局与主题，不扩大原资料的核验范围。",
+          "anchor": "diagram-llm-perf-simulation-2026-1",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "loop-transformer-survey": {
+      "title": "Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）",
+      "description": "沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。",
+      "published": "2026-09-15",
+      "publicationCommit": "04f6a9d9c75471bcb1f136a913bcdc13731f904f",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解排版",
+          "summary": "调整手绘图的字号、布局与主题，不扩大原资料的核验范围。",
+          "anchor": "diagram-loop-transformer-survey-1",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "moe-survey": {
+      "title": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来",
+      "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。",
+      "published": "2026-08-22",
+      "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解与来源",
+          "summary": "重绘MoE 路由与合并，核对图示机制与来源。",
+          "anchor": "moe-route-combine",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "parallelism-survey": {
+      "title": "大模型并行策略与通信优化：发展历程、原理与未来方向",
+      "description": "从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。",
+      "published": "2026-08-23",
+      "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解与来源",
+          "summary": "重绘ZeRO 分片比较图，核对图示机制与来源。",
+          "anchor": "zero-memory-figure",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "quantization-survey": {
+      "title": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告",
+      "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。",
+      "published": "2026-08-22",
+      "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "realtime-world-models-2026": {
+      "title": "实时交互世界模型全景：从看视频到进世界（2024–2026）",
+      "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。",
+      "published": "2026-10-29",
+      "publicationCommit": "42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "spec-decoding-post-training": {
+      "title": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）",
+      "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。",
+      "published": "2026-09-11",
+      "publicationCommit": "1126cb5bb6bc39354f1320c0f2554d15cd5f1b93",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "speculative-decoding": {
+      "title": "投机解码全景：从经典投机采样到 DFlash / DSpark",
+      "description": "从经典投机采样\"起草—验证\"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。",
+      "published": "2026-08-22",
+      "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "图解与来源",
+          "summary": "重绘投机拒绝采样，核对图示机制与来源。",
+          "anchor": "spec-rejection",
+          "evidence": "docs/core-visuals-redesign-20261104.md"
+        },
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "strata-hybrid-inference": {
+      "title": "大模型 CPU-GPU 混合推理：从专家卸载到分层缓存",
+      "description": "以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。",
+      "published": "2026-10-31",
+      "publicationCommit": "7946637a17e9be96a25975af0c3f4d246bb33b84",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "training-free-autotune-2026": {
+      "title": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）",
+      "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。",
+      "published": "2026-10-11",
+      "publicationCommit": "8f48de7b6f91249cf99bb0b68e455bc9f89fb25e",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "vit-sparsification": {
+      "title": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）",
+      "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。",
+      "published": "2026-08-22",
+      "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
+      "contentUpdated": "2026-11-03",
+      "reviewed": "2026-11-03",
+      "changes": [
+        {
+          "date": "2026-11-03",
+          "kind": "资料核验",
+          "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
+          "anchor": "research-20261103",
+          "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    }
+  }
+}

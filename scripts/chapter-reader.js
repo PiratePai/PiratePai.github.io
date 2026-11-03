@@ -1,4 +1,4 @@
-/* Standalone progressive reader: semantic pages inside each chapter. */
+/* Progressive reader: semantic pages inside each chapter, full HTML fallback. */
 (function () {
   'use strict';
   const guide = document.getElementById('reading-path');

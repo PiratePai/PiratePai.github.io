@@ -192,7 +192,7 @@ The rail uses compact links with a tonal wash for hover and `aria-current`. Topi
 
 First visits use the same cool paper, blue-gray rail, blue text, teal links and selected wash as the homepage. Pai's Blog appears above the article contents; a persistent Home link remains accessible when the contents are closed. Long chapter labels retain a wider (280px) rail, and long-form prose retains (17px/1.95) on desktop and (16px/1.95) on mobile. The desktop toolbar shares the homepage's (80px) height; mobile uses a compact (60px) toolbar. Controls use (6px) radii and contents links (4px), without shadows. Headings use the same bundled face and (32/25/20px) hierarchy, with existing mobile reductions.
 
-The optional dark theme preserves an explicit saved choice. Notes, summaries, citations, tables and code use theme-aware surfaces; code keywords, strings and comments have readable colors in both modes. Paper figures, authored SVGs and interactive diagrams retain their original graphics palettes. `build-reader.py` embeds the shared theme and licensed WOFF2 font as a data URL, preserving standalone HTML without runtime font/CSS dependencies.
+The optional dark theme preserves an explicit saved choice. Notes, summaries, citations, tables and code use theme-aware surfaces; code keywords, strings and comments have readable colors in both modes. Paper figures, authored SVGs and interactive diagrams retain their original graphics palettes. `build-site.py` links versioned same-origin CSS and JavaScript; the licensed WOFF2 font is cached across the homepage and articles.
 
 ### Reading Stages and Relationship Notes
 
@@ -228,3 +228,7 @@ The white, rounded, lightly bordered panel contains real profile-view context an
 - Don't turn document rows into shadowed promotional cards.
 - Don't treat the homepage reading sequence or Read mode as a requirement for every product surface.
 - Don't assume the bundled heading subset covers newly added Chinese copy; extend its licensed subset or allow the declared fallbacks.
+
+## Homepage maintenance · 2026-11-04
+
+The current main content is a single column capped at 1040px. Three flat, divided entry links lead to the first article, problem routes and recent changes. Problem routes use two columns on desktop and one on phones; the five-stage route is compact and links to the canonical archive groups. The duplicate relationship margin and mobile disclosure navigation have been removed. The rail, palette, typography, visible focus and static archive remain. Recent changes use native details/summary with direct section links. Article dates are small supporting text, with scoped history in a disclosure and explicit colors in both reader themes.

@@ -61,7 +61,28 @@
     return results.sort(function (a, b) { return b.score - a.score || a.article.localeCompare(b.article, 'zh-CN'); });
   }
 
-  if (typeof module !== 'undefined' && module.exports) module.exports = {normalize: normalize, prepare: prepare, search: search};
+  async function readIndex(fetcher, urls, signal, Decoder) {
+    if (Decoder && urls.gzip) {
+      try {
+        const response = await fetcher(urls.gzip, {signal: signal});
+        if (!response.ok) throw new Error('Compressed index unavailable');
+        let bytes = new Uint8Array(await response.arrayBuffer());
+        // Some hosts transparently decode Content-Encoding; only unzip gzip bytes.
+        if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+          bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new Decoder('gzip'))).arrayBuffer());
+        }
+        return JSON.parse(new TextDecoder().decode(bytes));
+      } catch (error) {
+        if (signal && signal.aborted) throw error;
+        // Older browsers, missing .gz artifacts and decoding failures use JSON.
+      }
+    }
+    const response = await fetcher(urls.plain, {signal: signal});
+    if (!response.ok) throw new Error('Index unavailable');
+    return response.json();
+  }
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = {normalize: normalize, prepare: prepare, search: search, readIndex: readIndex};
   if (typeof document === 'undefined') return;
 
   const form = document.getElementById('site-search');
@@ -86,10 +107,10 @@
     if (pending) return pending;
     const controller = new AbortController();
     const timeout = setTimeout(function () { controller.abort(); }, 8000);
-    pending = fetch('search-index.json', {signal: controller.signal}).then(function (response) {
-      if (!response.ok) throw new Error('Index unavailable');
-      return response.json();
-    }).then(function (data) {
+    pending = readIndex(fetch.bind(window), {
+      plain: form.dataset.indexUrl || 'search-index.json',
+      gzip: form.dataset.indexGzipUrl || 'search-index.json.gz'
+    }, controller.signal, window.DecompressionStream).then(function (data) {
       if (data.version !== 1 || !Array.isArray(data.documents) || !data.documents.length) throw new Error('Invalid index');
       data.documents.forEach(function (doc) {
         if (!/^posts\/[a-z0-9-]+\.html$/.test(doc.url) || typeof doc.title !== 'string' || !Array.isArray(doc.sections)) throw new Error('Invalid document');
