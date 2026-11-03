@@ -20,13 +20,13 @@
 
 通用主线：注意力 → KV Cache → 量化 → 投机解码 → 并行 → 服务 → 引擎集成 → 仿真 → 调优。MoE、草稿后训练、异构部署和研究延伸可按问题补读；编号用于目录定位，不意味着每一篇都是下一篇的严格先修。重排依据与支线关系见 [知识结构说明](docs/knowledge-structure.md)。
 
-文章源文件在 `posts/` 目录，均为自包含 HTML（暗色主题、移动端适配）。
+文章源文件在 `posts/` 目录，均为自包含 HTML（默认冷白阅读手册、可切深色、移动端适配）。
 
 阅读器统一采用可收起的左侧目录，手机端使用抽屉。短章节整章阅读，长章节按完整内容块分成少量连续阅读段，合并过短尾页；单页章节直接点击，多页章节展开选择。工具栏与页尾可翻页，支持直接链接、浏览器前进后退及全文切换。论文配图默认展示，可从侧栏配图目录直达。
 
-文章统一为较窄正文行宽、17px 桌面／16px 手机正文与舒展行距，使用柔和深灰配色；工具栏可切换纸白浅色，并跨文章记住选择。标题、引文、公式、代码、表格和提示框采用统一层级，图表和交互演示保留独立绘图背景。调整依据与分页数量对照见 [阅读体验修订](docs/reading-comfort-review.md)。
+文章统一为较窄正文行宽、17px 桌面／16px 手机正文与舒展行距，与首页共享冷白、蓝灰与深青配色及标题字体；工具栏可切换深色，并跨文章记住主动选择。标题、引文、公式、代码、表格和提示框采用统一层级，图表和交互演示保留独立绘图背景。调整依据与分页数量对照见 [阅读体验修订](docs/reading-comfort-review.md)。
 
-阅读器源文件位于 `scripts/chapter-reader.js` 和 `scripts/chapter-reader.css`；修改后执行 `python scripts/build-reader.py`，将它们内嵌进全部文章。分页在单个 HTML 内完成，初次下载仍包含全文；关闭 JavaScript 时保留全文和原有目录。设计边界、配图审计与验证记录见 [阅读器修订说明](docs/chapter-reader-review.md)。
+主题源文件为 `assets/reading-theme.css`，阅读器源文件位于 `scripts/chapter-reader.js` 和 `scripts/chapter-reader.css`；修改后执行 `python scripts/build-reader.py`，将主题、现有授权字体及阅读器内嵌进全部文章。首页与文章风格统一的实现与验证见 [阅读手册统一说明](docs/reader-handbook-review.md)。分页在单个 HTML 内完成，初次下载仍包含全文；关闭 JavaScript 时保留全文和原有目录。设计边界、配图审计与验证记录见 [阅读器修订说明](docs/chapter-reader-review.md)。
 
 本地检查（Python 标准库；站点检查另需 Node.js）：
 

@@ -1,0 +1,26 @@
+/* Shared by the homepage and the standalone article reader (inlined at build time). */
+@font-face {
+  font-family: "Pai Headings";
+  src: url("fonts/noto-sans-sc-headings.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  color-scheme: light;
+  --paper: #f4f7f8;
+  --surface: #fff;
+  --rail: #e8eef1;
+  --ink: var(--handbook-ink);
+  --secondary: #36596b;
+  --muted: var(--handbook-muted);
+  --accent: var(--handbook-accent);
+  --line: var(--handbook-line);
+  --selected: #d4e7e5;
+  --handbook-ink: #183b50;
+  --handbook-muted: #506c7b;
+  --handbook-accent: #176b67;
+  --handbook-line: #c7d5dc;
+  --font-body: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-heading: "Pai Headings", "PingFang SC", "Microsoft YaHei", sans-serif;
+}

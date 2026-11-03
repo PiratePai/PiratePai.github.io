@@ -318,7 +318,7 @@
   ],
   "narrative": {
     "northStar": "Reading handbook",
-    "overview": "A calm Chinese technical reference built from cool paper, a blue-gray navigation rail, deep blue text and deep teal links. Headings establish hierarchy without a promotional hero; compact controls use familiar document syntax.\n\nThe implemented visual language is flat and text-led. Rules, spacing and restrained tonal changes distinguish regions; explanatory relationships stay close to the material they qualify. This records the current homepage system; its reading stages and Read mode remain surface decisions in .impeccable/surfaces/index-html.md.",
+    "overview": "A calm Chinese technical reference built from cool paper, a blue-gray navigation rail, deep blue text and deep teal links. Headings establish hierarchy without a promotional hero; compact controls use familiar document syntax.\n\nThe implemented visual language is flat and text-led. Rules, spacing and restrained tonal changes distinguish regions; explanatory relationships stay close to the material they qualify. The homepage and article reader share the palette and heading face from assets/reading-theme.css; their reading layouts remain surface decisions in .impeccable/surfaces/.",
     "keyCharacteristics": [
       "Cool paper and blue-gray support surfaces.",
       "Self-hosted Chinese headings paired with platform body text.",
