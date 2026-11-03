@@ -532,6 +532,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 </div>
 
 <p>工程难点在并行策略：EAGLE-3 的训练时测试带来"分支注意力"（标准上下文并行 CP 不支持）、DFlash/DSpark 需要的中间层特征可能躺在流水线并行的远端 stage。该工作用"zigzag 环形注意力 + 秩本地分支注意力合并"扩展 CP，用 <b>TapChannel</b> 旁路传输跨 stage 特征，在 NeMo-RL 里对 8B–122B（Qwen3.5-122B-A10B、GPT-OSS-120B、Nemotron-3.5）模型实现 1.16–1.88× 的端到端训练加速。同一方向还有 FastGRPO（ICLR 2026，并发感知投机解码 + 在线草稿学习）、MTP-RL（ACL 2026，把参数共享的 MTP 模块当草稿做优势感知联合优化）、Bebop（直接以总变差"接受率"为损失训练）等<span class="cite">[22][23]</span>。<b>"投机解码是 RL 后训练的标配组件、草稿是策略的随身学生"</b>，这一判断在 2026 年成为共识。verl、slime、NeMo-RL 等主流 RL 框架均已内置相应支持。</p>
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">7.5 草稿工程入口与 Agent 轨迹验收</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>Model Optimizer 0.48.0 新增 <b>DFlash2DraftModel</b> 工程路径：在 DFlash 的并行草稿骨干中加入分组动态卷积与低秩候选选择器，并给出选择器损失和导出配置。TensorRT Edge-LLM 0.11.1 也扩展了相应草稿的支持。这里能确认的是工具链入口；不能据此推断新模型在所有目标模型上优于 DFlash，也不能把支持导出当成已完成部署复现。<sup class="cite"><a href="#R26-MODELOPT">[R26:MODELOPT]</a><a href="#R26-EDGE">[R26:EDGE]</a></sup></p><p>验收草稿后训练时，除了记录固定验证器下的接受长度，还应记录验证批大小、每轮提交量与能量。新能耗研究说明，同一草稿在代码与对话语料上的接受行为不同；训练收益需要回到实际工作负载检验。保持原有拒绝采样前提，草稿训练或选择器本身不构成“无损”证明。<sup class="cite"><a href="#R26-ENERGY">[R26:ENERGY]</a></sup></p><p><b>10-30 的 TraceSpec 将草稿监督放回 Agent 轨迹。</b>它结合真实执行与固定前缀回放，按状态条件估计连续接受缺口，再分配固定预测预算。汇总接受率随上下文上升，并不排除相同类型的后期浏览动作接受率下降；因此训练采样应区分工具阶段与工作负载。论文报告的回放吞吐也不等于包含浏览器、检索和工具等待的完整任务时延。<sup class="cite"><a href="#R26-TRACE">[R26:TRACE]</a></sup></p>
+</section>
 <h2 id="code">8 · 代码解析：用四个官方仓库看清"后训练"长什么样</h2>
 
 <p class="lead">本节所有代码摘自本地克隆的官方仓库（<code>D:/Github/spec/</code> 下的 <code>eagle</code>、<code>Medusa</code>、<code>LayerSkip</code> 与 <code>deepspec</code>/<code>dflash</code>），文件路径与行号均为真实位置。四个仓库恰好对应四种后训练形态：外挂草稿头训练（EAGLE）、多头训练（Medusa）、目标模型自投机（LayerSkip）、草稿训练全栈基建（DeepSpec）。</p>
@@ -774,6 +777,8 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 
 </section>
 <h2 id="refs">11 · 参考与引用出处</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-MODELOPT"><b>NVIDIA</b>. <i>NVIDIA/Model-Optimizer</i>. 0.48.0，发布于 2026-11-02；核验 2026-11-03。<a href="https://github.com/NVIDIA/Model-Optimizer/releases/tag/0.48.0">一手来源</a>。</li><li id="R26-EDGE"><b>NVIDIA</b>. <i>NVIDIA/TensorRT-Edge-LLM</i>. v0.11.1，发布于 2026-10-28；核验 2026-11-03。<a href="https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1">一手来源</a>。</li><li id="R26-ENERGY"><b>Ma, Bole, Afzal, Ayesha et al.</b>. <i>Only Accepted Tokens Count: An Energy Accounting of Speculative Decoding Under Latency Targets</i>. arXiv:2610.40287v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.40287v1">一手来源</a>。</li><li id="R26-TRACE"><b>Zhao, Jihao et al.</b> <i>TraceSpec: Understanding and Improving Speculative Decoding for LLM Agents</i>. arXiv:2610.41177v1，2026-10-30；预印本，核验 2026-11-03。<a href="https://arxiv.org/abs/2610.41177v1">论文</a>。</li></ol>
+
 
 <p class="muted">按文中编号排列；日期为 arXiv 首发日期（v1）。所有带引文的位置，原文与译文已以小字块标注在正文相应位置。</p>
 

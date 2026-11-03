@@ -872,6 +872,8 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 <p><b>进展</b>：Splitwise 首次把功率写进推理目标（-15%~-25%）<sup class="cite">[SPLITWISE24]</sup>；DeepInfer 公开"每 GPU 小时营收 38 美元（谷电价）"——<b>推理系统第一次把电价写进 KPI</b><sup class="cite">[DIQA26]</sup>；API 价格战的技术面：DeepSeek V3.2（DSA，−50%+）与 V4.1 的降价曲线背后是"KV 进 SSD + FP4 + Wide-EP"的组合账。</p>
 <p><b>开放问题</b>：主流基准仍无能耗/碳口径；"每 token 成本"缺乏跨厂商可比的公开模型（推理侧碳核算几乎空白）；长尾 P99.9 与成本的联合优化。</p>
 
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">6.10 端侧引擎也需要版本化的功能矩阵</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>NVIDIA TensorRT Edge-LLM <b>0.11.1（2026-10-28）</b>增加统一 trtedge CLI，覆盖服务、构建、导出和量化，并记录 Windows / TensorRT-RTX 路径、DFlash2 支持以及提示格式、KV scale 等正确性修复。其定位是端侧 C++ 运行时；不能与数据中心 TensorRT-LLM 或 Dynamo 混用版本号，也不能把某一模型的部署功能当作全模型通用能力。<sup class="cite"><a href="#R26-EDGE">[R26:EDGE]</a></sup></p><p>与 DeepInfer 等定制引擎比较时，先把“模型—硬件—权重格式—草稿—运行时”写成一份完整配置，再沿请求全链路测 TTFT、TPOT 和峰值内存。FlashMLA 的旧模型 / Hopper 兼容变更是一个具体反例：同名算子库升级可能改变可运行范围，而不只是提升速度。<sup class="cite"><a href="#R26-FLASHMLA">[R26:FLASHMLA]</a></sup></p></section>
 <div class="summary3"><b>本章小结</b>
 <ol>
 <li>2025–2026 的主旋律是三件事落地：PD 分离成为标配（Dynamo/NIXL/Mooncake 系）、KV 从"显存问题"升级为"存储系统问题"（全局池/TTL/跨引擎复用）、投机解码从"能不能"进入"何时值得"（batch 冲突与置信度调度）。</li>
@@ -958,6 +960,8 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 </table>
 </details>
 <h2 id="refs">参考文献</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-EDGE"><b>NVIDIA</b>. <i>NVIDIA/TensorRT-Edge-LLM</i>. v0.11.1，发布于 2026-10-28；核验 2026-11-03。<a href="https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1">一手来源</a>。</li><li id="R26-FLASHMLA"><b>deepseek-ai</b>. <i>deepseek-ai/FlashMLA</i>. 源码快照 395cb3afbb33，提交日期 2026-10-27；核验 2026-11-03。<a href="https://github.com/deepseek-ai/FlashMLA/blob/395cb3afbb331fef7b1b21e9340861b9436b42d8/README.md">一手来源</a>。</li></ol>
+
 <ol class="refs">
 <li id="r-ORCA22"><b>Yu, Jeong, Kim, Kim, Chun</b>. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. USENIX OSDI'22, 2022-07（无 arXiv 版本；网络流传的 arXiv:2205.05120 实为 CERN 论文，谨防误引）。<a href="https://www.usenix.org/conference/osdi22/presentation/yu">usenix.org/conference/osdi22/presentation/yu</a></li>
 <li id="r-VLLM23"><b>Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica</b>. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP'23, 2023-09-12. arXiv:2309.06180.<a href="https://arxiv.org/abs/2309.06180">arxiv.org/abs/2309.06180</a></li>

@@ -442,6 +442,8 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <tr><td>24 GB 卡跑 27B 级 + 要服务器并发</td><td>HyperQwen / vLLM</td><td>模型基本进显存时服务器生态更强</td></tr>
 </table>
 
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">5.3 缓存未命中的专家：CPU 计算还是搬到 GPU</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>2026-10-16 的 <i>Adaptive Expert Assignment</i> 将问题细化为“这次未命中的专家，分配了多少 token”：负载高的专家值得支付搬运成本交给 GPU；负载低的专家可留在 CPU，目标是平衡两条并发路径的完工时间。这补充了只看缓存命中率的分析，但论文的实验结果不能直接移植到 Strata 的量化格式与机器配置。<sup class="cite"><a href="#R26-ASSIGN">[R26:ASSIGN]</a></sup></p><p><b>教学估算：</b>若 GPU 路径需要搬运 4 ms＋计算 1 ms，而 CPU 计算为 3 ms，这个专家留在 CPU 更快；当 CPU 负载升至 9 ms、GPU 路径仍为 5 ms 时，选择可能反转。实际调度还要把同批其他专家的排队和共享带宽算进去。CRISP 的组合剪枝则属于另一条允许精度变化的路线，应另列质量约束。<sup class="cite"><a href="#R26-ASSIGN">[R26:ASSIGN]</a><a href="#R26-CRISP">[R26:CRISP]</a></sup></p></section>
 <div class="summary3"><b>本章小结</b>
 <ol>
 <li>混合推理的机制（专家缓存、CPU 专家、PCIe 分流）<b>正在从论文下沉为通用引擎的正式参数</b>。特化引擎的护城河是"为形状手写的并发流水"，不是单点机制。</li>
@@ -512,6 +514,8 @@ curl http://127.0.0.1:8080/v1/chat/completions -H "Content-Type: application/jso
 </ul>
 
 <h2 id="refs">参考文献</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-ASSIGN"><b>Lv, Wenhui, Liao, Yunming et al.</b>. <i>Efficient CPU-GPU collaborative MoE inference via Adaptive Expert Assignment</i>. arXiv:2610.23006v1，2026-10-16；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.23006v1">一手来源</a>。</li><li id="R26-CRISP"><b>Zhang, Congwei, Tao, Youming et al.</b>. <i>CRISP: Co-designing Pruning and Scheduling for Efficient MoE Inference on Edge Servers</i>. arXiv:2610.37442v1，2026-10-27；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.37442v1">一手来源</a>。</li></ol>
+
 
 <ol class="refs">
 <li><b>Strata Team.</b> <i>Running a 125-Billion-Parameter Model on a Normal PC.</i> 2026-09. <a href="https://github.com/Niko1221/Strata/blob/main/docs/paper/Strata-Paper.pdf">仓库内 PDF</a>（引擎原理、全部实测与 13 条 Findings）</li>

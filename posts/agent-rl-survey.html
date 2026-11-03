@@ -834,6 +834,8 @@ in-flight sample to finish."""</span>
 </table>
 
 <!-- ============================================================ -->
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">5.4 统一多模态训练接口，仍需保留不同的概率模型</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>腾讯 UniRL v0.2.0（2026-10-08）扩展模型包、SFT / agentic / async 训练模式及 rollout 栈。统一的是生成、打分、优势估计、更新和权重同步等接口；离散 token 与连续视频状态的动作概率仍需分别定义，不能仅更换 reward 就认为算法可直接通用。<sup class="cite"><a href="#R26-UNIRL">[R26:UNIRL]</a></sup></p><p>Precise（arXiv 2026-05-22；作者仓库于 09-26 宣布 NeurIPS 2026 接收）把随机采样器本身视为策略的一部分，联合考虑探索噪声和有限步长离散化；通过冻结干净潜变量后验均值的近似构造转移。它补足了 Flow-GRPO 一类流程中“从确定性 ODE 得到可训练随机策略”的细节。本文将会议状态标为作者披露，不把训练奖励提升等同于所有任务的泛化提升。<sup class="cite"><a href="#R26-PRECISEP">[R26:PRECISEP]</a><a href="#R26-PRECISE">[R26:PRECISE]</a></sup></p></section>
 <h2 class="sec" id="s6"><span class="num">6</span>2025–2026 最新进展盘点与未来方向<span class="roadmap">系统 · 算法 · 数据环境 · 多模态 四条主线的收敛点</span></h2>
 
 <h3>6.2 未来发展方向研判(附依据)</h3>
@@ -919,6 +921,8 @@ in-flight sample to finish."""</span>
 
 </section>
 <h2 class="sec" id="s7"><span class="num">7</span>参考文献<span class="roadmap">全部标注发表时间;引文处已附原文与译文</span></h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-UNIRL"><b>Tencent-Hunyuan</b>. <i>Tencent-Hunyuan/UniRL</i>. v0.2.0，发布于 2026-10-08；核验 2026-11-03。<a href="https://github.com/Tencent-Hunyuan/UniRL/releases/tag/v0.2.0">一手来源</a>。</li><li id="R26-PRECISEP"><b>Zou, Jade, Huang, Tao et al.</b>. <i>Precise: SDE-Consistent Stochastic Sampling for RL Post-Training of Flow-Matching Models</i>. arXiv:2605.23522v1，2026-05-22；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2605.23522v1">一手来源</a>。</li><li id="R26-PRECISE"><b>Tencent-Hunyuan</b>. <i>Tencent-Hunyuan/Precise</i>. 源码快照 4960f8150683，提交日期 2026-10-22；核验 2026-11-03。<a href="https://github.com/Tencent-Hunyuan/Precise/blob/4960f81506837d3eb7eeae9ab9d24899affa2076/README.md">一手来源</a>。</li></ol>
+
 <div class="refs">
 <ol>
   <li>Schulman et al. <i>Proximal Policy Optimization Algorithms</i>. arXiv:1707.06347, 2017-07.</li>

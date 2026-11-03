@@ -8,6 +8,8 @@
 
 2026-11-01 根据全站审阅报告修订机制、性能口径与引文，增加每篇的阅读路径、手算例子和研究取舍；发布快讯按需展开。修订范围与证据边界见 [修订说明](docs/research-quality-review.md)。
 
+2026-11-03 覆盖 16 个专题增补 13 个官方项目与 14 篇论文，修订 AIConfigurator 归属、Dynamo 版本、Hy-Nomas 发布日期与交互机制；增加两张授权论文原图和通信重叠 SVG 演示，现有动画改为默认静止、离屏停止和限帧播放。来源与验证范围见 [本轮修订说明](docs/research-refresh-20261103.md)。
+
 ## 知识结构与阅读顺序
 
 | 部分 | 顺序 | 专题 |
@@ -32,6 +34,7 @@
 
 ```text
 python scripts/verify-mechanisms.py
+python scripts/build-animations.py --check
 python scripts/build-reader.py --check
 python scripts/check-site.py
 python scripts/build-search-index.py --check
@@ -42,3 +45,5 @@ python -m http.server 8000
 数值示例只核对文中明确的机制与教学账本，不复现论文训练和 GPU 性能。
 
 修改文章后执行 `python scripts/build-search-index.py` 更新 `search-index.json`；该索引仅从已有文章提取文本与有效章节锚点，`--check` 检查索引是否过期。它按需加载，不阻塞首页阅读。首页样式与搜索逻辑分别位于 `assets/site.css` 和 `scripts/site-search.js`。
+
+修改动画调度器后执行 `python scripts/build-animations.py` 将脚本内嵌到相关文章，再重建搜索索引。浏览器行为回归可运行 `node scripts/check-animations.cjs <本地预览地址>`（需要 Playwright 与已安装的 Edge）。

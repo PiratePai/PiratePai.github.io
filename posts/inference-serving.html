@@ -109,6 +109,110 @@
 #reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -351,7 +455,7 @@ class CacheAgnosticPolicy(Enum):
 <div class="ppx-demo" id="PPX-W5">
   <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>静态批处理 vs 连续批处理（Continuous Batching）</b></div>
   <div class="ppx-bar">
-    <button class="ppx-play on">⏸ 暂停</button>
+    <button class="ppx-play">▶ 播放</button>
     <button class="ppx-reset">↻ 重置</button>
     <label>请求到达间隔 <input type="range" class="ppx-arr" min="4" max="30" step="1" value="12"> <span class="ppx-arrv ppx-stat">12</span> 格</label>
     <label><input type="checkbox" class="ppx-skew" checked> 长度差异大（长短夹杂）</label>
@@ -384,7 +488,7 @@ cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
 var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
 var COL=['#41d1a7','#6ea8ff','#ffb454','#ff8fa3','#9d7bff','#5fd4f0','#c9d86b','#f09a5f','#7ea8ff','#a1d991'];
 var SLOTS=4,SPEED=5; // 时间格/秒
-var playing=true,arrGap=12,skew=true;
+var playing=false,arrGap=12,skew=true;
 var t,queue,sys,requests,nextArr,idc,finished,doneTok,tokAcc;
 function reset(){
   t=0;queue=[];requests=[];nextArr=2;idc=1;finished=[];doneTok=0;tokAcc=0;
@@ -506,9 +610,7 @@ function draw(){
   ctx.fillStyle=C.orange;ctx.font='11px sans-serif';ctx.textAlign='left';
   ctx.fillText('t='+t.toFixed(0),cx+4,38);
 }
-var last=0;
-function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
-requestAnimationFrame(frame);
+PaiMotion.mount(root,step,draw,function(){return playing;});
 reset();
 root.querySelector('.ppx-play').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ 暂停':'▶ 播放';this.classList.toggle('on',playing);});
 root.querySelector('.ppx-reset').addEventListener('click',reset);
@@ -685,6 +787,8 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>有趣的是，分离并不需要两个集群才成立。2025–2026 年出现<b>单机 P/D</b>：一台 8 卡机内，不同 GPU 分饰 prefill/decode，KV 经 NVLink/内存通道（如 AMD MI300X 的 MORI-IO）搬运，用于中小规模部署获得稳定的 ITL 与更高 goodput<sup class="cite">[VLLMSINGLEPD]</sup>。思想一旦确立，形态随规模伸缩——这正是它成为"架构"而非"技巧"的标志。</p>
 
 <!-- ============================================================ -->
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">5.6 部署快照：编排版本与 KV 存储接口一起固定</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>Dynamo 当前稳定版为 <b>v1.6.1（2026-10-27）</b>。该版沿用 v1.6.0 的后端矩阵：SGLang 0.5.21、TensorRT-LLM 1.3.0rc29、vLLM 0.31.0；NIXL 版本还随后端不同而变化。它是补丁发布，不应从版本号推出新的推理加速倍率。仓库 main、稳定容器与单独升级的后端必须区分。<sup class="cite"><a href="#R26-DYNAMO">[R26:DYNAMO]</a></sup></p><p>字节 InfiniStore 提供独立的 KV 存储组件，可作为跨请求、跨实例复用的工程对照。存储命中只说明找到了缓存数据；是否能直接交给另一个 worker，还取决于模型权重、位置编码、token 前缀与缓存布局一致。分离服务的收益须扣除查找、传输和排队时间，而非把“命中”全部计成节省的 prefill。<sup class="cite"><a href="#R26-STORE">[R26:STORE]</a></sup></p></section>
 <h2 id="s6"><span class="no">6</span>E-P-D 分离：多模态三段式</h2>
 
 <h3>6.1 为什么多模态需要再拆一刀</h3>
@@ -965,6 +1069,8 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 
 </section>
 <h2 id="refs">参考文献</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-DYNAMO"><b>ai-dynamo</b>. <i>ai-dynamo/dynamo</i>. v1.6.1，发布于 2026-10-27；核验 2026-11-03。<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.1">一手来源</a>。</li><li id="R26-STORE"><b>bytedance</b>. <i>bytedance/InfiniStore</i>. 源码快照 e572c198da4d，提交日期 2026-09-16；核验 2026-11-03。<a href="https://github.com/bytedance/InfiniStore/blob/e572c198da4dc2268b664353f3d8336a20fa9420/README.md">一手来源</a>。</li></ol>
+
 <ol class="refs">
 <li id="ORCA22">Yu, Jeong, Kim, Kim, Chun. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. <b>OSDI 2022</b>. <a href="https://www.usenix.org/conference/osdi22/presentation/yu">链接</a></li>
 <li id="VLLM23">Kwon et al. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. <b>SOSP 2023</b>（vLLM 2023-06 开源）. <a href="https://arxiv.org/abs/2309.06180">arXiv:2309.06180</a></li>
