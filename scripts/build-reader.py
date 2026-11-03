@@ -8,11 +8,47 @@ import argparse
 import difflib
 import re
 import base64
+import colorsys
 
 ROOT = Path(__file__).resolve().parents[1]
 START = '<!-- chapter-reader:start -->'
 END = '<!-- chapter-reader:end -->'
 OLD_REVEAL = re.compile(r'<script>\s*\(function\(\)\{function reveal\(\).*?</script>', re.S)
+
+
+def diagram_color(value, stroke=False):
+    raw = value.lstrip('#')
+    if len(raw) == 3:
+        raw = ''.join(c * 2 for c in raw)
+    rgb = [int(raw[i:i+2], 16) / 255 for i in (0, 2, 4)]
+    h, light, saturation = colorsys.rgb_to_hls(*rgb)
+    if saturation < .22 or max(rgb) - min(rgb) < .12:
+        return 'var(--d-line)' if stroke else 'var(--d-surface)'
+    hue = h * 360
+    color = 'red' if hue < 15 or hue > 340 else 'amber' if hue < 75 else 'green' if hue < 185 else 'blue' if hue < 255 else 'purple'
+    return 'var(--d-' + color + ('' if stroke else '-soft') + ')'
+
+
+def style_diagrams(source, slug):
+    """Give authored SVGs isolated styles and theme tokens; never alter paper images."""
+    serial = 0
+    def decorate(match):
+        nonlocal serial
+        serial += 1
+        svg = match.group()
+        opening = svg[:svg.index('>')+1]
+        ident = re.search(r'\bid="([^"]+)"', opening)
+        ident = ident[1] if ident else f'diagram-{slug}-{serial}'
+        if 'data-handbook-diagram' not in opening:
+            svg = svg.replace('<svg', f'<svg data-handbook-diagram="true"' + ('' if ' id=' in opening else f' id="{ident}"'), 1)
+        def scope(m):
+            css = re.sub(r'([^{}]+)\{', lambda x: ','.join(sel.strip() if sel.strip().startswith('#'+ident+' ') else '#'+ident+' '+sel.strip() for sel in x[1].split(','))+'{', m[1])
+            return '<style>'+css+'</style>'
+        svg = re.sub(r'<style[^>]*>(.*?)</style>', scope, svg, flags=re.S)
+        svg = re.sub(r'\b(fill|stroke|stop-color)="(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)"', lambda m:m[1]+'="'+diagram_color(m[2],m[1]=='stroke')+'"', svg)
+        svg = re.sub(r'\b(fill|stroke|stop-color)\s*:\s*(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)\b', lambda m:m[1]+':'+diagram_color(m[2],m[1]=='stroke'), svg)
+        return svg
+    return re.sub(r'<svg\b[^>]*>.*?</svg>', decorate, source, flags=re.S)
 
 
 class Updates(HTMLParser):
@@ -88,6 +124,7 @@ def main():
             source = source[:a] + value + source[b:]
         source = re.sub(r'(<h2>更新附录[^<]*?)（展开选读）', r'\1', source)
         source = OLD_REVEAL.sub('', source)
+        source = style_diagrams(source, path.stem)
         if START in source:
             source = re.sub(re.escape(START) + '.*?' + re.escape(END), lambda _: block, source, flags=re.S)
         else:

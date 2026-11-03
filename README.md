@@ -10,6 +10,8 @@
 
 2026-11-03 覆盖 16 个专题增补 13 个官方项目与 14 篇论文，修订 AIConfigurator 归属、Dynamo 版本、Hy-Nomas 发布日期与交互机制；增加两张授权论文原图和通信重叠 SVG 演示，现有动画改为默认静止、离屏停止和限帧播放。来源与验证范围见 [本轮修订说明](docs/research-refresh-20261103.md)。
 
+2026-11-04 重绘 ZeRO / MoE 核心图，增加 KV 写时复制与投机拒绝采样的低频逐步演示；统一手绘 SVG 的深浅主题，修订相交、裁切和字号问题。设计、来源与检查见 [图解重绘说明](docs/core-visuals-redesign-20261104.md)。
+
 ## 知识结构与阅读顺序
 
 | 部分 | 顺序 | 专题 |
@@ -35,10 +37,12 @@
 ```text
 python scripts/verify-mechanisms.py
 python scripts/build-animations.py --check
+python scripts/build-core-visuals.py --check
 python scripts/build-reader.py --check
 python scripts/check-site.py
 python scripts/build-search-index.py --check
 node --test scripts/test-site-search.cjs
+node --test scripts/test-core-visuals.cjs
 python -m http.server 8000
 ```
 
@@ -47,3 +51,5 @@ python -m http.server 8000
 修改文章后执行 `python scripts/build-search-index.py` 更新 `search-index.json`；该索引仅从已有文章提取文本与有效章节锚点，`--check` 检查索引是否过期。它按需加载，不阻塞首页阅读。首页样式与搜索逻辑分别位于 `assets/site.css` 和 `scripts/site-search.js`。
 
 修改动画调度器后执行 `python scripts/build-animations.py` 将脚本内嵌到相关文章，再重建搜索索引。浏览器行为回归可运行 `node scripts/check-animations.cjs <本地预览地址>`（需要 Playwright 与已安装的 Edge）。
+
+核心原理图的样式与逻辑在 `scripts/core-visuals.css` / `scripts/core-visuals.js`，修改后运行 `python scripts/build-core-visuals.py`；几何、手机布局和逐步结果检查使用 `node scripts/check-core-visuals.cjs <本地预览地址>`。旧手绘 SVG 的配色与样式隔离由阅读器构建维护；论文原图保留原样。

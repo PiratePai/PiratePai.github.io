@@ -3,7 +3,8 @@
   'use strict';
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   window.PaiMotion = {
-    mount(root, step, draw, isPlaying) {
+    mount(root, step, draw, isPlaying, options = {}) {
+      const interval = 1000 / Math.max(1, Math.min(20, options.fps || 20));
       const controls = root.querySelector('.ppx-bar') || root;
       let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
       if (!isPlaying) {
@@ -47,10 +48,10 @@
           raf = requestAnimationFrame(now => {
             raf = 0;
             if (!active()) { stop(); return; }
-            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            const dt = last ? Math.min(interval / 1000 + 0.08, (now - last) / 1000) : interval / 1000;
             last = now; step(dt); paint(); schedule();
           });
-        }, 50);
+        }, interval);
       }
       function refresh() {
         if (queued) return;

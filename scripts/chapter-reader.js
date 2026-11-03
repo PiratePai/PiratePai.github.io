@@ -189,6 +189,27 @@
     while (ancestor && ancestor !== root) { if (ancestor.tagName === 'DETAILS') ancestor.open = true; ancestor = ancestor.parentElement; }
   });
 
+  // Preserve readable labels instead of shrinking a wide diagram into a phone.
+  // Setup and explicit button clicks only: no resize or animation polling.
+  root.querySelectorAll('svg[data-handbook-diagram]').forEach(svg => {
+    const box = svg.viewBox.baseVal;
+    const sizes = [...svg.querySelectorAll('text')].map(t => parseFloat(getComputedStyle(t).fontSize)).filter(n => n > 0);
+    if (!box.width || !sizes.length) return;
+    const readable = Math.ceil(box.width * 12 / Math.min(...sizes));
+    const viewport = element('div', 'reader-diagram-scroll');
+    viewport.style.setProperty('--diagram-readable-width', readable + 'px');
+    viewport.tabIndex = 0; viewport.setAttribute('role', 'region');
+    viewport.setAttribute('aria-label', '图解，可横向滚动');
+    const controls = element('div', 'reader-ui reader-diagram-tools');
+    controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
+    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    fit.addEventListener('click', () => {
+      const fitted = viewport.toggleAttribute('data-fit');
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+    });
+    controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
+  });
+
   const sidebar = element('aside', 'reader-ui reader-sidebar'); sidebar.id = 'reader-sidebar';
   sidebar.setAttribute('aria-label', '文章目录');
   const head = element('div', 'reader-sidebar-head');
