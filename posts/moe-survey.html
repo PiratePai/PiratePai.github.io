@@ -129,6 +129,110 @@
 #reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -509,11 +613,11 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
 <!-- ===================== 第二章 历史 ===================== -->
 <!-- WIDGET:w6 MoE 路由 · moe-survey.html -->
 <div class="ppx-demo" id="PPX-W6">
-  <div class="ppx-head"><span class="ppx-tag">交互演示 · 3D</span><b>MoE 路由：token 如何流向专家 · 负载均衡为什么是头号难题</b></div>
+  <div class="ppx-head"><span class="ppx-tag">交互演示 · 2D</span><b>MoE 路由：token 如何流向专家 · 负载均衡为什么是头号难题</b></div>
   <div class="ppx-bar">
     <button class="ppx-mode on" data-m="bal">均衡路由（带偏置修正）</button>
     <button class="ppx-mode" data-m="crash">无均衡（路由崩溃）</button>
-    <button class="ppx-play on">⏸ 暂停</button>
+    <button class="ppx-play">▶ 播放</button>
     <span style="margin-left:auto">每 token 激活 <b class="ppx-k ppx-stat">1</b>/8 个专家 · 最热专家占比 <b class="ppx-hot ppx-stat">–</b>（均衡目标 ≈ 12.5%）· 可拖拽旋转 / 滚轮缩放</span>
   </div>
   <canvas></canvas>
@@ -539,122 +643,8 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
 var root=document.getElementById('PPX-W6'); if(!root)return;
 var cv=root.querySelector('canvas');
 var LW=880,LH=480,dpr=Math.min(2,window.devicePixelRatio||1);
-var mode='bal',playing=true;
+var mode='bal',playing=false;
 var load=new Array(8).fill(0), hotShown='–';
-function pick3D(THREE){
-  cv.width=LW*dpr; cv.height=LH*dpr; cv.style.aspectRatio=LW+'/'+LH;
-  var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
-  renderer.setPixelRatio(dpr); renderer.setSize(LW,LH,false);
-  var scene=new THREE.Scene(); scene.fog=new THREE.Fog(0x0d1017,10,30);
-  var cam=new THREE.PerspectiveCamera(46,LW/LH,.1,100);
-  var camR=13.5,camA=0.9,camY=5.2;
-  function setCam(){cam.position.set(camR*Math.cos(camA),camY,camR*Math.sin(camA));cam.lookAt(0,1.2,0);}
-  setCam();
-  scene.add(new THREE.AmbientLight(0x8899bb,.55));
-  var dl=new THREE.DirectionalLight(0xffffff,.9); dl.position.set(4,8,5); scene.add(dl);
-  // router node
-  var router=new THREE.Mesh(new THREE.SphereGeometry(.55,24,24),new THREE.MeshStandardMaterial({color:0x9d7bff,emissive:0x3d2a80,roughness:.35}));
-  router.position.set(0,1.6,-4.4); scene.add(router);
-  // experts
-  var E=8,experts=[],baseCol=[];
-  var geo=new THREE.CylinderGeometry(.42,.5,1,20);
-  for(var i=0;i<E;i++){
-    var ang=Math.PI*2*i/E, r=3.6;
-    var col=new THREE.Color().setHSL(.36-(i/E)*.36,.62,.55);
-    baseCol.push(col.getHex());
-    var m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:col.getHex(),transparent:true,opacity:.92,roughness:.4}));
-    m.position.set(Math.cos(ang)*r,.5,Math.sin(ang)*r*.72+1.2);
-    scene.add(m); experts.push(m);
-    var ring=new THREE.Mesh(new THREE.TorusGeometry(.62,.03,8,32),new THREE.MeshBasicMaterial({color:0x2a2f3a}));
-    ring.rotation.x=Math.PI/2; ring.position.copy(m.position); ring.position.y=.02;
-    scene.add(ring);
-  }
-  // floor grid
-  var grid=new THREE.GridHelper(14,14,0x222839,0x1a1f2c); grid.position.y=0; scene.add(grid);
-  // particles
-  var MAXP=260, pos=new Float32Array(MAXP*3), col=new Float32Array(MAXP*3), parts=[];
-  var pGeo=new THREE.BufferGeometry();
-  pGeo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  pGeo.setAttribute('color',new THREE.BufferAttribute(col,3));
-  var pMat=new THREE.PointsMaterial({size:.16,vertexColors:true,transparent:true,opacity:.95});
-  var points=new THREE.Points(pGeo,pMat); scene.add(points);
-  function route(){
-    if(mode==='crash'){
-      var r=Math.random();
-      if(r<.55)return 0; if(r<.75)return 1; return 2+Math.floor(Math.random()*6);
-    }
-    var w=[0,0,0,0,0,0,0,0],i2;
-    for(i2=0;i2<8;i2++)w[i2]=Math.random()*(1-load[i2]*.75); // bias against busy
-    var best=0;for(i2=1;i2<8;i2++)if(w[i2]>w[best])best=i2;
-    return best;
-  }
-  function spawn(){
-    var e=route();
-    var ang=Math.PI*2*e/8, r=3.6;
-    var tx=Math.cos(ang)*r, tz=Math.sin(ang)*r*.72+1.2;
-    parts.push({x:-7.5+(Math.random()*1.2-.6),y:1.4+Math.random()*.6,z:-4.4+(Math.random()*1.2-.6),t:0,e:e,tx:tx,tz:tz,phase:0});
-    load[e]+=1; var sum=load.reduce(function(a,b){return a+b;},0)||1;
-    for(var k=0;k<8;k++)load[k]=Math.max(0,load[k]-.02);
-    var hot=Math.max.apply(null,load)/ (load.reduce(function(a,b){return a+b;},0)||1);
-    hotShown=(hot*100).toFixed(0)+'%';
-  }
-  function step(dt){
-    if(Math.random()<dt*16)spawn();
-    for(var i=parts.length-1;i>=0;i--){
-      var p=parts[i]; p.t+=dt;
-      if(p.phase===0){ // stream to router
-        var dx=router.position.x-p.x,dy=router.position.y-p.y,dz=router.position.z-p.z;
-        var d=Math.sqrt(dx*dx+dy*dy+dz*dz);
-        var sp=2.4*dt;
-        if(d<sp){p.phase=1;p.t=0;}
-        else{p.x+=dx/d*sp;p.y+=dy/d*sp;p.z+=dz/d*sp;}
-      }else{ // to expert
-        var dx2=p.tx-p.x,dy2=.8-p.y,dz2=p.tz-p.z;
-        var d2=Math.sqrt(dx2*dx2+dy2*dy2+dz2*dz2);
-        var sp2=2.6*dt;
-        if(d2<sp2){parts.splice(i,1);}
-        else{p.x+=dx2/d2*sp2;p.y+=dy2/d2*sp2;p.z+=dz2/d2*sp2;}
-      }
-    }
-    // expert height by load
-    var sumL=load.reduce(function(a,b){return a+b;},0)||1;
-    for(var e2=0;e2<8;e2++){
-      var f=load[e2]/sumL*8; // 1 = even
-      var h=.4+Math.min(2.6,f*.55);
-      experts[e2].scale.y=h; experts[e2].position.y=h*.5;
-      var mat=experts[e2].material;
-      if(f>1.8){mat.color.setHex(0xff6b6b);mat.emissive=new THREE.Color(0x551111);}
-      else{mat.color.setHex(baseCol[e2]);mat.emissive=new THREE.Color(0x0a0a12);}
-    }
-    root.querySelector('.ppx-hot').textContent=hotShown;
-  }
-  function draw(){
-    for(var i=0;i<MAXP;i++){
-      var p=parts[i];
-      if(p){pos[i*3]=p.x;pos[i*3+1]=p.y;pos[i*3+2]=p.z;
-        var c=new THREE.Color(baseCol[p.e]); col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
-      else{pos[i*3+1]=-99;}
-    }
-    pGeo.attributes.position.needsUpdate=true;
-    pGeo.attributes.color.needsUpdate=true;
-    router.rotation.y+=.02;
-    renderer.render(scene,cam);
-  }
-  // orbit
-  var drag=false,lx=0,ly=0;
-  cv.addEventListener('pointerdown',function(e){drag=true;lx=e.clientX;ly=e.clientY;});
-  window.addEventListener('pointerup',function(){drag=false;});
-  window.addEventListener('pointermove',function(e){
-    if(!drag)return;
-    camA+=(e.clientX-lx)*.006; camY=Math.max(1.5,Math.min(11,camY-(e.clientY-ly)*.03));
-    lx=e.clientX;ly=e.clientY;setCam();
-  });
-  cv.addEventListener('wheel',function(e){e.preventDefault();camR=Math.max(7,Math.min(20,camR+e.deltaY*.01));setCam();},{passive:false});
-  var last=0;
-  function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
-  requestAnimationFrame(frame);
-  return true;
-}
 function pick2D(){
   var ctx=cv.getContext('2d');
   cv.width=LW*dpr;cv.height=LH*dpr;ctx.scale(dpr,dpr);
@@ -674,6 +664,8 @@ function pick2D(){
   function draw(){
     ctx.clearRect(0,0,LW,LH);
     var mx=Math.max.apply(null,EX.map(function(e){return e.h;}))||1;
+    var total=EX.reduce(function(s,e){return s+e.h;},0);
+    root.querySelector(".ppx-hot").textContent=total?(100*mx/total).toFixed(1)+"%":"0%";
     for(var i=0;i<8;i++){
       var e=EX[i];e.hh=20+e.h/mx*70;
       ctx.fillStyle='rgba(110,168,255,'+(0.12+0.5*e.h/mx)+')';
@@ -687,14 +679,9 @@ function pick2D(){
     ctx.fillStyle='#aeb4bd';ctx.font='11px sans-serif';ctx.fillText('路由',50,LH/2+28);
     for(var j=0;j<parts.length;j++){var p=parts[j];ctx.fillStyle='rgba(110,168,255,.8)';ctx.beginPath();ctx.arc(p.x,p.y,3,0,7);ctx.fill();}
   }
-  var last=0;
-  function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;if(playing)step(dt);draw();requestAnimationFrame(frame);}
-  requestAnimationFrame(frame);
+  PaiMotion.mount(root,step,draw,function(){return playing;});
 }
-var ok=false;
-try{
-  import('https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js').then(function(m){ok=pick3D(m);}).catch(function(){pick2D();});
-}catch(e){pick2D();}
+pick2D();
 root.querySelectorAll('.ppx-mode').forEach(function(b){
   b.addEventListener('click',function(){
     root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
@@ -1565,9 +1552,13 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 
 <div class="note ok"><b>展望</b>：MoE 已从「小众技巧」变成「顶级模型的默认骨架」。未来 2–3 年，胜负手不在「要不要用 MoE」，而在 <b>如何让路由更智能（动态化）、训练更稳定（万亿级）、部署更便宜（合并/端侧）、专家更可解释</b>。这四个方向都还有大量适合上手的好问题（本报告 §1 的 toy 代码与 collapse 模拟就是很好的起点）。</div>
 
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">6.5 稀疏激活之后，优化边界继续向执行路径移动</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>字节 VeOmni v0.1.13（2026-09-30）的更新包含按 token 数收紧 fused-MoE grouped-GEMM 的启动上界。它说明即便 top-k 不变，专家实际拿到多少 token 仍会改变 kernel 的执行成本；这属于训练系统工程进展，不能直接当作推理服务吞吐结论。<sup class="cite"><a href="#R26-VEOMNI">[R26:VEOMNI]</a></sup></p><p>10-27 的 CRISP 进一步研究边缘 MoE 的专家组合：以组合相关的重要性做剪枝，并共同设计调度。应把这类会改变计算结果的近似路线，与保持原始路由结果的缓存、预取、通信重叠分开评估。其证据范围是论文中的 Mixtral / DeepSeek-MoE 与边缘配置，不支持“所有 MoE 都可无损剪枝”的结论。<sup class="cite"><a href="#R26-CRISP">[R26:CRISP]</a></sup></p></section>
+
 <!-- ===================== 参考资料 ===================== -->
 <span class="anchor" id="s7"></span>
-<section class="note" id="research-updates" data-research-updates><h2>更新附录 · MoE 发布与论文记录</h2><h3>6.1 2026 年 6–10 月：万亿俱乐部全面换代，均衡理论收敛</h3>
+<section class="note" id="research-updates" data-research-updates>
+
+<h2>更新附录 · MoE 发布与论文记录</h2><h3>6.1 2026 年 6–10 月：万亿俱乐部全面换代，均衡理论收敛</h3>
 <p>本文初稿调研于 2026-08，但 2026 年内开源万亿级 MoE 已完成一轮整体换代，新旗舰全部带有值得单独讲的 MoE 设计：</p>
 <ul>
 <li><b>Kimi K3</b>（月之暗面，2026-07-27，arXiv:2607.24653）：迄今最大开源权重模型，<b>2.78T 总参 / 104.2B 激活</b>。三项新设计：① KDA 线性注意力 + 周期性 Gated MLA（约 3:1）撑起 1M 上下文；② Attention Residuals（AttnRes）让每层可选择性回看之前所有层；③ <b>Stable LatentMoE</b>：896 路由专家选 16 + 2 共享，配 RMSNorm + 软上限激活 SiTU-GLU（防低精度数值爆炸）与 <b>Quantile Balancing</b>：利用路由分数的分位数统计构造负载控制信号；分位数受 batch 分布与统计估计影响，不能理解为任意负载下一步达到精确均衡，是 DeepSeek 偏置法之后均衡谱系的最新一代<sup class="ref"><a href="#r16">[16]</sup>。训练全程 MXFP4 权重 / MXFP8 激活的量化感知训练（QAT），MoE 量化已从 PTQ 走向原生 QAT。</li>
@@ -1614,6 +1605,8 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 </figure>
 </section>
 <h2 class="sec" id="ch7"><span class="num">7</span>参考资料与引用出处</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-VEOMNI"><b>ByteDance-Seed</b>. <i>ByteDance-Seed/VeOmni</i>. v0.1.13，发布于 2026-09-30；核验 2026-11-03。<a href="https://github.com/ByteDance-Seed/VeOmni/releases/tag/v0.1.13">一手来源</a>。</li><li id="R26-CRISP"><b>Zhang, Congwei, Tao, Youming et al.</b>. <i>CRISP: Co-designing Pruning and Scheduling for Efficient MoE Inference on Edge Servers</i>. arXiv:2610.37442v1，2026-10-27；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.37442v1">一手来源</a>。</li></ol>
+
 <ol class="ref-list" id="refs">
 <li id="r1">Shazeer, Mirhoseini, Maziarz, Davis, Le, Hinton, Dean. <i>Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer</i>. ICLR 2017. arXiv:<a href="https://arxiv.org/abs/1701.06538" target="_blank">1701.06538</a>.（首次稀疏门控 MoE，1000× 容量；本文图 3、路由崩溃数据出处）</li>
 <li id="r2">Fedus, Zoph, Shazeer. <i>Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity</i>. JMLR 2022（提交 2021.01）. arXiv:<a href="https://arxiv.org/pdf/2101.03961" target="_blank">2101.03961</a>.（top-1 路由、辅助损失、1.6T 参数；同源 GShard: Lepikhin et al. 2020, arXiv:2006.16668，专家并行/all-to-all 出处）</li>

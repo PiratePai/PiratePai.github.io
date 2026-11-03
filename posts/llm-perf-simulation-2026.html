@@ -109,6 +109,110 @@
 #reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -186,7 +290,7 @@
 <tr><th style="width:17%">流派</th><th style="width:24%">代表（时间）</th><th style="width:20%">输入</th><th style="width:39%">能回答 / 不能回答</th></tr>
 <tr><td><b>解析计数 + Roofline</b><span class="tag paper">paper</span></td><td>Transformer Inference Arithmetic 博客（2022-08）<sup class="cite">[KIPPLY22]</sup>；LLM-Viewer（2024）；RooflineBench（2026-02）<sup class="cite">[ROOFLINEBENCH26]</sup></td><td>模型 config + 硬件规格表</td><td>一步多快、瓶颈是算力还是带宽、显存够不够；<b>不回答</b>排队与调度</td></tr>
 <tr><td><b>服务级离散事件仿真</b><span class="tag sys">sys</span></td><td>Vidur（MLSys 2024）<sup class="cite">[VIDUR24]</sup>；LLMServingSim 2.0（IEEE CAL 2025-07）<sup class="cite">[LLMSERVSIM25]</sup>；APEX（2024-11，多机构研究工作）<sup class="cite">[APEX24]</sup></td><td>+ 请求到达流、调度策略</td><td>TTFT/TPOT 分布、goodput、容量规划、what-if（"开投机解码能多扛多少 QPS"）</td></tr>
-<tr><td><b>跨设备性能预测</b><span class="tag paper">paper</span></td><td>NeuSight（ASPLOS 2025）<sup class="cite">[NEUSIGHT25]</sup>；AIConfigurator（阿里，开源）<sup class="cite">[AICFG]</sup></td><td>历史 GPU 微基准 + 新 GPU 数据手册</td><td>"还没发布的卡能跑多快"；<b>不回答</b>服务层策略（KernelSight-LM 补上了这块）</td></tr>
+<tr><td><b>跨设备性能预测</b><span class="tag paper">paper</span></td><td>NeuSight（ASPLOS 2025）<sup class="cite">[NEUSIGHT25]</sup></td><td>历史 GPU 微基准 + 新 GPU 数据手册</td><td>"还没发布的卡能跑多快"；<b>不回答</b>服务层策略（KernelSight-LM 补上了这块）</td></tr>
 <tr><td><b>生产级画像/压测</b><span class="tag ind">ind</span></td><td>NVIDIA GenAI-Perf / Triton Perf Analyzer；vLLM <code>bench serve</code>；字节 AIBrix 混沌与性能模拟（2025-03）<sup class="cite">[AIBRIX25]</sup></td><td>真实部署</td><td>真值与回归；但<b>慢、贵、且买不到没发布的硬件</b></td></tr>
 </table>
 </div>
@@ -213,6 +317,8 @@
 </div>
 
 <!-- ============================================================ -->
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">0.1 模型估计、请求仿真和真实测量，分别回答什么</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p><b>AIConfigurator 是 NVIDIA 主导、与阿里等协作的开源项目，官方仓库为 ai-dynamo/aiconfigurator。</b>它用校准过的算子数据和分析模型搜索部署配置，论文发表于 arXiv 2026-01-09。旧文将其归到跨设备外推、写作 alibaba/ai-configurator 不准确：搜索可以离线运行，基础性能数据仍来自目标硬件与后端测量。<sup class="cite"><a href="#R26-AICP">[R26:AICP]</a><a href="#R26-AIC">[R26:AIC]</a></sup></p><p>截至 11-03，旧仓库已进入维护迁移阶段，后继 <b>AISimulate v0.13.0（10-21）</b>提供独立 Replay 与 Sweeper。分析估计用于筛候选，Replay 用请求轨迹检验排队与调度，真实服务压测用于确认部署表现；三者不互相替代。当前 AISimulate main 的文档可能领先已发布 wheel，必须连同数据集提交、运行时与 Dynamo 依赖一起固定。<sup class="cite"><a href="#R26-AISIM">[R26:AISIM]</a></sup></p><div class="citebox">[R26:AISIM] 官方 README（2026-11-03 快照）：<span class="q">“Documentation on main can describe features newer than the latest published wheel.”</span>（main 文档可能描述比已发布 wheel 更新的功能。）</div></section>
 <h2 id="s1"><span class="no">1</span>预备知识：一次推理到底在算什么</h2>
 <p>写给第一次接触推理性能的读者：只需要线性代数里"矩阵乘"的概念就能读完本节。</p>
 
@@ -674,6 +780,8 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 
 </section>
 <h2 id="refs">参考文献</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-AICP"><b>Xu, Tianhao, Liu, Yiming et al.</b>. <i>AIConfigurator: Lightning-Fast Configuration Optimization for Multi-Framework LLM Serving</i>. arXiv:2601.06288v1，2026-01-09；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2601.06288v1">一手来源</a>。</li><li id="R26-AIC"><b>ai-dynamo</b>. <i>ai-dynamo/aiconfigurator</i>. 源码快照 6cd6f9686ab7，提交日期 2026-10-29；核验 2026-11-03。<a href="https://github.com/ai-dynamo/aiconfigurator/blob/6cd6f9686ab7de6e8fb28171d6e350ee0aa4ed39/README.md">一手来源</a>。</li><li id="R26-AISIM"><b>ai-dynamo</b>. <i>ai-dynamo/aisimulate</i>. 源码快照 9f4819e2b77a，提交日期 2026-11-03；核验 2026-11-03。<a href="https://github.com/ai-dynamo/aisimulate/blob/9f4819e2b77afb4798bc8133c42ccc1d1b045e5c/README.md">一手来源</a>。</li></ol>
+
 <ol class="refs">
 <li id="DSV41FLASH26">DeepSeek-AI. <i>DeepSeek-V4.1-Flash: Pushing the Limits of KV Cache Compression</i>. arXiv, <b>2026-09-17</b>. <a href="https://arxiv.org/abs/2609.19969">arXiv:2609.19969</a> · <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">HF 模型页</a></li>
 <li id="DSAPI26">DeepSeek. <i>DeepSeek V4.1 Flash 发布公告（更强、更快、更普惠）</i>. 官方 API 文档新闻, <b>2026-09-10</b>. <a href="https://api-docs.deepseek.com/zh-cn/news/news260910">链接</a></li>
@@ -682,7 +790,7 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 <li id="LLMSERVSIM25">Cho, Choi, Park. <i>LLMServingSim2.0: A Unified Simulator for Heterogeneous Hardware and Serving Techniques in LLM Infrastructure</i>. <b>IEEE Computer Architecture Letters 24(2), 2025-07</b>（arXiv 2025-11）. <a href="https://arxiv.org/abs/2511.07229">arXiv:2511.07229</a></li>
 <li id="APEX24">Lin, Kwon, Pineda, Paravecino (多机构研究团队). <i>APEX: An Extensible and Dynamism-Aware Simulator for Automated Parallel Execution in LLM Serving</i>. arXiv, <b>2024-11-26</b>. <a href="https://arxiv.org/abs/2411.17651">arXiv:2411.17651</a></li>
 <li id="NEUSIGHT25">Lee, Phanishayee, Mahajan. <i>Forecasting GPU Performance for Deep Learning Training and Inference</i>. <b>ASPLOS 2025</b>（arXiv 2407.13853）. <a href="https://arxiv.org/abs/2407.13853">arXiv:2407.13853</a></li>
-<li id="AICFG">Alibaba PAI. <i>AIConfigurator：LLM 推理部署配置推荐器</i>. 开源, <b>2024-2025</b>. <a href="https://github.com/alibaba/ai-configurator">GitHub</a></li>
+<li id="AICFG"><b>Tianhao Xu et al.</b> <i>AIConfigurator: Lightning-Fast Configuration Optimization for Multi-Framework LLM Serving</i>. arXiv:2601.06288，2026-01-09。<a href="https://arxiv.org/abs/2601.06288">论文</a>；<a href="https://github.com/ai-dynamo/aiconfigurator">NVIDIA 主导的官方仓库</a>（2026-11-03 已核验，后继为 AISimulate）。</li>
 <li id="IMAI24">Imai, Nakazawa, Amaral, Choochotkaew, Chiba. <i>Predicting LLM Inference Latency: A Roofline-Driven ML Method</i>. NeurIPS 2024 ML for Systems Workshop, <b>2024-12</b>. <a href="https://mlforsystems.org/assets/papers/neurips2024/paper28.pdf">PDF</a></li>
 <li id="ROOFLINEBENCH26"><i>RooflineBench: A Benchmarking Framework for On-Device LLMs</i>. arXiv, <b>2026-02</b>. <a href="https://arxiv.org/abs/2602.11506">arXiv:2602.11506</a></li>
 <li id="KIPPLY22">Kipply (Anderson). <i>Transformer Inference Arithmetic</i>. 博客, <b>2022-08</b>. <a href="https://kipply.github.io/transformer-inference-arithmetic/">链接</a></li>
@@ -762,14 +870,13 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 (function(){
   var cv=document.getElementById('q-canvas'); if(!cv) return;
   var ctx=cv.getContext('2d');
-  var lam=0.30, mu=0.50, reqs=[], t=0, done=0, ttftSum=0, running=true, hist=[];
+  var lam=0.30, mu=0.50, reqs=[], t=0, done=0, ttftSum=0, hist=[];
   function reset(){reqs=[];t=0;done=0;ttftSum=0;hist=[];}
   document.getElementById('q-lambda').addEventListener('input',function(){lam=this.value/100;document.getElementById('q-lv').textContent=lam.toFixed(2);});
   document.getElementById('q-mu').addEventListener('input',function(){mu=this.value/100;document.getElementById('q-mv').textContent=mu.toFixed(2);});
   document.getElementById('q-reset').addEventListener('click',reset);
-  var last=performance.now();
-  function frame(now){
-    var dt=Math.min((now-last)/1000,0.08); last=now; t+=dt;
+  function step(dt){
+    t+=dt;
     if(Math.random()<lam*dt) reqs.push({arrive:t,start:null,end:null});
     var serving=reqs.filter(function(r){return r.start!==null&&r.end===null;});
     var queued=reqs.filter(function(r){return r.start===null;});
@@ -777,6 +884,8 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
     reqs.forEach(function(r){if(r.start!==null&&r.end===null&&Math.random()<mu*dt){r.end=t;done++;ttftSum+=(r.start-r.arrive);}});
     if(reqs.length>400) reqs=reqs.slice(-400);
     hist.push(reqs.filter(function(r){return r.end===null;}).length); if(hist.length>200)hist.shift();
+  }
+  function draw(){
     /* 画 */
     ctx.clearRect(0,0,cv.width,cv.height);
     ctx.fillStyle='#10141b'; ctx.fillRect(0,0,cv.width,cv.height);
@@ -798,9 +907,8 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
     ctx.fillStyle='#8a94ab'; ctx.font='11px sans-serif';
     var inSys=reqs.filter(function(r){return r.end===null;}).length;
     document.getElementById('q-stat').textContent='在途 '+inSys+' · 完成 '+done+' · 平均等待 '+ (done?(ttftSum/done).toFixed(1):'0.0') +'（仿真时间单位）';
-    requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  PaiMotion.mount(document.getElementById("q-demo"),step,draw);
 })();
 </script>
 

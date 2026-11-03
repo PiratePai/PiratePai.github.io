@@ -140,6 +140,110 @@
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
 <style>nav.toc{margin-inline:0}</style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -636,7 +740,7 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
   <div class="ppx-bar">
     <button class="ppx-mode on" data-m="gpipe">GPipe（全前向后全反向）</button>
     <button class="ppx-mode" data-m="pipedream">1F1B（交替执行）</button>
-    <button class="ppx-play on">⏸ 暂停</button>
+    <button class="ppx-play">▶ 播放</button>
     <button class="ppx-replay">↹ 重播</button>
     <span style="margin-left:auto">气泡占比 <b class="ppx-bubble ppx-stat">–</b> · 峰值在途微批 <b class="ppx-inflight ppx-stat">–</b>/8（决定激活显存）</span>
   </div>
@@ -666,7 +770,7 @@ var LW=880,LH=430,dpr=Math.min(2,window.devicePixelRatio||1);
 cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
 var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a'};
 var S=4,M=8,F=1,B=2;
-var mode='gpipe',playing=true,cursor=0;
+var mode='gpipe',playing=false,cursor=0;
 function buildSchedule(){
   var seq=[],s,m;
   for(s=0;s<S;s++)seq.push([]);
@@ -802,11 +906,7 @@ function hatch(x,y,w,h,color){
   for(var d=-h;d<w;d+=7){ctx.beginPath();ctx.moveTo(x+d,y+h);ctx.lineTo(x+d+h,y);ctx.stroke();}
   ctx.restore();
 }
-var last=0;
-function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;
-  if(playing){cursor+=dt*1.8;if(cursor>sched.T+1)cursor=0;}
-  draw();requestAnimationFrame(frame);}
-requestAnimationFrame(frame);
+PaiMotion.mount(root,function(dt){cursor+=dt*1.8;if(cursor>sched.T+1)cursor=0;},draw,function(){return playing;});
 root.querySelectorAll('.ppx-mode').forEach(function(b){
   b.addEventListener('click',function(){
     root.querySelectorAll('.ppx-mode').forEach(function(x){x.classList.remove('on');});
@@ -1035,6 +1135,39 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
   <div class="zh">「对 DeepSeek-V3 而言,跨节点专家并行带来的通信开销使计算通信比低至约 1:1。为解决该问题,我们设计了创新的流水线并行算法 DualPipe……它采用双向流水线调度,同时从流水线两端注入微批,大部分通信都能被完全重叠。」</div>
   <span class="src">— DeepSeek-V3 技术报告 §3.2.1,2024-12</span>
 </div>
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">9.1 从框架并行到细粒度重叠：以字节 Flux 为参照</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>Flux 将通信与依赖它的 GEMM 切成更细的片段并融合，使已到达的数据先开始计算。2026-11-03 核验的仓库仍提供 TP / EP 示例、NVSHMEM 依赖和 Ampere / Ada / Hopper 构建说明；最新提交日期为 2025-08-28，不能包装成“本周新开源”。新近系统对比应沿用这个机制基线，同时单独核对新硬件和框架版本。<sup class="cite"><a href="#R26-FLUX">[R26:FLUX]</a><a href="#R26-FLUXP">[R26:FLUXP]</a></sup></p><p><b>可重叠不是完全独立。</b>每块 GEMM 必须等待自己的输入；还需考虑通信与计算争用 SM、显存带宽、同步和小块调度的额外成本。理想上界接近 max（通信时间，计算时间），并非把通信时间直接删掉。下图用四块数据演示依赖关系，数值是教学设定，不是 Flux 实测。<sup class="cite"><a href="#R26-FLUXP">[R26:FLUXP]</a></sup></p>
+<div class="fig" id="overlap-demo" aria-label="通信计算重叠的教学时间线">
+<div class="ppx-bar" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px"><button type="button" class="ppx-play" aria-pressed="false">▶ 播放</button> <button type="button" data-reset>重置</button></div>
+<svg viewBox="0 0 640 245" role="img" aria-labelledby="overlap-title overlap-desc" style="display:block;width:100%;height:auto">
+<title id="overlap-title">四块数据的串行与流水执行</title><desc id="overlap-desc">每块通信 2 毫秒，计算 3 毫秒。串行总时长 20 毫秒，理想流水 14 毫秒；每块计算等待自己的通信完成。</desc>
+<text x="91" y="23" fill="#d7dce3" font-size="22">0 ms</text><text x="455" y="23" fill="#d7dce3" font-size="22">14 ms</text><text x="584" y="23" fill="#d7dce3" font-size="22">20 ms</text>
+<text x="8" y="63" fill="#d7dce3" font-size="22">先通信</text><g data-start="0" data-end="2"><rect x="91" y="44" width="49" height="29" rx="3" fill="#386eac"/><text x="101" y="63" font-size="22" fill="white">1</text></g><g data-start="2" data-end="4"><rect x="143" y="44" width="49" height="29" rx="3" fill="#386eac"/><text x="153" y="63" font-size="22" fill="white">2</text></g><g data-start="4" data-end="6"><rect x="195" y="44" width="49" height="29" rx="3" fill="#386eac"/><text x="205" y="63" font-size="22" fill="white">3</text></g><g data-start="6" data-end="8"><rect x="247" y="44" width="49" height="29" rx="3" fill="#386eac"/><text x="257" y="63" font-size="22" fill="white">4</text></g><text x="8" y="112" fill="#d7dce3" font-size="22">再计算</text><g data-start="8" data-end="11"><rect x="299" y="93" width="75" height="29" rx="3" fill="#176b67"/><text x="309" y="112" font-size="22" fill="white">1</text></g><g data-start="11" data-end="14"><rect x="377" y="93" width="75" height="29" rx="3" fill="#176b67"/><text x="387" y="112" font-size="22" fill="white">2</text></g><g data-start="14" data-end="17"><rect x="455" y="93" width="75" height="29" rx="3" fill="#176b67"/><text x="465" y="112" font-size="22" fill="white">3</text></g><g data-start="17" data-end="20"><rect x="533" y="93" width="75" height="29" rx="3" fill="#176b67"/><text x="543" y="112" font-size="22" fill="white">4</text></g><text x="8" y="161" fill="#d7dce3" font-size="22">流水通信</text><g data-start="0" data-end="2"><rect x="91" y="142" width="49" height="29" rx="3" fill="#386eac"/><text x="101" y="161" font-size="22" fill="white">1</text></g><g data-start="2" data-end="4"><rect x="143" y="142" width="49" height="29" rx="3" fill="#386eac"/><text x="153" y="161" font-size="22" fill="white">2</text></g><g data-start="4" data-end="6"><rect x="195" y="142" width="49" height="29" rx="3" fill="#386eac"/><text x="205" y="161" font-size="22" fill="white">3</text></g><g data-start="6" data-end="8"><rect x="247" y="142" width="49" height="29" rx="3" fill="#386eac"/><text x="257" y="161" font-size="22" fill="white">4</text></g><text x="8" y="210" fill="#d7dce3" font-size="22">流水计算</text><g data-start="2" data-end="5"><rect x="143" y="191" width="75" height="29" rx="3" fill="#176b67"/><text x="153" y="210" font-size="22" fill="white">1</text></g><g data-start="5" data-end="8"><rect x="221" y="191" width="75" height="29" rx="3" fill="#176b67"/><text x="231" y="210" font-size="22" fill="white">2</text></g><g data-start="8" data-end="11"><rect x="299" y="191" width="75" height="29" rx="3" fill="#176b67"/><text x="309" y="210" font-size="22" fill="white">3</text></g><g data-start="11" data-end="14"><rect x="377" y="191" width="75" height="29" rx="3" fill="#176b67"/><text x="387" y="210" font-size="22" fill="white">4</text></g>
+<line data-cursor x1="91" x2="91" y1="32" y2="237" stroke="#b75913" stroke-width="2"/>
+</svg>
+<p>蓝色为通信，绿色为计算；数字表示同一块数据。教学模型假设通信与计算独立，不计同步、启动与资源争用。</p>
+<p data-status aria-live="off">t = 0 ms；串行与流水均未提交计算结果。</p>
+<p class="cap">图 9-1 · 本文自绘，机制参照 <a href="https://arxiv.org/html/2406.06858v1#S2.F3">Flux Figure 3</a> 与 <a href="#R26-FLUX">Flux 内核库</a>。这是依赖与关键路径的简化模型，不是 GPU 性能仿真或论文实验值。</p>
+</div>
+<script>
+(function(){
+  const root=document.getElementById('overlap-demo');
+  let time=0,playing=false;
+  const button=root.querySelector('.ppx-play');
+  button.addEventListener('click',()=>{if(time>=20)time=0;playing=!playing;button.textContent=playing?'暂停':'▶ 播放';});
+  root.querySelector('[data-reset]').addEventListener('click',()=>{time=0;playing=false;button.textContent='▶ 播放';});
+  function step(dt){time=Math.min(20,time+dt*2);if(time>=20){playing=false;button.textContent='▶ 播放';}}
+  function draw(){
+    root.querySelectorAll('[data-start]').forEach(node=>{node.querySelector('rect').style.opacity=time>=+node.dataset.end?'1':time>=+node.dataset.start?'.85':'.4';});
+    const x=91+time*26;root.querySelector('[data-cursor]').setAttribute('x1',x);root.querySelector('[data-cursor]').setAttribute('x2',x);
+    const serial=Math.max(0,Math.min(4,Math.floor((time-8)/3)));
+    const pipeline=Math.max(0,Math.min(4,Math.floor((time-2)/3)));
+    root.querySelector('[data-status]').textContent='t = '+time.toFixed(1)+' ms；串行完成 '+serial+'/4 块，流水完成 '+pipeline+'/4 块。';
+  }
+  PaiMotion.mount(root,step,draw,()=>playing);
+})();
+</script>
+</section>
 </section>
 
 <section id="ch11">
@@ -1190,6 +1323,8 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </section></section>
 <section id="refs">
 <h2 class="sec"><span class="num">R</span>参考文献<span class="roadmap">按主题分组;日期为 arXiv v1/首发时间</span></h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-FLUX"><b>bytedance</b>. <i>bytedance/flux</i>. 源码快照 19831ca2d820，提交日期 2025-08-28；核验 2026-11-03。<a href="https://github.com/bytedance/flux/blob/19831ca2d820e3e782ed1d15d8b52d0898b78b26/README.md">一手来源</a>。</li><li id="R26-FLUXP"><b>Chang, Li-Wen, Bao, Wenlei et al.</b>. <i>FLUX: Fast Software-based Communication Overlap On GPUs Through Kernel Fusion</i>. arXiv:2406.06858v1，2024-06-11；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2406.06858v1">一手来源</a>。</li></ol>
+
 <h3>并行策略经典论文</h3>
 <ol class="ref-list">
 <li>Shoeybi et al., <i>Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism</i>, NVIDIA, arXiv:1909.08053, 2019-09.<br><a href="https://arxiv.org/abs/1909.08053">https://arxiv.org/abs/1909.08053</a></li>

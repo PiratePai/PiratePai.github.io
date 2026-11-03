@@ -135,6 +135,110 @@
 #reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -317,7 +421,7 @@
     <button class="ppx-mode on" data-m="tome">ToMe 风格：相似 token 合并</button>
     <button class="ppx-mode" data-m="fastv">FastV 风格：低注意力 token 剪枝</button>
     <label style="margin-left:8px">网络深度 <input type="range" class="ppx-layer" min="0" max="24" step="1" value="0"> <span class="ppx-lv ppx-stat">第 0/24 层</span></label>
-    <button class="ppx-play on">▶ 自动播放</button>
+    <button class="ppx-play">▶ 播放</button>
     <span style="margin-left:auto">剩余视觉 token <b class="ppx-n ppx-stat">256</b>/256 · 理论注意力 FLOPs <b class="ppx-f ppx-stat">100%</b></span>
   </div>
   <canvas></canvas>
@@ -497,18 +601,16 @@ function draw(){
   root.querySelector('.ppx-f').textContent=Math.round(flops*100)+'%';
   root.querySelector('.ppx-lv').textContent='第 '+layer+'/24 层';
 }
-function step(dt){
-  if(!auto)return;
-  layer+=dt*2.4;
-  if(layer>24){layer=0;}
-  layer=Math.floor(layer);
+var layerProgress=0;
+function step(dt,manual){
+  layerProgress+=manual?1:dt*2.4;
+  var advance=Math.floor(layerProgress);
+  layerProgress-=advance;
+  layer=(layer+advance)%25;
   root.querySelector('.ppx-layer').value=layer;
-  draw();
 }
-var last=0;
-function frame(ts){if(!last)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;step(dt);draw();requestAnimationFrame(frame);}
-requestAnimationFrame(frame);
-root.querySelector('.ppx-layer').addEventListener('input',function(){layer=+this.value;auto=false;var b=root.querySelector('.ppx-play');b.textContent='▶ 自动播放';b.classList.remove('on');});
+PaiMotion.mount(root,step,draw,function(){return auto;});
+root.querySelector('.ppx-layer').addEventListener('input',function(){layer=+this.value;layerProgress=0;auto=false;var b=root.querySelector('.ppx-play');b.textContent='▶ 自动播放';b.classList.remove('on');});
 root.querySelector('.ppx-play').addEventListener('click',function(){auto=!auto;this.textContent=auto?'⏸ 暂停播放':'▶ 自动播放';this.classList.toggle('on',auto);});
 root.querySelectorAll('.ppx-mode').forEach(function(b){
   b.addEventListener('click',function(){
@@ -873,6 +975,8 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <tr><td>2026 系列（LoSA/SPADE/FVAttn/Veda/Sparse Forcing…）</td><td>混合</td><td>近无损 / 硬件引擎 / 负载均衡 / 蒸馏 / 原生训练</td><td>详见 §6.2</td></tr>
   </table>
   <div class="box amber"><b>正交性</b>：token 合并 × 稀疏注意力 × 跨步缓存 × 量化（FP8/SageAttention INT8）× 步数削减（蒸馏/ODE 求解器）可尝试组合，但重复节省同一部分计算、额外路由与误差耦合使倍数不能直接相乘，须用共同基线做组合消融。SVG+FP8 已示范"稀疏 + 量化"叠加（2.33×）；TeaCache 与 SVG 的组合也是社区常见配置。</div>
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">5.6 Prism：让块形状随视听内容变化</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>腾讯混元与高校的 Prism（arXiv 首发 2026-10-04）把视频区域内的视觉变化和音频—视频关联共同用于分块，再结合 Top-k / Top-p 选择块。与固定窗口相比，块可以沿变化明显的方向变细；与 Token 剪枝相比，它保留 token 而减少要计算的连接。官方仓库公开训练、推理和 preview alpha / beta 权重，Prism-pro 仍列在待办。<sup class="cite"><a href="#R26-PRISMP">[R26:PRISMP]</a><a href="#R26-PRISM">[R26:PRISM]</a></sup></p><p>这是<b>原生训练稀疏</b>路线，应与本章的 ToMe、FastV、TeaCache 分开理解：它不支持直接推出“旧模型免训练获得同样提升”。评估时还需计入分块、索引、重排及跨模态计算，报告训练和推理各自的端到端耗时。本文保留论文中的研究方向，不把其训练倍率转写为实时生成 FPS。<sup class="cite"><a href="#R26-PRISMP">[R26:PRISMP]</a></sup></p></section>
 </section>
 
 <!-- ================================================================ -->
@@ -981,6 +1085,8 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 </section></section>
 <section id="s8" class="refs">
   <h2><span class="num">8</span>参考文献（按主题分组，含发表时间）</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-PRISMP"><b>Tu, Shuyuan, Tian, Qi et al.</b>. <i>Prism: Dynamic Sparse Attention for Native 2K Joint Video-Audio Generation Model Training</i>. arXiv:2610.05416v1，2026-10-04；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.05416v1">一手来源</a>。</li><li id="R26-PRISM"><b>Tencent-Hunyuan</b>. <i>Tencent-Hunyuan/Prism</i>. 源码快照 2de51622999f，提交日期 2026-10-31；核验 2026-11-03。<a href="https://github.com/Tencent-Hunyuan/Prism/blob/2de51622999f826e7b37d55711e8020203376acb/README.md">一手来源</a>。</li></ol>
+
   <h4>基础架构与早期稀疏注意力</h4>
   <ol>
     <li>Vaswani et al. <i>Attention Is All You Need</i>. NeurIPS 2017. arXiv:1706.03762（2017-06）.</li>

@@ -20,6 +20,7 @@
 </form><nav class="topbar-links" aria-label="站点导航"><a href="#all-articles">综述目录</a><a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a></nav>
 </header><details class="mobile-nav"><summary>阅读导航</summary><nav aria-label="手机阅读阶段"><a href="#start">模型基础</a><a href="#core">推理优化</a><a href="#systems">系统执行</a><a href="#evaluate">验证与调优</a><a href="#extensions">研究延伸</a><a href="#all-articles">全部综述</a></nav></details>
 <main id="main-content"><h1>大模型效率技术知识全景</h1>
+<p class="article-meta">11 月 3 日更新：16 个专题完成一手来源增补与错漏复查。可搜索 Prism、DFlash2、AISimulate；图解按需播放。</p>
 <noscript><p>搜索需要 JavaScript。仍可使用下方阅读指引和<a href="#all-articles">完整综述目录</a>。</p></noscript>
 <section class="search-results" id="search-results" aria-labelledby="search-heading" hidden><h2 id="search-heading">搜索结果</h2>
 <p class="search-help">搜索全部 16 篇文章的标题、章节与正文。英文不区分大小写；按 / 或 Ctrl / ⌘ K 聚焦搜索，Esc 清空。</p>
@@ -77,7 +78,7 @@
 <section class="archive-group" id="chapters-research"><h3>架构与任务延伸</h3><p class="group-range">第13–16篇</p>
 <article class="article-entry" id="article-loop-transformer-survey"><h3><span class="chapter-number">13.</span><a href="posts/loop-transformer-survey.html">Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</a></h3><p class="article-summary">沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。</p><p class="article-meta">模型架构 循环深度 · 潜空间推理</p><p class="article-foot">2026-09 · 综述 · 2026-10 增补</p></article>
 <article class="article-entry" id="article-vit-sparsification"><h3><span class="chapter-number">14.</span><a href="posts/vit-sparsification.html">ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</a></h3><p class="article-summary">2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p><p class="article-meta">视觉效率 Token 压缩 · 缓存复用</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-realtime-world-models-2026"><h3><span class="chapter-number">15.</span><a href="posts/realtime-world-models-2026.html">实时交互世界模型全景：从&quot;看视频&quot;到&quot;进世界&quot;（2024–2026）</a></h3><p class="article-summary">四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-27 新开源的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p><p class="article-meta">世界模型 实时交互 · 因果流式 · 神经渲染</p><p class="article-foot">2026-10 · 综述 · 源码实测 · 10-30 增补</p></article>
+<article class="article-entry" id="article-realtime-world-models-2026"><h3><span class="chapter-number">15.</span><a href="posts/realtime-world-models-2026.html">实时交互世界模型全景：从&quot;看视频&quot;到&quot;进世界&quot;（2024–2026）</a></h3><p class="article-summary">四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p><p class="article-meta">世界模型 实时交互 · 因果流式 · 神经渲染</p><p class="article-foot">2026-10 · 综述 · 源码实测 · 10-30 增补</p></article>
 <article class="article-entry" id="article-agent-rl-survey"><h3><span class="chapter-number">16.</span><a href="posts/agent-rl-survey.html">Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</a></h3><p class="article-summary">沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。</p><p class="article-meta">强化学习 RLHF → RLVR → Agent RL</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
 </section>
 </section><section class="group views" aria-labelledby="views-heading">
@@ -95,7 +96,7 @@
       <div id="views-chart"><div class="chart-empty">浏览量曲线每日快照一次，积累两天后即可看到第一段曲线。</div></div>
     </div>
   </section></div></div></main>
-<footer class="site-footer"><span>© 2026 PiratePai · Shanghai Jiao Tong University</span><span>机制与引文修订：2026-11-01</span></footer>
+<footer class="site-footer"><span>© 2026 PiratePai · Shanghai Jiao Tong University</span><span>研究与交互修订：2026-11-03</span></footer>
 </div></div><script>
 (function(){
   var el = document.getElementById('views-chart');

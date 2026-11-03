@@ -181,6 +181,110 @@
 #reading-path,#evidence-scope{color:#d7dce6}#reading-path a,#evidence-scope a{color:#6ea8ff}#evidence-scope,#reading-path>.note{background:#16212c;border:1px solid #375876;border-radius:10px;padding:16px 18px;margin:18px 0}#reading-path>.analogy{background:#302710;border-left:4px solid #a88936;border-radius:8px;padding:14px 18px;color:#e8ddbf}span.cite{white-space:normal;overflow-wrap:anywhere}sup.cite{white-space:normal;overflow-wrap:anywhere}table{max-width:100%}@media(max-width:760px){table{display:block;overflow-x:auto}#reading-path table{display:table;min-width:560px}}
 #reading-path{margin:24px 0;overflow-wrap:anywhere}#reading-path table{width:100%;min-width:0}#reading-path th,#reading-path td{white-space:normal;min-width:0}#reading-path .analogy{margin:18px 0}#reading-path .summary3{border:1px solid #387553;border-radius:10px;padding:14px 18px;background:#192a1e}details[data-research-updates],details[data-highlights]{margin:22px 0}details>summary{cursor:pointer;line-height:1.7;overflow-wrap:anywhere;color:#41d1a7;font-weight:600}#evidence-scope p{margin-bottom:0}pre{max-width:100%;overflow-x:auto}img,svg,canvas{max-width:100%}@media(max-width:760px){#reading-path{font-size:14px}#reading-path table{min-width:560px}#reading-path th,#reading-path td{padding:8px 6px}details[data-research-updates]{padding:12px}}
 </style>
+<!-- efficient-animations:start -->
+<script>
+/* Small, self-contained animation scheduler. No work while paused or off-screen. */
+(function () {
+  'use strict';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  window.PaiMotion = {
+    mount(root, step, draw, isPlaying) {
+      const controls = root.querySelector('.ppx-bar') || root;
+      let enabled = false, visible = false, timer = 0, raf = 0, last = 0, queued = false;
+      if (!isPlaying) {
+        const play = document.createElement('button');
+        play.type = 'button'; play.className = 'motion-play'; play.textContent = '播放';
+        play.setAttribute('aria-pressed', 'false');
+        play.addEventListener('click', () => {
+          enabled = !enabled;
+          play.textContent = enabled ? '暂停' : '播放';
+          play.setAttribute('aria-pressed', String(enabled));
+        });
+        controls.append(play);
+        isPlaying = () => enabled;
+      }
+      const next = document.createElement('button');
+      next.type = 'button'; next.className = 'motion-step'; next.textContent = '单步';
+      next.addEventListener('click', () => step(0.25, true));
+      controls.append(next);
+      const note = document.createElement('span');
+      note.className = 'motion-note';
+      const noteText = () => { note.textContent = reduced.matches ? '系统已减少动态效果，可用单步查看。' : '按需播放 · 离屏暂停'; };
+      noteText(); controls.append(note);
+      const active = () => visible && !document.hidden && !reduced.matches && isPlaying() && !!root.getClientRects().length;
+      function paint() {
+        draw();
+        const button = root.querySelector('.ppx-play');
+        if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+        root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+      }
+      function stop() {
+        clearTimeout(timer); cancelAnimationFrame(raf); timer = raf = last = 0;
+        root.dataset.motionState = 'idle';
+      }
+      function schedule() {
+        if (!active()) { stop(); return; }
+        if (timer || raf) return;
+        root.dataset.motionState = 'playing';
+        // A timer gates rAF itself: paused demos do not wake up at display refresh rate.
+        timer = setTimeout(() => {
+          timer = 0;
+          raf = requestAnimationFrame(now => {
+            raf = 0;
+            if (!active()) { stop(); return; }
+            const dt = last ? Math.min(0.08, (now - last) / 1000) : 0.05;
+            last = now; step(dt); paint(); schedule();
+          });
+        }, 50);
+      }
+      function refresh() {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false;
+          const button = root.querySelector('.ppx-play');
+          if (button) button.setAttribute('aria-pressed', String(isPlaying()));
+          if (visible && !document.hidden) paint();
+          schedule();
+        });
+      }
+      ['click', 'input', 'change'].forEach(type => root.addEventListener(type, refresh));
+      document.addEventListener('visibilitychange', refresh);
+      reduced.addEventListener('change', () => { noteText(); refresh(); });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+          // Reader pagination can move a demo twice before one observer delivery.
+          // The final record describes its current visibility, not the first one.
+          visible = entries[entries.length - 1].isIntersecting;
+          refresh();
+        }).observe(root);
+      } else {
+        // Old browsers retain manual controls without a continuously running fallback.
+        visible = true; enabled = false;
+        isPlaying = () => false;
+      }
+      root.dataset.motionState = 'idle';
+      // Defer until each demo has initialized its data and event handlers.
+      queueMicrotask(paint);
+      return {refresh};
+    },
+    static(root, draw) {
+      let queued = false;
+      const paint = () => {
+        if (queued) return;
+        queued = true;
+        queueMicrotask(() => {
+          queued = false; draw();
+          root.dataset.motionFrames = String(+(root.dataset.motionFrames || 0) + 1);
+        });
+      };
+      ['input', 'change', 'click'].forEach(type => root.addEventListener(type, paint));
+      root.dataset.motionState = 'static'; paint();
+    }
+  };
+})();
+</script>
+<!-- efficient-animations:end -->
 </head>
 <body>
 <div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
@@ -399,7 +503,7 @@ token&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 目标分布 p&nbsp;&nbsp;&nbsp; 投�
 <div class="ppx-demo" id="PPX-W1">
   <div class="ppx-head"><span class="ppx-tag">交互演示</span><b>投机解码："起草—验证"如何一次算出多个 token</b></div>
   <div class="ppx-bar">
-    <button class="ppx-play on">⏸ 暂停</button>
+    <button class="ppx-play">▶ 播放</button>
     <button class="ppx-reset">↻ 重置</button>
     <label>草稿长度 γ <input type="range" class="ppx-g" min="1" max="8" step="1" value="4"> <span class="ppx-gv ppx-stat">4</span></label>
     <label>草稿条件接受率 α <input type="range" class="ppx-q" min="20" max="95" step="1" value="70"> <span class="ppx-qv ppx-stat">0.70</span></label>
@@ -432,7 +536,7 @@ cv.width=LW*dpr; cv.height=LH*dpr; ctx.scale(dpr,dpr);
 var C={blue:'#6ea8ff',green:'#41d1a7',purple:'#9d7bff',orange:'#ffb454',red:'#ff6b6b',ink:'#e8eaed',muted:'#aeb4bd',line:'#2a2f3a',dim:'#5a6270'};
 var TOK='深度学习模型通过并行计算显著提升了训练效率并且'.split('');
 var q=root.querySelector.bind(root);
-var state,gamma=4,acc=0.7,playing=true;
+var state,gamma=4,acc=0.7,playing=false;
 function reset(){
   state={phase:'draft',draft:[],pos:0,round:0,nFwd:0,nTok:0,hist:[],flash:{},bonus:null,rej:null,rejTok:null,ti:0};
 }
@@ -541,9 +645,7 @@ function draw(){
   ctx.textAlign='left';ctx.fillStyle=C.muted;ctx.font='12px sans-serif';
   ctx.fillText('期望每次前向产出 ≈ (1−α^(γ+1))/(1−α) 个 token（α='+acc.toFixed(2)+'，γ='+gamma+' ⇒ '+( (1-Math.pow(acc,gamma+1))/(1-acc) ).toFixed(2)+'）',30,342);
 }
-var last=0;
-function frame(ts){ if(!last)last=ts; var dt=Math.min(.05,(ts-last)/1000); last=ts; if(playing)step(dt); draw(); requestAnimationFrame(frame); }
-requestAnimationFrame(frame);
+PaiMotion.mount(root,step,draw,function(){return playing;});
 root.querySelector('.ppx-play').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ 暂停':'▶ 播放';this.classList.toggle('on',playing);});
 root.querySelector('.ppx-reset').addEventListener('click',function(){reset();});
 root.querySelector('.ppx-g').addEventListener('input',function(){gamma=+this.value;root.querySelector('.ppx-gv').textContent=gamma;reset();});
@@ -552,6 +654,8 @@ root.querySelector('.ppx-q').addEventListener('input',function(){acc=+this.value
 </script>
 <!-- /WIDGET:w1 -->
 
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">2.5 接受率之外：每个最终输出 token 的能耗</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>2026-10-29 的 <i>Only Accepted Tokens Count</i> 在 H100/H200、SGLang 与 CUDA Graph 设置下比较不同草稿方案。报告显示，密集模型的验证成本可能比起草更大；batch 已摊薄权重读取后，继续扩大验证块可能转为算力瓶颈。因此低时延、低能耗、高接受率不一定指向同一个配置。语料和语言改变接受率，单一代码集不能替代真实会话负载。<sup class="cite"><a href="#R26-ENERGY">[R26:ENERGY]</a></sup></p><p><b>教学账本：</b>每轮花 10 J、提交 5 个 token，是 2 J/token；另一方案每轮 14 J、提交 6 个 token，则约 2.33 J/token。接受更多不等于更省电，这些数字只用于手算。测量时应同时记录实际提交数、墙钟时间与积分能量，在相同模型精度、并发和时延目标下比较；拒绝的候选仍消耗验证资源。<sup class="cite"><a href="#R26-ENERGY">[R26:ENERGY]</a></sup></p></section>
 <h2 id="timeline"><span class="num">3</span>发展时间线一览</h2>
 
 <div class="tl">
@@ -1262,6 +1366,8 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <footer class="foot">
 
 <h3 style="margin-top:0">📜 参考与引用出处</h3>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-ENERGY"><b>Ma, Bole, Afzal, Ayesha et al.</b>. <i>Only Accepted Tokens Count: An Energy Accounting of Speculative Decoding Under Latency Targets</i>. arXiv:2610.40287v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.40287v1">一手来源</a>。</li></ol>
+
   <ol style="font-size:.86rem; line-height:1.9">
     <li>Stern, Shazeer, Uszkoreit. <i>Blockwise Parallel Decoding for Deep Autoregressive Models</i>. arXiv:1811.03115, 2018.</li>
     <li>Leviathan, Kalman, Matias. <i>Fast Inference from Transformers via Speculative Decoding</i>. ICML 2023 / arXiv:2211.17192, 2022-11.</li>

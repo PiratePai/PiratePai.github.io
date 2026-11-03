@@ -1,0 +1,777 @@
+{
+  "checked": "2026-11-03",
+  "selection": "机制增量、官方代码与可核查边界优先；新预印本不冒称高被引或顶会录用。",
+  "sources": [
+    {
+      "repo": "ai-dynamo/aiconfigurator",
+      "url": "https://github.com/ai-dynamo/aiconfigurator",
+      "checked": "2026-11-03",
+      "sha": "6cd6f9686ab7de6e8fb28171d6e350ee0aa4ed39",
+      "commit_date": "2026-10-29T04:17:43Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v0.12.0",
+        "published_at": "2026-09-18T17:04:46Z",
+        "html_url": "https://github.com/ai-dynamo/aiconfigurator/releases/tag/v0.12.0",
+        "prerelease": false
+      },
+      "description": "Offline optimization of your disaggregated Dynamo graph",
+      "key": "AIC",
+      "evidence_url": "https://github.com/ai-dynamo/aiconfigurator/blob/6cd6f9686ab7de6e8fb28171d6e350ee0aa4ed39/README.md",
+      "title": "ai-dynamo/aiconfigurator",
+      "kind": "repository"
+    },
+    {
+      "id": "2601.06288",
+      "url": "https://arxiv.org/abs/2601.06288",
+      "checked": "2026-11-03",
+      "title": "AIConfigurator: Lightning-Fast Configuration Optimization for Multi-Framework LLM Serving",
+      "authors": [
+        "Xu, Tianhao",
+        "Liu, Yiming",
+        "Lu, Xianglong",
+        "Zhao, Yijia",
+        "Zhou, Xuting",
+        "Feng, Aichen",
+        "Chen, Yiyi",
+        "Shen, Yi",
+        "Zhou, Qin",
+        "Chen, Xumeng",
+        "Sherstyuk, Ilya",
+        "Li, Haorui",
+        "Thakkar, Rishi",
+        "Hamm, Ben",
+        "Li, Yuanzhe",
+        "Huang, Xue",
+        "Wu, Wenpeng",
+        "Shanbhag, Anish",
+        "Kim, Harry",
+        "Chen, Chuan",
+        "Lai, Junjie"
+      ],
+      "date": "2026/01/09",
+      "license": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+      "key": "AICP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2601.06288v1"
+    },
+    {
+      "repo": "ai-dynamo/aisimulate",
+      "url": "https://github.com/ai-dynamo/aisimulate",
+      "checked": "2026-11-03",
+      "sha": "9f4819e2b77afb4798bc8133c42ccc1d1b045e5c",
+      "commit_date": "2026-11-03T06:40:16Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v0.13.0",
+        "published_at": "2026-10-21T23:51:49Z",
+        "html_url": "https://github.com/ai-dynamo/aisimulate/releases/tag/v0.13.0",
+        "prerelease": false
+      },
+      "description": "AISimulate predicts LLM serving behavior and searches for strong deployment configurations offline, without bringing up a GPU serving cluster",
+      "key": "AISIM",
+      "evidence_url": "https://github.com/ai-dynamo/aisimulate/blob/9f4819e2b77afb4798bc8133c42ccc1d1b045e5c/README.md",
+      "title": "ai-dynamo/aisimulate",
+      "kind": "repository"
+    },
+    {
+      "id": "2610.23006",
+      "url": "https://arxiv.org/abs/2610.23006",
+      "checked": "2026-11-03",
+      "title": "Efficient CPU-GPU collaborative MoE inference via Adaptive Expert Assignment",
+      "authors": [
+        "Lv, Wenhui",
+        "Liao, Yunming",
+        "Xu, Hongli",
+        "Xu, Yang",
+        "Cheng, Junhao"
+      ],
+      "date": "2026/10/16",
+      "license": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+      "key": "ASSIGN",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.23006v1"
+    },
+    {
+      "id": "2610.37442",
+      "url": "https://arxiv.org/abs/2610.37442",
+      "checked": "2026-11-03",
+      "title": "CRISP: Co-designing Pruning and Scheduling for Efficient MoE Inference on Edge Servers",
+      "authors": [
+        "Zhang, Congwei",
+        "Tao, Youming",
+        "Zou, Yifei",
+        "Yang, Yu",
+        "Zhang, Ruirui",
+        "Zhang, Xiaoyu",
+        "Dressler, Falko",
+        "Cheng, Xiuzhen",
+        "Yu, Dongxiao"
+      ],
+      "date": "2026/10/27",
+      "license": null,
+      "key": "CRISP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.37442v1"
+    },
+    {
+      "id": "2610.39853",
+      "url": "https://arxiv.org/abs/2610.39853",
+      "checked": "2026-11-03",
+      "title": "KV Cache Quantization for Diffusion Language Models",
+      "authors": [
+        "Tai, Yan",
+        "Ding, Yunan",
+        "Li, Guangzhao",
+        "Luo, Siqi",
+        "Zhang, Chaoyang",
+        "Zhai, Guangtao",
+        "Guo, Guodong",
+        "Liu, Xiaohong"
+      ],
+      "date": "2026/10/29",
+      "license": null,
+      "key": "DLLM",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.39853v1"
+    },
+    {
+      "repo": "ai-dynamo/dynamo",
+      "url": "https://github.com/ai-dynamo/dynamo",
+      "checked": "2026-11-03",
+      "sha": "c80a17b4631ea95e458e564be2bc7495a60705a2",
+      "commit_date": "2026-11-03T14:10:33Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v1.6.1",
+        "published_at": "2026-10-27T20:24:42Z",
+        "html_url": "https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.1",
+        "prerelease": false
+      },
+      "description": "A Datacenter Scale Distributed Inference Serving Framework",
+      "key": "DYNAMO",
+      "evidence_url": "https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.1",
+      "title": "ai-dynamo/dynamo",
+      "kind": "release"
+    },
+    {
+      "repo": "NVIDIA/TensorRT-Edge-LLM",
+      "url": "https://github.com/NVIDIA/TensorRT-Edge-LLM",
+      "checked": "2026-11-03",
+      "sha": "a16b2d162bb12245f98ebef4227a1d7fe9c67757",
+      "commit_date": "2026-10-30T21:05:14Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v0.11.1",
+        "published_at": "2026-10-28T17:53:54Z",
+        "html_url": "https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1",
+        "prerelease": false
+      },
+      "description": "High-performance, light-weight C++ LLM and VLM Inference Software for Physical AI",
+      "key": "EDGE",
+      "evidence_url": "https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1",
+      "title": "NVIDIA/TensorRT-Edge-LLM",
+      "kind": "release"
+    },
+    {
+      "id": "2610.40287",
+      "url": "https://arxiv.org/abs/2610.40287",
+      "checked": "2026-11-03",
+      "title": "Only Accepted Tokens Count: An Energy Accounting of Speculative Decoding Under Latency Targets",
+      "authors": [
+        "Ma, Bole",
+        "Afzal, Ayesha",
+        "Eitzinger, Jan",
+        "Koestler, Harald",
+        "Wellein, Gerhard"
+      ],
+      "date": "2026/10/29",
+      "license": null,
+      "key": "ENERGY",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.40287v1"
+    },
+    {
+      "repo": "deepseek-ai/FlashMLA",
+      "url": "https://github.com/deepseek-ai/FlashMLA",
+      "checked": "2026-11-03",
+      "sha": "395cb3afbb331fef7b1b21e9340861b9436b42d8",
+      "commit_date": "2026-10-27T02:50:39Z",
+      "license": "MIT",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": null,
+        "published_at": null,
+        "html_url": null,
+        "prerelease": null
+      },
+      "description": "FlashMLA: Efficient Multi-head Latent Attention Kernels",
+      "key": "FLASHMLA",
+      "evidence_url": "https://github.com/deepseek-ai/FlashMLA/blob/395cb3afbb331fef7b1b21e9340861b9436b42d8/README.md",
+      "title": "deepseek-ai/FlashMLA",
+      "kind": "repository"
+    },
+    {
+      "repo": "bytedance/flux",
+      "url": "https://github.com/bytedance/flux",
+      "checked": "2026-11-03",
+      "sha": "19831ca2d820e3e782ed1d15d8b52d0898b78b26",
+      "commit_date": "2025-08-28T06:26:38Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v1.0.4",
+        "published_at": "2024-10-30T02:33:14Z",
+        "html_url": "https://github.com/bytedance/flux/releases/tag/v1.0.4",
+        "prerelease": false
+      },
+      "description": "A fast communication-overlapping library for tensor/expert parallelism on GPUs.",
+      "key": "FLUX",
+      "evidence_url": "https://github.com/bytedance/flux/blob/19831ca2d820e3e782ed1d15d8b52d0898b78b26/README.md",
+      "title": "bytedance/flux",
+      "kind": "repository"
+    },
+    {
+      "id": "2406.06858",
+      "url": "https://arxiv.org/abs/2406.06858",
+      "checked": "2026-11-03",
+      "title": "FLUX: Fast Software-based Communication Overlap On GPUs Through Kernel Fusion",
+      "authors": [
+        "Chang, Li-Wen",
+        "Bao, Wenlei",
+        "Hou, Qi",
+        "Jiang, Chengquan",
+        "Zheng, Ningxin",
+        "Zhong, Yinmin",
+        "Zhang, Xuanrun",
+        "Song, Zuquan",
+        "Yao, Chengji",
+        "Jiang, Ziheng",
+        "Lin, Haibin",
+        "Jin, Xin",
+        "Liu, Xin"
+      ],
+      "date": "2024/06/11",
+      "license": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+      "key": "FLUXP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2406.06858v1"
+    },
+    {
+      "id": "2610.40325",
+      "url": "https://arxiv.org/abs/2610.40325",
+      "checked": "2026-11-03",
+      "title": "How to Loop Your Transformer: Loop Scaling, Specialization, and Parallel Inference",
+      "authors": [
+        "Ekbote, Chanakya",
+        "Pagnoni, Artidoro",
+        "Sachan, Devendra Singh",
+        "Bhosale, Shruti",
+        "Lewis, Mike",
+        "Fazel-Zarandi, Maryam",
+        "Rajput, Shashank",
+        "Gonugondla, Sujan Kumar"
+      ],
+      "date": "2026/10/29",
+      "license": null,
+      "key": "LOOP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.40325v1"
+    },
+    {
+      "repo": "NVIDIA/Model-Optimizer",
+      "url": "https://github.com/NVIDIA/Model-Optimizer",
+      "checked": "2026-11-03",
+      "sha": "472ecb39ad498a6b0d818583d5b1dc483a708abf",
+      "commit_date": "2026-11-03T09:15:50Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "0.48.0",
+        "published_at": "2026-11-02T10:57:53Z",
+        "html_url": "https://github.com/NVIDIA/Model-Optimizer/releases/tag/0.48.0",
+        "prerelease": false
+      },
+      "description": "A unified library of SOTA model optimization techniques like quantization, distillation, pruning, neural architecture search, speculative decoding, etc. It compresses deep learning models for downstream deployment frameworks like TensorRT-LLM, TensorRT, vLLM, etc. to optimize inference speed.",
+      "key": "MODELOPT",
+      "evidence_url": "https://github.com/NVIDIA/Model-Optimizer/releases/tag/0.48.0",
+      "title": "NVIDIA/Model-Optimizer",
+      "kind": "release"
+    },
+    {
+      "repo": "Tencent-Hunyuan/Hy-Nomas",
+      "url": "https://github.com/Tencent-Hunyuan/Hy-Nomas",
+      "checked": "2026-11-03",
+      "sha": "a31c0fe0bcc493be188fd37ddba4ce2f674becb4",
+      "commit_date": "2026-11-01T05:25:28Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": null,
+        "published_at": null,
+        "html_url": null,
+        "prerelease": null
+      },
+      "description": "Hy-Nomas: Towards Free-form Interactive World Generation",
+      "key": "NOMAS",
+      "evidence_url": "https://github.com/Tencent-Hunyuan/Hy-Nomas/blob/a31c0fe0bcc493be188fd37ddba4ce2f674becb4/README.md",
+      "title": "Tencent-Hunyuan/Hy-Nomas",
+      "kind": "repository"
+    },
+    {
+      "id": "2610.36729",
+      "url": "https://arxiv.org/abs/2610.36729",
+      "checked": "2026-11-03",
+      "title": "Hy-Nomas: Towards Free-form Interactive World Generation",
+      "authors": [
+        "Chen, Qiaoling",
+        "Cheng, Jiaxiang",
+        "Deng, Xueqing",
+        "Hang, Tiankai",
+        "Hou, Ji",
+        "Li, Jiaqi",
+        "Liu, Yifan",
+        "Lu, Tao",
+        "Tang, Junshu",
+        "Tang, Yu",
+        "Teng, Yao",
+        "Tian, Yu",
+        "Wang, Heng",
+        "Wang, Weizhi",
+        "Wang, Xiyao",
+        "Wu, Xilun",
+        "Yang, Mingyu",
+        "Yu, Yangbin",
+        "Zhao, Rui",
+        "Cao, Longjun",
+        "Chen, Linghao",
+        "Duan, Haoyi",
+        "Han, Jiaming",
+        "Han, Mingji",
+        "Jiang, Enhua",
+        "Li, Shunkai",
+        "Liang, Yanzhe",
+        "Ma, Qinwei",
+        "Wang, Cong",
+        "Wang, Lei",
+        "Wu, Bing",
+        "Xing, Ke",
+        "Ying, Ray",
+        "Yu, Zhentao",
+        "Zhang, Key",
+        "Zhou, Yuan",
+        "Zhou, Zhengguang",
+        "Zou, Kai"
+      ],
+      "date": "2026/10/27",
+      "license": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+      "key": "NOMASP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.36729v1"
+    },
+    {
+      "repo": "Tencent-Hunyuan/Precise",
+      "url": "https://github.com/Tencent-Hunyuan/Precise",
+      "checked": "2026-11-03",
+      "sha": "4960f81506837d3eb7eeae9ab9d24899affa2076",
+      "commit_date": "2026-10-22T03:25:21Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": null,
+        "published_at": null,
+        "html_url": null,
+        "prerelease": null
+      },
+      "description": "[NeurIPS 2026] Precise: SDE-Consistent Stochastic Sampling for RL Post-Training of Flow-Matching Models",
+      "key": "PRECISE",
+      "evidence_url": "https://github.com/Tencent-Hunyuan/Precise/blob/4960f81506837d3eb7eeae9ab9d24899affa2076/README.md",
+      "title": "Tencent-Hunyuan/Precise",
+      "kind": "repository"
+    },
+    {
+      "id": "2605.23522",
+      "url": "https://arxiv.org/abs/2605.23522",
+      "checked": "2026-11-03",
+      "title": "Precise: SDE-Consistent Stochastic Sampling for RL Post-Training of Flow-Matching Models",
+      "authors": [
+        "Zou, Jade",
+        "Huang, Tao",
+        "Kong, Weijie",
+        "Li, Junzhe",
+        "Wu, Yue",
+        "Tian, Qi",
+        "Xiong, Jiangfeng",
+        "Zhang, Jianwei",
+        "Bo, Liefeng",
+        "Zhong, Zhao"
+      ],
+      "date": "2026/05/22",
+      "license": "http://arxiv.org/licenses/nonexclusive-distrib/1.0/",
+      "key": "PRECISEP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2605.23522v1"
+    },
+    {
+      "repo": "Tencent-Hunyuan/Prism",
+      "url": "https://github.com/Tencent-Hunyuan/Prism",
+      "checked": "2026-11-03",
+      "sha": "2de51622999f826e7b37d55711e8020203376acb",
+      "commit_date": "2026-10-31T07:19:25Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": null,
+        "published_at": null,
+        "html_url": null,
+        "prerelease": null
+      },
+      "description": "We propose Prism, a dynamic sparse attention framework for natively training joint video-audio generation models at 2K.",
+      "key": "PRISM",
+      "evidence_url": "https://github.com/Tencent-Hunyuan/Prism/blob/2de51622999f826e7b37d55711e8020203376acb/README.md",
+      "title": "Tencent-Hunyuan/Prism",
+      "kind": "repository"
+    },
+    {
+      "id": "2610.05416",
+      "url": "https://arxiv.org/abs/2610.05416",
+      "checked": "2026-11-03",
+      "title": "Prism: Dynamic Sparse Attention for Native 2K Joint Video-Audio Generation Model Training",
+      "authors": [
+        "Tu, Shuyuan",
+        "Tian, Qi",
+        "Huang, Yinming",
+        "Wu, Yue",
+        "Han, Xintong",
+        "Pan, Kaihang",
+        "Kong, Weijie",
+        "Xiong, Jiangfeng",
+        "Zhang, Jian-Wei",
+        "Wu, Zuxuan",
+        "Jiang, Yu-Gang"
+      ],
+      "date": "2026/10/04",
+      "license": null,
+      "key": "PRISMP",
+      "kind": "preprint",
+      "evidence_url": "https://arxiv.org/abs/2610.05416v1"
+    },
+    {
+      "repo": "bytedance/InfiniStore",
+      "url": "https://github.com/bytedance/InfiniStore",
+      "checked": "2026-11-03",
+      "sha": "e572c198da4dc2268b664353f3d8336a20fa9420",
+      "commit_date": "2026-09-16T06:06:57Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "0.2.33",
+        "published_at": "2025-03-23T06:34:06Z",
+        "html_url": "https://github.com/bytedance/InfiniStore/releases/tag/0.2.33",
+        "prerelease": false
+      },
+      "description": "KV cache store for distributed LLM inference",
+      "key": "STORE",
+      "evidence_url": "https://github.com/bytedance/InfiniStore/blob/e572c198da4dc2268b664353f3d8336a20fa9420/README.md",
+      "title": "bytedance/InfiniStore",
+      "kind": "repository"
+    },
+    {
+      "repo": "Tencent-Hunyuan/UniRL",
+      "url": "https://github.com/Tencent-Hunyuan/UniRL",
+      "checked": "2026-11-03",
+      "sha": "0d07b80b952a8ea3ae6c4d2df3a42a3628cec096",
+      "commit_date": "2026-11-02T05:56:10Z",
+      "license": "NOASSERTION",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v0.2.0",
+        "published_at": "2026-10-08T08:43:40Z",
+        "html_url": "https://github.com/Tencent-Hunyuan/UniRL/releases/tag/v0.2.0",
+        "prerelease": false
+      },
+      "description": "UniRL is a Framework for Unified Multimodal Model Reinforcement Learning",
+      "key": "UNIRL",
+      "evidence_url": "https://github.com/Tencent-Hunyuan/UniRL/releases/tag/v0.2.0",
+      "title": "Tencent-Hunyuan/UniRL",
+      "kind": "release"
+    },
+    {
+      "repo": "ByteDance-Seed/VeOmni",
+      "url": "https://github.com/ByteDance-Seed/VeOmni",
+      "checked": "2026-11-03",
+      "sha": "3ba1d9e621c95592352a33fb23287dfaf4b35dc9",
+      "commit_date": "2026-11-03T07:16:49Z",
+      "license": "Apache-2.0",
+      "readme_path": "README.md",
+      "release": {
+        "tag_name": "v0.1.13",
+        "published_at": "2026-09-30T14:28:41Z",
+        "html_url": "https://github.com/ByteDance-Seed/VeOmni/releases/tag/v0.1.13",
+        "prerelease": false
+      },
+      "description": "VeOmni: Scaling Any Modality Model Training with Model-Centric Distributed Recipe Zoo",
+      "key": "VEOMNI",
+      "evidence_url": "https://github.com/ByteDance-Seed/VeOmni/releases/tag/v0.1.13",
+      "title": "ByteDance-Seed/VeOmni",
+      "kind": "release"
+    },
+    {
+      "key": "ZHA",
+      "id": "2610.42112",
+      "kind": "preprint",
+      "title": "Subquadratic Attention with a Hierarchical Tree-Structured Indexer",
+      "authors": [
+        "Lufkin, Leon",
+        "Dawes, Cutter",
+        "Speicher, Alexander",
+        "Krishnamurthy, Kamesh",
+        "Figliolia, Tomás",
+        "Millidge, Beren"
+      ],
+      "date": "2026-10-30",
+      "version": "v2",
+      "checked": "2026-11-03",
+      "evidence_url": "https://arxiv.org/abs/2610.42112v2",
+      "revised": "2026-11-02"
+    },
+    {
+      "key": "BASIS",
+      "id": "2611.02583",
+      "kind": "preprint",
+      "title": "BasisKV: Value Latents for Communication and Key Routing",
+      "authors": [
+        "Zhang, Lixun",
+        "Shao, Zishan",
+        "Cui, Kangning",
+        "Liang, Yu",
+        "Yang, Fan",
+        "Chen, Yiran"
+      ],
+      "date": "2026-11-02",
+      "version": "v1",
+      "checked": "2026-11-03",
+      "evidence_url": "https://arxiv.org/abs/2611.02583v1"
+    },
+    {
+      "key": "MXCODE",
+      "id": "2611.00403",
+      "kind": "preprint",
+      "title": "MXCode: Vector Quantization for MX-Native Inference at Scale",
+      "authors": [
+        "Kolhe, Gaurav",
+        "Demirkiran, Cansu",
+        "Tyagi, Shubhi",
+        "Sadiq, Sulaiman",
+        "Wang, Boyao",
+        "Wang, Richard",
+        "Behnke, Maximiliana",
+        "Labhsetwar, Shreyas",
+        "Melnick, Levi",
+        "Mattina, Matthew",
+        "Maji, Partha"
+      ],
+      "date": "2026-10-30",
+      "version": "v1",
+      "checked": "2026-11-03",
+      "evidence_url": "https://arxiv.org/abs/2611.00403v1"
+    },
+    {
+      "key": "TRACE",
+      "id": "2610.41177",
+      "kind": "preprint",
+      "title": "TraceSpec: Understanding and Improving Speculative Decoding for LLM Agents",
+      "authors": [
+        "Zhao, Jihao",
+        "Zu, Shuaishuai",
+        "Li, Pengfei",
+        "Qin, Biao",
+        "Fang, Guanghuan",
+        "Feng, Ben",
+        "Yang, Baochuan"
+      ],
+      "date": "2026-10-30",
+      "version": "v1",
+      "checked": "2026-11-03",
+      "evidence_url": "https://arxiv.org/abs/2610.41177v1"
+    }
+  ],
+  "figures": [
+    {
+      "paper": "2610.39853",
+      "figure": 1,
+      "license": "CC BY 4.0",
+      "source": "https://arxiv.org/html/2610.39853v1",
+      "original": "figure1.png",
+      "transform": "lossless WebP, no crop or rescale",
+      "bytes": 222738,
+      "sha256": "2bb195e8209b3c0ef3b839b351b4864a4c229ddad330438263eb046071aca0f7"
+    },
+    {
+      "paper": "2610.40325",
+      "figure": 2,
+      "license": "CC BY 4.0",
+      "source": "https://arxiv.org/html/2610.40325v1",
+      "original": "combined_recurrence_architecture.png",
+      "transform": "lossless WebP, no crop or rescale",
+      "bytes": 127506,
+      "sha256": "e0b5bca1d0de476ab2381e943963062bb25b7f6e2182d2112e808b15dca84d34"
+    }
+  ],
+  "coverage": [
+    {
+      "slug": "attention-evolution",
+      "anchor": "s6",
+      "title": "原生稀疏与内核适配：分别解决两类问题",
+      "keys": [
+        "PRISMP",
+        "PRISM",
+        "FLASHMLA",
+        "ZHA"
+      ]
+    },
+    {
+      "slug": "kv-cache-survey",
+      "anchor": "s6",
+      "title": "扩散语言模型：量化前，缓存就可能已经过时",
+      "keys": [
+        "DLLM",
+        "BASIS"
+      ]
+    },
+    {
+      "slug": "quantization-survey",
+      "anchor": "s8",
+      "title": "从能导出到能运行：Model Optimizer 0.48.0 的兼容边界",
+      "keys": [
+        "MODELOPT",
+        "DLLM",
+        "MXCODE"
+      ]
+    },
+    {
+      "slug": "speculative-decoding",
+      "anchor": "core",
+      "title": "接受率之外：每个最终输出 token 的能耗",
+      "keys": [
+        "ENERGY"
+      ]
+    },
+    {
+      "slug": "spec-decoding-post-training",
+      "anchor": "phase4",
+      "title": "DFlash2 工程入口与草稿目标的外部验收",
+      "keys": [
+        "MODELOPT",
+        "EDGE",
+        "ENERGY",
+        "TRACE"
+      ]
+    },
+    {
+      "slug": "moe-survey",
+      "anchor": "s6",
+      "title": "稀疏激活之后，优化边界继续向执行路径移动",
+      "keys": [
+        "VEOMNI",
+        "CRISP"
+      ]
+    },
+    {
+      "slug": "parallelism-survey",
+      "anchor": "ch9",
+      "title": "从框架并行到细粒度重叠：以字节 Flux 为参照",
+      "keys": [
+        "FLUX",
+        "FLUXP"
+      ]
+    },
+    {
+      "slug": "inference-serving",
+      "anchor": "s5",
+      "title": "部署快照：编排版本与 KV 存储接口一起固定",
+      "keys": [
+        "DYNAMO",
+        "STORE"
+      ]
+    },
+    {
+      "slug": "custom-inference-engines-2026",
+      "anchor": "s6",
+      "title": "端侧引擎也需要版本化的功能矩阵",
+      "keys": [
+        "EDGE",
+        "FLASHMLA"
+      ]
+    },
+    {
+      "slug": "strata-hybrid-inference",
+      "anchor": "s5",
+      "title": "缓存未命中的专家：CPU 计算还是搬到 GPU",
+      "keys": [
+        "ASSIGN",
+        "CRISP"
+      ]
+    },
+    {
+      "slug": "llm-perf-simulation-2026",
+      "anchor": "s0",
+      "title": "模型估计、请求仿真和真实测量，分别回答什么",
+      "keys": [
+        "AICP",
+        "AIC",
+        "AISIM"
+      ]
+    },
+    {
+      "slug": "training-free-autotune-2026",
+      "anchor": "s3",
+      "title": "自动搜索前先检查可组合性，再保留回退方案",
+      "keys": [
+        "AISIM",
+        "MODELOPT",
+        "ENERGY"
+      ]
+    },
+    {
+      "slug": "loop-transformer-survey",
+      "anchor": "future",
+      "title": "循环多少次，要先说明哪一种预算固定",
+      "keys": [
+        "LOOP"
+      ]
+    },
+    {
+      "slug": "vit-sparsification",
+      "anchor": "s5",
+      "title": "Prism：让块形状随视听内容变化",
+      "keys": [
+        "PRISMP",
+        "PRISM"
+      ]
+    },
+    {
+      "slug": "realtime-world-models-2026",
+      "anchor": "s3",
+      "title": "Hy-Nomas：从发布记录到可操作的交互条件",
+      "keys": [
+        "NOMAS",
+        "NOMASP"
+      ]
+    },
+    {
+      "slug": "agent-rl-survey",
+      "anchor": "s5",
+      "title": "统一多模态训练接口，仍需保留不同的概率模型",
+      "keys": [
+        "UNIRL",
+        "PRECISEP",
+        "PRECISE"
+      ]
+    }
+  ]
+}

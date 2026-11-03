@@ -419,6 +419,8 @@
 <tr><td><b>字节跳动 Seed</b></td><td>2026</td><td>路线图公开押注世界模型：36kr 报道其 2026 年目标"年底达到 Genie 3 水平"；Seedance 2.0/2.5 提供世界模型视频底座（Seedance 2.5 已被 Code Video Model 用作闭源后端），Bloomberg 报道其基于 Seedance 的实时空间视频系统探索中[SEED26]</td></tr>
 </table>
 
+
+<section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">3.8 Hy-Nomas：从发布记录到可操作的交互条件</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p><b>日期勘误：</b>Hy-Nomas 的初始训练 / 推理代码与交互 demo 发布于 2026-10-21；10-27 是技术报告上 arXiv 的日期，不能统称“10-27 新开源”。10-31 的官方更新增加参考图初始化，11-03 快照还列出 LoRA 微调、低显存单卡推理与社区流式集成。<sup class="cite"><a href="#R26-NOMAS">[R26:NOMAS]</a><a href="#R26-NOMASP">[R26:NOMASP]</a></sup></p><p>这些入口让读者可以复查“多轮文本＋相机控制”的真实接口，但能在 RTX 4090 上运行与达到某一实时 FPS 是不同声明。测交互时需要同时记录参考图编码、首帧、动作到画面、连续帧生成和传输延迟；社区 TPU 演示也要按其芯片、分辨率、持续时间单列，不能与 GPU 结果混排。参考图能约束初始状态，并不自动证明长程身份和几何一致。<sup class="cite"><a href="#R26-NOMAS">[R26:NOMAS]</a></sup></p></section>
 <div class="summary3"><b>本章小结</b>
 <ol>
 <li>部分交互视频路线使用因果分块生成与零噪声历史回写；离线 3D 生成和代码制作管线不必共享该循环，<b>分歧全在"世界状态放哪"</b>：Genie 4 靠 Gemini 推理在环、Matrix-Game 4.0 靠 C++ 引擎、Oneira/CVM 靠代码与状态表、HY-World 2.0/Atlas 靠 3D 几何。</li>
@@ -491,9 +493,9 @@
 </table>
 <p>0.30 的"engine-owned sessions + 跨阶段 KV 传递"正对应 §1.3 的块循环：会话即世界、KV 即记忆，LLM serving 的会话语义与因果视频模型的 KV 语义在这里完成了对齐[VLLMOMNITR]。</p>
 
-<h3>5.3 NVIDIA Dynamo 1.5 与 Cosmos 生态：编排层的答案</h3>
+<h3>5.3 NVIDIA Dynamo 与 Cosmos 生态：编排层的答案</h3>
 
-<p>Dynamo 定位为"推理引擎之上的编排层"：把一集群 GPU 变成一个协调的推理系统。当前 1.5.0 版本与视频/世界模型直接相关的面板：<b>原生 FastVideo 与 SGLang Diffusion 支持（单卡 B200 实时 1080p 视频生成）</b>；多模态 E/P/D 分离（编码/prefill/decode 三池 + 嵌入缓存，图像负载 TTFT 快 30%）；KVBM 把 KV 卸载到 GPU→CPU→SSD→远端；KV 感知路由（TTFT 快 2×）；1.0 起的 DGDR 零配置部署（模型+硬件+SLA 一份 YAML，AISimulate 离线搜配置）[DYNAMO]。Cosmos 3 的官方服务矩阵则是：Reasoner 走 vLLM / TensorRT-LLM（分页 KV + 连续批处理），Generator 走 vLLM-Omni，NIM 版支持 BF16/FP8/NVFP4（约 2× 加速）[COSMOS3]。增补（10-30）：Dynamo 已发布 <b>v1.5.1 补丁版</b>，官方兼容矩阵对齐 SGLang 0.5.18 / TensorRT-LLM 1.3.0rc25 / vLLM 0.28.0，跨引擎版本对齐是编排层落地的实际约束。</p>
+<p>Dynamo 定位为"推理引擎之上的编排层"：把一集群 GPU 变成一个协调的推理系统。历史 v1.5.0 发布材料中与视频/世界模型相关的项目（其中性能数字仍按原发布口径，不视为本轮复现）：<b>原生 FastVideo 与 SGLang Diffusion 支持（单卡 B200 实时 1080p 视频生成）</b>；多模态 E/P/D 分离（编码/prefill/decode 三池 + 嵌入缓存，图像负载 TTFT 快 30%）；KVBM 把 KV 卸载到 GPU→CPU→SSD→远端；KV 感知路由（TTFT 快 2×）；1.0 起的 DGDR 零配置部署（模型+硬件+SLA 一份 YAML，AISimulate 离线搜配置）[DYNAMO]。Cosmos 3 的官方服务矩阵则是：Reasoner 走 vLLM / TensorRT-LLM（分页 KV + 连续批处理），Generator 走 vLLM-Omni，NIM 版支持 BF16/FP8/NVFP4（约 2× 加速）[COSMOS3]。版本校正（11-03）：稳定版已为 <b>v1.6.1（2026-10-27）</b>；兼容矩阵为 SGLang 0.5.21 / TensorRT-LLM 1.3.0rc29 / vLLM 0.31.0。<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.1">官方发布说明</a>；这些是 LLM 后端版本，不能自动视为视频后端的功能矩阵。</p>
 
 <h3>5.4 端到端案例：Matrix-Game 4.0 的传输与背压设计</h3>
 
@@ -560,6 +562,8 @@
 </ul>
 
 <h2 id="refs">参考文献</h2>
+<h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-NOMAS"><b>Tencent-Hunyuan</b>. <i>Tencent-Hunyuan/Hy-Nomas</i>. 源码快照 a31c0fe0bcc4，提交日期 2026-11-01；核验 2026-11-03。<a href="https://github.com/Tencent-Hunyuan/Hy-Nomas/blob/a31c0fe0bcc493be188fd37ddba4ce2f674becb4/README.md">一手来源</a>。</li><li id="R26-NOMASP"><b>Chen, Qiaoling, Cheng, Jiaxiang et al.</b>. <i>Hy-Nomas: Towards Free-form Interactive World Generation</i>. arXiv:2610.36729v1，2026-10-27；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.36729v1">一手来源</a>。</li></ol>
+
 
 <ol class="refs">
 <li><b>Ha D., Schmidhuber J.</b> <i>World Models.</i> arXiv:1803.10122, 2018-10-06（NeurIPS 2019 版 2019-03 更新）. <a href="https://arxiv.org/abs/1803.10122">arXiv:1803.10122</a></li>
