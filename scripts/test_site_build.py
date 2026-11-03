@@ -44,7 +44,70 @@ class Head(HTMLParser):
             self.schema = None
 
 
+class Updates(HTMLParser):
+    def __init__(self, source):
+        super().__init__()
+        self.groups, self.group, self.in_summary = [], None, False
+        self.feed(source)
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == 'details':
+            self.group = {'titles': [], 'changes': [], 'summary': ''}
+            self.groups.append(self.group)
+        if self.group is None:
+            return
+        if tag == 'summary':
+            self.in_summary = True
+        if tag == 'time':
+            self.group['date'] = a['datetime']
+        if tag == 'a':
+            key = 'titles' if a.get('class') == 'update-title' else 'changes'
+            self.group[key].append(a['href'])
+
+    def handle_data(self, data):
+        if self.in_summary:
+            self.group['summary'] += data
+
+    def handle_endtag(self, tag):
+        if tag == 'summary':
+            self.in_summary = False
+        if tag == 'details':
+            self.group = None
+
+
 class PublicationTests(unittest.TestCase):
+    def test_recent_updates_group_articles_without_losing_change_links(self):
+        data = metadata.load_metadata()
+        source = (ROOT / 'index.html').read_text(encoding='utf-8')
+        fragment = source.split('<!-- recent-updates:start -->')[1].split('<!-- recent-updates:end -->')[0]
+        actual = Updates(fragment).groups
+        days = sorted({c['date'] for a in data['articles'].values() for c in a['changes']}, reverse=True)
+        self.assertEqual([g['date'] for g in actual], days)
+        for group in actual:
+            titles, links = [], []
+            for slug, item in data['articles'].items():
+                changes = [c for c in item['changes'] if c['date'] == group['date']]
+                if changes:
+                    titles.append(f'posts/{slug}.html')
+                links.extend(f'posts/{slug}.html#{c["anchor"]}' for c in changes)
+            with self.subTest(day=group['date']):
+                self.assertEqual(group['titles'], titles)
+                self.assertEqual(len(group['titles']), len(set(group['titles'])))
+                self.assertEqual(group['changes'], links)
+                self.assertTrue(group['summary'].endswith(f'· {len(titles)} 篇'))
+
+    def test_multiple_changes_in_one_day_keep_a_single_article_title(self):
+        data = {'articles': {'example': {'title': 'A & B', 'changes': [
+            {'date': '2026-11-04', 'anchor': 'one', 'kind': '资料核验', 'summary': 'First'},
+            {'date': '2026-11-04', 'anchor': 'two', 'kind': '图解排版', 'summary': 'Second'},
+            {'date': '2026-11-03', 'anchor': 'old', 'kind': '资料核验', 'summary': 'Older'}]}}}
+        groups = Updates(metadata.recent_updates(data)).groups
+        self.assertEqual([g['titles'] for g in groups], [['posts/example.html'], ['posts/example.html']])
+        self.assertEqual(groups[0]['changes'], ['posts/example.html#one', 'posts/example.html#two'])
+        self.assertEqual(groups[1]['changes'], ['posts/example.html#old'])
+        self.assertIn('A &amp; B', metadata.recent_updates(data))
+
     def test_unique_metadata_and_editorial_dates(self):
         data = metadata.load_metadata()
         for slug, item in data['articles'].items():

@@ -126,6 +126,10 @@ mark { background: #d8ebe3; color: #143f38; padding: 0 1px; }
 .update-group ul { padding-left: 22px; margin-block: 12px; }
 .update-group li { margin-bottom: 12px; }
 .update-group li span { display: block; font-size: 14px; color: var(--muted); }
+.update-title { font-weight: 600; }
+.update-group .update-changes { list-style: none; padding-left: 0; margin-block: 6px 18px; }
+.update-changes li { margin-bottom: 8px; }
+.update-changes a { font-size: 14px; }
 .update-group time, .article-foot time { font-variant-numeric: tabular-nums; }
 @media (max-width: 540px) {
   .entrypoints { grid-template-columns: 1fr; margin: 20px 0 32px; }

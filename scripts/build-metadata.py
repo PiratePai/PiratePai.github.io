@@ -88,6 +88,26 @@ def maintenance(item, slug):
             '</details></div>')
 
 
+def recent_updates(data):
+    groups = {}
+    for slug, item in data['articles'].items():
+        for change in item['changes']:
+            groups.setdefault(change['date'], {}).setdefault(slug, []).append(change)
+    updates = '<p>同一天每篇文章列一次，条目下保留各处修改的直达链接。页面维护不改变研究资料的核验日期。</p>'
+    for day, articles in sorted(groups.items(), reverse=True):
+        label = '专题新增与内容修订' if any(c['kind'] == '新增专题' for changes in articles.values() for c in changes) else '内容更新'
+        updates += f'<details class="update-group"><summary><time datetime="{day}">{day}</time> · {label} · {len(articles)} 篇</summary><ul class="update-articles">'
+        for slug, changes in articles.items():
+            item = data['articles'][slug]
+            updates += f'<li><a class="update-title" href="posts/{slug}.html">{escape(item["title"])}</a><ul class="update-changes">'
+            for change in changes:
+                updates += (f'<li><a href="posts/{slug}.html#{escape(change["anchor"], quote=True)}">{escape(change["kind"])}</a>'
+                            f'<span>{escape(change["summary"])}</span></li>')
+            updates += '</ul></li>'
+        updates += '</ul></details>'
+    return updates
+
+
 def build():
     data = load_metadata()
     outputs = {}
@@ -102,19 +122,7 @@ def build():
     # Old manually maintained description is superseded by the generated block.
     home = re.sub(r'<meta name="description"[^>]*>\s*', '', home, count=1) if '<!-- site-metadata:start -->' not in home else home
     home = block(home, 'site-metadata', seo(data), '</head>')
-    groups = {}
-    for slug, item in data['articles'].items():
-        for change in item['changes']:
-            groups.setdefault(change['date'], []).append((slug, item, change))
-    updates = '<p>日期对应具体改动；展开后可直接到修改章节。页面维护不改变研究资料的核验日期。</p>'
-    for day, entries in sorted(groups.items(), reverse=True):
-        label = '专题新增与内容修订' if any(c['kind'] == '新增专题' for _, _, c in entries) else '内容更新'
-        article_count = len({slug for slug, _, _ in entries})
-        updates += f'<details class="update-group"><summary><time datetime="{day}">{day}</time> · {label} · {article_count} 篇</summary><ul>'
-        for slug, item, change in entries:
-            updates += f'<li><a href="posts/{slug}.html#{change["anchor"]}">{escape(item["title"])}</a><span>{escape(change["summary"])}</span></li>'
-        updates += '</ul></details>'
-    home = block(home, 'recent-updates', updates, '</main>')
+    home = block(home, 'recent-updates', recent_updates(data), '</main>')
     for slug, item in data['articles'].items():
         pattern = r'(<article class="article-entry" id="article-' + re.escape(slug) + r'">)(.*?)(</article>)'
         def update(match):

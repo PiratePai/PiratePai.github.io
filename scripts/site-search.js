@@ -61,6 +61,17 @@
     return results.sort(function (a, b) { return b.score - a.score || a.article.localeCompare(b.article, 'zh-CN'); });
   }
 
+  function validateIndex(data) {
+    if (!data || data.version !== 1 || !Array.isArray(data.documents) || !data.documents.length) throw new Error('Invalid index');
+    data.documents.forEach(function (doc) {
+      if (!doc || !/^posts\/[a-z0-9-]+\.html$/.test(doc.url) || typeof doc.title !== 'string' || !Array.isArray(doc.sections)) throw new Error('Invalid document');
+      doc.sections.forEach(function (section) {
+        if (!section || typeof section.heading !== 'string' || typeof section.text !== 'string' || typeof section.anchor !== 'string') throw new Error('Invalid section');
+      });
+    });
+    return data;
+  }
+
   async function readIndex(fetcher, urls, signal, Decoder) {
     if (Decoder && urls.gzip) {
       try {
@@ -71,7 +82,7 @@
         if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
           bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new Decoder('gzip'))).arrayBuffer());
         }
-        return JSON.parse(new TextDecoder().decode(bytes));
+        return validateIndex(JSON.parse(new TextDecoder().decode(bytes)));
       } catch (error) {
         if (signal && signal.aborted) throw error;
         // Older browsers, missing .gz artifacts and decoding failures use JSON.
@@ -79,7 +90,7 @@
     }
     const response = await fetcher(urls.plain, {signal: signal});
     if (!response.ok) throw new Error('Index unavailable');
-    return response.json();
+    return validateIndex(await response.json());
   }
 
   if (typeof module !== 'undefined' && module.exports) module.exports = {normalize: normalize, prepare: prepare, search: search, readIndex: readIndex};
@@ -111,13 +122,6 @@
       plain: form.dataset.indexUrl || 'search-index.json',
       gzip: form.dataset.indexGzipUrl || 'search-index.json.gz'
     }, controller.signal, window.DecompressionStream).then(function (data) {
-      if (data.version !== 1 || !Array.isArray(data.documents) || !data.documents.length) throw new Error('Invalid index');
-      data.documents.forEach(function (doc) {
-        if (!/^posts\/[a-z0-9-]+\.html$/.test(doc.url) || typeof doc.title !== 'string' || !Array.isArray(doc.sections)) throw new Error('Invalid document');
-        doc.sections.forEach(function (section) {
-          if (typeof section.heading !== 'string' || typeof section.text !== 'string' || typeof section.anchor !== 'string') throw new Error('Invalid section');
-        });
-      });
       documents = prepare(data.documents);
       failed = false;
     }).catch(function () { failed = true; }).finally(function () {
@@ -148,6 +152,7 @@
     region.hidden = !active;
     guide.hidden = active;
     clear.hidden = !input.value;
+    syncNavigation();
     list.replaceChildren();
     message.replaceChildren();
     if (!active) { status.textContent = ''; return; }
@@ -193,6 +198,21 @@
     render();
     if (input.value.trim() && !failed) loadIndex(false);
   }
+  function syncNavigation() {
+    const active = input.value.trim() ? '' : location.hash || '#start';
+    document.querySelectorAll('.stage-nav a, .mobile-nav a').forEach(function (link) {
+      if (link.getAttribute('href') === active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+  function restoreLocation() {
+    clearTimeout(timer);
+    composing = false;
+    limit = 12;
+    input.value = (new URL(location.href).searchParams.get('q') || '').slice(0, 160);
+    render();
+    if (input.value.trim() && !failed) loadIndex(false);
+  }
   input.disabled = false;
   input.placeholder = '搜索专题、术语或章节';
   input.addEventListener('focus', function () { loadIndex(false); });
@@ -213,15 +233,24 @@
   });
   document.addEventListener('click', function (event) {
     const link = event.target.closest('a[href^="#"]');
-    if (!link) return;
-    if (input.value) { input.value = ''; clearTimeout(timer); update(); }
-    if (link.closest('.stage-nav, .mobile-nav')) {
-      document.querySelectorAll('.stage-nav a, .mobile-nav a').forEach(function (item) {
-        if (item.getAttribute('href') === link.getAttribute('href')) item.setAttribute('aria-current', 'location');
-        else item.removeAttribute('aria-current');
-      });
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
+    if (input.value || new URL(location.href).searchParams.has('q')) {
+      event.preventDefault();
+      clearTimeout(timer);
+      update();
+      const url = new URL(location.href);
+      url.searchParams.delete('q');
+      url.hash = link.getAttribute('href');
+      // Keep the search entry intact so Back can restore its query and results.
+      history.pushState(null, '', url);
+      restoreLocation();
+      let id = ''; try { id = decodeURIComponent(url.hash.slice(1)); } catch (_) {}
+      const target = document.getElementById(id);
+      if (target) target.scrollIntoView({block: 'start'});
     }
   });
+  window.addEventListener('popstate', restoreLocation);
+  window.addEventListener('hashchange', restoreLocation);
   document.addEventListener('keydown', function (event) {
     const target = event.target;
     const editing = target.matches('input,textarea,select') || target.isContentEditable;
@@ -230,6 +259,5 @@
     }
     if (event.key === 'Escape' && target === input) { input.value = ''; clearTimeout(timer); update(); }
   });
-  input.value = (new URL(location.href).searchParams.get('q') || '').slice(0, 160);
-  update();
+  restoreLocation();
 }());
