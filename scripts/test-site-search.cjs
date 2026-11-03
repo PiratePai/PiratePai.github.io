@@ -7,11 +7,17 @@ const index = JSON.parse(fs.readFileSync(path.join(__dirname, '../search-index.j
 const docs = prepare(index.documents);
 
 test('all existing articles and chapter anchors are indexed', () => {
-  assert.equal(docs.length, 16);
+  const articles = fs.readdirSync(path.join(__dirname, '../posts')).filter(file => file.endsWith('.html')).map(file => 'posts/' + file).sort();
+  assert.deepEqual(index.documents.map(doc => doc.url).sort(), articles);
   for (const doc of index.documents) {
     const source = fs.readFileSync(path.join(__dirname, '..', doc.url), 'utf8');
     assert.ok(doc.sections.length > 0);
     for (const section of doc.sections) assert.ok(source.includes('id="' + section.anchor + '"'), doc.url + '#' + section.anchor);
+  }
+});
+test('evaluation, reasoning budgets and Agent recovery are discoverable', () => {
+  for (const [query, slug] of [['可复算账本', 'inference-evaluation'], ['预算预留', 'test-time-compute'], ['幂等', 'agent-inference-systems']]) {
+    assert.ok(search(docs, query).some(result => result.url.includes(slug)), query);
   }
 });
 test('Chinese topic and case/punctuation-normalized English return the relevant article first', () => {

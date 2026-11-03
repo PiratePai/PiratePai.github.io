@@ -12,6 +12,13 @@
       "changes": [
         {
           "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-04",
           "kind": "图解排版",
           "summary": "调整手绘图的字号、布局与主题，不扩大原资料的核验范围。",
           "anchor": "diagram-agent-rl-survey-1",
@@ -65,9 +72,16 @@
       "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-03",
+      "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
         {
           "date": "2026-11-03",
           "kind": "资料核验",
@@ -111,6 +125,13 @@
       "changes": [
         {
           "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-04",
           "kind": "图解排版",
           "summary": "调整手绘图的字号、布局与主题，不扩大原资料的核验范围。",
           "anchor": "diagram-llm-perf-simulation-2026-1",
@@ -133,6 +154,13 @@
       "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
         {
           "date": "2026-11-04",
           "kind": "图解排版",
@@ -258,6 +286,13 @@
       "changes": [
         {
           "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-04",
           "kind": "图解与来源",
           "summary": "重绘投机拒绝采样，核对图示机制与来源。",
           "anchor": "spec-rejection",
@@ -294,9 +329,16 @@
       "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。",
       "published": "2026-10-11",
       "publicationCommit": "8f48de7b6f91249cf99bb0b68e455bc9f89fb25e",
-      "contentUpdated": "2026-11-03",
+      "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。",
+          "anchor": "related-methods-20261104",
+          "evidence": "docs/content-gaps-20261104.md"
+        },
         {
           "date": "2026-11-03",
           "kind": "资料核验",
@@ -320,6 +362,57 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        }
+      ]
+    },
+    "inference-evaluation": {
+      "title": "大模型性能评测与可复现实验：指标、对照、账本与失败边界",
+      "description": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
+      "published": "2026-11-04",
+      "publicationCommit": null,
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "新增专题",
+          "summary": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
+          "anchor": "s0",
+          "evidence": "docs/content-gaps-20261104.md"
+        }
+      ]
+    },
+    "test-time-compute": {
+      "title": "推理时计算与自适应预算：采样、验证、搜索与模型路由",
+      "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。",
+      "published": "2026-11-04",
+      "publicationCommit": null,
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "新增专题",
+          "summary": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。",
+          "anchor": "s0",
+          "evidence": "docs/content-gaps-20261104.md"
+        }
+      ]
+    },
+    "agent-inference-systems": {
+      "title": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测",
+      "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
+      "published": "2026-11-04",
+      "publicationCommit": null,
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "新增专题",
+          "summary": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
+          "anchor": "s0",
+          "evidence": "docs/content-gaps-20261104.md"
         }
       ]
     }

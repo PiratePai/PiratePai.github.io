@@ -138,7 +138,7 @@
     <span class="chip">关键引文附 <b>原文 + 译文</b>(小字)</span>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-agent-rl-survey-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-agent-rl-survey-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -1021,6 +1021,7 @@ in-flight sample to finish."""</span>
 
 <div class="warnbox"><b>关于"未核实内容"的说明:</b>调研中对以下名称<b>未能找到可靠公开出处</b>,故本文未引用或仅按工作名+年份弱引用:BiDiRL 与 AReaL-Hex 的 arXiv 编号、Together AI 博客的具体月份、"EpicVid / KickDiffusion / KickMusic / VideoRL"等传闻名称(经查无对应论文)。多模态部分经子调研逐条核实并剔除了无法验证的条目——包括"Sora 2 使用 RLVR"这一流行说法(见 §5.2 证据边界)。</div>
 
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="agent-inference-systems.html#reading-path">Agent 在线推理系统</a> · <a href="test-time-compute.html#reading-path">推理时计算与自适应预算</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <footer>
   <p><b>阅读指引:</b>① 原理部分由浅入深,可从 §1 顺读;② 所有"原文"引号内容均来自本次调研抓取的论文/官方页面原文,译文由作者提供;标注"要点概述(非原文直引)"处为忠实概括而非原文;③ 源码引用基于 2026-08-23 本地 clone 的三个仓库(verl / AReaL / slime),文件路径与行号真实可查;④ 时间线与"未来方向"为作者基于所引证据的综合研判,不代表任何机构观点。</p>
   <p>Agent &amp; RL 技术全景 · 2026-08-23</p>
@@ -1035,7 +1036,7 @@ in-flight sample to finish."""</span>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

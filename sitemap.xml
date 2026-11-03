@@ -18,7 +18,7 @@
   </url>
   <url>
     <loc>https://piratepai.github.io/posts/inference-serving.html</loc>
-    <lastmod>2026-11-03</lastmod>
+    <lastmod>2026-11-04</lastmod>
   </url>
   <url>
     <loc>https://piratepai.github.io/posts/kv-cache-survey.html</loc>
@@ -62,10 +62,22 @@
   </url>
   <url>
     <loc>https://piratepai.github.io/posts/training-free-autotune-2026.html</loc>
-    <lastmod>2026-11-03</lastmod>
+    <lastmod>2026-11-04</lastmod>
   </url>
   <url>
     <loc>https://piratepai.github.io/posts/vit-sparsification.html</loc>
     <lastmod>2026-11-03</lastmod>
+  </url>
+  <url>
+    <loc>https://piratepai.github.io/posts/inference-evaluation.html</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://piratepai.github.io/posts/test-time-compute.html</loc>
+    <lastmod>2026-11-04</lastmod>
+  </url>
+  <url>
+    <loc>https://piratepai.github.io/posts/agent-inference-systems.html</loc>
+    <lastmod>2026-11-04</lastmod>
   </url>
 </urlset>

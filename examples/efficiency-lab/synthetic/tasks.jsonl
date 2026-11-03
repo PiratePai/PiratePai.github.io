@@ -1,0 +1,12 @@
+{"task_id":"easy-1","strategy":"single","status":"completed","success":true,"cost_units":1,"latency_ms":1000}
+{"task_id":"easy-2","strategy":"single","status":"completed","success":true,"cost_units":1,"latency_ms":1000}
+{"task_id":"hard-1","strategy":"single","status":"completed","success":false,"cost_units":1,"latency_ms":1000}
+{"task_id":"hard-2","strategy":"single","status":"completed","success":false,"cost_units":1,"latency_ms":1000}
+{"task_id":"easy-1","strategy":"best-of-4","status":"completed","success":true,"cost_units":5,"latency_ms":3000}
+{"task_id":"easy-2","strategy":"best-of-4","status":"completed","success":true,"cost_units":5,"latency_ms":3000}
+{"task_id":"hard-1","strategy":"best-of-4","status":"completed","success":true,"cost_units":5,"latency_ms":3000}
+{"task_id":"hard-2","strategy":"best-of-4","status":"timeout","success":false,"cost_units":5,"latency_ms":6000}
+{"task_id":"easy-1","strategy":"adaptive","status":"completed","success":true,"cost_units":1,"latency_ms":1000}
+{"task_id":"easy-2","strategy":"adaptive","status":"completed","success":true,"cost_units":1,"latency_ms":1000}
+{"task_id":"hard-1","strategy":"adaptive","status":"completed","success":true,"cost_units":5,"latency_ms":4500}
+{"task_id":"hard-2","strategy":"adaptive","status":"completed","success":false,"cost_units":5,"latency_ms":4500}
