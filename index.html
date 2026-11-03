@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="沿全景、核心优化和性能评估理解大模型效率技术。搜索全部16篇综述的专题、术语与章节。">
+<meta name="description" content="按模型基础、推理优化、系统执行、性能验证与研究延伸理解大模型效率技术。搜索全部16篇综述的专题、术语与章节。">
 <title>Pai's Blog · 大模型效率技术知识全景</title>
 <link rel="preload" href="assets/fonts/noto-sans-sc-headings.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/site.css"><script defer src="scripts/site-search.js"></script>
@@ -9,11 +9,7 @@
 <a class="skip-link" href="#main-content">跳到正文</a>
 <div class="page"><aside class="sidebar" aria-label="阅读导航">
 <a class="brand" href="./">Pai's Blog</a><p class="brand-note">大模型效率技术综述</p>
-<p class="nav-label">阅读阶段</p><nav class="stage-nav" aria-label="阅读阶段">
-<a href="#start" aria-current="location">全景起点<span>L0</span></a><a href="#core">核心优化<span>L1–L5</span></a><a href="#evaluate">性能评估<span>L6</span></a><a href="#related">延伸阅读</a>
-</nav><p class="nav-label">按主题阅读</p><nav class="topic-nav" aria-label="技术专题">
-<a href="posts/speculative-decoding.html">投机解码</a><a href="posts/attention-evolution.html">注意力结构</a><a href="posts/kv-cache-survey.html">KV Cache</a><a href="posts/quantization-survey.html">模型量化</a><a href="posts/inference-serving.html">推理服务</a><a href="#all-articles">查看全部 16 篇综述</a>
-</nav><div class="sidebar-foot"><p>从技术动机到系统实现</p><p>LLM · VLM · DiT · 世界模型</p><a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a></div>
+<p class="nav-label">阅读阶段</p><nav class="stage-nav" aria-label="阅读阶段"><a href="#start" aria-current="location">模型基础<span>1–2</span></a><a href="#core">推理优化<span>3–6</span></a><a href="#systems">系统执行<span>7–10</span></a><a href="#evaluate">验证与调优<span>11–12</span></a><a href="#extensions">研究延伸<span>13–16</span></a></nav><p class="nav-label">按主题阅读</p><nav class="topic-nav" aria-label="技术专题"><a href="posts/attention-evolution.html">注意力结构</a><a href="posts/kv-cache-survey.html">KV Cache</a><a href="posts/quantization-survey.html">模型量化</a><a href="posts/speculative-decoding.html">投机解码</a><a href="posts/parallelism-survey.html">并行与通信</a><a href="posts/inference-serving.html">推理服务</a><a href="#all-articles">查看全部 16 篇综述</a></nav><div class="sidebar-foot"><p>从技术动机到系统实现</p><p>LLM · VLM · DiT · 世界模型</p><a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a></div>
 </aside><div class="workspace"><header class="topbar">
 <a class="mobile-brand" href="./">Pai's Blog</a><span class="topbar-title">大模型效率技术综述</span>
 <form class="search-form" id="site-search" role="search">
@@ -22,67 +18,67 @@
 <input type="search" id="search-input" name="q" placeholder="启用 JavaScript 后可搜索" maxlength="160" autocomplete="off" spellcheck="false" aria-controls="search-results" disabled>
 <button type="button" id="search-clear" class="search-clear" hidden>清空</button>
 </form><nav class="topbar-links" aria-label="站点导航"><a href="#all-articles">综述目录</a><a href="https://github.com/PiratePai" target="_blank" rel="noopener">GitHub</a></nav>
-</header><details class="mobile-nav"><summary>阅读导航</summary><nav aria-label="手机阅读阶段"><a href="#start">全景起点</a><a href="#core">核心优化</a><a href="#evaluate">性能评估</a><a href="#related">延伸阅读</a><a href="#all-articles">全部综述</a></nav></details>
+</header><details class="mobile-nav"><summary>阅读导航</summary><nav aria-label="手机阅读阶段"><a href="#start">模型基础</a><a href="#core">推理优化</a><a href="#systems">系统执行</a><a href="#evaluate">验证与调优</a><a href="#extensions">研究延伸</a><a href="#all-articles">全部综述</a></nav></details>
 <main id="main-content"><h1>大模型效率技术知识全景</h1>
 <noscript><p>搜索需要 JavaScript。仍可使用下方阅读指引和<a href="#all-articles">完整综述目录</a>。</p></noscript>
 <section class="search-results" id="search-results" aria-labelledby="search-heading" hidden><h2 id="search-heading">搜索结果</h2>
 <p class="search-help">搜索全部 16 篇文章的标题、章节与正文。英文不区分大小写；按 / 或 Ctrl / ⌘ K 聚焦搜索，Esc 清空。</p>
 <p id="search-status" role="status" aria-live="polite"></p><p class="search-message" id="search-message"></p><ol id="search-list"></ol><button id="more-results" class="more-results" type="button" hidden>显示更多</button></section>
-<div id="reading-content"><div class="layout"><section class="guide" id="knowledge-map" aria-label="阅读路径与主题关系">
-
-<h2>如何读懂推理效率栈</h2>
-<p class="lead">推理效率并不由某一项技术决定。解码方式、注意力结构、显存管理和服务调度相互影响。先理解引擎如何运行，再带着瓶颈问题阅读各项优化，最后回到系统层面评估收益。</p>
-<div class="reading-note" id="order"><svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true"><path d="M3 3v10h10M3 13 13 3M8 3h5v5" fill="none" stroke="#237b77" stroke-width="1.3"/></svg>建议路径，非严格先修；已有问题时，可直接进入对应主题。</div>
-<section class="stage" id="start">
-<div class="stage-label">全景起点<span>建立系统视角</span></div>
-<div><h3><a href="posts/custom-inference-engines-2026.html">L0 · 定制推理引擎</a></h3><p>从一次请求的执行过程出发，理解计算、数据搬运与调度如何配合。它为后续主题提供共同坐标：优化究竟发生在推理流程的哪一层？</p></div>
+<div id="reading-content"><div class="layout"><section class="guide" id="knowledge-map" aria-label="知识结构与建议阅读顺序">
+<h2>先理解模型，再优化推理，最后验证系统</h2>
+<p class="lead">先理解模型结构和状态，再看压缩与解码；把单请求优化放进并行与服务系统，最后用仿真和调优检验收益。架构与应用专题按研究问题选读。</p>
+<p class="reading-note" id="order">第1–16篇对应下方目录。主线可以顺读，分支按需选读；各篇先看导读与预备知识。</p>
+<section class="stage" id="start"><div class="stage-label">模型基础<span>第1–2篇</span></div><div><p>先读注意力的导读与预备知识；研究专家路由、并行或卸载时，再读 MoE。</p><div class="topics"><div class="topic"><a href="posts/attention-evolution.html"><span class="l">1.</span>注意力结构</a><small>理解 MHA、GQA、MLA 及其计算、缓存关系。</small></div>
+<div class="topic"><a href="posts/moe-survey.html"><span class="l">2.</span>混合专家 MoE</a><small>稀疏专家支线的结构基础，不是所有优化的前置。</small></div></div></div></section>
+<section class="stage" id="core"><div class="stage-label">推理优化<span>第3–6篇</span></div><div><p>从上下文状态出发，再看数值表示和解码步骤。先读投机解码的起草与验证，再读草稿后训练。</p><div class="topics"><div class="topic"><a href="posts/kv-cache-survey.html"><span class="l">3.</span>KV Cache</a><small>接在注意力之后，理解缓存的容量、组织与复用。</small></div>
+<div class="topic"><a href="posts/quantization-survey.html"><span class="l">4.</span>模型量化</a><small>区分权重、激活和 KV 的压缩对象与精度取舍。</small></div>
+<div class="topic"><a href="posts/speculative-decoding.html"><span class="l">5.</span>投机解码</a><small>理解草稿、验证与接受率，再讨论训练草稿。</small></div>
+<div class="topic"><a href="posts/spec-decoding-post-training.html"><span class="l">6.</span>投机解码的后训练</a><small>沿投机解码继续，进入蒸馏、损失与训练目标。</small></div></div></div></section>
+<section class="stage" id="systems"><div class="stage-label">系统执行<span>第7–10篇</span></div><div><p>先理解如何切分计算和组织通信，再看多请求调度与完整引擎。CPU-GPU 混合推理是资源受限部署支线。</p><div class="topics"><div class="topic"><a href="posts/parallelism-survey.html"><span class="l">7.</span>并行与通信</a><small>连接模型结构、数据分布、显存与通信成本。</small></div>
+<div class="topic"><a href="posts/inference-serving.html"><span class="l">8.</span>推理服务</a><small>将单请求优化放进批处理、调度和多请求负载。</small></div>
+<div class="topic"><a href="posts/custom-inference-engines-2026.html"><span class="l">9.</span>定制推理引擎</a><small>在基础之后回看算子、缓存、并行与服务的集成。</small></div>
+<div class="topic"><a href="posts/strata-hybrid-inference.html"><span class="l">10.</span>CPU-GPU 混合推理</a><small>结合 MoE、压缩和存储层次，按部署需求选读。</small></div></div></div></section>
+<section class="stage" id="evaluate"><div class="stage-label">验证与调优<span>第11–12篇</span></div><div><p>先建立性能账本和评估口径，再使用自动调优搜索配置。把“提出方案—评估瓶颈—试验配置”连成闭环。</p><div class="topics"><div class="topic"><a href="posts/llm-perf-simulation-2026.html"><span class="l">11.</span>性能仿真</a><small>把计算、访存、通信和请求负载放进同一评估框架。</small></div>
+<div class="topic"><a href="posts/training-free-autotune-2026.html"><span class="l">12.</span>免训练优化与自动调优</a><small>建立评估方法后，再看 Agent 如何提出与验证改动。</small></div></div></div></section>
+<section class="stage" id="extensions"><div class="stage-label">研究延伸<span>第13–16篇</span></div><div><p>掌握通用机制后，按研究问题进入分支；这四篇不构成必须依次完成的先修链。</p><div class="topics"><div class="topic"><a href="posts/loop-transformer-survey.html"><span class="l">13.</span>Loop Transformer</a><small>从注意力与推理流程转向循环深度和测试时计算。</small></div>
+<div class="topic"><a href="posts/vit-sparsification.html"><span class="l">14.</span>ViT 稀疏化</a><small>将结构、压缩和缓存思路迁移到视觉 token 与生成。</small></div>
+<div class="topic"><a href="posts/realtime-world-models-2026.html"><span class="l">15.</span>实时交互世界模型</a><small>沿视觉生成继续，连接流式生成与实时服务。</small></div>
+<div class="topic"><a href="posts/agent-rl-survey.html"><span class="l">16.</span>Agent 与强化学习</a><small>结合后训练与服务知识，进入 rollout、异步 RL 和任务闭环。</small></div></div></div></section>
+<div class="next"><span>初次阅读，从注意力结构开始。</span><a href="posts/attention-evolution.html">阅读第1篇：注意力结构</a></div></section><aside class="margin" id="related">
+<section><h2>通用推理主线</h2><p>这是一条精读路线，不要求逐篇读完所有分支。</p>
+<p><a href="posts/attention-evolution.html">注意力</a> → <a href="posts/kv-cache-survey.html">KV Cache</a> → <a href="posts/quantization-survey.html">量化</a> → <a href="posts/speculative-decoding.html">投机解码</a> → <a href="posts/parallelism-survey.html">并行</a> → <a href="posts/inference-serving.html">服务</a> → <a href="posts/custom-inference-engines-2026.html">引擎集成</a> → <a href="posts/llm-perf-simulation-2026.html">仿真</a> → <a href="posts/training-free-autotune-2026.html">调优</a></p></section>
+<section><h2>需要时进入支线</h2>
+<div class="ref"><a href="posts/moe-survey.html">MoE</a> → <a href="posts/strata-hybrid-inference.html">混合推理</a><span>关注稀疏专家与资源受限部署时，补读这条路径。</span></div>
+<div class="ref"><a href="posts/speculative-decoding.html">投机解码</a> → <a href="posts/spec-decoding-post-training.html">草稿后训练</a><span>先理解验证机制，再讨论如何训练更合适的草稿。</span></div>
+<div class="ref"><a href="posts/attention-evolution.html">注意力</a> → <a href="posts/vit-sparsification.html">ViT 稀疏化</a> → <a href="posts/realtime-world-models-2026.html">世界模型</a><span>视觉生成支线还会用到缓存与服务系统知识。</span></div>
+<div class="ref"><a href="posts/loop-transformer-survey.html">Loop Transformer</a> / <a href="posts/agent-rl-survey.html">Agent 与 RL</a><span>分别展开计算深度和训练、任务闭环，不是通用推理主线的必读前置。</span></div>
 </section>
-<section class="stage core" id="core">
-<div class="stage-label">核心优化<span>按瓶颈选读</span></div>
-<div><p class="core-intro">以下主题可以并行阅读。先选一个关心的问题，再沿着关联补齐背景。</p>
-<div class="topics">
-<div class="topic"><a href="posts/speculative-decoding.html"><span class="l">L1</span>投机解码</a><small>生成步骤：如何一次接受更多 token？</small></div>
-<div class="topic"><a href="posts/attention-evolution.html"><span class="l">L2</span>注意力结构</a><small>计算与访存：注意力如何影响成本？</small></div>
-<div class="topic"><a href="posts/kv-cache-survey.html"><span class="l">L3</span>KV Cache</a><small>上下文存储：缓存如何组织与复用？</small></div>
-<div class="topic"><a href="posts/quantization-survey.html"><span class="l">L4</span>模型量化</a><small>数值精度：如何降低存储与计算开销？</small></div>
-<div class="topic wide"><a href="posts/inference-serving.html"><span class="l">L5</span>推理服务</a><small>把单次推理放回多请求场景，理解批处理、调度与系统吞吐。</small></div>
-</div></div>
+<section><h2>为什么引擎放在后面？</h2><p>定制推理引擎综合了算子、缓存、量化、并行与调度。已有工程经验时，可以先用<a href="posts/custom-inference-engines-2026.html">引擎总览</a>定位问题；初学者按左侧顺序补齐基础更容易对照各层职责。</p></section>
+</aside><section class="archive" id="all-articles" aria-labelledby="archive-heading"><h2 id="archive-heading">按知识结构阅读 · 16篇综述</h2><p>先基础、再方法、后系统与验证；研究支线按需选读。已有明确问题时，可直接进入对应专题。</p><section class="archive-group" id="chapters-foundations"><h3>模型与计算基础</h3><p class="group-range">第1–2篇</p>
+<article class="article-entry" id="article-attention-evolution"><h3><span class="chapter-number">1.</span><a href="posts/attention-evolution.html">注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）</a></h3><p class="article-summary">沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。</p><p class="article-meta">结构层 · 改变模型本身</p><p class="related">关联阅读：<a href="posts/kv-cache-survey.html">KV Cache</a> <a href="posts/vit-sparsification.html">ViT 稀疏化</a></p></article>
+<article class="article-entry" id="article-moe-survey"><h3><span class="chapter-number">2.</span><a href="posts/moe-survey.html">混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</a></h3><p class="article-summary">从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p><p class="article-meta">模型架构 稀疏专家</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
 </section>
-<section class="stage" id="evaluate">
-<div class="stage-label">性能评估<span>回到整体系统</span></div>
-<div><h3><a href="posts/llm-perf-simulation-2026.html">L6 · 性能仿真</a></h3><p>把硬件、模型和负载放在一起，比较不同优化的收益与边界。读完一项技术后，可以回到这里检验它在系统中是否仍然有效。</p></div>
+<section class="archive-group" id="chapters-optimization"><h3>缓存、压缩与解码</h3><p class="group-range">第3–6篇</p>
+<article class="article-entry" id="article-kv-cache-survey"><h3><span class="chapter-number">3.</span><a href="posts/kv-cache-survey.html">KV Cache 技术全景：从原理到前沿（2017–2026）</a></h3><p class="article-summary">结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。</p><p class="article-meta">显存层 · 管理 KV Cache</p><p class="related">关联阅读：<a href="posts/quantization-survey.html">模型量化</a> <a href="posts/strata-hybrid-inference.html">CPU-GPU 混合推理</a></p></article>
+<article class="article-entry" id="article-quantization-survey"><h3><span class="chapter-number">4.</span><a href="posts/quantization-survey.html">模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展</a></h3><p class="article-summary">从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。</p><p class="article-meta">压缩层 · 降低数值精度</p><p class="related">关联阅读：<a href="posts/inference-serving.html">推理服务</a></p></article>
+<article class="article-entry" id="article-speculative-decoding"><h3><span class="chapter-number">5.</span><a href="posts/speculative-decoding.html">投机解码全景：从经典投机采样，到 MTP / DFlash / DSpark</a></h3><p class="article-summary">从经典投机采样&quot;起草—验证&quot;框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。</p><p class="article-meta">算法层 · 改变解码方式</p><p class="related">关联阅读：<a href="posts/spec-decoding-post-training.html">草稿后训练</a></p></article>
+<article class="article-entry" id="article-spec-decoding-post-training"><h3><span class="chapter-number">6.</span><a href="posts/spec-decoding-post-training.html">投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）</a></h3><p class="article-summary">沿&quot;草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练&quot;的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。</p><p class="article-meta">推理加速 草稿训练 · 蒸馏 · MTP</p><p class="article-foot">2026-09 · 综述 · 2026-10 增补</p></article>
 </section>
-<div class="next"><span>准备好了，就从引擎的执行过程开始。</span><a href="posts/custom-inference-engines-2026.html">阅读 L0 · 定制推理引擎 →</a></div>
-</section><aside class="margin" id="related">
-<section><h2>主题之间，怎样连接？</h2><p>沿着同一个问题，把主线与延伸文章连起来读。</p>
-<div class="ref"><a href="posts/spec-decoding-post-training.html">草稿后训练</a><span><span class="target">接到投机解码</span>理解草稿模型为什么影响接受率。</span></div>
-<div class="ref"><a href="posts/moe-survey.html">MoE</a> / <a href="posts/parallelism-survey.html">并行策略</a><span><span class="target">接到推理系统</span>理解模型结构与部署方式的配合。</span></div>
-<div class="ref"><a href="posts/strata-hybrid-inference.html">CPU-GPU 混合推理</a><span><span class="target">接到显存管理</span>把容量约束与数据搬运放在一起看。</span></div>
+<section class="archive-group" id="chapters-execution"><h3>并行、服务与部署</h3><p class="group-range">第7–10篇</p>
+<article class="article-entry" id="article-parallelism-survey"><h3><span class="chapter-number">7.</span><a href="posts/parallelism-survey.html">大模型并行策略与通信优化：发展历程、原理与未来方向</a></h3><p class="article-summary">从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。</p><p class="article-meta">训练系统 TP · PP · EP · CP</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
+<article class="article-entry" id="article-inference-serving"><h3><span class="chapter-number">8.</span><a href="posts/inference-serving.html">大模型推理服务优化：技术发展史、原理与前沿展望</a></h3><p class="article-summary">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。</p><p class="article-meta">系统层 · 调度与服务</p><p class="related">关联阅读：<a href="posts/moe-survey.html">MoE</a> <a href="posts/parallelism-survey.html">并行策略</a></p></article>
+<article class="article-entry" id="article-custom-inference-engines-2026"><h3><span class="chapter-number">9.</span><a href="posts/custom-inference-engines-2026.html">定制化大模型推理引擎全景：从通用框架到 DeepInfer</a></h3><p class="article-summary">以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。</p><p class="article-meta">全景层 · 定制化推理引擎（2018–2026）</p></article>
+<article class="article-entry" id="article-strata-hybrid-inference"><h3><span class="chapter-number">10.</span><a href="posts/strata-hybrid-inference.html">大模型 CPU-GPU 混合推理：从专家卸载到分层缓存</a></h3><p class="article-summary">以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。</p><p class="article-meta">端侧推理 CPU-GPU 混合推理 · MoE 卸载</p><p class="article-foot">2026-10 · 综述 · 源码 0.2.7</p></article>
 </section>
-<section><h2>还有一条视觉模型支线</h2><p><a href="posts/vit-sparsification.html">ViT 稀疏化</a>关注视觉模型中的冗余计算，可在理解注意力结构后继续阅读。</p></section>
-<section><h2>带着问题阅读</h2><p>瓶颈在计算，还是访存？<br>收益依赖怎样的负载？<br>单请求加速能否转化为服务收益？</p></section>
-</aside><section class="archive" id="all-articles" aria-labelledby="archive-heading"><h2 id="archive-heading">综述目录</h2><p>16 篇技术综述 · 覆盖 2014–2026 · 保留各篇的调研日期与版本口径</p>
-<section class="archive-group"><h3>推理效率栈</h3>
-<article class="article-entry" id="article-custom-inference-engines-2026"><h3><a href="posts/custom-inference-engines-2026.html">定制化大模型推理引擎全景：从通用框架到 DeepInfer</a></h3><p class="article-summary">以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。</p><p class="article-meta">全景层 · 定制化推理引擎（2018–2026）</p></article>
-<article class="article-entry" id="article-speculative-decoding"><h3><a href="posts/speculative-decoding.html">投机解码全景：从经典投机采样，到 MTP / DFlash / DSpark</a></h3><p class="article-summary">从经典投机采样&quot;起草—验证&quot;框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。</p><p class="article-meta">算法层 · 改变解码方式</p><p class="related">关联阅读：<a href="posts/spec-decoding-post-training.html">草稿后训练</a></p></article>
-<article class="article-entry" id="article-attention-evolution"><h3><a href="posts/attention-evolution.html">注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）</a></h3><p class="article-summary">沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。</p><p class="article-meta">结构层 · 改变模型本身</p><p class="related">关联阅读：<a href="posts/kv-cache-survey.html">KV Cache</a> <a href="posts/vit-sparsification.html">ViT 稀疏化</a></p></article>
-<article class="article-entry" id="article-kv-cache-survey"><h3><a href="posts/kv-cache-survey.html">KV Cache 技术全景：从原理到前沿（2017–2026）</a></h3><p class="article-summary">结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。</p><p class="article-meta">显存层 · 管理 KV Cache</p><p class="related">关联阅读：<a href="posts/quantization-survey.html">模型量化</a> <a href="posts/strata-hybrid-inference.html">CPU-GPU 混合推理</a></p></article>
-<article class="article-entry" id="article-quantization-survey"><h3><a href="posts/quantization-survey.html">模型量化在 LLM / VLM / DiT 中的原理、代码实现与前沿进展</a></h3><p class="article-summary">从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。</p><p class="article-meta">压缩层 · 降低数值精度</p><p class="related">关联阅读：<a href="posts/inference-serving.html">推理服务</a></p></article>
-<article class="article-entry" id="article-inference-serving"><h3><a href="posts/inference-serving.html">大模型推理服务优化：技术发展史、原理与前沿展望</a></h3><p class="article-summary">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。</p><p class="article-meta">系统层 · 调度与服务</p><p class="related">关联阅读：<a href="posts/moe-survey.html">MoE</a> <a href="posts/parallelism-survey.html">并行策略</a></p></article>
-<article class="article-entry" id="article-llm-perf-simulation-2026"><h3><a href="posts/llm-perf-simulation-2026.html">大模型性能仿真：从算子账本到请求曲线</a></h3><p class="article-summary">从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。</p><p class="article-meta">仿真层 · 不部署就预估性能</p><p class="related">关联阅读：<a href="posts/custom-inference-engines-2026.html">定制推理引擎</a></p></article>
+<section class="archive-group" id="chapters-evaluation"><h3>性能验证与自动调优</h3><p class="group-range">第11–12篇</p>
+<article class="article-entry" id="article-llm-perf-simulation-2026"><h3><span class="chapter-number">11.</span><a href="posts/llm-perf-simulation-2026.html">大模型性能仿真：从算子账本到请求曲线</a></h3><p class="article-summary">从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。</p><p class="article-meta">仿真层 · 不部署就预估性能</p><p class="related">关联阅读：<a href="posts/custom-inference-engines-2026.html">定制推理引擎</a></p></article>
+<article class="article-entry" id="article-training-free-autotune-2026"><h3><span class="chapter-number">12.</span><a href="posts/training-free-autotune-2026.html">Training-free 推理优化与 Agent 自动调优全景（2024–2026） —— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</a></h3><p class="article-summary">从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。</p><p class="article-meta">研究工具 · 自动调优</p></article>
 </section>
-<section class="archive-group"><h3>延伸 · 训练与架构</h3>
-<article class="article-entry" id="article-strata-hybrid-inference"><h3><a href="posts/strata-hybrid-inference.html">大模型 CPU-GPU 混合推理：从专家卸载到分层缓存</a></h3><p class="article-summary">以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。</p><p class="article-meta">端侧推理 CPU-GPU 混合推理 · MoE 卸载</p><p class="article-foot">2026-10 · 综述 · 源码 0.2.7</p></article>
-<article class="article-entry" id="article-realtime-world-models-2026"><h3><a href="posts/realtime-world-models-2026.html">实时交互世界模型全景：从&quot;看视频&quot;到&quot;进世界&quot;（2024–2026）</a></h3><p class="article-summary">四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-27 新开源的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p><p class="article-meta">世界模型 实时交互 · 因果流式 · 神经渲染</p><p class="article-foot">2026-10 · 综述 · 源码实测 · 10-30 增补</p></article>
-<article class="article-entry" id="article-spec-decoding-post-training"><h3><a href="posts/spec-decoding-post-training.html">投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）</a></h3><p class="article-summary">沿&quot;草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练&quot;的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。</p><p class="article-meta">推理加速 草稿训练 · 蒸馏 · MTP</p><p class="article-foot">2026-09 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-moe-survey"><h3><a href="posts/moe-survey.html">混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来</a></h3><p class="article-summary">从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。</p><p class="article-meta">模型架构 稀疏专家</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-parallelism-survey"><h3><a href="posts/parallelism-survey.html">大模型并行策略与通信优化：发展历程、原理与未来方向</a></h3><p class="article-summary">从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。</p><p class="article-meta">训练系统 TP · PP · EP · CP</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-agent-rl-survey"><h3><a href="posts/agent-rl-survey.html">Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</a></h3><p class="article-summary">沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。</p><p class="article-meta">强化学习 RLHF → RLVR → Agent RL</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-loop-transformer-survey"><h3><a href="posts/loop-transformer-survey.html">Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</a></h3><p class="article-summary">沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。</p><p class="article-meta">模型架构 循环深度 · 潜空间推理</p><p class="article-foot">2026-09 · 综述 · 2026-10 增补</p></article>
-<article class="article-entry" id="article-vit-sparsification"><h3><a href="posts/vit-sparsification.html">ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</a></h3><p class="article-summary">2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p><p class="article-meta">视觉效率 Token 压缩 · 缓存复用</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
-</section>
-<section class="archive-group"><h3>研究工具</h3>
-<article class="article-entry" id="article-training-free-autotune-2026"><h3><a href="posts/training-free-autotune-2026.html">Training-free 推理优化与 Agent 自动调优全景（2024–2026） —— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</a></h3><p class="article-summary">从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。</p><p class="article-meta">研究工具 · 自动调优</p></article>
+<section class="archive-group" id="chapters-research"><h3>架构与任务延伸</h3><p class="group-range">第13–16篇</p>
+<article class="article-entry" id="article-loop-transformer-survey"><h3><span class="chapter-number">13.</span><a href="posts/loop-transformer-survey.html">Loop Transformer 全景：循环深度、潜空间推理与测试时算力（2016–2026）</a></h3><p class="article-summary">沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。</p><p class="article-meta">模型架构 循环深度 · 潜空间推理</p><p class="article-foot">2026-09 · 综述 · 2026-10 增补</p></article>
+<article class="article-entry" id="article-vit-sparsification"><h3><span class="chapter-number">14.</span><a href="posts/vit-sparsification.html">ViT 稀疏化技术梳理：结构稀疏、Token 压缩与步间缓存</a></h3><p class="article-summary">2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。</p><p class="article-meta">视觉效率 Token 压缩 · 缓存复用</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
+<article class="article-entry" id="article-realtime-world-models-2026"><h3><span class="chapter-number">15.</span><a href="posts/realtime-world-models-2026.html">实时交互世界模型全景：从&quot;看视频&quot;到&quot;进世界&quot;（2024–2026）</a></h3><p class="article-summary">四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-27 新开源的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。</p><p class="article-meta">世界模型 实时交互 · 因果流式 · 神经渲染</p><p class="article-foot">2026-10 · 综述 · 源码实测 · 10-30 增补</p></article>
+<article class="article-entry" id="article-agent-rl-survey"><h3><span class="chapter-number">16.</span><a href="posts/agent-rl-survey.html">Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL</a></h3><p class="article-summary">沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。</p><p class="article-meta">强化学习 RLHF → RLVR → Agent RL</p><p class="article-foot">2026-08 · 综述 · 2026-10 增补</p></article>
 </section>
 </section><section class="group views" aria-labelledby="views-heading">
     <div class="section-heading"><h2 class="section-label" id="views-heading">站点数据 · 浏览量曲线</h2><span class="section-index">每日快照</span></div>
