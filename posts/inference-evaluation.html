@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大模型性能评测与可复现实验：指标、对照、账本与失败边界</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:var(--muted);margin:-6px 0 10px;}
+  .codecap b{color:#6ea8ff;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:#171a21;font-size:14.5px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:#17212b;color:#6ea8ff;}
+  tr:nth-child(even) td{background:#112132;}
+  .timeline{list-style:none;margin:18px 0;padding:0;border-left:3px solid #3e5770;}
+  .timeline li{margin:0 0 14px;padding:0 0 0 22px;position:relative;}
+  .timeline li::before{content:"";position:absolute;left:-8.5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #2a2f3a;box-shadow:0 0 0 2px var(--accent);}
+  .timeline .t{font-weight:700;color:var(--accent);font-family:Consolas,monospace;margin-right:10px;}
+  .fig{background:#171a21;border:1px dashed #40596e;border-radius:10px;padding:16px 18px;margin:16px 0;font-size:14px;overflow-x:auto;}
+  .fig .cap{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .flowrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .fbox{border:1.5px solid #3f576e;border-radius:8px;padding:8px 12px;background:#15212e;font-size:13px;text-align:center;min-width:92px;}
+  .fbox.hl{border-color:#7c5a31;background:#312411;}
+  .fbox.ok{border-color:#387553;background:#192a1e;}
+  .arr{align-self:center;color:#6ea8ff;font-size:18px;font-weight:700;}
+  .pill{display:inline-block;background:#16212c;border:1px solid #385975;color:#6ea8ff;border-radius:20px;padding:1px 12px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap;}
+  .kbd{font-family:Consolas,monospace;background:#12212f;color:#6ea8ff;padding:2px 7px;border-radius:5px;font-size:12.5px;}
+  .good{color:var(--ok);font-weight:600;} .bad{color:#ff6b6b;font-weight:600;}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .refs li{margin:8px 0;font-size:14px;}
+  details{margin:10px 0;}
+  summary{cursor:pointer;color:var(--accent);font-weight:600;}
+  .tag{font-size:11px;padding:1px 8px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle;}
+  .tag.sys{background:#1e261c;color:#41d1a7;} .tag.paper{background:#20182a;color:#9d7bff;} .tag.ind{background:#322111;color:#ffb454;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
+  .summary3 b{color:#41d1a7;}
+  .summary3 ol{margin:6px 0 2px;}
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大模型性能评测与可复现实验：指标、对照、账本与失败边界">
+<meta property="og:description" content="从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。">
+<meta property="og:url" content="https://piratepai.github.io/posts/inference-evaluation.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-04">
+<link rel="canonical" href="https://piratepai.github.io/posts/inference-evaluation.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型性能评测与可复现实验：指标、对照、账本与失败边界", "url": "https://piratepai.github.io/posts/inference-evaluation.html", "description": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。", "inLanguage": "zh-CN", "headline": "大模型性能评测与可复现实验：指标、对照、账本与失败边界", "datePublished": "2026-11-04", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-evaluation.html"}</script>
+<!-- site-metadata:end -->
+</head>
+<body>
+<div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
+<header class="hero"><div class="inner"><p class="kicker">性能验证 · 实验方法 · 2026</p><h1>大模型性能评测与可复现实验：指标、对照、账本与失败边界</h1><p class="sub">从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。</p><div class="meta"><span class="pill">调研与核验：2026-11-04</span><span class="pill">机制与统计工具已验证；GPU 实验协议待执行</span></div></div><!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/inference-evaluation.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+<div class="wrap"><nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">关键进展与实践入口</a></li><li><a href="#s0">0 导读：把优化结论变成可检查的实验</a></li><li><a href="#s1">1 预备知识：请求的四只时钟</a></li><li><a href="#s2">2 指标：从吞吐走到有效吞吐与质量</a></li><li><a href="#s3">3 实验设计：让对照只改变一个问题</a></li><li><a href="#s4">4 可复算账本：六条请求与三种任务策略</a></li><li><a href="#s5">5 目标硬件上的服务实验协议</a></li><li><a href="#s6">6 从结果回到瓶颈：归因与发布</a></li><li><a href="#refs">参考文献与来源口径</a></li></ol></nav><div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
+.hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:#e8eaed;font-size:14px}
+.hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style><div class="hl-head"><b>关键进展与实践入口</b><i>基础研究日期与本次核验日期分别标注</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>受延迟约束的服务能力</b><span class="hl-date">2024-01-18</span></div><p>DistServe 的 goodput 目标连接吞吐与用户等待。</p><a class="hl-link" href="#s2">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>到达率与并发是两个参数</b><span class="hl-date">2026-11-04 文档核验</span></div><p>vLLM CLI 分开控制请求速率、并发上限与指标导出。</p><a class="hl-link" href="#s1">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>固定种子仍有边界</b><span class="hl-date">2026-11-04 文档核验</span></div><p>版本、硬件和调度共同限定复现条件。</p><a class="hl-link" href="#s3">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>可复算请求账本</b><span class="hl-date">2026-11-04 本站</span></div><p>六条人工请求覆盖单 token、超时与质量不合格。</p><a class="hl-link" href="#s4">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>目标硬件实验协议</b><span class="hl-date">2026-11-04 本站</span></div><p>模型与数据固定、负载扫描、单项和组合消融。</p><a class="hl-link" href="#s5">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>以任务质量收口</b><span class="hl-date">2026-11-04 本站</span></div><p>把服务指标连接到预算策略与 Agent 成功成本。</p><a class="hl-link" href="#s6">→ 进入章节</a></div></div></div><h2 id="s0">0 导读：把优化结论变成可检查的实验</h2>
+<p><b>本文主线：固定比较条件 → 记录完整请求 → 同时检查质量与服务目标 → 用消融解释收益。</b>本文回答四个问题：吞吐更高是否代表用户更快？怎样公平比较量化、缓存和投机解码？一次实验需要留下哪些材料？没有 GPU 时哪些检查仍然有效？</p>
+<div class="note"><b>证据范围（2026-11-04）：</b>论文机制与官方文档已核对；本站附带的 Python 账本工具和教学样例可在 CPU 上复算。本文没有独立运行 GPU 推理、没有测量模型准确率，也没有给出本站硬件排行榜。第 5 章的服务压测是待在目标硬件执行的实验协议。</div>
+<table><caption>表 0-1 · 三层验证各回答一个问题（本文设计）</caption><thead><tr><th>层次</th><th>对象与指标</th><th>不能代替什么</th></tr></thead><tbody><tr><td>机制检查</td><td>公式、调度时间线、统计程序的边界条件</td><td>不能预测真实 GPU 加速比</td></tr><tr><td>服务实测</td><td>固定模型与硬件上的吞吐、尾延迟、显存</td><td>不能单独证明答案质量</td></tr><tr><td>任务评测</td><td>同一任务集上的成功率、费用、完成时间</td><td>不能跨任务直接宣称模型全面领先</td></tr></tbody></table>
+<ul class="timeline"><li><span class="t">2024-01-18</span>DistServe 将同时满足 TTFT 与 TPOT 约束的服务能力作为优化目标。<sup class="cite"><a href="#ref-DIST">[DIST]</a></sup></li><li><span class="t">2026-11-04 核验</span>vLLM 压测文档提供请求速率、并发限制、分位数、goodput 与逐请求导出选项。<sup class="cite"><a href="#ref-BENCH">[BENCH]</a></sup></li><li><span class="t">2026-11-04 本站</span>发布六条请求、十二条任务记录及可复算统计工具；所有输入均为手工构造的教学数据。</li></ul>
+<div class="card" id="reading-path"><b>阅读路径</b><p>初学者读第 1、2、4 章；已有服务的工程师读第 3、5、6 章。先修可读<a href="inference-serving.html#reading-path">推理服务</a>；容量预测接<a href="llm-perf-simulation-2026.html#reading-path">性能仿真</a>；模型预算和 Agent 任务分别接<a href="test-time-compute.html#reading-path">推理时计算</a>与<a href="agent-inference-systems.html#reading-path">Agent 在线系统</a>。</p></div>
+<div class="summary3"><b>本章小结</b><ol><li>把机制验证、服务实测和任务质量分开记录。</li><li>比较前固定条件，比较后保留失败样本。</li><li>本站提供可运行账本，GPU 性能结论仍需目标环境实测。</li></ol></div>
+
+<h2 id="s1">1 预备知识：请求的四只时钟</h2>
+<h3 id="s1-1">1.1 从计划到达到最后一个 token</h3>
+<p>对请求 i，记计划到达时刻 a、客户端真正发出时刻 s、首个输出 token 到达时刻 f、最后一个 token 到达时刻 l、请求结束时刻 e。它们满足 a ≤ s ≤ f ≤ l ≤ e。请求结束可能晚于最后一个 token，因为还有终止事件和用量统计。</p>
+<div class="fig"><div class="flowrow"><div class="fbox">计划到达 a<br><small>开始承担用户等待</small></div><div class="arr">→</div><div class="fbox">发出 s<br><small>客户端排队结束</small></div><div class="arr">→</div><div class="fbox hl">首 token f<br><small>开始可见输出</small></div><div class="arr">→</div><div class="fbox">末 token l</div><div class="arr">→</div><div class="fbox ok">结束 e</div></div><div class="cap">图 1-1 · 本文自绘的客户端时间线；TTFT/TPOT 概念参考 DistServe §2，额外区分客户端排队与结束事件。</div></div>
+<table><caption>表 1-1 · 本文账本的指标定义</caption><thead><tr><th>指标</th><th>公式</th><th>边界</th></tr></thead><tbody><tr><td>客户端排队</td><td>s − a</td><td>压测机或并发上限造成的等待</td></tr><tr><td>TTFT（首 token 延迟）</td><td>f − a</td><td>本文包括客户端排队；若使用 f − s 必须另标口径</td></tr><tr><td>TPOT（请求平均输出间隔）</td><td>(l − f)/(输出 token 数 − 1)</td><td>仅对至少两个 token 的成功请求定义</td></tr><tr><td>E2E（端到端延迟）</td><td>e − a</td><td>含请求结束阶段；超时也占用观察窗口</td></tr><tr><td>ITL（相邻 token 间隔）</td><td>t[j] − t[j−1]</td><td>需要逐 token 时间戳；TPOT 不能反映中间的一次长停顿</td></tr></tbody></table>
+<div class="analogy">餐厅中，TTFT 类似从入队到第一道菜上桌；TPOT 类似后续菜品的平均上菜间隔。最后一道菜和结账结束也不是同一时刻。</div>
+<p>流式 HTTP 的一个数据块可能包含多个 token。把数据块数量当 token 数，会同时算错吞吐和 TPOT。真实采集应保留服务端 token 计数、客户端接收时间及聚合方式；得不到逐 token 时间戳时，不宣称测到了逐 token ITL。上述时间线是本文的统计约定，不要求不同压测器天然采用同一口径。</p>
+<h3 id="s1-2">1.2 两种负载回答不同问题</h3>
+<p><b>闭环负载</b>维持固定数量的在途请求，完成一个再补一个，适合观察并发用户体验。系统变慢时，产生新请求的速度也下降。<b>开环负载</b>按预定时间发送，例如每秒到达若干请求，用来观察排队和过载。限制最大并发会把开环输入变成受限输入，必须记录积压或拒绝，避免隐藏负载。</p>
+<p>vLLM 将 <code>--request-rate</code> 与 <code>--max-concurrency</code> 分开控制；文档明确说明，并发限制可能使实际发起速率低于设定速率。无限请求速率则表示一次性提交，不能标为“稳态每秒请求数”。<sup class="cite"><a href="#ref-BENCH">[BENCH]</a></sup></p>
+<div class="summary3"><b>本章小结</b><ol><li>先说明计时从哪里开始，结束在什么事件。</li><li>平均 TPOT、逐 token ITL 和完整任务耗时是不同指标。</li><li>固定并发与固定到达率应分别实验，过载时仍保留积压和失败。</li></ol></div>
+
+<h2 id="s2">2 指标：从吞吐走到有效吞吐与质量</h2>
+<h3 id="s2-1">2.1 goodput 的单位与分母</h3>
+<p>在长度为 T 秒的观察窗口内，完成吞吐为成功请求数/T；输出吞吐为成功请求生成的 token 总数/T。本文的 SLO goodput 定义为：<b>同时满足首 token、输出间隔、总延迟上限的成功请求数/T</b>，单位是请求/秒。SLO 是服务目标，例如 TTFT ≤ 300 ms；这些阈值由应用确定，本文教学阈值不构成部署建议。DistServe 研究的核心也是受延迟约束的服务能力。<sup class="cite"><a href="#ref-DIST">[DIST]</a></sup></p>
+<div class="citebox"><b>[DIST] Yinmin Zhong 等.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>，OSDI 2024；arXiv:2401.09670，首次提交 2024-01-18，v3 2024-06-06。原文：<span class="q">“within both TTFT and TPOT constraints”</span>（同时处在 TTFT 和 TPOT 两项约束内。）<a href="https://arxiv.org/abs/2401.09670">原文</a>。</div>
+<p>另一个量是达标率：达标请求数/全部计划请求数。失败、超时、取消不能从分母消失。只有一个 token 的请求没有 TPOT，本文将该约束记为“不适用”，仍检查 TTFT 和总延迟；必须同时报告单 token 数量或 TPOT 有效样本数。</p>
+<p>如果成功响应还有准确性标签，可以再计算“质量与延迟同时合格的请求/秒”。但不能默认 HTTP 成功就是回答正确；质量标签不全时，附带工具会把该指标输出为 <code>null</code>，避免让未知质量冒充已验证质量。</p>
+<h3 id="s2-2">2.2 分位数和不确定性</h3>
+<p>P95 表示一个分布的 95% 分位位置。本文工具使用 nearest-rank：升序排列 n 个值，取第 ceil(0.95n) 个。插值算法会给出不同答案，所以实验应固定算法。成功请求的延迟分布必须与失败率并列展示；大量超时被排除后，“成功样本 P99 很低”仍可能对应不可用的服务。</p>
+<p>六条请求只足以检查算式。小样本的 P99 往往就是最大值，不能据此估算生产尾延迟。正式比较需要独立重复、相同请求集和随机化执行顺序；置信区间的抽样单位也应匹配依赖关系。多轮 Agent 应按整条任务轨迹重采样，不能把同一任务中的 token 当作独立实验。</p>
+<h3 id="s2-3">2.3 费用与显存应怎样记录</h3>
+<p>报告峰值显存时，区分驱动看到的进程占用、框架预留内存和活跃张量；说明预热、空闲缓存及共卡进程。费用至少包含生成、验证器、草稿、工具和失败重试；自部署服务还要明确 GPU 空闲时间是否计入。单纯降低每 token 费用，未必降低完成一个任务的总费用。</p>
+<div class="summary3"><b>本章小结</b><ol><li>吞吐、有效吞吐和达标率必须标明单位与分母。</li><li>失败率应与成功请求的尾延迟同时展示。</li><li>质量、显存和费用各有独立口径，不能从吞吐推导出来。</li></ol></div>
+
+<h2 id="s3">3 实验设计：让对照只改变一个问题</h2>
+<h3 id="s3-1">3.1 最小实验矩阵</h3>
+<table><caption>表 3-1 · 建议起始矩阵；长度与负载是实验设计值</caption><thead><tr><th>维度</th><th>起始取值</th><th>要发现的差异</th></tr></thead><tbody><tr><td>输入/输出 token</td><td>512/128、4096/128、512/1024</td><td>短对话、prefill 重、decode 重</td></tr><tr><td>到达负载</td><td>低负载、接近饱和、过载；先通过小扫描确定</td><td>收益是否被排队淹没</td></tr><tr><td>前缀分布</td><td>无共享、已知共享比例；冷缓存与热缓存分开</td><td>缓存收益与命中率依赖</td></tr><tr><td>方法开关</td><td>基线、量化、投机、前缀缓存、通过兼容性检查后的组合</td><td>单项收益及交互影响</td></tr><tr><td>质量任务</td><td>固定留出集，按长度与任务类型分组</td><td>长文本或工具调用能力是否下降</td></tr></tbody></table>
+<p>随机 token 输入适合控制形状，不代表真实对话内容，尤其不能代表草稿接受率、前缀命中率或准确率。测投机解码至少增加真实文本回放；测前缀缓存则生成并保存确切共享前缀，避免压测脚本无意复制系统提示导致不公平热缓存。</p>
+<h3 id="s3-2">3.2 固定什么，允许改变什么</h3>
+<p>记录权重和 tokenizer 的 revision、提示模板、引擎提交或镜像 digest、驱动、计算库、GPU 型号与数量、功耗设置、并行配置、采样参数、输出上限、数据哈希和压测机规格。模型量化会改变数值行为；投机方法即使有分布等价保证，也不意味着同一种子下逐字相同。应在相同任务上比较质量分布。</p>
+<p>固定种子有助于复现，但不足以消除调度和浮点实现差异。vLLM 文档明确限定其复现条件；跨硬件或跨版本不应承诺逐位一致。性能测试与确定性测试可以分开做，并记录为了确定性开启的配置。<sup class="cite"><a href="#ref-REPRO">[REPRO]</a></sup></p>
+<h3 id="s3-3">3.3 组合优化需要消融</h3>
+<p>对两个开关 A、B，至少测基线、A、B、A+B 四组。若 A 使平均时间从 100 降到 80，B 降到 70，不能据此承诺组合后是 56；它们可能在优化相同瓶颈，也可能争用缓存或工作空间。先检查后端支持与数值精度，再对同一负载画质量—延迟曲线。</p>
+<div class="analogy">同一条拥堵道路拓宽两次，收益会互相影响。每项技术单独节省的时间，不能像两笔互不相关的折扣直接相乘。</div>
+<div class="summary3"><b>本章小结</b><ol><li>短长输入、短长输出、冷热点和负载必须分层。</li><li>保存模型、环境、请求集及配置的不可变标识。</li><li>组合实验先查兼容性，再做四格消融，不乘论文加速比。</li></ol></div>
+
+<h2 id="s4">4 可复算账本：六条请求与三种任务策略</h2>
+<h3 id="s4-1">4.1 在没有模型的机器上运行</h3>
+<p>从仓库根目录运行下面两条命令。工具只使用 Python 标准库，不调用模型、不连接服务，也不下载数据。输入、统计程序和期望结果一起提交，便于读者修改边界条件。</p>
+<pre><code>python examples/efficiency-lab/evaluate.py examples/efficiency-lab/synthetic
+python examples/efficiency-lab/evaluate.py examples/efficiency-lab/synthetic --check examples/efficiency-lab/synthetic/expected.json</code></pre>
+<div class="codecap">代码 4-1 · 本站账本检查。<a href="../examples/efficiency-lab/README.md">字段与运行说明</a> · <a href="../examples/efficiency-lab/evaluate.py">统计源码</a> · <a href="../examples/efficiency-lab/synthetic/requests.jsonl">请求输入</a> · <a href="../examples/efficiency-lab/synthetic/expected.json">期望输出</a>。</div>
+<table><caption>表 4-1 · 手工构造的 10 秒窗口，全部是教学输入</caption><thead><tr><th>请求</th><th>TTFT / TPOT（ms）</th><th>结果</th><th>SLO 合格</th></tr></thead><tbody><tr><td>r1</td><td>100 / 50</td><td>成功，质量通过</td><td>是</td></tr><tr><td>r2</td><td>450 / 50</td><td>成功，质量未通过</td><td>否：首 token 超限</td></tr><tr><td>r3</td><td>100 / 不适用</td><td>成功，只有 1 token</td><td>是</td></tr><tr><td>r4</td><td>100 / 80</td><td>成功，质量通过</td><td>否：输出间隔超限</td></tr><tr><td>r5</td><td>无 / 无</td><td>失败，计入分母和观察窗口</td><td>否</td></tr><tr><td>r6</td><td>200 / 50</td><td>成功，质量未通过</td><td>是</td></tr></tbody></table>
+<p>本例共成功 5 条，成功输出 21 token；完成吞吐为 0.5 请求/秒，输出吞吐为 2.1 token/秒。SLO 合格 3 条，因此 goodput 为 0.3 请求/秒、达标率为 3/6 = 50%；同时质量通过的只有 r1、r3，因此质量与 SLO goodput 为 0.2 请求/秒。失败率是 1/6，成功请求 TTFT 的 nearest-rank P95/P99 都是 450 ms。</p>
+<h3 id="s4-2">4.2 每次成功任务成本为什么会反转</h3>
+<table><caption>表 4-2 · 相同四道题的人工账本；费用单位为教学积分，不是美元</caption><thead><tr><th>策略标签</th><th>成功/总数</th><th>所有尝试的总成本</th><th>每次成功成本</th></tr></thead><tbody><tr><td>single</td><td>2/4</td><td>4</td><td>2</td></tr><tr><td>best-of-4</td><td>3/4</td><td>20</td><td>20/3 ≈ 6.67</td></tr><tr><td>adaptive</td><td>3/4</td><td>12</td><td>4</td></tr></tbody></table>
+<p>这些成功标签是人工设定的，<b>不能证明自适应策略真的优于固定采样</b>。它只展示统计逻辑：预算更多可以伴随更高成功率，却同时增加每次成功成本。工具要求各策略包含同一组任务，拒绝漏掉困难题、超时或失败行；失败花掉的费用仍保留。真实的自适应策略如何避免使用答案标签，见<a href="test-time-compute.html#s5">预算分配篇第 5 章</a>。</p>
+<div class="summary3"><b>本章小结</b><ol><li>样例验证计算与数据契约，不测模型能力。</li><li>单 token、失败、质量未知都需要显式分支。</li><li>比较策略时保持同一任务分母，并计入所有尝试的成本。</li></ol></div>
+
+<h2 id="s5">5 目标硬件上的服务实验协议</h2>
+<h3 id="s5-1">5.1 从一个可以归档的基线开始</h3>
+<p>下面使用已安装且记录版本的 vLLM，并指向本地已固定 revision 的模型目录。先在隔离环境检查 <code>vllm serve --help</code> 与 <code>vllm bench serve --help</code>；命令参数按 2026-11-04 官方文档核验，不表示所有旧版本都支持。服务端与客户端各用一个终端。<sup class="cite"><a href="#ref-BENCH">[BENCH]</a></sup></p>
+<pre><code># Linux / GPU 环境；替换为已固定权重与 tokenizer 的本地目录
+vllm serve /models/pinned-checkpoint --served-model-name baseline --host 127.0.0.1 --port 8000
+
+# 另一个终端：先确认服务就绪，再执行形状可控的冒烟压测
+vllm bench serve --backend vllm --host 127.0.0.1 --port 8000 --model /models/pinned-checkpoint --served-model-name baseline --dataset-name random --input-len 512 --output-len 128 --num-prompts 100 --request-rate 1 --num-warmups 10 --seed 0 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,95,99 --goodput ttft:300 tpot:60 e2el:10000 --save-result --save-detailed --result-dir runs/baseline-r1 --result-filename raw.json</code></pre>
+<div class="codecap">代码 5-1 · 待在目标硬件执行的服务冒烟实验；1 请求/秒、100 请求与延迟阈值是示例设置，不能据此声明容量。参数含义见 [BENCH]；随机输入不能用于质量或投机接受率结论。</div>
+<p>归档目录至少包含 <code>environment.txt</code>（硬件、驱动、依赖）、<code>commands.txt</code>（完整启动及压测命令）、<code>manifest.json</code>（模型/数据哈希、负载、缓存状态）、原始结果、服务日志和质量结果。提供的<a href="../examples/efficiency-lab/run-manifest.template.json">运行清单模板</a>中未填写字段保留 <code>null</code>；有空缺时不把它标为已复现。</p>
+<p>官方原始 JSON 与本站标准化 JSONL 是不同格式。转换时必须核对单位、结束时刻和失败记录；不能直接改扩展名，也不能从汇总平均值倒推出逐请求记录。若原始数据缺少计划到达时刻，本文“包含客户端排队的 TTFT”应标为未测，不能补造时间。</p>
+<h3 id="s5-2">5.2 从冒烟到可以支持结论的运行</h3>
+<ol><li>锁定配置并预热；冷启动耗时单独测，稳态样本不混入编译和加载。</li><li>扫描到达率并观察积压，确定低负载、临界点和过载三档；检查压测机 CPU、连接数和网络是否先饱和。</li><li>对每档运行基线与单项优化，多次独立重复并交错执行；为每次运行分配独立目录。</li><li>缓存实验明确清空或预热过程，确认实测命中率；量化和投机保持任务、提示模板、采样协议一致。</li><li>在留出集测质量与失败类型，按输入长度、任务类型分组；画质量—延迟—费用曲线，再决定是否保留配置。</li></ol>
+<div class="note"><b>负结果也归档：</b>接受率高但吞吐下降、平均延迟改善但 P99 变差、缓存命中高但路由成本吞掉收益，都应留下原始数据。是否启用一项优化由目标负载决定。</div>
+<div class="summary3"><b>本章小结</b><ol><li>先留下一份完整基线，再扩大扫描矩阵。</li><li>官方压测结果必须核对格式与口径后才能进入本站账本。</li><li>真实质量与硬件性能实验尚未执行，命令和清单提供可复现起点。</li></ol></div>
+
+<h2 id="s6">6 从结果回到瓶颈：归因与发布</h2>
+<h3 id="s6-1">6.1 一张表组织诊断</h3>
+<table><caption>表 6-1 · 本文建议的诊断顺序；均为待验证假设</caption><thead><tr><th>现象</th><th>先核对</th><th>后续实验</th></tr></thead><tbody><tr><td>低负载快，高负载差</td><td>排队、工作空间、有效批大小</td><td>同到达率与同达标率分别比较</td></tr><tr><td>首 token 改善，任务仍慢</td><td>输出长度、工具等待、后处理</td><td>整条任务时间线及关键路径</td></tr><tr><td>量化省显存但未提速</td><td>后端是否实际调用低精度 kernel</td><td>算子 profile 与形状分布</td></tr><tr><td>仿真预测与实测偏离</td><td>输入分布、通信、编译和缓存命中</td><td>在校准集拟合参数，在留出负载验证</td></tr><tr><td>平均质量稳定，长任务失败</td><td>截断、摘要丢事实、工具协议变化</td><td>按任务长度与失败原因拆分</td></tr></tbody></table>
+<p>一份可审阅结论应是：“在模型 revision X、硬件 H、请求分布 W、质量阈值 Q 下，配置 A 相对基线的指标如何变化”。<b>只在采样过的范围内声明结论</b>；不同模型、不同长度或另一种并行拓扑属于外推。容量模型的用途是提出下一次实验，不是替代校准。</p>
+<h3 id="s6-2">6.2 与另外两个新专题形成闭环</h3>
+<p><a href="test-time-compute.html">推理时计算</a>确定每道题该投入多少生成与验证预算；<a href="agent-inference-systems.html">Agent 在线推理系统</a>把多轮模型调用、工具等待和恢复开销放回完整任务。最终以相同任务集上的成功率、延迟和成本选择方案，并把失败样本送回下一轮优化。</p>
+<div class="summary3"><b>本章小结</b><ol><li>性能现象先转成可验证的瓶颈假设。</li><li>模型、硬件和负载共同限定结论的适用范围。</li><li>用任务成功率与总成本收口，保留原始材料和负结果。</li></ol></div>
+<h2 id="refs">参考文献与来源口径</h2><ol class="refs"><li id="ref-DIST"><b>[DIST] Yinmin Zhong 等.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>，OSDI 2024；arXiv:2401.09670，首次提交 2024-01-18，v3 2024-06-06。<a href="https://arxiv.org/abs/2401.09670">一手来源</a>。</li><li id="ref-BENCH"><b>[BENCH] vLLM 项目.</b> <i>vllm bench serve CLI Reference</i>，官方滚动文档，首发日期未标注；核验快照 2026-11-04。<a href="https://docs.vllm.ai/en/latest/cli/bench/serve/">一手来源</a>。</li><li id="ref-REPRO"><b>[REPRO] vLLM 项目.</b> <i>Reproducibility</i>，官方滚动文档；核验快照 2026-11-04。<a href="https://docs.vllm.ai/en/latest/usage/reproducibility/">一手来源</a>。</li></ol><p class="note">注：来源核验日期为 2026-11-04。论文日期区分首次提交与修订；滚动文档仅记录访问快照，不推断首发日期。文中的“本文设计”“教学输入”“伪代码”是作者推导或示例，不能视为论文或生产实测结果。未开展 GPU 推理与模型质量复现。</p></div><footer><p>© 2026 PiratePai · <a href="../index.html">返回完整目录</a></p><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="与 GitHub 主页共享的浏览量计数" loading="lazy"></footer>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<!-- chapter-reader:end -->
+</body>
+</html>

@@ -126,9 +126,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-04">
 <link rel="canonical" href="https://piratepai.github.io/posts/inference-serving.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型推理服务优化：技术发展史、原理与前沿展望", "url": "https://piratepai.github.io/posts/inference-serving.html", "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。", "inLanguage": "zh-CN", "headline": "大模型推理服务优化：技术发展史、原理与前沿展望", "datePublished": "2026-08-23", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-serving.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型推理服务优化：技术发展史、原理与前沿展望", "url": "https://piratepai.github.io/posts/inference-serving.html", "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。", "inLanguage": "zh-CN", "headline": "大模型推理服务优化：技术发展史、原理与前沿展望", "datePublished": "2026-08-23", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-serving.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -139,7 +139,7 @@
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译。正文系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -988,6 +988,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <p>vLLM <b>Elastic EP</b> 近零停机扩缩容（对应 v0.32.0 MRV2 特性）与 <b>TorchTPU</b> 后端回归，服务化"可伸缩性"与硬件多极化两条支线并行。学界：<b>DLite</b>（上交大，10-16）证明 agentic 负载需要免草稿历史的投机解码；<b>Prorsa</b>（PKU+小米，10-12）把 P/D 分离引入 agentic RL rollout；SNU（10-19）探索 GPU + 存算一体的混合 P/D。<b>When the KV Cache Is Slower Than the GPU</b>（Multiverse，10-15）用远程 KV 层 × 上下文并行 prefill 回答"当 KV 比算力更慢怎么办"。</p>
 
 </section>
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="inference-evaluation.html#reading-path">性能评测与复现实验</a> · <a href="agent-inference-systems.html#reading-path">Agent 在线推理系统</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <h2 id="refs">参考文献</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-DYNAMO"><b>ai-dynamo</b>. <i>ai-dynamo/dynamo</i>. v1.6.1，发布于 2026-10-27；核验 2026-11-03。<a href="https://github.com/ai-dynamo/dynamo/releases/tag/v1.6.1">一手来源</a>。</li><li id="R26-STORE"><b>bytedance</b>. <i>bytedance/InfiniStore</i>. 源码快照 e572c198da4d，提交日期 2026-09-16；核验 2026-11-03。<a href="https://github.com/bytedance/InfiniStore/blob/e572c198da4dc2268b664353f3d8336a20fa9420/README.md">一手来源</a>。</li></ol>
 
@@ -1061,7 +1062,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>推理时计算与自适应预算：采样、验证、搜索与模型路由</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:var(--muted);margin:-6px 0 10px;}
+  .codecap b{color:#6ea8ff;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:#171a21;font-size:14.5px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:#17212b;color:#6ea8ff;}
+  tr:nth-child(even) td{background:#112132;}
+  .timeline{list-style:none;margin:18px 0;padding:0;border-left:3px solid #3e5770;}
+  .timeline li{margin:0 0 14px;padding:0 0 0 22px;position:relative;}
+  .timeline li::before{content:"";position:absolute;left:-8.5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #2a2f3a;box-shadow:0 0 0 2px var(--accent);}
+  .timeline .t{font-weight:700;color:var(--accent);font-family:Consolas,monospace;margin-right:10px;}
+  .fig{background:#171a21;border:1px dashed #40596e;border-radius:10px;padding:16px 18px;margin:16px 0;font-size:14px;overflow-x:auto;}
+  .fig .cap{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .flowrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .fbox{border:1.5px solid #3f576e;border-radius:8px;padding:8px 12px;background:#15212e;font-size:13px;text-align:center;min-width:92px;}
+  .fbox.hl{border-color:#7c5a31;background:#312411;}
+  .fbox.ok{border-color:#387553;background:#192a1e;}
+  .arr{align-self:center;color:#6ea8ff;font-size:18px;font-weight:700;}
+  .pill{display:inline-block;background:#16212c;border:1px solid #385975;color:#6ea8ff;border-radius:20px;padding:1px 12px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap;}
+  .kbd{font-family:Consolas,monospace;background:#12212f;color:#6ea8ff;padding:2px 7px;border-radius:5px;font-size:12.5px;}
+  .good{color:var(--ok);font-weight:600;} .bad{color:#ff6b6b;font-weight:600;}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .refs li{margin:8px 0;font-size:14px;}
+  details{margin:10px 0;}
+  summary{cursor:pointer;color:var(--accent);font-weight:600;}
+  .tag{font-size:11px;padding:1px 8px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle;}
+  .tag.sys{background:#1e261c;color:#41d1a7;} .tag.paper{background:#20182a;color:#9d7bff;} .tag.ind{background:#322111;color:#ffb454;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
+  .summary3 b{color:#41d1a7;}
+  .summary3 ol{margin:6px 0 2px;}
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="推理时计算与自适应预算：采样、验证、搜索与模型路由">
+<meta property="og:description" content="系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。">
+<meta property="og:url" content="https://piratepai.github.io/posts/test-time-compute.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-04">
+<link rel="canonical" href="https://piratepai.github.io/posts/test-time-compute.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "url": "https://piratepai.github.io/posts/test-time-compute.html", "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。", "inLanguage": "zh-CN", "headline": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "datePublished": "2026-11-04", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/test-time-compute.html"}</script>
+<!-- site-metadata:end -->
+</head>
+<body>
+<div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
+<header class="hero"><div class="inner"><p class="kicker">推理策略 · 质量与计算 · 2026</p><h1>推理时计算与自适应预算：采样、验证、搜索与模型路由</h1><p class="sub">系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。</p><div class="meta"><span class="pill">调研与核验：2026-11-04</span><span class="pill">一手论文核验；教学预算账本；无模型性能复现</span></div></div><!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/test-time-compute.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+<div class="wrap"><nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">关键进展与实践入口</a></li><li><a href="#s0">0 导读：把额外计算变成可验证的答案收益</a></li><li><a href="#s1">1 预备知识：质量、算力、费用和等待时间</a></li><li><a href="#s2">2 并行采样：从多数投票到 Best-of-N</a></li><li><a href="#s3">3 验证器与搜索：判断下一步是否值得扩展</a></li><li><a href="#s4">4 串行推理：思考长度、修正与提前停止</a></li><li><a href="#s5">5 自适应预算与大小模型路由</a></li><li><a href="#s6">6 与推理服务、缓存和 Agent 的连接</a></li><li><a href="#s7">7 对照实验：怎样证明预算花得值得</a></li><li><a href="#s8">8 研究边界与下一步</a></li><li><a href="#refs">参考文献与来源口径</a></li></ol></nav><div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
+.hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:#e8eaed;font-size:14px}
+.hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style><div class="hl-head"><b>关键进展与实践入口</b><i>基础研究日期与本次核验日期分别标注</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>多路径与答案聚合</b><span class="hl-date">2022-03-21</span></div><p>Self-Consistency 连接候选多样性与选择规则。</p><a class="hl-link" href="#s2">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>步骤也可以被评价</b><span class="hl-date">2023-05-31</span></div><p>过程监督给搜索提供反馈，同时引入验证成本。</p><a class="hl-link" href="#s3">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>按题目分配计算</b><span class="hl-date">2024-08-06</span></div><p>难度影响收益，线上策略仍需要可部署的预测信号。</p><a class="hl-link" href="#s5">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>大小模型路由</b><span class="hl-date">2024-06-26</span></div><p>RouteLLM 研究质量与模型调用费用之间的权衡。</p><a class="hl-link" href="#s5">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>串行预算控制</b><span class="hl-date">2025-01-31</span></div><p>s1 将思考长度作为可调参数；适用条件需随模型验证。</p><a class="hl-link" href="#s4">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>交互轨迹上的额外计算</b><span class="hl-date">2025-06-15</span></div><p>Agent 测试时计算把验证、修正与并行扩展到工具环境。</p><a class="hl-link" href="#s6">→ 进入章节</a></div></div></div><h2 id="s0">0 导读：把额外计算变成可验证的答案收益</h2>
+<p><b>本文主线：生成候选 → 选择与验证 → 分配预算 → 在质量、延迟和费用之间选择。</b>本文回答四个问题：多想一会儿和多答几次分别改变了什么？为什么候选里有正确答案仍可能交付错误答案？简单题与困难题如何分配预算？怎样把策略接入真实推理服务？</p>
+<p>推理时计算（test-time compute）指模型部署后，为解决一个输入投入的计算。它可以用于更长的生成、多个候选、搜索中间状态、验证器或另一个模型。这里研究的是完整求解策略；底层生成如何加速，见<a href="speculative-decoding.html#reading-path">投机解码</a>；循环深度怎样改变模型内部计算，见<a href="loop-transformer-survey.html#reading-path">Loop Transformer</a>。</p>
+<table><caption>表 0-1 · 四条计算路线及额外成本（本文归纳）</caption><thead><tr><th>路线</th><th>增加什么</th><th>主要风险</th></tr></thead><tbody><tr><td>并行候选</td><td>多个完整解与答案聚合</td><td>错误相关、选择器失误、显存和并发争用</td></tr><tr><td>串行修正</td><td>更长生成或再次检查</td><td>自我确认、反复改错、截止时间被耗尽</td></tr><tr><td>树形搜索</td><td>扩展、打分、剪枝和回退</td><td>验证器成本大，局部分数偏离最终目标</td></tr><tr><td>模型路由</td><td>难度估计、大小模型选择或升级</td><td>误路由、分布漂移、重复 prefill</td></tr></tbody></table>
+<ul class="timeline"><li><span class="t">2022-03-21</span>Self-Consistency 用多个推理路径聚合答案。<sup class="cite"><a href="#ref-SC">[SC]</a></sup></li><li><span class="t">2023-05-17 / 05-31</span>Tree of Thoughts 与过程监督分别研究搜索、步骤评价。<sup class="cite"><a href="#ref-TOT">[TOT]</a></sup><sup class="cite"><a href="#ref-PRM">[PRM]</a></sup></li><li><span class="t">2024-06-26 / 08-06</span>RouteLLM 研究模型路由；Snell 等研究按题目难度分配推理计算。<sup class="cite"><a href="#ref-ROUTE">[ROUTE]</a></sup><sup class="cite"><a href="#ref-TTC">[TTC]</a></sup></li><li><span class="t">2025-01-31 / 06-15</span>s1 研究预算控制；Agent 测试时计算研究扩展到交互轨迹。<sup class="cite"><a href="#ref-S1">[S1]</a></sup><sup class="cite"><a href="#ref-ATTC">[ATTC]</a></sup></li><li><span class="t">2026-11-04 核验</span>本文将上述一手研究与预算账本连接；没有重新运行这些论文的模型实验。</li></ul>
+<div class="card" id="reading-path"><b>阅读路径</b><p>先读第 1、2 章区分预算和质量；第 3、4 章解释验证器与串行计算；第 5、6 章面向路由和部署；第 7 章给出对照实验，第 8 章列出研究边界。统计工具入口在<a href="inference-evaluation.html#s4">可复算账本</a>。</p></div>
+<div class="summary3"><b>本章小结</b><ol><li>推理预算包含生成、选择、验证和调用其他模型。</li><li>额外计算有多种组织方式，不能只按输出长度比较。</li><li>论文结果提供机制证据，本站样例只验证账本与决策逻辑。</li></ol></div>
+
+<h2 id="s1">1 预备知识：质量、算力、费用和等待时间</h2>
+<h3 id="s1-1">1.1 四种预算不能互相替代</h3>
+<p>设策略 π 对题目 x 的最终正确概率为 Q，消耗计算 C、费用 M、墙钟时间 L。“预算相同”必须指明限制的是哪一个量。相同输出 token 数不意味着相同 FLOPs：模型大小、上下文长度、验证器及缓存复用都会改变计算。并行生成可以缩短等待，却仍占用更多 GPU 时间。</p>
+<pre><code>目标示例（本文定义）：最大化 E[Q(x, π)]
+约束：E[M(x, π)] ≤ 平均费用预算
+      P(L(x, π) ≤ 截止时间) ≥ 服务达标率
+      同时满足显存、在途任务数与总调用次数限制</code></pre>
+<div class="codecap">代码 1-1 · 优化目标的符号表达；Q 需由独立任务评测得到，不能用模型自报信心替代。</div>
+<div class="analogy">考试时可以让一个人反复检查，也可以请几个人各做一遍再选答案。人数、总工时、交卷时间和最终正确率是四本账。</div>
+<h3 id="s1-2">1.2 一个候选的概率与一组候选的概率</h3>
+<p>在“各次独立、成功概率相同且等于 p”的教学假设下，n 个候选至少一个正确的概率是 1 − (1−p)<sup>n</sup>。若 p=0.4、n=4，结果为 0.8704。但这个数描述候选集合中存在正确答案；实际部署还得把它选出来。候选会共享知识盲点，独立假设也可能不成立。</p>
+<p><b>pass@k</b>用于衡量 k 个候选中至少一个成功的能力，通常依赖评测时知道正确与否。系统真正交付一个答案时，应报告所选答案的准确率。不能把评测器挑中的最佳答案当成线上可用的选择策略。</p>
+<div class="summary3"><b>本章小结</b><ol><li>比较之前写清费用、计算量和墙钟约束。</li><li>候选集包含正确答案，不保证选择器能找到它。</li><li>独立采样公式是教学上界分析的起点，真实错误相关性需要测量。</li></ol></div>
+
+<h2 id="s2">2 并行采样：从多数投票到 Best-of-N</h2>
+<h3 id="s2-1">2.1 两种选择规则</h3>
+<p>Self-Consistency 对多个推理路径的最终答案做聚合，适用于答案可以规范化并比较一致性的任务。它不要求每个路径都相同。<sup class="cite"><a href="#ref-SC">[SC]</a></sup> Best-of-N 则使用评分器给完整候选排序，取分数最高者；评分器可以是规则、可执行测试或学习到的奖励模型。</p>
+<div class="citebox"><b>[SC] Xuezhi Wang 等.</b> <i>Self-Consistency Improves Chain of Thought Reasoning in Language Models</i>，ICLR 2023；arXiv:2203.11171，首次提交 2022-03-21，v4 2023-03-07。原文：<span class="q">“samples a diverse set of reasoning paths”</span>（采样一组具有差异的推理路径。）<a href="https://arxiv.org/abs/2203.11171">原文</a>。</div>
+<p>例如四个候选答案是“0.5”“1/2”“0.50”“2”，字符串投票会把前三个拆散。数学、代码和开放问答需要不同的答案规范化及判定规则。开放式写作没有天然的唯一正确答案，投票也不自动等价于质量评价。</p>
+<h3 id="s2-2">2.2 生成与选择的错误要分开</h3>
+<table><caption>表 2-1 · 本文建议的候选级诊断</caption><thead><tr><th>观测</th><th>主要问题</th><th>下一步</th></tr></thead><tbody><tr><td>所有候选都错</td><td>基础模型或候选多样性不足</td><td>换模型、检索证据、改变求解策略</td></tr><tr><td>存在正确候选，最终仍错</td><td>选择器失误</td><td>校准评分器、增加执行验证、检查长度偏好</td></tr><tr><td>更多候选后准确率下降</td><td>挑中了投机迎合评分器的样本</td><td>检查分布漂移与评分漏洞，降低 N 或更换判据</td></tr><tr><td>准确率增加，任务超时增多</td><td>服务或并发资源约束</td><td>联合评价达标成功率，限制并行扇出</td></tr></tbody></table>
+<p>固定 N 的计算近似为 N 次生成成本加选择成本，但墙钟时间取决于排队和批处理。若所有候选共享完全相同的输入前缀，缓存可以减少重复 prefill；分支生成后的 KV 仍然各自增长。不要把前缀复用解释成 N 条分支只占一条分支的显存。</p>
+<div class="summary3"><b>本章小结</b><ol><li>多数投票依赖答案可比较，Best-of-N 依赖评分器可靠。</li><li>分别测量候选覆盖率与最终选择正确率。</li><li>并行候选能增加计算与显存压力，延迟收益要放进实际负载验证。</li></ol></div>
+
+<h2 id="s3">3 验证器与搜索：判断下一步是否值得扩展</h2>
+<h3 id="s3-1">3.1 结果奖励与过程奖励</h3>
+<p>结果奖励模型（ORM）给完整答案评分；过程奖励模型（PRM）给中间步骤反馈。过程监督研究在 MATH 场景比较了这两类监督信号，并公开步骤标注数据。其证据针对论文模型与任务，不能直接推出任何 PRM 在所有领域都优于结果判定。<sup class="cite"><a href="#ref-PRM">[PRM]</a></sup></p>
+<p>步骤分数需要聚合成候选分数。取最小值强调最弱一步，取乘积会受到步骤数和校准误差影响，取平均则可能掩盖一个致命错误。要在留出的完整任务上校准聚合规则；“语言流畅”“看起来严谨”都不能作为已验证正确性的同义词。</p>
+<h3 id="s3-2">3.2 搜索需要状态、扩展器和停止条件</h3>
+<p>树形搜索把一个部分解作为节点，生成若干下一步，评价后保留有希望的分支。Tree of Thoughts 将这种探索、评估与回退组织成语言模型求解流程。<sup class="cite"><a href="#ref-TOT">[TOT]</a></sup> 实现时至少定义：节点包含哪些状态、一次扩展生成多长、保留多宽、何时回退、如何判断完成。</p>
+<div class="fig"><div class="flowrow"><div class="fbox">部分解与剩余预算</div><div class="arr">→</div><div class="fbox">生成候选步骤</div><div class="arr">→</div><div class="fbox hl">规则 / PRM / 执行测试</div><div class="arr">→</div><div class="fbox">保留或剪枝</div><div class="arr">→</div><div class="fbox ok">完成 / 回退 / 停止</div></div><div class="cap">图 3-1 · 本文自绘；搜索环节综合自 Tree of Thoughts §3，预算扣减为本文工程补充。</div></div>
+<h3 id="s3-3">3.3 验证也要占预算</h3>
+<p>设每轮扩展 b 个分支，深度 d，即使只保留固定宽度，仍需为每轮候选评分。代码执行验证还要支付构建、沙箱和测试时间。为了比较策略，应把生成器、验证器、合并器和工具都计入成本；验证器用到更强模型时，也应写出模型版本与费用。</p>
+<div class="note"><b>失败边界：</b>可执行测试仅覆盖测试集，不能证明程序对所有输入都正确；过程评分的局部最优也可能走向错误终点。保留一个无需模型主观评分的最终验收步骤，记录评分高但验收失败的样本。</div>
+<div class="summary3"><b>本章小结</b><ol><li>步骤反馈和最终结果判定承担不同职责。</li><li>搜索必须明确状态、扩展、剪枝和终止条件。</li><li>验证与工具调用的时间、费用都进入同一预算账本。</li></ol></div>
+
+<h2 id="s4">4 串行推理：思考长度、修正与提前停止</h2>
+<h3 id="s4-1">4.1 更多 token 可能改变什么</h3>
+<p>串行计算可以用于分解问题、检查已得到的结论、重新求解，也可能只产生重复文字。s1 研究在特定训练模型上通过 budget forcing 控制思考过程：限制长度或在模型试图结束时延长生成。其效果建立在相应模型与评测条件上。<sup class="cite"><a href="#ref-S1">[S1]</a></sup></p>
+<p>部署时应区分“思考预算”和“最终答案输出预算”。把所有预算耗尽后直接截断，可能得到不完整 JSON、缺少结论或未结束的工具参数。本文建议预留最终输出和验收预算，并将被上限截断的响应计入失败或单独的截断类别。</p>
+<h3 id="s4-2">4.2 什么时候值得继续</h3>
+<p>一个可研究的决策量是“再花一单位预算带来的预期质量提升”。继续生成的理由可以是执行测试失败且错误可定位、两个独立候选冲突、必要证据尚缺；单纯把“再仔细想想”重复多次，缺少可检验的停止依据。</p>
+<p>提前停止也会犯错：模型可能过度自信，容易检查的问题未必就是容易解的问题。因此应报告停止策略在不同难度、长度、领域上的误停率，并保留固定预算作为对照。控制器观察得到的是当前状态和历史校准结果，不能看到本题的测试答案。</p>
+<h3 id="s4-3">4.3 串行和并行怎样组合</h3>
+<p>可以先小规模并行生成，再只修正冲突候选；也可以先快速求解，未通过验证才升级模型。每个阶段都要重新估计剩余截止时间，避免前阶段花掉大部分预算后，后阶段仍按完整额度执行。具体收益属于待测量的系统设计，不是叠加两篇论文的加速比。</p>
+<div class="summary3"><b>本章小结</b><ol><li>思考长度是策略参数，更多文字不等于更高正确率。</li><li>为最终答案、工具执行和验收预留预算。</li><li>提前停止与升级都要在留出集校准，并统计错误决策。</li></ol></div>
+
+<h2 id="s5">5 自适应预算与大小模型路由</h2>
+<h3 id="s5-1">5.1 给不同题目不同预算</h3>
+<p>Snell 等研究发现，推理时计算策略的效果随题目难度变化，由此研究按题目自适应分配计算。<sup class="cite"><a href="#ref-TTC">[TTC]</a></sup> 这提供了一条方法论：先估计收益曲线，再选择预算档位。线上难度未知，论文分析中的难度划分与实际可部署的难度预测器必须分开。</p>
+<div class="citebox"><b>[TTC] Charlie Snell 等.</b> <i>Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters</i>，arXiv:2408.03314，2024-08-06。原文：<span class="q">“critically varies depending on the difficulty of the prompt”</span>（效果会显著随输入问题的难度而变化。）<a href="https://arxiv.org/abs/2408.03314">原文</a>。</div>
+<p>可用信号包括输入特征、快速模型的行为、候选分歧和执行反馈。使用模型自报信心前，需要检验其校准：预测 80% 成功的一组题是否真的接近 80% 成功。阈值在校准集上选择，最终结果在未参与调参的测试集上报告；禁止用测试答案给每道题挑最佳预算。</p>
+<h3 id="s5-2">5.2 路由和失败后升级的区别</h3>
+<p>RouteLLM 使用偏好数据学习强弱模型之间的路由，以权衡响应质量和成本。<sup class="cite"><a href="#ref-ROUTE">[ROUTE]</a></sup> 请求开始前直接路由，代价是预测错误可能难以及时纠正；先用小模型再升级，可以利用中间反馈，但必须加上小模型已经花掉的费用、再次读取上下文的开销和累计等待时间。</p>
+<table><caption>表 5-1 · 本文建议的控制器输出</caption><thead><tr><th>动作</th><th>预算承诺</th><th>停止条件</th></tr></thead><tbody><tr><td>直接回答</td><td>一次生成＋格式检查</td><td>验收完成或额度耗尽</td></tr><tr><td>增加候选</td><td>候选数量×生成上限＋选择器</td><td>达到预算、截止时间或可信验收条件</td></tr><tr><td>修正一次</td><td>可定位错误的修正＋再验收</td><td>错误消除，或没有新增证据</td></tr><tr><td>升级模型</td><td>已花费用＋强模型＋验证</td><td>总预算上限，而非只看升级阶段</td></tr></tbody></table>
+<h3 id="s5-3">5.3 带预算预留的控制伪代码</h3>
+<pre><code># 教学伪代码；estimate 来自校准集，不接触测试答案
+remaining = total_budget
+while not verified and now() &lt; deadline:
+    options = policy.propose(observed_state)
+    feasible = [a for a in options
+                if upper_cost(a) + finalization_reserve &lt;= remaining
+                and predicted_latency(a) &lt; deadline - now()]
+    if not feasible:
+        break
+    action = choose_by_calibrated_gain(feasible)
+    reservation = ledger.reserve(upper_cost(action))
+    result = execute_with_limit(action, reservation, deadline)
+    ledger.settle(reservation, result.actual_cost)  # 失败也扣费
+    remaining = ledger.remaining
+    observed_state = update_from_observation(result)
+return finalize_with_reserved_budget(observed_state)</code></pre>
+<div class="codecap">代码 5-1 · 本文设计的预算控制伪代码；预测延迟不提供硬保证，执行层仍需超时与取消，费用无法预先硬封顶的服务需额外处理超支。</div>
+<p>多分支同时启动时，先预留再结算，避免每个分支都看到同一份“剩余预算”。取消请求也不代表已发生的调用免费；账本要处理取消确认前的在途费用。难度分布变化时重新校准，保留固定策略作为漂移检测基线。</p>
+<div class="summary3"><b>本章小结</b><ol><li>自适应策略依赖可部署信号与独立校准集。</li><li>模型路由和失败后升级的费用、时间结构不同。</li><li>并发分支先预留预算，失败和取消仍要结算。</li></ol></div>
+
+<h2 id="s6">6 与推理服务、缓存和 Agent 的连接</h2>
+<h3 id="s6-1">6.1 一个请求变成多个排队实体</h3>
+<p>Best-of-N 会把一个用户任务展开成多个生成请求。如果每条分支都获得独立的高优先级，少量复杂任务就可能挤压其他用户。本文建议为“任务”建立统一标识与在途预算，在任务级限制扇出，在请求级做组批；达到截止时间时将取消传播到生成、验证器和工具。</p>
+<p>串行深推理通常拉长占用时间；并行探索则增加同时驻留的 KV。调度器可以按剩余时间、分支价值和可抢占性研究策略，但这些估计会出错。应比较相同用户任务到达率下的达标成功数，不能只比较解码 token/秒。</p>
+<h3 id="s6-2">6.2 投机解码与预算策略的分工</h3>
+<p>正确实现的经典投机采样旨在保持目标采样分布同时减少生成耗时；增加候选或改变思考长度则改变完整求解策略。两者可以结合，但草稿、验证和额外分支会争用算力，必须做基线、单项、组合消融。KV 前缀复用是否有效，也取决于模型、提示模板和精确 token 前缀是否相同。</p>
+<h3 id="s6-3">6.3 交互任务中的计算边界</h3>
+<p>Agent 测试时计算研究把并行采样、串行修正、验证与轨迹多样性扩展到交互任务。<sup class="cite"><a href="#ref-ATTC">[ATTC]</a></sup> 在真实环境中，并行候选不能各自随意执行有副作用的操作；可以并行读取与模拟，最终提交应经过统一执行与验收。环境等待很长时，加速模型生成可能只改善很小一段关键路径，详见<a href="agent-inference-systems.html#s2">Agent 时间账本</a>。</p>
+<div class="summary3"><b>本章小结</b><ol><li>调度与预算都应认识用户任务及其多个分支。</li><li>底层解码加速与求解策略优化需要组合验证。</li><li>交互式搜索必须计入工具时间，并控制最终动作的执行。</li></ol></div>
+
+<h2 id="s7">7 对照实验：怎样证明预算花得值得</h2>
+<h3 id="s7-1">7.1 四组基线与公平条件</h3>
+<p>在相同模型、提示模板和任务集上，比较单次生成、固定 N 的采样选择、固定串行预算、自适应策略。路由实验再加入始终用小模型和始终用大模型。分别做等平均费用、等截止时间两种比较；一个策略在其中一项占优，不代表另一项也占优。</p>
+<p>每组保存完整候选、最终选择、生成与验证 token、工具费用、排队时间、终止原因和独立质量标签。多次运行保持相同题目集合，按题目配对比较并估计不确定性；测试集上的失败样本全部保留。搜索参数和评分器只能在训练/校准划分调节。</p>
+<h3 id="s7-2">7.2 复算一个明确标为人工的账本</h3>
+<p>本站提供同一组四道题的三种策略记录：single 成功 2/4、花费 4 积分；best-of-4 成功 3/4、花费 20；adaptive 成功 3/4、花费 12。每次成功成本分别为 2、20/3 和 4。这些标签与费用均由作者手工设定，不是模型测量，也不是实际运行了一个自适应控制器。</p>
+<pre><code>python examples/efficiency-lab/evaluate.py examples/efficiency-lab/synthetic --check examples/efficiency-lab/synthetic/expected.json</code></pre>
+<div class="codecap">代码 7-1 · 检查<a href="../examples/efficiency-lab/synthetic/tasks.jsonl">教学任务账本</a>与<a href="../examples/efficiency-lab/synthetic/expected.json">期望输出</a>；字段定义见<a href="../examples/efficiency-lab/README.md">说明</a>。</div>
+<p>这个例子只支持一个算术结论：同样成功次数，成本可能不同；提高成功率也可能增加每次成功成本。真实论文级结论还需要运行前述对照实验。若某组零成功，每次成功成本不可定义，工具输出 <code>null</code>，不把它写成零成本。</p>
+<h3 id="s7-3">7.3 看失败边界而非单点排名</h3>
+<p>画出预算横轴、最终准确率纵轴的曲线，另画截止时间内成功率和每次成功费用。按题目类别与难度分层，标出候选全错、选择失败、截断、工具失败等原因。在质量、延迟和费用上同时不被另一方案压过的配置构成可选集合；最终选择由应用约束决定。</p>
+<div class="summary3"><b>本章小结</b><ol><li>对照必须包含简单固定策略及路由的两端模型。</li><li>评测独立于预算选择，所有失败进入同一账本。</li><li>人工样例只核对统计，真正的收益要靠留出集与多次运行证明。</li></ol></div>
+
+<h2 id="s8">8 研究边界与下一步</h2>
+<p>值得继续研究的三个问题是：低成本难度预测能否在新领域保持校准；验证器能否识别高分错误并控制额外开销；预算控制器能否与负载、缓存和截止时间联动。它们分别需要分布外评测、对抗性错误集和服务负载实验。</p>
+<p>本站已有架构、量化、缓存和服务文章提供底层优化手段；本篇把这些手段接到“最终任务是否成功”的目标上。实际部署先选择可解释的少量预算档位，取得完整账本后再增加复杂控制器。相邻专题：<a href="inference-evaluation.html">性能评测与复现实验</a>、<a href="agent-inference-systems.html">Agent 在线推理系统</a>。</p>
+<div class="summary3"><b>本章小结</b><ol><li>难度预测、验证器可靠性和负载联动是三项独立研究问题。</li><li>先有固定基线与完整记录，再增加自适应复杂度。</li><li>收益最终体现在可验证任务质量、截止时间和总费用上。</li></ol></div>
+<h2 id="refs">参考文献与来源口径</h2><ol class="refs"><li id="ref-SC"><b>[SC] Xuezhi Wang 等.</b> <i>Self-Consistency Improves Chain of Thought Reasoning in Language Models</i>，ICLR 2023；arXiv:2203.11171，首次提交 2022-03-21，v4 2023-03-07。<a href="https://arxiv.org/abs/2203.11171">一手来源</a>。</li><li id="ref-TOT"><b>[TOT] Shunyu Yao 等.</b> <i>Tree of Thoughts: Deliberate Problem Solving with Large Language Models</i>，NeurIPS 2023；arXiv:2305.10601，首次提交 2023-05-17，v2 2023-12-03。<a href="https://arxiv.org/abs/2305.10601">一手来源</a>。</li><li id="ref-PRM"><b>[PRM] Hunter Lightman 等.</b> <i>Let&#x27;s Verify Step by Step</i>，arXiv:2305.20050，2023-05-31。<a href="https://arxiv.org/abs/2305.20050">一手来源</a>。</li><li id="ref-ROUTE"><b>[ROUTE] Isaac Ong 等.</b> <i>RouteLLM: Learning to Route LLMs with Preference Data</i>，arXiv:2406.18665，首次提交 2024-06-26，v4 2025-02-23。<a href="https://arxiv.org/abs/2406.18665">一手来源</a>。</li><li id="ref-TTC"><b>[TTC] Charlie Snell 等.</b> <i>Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters</i>，arXiv:2408.03314，2024-08-06。<a href="https://arxiv.org/abs/2408.03314">一手来源</a>。</li><li id="ref-S1"><b>[S1] Niklas Muennighoff 等.</b> <i>s1: Simple test-time scaling</i>，arXiv:2501.19393，首次提交 2025-01-31，v3 2025-03-01。<a href="https://arxiv.org/abs/2501.19393">一手来源</a>。</li><li id="ref-ATTC"><b>[ATTC] King Zhu 等.</b> <i>Scaling Test-time Compute for LLM Agents</i>，arXiv:2506.12928，2025-06-15。<a href="https://arxiv.org/abs/2506.12928">一手来源</a>。</li></ol><p class="note">注：来源核验日期为 2026-11-04。论文日期区分首次提交与修订；滚动文档仅记录访问快照，不推断首发日期。文中的“本文设计”“教学输入”“伪代码”是作者推导或示例，不能视为论文或生产实测结果。未开展 GPU 推理与模型质量复现。</p></div><footer><p>© 2026 PiratePai · <a href="../index.html">返回完整目录</a></p><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="与 GitHub 主页共享的浏览量计数" loading="lazy"></footer>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<!-- chapter-reader:end -->
+</body>
+</html>

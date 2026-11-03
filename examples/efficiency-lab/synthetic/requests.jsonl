@@ -1,0 +1,6 @@
+{"request_id":"r1","scheduled_ms":0,"sent_ms":0,"first_token_ms":100,"last_token_ms":300,"end_ms":320,"output_tokens":5,"success":true,"quality_pass":true}
+{"request_id":"r2","scheduled_ms":0,"sent_ms":50,"first_token_ms":450,"last_token_ms":650,"end_ms":680,"output_tokens":5,"success":true,"quality_pass":false}
+{"request_id":"r3","scheduled_ms":1000,"sent_ms":1000,"first_token_ms":1100,"last_token_ms":1100,"end_ms":1120,"output_tokens":1,"success":true,"quality_pass":true}
+{"request_id":"r4","scheduled_ms":2000,"sent_ms":2000,"first_token_ms":2100,"last_token_ms":2420,"end_ms":2450,"output_tokens":5,"success":true,"quality_pass":true}
+{"request_id":"r5","scheduled_ms":3000,"sent_ms":3000,"first_token_ms":null,"last_token_ms":null,"end_ms":9000,"output_tokens":0,"success":false,"quality_pass":null}
+{"request_id":"r6","scheduled_ms":4000,"sent_ms":4100,"first_token_ms":4200,"last_token_ms":4400,"end_ms":4430,"output_tokens":5,"success":true,"quality_pass":false}

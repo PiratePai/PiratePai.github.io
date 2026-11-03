@@ -139,7 +139,7 @@
   <p class="sub">不部署就回答"这套模型+硬件+配置能跑多快、要多少显存、扛得住多少 QPS"。从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs/权重/激活/KV 的记账方法，再到 Roofline 与请求级离散事件仿真的完整推导；全程以 DeepSeek-V4.1-Flash（AR-LLM）与 MiniMax-H3（全模态 DiT）为双案例，并给出一个可改 config 的开源原型。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-10-26</b></span><span class="chip">案例 <b>DeepSeek-V4.1-Flash · MiniMax-H3</b></span><span class="chip">源码 <b>vLLM 0.32 · vLLM-Omni 0.30</b> + 自研 llsim 原型</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-26">2026-10-26</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-llm-perf-simulation-2026-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/b497668aea429d7e7c77cac64cfffacc1147571f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-26">2026-10-26</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-llm-perf-simulation-2026-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/b497668aea429d7e7c77cac64cfffacc1147571f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -699,6 +699,7 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 </figure>
 
 </section>
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="inference-evaluation.html#reading-path">性能评测与复现实验</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <h2 id="refs">参考文献</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-AICP"><b>Xu, Tianhao, Liu, Yiming et al.</b>. <i>AIConfigurator: Lightning-Fast Configuration Optimization for Multi-Framework LLM Serving</i>. arXiv:2601.06288v1，2026-01-09；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2601.06288v1">一手来源</a>。</li><li id="R26-AIC"><b>ai-dynamo</b>. <i>ai-dynamo/aiconfigurator</i>. 源码快照 6cd6f9686ab7，提交日期 2026-10-29；核验 2026-11-03。<a href="https://github.com/ai-dynamo/aiconfigurator/blob/6cd6f9686ab7de6e8fb28171d6e350ee0aa4ed39/README.md">一手来源</a>。</li><li id="R26-AISIM"><b>ai-dynamo</b>. <i>ai-dynamo/aisimulate</i>. 源码快照 9f4819e2b77a，提交日期 2026-11-03；核验 2026-11-03。<a href="https://github.com/ai-dynamo/aisimulate/blob/9f4819e2b77afb4798bc8133c42ccc1d1b045e5c/README.md">一手来源</a>。</li></ol>
 
@@ -835,7 +836,7 @@ uv run python -m llsim.report --model ... --feature spec --feature prefix0.6   #
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

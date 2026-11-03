@@ -131,9 +131,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-11">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-04">
 <link rel="canonical" href="https://piratepai.github.io/posts/training-free-autotune-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "url": "https://piratepai.github.io/posts/training-free-autotune-2026.html", "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。", "inLanguage": "zh-CN", "headline": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "datePublished": "2026-10-11", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/training-free-autotune-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "url": "https://piratepai.github.io/posts/training-free-autotune-2026.html", "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。", "inLanguage": "zh-CN", "headline": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "datePublished": "2026-10-11", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/training-free-autotune-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -176,7 +176,7 @@
   <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
   <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· <b>2026-10-30 历史增补</b>（版本事实与 Agent 自动优化最新动态，见前沿亮点与 §2 快讯）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华 / UC Berkeley）、arXiv 论文与推理框架版本及 Roadmap · 原理与实现</div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-11">2026-10-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/8f48de7b6f91249cf99bb0b68e455bc9f89fb25e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-11">2026-10-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/8f48de7b6f91249cf99bb0b68e455bc9f89fb25e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -558,6 +558,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
   <li>MORCA（arXiv:2610.10457）/ ACID（2607.12358）/ Carnator（2609.32420）/ UnStep（2609.32518, Meta SIL）/ LoSA（2608.12032）/ RA-CFGCache（2609.36433）/ TaskPress（2608.03276）/ AnchorKV（2608.02901）等, 2026.</li>
 </ol>
 
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="inference-evaluation.html#reading-path">性能评测与复现实验</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <footer>
   <p>本文基于 2026-10-12 可核实的开源仓库、模型卡、arXiv 论文与框架 Release Notes 整理；
   关键数字均附原文小字引用。v3（2026-10-12）：H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环（目标与基线→三层诊断→处方循环→收口），RUNBOOK 面向人、AGENTS.md 面向 ZCode，双模式共用同一套裁判脚本。
@@ -574,7 +575,7 @@ vllm serve "$H3_MODEL" --omni --trust-remote-code --task-type fl2va --num-gpus 8
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

@@ -216,7 +216,7 @@
     <div class="meta"><span class="chip">原稿日期：<b>2026-08-13</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#spec-rejection">重绘投机拒绝采样，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#spec-rejection">重绘投机拒绝采样，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -1291,6 +1291,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <p><b>FlashMap</b>（Polymathic+Princeton 等，arXiv:2610.24365）把流匹配引入并行起草，绕开块扩散的单步瓶颈；<b>JetSpec++</b>（UCSD+UIUC+NJU+Meta+StepFun，arXiv:2610.19792）在 JetSpec 之上加前瞻并行起草与自我精化；<b>ReAnchor</b>（KAIST+SNU，arXiv:2610.26531）回收"被拒的验证前向"做扩散起草、<b>DStill</b>（Capital One，arXiv:2610.27379）用轨迹一致性蒸馏出一步起草，"浪费掉的验证算力被再利用"成为与 DPara 同轴的新思路。<b>ProVe</b>（NTU+字节，arXiv:2610.27815）则反其道探索"大模型起草、小模型验证"的角色反转。生态侧：DFlash2/DSpark/MTP 已下沉到端侧引擎（AMD Strix Halo、Apple MLX/M3 Ultra、DGX Spark GB10），10 月 GitHub 新增相关仓库约 460 个。</p>
 
 </section>
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="test-time-compute.html#reading-path">推理时计算与自适应预算</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <footer class="foot">
 
 <h3 style="margin-top:0">📜 参考与引用出处</h3>
@@ -1355,7 +1356,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

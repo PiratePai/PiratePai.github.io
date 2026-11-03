@@ -79,6 +79,10 @@ class PublicationTests(unittest.TestCase):
 
     def test_homepage_routes_and_generated_metadata_work_without_javascript(self):
         source = (ROOT / 'index.html').read_text(encoding='utf-8')
+        data = metadata.load_metadata()
+        self.assertIn(f'· {len(data["articles"])}篇综述', source)
+        for slug in data['articles']:
+            self.assertEqual(source.count(f'id="article-{slug}"'), 1)
         self.assertIn('href="posts/attention-evolution.html#reading-path"', source)
         for anchor in ('problems', 'recent-updates', 'knowledge-map', 'all-articles'):
             self.assertIn(f'id="{anchor}"', source)

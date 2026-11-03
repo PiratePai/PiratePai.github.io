@@ -238,7 +238,7 @@
     nav.append(details);
   }
   const highlights = document.getElementById('hl');
-  if (highlights) nav.append(link('近期进展', 'hl'));
+  if (highlights) nav.append(link(highlights.querySelector('.hl-head b')?.textContent.trim() || '近期进展', 'hl'));
   if (figures.length) {
     const gallery = element('details'); gallery.append(element('summary', '', '论文配图 · ' + figures.length + ' 张'));
     figures.forEach((f, i) => gallery.append(link((i + 1) + '. ' + f.title.slice(0, 90), f.id, 'reader-figure-link')));

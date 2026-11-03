@@ -48,7 +48,7 @@ def seo(data, item=None, slug=None):
     site = data['siteUrl']
     url = site + (f'/posts/{slug}.html' if slug else '/')
     title = item['title'] if item else "Pai's Blog · 大模型效率技术知识全景"
-    description = item['description'] if item else '16 篇中文大模型效率技术综述：从注意力、缓存与解码，到并行、服务和性能验证。按阅读路线、实际问题或最近更新进入专题。'
+    description = item['description'] if item else f'{len(data["articles"])} 篇中文大模型效率技术综述：从注意力、缓存与解码，到并行、服务、性能验证、推理预算与 Agent 系统。按阅读路线、实际问题或最近更新进入专题。'
     schema = {'@context': 'https://schema.org', '@type': 'BlogPosting' if item else 'WebSite',
               'name': title, 'url': url, 'description': description, 'inLanguage': 'zh-CN'}
     if item:
@@ -70,7 +70,7 @@ def seo(data, item=None, slug=None):
             + '<script type="application/ld+json">' + json.dumps(schema, ensure_ascii=False).replace('<', '\\u003c') + '</script>')
 
 
-def maintenance(item):
+def maintenance(item, slug):
     dates = ' <span aria-hidden="true">·</span> '.join(
         f'<span>{label} <time datetime="{item[key]}">{item[key]}</time></span>'
         for label, key in [('首次发布', 'published'), ('内容更新', 'contentUpdated'), ('最近核验', 'reviewed')])
@@ -78,11 +78,13 @@ def maintenance(item):
                       f'<a href="#{c["anchor"]}">{escape(c["summary"])}</a> '
                       f'<a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/{c["evidence"]}">范围说明</a></li>'
                       for c in item['changes'])
+    history = (f'https://github.com/PiratePai/PiratePai.github.io/commit/{item["publicationCommit"]}'
+               if item.get('publicationCommit') else f'https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/{slug}.html')
     return (f'<div class="article-maintenance"><div class="article-dates">{dates}</div>'
             '<details id="article-history"><summary>变更记录与核验范围</summary>'
             '<p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。'
             '论文报告、源码核对与独立复现，以正文各处的说明为准。</p>'
-            f'<ul>{changes}</ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/{item["publicationCommit"]}">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p>'
+            f'<ul>{changes}</ul><p>首次发布以<a href="{history}">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p>'
             '</details></div>')
 
 
@@ -94,7 +96,7 @@ def build():
         source = path.read_text(encoding='utf-8')
         source = re.sub(r'<title>.*?</title>', lambda _: '<title>' + escape(item['title']) + '</title>', source, count=1, flags=re.S)
         source = block(source, 'site-metadata', seo(data, item, slug), '</head>')
-        source = block(source, 'article-maintenance', maintenance(item), '</header>')
+        source = block(source, 'article-maintenance', maintenance(item, slug), '</header>')
         outputs[path] = source
     home = (ROOT / 'index.html').read_text(encoding='utf-8')
     # Old manually maintained description is superseded by the generated block.
@@ -106,8 +108,9 @@ def build():
             groups.setdefault(change['date'], []).append((slug, item, change))
     updates = '<p>日期对应具体改动；展开后可直接到修改章节。页面维护不改变研究资料的核验日期。</p>'
     for day, entries in sorted(groups.items(), reverse=True):
-        label = '图解与可读性修订' if day == '2026-11-04' else '研究资料增补'
-        updates += f'<details class="update-group"><summary><time datetime="{day}">{day}</time> · {label} · {len(entries)} 篇</summary><ul>'
+        label = '专题新增与内容修订' if any(c['kind'] == '新增专题' for _, _, c in entries) else '内容更新'
+        article_count = len({slug for slug, _, _ in entries})
+        updates += f'<details class="update-group"><summary><time datetime="{day}">{day}</time> · {label} · {article_count} 篇</summary><ul>'
         for slug, item, change in entries:
             updates += f'<li><a href="posts/{slug}.html#{change["anchor"]}">{escape(item["title"])}</a><span>{escape(change["summary"])}</span></li>'
         updates += '</ul></details>'

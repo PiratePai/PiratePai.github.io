@@ -176,7 +176,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-15">2026-09-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-loop-transformer-survey-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/04f6a9d9c75471bcb1f136a913bcdc13731f904f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-15">2026-09-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-loop-transformer-survey-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/04f6a9d9c75471bcb1f136a913bcdc13731f904f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -1055,6 +1055,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 
 <div class="callout"><b>关于"传闻类"引用的说明（2026-10-11 更新）</b>：本文涉及 OpenAI Astra / Claude "Mythos" 的内容均来自二手信源（The Information 报道的转述、研究者博客与社区分析<span class="cite">[21][22][44]</span>）。<b>事实更新：OpenAI 已于 2026-09-03 正式发布 GPT-6 Astra</b>；The Information 于发布前两日报道其使用 recurrent depth / looped transformers，Jakub Pachocki 回应称 Astra 的计算图深度在 GPT-4 的 2× 以内，但 <b>OpenAI 至今未官方确认架构</b>。Astra 系统卡确认了安全性影响：其 CoT 可监控性低于此前模型（更短、更少文字化的推理轨迹），UK AISI 实测其无 CoT 数学任务时域 30.9 分钟，但 OpenAI 声明"分析未将可控性变化归因于架构"。结论：模型已发布、架构仍未证实，"循环深度假说"保持假说身份<span class="cite">[21][22][44][61]</span>。</div>
 
+<div class="note" id="related-methods-20261104"><b>关联专题：</b><a href="test-time-compute.html#reading-path">推理时计算与自适应预算</a>。将本篇机制连接到统一评测、任务预算和在线运行。</div>
 <footer>
   <p><b>系列阅读</b>：本文是本站架构系列的续篇，姊妹篇：<a href="attention-evolution.html">《注意力结构演进：MHA → MLA 与混合架构》</a> · <a href="moe-survey.html">《MoE 全景》</a> · <a href="spec-decoding-post-training.html">《投机解码的后训练》</a>。代码解析所涉仓库已 clone 至本地（<code>spec/recurrent-pretraining</code>、<code>spec/coconut</code>、<code>spec/Awesome-Loop-Models</code>）。</p>
   <p>© 2026 PiratePai · <a href="../index.html">← 返回首页</a></p>
@@ -1069,7 +1070,7 @@ k = min(max_latent_stage, scheduled_stage)</code></pre>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
 <link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=62ee250d1981"></script>
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

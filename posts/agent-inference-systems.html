@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:var(--muted);margin:-6px 0 10px;}
+  .codecap b{color:#6ea8ff;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:#171a21;font-size:14.5px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:#17212b;color:#6ea8ff;}
+  tr:nth-child(even) td{background:#112132;}
+  .timeline{list-style:none;margin:18px 0;padding:0;border-left:3px solid #3e5770;}
+  .timeline li{margin:0 0 14px;padding:0 0 0 22px;position:relative;}
+  .timeline li::before{content:"";position:absolute;left:-8.5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #2a2f3a;box-shadow:0 0 0 2px var(--accent);}
+  .timeline .t{font-weight:700;color:var(--accent);font-family:Consolas,monospace;margin-right:10px;}
+  .fig{background:#171a21;border:1px dashed #40596e;border-radius:10px;padding:16px 18px;margin:16px 0;font-size:14px;overflow-x:auto;}
+  .fig .cap{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .flowrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .fbox{border:1.5px solid #3f576e;border-radius:8px;padding:8px 12px;background:#15212e;font-size:13px;text-align:center;min-width:92px;}
+  .fbox.hl{border-color:#7c5a31;background:#312411;}
+  .fbox.ok{border-color:#387553;background:#192a1e;}
+  .arr{align-self:center;color:#6ea8ff;font-size:18px;font-weight:700;}
+  .pill{display:inline-block;background:#16212c;border:1px solid #385975;color:#6ea8ff;border-radius:20px;padding:1px 12px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap;}
+  .kbd{font-family:Consolas,monospace;background:#12212f;color:#6ea8ff;padding:2px 7px;border-radius:5px;font-size:12.5px;}
+  .good{color:var(--ok);font-weight:600;} .bad{color:#ff6b6b;font-weight:600;}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .refs li{margin:8px 0;font-size:14px;}
+  details{margin:10px 0;}
+  summary{cursor:pointer;color:var(--accent);font-weight:600;}
+  .tag{font-size:11px;padding:1px 8px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle;}
+  .tag.sys{background:#1e261c;color:#41d1a7;} .tag.paper{background:#20182a;color:#9d7bff;} .tag.ind{background:#322111;color:#ffb454;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
+  .summary3 b{color:#41d1a7;}
+  .summary3 ol{margin:6px 0 2px;}
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测">
+<meta property="og:description" content="从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。">
+<meta property="og:url" content="https://piratepai.github.io/posts/agent-inference-systems.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-04">
+<link rel="canonical" href="https://piratepai.github.io/posts/agent-inference-systems.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "url": "https://piratepai.github.io/posts/agent-inference-systems.html", "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。", "inLanguage": "zh-CN", "headline": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "datePublished": "2026-11-04", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/agent-inference-systems.html"}</script>
+<!-- site-metadata:end -->
+</head>
+<body>
+<div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
+<header class="hero"><div class="inner"><p class="kicker">Agent 运行时 · 推理系统 · 2026</p><h1>Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测</h1><p class="sub">从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。</p><div class="meta"><span class="pill">调研与核验：2026-11-04</span><span class="pill">一手来源核验；本地 SQLite 故障注入；无生产系统基准</span></div></div><!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/agent-inference-systems.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+<div class="wrap"><nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">关键进展与实践入口</a></li><li><a href="#s0">0 导读：从一次生成到一项可恢复的任务</a></li><li><a href="#s1">1 预备知识：状态机、上下文与记忆</a></li><li><a href="#s2">2 时间与费用：找到任务的关键路径</a></li><li><a href="#s3">3 上下文工程：减少输入而保留任务依据</a></li><li><a href="#s4">4 工具与模型调度：并行、限流与背压</a></li><li><a href="#s5">5 持久化与恢复：检查点为何还不够</a></li><li><a href="#s6">6 可观测性：把一项任务拆成可归因的记录</a></li><li><a href="#s7">7 评测：状态验收、消融与故障矩阵</a></li><li><a href="#s8">8 工程选型与研究边界</a></li><li><a href="#refs">参考文献与来源口径</a></li></ol></nav><div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
+.hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:#e8eaed;font-size:14px}
+.hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style><div class="hl-head"><b>关键进展与实践入口</b><i>基础研究日期与本次核验日期分别标注</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>交替观察与动作</b><span class="hl-date">2022-10-06</span></div><p>ReAct 帮助理解 Agent 的运行循环。</p><a class="hl-link" href="#s1">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>上下文与长期记忆分层</b><span class="hl-date">2023-10-12</span></div><p>MemGPT 提供有限窗口之外的信息管理视角。</p><a class="hl-link" href="#s3">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>多次调用共享前缀</b><span class="hl-date">2023-12-12</span></div><p>SGLang 连接程序控制流与 KV 复用。</p><a class="hl-link" href="#s3">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>任务最终状态验收</b><span class="hl-date">2024-06-17</span></div><p>τ-bench 区分一次成功与重复运行可靠性。</p><a class="hl-link" href="#s7">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>长任务上下文工程</b><span class="hl-date">2025-09-29</span></div><p>压缩与结构化笔记都需要验证事实保留。</p><a class="hl-link" href="#s3">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>中断恢复教学示例</b><span class="hl-date">2026-11-04 本站</span></div><p>工具提交后故意中断，恢复时核对副作用没有重复。</p><a class="hl-link" href="#s5">→ 进入章节</a></div></div></div><h2 id="s0">0 导读：从一次生成到一项可恢复的任务</h2>
+<p><b>本文主线：任务状态 → 上下文装配 → 模型与工具调度 → 持久化恢复 → 最终状态验收。</b>本文回答四个问题：Agent 时间和费用究竟花在哪里？怎样缩短上下文又保住任务事实？工具等待和多分支怎样调度？进程中断后如何继续，并检验没有重复执行动作？</p>
+<p>这里的 Agent 指模型根据当前任务状态选择动作、读取外部观察并继续求解的程序。ReAct 将推理与环境动作交替组织，为理解这条循环提供了早期范式。<sup class="cite"><a href="#ref-REACT">[REACT]</a></sup> 本篇研究上线后的运行系统；训练时如何产生轨迹、更新策略与同步权重，见<a href="agent-rl-survey.html#reading-path">Agent 与强化学习</a>。</p>
+<table><caption>表 0-1 · 三层系统的接口（本文归纳）</caption><thead><tr><th>层次</th><th>负责什么</th><th>主要指标</th></tr></thead><tbody><tr><td>模型服务</td><td>prefill、decode、KV、组批、结构化输出</td><td>TTFT、TPOT、请求 goodput</td></tr><tr><td>Agent 运行时</td><td>状态、上下文、工具、预算、检查点、恢复</td><td>任务耗时、失败恢复、重复动作</td></tr><tr><td>任务验收</td><td>检查产物或业务最终状态</td><td>成功率、截止时间内成功率、每次成功成本</td></tr></tbody></table>
+<ul class="timeline"><li><span class="t">2022-10-06</span>ReAct：在求解中交替使用推理与动作。<sup class="cite"><a href="#ref-REACT">[REACT]</a></sup></li><li><span class="t">2023-10-12 / 12-12</span>MemGPT 研究分层记忆；SGLang 研究多次模型调用与结构化程序的高效执行。<sup class="cite"><a href="#ref-MEM">[MEM]</a></sup><sup class="cite"><a href="#ref-SGL">[SGL]</a></sup></li><li><span class="t">2024-06-17</span>τ-bench 用工具、用户和领域规则构造交互任务，以最终状态评估成功与重复运行可靠性。<sup class="cite"><a href="#ref-TAU">[TAU]</a></sup></li><li><span class="t">2025-09-29</span>Anthropic 发布上下文工程实践，讨论压缩、结构化笔记与多 Agent 分工。<sup class="cite"><a href="#ref-CTX">[CTX]</a></sup></li><li><span class="t">2026-11-04 核验</span>核对 LangGraph 持久化和故障处理文档；本站增加可本地执行的恢复教学示例。<sup class="cite"><a href="#ref-PERSIST">[PERSIST]</a></sup><sup class="cite"><a href="#ref-FAULT">[FAULT]</a></sup></li></ul>
+<div class="card" id="reading-path"><b>阅读路径</b><p>第 1、2 章建立状态和时间模型；第 3 章研究上下文，第 4 章研究调度，第 5 章研究恢复，第 6、7 章提供观测和验收方法。预算控制接<a href="test-time-compute.html#s5">推理时计算</a>，请求统计接<a href="inference-evaluation.html#s4">评测账本</a>。</p></div>
+<div class="summary3"><b>本章小结</b><ol><li>一次成功生成只是完整任务中的一个事件。</li><li>运行时负责连接模型、工具、状态与恢复。</li><li>用最终任务状态验收，训练吞吐和 token 吞吐不能代替任务成功率。</li></ol></div>
+
+<h2 id="s1">1 预备知识：状态机、上下文与记忆</h2>
+<h3 id="s1-1">1.1 状态是事实，提示词是一次读取</h3>
+<p>任务状态至少包含目标、约束、已确认事实、待办动作、工具结果引用、预算余额和终止原因。一次模型调用的上下文是从这些信息中选出的输入，而非全部状态的唯一副本。模型生成的新结论也应区分“已观察事实”和“待检验假设”。</p>
+<div class="analogy">项目档案记录已经发生的事情；会议材料只选本次讨论需要的部分。删去会议材料中的旧日志，不应该同时删掉档案里可追溯的原始凭据。</div>
+<div class="fig"><div class="flowrow"><div class="fbox">持久化任务状态</div><div class="arr">→</div><div class="fbox">装配当前上下文</div><div class="arr">→</div><div class="fbox hl">模型决定下一动作</div><div class="arr">→</div><div class="fbox">执行工具并观察</div><div class="arr">→</div><div class="fbox ok">更新状态 / 验收 / 保存</div></div><div class="cap">图 1-1 · 本文自绘；交互循环参考 ReAct §2，持久化层参考 LangGraph Persistence 文档。错误与预算耗尽返回状态机，不静默丢失。</div></div>
+<h3 id="s1-2">1.2 四种经常被统称为“记忆”的东西</h3>
+<table><caption>表 1-1 · 存储对象与失效条件</caption><thead><tr><th>对象</th><th>保存内容</th><th>不能替代什么</th></tr></thead><tbody><tr><td>上下文窗口</td><td>这次模型可读取的 token</td><td>不能保证进程崩溃后仍然存在</td></tr><tr><td>检查点 checkpoint</td><td>任务状态、执行进度、结果引用</td><td>不能自动撤销或去重外部工具副作用</td></tr><tr><td>长期记忆 / 文档库</td><td>跨会话事实与可检索材料</td><td>检索命中不保证事实仍有效</td></tr><tr><td>KV Cache</td><td>特定模型与前缀的中间张量</td><td>不能承担业务任务状态与结果验收</td></tr></tbody></table>
+<p>MemGPT 用层次化存储的思想管理有限上下文。<sup class="cite"><a href="#ref-MEM">[MEM]</a></sup> LangGraph 则明确区分线程范围的 checkpointer 和跨线程的 store。<sup class="cite"><a href="#ref-PERSIST">[PERSIST]</a></sup> 两者讨论的接口不同；本文用表 1-1 对齐存储职责，不把它们视作同一种缓存。</p>
+<div class="summary3"><b>本章小结</b><ol><li>任务事实应独立于某一次提示词保存。</li><li>上下文、检查点、长期记忆和 KV 分别解决不同问题。</li><li>压缩与缓存可以优化读取过程，最终状态仍需可追溯。</li></ol></div>
+
+<h2 id="s2">2 时间与费用：找到任务的关键路径</h2>
+<h3 id="s2-1">2.1 用依赖图计算等待</h3>
+<p>一个任务由模型调用、工具调用、排队、存储和验收等节点组成；依赖边表示后一项必须等待前一项。没有资源争用时，任务时间至少是依赖图中最长路径的时长。真实系统还要加上资源排队与重试。把所有节点耗时相加，会高估已经并行的部分；只看模型时间，又会低估任务等待。</p>
+<table><caption>表 2-1 · 人工构造的关键路径例子，不是服务实测</caption><thead><tr><th>阶段</th><th>时长</th><th>依赖</th></tr></thead><tbody><tr><td>第一次模型调用</td><td>1 秒</td><td>任务开始</td></tr><tr><td>工具 A / 工具 B</td><td>8 秒 / 5 秒</td><td>都依赖第一次调用；相互无依赖</td></tr><tr><td>最终模型调用</td><td>1 秒</td><td>等待 A、B</td></tr><tr><td>验收与保存</td><td>0.2 秒</td><td>等待最终输出</td></tr></tbody></table>
+<p>串行执行工具时，总耗时为 1+8+5+1+0.2=15.2 秒；允许二者并行且资源足够时是 1+max(8,5)+1+0.2=10.2 秒。此后即使两次模型调用都快一倍，总时间也只从 10.2 降到 9.2 秒。这个算式解释了为何模型加速未必等比例缩短 Agent 任务。</p>
+<h3 id="s2-2">2.2 完整成本账本</h3>
+<p>任务费用应累加所有模型、验证器、工具、存储和重试成本。以同一任务集为分母，记录成功率和平均任务成本；以成功次数为分母时，用<b>所有尝试总成本/成功任务数</b>，避免把失败花掉的钱丢掉。工具订阅、自部署 GPU 与空闲容量如何摊销，应另写计费假设。</p>
+<p>首个用户可见响应、首个有效工具动作、最终产物完成时间分别记录。展示“正在处理”可能改善交互感受，却不会减少完成任务的时间。若用户有明确截止时间，还要统计截止时间内的成功比例。</p>
+<div class="summary3"><b>本章小结</b><ol><li>任务时间由依赖、关键路径和资源排队共同决定。</li><li>并行化只适用于没有数据依赖且资源允许的节点。</li><li>模型、工具、验证和失败重试全部进入任务成本。</li></ol></div>
+
+<h2 id="s3">3 上下文工程：减少输入而保留任务依据</h2>
+<h3 id="s3-1">3.1 装配顺序与数据类型</h3>
+<p>本文建议把上下文分为稳定指令、当前任务约束、结构化状态、相关证据、最近交互五部分。原始日志与大文件保留在外部，通过路径、版本和摘要引用；只读当前决策需要的片段。检索结果带来源和时间，冲突事实保留冲突标记，不能由摘要悄悄选一个当真。</p>
+<p>Anthropic 的工程文章讨论了压缩、结构化笔记和分工；同时指出压缩过度可能丢失后续才显得关键的细节。<sup class="cite"><a href="#ref-CTX">[CTX]</a></sup> 因此压缩不能只按 token 缩减比例验收，要检查约束、数值、失败尝试、未决问题和证据链接是否仍然可恢复。</p>
+<h3 id="s3-2">3.2 摘要、检索与裁剪的误差</h3>
+<table><caption>表 3-1 · 本文建议的上下文策略检查</caption><thead><tr><th>策略</th><th>主要收益</th><th>失败模式与检查</th></tr></thead><tbody><tr><td>裁剪旧工具输出</td><td>减少重复 token</td><td>删除了未解决错误；先保留错误码、产物位置与状态</td></tr><tr><td>摘要压缩</td><td>缩短长会话</td><td>数字或约束丢失；用任务事实清单做前后对照</td></tr><tr><td>按需检索</td><td>只载入相关资料</td><td>漏召回关键证据；保留扩展查询与读取原文的路径</td></tr><tr><td>结构化任务笔记</td><td>恢复目标和进度</td><td>状态过期；写入版本并在恢复时核验外部环境</td></tr></tbody></table>
+<h3 id="s3-3">3.3 压缩与前缀缓存的交互</h3>
+<p>SGLang 的 RadixAttention 研究复用多次模型调用中的公共前缀。<sup class="cite"><a href="#ref-SGL">[SGL]</a></sup> 缓存命中取决于实际 token 前缀及服务端兼容条件；“文字意思相同”不等于相同 KV。重写较早位置的摘要会缩短最长公共前缀，其后的缓存不能直接复用。稳定内容置前、变化内容置后，是值得验证的布局策略，不能以改变指令语义为代价。</p>
+<p>一次压缩的净时间收益，可以按本文账本写成“后续各轮节省的处理时间之和 − 压缩耗时 − 新增检索耗时 − 因前缀变化增加的重算时间”。各项应实测；如果任务即将结束，压缩可能来不及回本。更长窗口也不能消除事实筛选、冲突处理和无关信息干扰。</p>
+<div class="summary3"><b>本章小结</b><ol><li>上下文优化要保住约束、事实与证据引用。</li><li>摘要和检索各有误差，应以完整任务结果验证。</li><li>前缀缓存按实际 token 复用，压缩收益需扣除重算与额外调用。</li></ol></div>
+
+<h2 id="s4">4 工具与模型调度：并行、限流与背压</h2>
+<h3 id="s4-1">4.1 先检查依赖，再决定并发</h3>
+<p>独立的只读查询可以并行；读取工具 A 的结果再构造工具 B 参数时必须串行。共享文件、同一数据库对象或同一外部资源的写入，应明确冲突处理与提交顺序。多个 Agent 分支共享任务预算，生成候选计划与真正执行计划分开记录。</p>
+<p>模型服务善于组批生成；工具可能等待网络、磁盘或外部任务。工具等待期间，运行时可以释放工作线程或计算槽，但是否保留会话 KV 取决于缓存策略。等待期间的缓存占用、重载成本和下一轮延迟，应一起比较。</p>
+<h3 id="s4-2">4.2 背压防止局部加速拖垮下游</h3>
+<p>背压指下游处理不过来时限制上游产生新工作。本文建议分别设置任务数、模型请求数、每种工具并发数和排队上限，而不是只设一个全局线程数。某个工具持续返回限流时，降低该工具的并发，避免模型继续产生无法执行的动作。</p>
+<p>为任务建立统一截止时间；各节点超时不应超过剩余时间。重试只针对明确可重试的暂时故障，使用次数上限和退避；参数错误需要修正，重复相同请求不会自动成功。取消要传播到在途节点，记录哪些已经停止、哪些仍可能完成及产生费用。</p>
+<h3 id="s4-3">4.3 任务级调度与请求级调度</h3>
+<p>把每条分支都当独立用户，会使大扇出任务占据过多资源。本文建议在任务级分配预算、优先级和并发配额，再在模型服务内部做组批。跨会话的前缀复用仍需满足隔离和授权条件；不能让缓存命中改变工具可访问的数据范围。</p>
+<div class="summary3"><b>本章小结</b><ol><li>并发前先确认数据依赖与资源冲突。</li><li>下游限流应反馈到上游，重试受统一预算约束。</li><li>任务级配额与模型服务组批共同决定体验。</li></ol></div>
+
+<h2 id="s5">5 持久化与恢复：检查点为何还不够</h2>
+<h3 id="s5-1">5.1 保存什么，何时恢复</h3>
+<p>一个检查点至少保存任务 ID、逻辑步骤 ID、状态版本、已完成动作、结果引用、剩余预算和下一动作。LangGraph 的 checkpointer 保存线程执行状态，持久化存储可以支持中断后的恢复；内存实现则不能跨进程重启保留。<sup class="cite"><a href="#ref-PERSIST">[PERSIST]</a></sup> 故障处理还涉及重试、超时和恢复语义，具体支持应按所用版本核对。<sup class="cite"><a href="#ref-FAULT">[FAULT]</a></sup></p>
+<div class="citebox"><b>[PERSIST] LangChain 项目.</b> <i>LangGraph Persistence</i>，官方滚动文档，首发日期未标注；核验快照 2026-11-04。原文：<span class="q">“resume after an interruption, recover from a failure”</span>（在中断后继续，并从失败中恢复。）<a href="https://docs.langchain.com/oss/python/langgraph/persistence">原文</a>。</div>
+<p>恢复时重新核对工作区版本、外部对象状态和数据有效期。如果文件已被别人修改、订单状态已改变，旧计划可能失效。恢复计算与重新执行外部写操作是两个不同决定；检查点不能单独保证外部副作用恰好发生一次。</p>
+<h3 id="s5-2">5.2 “工具成功，保存失败”的时间窗口</h3>
+<div class="fig"><div class="flowrow"><div class="fbox">保存动作意图<br><small>稳定 action_key</small></div><div class="arr">→</div><div class="fbox hl">工具已提交副作用</div><div class="arr">→</div><div class="fbox">进程中断<br><small>尚未保存结果</small></div><div class="arr">→</div><div class="fbox ok">按同一键查询 / 重试<br><small>工具侧去重并返回结果</small></div></div><div class="cap">图 5-1 · 本文自绘的故障窗口；对应本站 recovery_demo.py 的实际注入点。工具幂等键为示例设计，不是检查点框架自动提供的保证。</div></div>
+<p><b>幂等</b>指同一个逻辑动作重复提交，不会重复产生业务效果。幂等键必须绑定逻辑动作，不能每次重试生成新键；同一键对应不同参数应报冲突。可靠去重通常需要工具或业务存储在同一事务中提交效果与键记录。若外部服务不支持幂等或结果查询，遇到结果未知应先对账，不能一律盲重试。</p>
+<h3 id="s5-3">5.3 可运行的故障注入示例</h3>
+<pre><code>python examples/efficiency-lab/recovery_demo.py</code></pre>
+<div class="codecap">代码 5-1 · <a href="../examples/efficiency-lab/recovery_demo.py">本站恢复教学源码</a>；仅使用临时目录与 SQLite，不访问真实业务服务。</div>
+<p>脚本分别建立“Agent 检查点库”和“工具业务库”：先保存动作意图，让模拟工具提交一次计数增量，随后在写入检查点结果前主动抛出异常。第二次执行读取已保存意图，用相同键调用工具，最后断言工具实际效果仍为 1、检查点状态为 completed。示例还拒绝同键不同参数。</p>
+<p>本例能证明这段 Python/SQLite 代码在所注入窗口中正确恢复；它没有验证真实 Agent 的规划能力、网络分区、跨地域数据库、工具键过期或外部服务事务。一次效果的保证来自模拟工具内部事务与唯一键，不能外推到任意第三方 API。</p>
+<div class="summary3"><b>本章小结</b><ol><li>检查点记录执行进度，外部副作用需要额外协调。</li><li>幂等键绑定逻辑动作，工具侧效果与去重记录应原子提交。</li><li>恢复示例覆盖明确故障窗口，真实服务仍需对账和更多故障注入。</li></ol></div>
+
+<h2 id="s6">6 可观测性：把一项任务拆成可归因的记录</h2>
+<h3 id="s6-1">6.1 事件应能还原依赖关系</h3>
+<table><caption>表 6-1 · 本文建议的最小事件字段</caption><thead><tr><th>字段</th><th>用途</th><th>常见遗漏</th></tr></thead><tbody><tr><td>task_id、span_id、parent_span_id</td><td>关联任务与依赖链</td><td>只有日志文本，无法识别并行节点</td></tr><tr><td>logical_step、attempt、action_key</td><td>区分逻辑动作与物理重试</td><td>重试被当成新的成功动作</td></tr><tr><td>计划、开始、结束时间</td><td>区分排队与执行</td><td>只记执行时间，漏掉等待</td></tr><tr><td>模型/工具版本、输入摘要哈希、输出引用</td><td>定位行为变化与复现输入</td><td>版本随默认值变化</td></tr><tr><td>费用、token、状态、终止原因</td><td>汇总预算与失败</td><td>取消或超时费用消失</td></tr></tbody></table>
+<p>跨进程耗时使用各进程的单调时钟测量，再通过关联 ID 连接；跨机器墙钟可能存在偏差，不能直接拿两个未校准时间戳相减。正文和工具原始输出可以存为独立产物，事件只保留引用；公开复现材料时需清理凭据和不应公开的数据。</p>
+<h3 id="s6-2">6.2 从请求指标汇总到任务指标</h3>
+<p>至少报告任务成功率、截止时间内成功率、全部尝试费用/成功次数、任务延迟分布、超时率和重复副作用次数。成功任务延迟要与所有终止任务的分布分别展示；超时记录是被截断的观察，不能把超时阈值当成任务本来就会在该时刻完成。</p>
+<p>本站<a href="../examples/efficiency-lab/evaluate.py">账本工具</a>支持相同任务集合上的策略比较，显式记录 completed、failed、timeout、cancelled。它不自动验证任务成功，<code>success</code> 必须来自最终状态评测器；提供的样例标签为人工设定。</p>
+<div class="summary3"><b>本章小结</b><ol><li>事件记录应还原依赖、重试、版本与费用。</li><li>任务时间与请求时间分别统计，超时是截断观察。</li><li>成功标签来自独立验收，日志本身不产生正确性证据。</li></ol></div>
+
+<h2 id="s7">7 评测：状态验收、消融与故障矩阵</h2>
+<h3 id="s7-1">7.1 验收最终状态</h3>
+<p>τ-bench 比较交互结束后的数据库状态与目标状态，并用 pass<sup>k</sup> 研究重复运行可靠性。<sup class="cite"><a href="#ref-TAU">[TAU]</a></sup> 这里的 pass<sup>k</sup> 关注多次运行均成功，不能与“多个候选至少一个成功”的 pass@k 混用。自己的任务应定义相应最终判据：代码测试是否通过、产物字段是否满足要求、业务对象是否处在正确状态。</p>
+<p>任务环境也要固定版本和初始快照。每次运行从同一状态开始，不能让上次产生的文件、缓存或外部修改使后续任务变简单；如果研究跨会话记忆，则把允许保留的状态作为独立实验条件写清。</p>
+<h3 id="s7-2">7.2 一次只比较一个机制</h3>
+<table><caption>表 7-1 · 可执行的消融与故障计划；实际 Agent/GPU 实验待运行</caption><thead><tr><th>实验</th><th>保持相同</th><th>比较与验收</th></tr></thead><tbody><tr><td>完整历史 / 摘要 / 按需检索</td><td>模型、任务、工具、预算</td><td>成功率、输入 token、关键事实丢失</td></tr><tr><td>串行 / 独立工具并行</td><td>工具返回和依赖图</td><td>关键路径、限流、最终状态一致性</td></tr><tr><td>关闭 / 开启前缀复用</td><td>请求 token 与模型配置</td><td>命中率、任务延迟、缓存占用</td></tr><tr><td>提交工具效果后中断</td><td>动作键和参数</td><td>恢复后无重复效果；本站示例覆盖此项</td></tr><tr><td>工具超时 / 429 / 返回格式错误</td><td>固定注入位置和随机种子</td><td>次数受限、错误可归因、预算不失真</td></tr><tr><td>恢复前外部状态变化</td><td>已保存检查点</td><td>重新核验与重新规划，不执行过期假设</td></tr></tbody></table>
+<h3 id="s7-3">7.3 交付材料与负结果</h3>
+<p>保存任务定义、初始化快照、模型/工具版本、策略配置、事件流、最终状态和验收结果。每项优化至少报告失败案例：摘要删掉约束、并发读取过期数据、重试导致重复效果、长期记忆命中旧事实。把“尚未覆盖的故障”与“已经通过的测试”列开，避免一次本地演示被当成生产可靠性证明。</p>
+<div class="summary3"><b>本章小结</b><ol><li>以环境或产物的最终状态评价成功。</li><li>重复运行可靠性与多候选覆盖率是不同指标。</li><li>消融与故障注入使用固定任务和环境，并归档所有失败。</li></ol></div>
+
+<h2 id="s8">8 工程选型与研究边界</h2>
+<p>短任务、工具少且无持久化需要时，可以从简单循环和结构化日志开始。长任务、人工中断、多分支与恢复需求增加后，再引入显式状态图、持久化检查点和任务级预算。选择框架时核对状态序列化、恢复兼容性、工具幂等支持、观测接口和版本升级策略。</p>
+<p>后续值得验证的方向包括：上下文压缩与 KV 生命周期的联合决策、工具等待预测与缓存驻留策略、带任务期限的生成调度、可检验的长期记忆更新。每个方向都需要任务级指标，才能与<a href="inference-evaluation.html">服务评测</a>和<a href="test-time-compute.html">预算分配</a>对齐。</p>
+<div class="summary3"><b>本章小结</b><ol><li>从任务持续时间、分支和恢复需求选择运行时复杂度。</li><li>框架提供机制，最终正确性仍取决于工具和业务协议。</li><li>研究收益用任务成功、完成时间和总成本共同衡量。</li></ol></div>
+<h2 id="refs">参考文献与来源口径</h2><ol class="refs"><li id="ref-REACT"><b>[REACT] Shunyu Yao 等.</b> <i>ReAct: Synergizing Reasoning and Acting in Language Models</i>，ICLR 2023；arXiv:2210.03629，首次提交 2022-10-06，v3 2023-03-10。<a href="https://arxiv.org/abs/2210.03629">一手来源</a>。</li><li id="ref-MEM"><b>[MEM] Charles Packer 等.</b> <i>MemGPT: Towards LLMs as Operating Systems</i>，arXiv:2310.08560，首次提交 2023-10-12，v2 2024-02-12。<a href="https://arxiv.org/abs/2310.08560">一手来源</a>。</li><li id="ref-SGL"><b>[SGL] Lianmin Zheng 等.</b> <i>SGLang: Efficient Execution of Structured Language Model Programs</i>，arXiv:2312.07104，首次提交 2023-12-12，v2 2024-06-06。<a href="https://arxiv.org/abs/2312.07104">一手来源</a>。</li><li id="ref-TAU"><b>[TAU] Shunyu Yao、Noah Shinn、Pedram Razavi、Karthik Narasimhan.</b> <i>τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains</i>，arXiv:2406.12045，2024-06-17。<a href="https://arxiv.org/abs/2406.12045">一手来源</a>。</li><li id="ref-CTX"><b>[CTX] Anthropic Applied AI 团队.</b> <i>Effective context engineering for AI agents</i>，官方工程文章，2025-09-29；核验 2026-11-04。<a href="https://www.anthropic.com/research/effective-context-engineering-for-ai-agents">一手来源</a>。</li><li id="ref-PERSIST"><b>[PERSIST] LangChain 项目.</b> <i>LangGraph Persistence</i>，官方滚动文档，首发日期未标注；核验快照 2026-11-04。<a href="https://docs.langchain.com/oss/python/langgraph/persistence">一手来源</a>。</li><li id="ref-FAULT"><b>[FAULT] LangChain 项目.</b> <i>LangGraph Fault tolerance</i>，官方滚动文档，首发日期未标注；核验快照 2026-11-04。<a href="https://docs.langchain.com/oss/python/langgraph/fault-tolerance">一手来源</a>。</li></ol><p class="note">注：来源核验日期为 2026-11-04。论文日期区分首次提交与修订；滚动文档仅记录访问快照，不推断首发日期。文中的“本文设计”“教学输入”“伪代码”是作者推导或示例，不能视为论文或生产实测结果。未开展 GPU 推理与模型质量复现。</p></div><footer><p>© 2026 PiratePai · <a href="../index.html">返回完整目录</a></p><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="与 GitHub 主页共享的浏览量计数" loading="lazy"></footer>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=9094e278b3fd">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<!-- chapter-reader:end -->
+</body>
+</html>

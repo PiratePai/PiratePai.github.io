@@ -1,0 +1,10 @@
+{
+  "evidence_kind": "synthetic teaching fixture; no GPU inference or model quality was measured",
+  "cost_unit": "arbitrary teaching credit, not USD or token count",
+  "duration_ms": 10000,
+  "planned_requests": 6,
+  "slo_ms": {"ttft": 300, "tpot": 60, "e2e": 1000},
+  "task_deadline_ms": 5000,
+  "strategies": ["single", "best-of-4", "adaptive"],
+  "task_ids": ["easy-1", "easy-2", "hard-1", "hard-2"]
+}

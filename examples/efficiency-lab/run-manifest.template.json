@@ -1,0 +1,23 @@
+{
+  "evidence_kind": "planned GPU experiment; not executed",
+  "run_id": null,
+  "started_at_utc": null,
+  "model_revision": null,
+  "tokenizer_revision": null,
+  "chat_template_sha256": null,
+  "dataset_revision_and_sha256": null,
+  "engine_version_or_commit": null,
+  "container_digest": null,
+  "driver_and_compute_libraries": null,
+  "hardware_and_topology": null,
+  "power_limit_and_co_tenants": null,
+  "server_command": null,
+  "benchmark_command": null,
+  "sampling_parameters": null,
+  "workload_lengths_arrivals_concurrency": null,
+  "cache_state_and_warmup": null,
+  "quality_evaluator_and_holdout_split": null,
+  "raw_results_and_logs": null,
+  "repeat_index": null,
+  "known_limitations": []
+}
