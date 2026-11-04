@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const base = process.argv[2] || 'http://127.0.0.1:8957';
-const slugs = ['inference-evaluation', 'test-time-compute', 'agent-inference-systems'];
+const slugs = ['inference-evaluation', 'test-time-compute', 'agent-inference-systems', 'diffusion-flow-sampling'];
 const output = process.env.SITE_QA_OUTPUT || path.join(require('node:os').tmpdir(), 'piratepai-content-qa');
 fs.mkdirSync(output,{recursive:true});
 (async () => {
@@ -60,7 +60,7 @@ fs.mkdirSync(output,{recursive:true});
     await page.goto(base);
     const articles=fs.readdirSync(path.join(__dirname,'../posts')).filter(name=>name.endsWith('.html'));
     assert.equal(await page.locator('.article-entry').count(),articles.length);
-    for (const [query,slug] of [['可复算账本','inference-evaluation'],['预算预留','test-time-compute'],['幂等','agent-inference-systems']]) {
+    for (const [query,slug] of [['可复算账本','inference-evaluation'],['预算预留','test-time-compute'],['幂等','agent-inference-systems'],['时间网格','diffusion-flow-sampling']]) {
       await page.locator('#search-input').fill(query);
       await page.locator(`#search-list a[href*="${slug}"]`).first().waitFor({state:'visible'});
     }
@@ -73,6 +73,7 @@ fs.mkdirSync(output,{recursive:true});
       await p.goto(`${base}/posts/${slug}.html`);
       assert.ok(await p.locator('.toc').isVisible());
       assert.equal(await p.locator('h2').count(),await p.locator('h2:visible').count());
+      assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth <= innerWidth + 1), `No-JS mobile overflow in ${slug}`);
     }
     console.log('PASS mobile/desktop chapters, references, full text, no-JS and search');
   } finally { await browser.close(); }

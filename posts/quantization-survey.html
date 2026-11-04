@@ -168,9 +168,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-04">
 <link rel="canonical" href="https://piratepai.github.io/posts/quantization-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -189,7 +189,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看量化与少步采样的组合实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -901,6 +901,7 @@ dequantized = input_in_groups * scale + mn</code></pre>
 <h2 id="s7"><span class="no">7</span>DiT 的量化：扩散模型与众不同</h2>
 
 <h3>7.1 为什么扩散模型的量化更难</h3>
+<div class="note" id="sampling-efficiency-crossref"><b>关联阅读</b><p>换成少步权重或提高引导强度后，校准数据也要覆盖新的采样轨迹。<a href="diffusion-flow-sampling.html#s6-combine">查看量化与少步采样的组合实验</a></p></div>
 <p>Sora、FLUX、HunyuanVideo、Qwen-Image 这类生成模型的骨架是<strong>扩散 Transformer（DiT）</strong>：同一个网络被去噪步骤（timestep）反复调用几十次。这带来与 LLM 截然不同的量化难题：</p>
 <ol>
   <li><strong>分布随时间步漂移</strong>：t 接近 1（纯噪声）和接近 0（接近成图）时，激活分布差别巨大。用一套静态 scale＝只对某个时间步最优；</li>

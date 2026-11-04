@@ -230,9 +230,16 @@
       "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-03",
+      "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "查看量化与少步采样的组合实验。",
+          "anchor": "sampling-efficiency-crossref",
+          "evidence": "docs/diffusion-flow-sampling.md"
+        },
         {
           "date": "2026-11-03",
           "kind": "资料核验",
@@ -247,9 +254,16 @@
       "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。",
       "published": "2026-10-29",
       "publicationCommit": "42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c",
-      "contentUpdated": "2026-11-03",
+      "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "查看视频采样的评测模板。",
+          "anchor": "sampling-efficiency-crossref",
+          "evidence": "docs/diffusion-flow-sampling.md"
+        },
         {
           "date": "2026-11-03",
           "kind": "资料核验",
@@ -353,9 +367,16 @@
       "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-03",
+      "contentUpdated": "2026-11-04",
       "reviewed": "2026-11-03",
       "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "关联阅读",
+          "summary": "对照少步、缓存与稀疏化的组合。",
+          "anchor": "sampling-efficiency-crossref",
+          "evidence": "docs/diffusion-flow-sampling.md"
+        },
         {
           "date": "2026-11-03",
           "kind": "资料核验",
@@ -413,6 +434,23 @@
           "summary": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
           "anchor": "s0",
           "evidence": "docs/content-gaps-20261104.md"
+        }
+      ]
+    },
+    "diffusion-flow-sampling": {
+      "title": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏",
+      "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。",
+      "published": "2026-11-04",
+      "publicationCommit": null,
+      "contentUpdated": "2026-11-04",
+      "reviewed": "2026-11-04",
+      "changes": [
+        {
+          "date": "2026-11-04",
+          "kind": "新增专题",
+          "summary": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。",
+          "anchor": "s0",
+          "evidence": "docs/diffusion-flow-sampling.md"
         }
       ]
     }
