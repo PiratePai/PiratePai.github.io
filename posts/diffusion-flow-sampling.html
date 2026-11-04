@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:var(--muted);margin:-6px 0 10px;}
+  .codecap b{color:#6ea8ff;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;background:#171a21;font-size:14.5px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:#17212b;color:#6ea8ff;}
+  tr:nth-child(even) td{background:#112132;}
+  .timeline{list-style:none;margin:18px 0;padding:0;border-left:3px solid #3e5770;}
+  .timeline li{margin:0 0 14px;padding:0 0 0 22px;position:relative;}
+  .timeline li::before{content:"";position:absolute;left:-8.5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--accent);border:3px solid #2a2f3a;box-shadow:0 0 0 2px var(--accent);}
+  .timeline .t{font-weight:700;color:var(--accent);font-family:Consolas,monospace;margin-right:10px;}
+  .fig{background:#171a21;border:1px dashed #40596e;border-radius:10px;padding:16px 18px;margin:16px 0;font-size:14px;overflow-x:auto;}
+  .fig .cap{text-align:center;font-size:12.5px;color:var(--muted);margin-top:10px;}
+  .flowrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+  .fbox{border:1.5px solid #3f576e;border-radius:8px;padding:8px 12px;background:#15212e;font-size:13px;text-align:center;min-width:92px;}
+  .fbox.hl{border-color:#7c5a31;background:#312411;}
+  .fbox.ok{border-color:#387553;background:#192a1e;}
+  .arr{align-self:center;color:#6ea8ff;font-size:18px;font-weight:700;}
+  .pill{display:inline-block;background:#16212c;border:1px solid #385975;color:#6ea8ff;border-radius:20px;padding:1px 12px;font-size:12.5px;margin:2px 4px 2px 0;white-space:nowrap;}
+  .kbd{font-family:Consolas,monospace;background:#12212f;color:#6ea8ff;padding:2px 7px;border-radius:5px;font-size:12.5px;}
+  .good{color:var(--ok);font-weight:600;} .bad{color:#ff6b6b;font-weight:600;}
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;}
+  .refs li{margin:8px 0;font-size:14px;}
+  details{margin:10px 0;}
+  summary{cursor:pointer;color:var(--accent);font-weight:600;}
+  .tag{font-size:11px;padding:1px 8px;border-radius:4px;margin-left:8px;font-weight:600;vertical-align:middle;}
+  .tag.sys{background:#1e261c;color:#41d1a7;} .tag.paper{background:#20182a;color:#9d7bff;} .tag.ind{background:#322111;color:#ffb454;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:12px 18px;margin:22px 0;}
+  .summary3 b{color:#41d1a7;}
+  .summary3 ol{margin:6px 0 2px;}
+  @media (max-width:760px){ .toc ol{columns:1;} body{font-size:15px;} }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏">
+<meta property="og:description" content="从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。">
+<meta property="og:url" content="https://piratepai.github.io/posts/diffusion-flow-sampling.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-04">
+<link rel="canonical" href="https://piratepai.github.io/posts/diffusion-flow-sampling.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "url": "https://piratepai.github.io/posts/diffusion-flow-sampling.html", "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。", "inLanguage": "zh-CN", "headline": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "datePublished": "2026-11-04", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/diffusion-flow-sampling.html"}</script>
+<!-- site-metadata:end -->
+</head><body>
+<div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
+<header class="hero"><div class="inner"><p class="kicker">生成模型 · 采样与推理效率 · 2026</p><h1>扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏</h1><p class="sub">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</p><div class="meta"><span class="pill">资料核验 2026-11-04</span><span class="pill">Diffusers v0.35.1 源码</span><span class="pill">Python 标量实验</span></div></div><!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/diffusion-flow-sampling.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+<div class="wrap">
+<nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">研究进展与实践入口</a></li>
+<li><a href="#s0">0 导读 · 一张图究竟算了几次</a></li>
+<li><a href="#s1">1 读懂模型输出与时间方向</a></li>
+<li><a href="#s2">2 求解器 · 相同模型预算能走多远</a></li>
+<li><a href="#s3">3 时间网格 · 有限的步数放在哪里</a></li>
+<li><a href="#s4">4 引导强度如何改变一次求值的成本</a></li>
+<li><a href="#s5">5 少步生成需要学会什么</a></li>
+<li><a href="#s6">6 少步与缓存、稀疏化、量化怎样组合</a></li>
+<li><a href="#s7">7 怎样在同等质量要求下选方案</a></li>
+<li><a href="#refs">参考文献与来源口径</a></li></ol></nav>
+<div class="hl-wrap" id="hl"><style>
+.hl-wrap{margin:30px 0 6px;border:1px solid rgba(65,209,167,.28);border-radius:14px;background:linear-gradient(180deg,rgba(65,209,167,.06),rgba(65,209,167,.015));padding:16px 18px 10px}
+.hl-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.hl-head b{color:#41d1a7;font-size:15px;letter-spacing:.02em}
+.hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+.hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+.hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+.hl-card:hover{border-color:rgba(65,209,167,.45)}
+.hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.hl-meta b{color:#e8eaed;font-size:14px}
+.hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+.hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+.hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+.hl-card .hl-link:hover{text-decoration:underline}
+</style><div class="hl-head"><b>研究进展与实践入口</b><i>论文日期为首次公开时间，模型卡与源码另标核验日期</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>同样四次求值怎么花</b><span class="hl-date">2022-06-02</span></div><p>DPM-Solver 利用方程结构。手算例子演示在固定求值预算下比较积分误差。</p><a class="hl-link" href="#s2-equal-nfe">→ 进入章节</a></div>
+<div class="hl-card"><div class="hl-meta"><b>重新放置时间点</b><span class="hl-date">2024-04-22</span></div><p>Align Your Steps 把时间网格本身作为优化对象。</p><a class="hl-link" href="#s3-grid">→ 进入章节</a></div>
+<div class="hl-card"><div class="hl-meta"><b>训练跨区间的速度</b><span class="hl-date">2025-05-19</span></div><p>MeanFlow 让网络学习整段平均速度，用于一步生成。</p><a class="hl-link" href="#s5-meanflow">→ 进入章节</a></div>
+<div class="hl-card"><div class="hl-meta"><b>按输入分配采样点</b><span class="hl-date">2026-03-18</span></div><p>样本自适应网格将点位选择细化到单个输入。</p><a class="hl-link" href="#s3-protocol">→ 进入章节</a></div>
+<div class="hl-card"><div class="hl-meta"><b>在数据空间做修正</b><span class="hl-date">2026-10-08</span></div><p>Data-Space Iteration 研究类别条件图像的少步细化。</p><a class="hl-link" href="#s5-meanflow">→ 进入章节</a></div>
+<div class="hl-card"><div class="hl-meta"><b>判读 FLUX 示例</b><span class="hl-date">2026-11-04 核验</span></div><p>从模型卡的步数、引导参数追到实际网络调用。</p><a class="hl-link" href="#s4-flux">→ 进入章节</a></div></div></div>
+<h2 id="s0">0 导读 · 一张图究竟算了几次</h2>
+<p>把 24 步改成 12 步，程序仍能出图。要判断改动是否值得，需要知道去掉了哪十二次计算、剩余计算用了多久，以及文字、细节和运动是否仍然达标。<b>比较目标是在同一质量门槛下，缩短每个合格结果的交付时间。</b>本文回答四个问题。一次采样步调用几次模型？时间点应该放在哪里？哪些少步方法需要专门权重？减少步数后，缓存和低精度还能节省多少时间？</p>
+<div class="card" id="reading-path"><b>阅读路径</b><p>想读懂采样器参数，从第 1–4 章开始。手里已有一个少步模型，可从第 5 章核对权重与推理配置。要给部署选方案，直接用第 6 章的成本拆分和第 7 章的质量验收表。</p></div>
+<table><caption>表 0-1 · 按现有资源选择实验</caption><thead><tr><th>手里有什么</th><th>可以动哪里</th><th>第一组对照</th></tr></thead><tbody>
+<tr><td>一套冻结的权重</td><td>兼容的求解器、时间网格、外部 CFG</td><td>同一初始噪声、同一模型求值预算，比较两种积分方法</td></tr>
+<tr><td>教师和训练算力</td><td>蒸馏多步映射、一致性或分布目标</td><td>多步教师、普通权重直接降步、少步学生三组</td></tr>
+<tr><td>已经训练好的少步权重</td><td>发布者支持的步数、引导与精度，再试缓存或稀疏化</td><td>先复现官方配置，再逐项开启优化</td></tr>
+</tbody></table>
+<ul class="timeline">
+<li><span class="t">2020-10-06</span>DDIM 让同一训练目标对应不同的采样过程，可选择较稀的时间点。<sup class="cite"><a href="#ref-DDIM">[DDIM]</a></sup></li>
+<li><span class="t">2022</span>逐级蒸馏把教师的两步学为学生的一步。DPM-Solver 利用扩散方程的结构改进积分。Rectified Flow 与 Flow Matching 则从训练的速度场入手。<sup class="cite"><a href="#ref-PD">[PD]</a></sup><sup class="cite"><a href="#ref-DPM">[DPM]</a></sup><sup class="cite"><a href="#ref-RF">[RF]</a></sup><sup class="cite"><a href="#ref-FM">[FM]</a></sup></li>
+<li><span class="t">2023–2025</span>一致性模型学习轨迹的共同终点，DMD 约束学生输出的分布，MeanFlow 学习一段时间内的平均速度。<sup class="cite"><a href="#ref-CM">[CM]</a></sup><sup class="cite"><a href="#ref-DMD">[DMD]</a></sup><sup class="cite"><a href="#ref-MEAN">[MEAN]</a></sup></li>
+<li><span class="t">2026</span>研究继续分化。一条路线为不同输入学习不同的时间网格，另一条路线让生成器直接在数据空间细化预测。<sup class="cite"><a href="#ref-GRID">[GRID]</a></sup><sup class="cite"><a href="#ref-DSI">[DSI]</a></sup></li>
+</ul>
+<div class="summary3"><b>本章小结</b><ol><li>先确认能否训练或更换权重，再选加速路线。</li><li>采样步、网络求值和端到端等待时间要分别记录。</li><li>所有候选配置在同一批提示词上验收质量。</li></ol></div>
+
+<h2 id="s1">1 读懂模型输出与时间方向</h2>
+<h3 id="s1-field">1.1 一次前向提供什么信息</h3>
+<p>想象在雾中沿弯路行走。每次问路得到当前位置的方向，走多远由自己决定。扩散或 Flow 网络在给定状态、时间与文本条件下返回一个张量。调度器把这个输出转换成下一位置。路标相同，步子过大也可能切过弯道。<sup class="cite"><a href="#ref-EDM">[EDM]</a></sup><sup class="cite"><a href="#ref-FM">[FM]</a></sup></p>
+<p>在常见的扩散参数化中，加噪状态写成 <code>xₜ = αₜ x₀ + σₜ ε</code>。这里 x₀ 是干净样本，ε 是高斯噪声。网络可以预测噪声，也可以预测干净样本。以预测噪声为例，在 αₜ 非零时可还原估计值 <code>x̂₀ = (xₜ − σₜ ε̂) / αₜ</code>。调度器选错输出类型，即使张量形状一致，更新量也会错。在 αₜ 很小的区域，直接做除法还会放大数值误差。<sup class="cite"><a href="#ref-DPM">[DPM]</a></sup><sup class="cite"><a href="#ref-DPMpp">[DPM++]</a></sup></p>
+<p>还有检查点使用 <code>v_prediction</code>。在 α²+σ²=1 的常用约定下，v = αε − σx₀，可反推 x₀ = αxₜ − σv。这个符号与 Flow Matching 中的速度场共享字母 v，接入调度器时要逐项查看训练目标、尺度和时间方向。<sup class="cite"><a href="#ref-PD">[PD]</a></sup><sup class="cite"><a href="#ref-FM">[FM]</a></sup></p>
+<h3 id="s1-flow">1.2 直线训练样本为什么还能学出弯曲轨迹</h3>
+<p>换一套符号。令 z 为噪声、y 为数据，t 从 0 走到 1。直线插值为 <code>x(t) = (1−t)z + ty</code>，这对端点的监督速度始终是 y−z。推理时端点 y 未知，网络只能根据当前位置、时间和条件，估计与之相容的速度。多个端点对经过附近时，给出的方向可能不同。因此，单对端点的插值直，并不能保证学习到的整条生成轨迹一步走完。Reflow 用已学流产生新的端点配对再训练，使轨迹更适合粗步长。<sup class="cite"><a href="#ref-FM">[FM]</a></sup><sup class="cite"><a href="#ref-RF">[RF]</a></sup></p>
+<div class="analogy">同一十字路口经过许多车辆。训练时知道每辆车的起点和目的地，生成时只有当前位置和条件。把路口的平均方向当作整段路程的方向，需要额外假设。</div>
+<p>工程代码的时钟也可能相反。Diffusers v0.35.1 的 FlowMatch Euler 确定性分支按相邻 σ 的差更新 <code>x ← x + (σ_next − σ) × model_output</code>。当 σ 从大到小排列，该差值为负。移植时应一起抄验网格顺序、场的定义和端点，单独改符号容易沿反方向积分。<sup class="cite"><a href="#ref-EULER">[EULER]</a></sup></p>
+<div class="summary3"><b>本章小结</b><ol><li>确定每个张量代表噪声、干净样本还是速度。</li><li>Flow Matching 的训练路径和实际生成轨迹需要分别理解。</li><li>核对调度器的时间轴、尺度和末端处理，再切换算法。</li></ol></div>
+
+<h2 id="s2">2 求解器 · 相同模型预算能走多远</h2>
+<h3 id="s2-ddim">2.1 DDIM、Euler 和高阶方法各省了什么</h3>
+<p>DDIM 允许沿训练时间点的子序列生成。在确定性设置 η=0 下，从当前点估计干净样本和噪声，再按下一时间点的系数重组状态。保留更多中间点，就有更多次纠正方向的机会。这里可调整的是采样过程，原检查点的预测接口仍须匹配。<sup class="cite"><a href="#ref-DDIM">[DDIM]</a></sup></p>
+<p>对常微分方程（ODE）<code>dx/dt = f(x,t)</code>，Euler 在步首取一次方向并前进一步。Heun 先用这个方向预测终点，再在预测点取第二个方向，用两者的平均值修正本步。后者在光滑场上有更高的收敛阶，每个完整步也多一次场求值。某些采样器在最后一个端点退回 Euler，实际 NFE 应从执行路径数出。<sup class="cite"><a href="#ref-EDM">[EDM]</a></sup></p>
+<p><b>NFE</b> 是函数求值次数。本文先把一次求引导后的速度或噪声估计记为一次场求值。若它需要两个条件分支，再单列分支工作量和实际网络前向次数。比较论文时应先核对作者的 NFE 定义。</p>
+<p>DPM-Solver 利用扩散 ODE 的半线性结构，解析处理线性部分，再近似含网络预测的积分。DPM-Solver++ 采用数据预测形式来改善引导采样的稳定性。多步公式可复用以往步骤的预测，达到相应阶数时，每个新时间点通常只需要一次新预测。启动阶段历史不足，要用较低阶公式。直接将网格减半或把任意 Flow 输出交给扩散专用系数，都需要重新检查适配条件。<sup class="cite"><a href="#ref-DPM">[DPM]</a></sup><sup class="cite"><a href="#ref-DPMpp">[DPM++]</a></sup></p>
+<div class="citebox"><b>[DPM++] Cheng Lu 等，DPM-Solver++，2022-11-02。</b>作者讨论较强引导下已有高阶采样器的局限，原文为 <span class="q">“previous high-order fast samplers suffer from instability issues”</span>（先前的高阶快速采样器存在稳定性问题）。其比较条件包括引导强度，选择求解器时应保留这一维度。<sup class="cite"><a href="#ref-DPMpp">[DPM++]</a></sup></div>
+<h3 id="s2-equal-nfe">2.2 可复算的四次求值实验</h3>
+<p>取一条已知精确解的轨迹，从 x(0)=1 积分到 t=1，令 x′=x，则终点是 e。两种方法都只许问四次方向。Euler 可以走四步，Heun 可以走两步。下面的 Python 代码会数出实际调用次数并报告终点误差。</p>
+<pre><code id="equal-nfe-example">from math import e
+
+def integrate(method, steps):
+    x = 1.0
+    h = 1.0 / steps
+    calls = 0
+
+    def velocity(position):
+        nonlocal calls
+        calls += 1
+        return position
+
+    for _ in range(steps):
+        first = velocity(x)
+        if method == "Heun":
+            second = velocity(x + h * first)
+            first = (first + second) / 2
+        x += h * first
+    return calls, x, abs(x - e)
+
+for method, steps in [("Euler", 4), ("Heun", 2)]:
+    nfe, endpoint, error = integrate(method, steps)
+    print(f"{method}: {nfe} NFE, x={endpoint:.6f}, error={error:.6f}")</code></pre>
+<div class="codecap">代码 2-1 · 本文的标量数值实验，仅依赖 Python 标准库。把速度改成恒定值 1 时，两种方法的终点都应对照精确解 2。</div>
+<table><caption>表 2-1 · 代码 2-1 的计算结果，绝对误差以 e 为参考</caption><thead><tr><th>求解器</th><th>步数 × 每步求值</th><th>预测终点</th><th>绝对误差</th></tr></thead><tbody><tr><td>Euler</td><td>4 × 1</td><td>2.441406</td><td>0.276876</td></tr><tr><td>Heun</td><td>2 × 2</td><td>2.640625</td><td>0.077657</td></tr></tbody></table>
+<figure class="fig" id="equal-nfe-figure"><img src="img/sampling-equal-nfe.svg" width="440" height="240" style="max-width:100%;height:auto" alt="横轴是时间，纵轴是位置。四步 Euler 和两步 Heun 都低于精确终点，Heun 的终点更接近精确解。"><figcaption class="cap">图 2-1 · 本文自绘，三条轨迹由代码 2-1 的更新公式和解析解得出。线段连接实际步末的位置，Heun 的中间试探点不计作步末。</figcaption></figure>
+<p>Euler 四次都沿步首方向前进，在这条不断变陡的轨迹上会持续低估增长。Heun 的第二次求值修正了这个偏差。真实模型还会有场估计误差、有限精度和引导误差，这个可解析例子只隔离了积分误差。DPM-Solver 原论文在 CIFAR-10 上报告 10 与 20 次函数求值的 FID 分别为 4.70、2.87，这组数限于论文自己的模型、数据与测量条件。<sup class="cite"><a href="#ref-DPM">[DPM]</a></sup></p>
+<div class="summary3"><b>本章小结</b><ol><li>比较积分精度时固定场求值次数，并注明启动与末步成本。</li><li>多阶段方法在本步追加预测，多步方法利用前步历史。</li><li>解析例子能验证更新公式，图像质量仍由生成实验衡量。</li></ol></div>
+
+<h2 id="s3">3 时间网格 · 有限的步数放在哪里</h2>
+<h3 id="s3-grid">3.1 时间均匀、噪声均匀与误差均匀</h3>
+<p>同样四段路可以设在等间隔时间 t、等间隔噪声 σ，或接近等间隔的对数信噪比上。信噪比为 α²/σ²，取对数后，噪声跨几个数量级的变化更容易比较。t 到 σ 的变换通常是非线性的，所以界面里同样写着“四步”的两套网格，实际访问的噪声区域可能不同。对数坐标在端点可能发散，复现时应保存完整数列与真实的端点处理方式。<sup class="cite"><a href="#ref-EDM">[EDM]</a></sup><sup class="cite"><a href="#ref-DPM">[DPM]</a></sup></p>
+<p>设精确轨迹的局部弯曲程度较大，用长直线跨过这里就容易偏离。把采样点移到这一区域可以降低局部误差，但要从别处挪走点，而且早期误差可能传递到后续。因而“总在高噪声区加点”或“总在末端加点”都需要结合模型、求解器和任务验证。Align Your Steps 直接针对模型、求解器和数据优化时间表，给出了固定步数下比较网格的实验范式。<sup class="cite"><a href="#ref-AYS">[AYS]</a></sup></p>
+<h3 id="s3-protocol">3.2 怎样验证换网格带来的收益</h3>
+<p>先锁定权重、求解器阶数、引导和预算，保存默认网格的实际 σ 列表。在校准提示词上选择候选网格，把两套列表冻结，再到留出提示词上用成对初始噪声比较。记录具体分辨率和序列长度，有动态 shift（时间轴重映射）的实现还应保存重映射后的列表。只公布调度器名称和步数，别人无法重建这次轨迹。<sup class="cite"><a href="#ref-AYS">[AYS]</a></sup><sup class="cite"><a href="#ref-EULER">[EULER]</a></sup></p>
+<p>Yuan 等把全体样本共用一张表扩展为基于输入信息分配时间点。落地时要分别记录挑选网格的开销、每个样本的 NFE 和最终质量。对于批处理，还应检查不同网格是否会拆散批次，以及最慢样本是否拖长整批的完成时间。后两项为本文建议的系统验证。<sup class="cite"><a href="#ref-GRID">[GRID]</a></sup></p>
+<div class="summary3"><b>本章小结</b><ol><li>保存实际被访问的时间点，连同时间与噪声的转换规则。</li><li>在固定模型、引导、求解器和 NFE 的条件下只改变网格。</li><li>样本自适应策略还需统计调度开销与批处理表现。</li></ol></div>
+
+<h2 id="s4">4 引导强度如何改变一次求值的成本</h2>
+<h3 id="s4-cfg">4.1 把引导后的场、样本分支与网络调用分开计数</h3>
+<p>无分类器引导（classifier-free guidance，CFG）让模型在同一状态和时间下分别给出无条件预测 u 和有条件预测 c，以 <code>u + s(c − u)</code> 合成为更新方向。这里采用 s=1 时得到 c 的约定。增大 s 会放大条件信号，也会放大两分支预测差异中的误差。在少步设置下应重新选择引导强度。<sup class="cite"><a href="#ref-CFG">[CFG]</a></sup><sup class="cite"><a href="#ref-DPMpp">[DPM++]</a></sup></p>
+<p>假设每张图走 12 步 Euler，每步都需要两分支。按本文口径，共有 12 次引导后的场求值和 24 次单样本分支求值。若正负分支分别跑，网络调用 24 次。若实现将两者沿 batch 维拼接，则调用 12 次，每次处理双倍的样本数。两种方式还可能占用不同的显存和墙钟时间。单看模型调用计数，会漏掉每次调用实际处理的数据量。</p>
+<h3 id="s4-flux">4.2 FLUX 的两个引导参数各控制哪段代码</h3>
+<table><caption>表 4-1 · Black Forest Labs 两张官方模型卡的 Diffusers 文生图示例，核对于 2026-11-04 <sup class="cite"><a href="#ref-SCHNELL">[SCHNELL]</a></sup><sup class="cite"><a href="#ref-DEV">[DEV]</a></sup></caption><thead><tr><th>检查点</th><th>采样步数</th><th>引导系数</th><th>文本长度上限（token）</th></tr></thead><tbody><tr><td>FLUX.1 [schnell]</td><td>4</td><td>0.0</td><td>256</td></tr><tr><td>FLUX.1 [dev]</td><td>50</td><td>3.5</td><td>512</td></tr></tbody></table>
+<p>两项参数在示例中分别写作 <code>guidance_scale</code> 和 <code>max_sequence_length</code>。在本文核对的 Diffusers v0.35.1 中，若 transformer 配置启用了 <code>guidance_embeds</code>，FluxPipeline 会把 <code>guidance_scale</code> 编成张量送入网络。另一条路径检查 <code>true_cfg_scale &gt; 1</code> 且有负面提示输入，才额外执行负分支，再按 true CFG 系数组合。看到 [dev] 示例填了 3.5，无法据此推断每步跑了两次。可以给 transformer 加前向计数器，同时记录每次 latent 的 batch 大小来验证。<sup class="cite"><a href="#ref-PIPE">[PIPE]</a></sup><sup class="cite"><a href="#ref-DEV">[DEV]</a></sup></p>
+<p>这两张卡展示的是不同权重及其用法。[schnell] 面向一至四步推理，[dev] 使用引导蒸馏。50 ÷ 4 只能给出示例步数之比。比较两条产品路径时，还需要在自己的提示词、硬件和输出尺寸下测质量、文本编码、去噪和解码耗时。<sup class="cite"><a href="#ref-SCHNELL">[SCHNELL]</a></sup><sup class="cite"><a href="#ref-DEV">[DEV]</a></sup></p>
+<div class="summary3"><b>本章小结</b><ol><li>报告场求值、分支样本数、网络调用和实际 batch。</li><li>区分网络内的引导条件和需要第二次前向的外部引导。</li><li>把少步权重与对应的时间表及引导配置一起复现。</li></ol></div>
+
+<h2 id="s5">5 少步生成需要学会什么</h2>
+<h3 id="s5-targets">5.1 三种蒸馏目标怎样压缩多步教师</h3>
+<table><caption>表 5-1 · 按学生收到的监督信号整理，来源为各方法的原始论文</caption><thead><tr><th>训练目标</th><th>一个训练样本如何产生信号</th><th>验证时观察什么</th></tr></thead><tbody>
+<tr><td>渐进蒸馏 <sup class="cite"><a href="#ref-PD">[PD]</a></sup></td><td>教师连续走两步，学生从同一起点走一步，学习到达教师的端点。下一轮以学生作为新教师，继续将步数减半。</td><td>比较约定时间网格上的学生误差，观察连续几轮压缩后细节能否保留。</td></tr>
+<tr><td>一致性模型 <sup class="cite"><a href="#ref-CM">[CM]</a></sup></td><td>学习把同一条概率流 ODE 轨迹上的不同噪声状态映到共同的近数据端点。可从预训练模型蒸馏，也可直接从数据训练。</td><td>从高噪声直接预测一次，再与算法规定的多步再加噪、校正路径比较。</td></tr>
+<tr><td>分布匹配蒸馏 DMD <sup class="cite"><a href="#ref-DMD">[DMD]</a></sup></td><td>用真实与学生生成分布的分数估计之差给生成器提供更新方向。原版还用教师生成的配对数据作回归约束。</td><td>评估整组输出的质量与多样性，同时检查同一提示词连续换种子会不会反复生成相似画面。</td></tr>
+</tbody></table>
+<p>这三个目标对应不同的验收信号。逐点回归适合观察轨迹误差。训练若只要求生成分布接近，在固定种子下与教师逐像素对齐就没有充分依据。对使用者来说，先跑通学生支持的时间点和引导接口，再逐项改动，才容易查出画质变化来自哪里。<sup class="cite"><a href="#ref-PD">[PD]</a></sup><sup class="cite"><a href="#ref-CM">[CM]</a></sup><sup class="cite"><a href="#ref-DMD">[DMD]</a></sup></p>
+<h3 id="s5-meanflow">5.2 平均速度与数据空间迭代</h3>
+<p>若能直接得到整个区间的平均速度，乘上区间长度即可到达终点。难点在于，区间中的位置依赖尚未积分的轨迹。MeanFlow 建立平均速度与瞬时速度的关系，据此从数据训练区间预测器，支持一步生成。这与将普通瞬时速度模型的 Euler 步长调到全程有不同的训练前提。<sup class="cite"><a href="#ref-MEAN">[MEAN]</a></sup></p>
+<p>Lin 等的 Data-Space Iteration 让后续调用直接在数据空间修正前一次预测。论文在类别条件 ImageNet 256×256 上检验少步生成，提供了另一种分配有限前向预算的方式。将结论移到文本生成视频，需要重新覆盖长提示对齐、运动连续和跨帧身份等质量维度。<sup class="cite"><a href="#ref-DSI">[DSI]</a></sup></p>
+<p>用于部署的最小对照有三组。先跑原权重推荐的多步配置，然后用同一权重直接降步，最后在相同步数预算下换成少步学生及其配套参数。第一、二组估计直接降步的损失，第二、三组观察更换整套训练与推理配置能恢复多少质量。若中间还换了引导方式，另列分支工作量。</p>
+<div class="summary3"><b>本章小结</b><ol><li>渐进蒸馏学两步的端点，一致性训练学同轨迹映射，DMD 约束输出分布。</li><li>平均速度模型显式学习跨区间移动所需的信息。</li><li>对比多步教师、直接降步与专用学生，按各自训练目标解读差异。</li></ol></div>
+
+<h2 id="s6">6 少步与缓存、稀疏化、量化怎样组合</h2>
+<h3 id="s6-cost">6.1 从一次请求的等待时间算起</h3>
+<p>在各阶段串行的单请求中，可以按 <code>总耗时 = 排队 + 文本编码 + 各次去噪耗时之和 + VAE 解码 + 传输与后处理</code> 记账。VAE 解码把低维潜变量还原成像素。若服务重叠执行阶段，则用时间线上的关键路径来算用户等待，分别保留各算子耗时作归因。</p>
+<p>例如，假设编码需 120 ms，解码需 100 ms，每次去噪需 20 ms，其他开销忽略。24 次去噪时总计 700 ms，减到 12 次是 460 ms，端到端加速约 1.52 倍。若已有四步学生，总计 300 ms。假设中间两步复用部分计算后各需 5 ms，总耗时为 270 ms，加速约 1.11 倍。以上均为用于核算的设定值，实际跳过哪些层及画质是否达标要另外测量。</p>
+<h3 id="s6-combine">6.2 三种逐步优化在哪些条件下还能奏效</h3>
+<ul><li><b>跨步缓存。</b>TeaCache 由相邻时间步的嵌入变化估计模型输出变化，以决定何时复用已算过的内容。时间点变稀后，相邻状态的间隔和变化都可能增大。在新网格上应重新校准阈值，记录命中的步号、保留的全量步和质量变化。<sup class="cite"><a href="#ref-TEA">[TEA]</a></sup></li>
+<li><b>稀疏注意力。</b>它压低的是每次前向中 token 交互的成本。计入选块、索引、数据搬运之后，再核对注意力在整步耗时中的占比。视频还要看远距离跨帧交互被省去后，身份和背景能否保持。<a href="vit-sparsification.html">ViT 稀疏化专题</a></li>
+<li><b>低比特量化。</b>SVDQuant 以低秩分支承接异常值，使其余主分支更适于 4 位计算。真实收益依赖匹配的内核，还受融合与额外读写影响。换成少步权重或不同引导后，用新轨迹上的激活重查校准和画质。<sup class="cite"><a href="#ref-SVDQ">[SVDQ]</a></sup> <a href="quantization-survey.html">量化专题</a></li></ul>
+<p>最小组合实验包括“原步数”“只减步”“只开缓存”“减步并开缓存”。同一权重下保持其余条件一致，分别记录每步全量计算或命中情况。量化与稀疏化也可各自套用这张四格表。缓存若省掉了本会执行的注意力层，稀疏化就只能继续优化余下的调用。两个单项加速比直接相乘会将重叠部分算两次。</p>
+<div class="summary3"><b>本章小结</b><ol><li>先拆出端到端延迟中可由去噪优化影响的比例。</li><li>换网格、权重或精度后，复测缓存命中与质量。</li><li>对每个组合单独计时，并定位收益重合的算子。</li></ol></div>
+
+<h2 id="s7">7 怎样在同等质量要求下选方案</h2>
+<h3 id="s7-protocol">7.1 固定输入、记录时钟、分别验收图像和视频</h3>
+<table><caption>表 7-1 · 面向目标硬件的实验记录模板，2026-11-04 整理</caption><thead><tr><th>记录项</th><th>最低可重建信息</th></tr></thead><tbody>
+<tr><td>输入与配置</td><td>固定提示词和负面提示词，留出独立验收集，每条配多个种子。兼容的模型复用保存的初始噪声张量。若潜空间不同，保留相同的提示词分层与抽样策略。记录检查点修订、调度器代码版本、实际时间网格、引导与输出尺寸。</td></tr>
+<tr><td>成本</td><td>记录设备、精度、batch、编译与预热、权重卸载、视频帧数和帧率。同步 GPU 后测各段耗时，另以客户端时钟记录冷启动和稳态端到端 p50/p95、吞吐和峰值显存。输出可流式播放时分别记首个可观看帧和整段交付时间。</td></tr>
+<tr><td>图像质量</td><td>覆盖文字拼写、多物体关系、手部和细纹理，保存每种失败的样张。自动指标锁定特征模型、前处理、样本数和参考集，同时盲评提示词满足率与伪影。单张样例无法给出分布级 FID。</td></tr>
+<tr><td>视频质量</td><td>额外覆盖快速运动、遮挡后重现、镜头转换和长时背景。按整段盲评运动是否完成、身份是否一致，记录闪烁和跨帧漂移。逐帧看似清晰的视频仍可能几乎静止。<a href="realtime-world-models-2026.html">实时世界模型专题</a></td></tr>
+</tbody></table>
+<h3 id="s7-decision">7.2 用质量门槛决定哪组延迟有意义</h3>
+<p>先定可容忍的质量损失，再看结果。例如，团队约定“提示词满足率相对基线的绝对降幅最多 2 个百分点”。每条提示词同时送入两组，随机隐去方法名与左右次序。以提示词为单位成组重采样，连同其全部种子计算差值的置信区间。若差值区间下界低于 −2 个百分点，该组证据不足以通过这个门槛。这里的 2 个百分点是决策示例，各任务要自行预先约定。</p>
+<p>在所有画质与运动门槛均通过的配置中，比较同一负载下的 p95 延迟、显存与每个合格结果的成本。超时、显存不足、触发重试或质检拒收的请求都进入账本。图像服务可以选稳定低延迟的配置，离线视频生产则可按整段通过率与单位合格视频成本取舍。<a href="inference-evaluation.html">性能评测与可复现实验</a></p>
+<div class="summary3"><b>本章小结</b><ol><li>相容模型复用初始噪声，将含多种子的提示词作为成组对照。</li><li>视频验收加入运动、闪烁和身份维度，并报告首帧与整段时间。</li><li>仅在通过预定质量门槛的候选中比较延迟和合格产出的成本。</li></ol></div>
+<h2 id="refs">参考文献与来源口径</h2>
+<ol class="refs">
+<li id="ref-DDIM"><b>[DDIM] Jiaming Song、Chenlin Meng、Stefano Ermon.</b> <i>Denoising Diffusion Implicit Models</i>。arXiv:2010.02502，首次提交于 2020-10-06。<a href="https://arxiv.org/abs/2010.02502">一手来源</a></li>
+<li id="ref-EDM"><b>[EDM] Tero Karras 等.</b> <i>Elucidating the Design Space of Diffusion-Based Generative Models</i>。arXiv:2206.00364，首次提交于 2022-06-01。<a href="https://arxiv.org/abs/2206.00364">一手来源</a></li>
+<li id="ref-DPM"><b>[DPM] Cheng Lu 等.</b> <i>DPM-Solver: A Fast ODE Solver for Diffusion Probabilistic Model Sampling in Around 10 Steps</i>。arXiv:2206.00927，首次提交于 2022-06-02。<a href="https://arxiv.org/abs/2206.00927">一手来源</a></li>
+<li id="ref-DPMpp"><b>[DPM++] Cheng Lu 等.</b> <i>DPM-Solver++: Fast Solver for Guided Sampling of Diffusion Probabilistic Models</i>。arXiv:2211.01095，首次提交于 2022-11-02。<a href="https://arxiv.org/abs/2211.01095">一手来源</a></li>
+<li id="ref-FM"><b>[FM] Yaron Lipman 等.</b> <i>Flow Matching for Generative Modeling</i>。arXiv:2210.02747，首次提交于 2022-10-06。<a href="https://arxiv.org/abs/2210.02747">一手来源</a></li>
+<li id="ref-RF"><b>[RF] Xingchao Liu、Chengyue Gong、Qiang Liu.</b> <i>Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow</i>。arXiv:2209.03003，首次提交于 2022-09-07。<a href="https://arxiv.org/abs/2209.03003">一手来源</a></li>
+<li id="ref-AYS"><b>[AYS] Amirmojtaba Sabour、Sanja Fidler、Karsten Kreis.</b> <i>Align Your Steps: Optimizing Sampling Schedules in Diffusion Models</i>。arXiv:2404.14507，首次提交于 2024-04-22。<a href="https://arxiv.org/abs/2404.14507">一手来源</a></li>
+<li id="ref-GRID"><b>[GRID] Liangyu Yuan 等.</b> <i>Few-Step Diffusion Sampling Through Instance-Aware Discretizations</i>。arXiv:2603.17671，首次提交于 2026-03-18。<a href="https://arxiv.org/abs/2603.17671">一手来源</a></li>
+<li id="ref-CFG"><b>[CFG] Jonathan Ho、Tim Salimans.</b> <i>Classifier-Free Diffusion Guidance</i>。arXiv:2207.12598，首次提交于 2022-07-26。<a href="https://arxiv.org/abs/2207.12598">一手来源</a></li>
+<li id="ref-PD"><b>[PD] Tim Salimans、Jonathan Ho.</b> <i>Progressive Distillation for Fast Sampling of Diffusion Models</i>。arXiv:2202.00512，首次提交于 2022-02-01。<a href="https://arxiv.org/abs/2202.00512">一手来源</a></li>
+<li id="ref-CM"><b>[CM] Yang Song 等.</b> <i>Consistency Models</i>。arXiv:2303.01469，首次提交于 2023-03-02。<a href="https://arxiv.org/abs/2303.01469">一手来源</a></li>
+<li id="ref-DMD"><b>[DMD] Tianwei Yin 等.</b> <i>One-step Diffusion with Distribution Matching Distillation</i>。arXiv:2311.18828，首次提交于 2023-11-30。<a href="https://arxiv.org/abs/2311.18828">一手来源</a></li>
+<li id="ref-MEAN"><b>[MEAN] Zhengyang Geng 等.</b> <i>Mean Flows for One-step Generative Modeling</i>。arXiv:2505.13447，首次提交于 2025-05-19。<a href="https://arxiv.org/abs/2505.13447">一手来源</a></li>
+<li id="ref-DSI"><b>[DSI] Shanchuan Lin、Yansong Peng、Fu-Yun Wang、Haoqi Fan.</b> <i>Few-Step Generation via Data-Space Iteration</i>。arXiv:2610.12102，首次提交于 2026-10-08。<a href="https://arxiv.org/abs/2610.12102">一手来源</a></li>
+<li id="ref-TEA"><b>[TEA] Feng Liu 等.</b> <i>Timestep Embedding Tells: It's Time to Cache for Video Diffusion Model</i>。arXiv:2411.19108，首次提交于 2024-11-28。<a href="https://arxiv.org/abs/2411.19108">一手来源</a></li>
+<li id="ref-SVDQ"><b>[SVDQ] Muyang Li 等.</b> <i>SVDQuant: Absorbing Outliers by Low-Rank Components for 4-Bit Diffusion Models</i>。arXiv:2411.05007，首次提交于 2024-11-07。<a href="https://arxiv.org/abs/2411.05007">一手来源</a></li>
+<li id="ref-SCHNELL"><b>[SCHNELL] Black Forest Labs.</b> <i>FLUX.1 [schnell] 官方模型卡，Diffusers 示例</i>。官方资料，核对于 2026-11-04。<a href="https://huggingface.co/black-forest-labs/FLUX.1-schnell#diffusers">一手来源</a></li>
+<li id="ref-DEV"><b>[DEV] Black Forest Labs.</b> <i>FLUX.1 [dev] 官方模型卡，Diffusers 示例</i>。官方资料，核对于 2026-11-04。<a href="https://huggingface.co/black-forest-labs/FLUX.1-dev#diffusers">一手来源</a></li>
+<li id="ref-EULER"><b>[EULER] Hugging Face Diffusers.</b> <i>FlowMatchEulerDiscreteScheduler.step，v0.35.1</i>。官方资料，核对于 2026-11-04。<a href="https://github.com/huggingface/diffusers/blob/0f252be0ed42006c125ef4429156cb13ae6c1d60/src/diffusers/schedulers/scheduling_flow_match_euler_discrete.py#L454-L461">一手来源</a></li>
+<li id="ref-PIPE"><b>[PIPE] Hugging Face Diffusers.</b> <i>FluxPipeline 的内嵌引导与双分支引导，v0.35.1</i>。官方资料，核对于 2026-11-04。<a href="https://github.com/huggingface/diffusers/blob/0f252be0ed42006c125ef4429156cb13ae6c1d60/src/diffusers/pipelines/flux/pipeline_flux.py#L798-L947">一手来源</a></li>
+</ol>
+<p class="note"><small>论文以 arXiv 首次提交日期标注。模型卡与固定版本源码核对于 2026-11-04。图 2-1 和表 2-1 来自标量计算，第 6 章的延迟为教学设定值，第 7 章给出在目标设备上执行的实验协议。</small></p>
+</div>
+<footer><p>© 2026 PiratePai · <a href="../index.html">返回完整目录</a></p><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="与 GitHub 主页共享的浏览量计数" loading="lazy"></footer>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<!-- chapter-reader:end -->
+</body></html>

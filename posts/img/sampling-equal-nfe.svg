@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 240" width="440" height="240" role="img" aria-labelledby="title desc">
+  <title id="title">同样四次函数求值的两条数值轨迹</title>
+  <desc id="desc">横轴为时间 t，纵轴为 x。Euler 四步得到 2.441406，Heun 两步得到 2.640625，精确解为 e。</desc>
+  <rect width="440" height="240" rx="8" fill="#f8fafc"/>
+  <g font-family="system-ui, sans-serif" font-size="17" fill="#263746">
+    <g text-anchor="start"><path d="M34 19h22" stroke="#176974" stroke-width="3"/><text x="61" y="24">精确解</text><path d="M136 19h22" stroke="#ad461e" stroke-width="2.5" stroke-dasharray="5 3"/><text x="164" y="24">Euler 4 步</text><path d="M267 19h22" stroke="#5747a3" stroke-width="2.5" stroke-dasharray="2 2"/><text x="295" y="24">Heun 2 步</text></g>
+    <path d="M44 48H398 M44 108H398" fill="none" stroke="#ccd6df" stroke-dasharray="3 3"/>
+    <path d="M44 39V192H414" fill="none" stroke="#556575"/>
+    <g text-anchor="end"><text x="34" y="52">e</text><text x="34" y="113">2</text><text x="34" y="197">1</text></g>
+    <g text-anchor="middle"><text x="44" y="215">0</text><text x="221" y="215">0.5</text><text x="398" y="215">1</text><text x="221" y="234">时间 t</text></g>
+    <text x="13" y="42">x</text>
+  </g>
+  <g fill="none" stroke-width="2.8">
+    <polyline stroke="#176974" points="44.00,192.00 52.85,189.87 61.70,187.69 70.55,185.46 79.40,183.17 88.25,180.82 97.10,178.41 105.95,175.94 114.80,173.40 123.65,170.80 132.50,168.14 141.35,165.41 150.20,162.61 159.05,159.74 167.90,156.80 176.75,153.78 185.60,150.69 194.45,147.51 203.30,144.26 212.15,140.93 221.00,137.51 229.85,134.00 238.70,130.41 247.55,126.72 256.40,122.94 265.25,119.07 274.10,115.09 282.95,111.02 291.80,106.84 300.65,102.56 309.50,98.17 318.35,93.67 327.20,89.05 336.05,84.32 344.90,79.47 353.75,74.49 362.60,69.39 371.45,64.16 380.30,58.80 389.15,53.30 398.00,47.66"/>
+    <polyline stroke="#ad461e" stroke-dasharray="6 3" points="44.00,192.00 132.50,171.00 221.00,144.75 309.50,111.94 398.00,70.92"/>
+    <polyline stroke="#5747a3" stroke-dasharray="2 2" points="44.00,192.00 221.00,139.50 398.00,54.19"/>
+  </g>
+  <g fill="#ad461e"><circle cx="44.00" cy="192.00" r="3"/><circle cx="132.50" cy="171.00" r="3"/><circle cx="221.00" cy="144.75" r="3"/><circle cx="309.50" cy="111.94" r="3"/><circle cx="398.00" cy="70.92" r="3"/></g>
+  <g fill="#5747a3"><rect x="41.00" y="189.00" width="6" height="6"/><rect x="218.00" y="136.50" width="6" height="6"/><rect x="395.00" y="51.19" width="6" height="6"/></g>
+</svg>

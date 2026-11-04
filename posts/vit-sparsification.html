@@ -152,9 +152,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-04">
 <link rel="canonical" href="https://piratepai.github.io/posts/vit-sparsification.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -172,7 +172,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -882,6 +882,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
   <p><b>后续 SVG2</b>（arXiv:2505.18875 · NeurIPS 2025）把"空间/时间二分类"升级为<b>语义 token 聚类</b>：按内容聚类出重要 token 集合统一处理，不再依赖手工模式，在 HunyuanVideo / Wan2.1 上达 2.30× / 1.89× 端到端加速。</p>
 
   <h3>5.5 DiT 加速方法一览（免训练为主）</h3>
+<div class="note" id="sampling-efficiency-crossref"><b>关联阅读</b><p>稀疏注意力在单步省下的时间，能否转化为整段采样的收益？<a href="diffusion-flow-sampling.html#s6-combine">对照少步、缓存与稀疏化的组合</a></p></div>
   <table>
     <tr><th>方法（年份）</th><th>路线</th><th>核心机制</th><th>端到端加速</th></tr>
     <tr><td>ToMeSD（2023-03）</td><td><span class="badge b-merge">token 合并</span></td><td>模块前按输入特征合并、模块后 unmerge；并非 self-attn 后按 Key 合并或默认逐步递增</td><td>~2×（SD）</td></tr>
