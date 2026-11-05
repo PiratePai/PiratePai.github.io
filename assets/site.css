@@ -105,6 +105,13 @@ mark { background: #d8ebe3; color: #143f38; padding: 0 1px; }
 .empty-state { padding-block: 24px; }
 .empty-state strong { display: block; margin-bottom: 8px; font-weight: 600; }
 .home-intro { color: var(--secondary); margin-top: -12px; }
+.book-entry { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; max-width: 1040px; margin-block: 24px; padding: 20px; border-left: 3px solid var(--accent); background: var(--surface); }
+.book-entry > div { flex: 1 1 28rem; min-width: 0; }
+.book-entry p { color: var(--secondary); font-size: 15px; margin: 0; }
+.book-entry .book-label { color: var(--accent); font-size: 13px; }
+.book-entry h2 { font-size: 22px; margin: 4px 0 8px; }
+.book-entry h2 span { display: inline-block; }
+.book-entry > a { flex-shrink: 0; font-weight: 600; padding-block: 8px; }
 .entrypoints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; max-width: 1040px; margin: 24px 0 40px; border-block: 1px solid var(--line); }
 .entrypoints a { display: block; padding: 20px; text-decoration: none; border-right: 1px solid var(--line); }
 .entrypoints a:first-child { padding-left: 0; }
