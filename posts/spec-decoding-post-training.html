@@ -160,9 +160,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-09-11">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/spec-decoding-post-training.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -177,7 +177,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -227,10 +227,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬–11 月上旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>D-PAL：重叠度加权蒸馏</b><span class="hl-date">10-20 · 哈佛+MIT</span></div><p>位置权重结合平滑重叠度、前缀连乘与继续价值，配合 Rényi-½ 散度做损失：τ 4.50→4.57（T=0），比 D-PACE 至多 +5%、比 DFlash 至多 +11%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>目标再生成让 KD 收益塌缩</b><span class="hl-date">10-21 · 韩国大学+延世</span></div><p>外部语料上的蒸馏收益 +14.4%/+18.0%，换成目标模型再生成语料后只剩 +3.7%/+3.6%、gate 归零，“草稿语料必须目标自生成”再添实证。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>T2D：剪枝造草稿</b><span class="hl-date">10-25 · USF+ASU+UC Davis</span></div><p>延迟感知的结构化剪枝+蒸馏，直接从目标模型剪出草稿，最高剪掉 92%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
+<div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>SpecOPD：分支并行在线策略蒸馏</b><span class="hl-date">11-02 · 阿里 Qwen App 等</span></div><p>分支打包成提议树共享前缀计算：监督 token 吞吐 16.09×（vs 顺序 rollout OPD），平均接受长度 +41.45%，对 AR 解码最高 3.56×；覆盖 8B–125B 目标 × DFlash/DSpark/V2 × 四域。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>草稿损失"客观目标"研究潮</b><span class="hl-date">10-31 / 11-10</span></div><p>REAL Loss 用路径权重无偏估计+Rao-Blackwellization 把梯度方差降 52~58%、接受长度 4.792；TVP 系统对比显示 TV 类损失比 CE +9.8% 接受长度、比公开 DFlash2 配方 +6.2~12.9%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="why">1 · 为什么投机解码需要"后训练"？</h2>
 
@@ -796,9 +796,16 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 </figure>
 
 
+
+<h3>⚡ 11 月上旬快讯（增补 2026-11-15）</h3>
+<ul>
+<li><b>SpecOPD</b>（阿里 Qwen App+中科大/浙大+CMU 等，11-02）：在线策略蒸馏（OPD）的瓶颈在逐轮顺序 rollout；SpecOPD 把草稿分支打包成提议树、共享前缀计算，用 E2E-TV 损失直指接受长度：监督 token 吞吐 16.09×、平均接受长度 +41.45%、对 AR 解码最高 3.56×；覆盖 8B GQA / 27B 全线性 / 125B 稀疏线性目标 × DFlash/DSpark/DFlash V2 × 对话/代码/数学/agent 四域<sup class="cite">[R26B-SPECOPD]</sup>。</li>
+<li><b>草稿损失的"客观目标"竞速</b>（11-10 / 10-31）：REAL Loss 以路径权重无偏估计+Rao-Blackwellization 把梯度方差降 52~58%，Qwen3.6-35B-A3B+Domino drafter 达 4.792 概率接受长度（基线 4.657–4.749），胜 WTV/VSD/DBLast 与静态 LK<sup class="cite">[R26B-REAL]</sup>；同期 TVP 系统对比显示 TV 类损失比 CE +9.8% 接受长度、比公开 DFlash2 训练配方 +6.2–12.9%，块验证下同样领先 BV<sup class="cite">[R26B-TVP]</sup>。与 DSpark 的 LK、D-PAL 的接受长度目标同一谱系：草稿损失函数设计已成本文的独立研究线。</li>
+</ul>
 </section>
 <h2 id="refs">11 · 参考与引用出处</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-MODELOPT"><b>NVIDIA</b>. <i>NVIDIA/Model-Optimizer</i>. 0.48.0，发布于 2026-11-02；核验 2026-11-03。<a href="https://github.com/NVIDIA/Model-Optimizer/releases/tag/0.48.0">一手来源</a>。</li><li id="R26-EDGE"><b>NVIDIA</b>. <i>NVIDIA/TensorRT-Edge-LLM</i>. v0.11.1，发布于 2026-10-28；核验 2026-11-03。<a href="https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1">一手来源</a>。</li><li id="R26-ENERGY"><b>Ma, Bole, Afzal, Ayesha et al.</b>. <i>Only Accepted Tokens Count: An Energy Accounting of Speculative Decoding Under Latency Targets</i>. arXiv:2610.40287v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.40287v1">一手来源</a>。</li><li id="R26-TRACE"><b>Zhao, Jihao et al.</b> <i>TraceSpec: Understanding and Improving Speculative Decoding for LLM Agents</i>. arXiv:2610.41177v1，2026-10-30；预印本，核验 2026-11-03。<a href="https://arxiv.org/abs/2610.41177v1">论文</a>。</li></ol>
+<h3>2026-11-15 增补来源</h3><ol class="refs"><li id="R26B-SPECOPD">Qwen App 团队 等. SpecOPD: Branch-Parallel Online Policy Distillation for Speculative Decoding. arXiv:2611.02846, 2026-11-02. <a href="https://arxiv.org/abs/2611.02846">官方一手</a>.</li><li id="R26B-REAL">Tian, Y. REAL Loss：草稿训练损失的路径权重无偏估计（梯度方差 −52~58%）. arXiv:2611.14399, 2026-11-10. <a href="https://arxiv.org/abs/2611.14399">官方一手</a>.</li><li id="R26B-TVP">Sharma, A.（滑铁卢大学/Baseten）. TVP：TV 类草稿损失的系统对比研究. arXiv:2611.00588；收录时间戳 2026-10-31（deeplearn，二手）. <a href="https://arxiv.org/abs/2611.00588">论文</a>.</li></ol>
 
 
 <p class="muted">按文中编号排列；日期为 arXiv 首发日期（v1）。所有带引文的位置，原文与译文已以小字块标注在正文相应位置。</p>

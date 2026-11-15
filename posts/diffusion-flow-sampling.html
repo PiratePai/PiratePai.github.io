@@ -86,14 +86,14 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-04">
-<meta property="article:modified_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/diffusion-flow-sampling.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "url": "https://piratepai.github.io/posts/diffusion-flow-sampling.html", "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。", "inLanguage": "zh-CN", "headline": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "datePublished": "2026-11-04", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/diffusion-flow-sampling.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "url": "https://piratepai.github.io/posts/diffusion-flow-sampling.html", "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。", "inLanguage": "zh-CN", "headline": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "datePublished": "2026-11-04", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/diffusion-flow-sampling.html"}</script>
 <!-- site-metadata:end -->
 </head><body>
 <div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
 <header class="hero"><div class="inner"><p class="kicker">生成模型 · 采样与推理效率 · 2026</p><h1>扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏</h1><p class="sub">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</p><div class="meta"><span class="pill">资料核验 2026-11-04</span><span class="pill">Diffusers v0.35.1 源码</span><span class="pill">Python 标量实验</span></div></div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/diffusion-flow-sampling.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s5-frontier-20261115">AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/diffusion-flow-sampling.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -127,7 +127,7 @@
 <div class="hl-card"><div class="hl-meta"><b>训练跨区间的速度</b><span class="hl-date">2025-05-19</span></div><p>MeanFlow 让网络学习整段平均速度，用于一步生成。</p><a class="hl-link" href="#s5-meanflow">→ 进入章节</a></div>
 <div class="hl-card"><div class="hl-meta"><b>按输入分配采样点</b><span class="hl-date">2026-03-18</span></div><p>样本自适应网格将点位选择细化到单个输入。</p><a class="hl-link" href="#s3-protocol">→ 进入章节</a></div>
 <div class="hl-card"><div class="hl-meta"><b>在数据空间做修正</b><span class="hl-date">2026-10-08</span></div><p>Data-Space Iteration 研究类别条件图像的少步细化。</p><a class="hl-link" href="#s5-meanflow">→ 进入章节</a></div>
-<div class="hl-card"><div class="hl-meta"><b>判读 FLUX 示例</b><span class="hl-date">2026-11-04 核验</span></div><p>从模型卡的步数、引导参数追到实际网络调用。</p><a class="hl-link" href="#s4-flux">→ 进入章节</a></div></div></div>
+<div class="hl-card"><div class="hl-meta"><b>判读 FLUX 示例</b><span class="hl-date">2026-11-04 核验</span></div><p>从模型卡的步数、引导参数追到实际网络调用。</p><a class="hl-link" href="#s4-flux">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>AGAVE：把引导场"编译"进单步</b><span class="hl-date">2026-11-05 · WACV 2027</span></div><p>区间积分 CFG：新增可学标量少于 10 个、推理开销为零；1-NFE 视频在 VBench/UCF-101/MSR-VTT 超全部 one-step 基线，FVD 上 1 步匹敌 50 步教师。</p><a class="hl-link" href="#s5">→ 进入章节</a></div><div class="hl-card"><div class="hl-meta"><b>History Forcing：给少步蒸馏加历史监督</b><span class="hl-date">2026-11-02 · 浙大</span></div><p>用"教师带历史/不带历史的预测残差"修正蒸馏目标：1.3B 模型 VBench-Long 79.82（60s，1.3B 中 SOTA），出画回看演化 2.35→2.70。</p><a class="hl-link" href="#s5">→ 进入章节</a></div></div></div>
 <h2 id="s0">0 导读 · 一张图究竟算了几次</h2>
 <p>把 24 步改成 12 步，程序仍能出图。要判断改动是否值得，需要知道去掉了哪十二次计算、剩余计算用了多久，以及文字、细节和运动是否仍然达标。<b>比较目标是在同一质量门槛下，缩短每个合格结果的交付时间。</b>本文回答四个问题。一次采样步调用几次模型？时间点应该放在哪里？哪些少步方法需要专门权重？减少步数后，缓存和低精度还能节省多少时间？</p>
 <div class="card" id="reading-path"><b>阅读路径</b><p>想读懂采样器参数，从第 1–4 章开始。手里已有一个少步模型，可从第 5 章核对权重与推理配置。要给部署选方案，直接用第 6 章的成本拆分和第 7 章的质量验收表。</p></div>
@@ -226,6 +226,8 @@ for method, steps in [("Euler", 4), ("Heun", 2)]:
 <p>用于部署的最小对照有三组。先跑原权重推荐的多步配置，然后用同一权重直接降步，最后在相同步数预算下换成少步学生及其配套参数。第一、二组估计直接降步的损失，第二、三组观察更换整套训练与推理配置能恢复多少质量。若中间还换了引导方式，另列分支工作量。</p>
 <div class="summary3"><b>本章小结</b><ol><li>渐进蒸馏学两步的端点，一致性训练学同轨迹映射，DMD 约束输出分布。</li><li>平均速度模型显式学习跨区间移动所需的信息。</li><li>对比多步教师、直接降步与专用学生，按各自训练目标解读差异。</li></ol></div>
 
+
+<h3 id="s5-frontier-20261115">前沿增补（2026-11-15 核验）</h3><p><b>少步生成的两条新支线：引导场编译与蒸馏目标修正。</b>AGAVE（11-05，WACV 2027 接收）把 CFG 的引导场用 MeanFlow 式区间积分目标直接"编译"进网络：新增可学标量少于 10 个、推理开销为零；1-NFE 视频生成在 VBench/UCF-101/MSR-VTT 超过全部 one-step 基线（含 NVIDIA rCM 的 4/2/1 步），FVD 上 1 步匹敌 50 步教师<sup class="cite"><a href="#ref-AGAVE">[AGAVE]</a></sup>。History Forcing（浙大，11-02）针对少步 AR 视频蒸馏的长时程一致性：用教师"带历史/不带历史"的预测残差修正学生目标，1.3B 模型 VBench 质量 85.07（15s）、VBench-Long 79.82（60s），出画回看场景 PlayWorld 演化质量 2.35→2.70<sup class="cite"><a href="#ref-HFZJU">[HFZJU]</a></sup>。工程侧还有两个信号：Microsoft SMD（10-13）把蒸馏砍到"速度回归+残差代理+弱教师排斥"三件套、扩到 33B<sup class="cite"><a href="#ref-SMD">[SMD]</a></sup>；StepX-OPD（11-03）把能力蒸馏与步数蒸馏合并为单阶段<sup class="cite"><a href="#ref-STEPX">[STEPX]</a></sup>。</p>
 <h2 id="s6">6 少步与缓存、稀疏化、量化怎样组合</h2>
 <h3 id="s6-cost">6.1 从一次请求的等待时间算起</h3>
 <p>在各阶段串行的单请求中，可以按 <code>总耗时 = 排队 + 文本编码 + 各次去噪耗时之和 + VAE 解码 + 传输与后处理</code> 记账。VAE 解码把低维潜变量还原成像素。若服务重叠执行阶段，则用时间线上的关键路径来算用户等待，分别保留各算子耗时作归因。</p>
@@ -271,6 +273,11 @@ for method, steps in [("Euler", 4), ("Heun", 2)]:
 <li id="ref-DEV"><b>[DEV] Black Forest Labs.</b> <i>FLUX.1 [dev] 官方模型卡，Diffusers 示例</i>。官方资料，核对于 2026-11-04。<a href="https://huggingface.co/black-forest-labs/FLUX.1-dev#diffusers">一手来源</a></li>
 <li id="ref-EULER"><b>[EULER] Hugging Face Diffusers.</b> <i>FlowMatchEulerDiscreteScheduler.step，v0.35.1</i>。官方资料，核对于 2026-11-04。<a href="https://github.com/huggingface/diffusers/blob/0f252be0ed42006c125ef4429156cb13ae6c1d60/src/diffusers/schedulers/scheduling_flow_match_euler_discrete.py#L454-L461">一手来源</a></li>
 <li id="ref-PIPE"><b>[PIPE] Hugging Face Diffusers.</b> <i>FluxPipeline 的内嵌引导与双分支引导，v0.35.1</i>。官方资料，核对于 2026-11-04。<a href="https://github.com/huggingface/diffusers/blob/0f252be0ed42006c125ef4429156cb13ae6c1d60/src/diffusers/pipelines/flux/pipeline_flux.py#L798-L947">一手来源</a></li>
+
+<li id="ref-AGAVE"><b>[AGAVE] Guidance Is a Field, Not a Scalar（AGAVE）：区间积分 CFG 的单步视频生成（WACV 2027 接收）</b>，arXiv:2611.07566，2026-11-05。<a href="https://arxiv.org/abs/2611.07566">官方一手</a>.</li>
+<li id="ref-HFZJU"><b>[HFZJU] 浙江大学.</b> <i>History Forcing：少步 AR 视频蒸馏的历史监督（VBench-Long 79.82）</i>，arXiv:2611.02782，2026-11-02。<a href="https://arxiv.org/abs/2611.02782">官方一手</a>.</li>
+<li id="ref-SMD"><b>[SMD] Microsoft.</b> <i>SMD：纯回归式 on-policy 蒸馏做到 4-NFE、33B</i>，arXiv:2610.18472，2026-10-13。<a href="https://arxiv.org/abs/2610.18472">官方一手</a>.</li>
+<li id="ref-STEPX"><b>[STEPX] StepX-OPD：能力蒸馏与步数蒸馏的一段式合并</b>，arXiv:2611.04386，2026-11-03。<a href="https://arxiv.org/abs/2611.04386">官方一手</a>.</li>
 </ol>
 <p class="note"><small>论文以 arXiv 首次提交日期标注。模型卡与固定版本源码核对于 2026-11-04。图 2-1 和表 2-1 来自标量计算，第 6 章的延迟为教学设定值，第 7 章给出在目标设备上执行的实验协议。</small></p>
 </div>

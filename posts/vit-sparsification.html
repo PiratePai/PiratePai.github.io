@@ -152,9 +152,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/vit-sparsification.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -172,7 +172,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s6">AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -236,10 +236,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬–11 月上旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>Triage：注意力 tile 三档分诊</b><span class="hl-date">10-26 · 首尔大学</span></div><p>视频 DiT 的 tile 分 skip / skim（NVFP4）/ refine 三档，端到端最高 2.32×，相对其他近似注意力基线，接近稠密参考输出的 PSNR 高 0.3–3.0dB；非优于稠密模型。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LearnPrunerV2 学习式剪枝</b><span class="hl-date">10-27 · 理想汽车 · ACM MM 2026</span></div><p>剪 77.8% 视觉 token 保留 99.8%；TFLOPs 9.7×、prefill 6.2×、KV Cache 8.7×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>LOWN：扩散 VLM 按需看图</b><span class="hl-date">10-27 · KAIST</span></div><p>去掉图像只改 22.8% 步的决策：0.353× 解码 FLOPs 保留 99.6%，叠 Fast-dLLM 达 5.6–7.0×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8，说明"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
+<div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8，说明"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>AB-Attention：跳 89–92% 注意力仍高保真</b><span class="hl-date">10-29 · InfRec-Cardinal</span></div><p>免训练三件套（块内查询聚类选择器 IBCS + 包含概率加权采样 SIP + 细粒度 KV 装载内核）：Wan2.1/HunyuanVideo 上比最强基线 PSNR 最高 +4.4dB，端到端 2.23×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>少步 AR 视频的免训练 token 剪枝</b><span class="hl-date">11-05 · 港大</span></div><p>少步蒸馏后既有 caching 大量失效：识别跨帧静态冗余+跨步早收敛冗余，用模型自身去噪轨迹的早期干净估计在线定位——零重训、零辅助预测器。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>混元 Prism：稀疏注意力进原生训练（补录）</b><span class="hl-date">10-05 · 复旦+腾讯+浙大</span></div><p>2K（2560×1440）音视频联合训练比全注意力快 2.5× 且质量更优；默认稀疏率 0.75（每 query 块仅看 25% key 块），对比 Kling3/Wan3.0/Seedance-2.5/MOVA。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
 <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
   <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>
@@ -1003,10 +1003,18 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
     <li><b>TwinPrune</b>（上交大 + 华为，NeurIPS 2026，arXiv:2610.17530，2026-10-13）：揭出 VLM 剪枝的评测方法学缺陷：MMBench/POPE/ScienceQA 等"prefill 探针"只打分第一个解码 token，<b>结构上不可能度量 decode 阶段 KV 驱逐的效果</b>；实证"删光全部视觉 KV 时 prefill 探针精度几乎不变、TextVQA 却崩塌 45.6%"。统一空间密度信号同时驱动 prefill 二部合并与 decode KV 驱逐：InternVL-3.5-8B 端到端 prefill 3.24×，12.5% 保留时 decode 侧超 H2O 9.6pp。本文引用的 MMBench/POPE 类"decode 压缩无损"结论都应据此重新审视<sup class="cite">[TwinPrune · arXiv:2610.17530 · NeurIPS 2026]</sup>。</li>
     <li><b>外溢：VLA 剪枝成 10 月小趋势</b>：VLA-ACL（ETH + 清华黄高组，arXiv:2610.08133）冻结 VLA 底座、只用"动作一致性"监督训练轻量 patch scorer，OpenVLA-OFT 剪 87.5% 视觉 token、FLOPs 降 75%、1.5× 推理加速，LIBERO 成功率仅 −1.4%；同潮还有 When-and-What-to-Prune（2610.05273）、WAM-Cache（2610.11401）。另 HyperVAttention（时空聚类）已中稿 NeurIPS 2026（端到端最高 2.23×）；NVlabs Sana 的 sol-engine 分支新增全优化配置（GB200/GB10/H100/A100/RTX4090/5090，3.55–4.52×）；fal 的 H3 Max（MiniMax-H3 后训练+推理协同）达官方端点约 35× 吞吐，§6.4"系统层红利"继续兑现。</li>
   </ul>
-</section></section>
+</section>
+<h3>⚡ 11 月上旬快讯（增补 2026-11-15）</h3>
+<ul>
+<li><b>AB-Attention</b>（10-29）：视频 DiT 的高精度块稀疏注意力：免训练三件套——块内查询聚类选择器（IBCS）、包含概率加权采样（SIP）与细粒度 KV 装载内核；Wan2.1 与 HunyuanVideo 上跳过 89–92% 注意力（基线要多算 1.8–3.6×），最强基线之上 PSNR 最高 +4.4dB，端到端最高 2.23×，代码开源<sup class="cite">[R26B-AB]</sup>。</li>
+<li><b>少步 AR 视频的免训练时空 token 剪枝</b>（港大，11-05）：少步蒸馏后跨步冗余稀薄、既有 caching 方法大量失效；本文识别"跨帧静态冗余+跨步早收敛冗余"两种模式，用模型自身去噪轨迹的早期干净估计作在线定位信号——零重训、零辅助预测器<sup class="cite">[R26B-HKPRUNE]</sup>。"少步化×剪枝"的叠加效应成为视频加速新战场。</li>
+<li><b>混元 Prism（补录）</b>（复旦+腾讯混元+浙大，论文 10-05、开源 10-06，MIT）：动态稀疏注意力<b>原生训练</b>的 2K 音视频联合生成：比全注意力训练快 2.5× 且质量更优；默认稀疏率 0.75（每 query 块仅看 25% key 块）<sup class="cite">[R26B-PRISM]</sup>。稀疏注意力从推理侧近似进入原生训练侧。</li>
+</ul>
+</section>
 <section id="s8" class="refs">
   <h2><span class="num">8</span>参考文献（按主题分组，含发表时间）</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-PRISMP"><b>Tu, Shuyuan, Tian, Qi et al.</b>. <i>Prism: Dynamic Sparse Attention for Native 2K Joint Video-Audio Generation Model Training</i>. arXiv:2610.05416v1，2026-10-04；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.05416v1">一手来源</a>。</li><li id="R26-PRISM"><b>Tencent-Hunyuan</b>. <i>Tencent-Hunyuan/Prism</i>. 源码快照 2de51622999f，提交日期 2026-10-31；核验 2026-11-03。<a href="https://github.com/Tencent-Hunyuan/Prism/blob/2de51622999f826e7b37d55711e8020203376acb/README.md">一手来源</a>。</li></ol>
+<h3>2026-11-15 增补来源</h3><ol class="refs"><li id="R26B-AB">Xu, B. 等 9 人（InfRec-Cardinal；通讯 Wangbo Zhao）. AB-Attention：视频 DiT 高精度块稀疏注意力. arXiv:2610.39663, 2026-10-29. <a href="https://arxiv.org/abs/2610.39663">官方一手</a>.</li><li id="R26B-HKPRUNE">香港大学. 少步 AR 视频扩散的免训练时空 token 剪枝. arXiv:2611.07551（v2 11-06）, 2026-11-05. <a href="https://arxiv.org/abs/2611.07551">官方一手</a>.</li><li id="R26B-PRISM">复旦+腾讯混元+浙大. Prism：动态稀疏注意力原生训练的 2K 音视频联合生成. arXiv:2610.05416, 2026-10-05；开源 2026-10-06（MIT）. <a href="https://arxiv.org/abs/2610.05416">论文</a> · <a href="https://github.com/Tencent-Hunyuan/Prism">代码</a>.</li></ol>
 
   <h4>基础架构与早期稀疏注意力</h4>
   <ol>

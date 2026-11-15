@@ -1,14 +1,14 @@
 {
   "siteUrl": "https://piratepai.github.io",
-  "siteUpdated": "2026-11-04",
+  "siteUpdated": "2026-11-15",
   "articles": {
     "agent-rl-survey": {
       "title": "Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL",
       "description": "沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -30,6 +30,20 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Targeted Guidance on-policy 定向引导；tokin token-native RL 网关；K3.1 Pro day-0 零失配 RL（KL=0）。",
+          "anchor": "research-updates",
+          "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "图解与来源",
+          "summary": "新增图 2-2 交互图解：Agent RL 数据飞轮一圈的运转顺序（保留原图 2-1；见 docs/research-refresh-20261115.md）。",
+          "anchor": "fig-flywheel-interactive",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -38,8 +52,8 @@
       "description": "沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-03",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-03",
@@ -47,6 +61,20 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Bifocal 等内存蒸馏对比回应 SWA vs 线性注意力论战；Hy4 正式版 GA（Gated DSA、1M 上下文）；SinkState 线性注意力状态压缩；Pavlichenko 架构长文。",
+          "anchor": "research-updates",
+          "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "图解与来源",
+          "summary": "新增图 0-1 交互图解：2014–2026 注意力结构演进时间线，三时期对照本章大事记（见 docs/research-refresh-20261115.md）。",
+          "anchor": "fig-attention-timeline",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -55,8 +83,8 @@
       "description": "以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。",
       "published": "2026-10-31",
       "publicationCommit": "1b68d9a3375a51832f61128e94ef6165e87989d4",
-      "contentUpdated": "2026-11-03",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-03",
@@ -64,6 +92,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "NVIDIA Dynamo 转向逐模型 dev 分支、TRT-LLM 稳定版停更；vLLM v0.33.0 × SGLang v0.5.23 双周节奏；DeepInfer 仓库动态（Q&A v0.2、star 26k）。",
+          "anchor": "research-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -72,8 +107,8 @@
       "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -88,6 +123,20 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Kimi K3.1 Pro 权重开放与 day-0 服务栈（AgentX/DCP 数字）；SGLang v0.5.23 Paged Experts 与 megakernel；NEAR AI 披露 SGLang RCE 生产事故；vLLM v0.33.0 投机方法官方化。",
+          "anchor": "s9",
+          "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "图解与来源",
+          "summary": "新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。",
+          "anchor": "fig-pd-interactive",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -96,8 +145,8 @@
       "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -112,6 +161,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。",
+          "anchor": "s10",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -120,8 +176,8 @@
       "description": "从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。",
       "published": "2026-10-26",
       "publicationCommit": "b497668aea429d7e7c77cac64cfffacc1147571f",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -143,6 +199,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "SIMPLE 能耗定律（4 参数解析模型）；StepSplit 请求级 Shapley 能耗归因；LM-SimBench 训练仿真器统一基准（含昇腾 NPU 侧）。",
+          "anchor": "research-updates",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -151,8 +214,8 @@
       "description": "沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。",
       "published": "2026-09-15",
       "publicationCommit": "04f6a9d9c75471bcb1f136a913bcdc13731f904f",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -174,6 +237,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "NVIDIA 开源首个 looped 语言模型 Dory1.0-4B（弹性深度、NVFP4 QAT）；字节 Seed 开源 Cola2 连续潜空间语言模型权重。",
+          "anchor": "latest",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -182,8 +252,8 @@
       "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -198,6 +268,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。",
+          "anchor": "research-updates",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -206,8 +283,8 @@
       "description": "从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -222,6 +299,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "NCCL 2.32.6-1 与 2026.11–2027.01 路线图（GENK、IB SHARP 进 GIN）；vLLM 弹性专家并行；K3.1 Pro DCP 数字；HF MoE 训练手册。",
+          "anchor": "ch10",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -230,8 +314,8 @@
       "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -246,6 +330,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "BitDecoding-FP4（爱丁堡+腾讯）NVFP4 KV 近无损解码；KV 量化的对齐坍塌（NeurIPS 2026）；FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化。",
+          "anchor": "s9",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -254,8 +345,8 @@
       "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。",
       "published": "2026-10-29",
       "publicationCommit": "42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -270,6 +361,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "NVIDIA Cosmos 交互式世界仿真框架；World Labs Atlas 正式版与 Frameboy；Hy-Nomas 进 SGLang 主分支并在 TPU 达成严格实时 720p。",
+          "anchor": "research-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -278,8 +376,8 @@
       "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。",
       "published": "2026-09-11",
       "publicationCommit": "1126cb5bb6bc39354f1320c0f2554d15cd5f1b93",
-      "contentUpdated": "2026-11-03",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-03",
@@ -287,6 +385,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失\"客观目标\"研究潮。",
+          "anchor": "latest",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -295,8 +400,8 @@
       "description": "从经典投机采样\"起草—验证\"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -318,6 +423,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "ForeSpark 草稿与验证预算联合调度（vs DSpark 吞吐 1.77×）；K3.1 Pro 官方 DSpark 预览草稿（接受长度 4.597、batch1 3.0×）；vLLM v0.33.0 把 dflash/ngram_gpu/动态投机纳入官方配置。",
+          "anchor": "latest",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -326,8 +438,8 @@
       "description": "以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。",
       "published": "2026-10-31",
       "publicationCommit": "7946637a17e9be96a25975af0c3f4d246bb33b84",
-      "contentUpdated": "2026-11-03",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-03",
@@ -335,6 +447,20 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "SGLang v0.5.23 Paged Experts 把专家卸载带进主流引擎（比 CPU offload 快 12–30×）；AdaOffload 多 GPU 专家卸载；llama.cpp moe-cache 子系统化与 SYCL -ncmoe；补录 KTransformers v0.7.2 CPU 驻留专家微调。",
+          "anchor": "research-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "图解与来源",
+          "summary": "新增图 3-2 交互图解：缺失专家在三级存储间的取用路径（保留原图 3-1 全量布局；见 docs/research-refresh-20261115.md）。",
+          "anchor": "fig-strata-interactive",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -343,8 +469,8 @@
       "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。",
       "published": "2026-10-11",
       "publicationCommit": "8f48de7b6f91249cf99bb0b68e455bc9f89fb25e",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -359,6 +485,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Together Compiler 持续编译系统（<24h 2.6× TPS、agent 实验 252×）；KernelMosaic CUDA 内核生成数据集（14,566 任务）。",
+          "anchor": "research-updates",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -367,8 +500,8 @@
       "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-03",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -383,6 +516,13 @@
           "summary": "增补本专题的一手来源与工程快照，核验范围限于本次增补。",
           "anchor": "research-20261103",
           "evidence": "docs/research-refresh-20261103.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。",
+          "anchor": "s6",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -391,8 +531,8 @@
       "description": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -400,6 +540,13 @@
           "summary": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
           "anchor": "s0",
           "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "SemiAnalysis TPUv7 首批 AgentX 结果（三方军备事实标准）；AMD GLM-5.2 AgentX 官方验证驱动调优记录。",
+          "anchor": "s6-frontier-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -408,8 +555,8 @@
       "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -417,6 +564,13 @@
           "summary": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。",
           "anchor": "s0",
           "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Claude Fable 5.2 effort 档位把推理预算产品化；ADP-HT 按路径预算在线路由；小模型 SC 门控负结果。",
+          "anchor": "s5-frontier-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -425,8 +579,8 @@
       "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -434,6 +588,13 @@
           "summary": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
           "anchor": "s0",
           "evidence": "docs/content-gaps-20261104.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "Evolving Infra 按会话状态在线重排 P/D（vs Dynamo 延迟最高降 4.1×）；Δτ-Bench 工具生态漂移评测；tau-bench 2.0.0。",
+          "anchor": "s4-frontier-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     },
@@ -442,8 +603,8 @@
       "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-04",
-      "reviewed": "2026-11-04",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
       "changes": [
         {
           "date": "2026-11-04",
@@ -451,6 +612,13 @@
           "summary": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。",
           "anchor": "s0",
           "evidence": "docs/diffusion-flow-sampling.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "前沿增补",
+          "summary": "AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。",
+          "anchor": "s5-frontier-20261115",
+          "evidence": "docs/research-refresh-20261115.md"
         }
       ]
     }

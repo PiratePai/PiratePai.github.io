@@ -109,9 +109,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-31">
-<meta property="article:modified_time" content="2026-11-03">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/custom-inference-engines-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）", "url": "https://piratepai.github.io/posts/custom-inference-engines-2026.html", "description": "以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。", "inLanguage": "zh-CN", "headline": "定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）", "datePublished": "2026-10-31", "dateModified": "2026-11-03", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/custom-inference-engines-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）", "url": "https://piratepai.github.io/posts/custom-inference-engines-2026.html", "description": "以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。", "inLanguage": "zh-CN", "headline": "定制化大模型推理引擎全景：从通用框架到 DeepInfer（2018–2026）", "datePublished": "2026-10-31", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/custom-inference-engines-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -128,7 +128,7 @@
     <span class="chip">对比框架 <b>FT / TRT-LLM / DeepSpeed / vLLM / SGLang / LightLLM / LMDeploy 等</b></span>
   </div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-31">2026-10-31</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-03">2026-11-03</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1b68d9a3375a51832f61128e94ef6165e87989d4">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-31">2026-10-31</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-20261115">NVIDIA Dynamo 转向逐模型 dev 分支、TRT-LLM 稳定版停更；vLLM v0.33.0 × SGLang v0.5.23 双周节奏；DeepInfer 仓库动态（Q&amp;A v0.2、star 26k）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1b68d9a3375a51832f61128e94ef6165e87989d4">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -169,7 +169,7 @@
   <div class="hl-card"><div class="d">2025–2026</div><b>Prefill/Decode 分离成为生产标配</b>：DistServe/Splitwise 论文（2024）→ Mooncake（FAST'25）→ NVIDIA Dynamo（2025-03）→ vLLM/SGLang/TRT-LLM 内置 disaggregation。→ <a href="#s2-5">2.5 节</a>、<a href="#s6">第 6 章</a></div>
   <div class="hl-card"><div class="d">2025-02/09</div><b>DeepSeek 开源周 + DSA 稀疏注意力</b>：FlashMLA/DeepGEMM/DeepEP/3FS 等推理底座组件陆续开源；V3.2-Exp 引入 DSA，注意力渐成"可学的稀疏检索"。→ <a href="#s3-8">3.8 节</a></div>
   <div class="hl-card"><div class="d">2025–2026</div><b>通用引擎军备竞赛转向"宽矩阵"</b>：vLLM V1 重写、SGLang 大规模 EP 部署、FlashInfer 统一 kernel 层——通用框架与专用引擎的分工在 2026 年彻底清晰。→ <a href="#s5-1">5.1 节</a></div>
-</div>
+<div class="hl-card"><div class="d">11-05 · NVIDIA</div><b>Dynamo 转向"逐模型 dev 分支"</b>：v1.6.2 补丁版之外，按前沿模型出 dev 分支（deepseek-v4.1-flash、kimi-k3.1-pro、mistral-large-4）；TRT-LLM GitHub 稳定版停在 v1.2.1（2026-04-20），v1.4.0 仍是 RC——Dynamo 成为 NVIDIA serving 层事实主轴。 → <a href="#research-20261115">详情</a></div><div class="hl-card"><div class="d">11-01/02 · 社区</div><b>vLLM v0.33.0 × SGLang v0.5.23 双周节奏</b>：vLLM 927 commits（投机解码成主轴、CUDA 13 only）；SGLang 1007 PR（Paged Experts、megakernel、TPU7x）。引擎竞争焦点从"跑得快"转向"day-0 支持新架构 + 低延迟 decode 范式"。 → <a href="#research-20261115">详情</a></div></div>
 </details><h2 id="s0"><span class="no">0</span>导读与大事记</h2>
 
 <div class="card">
@@ -980,8 +980,15 @@ q* = max{ q : cost(q,c) ≤ budget, q ≤ 32768 }   # 取时间预算内能吃�
 <tr><td><b>deepseek-recipe / DSML</b></td><td>DeepSeek 开源的生产级 token 编解码组件（Rust；多协议转换、防特殊 token 注入、流式增量解析）/ DeepSeek 的工具调用标记语言</td></tr>
 </table>
 </details>
+<section class="research-refresh" aria-labelledby="research-20261115"><h3 id="research-20261115">⚡ 11 月上旬快讯（增补 2026-11-15）</h3><p class="muted">核验：2026-11-15 · 新发布与工程快照</p><ul>
+<li><b>NVIDIA Dynamo v1.6.1/v1.6.2 与逐模型 dev 分支</b>（10-27 / 11-05）：v1.6.2 为 patch（TRT-LLM 超长 prompt 返 HTTP 400、SGLang worker GC 冻结 opt-in、Mooncake 0.3.14）；新打法是按前沿模型发 dev 分支——v1.7.0-mistral-large-4-dev.1（11-02）、v1.6.0-deepseek-v4.1-flash-dev.2-post.1（11-05）、v1.7.0-kimi-k3.1-pro-dev.1（11-06）<sup class="cite">[R26B-DYN]</sup>。同页可见 TRT-LLM GitHub 稳定版停在 v1.2.1（2026-04-20）、v1.4.0rc3 指向 11-03 commit：NVIDIA 把 serving 层重心移到 Dynamo，"引擎→编排器→worker"分层基本定型。</li>
+<li><b>vLLM v0.33.0（11-01）与 SGLang v0.5.23（11-02）</b>：两版合计近 2000 个 PR。vLLM 侧 <code>dflash</code>/<code>ngram_gpu</code>/动态投机进官方配置、DSv4.1-Flash+DSpark GB300 1373→3390 tok/s、ROCm MonoKernel MI300X/MI325X P50 2.32×<sup class="cite">[R26B-V33B]</sup>；SGLang 侧 Paged Experts/megakernel 插件化、TPU7x 支持<sup class="cite">[R26B-SGL23B]</sup>。</li>
+<li><b>DeepInfer 后续</b>（deepseek-ai，11-03）：仓库更新《V4.1 Flash Q&A》至 v0.2；star 从开源时约 1.7 万增至 26,045（2026-11-15 GitHub API 口径，含 3,199 fork），无重大代码更新<sup class="cite">[R26B-DIQA]</sup>。</li>
+</ul></section>
+
 <h2 id="refs">参考文献</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-EDGE"><b>NVIDIA</b>. <i>NVIDIA/TensorRT-Edge-LLM</i>. v0.11.1，发布于 2026-10-28；核验 2026-11-03。<a href="https://github.com/NVIDIA/TensorRT-Edge-LLM/releases/tag/v0.11.1">一手来源</a>。</li><li id="R26-FLASHMLA"><b>deepseek-ai</b>. <i>deepseek-ai/FlashMLA</i>. 源码快照 395cb3afbb33，提交日期 2026-10-27；核验 2026-11-03。<a href="https://github.com/deepseek-ai/FlashMLA/blob/395cb3afbb331fef7b1b21e9340861b9436b42d8/README.md">一手来源</a>。</li></ol>
+<h3>2026-11-15 增补来源</h3><ol class="refs"><li id="R26B-DYN">NVIDIA. Dynamo v1.6.1/v1.6.2 Releases 及逐模型 dev 分支（mistral-large-4 / deepseek-v4.1-flash / kimi-k3.1-pro）. GitHub Releases, 2026-10-27 / 2026-11-05. <a href="https://github.com/ai-dynamo/dynamo/releases">官方一手</a>.</li><li id="R26B-V33B">vLLM Project. vLLM v0.33.0 Release. GitHub Release, 2026-11-01. <a href="https://github.com/vllm-project/vllm/releases/tag/v0.33.0">官方一手</a>.</li><li id="R26B-SGL23B">sgl-project. SGLang v0.5.23 Release. GitHub Release, 2026-11-02. <a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">官方一手</a>.</li><li id="R26B-DIQA">deepseek-ai. DeepInfer 仓库动态（Q&A v0.2 更新 2026-11-03；star 26,045 @ 2026-11-15）. GitHub, 2026-11. <a href="https://github.com/deepseek-ai/DeepInfer">官方一手</a>.</li></ol>
 
 <ol class="refs">
 <li id="r-ORCA22"><b>Yu, Jeong, Kim, Kim, Chun</b>. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. USENIX OSDI'22, 2022-07（无 arXiv 版本；网络流传的 arXiv:2205.05120 实为 CERN 论文，谨防误引）。<a href="https://www.usenix.org/conference/osdi22/presentation/yu">usenix.org/conference/osdi22/presentation/yu</a></li>

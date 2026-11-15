@@ -191,9 +191,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/kv-cache-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "KV Cache 技术全景：从原理到前沿（2017–2026）", "url": "https://piratepai.github.io/posts/kv-cache-survey.html", "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。", "inLanguage": "zh-CN", "headline": "KV Cache 技术全景：从原理到前沿（2017–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/kv-cache-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "KV Cache 技术全景：从原理到前沿（2017–2026）", "url": "https://piratepai.github.io/posts/kv-cache-survey.html", "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。", "inLanguage": "zh-CN", "headline": "KV Cache 技术全景：从原理到前沿（2017–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/kv-cache-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -250,7 +250,7 @@
   <div class="sub">结构压缩 · 分页管理 · 前缀复用 · 量化 · 稀疏驱逐 · 分层卸载 · 混合架构</div>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">七条路线 <b>少存 / 管好 / 别重算 / 存粗 / 扔掉 / 分层 / 不用</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-04">2026-11-04</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s10">K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -312,10 +312,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬–11 月上旬 · 本方向近期论文与项目更新（详见文末「最新进展」）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>破 1M KV 墙</b><span class="hl-date">10-23 · vLLM×Z.ai</span></div><p>GLM-5.3 以 PCP/DCP 上下文并行 + Hybrid HiSparse 服务 1M 上下文：FP8 KV 从 53.4GiB 轮转切到 8 卡（6.7GiB/卡），16×H200 吞吐 1.7–3.2×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>MLA 缓存 ~2.5bit</b><span class="hl-date">10-24 · 中科院+腾讯</span></div><p>RAQ-MLA 按"角色"分别变换：latent 供 value、RoPE 键主导打分，论文推理/代码汇总指标损失 &lt;0.5pp、理论 KV 容量约 6.5×；128K RULER-NIAH 为 79.13 vs BF16 87.22，检索并非同样无损。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>KV 跨请求泄露披露</b><span class="hl-date">10-26 · Cloudflare×SGLang</span></div><p>P/D 分离下 KV 池小于上下文长度 + 失败提前释放，155 条响应泄漏他人内容；v0.5.21/22 已修，官方建议升级。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div></details>
+<div class="hl-card"><div class="hl-meta"><b>无损解压进注意力内核</b><span class="hl-date">10-24 · ZipFusion</span></div><p>解压以寄存器位运算融进注意力计算重建 value：H100 decode 比 FlashInfer 快 1.25×，同显存 8K 吞吐 +26.3%。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>K3.1 Pro：sparse-MLA 的缓存结构定型</b><span class="hl-date">11-04 · Moonshot×vLLM</span></div><p>24 层全注意力换 DSA 稀疏注意力：FP8 键的 indexer 每 token 仅 132 字节、top-2048 精确注意力；长上下文 decode 每层读字节约为稠密 MLA 的 1/4。配合 packed block cache 统一管 latent+indexer 键+KDA 状态。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>LowRAM：测试时摊销 value</b><span class="hl-date">11-04 · UCL 等</span></div><p>per-head K→V 轻量预测器+残差存储：4× 近无损 value 压缩；与量化/驱逐组合达 26.9× 压缩保持 94.5% 基线表现，4× 压缩下峰值 decode 吞吐最高 5×。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>ADKV：自适应 delta 量化进 NeurIPS</b><span class="hl-date">NeurIPS 2026</span></div><p>在线 EMA 自适应 delta 量化追踪 post-RoPE outlier 漂移：等精度下 metadata 内存约 12.8×↓，配套融合 ADKV-GEMV kernel。</p><a class="hl-link" href="#s10">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>预备知识：KV Cache 是什么，为什么它既是救星又是瓶颈</h2>
 
@@ -1138,10 +1138,18 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <li><b>偏置折进 Keys</b>（Kanwat，10-27）：把注意力偏置折进 K，不改 FlashAttention/vLLM 内核即可直接服务压缩缓存，14 组对照中 13 组与注意力矩阵方案无差<sup class="c"><a href="#ref-94">[94]</a></sup>。</li>
 </ul>
 
+
+<h3>⚡ 11 月上旬快讯（增补 2026-11-15）</h3>
+<ul>
+<li><b>K3.1 Pro 的稀疏 MLA 缓存结构</b>（Moonshot×vLLM，11-04）：24 层全注意力层全部换成"MLA + DSA indexer"：32 头轻量 indexer（FP8 键、每 token 132 字节）给全部历史 token 打分，只保留 top-2048 做 MLA 精确注意力；长上下文 decode 每层读取字节约为稠密 MLA 的 1/4；KV 池用 packed block cache 统一管理 latent、indexer 键与 KDA 状态<sup class="cite">[R26B-K31KV]</sup>。"可学习的稀疏检索"从 DeepSeek 单点变成两代旗舰的共同选择。</li>
+<li><b>LowRAM</b>（UCL 等，11-04）：注意到 K 与 V 的结构不对称——用 per-head K→V 轻量预测器+残差存储实现 4× 近无损 value 压缩；与量化/驱逐组合达 26.9× 压缩、保持 94.5% 基线表现；4× 压缩下峰值 decode 吞吐最高 5×；预测器可元学习初始化以降低 prefill 开销<sup class="cite">[R26B-LOWRAM]</sup>。为"压缩"轴补充 K/V 不对称这一正交维度。</li>
+<li><b>ADKV 入选 NeurIPS 2026</b>（poster 12 月）：在线 EMA 自适应 delta 量化追踪 post-RoPE outlier 漂移，等精度下 metadata 内存约 12.8×↓，配套融合 ADKV-GEMV kernel<sup class="cite">[R26B-ADKV]</sup>。</li>
+</ul>
 </section>
 <h2 id="refs">参考文献</h2>
 <h3>原理图解来源（2026-11-04 核验）</h3><ol class="refs"><li id="V26-PAGED"><b>Kwon et al.</b>. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP 2023；arXiv:2309.06180，2023-09-12。<a href="https://arxiv.org/pdf/2309.06180">原文 Figure 8、§4.4</a>。</li></ol>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-DLLM"><b>Tai, Yan, Ding, Yunan et al.</b>. <i>KV Cache Quantization for Diffusion Language Models</i>. arXiv:2610.39853v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.39853v1">一手来源</a>。</li><li id="R26-BASIS"><b>Zhang, Lixun et al.</b> <i>BasisKV: Value Latents for Communication and Key Routing</i>. arXiv:2611.02583v1，2026-11-02；预印本，核验 2026-11-03。<a href="https://arxiv.org/abs/2611.02583v1">论文</a>。</li></ol>
+<h3>2026-11-15 增补来源</h3><ol class="refs"><li id="R26B-K31KV">vLLM Team × Moonshot AI. Kimi K3.1 Pro day-0（sparse-MLA：indexer 132 字节/token、top-2048；packed block cache）. vLLM 官方博客, 2026-11-04. <a href="https://vllm.ai/blog/2026-11-04-kimi-k31-pro">官方一手</a>.</li><li id="R26B-LOWRAM">Delgado, T., Wang, J.（UCL）, Fountas, Z. 等. LowRAM：测试时 value 摊销与低秩 key 的可组合 KV 压缩. arXiv:2611.07025, 2026-11 上旬. <a href="https://arxiv.org/abs/2611.07025">官方一手</a>.</li><li id="R26B-ADKV">Jia, H. 等. ADKV：自适应 delta KV 量化（在线 EMA；NeurIPS 2026 poster）. NeurIPS 2026. <a href="https://nips.cc/virtual/2026/poster/150885">官方一手</a>.</li></ol>
 
 <p style="font-size:12.5px;color:#aeb4bd">标注约定：日期为 arXiv v1 提交或官方发布时间（精确到月）；会议名后为正式发表年份。链接指向 arXiv 摘要页或官方页面。</p>
 <ol class="refs">
