@@ -137,6 +137,13 @@
           "summary": "新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。",
           "anchor": "fig-pd-interactive",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "图解与来源",
+          "summary": "新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。",
+          "anchor": "fig-radix-interactive",
+          "evidence": "docs/cost-efficient-inference-2026.md"
         }
       ]
     },
@@ -430,6 +437,13 @@
           "summary": "ForeSpark 草稿与验证预算联合调度（vs DSpark 吞吐 1.77×）；K3.1 Pro 官方 DSpark 预览草稿（接受长度 4.597、batch1 3.0×）；vLLM v0.33.0 把 dflash/ngram_gpu/动态投机纳入官方配置。",
           "anchor": "latest",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-15",
+          "kind": "编号修订",
+          "summary": "更新附录小节 7.1–7.5 改为 附A–附E（原编号与正文第 8/9 章顺序错位；文内 §7.3 交叉引用同步更新）。",
+          "anchor": "research-appendix",
+          "evidence": "docs/cost-efficient-inference-2026.md"
         }
       ]
     },
@@ -619,6 +633,22 @@
           "summary": "AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。",
           "anchor": "s5-frontier-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        }
+      ]
+    },
+    "cost-efficient-inference-2026": {
+      "title": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）",
+      "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。",
+      "published": "2026-11-15",
+      "contentUpdated": "2026-11-15",
+      "reviewed": "2026-11-15",
+      "changes": [
+        {
+          "date": "2026-11-15",
+          "kind": "新增专题",
+          "summary": "新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。",
+          "anchor": "s0",
+          "evidence": "docs/cost-efficient-inference-2026.md"
         }
       ]
     }
