@@ -168,9 +168,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-04">
+<meta property="article:modified_time" content="2026-11-15">
 <link rel="canonical" href="https://piratepai.github.io/posts/quantization-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-04", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -189,7 +189,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-03">2026-11-03</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看量化与少步采样的组合实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看量化与少步采样的组合实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">BitDecoding-FP4（爱丁堡+腾讯）NVFP4 KV 近无损解码；KV 量化的对齐坍塌（NeurIPS 2026）；FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -246,10 +246,10 @@
 .hl-card .hl-link{color:var(--blue,#6ea8ff);font-size:12px;text-decoration:none}
 .hl-card .hl-link:hover{text-decoration:underline}
 </style>
-<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬 · 本方向近期论文与项目更新（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>RAQ-MLA：缓存整体 2.5 bit</b><span class="hl-date">10-24 · 中科院自动化所+腾讯</span></div><p>MLA 潜在 KV 缓存（含 kR）整体量化到约 2.5 bit，四模型掉点 &lt;0.5pp，KV 容量 6.5×。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
+<div class="hl-head"><b>近期进展</b><i>2026 年 10 月下旬–11 月上旬 · 本方向近期论文与项目更新（详见文末"最新进展"）</i></div><div class="hl-grid"><div class="hl-card"><div class="hl-meta"><b>RAQ-MLA：缓存整体 2.5 bit</b><span class="hl-date">10-24 · 中科院自动化所+腾讯</span></div><p>MLA 潜在 KV 缓存（含 kR）整体量化到约 2.5 bit，四模型掉点 &lt;0.5pp，KV 容量 6.5×。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>ALTO：MXFP4 预训练跑通</b><span class="hl-date">10-26 · AMD</span></div><p>GPT-OSS-20B 从零 MXFP4 预训练：C4 3.3350 vs BF16 3.3283，步数开销 +20%→+5%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Muse Spark Open 多格式发行</b><span class="hl-date">10-15 · Meta</span></div><p>NVFP4 只量化专家（1.65TB→537GB），day-one 覆盖四引擎，另有 FP8/MXFP4、INT4、GGUF。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>BiLoCo：±1 符号修正</b><span class="hl-date">10-23 · MIT · NeurIPS 2026</span></div><p>用 ±1 符号向量存高精度修正：存储省 16×，batch-1 推理仅慢 6–11%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
+<div class="hl-card"><div class="hl-meta"><b>BiLoCo：±1 符号修正</b><span class="hl-date">10-23 · MIT · NeurIPS 2026</span></div><p>用 ±1 符号向量存高精度修正：存储省 16×，batch-1 推理仅慢 6–11%。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>BitDecoding-FP4：NVFP4 KV 近无损解码</b><span class="hl-date">11-06 · 爱丁堡+腾讯混元</span></div><p>双残差 query 分解把 query logit 误差 60%→1%：NVFP4 KV 与 BF16 差 <0.5 点（7 基准；TRT-LLM 原生方案掉 8.5 点）；B300 128K 解码内核 2.99×、端到端峰值吞吐 2.4–3.0×；MIT 开源（vLLM out-of-tree）。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>KV 量化会掉"对齐"</b><span class="hl-date">NeurIPS 2026</span></div><p>11 个指令模型 ×5 基准：Mistral-7B 在 1-bit KV 下 ppl 仅 1.03× 却丢 15.2% refusal；PCR 训练无关协议（约 35 GPU 分钟）可恢复最高 97% 对齐。评测维度从 ppl/accuracy 扩展到安全。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>FlashInfer v0.7.2：NVFP4 KV 全栈铺开</b><span class="hl-date">10-15 起 · NVIDIA</span></div><p>DSv4 NVFP4 sparse-MLA decode 覆盖 SM100/103；SM120/121（RTX PRO 6000/5090/DGX Spark）补 NVFP4 prefill 与 DSv4.1 混合缓存（528B FP8 SWA + 288B FP4）；投机/MTP 验证自动路由 cuDNN。</p><a class="hl-link" href="#s9">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>为什么需要量化：一张账单讲清楚</h2>
 
@@ -1125,9 +1125,17 @@ class DynamicQuantizer(BaseQuantizer):       # —— 用于激活：在线统�
 
 <p class="small muted">同期工作：AGQ（Monash，10-21，arXiv:2610.33074）VLA 的动作引导量化：4 bpw 成功率 96.8%（超 AWQ 2.3pp），2-bit AWQ/GPTQ 全崩而 AGQ 3 bpw 仍 91.3%；MPQ（arXiv:2610.32127）；扩散 LM 的"任务 × 时间步"量化（arXiv:2610.31198）；DCKV（arXiv:2610.36950）。另：DeepInfer 10-20 开源的推理栈目前仅含 BF16，量化支持标注"待更新"。</p>
 
+
+<h3>⚡ 11 月上旬快讯（增补 2026-11-15）</h3>
+<ul>
+<li><b>BitDecoding-FP4</b>（爱丁堡大学+腾讯混元，11-06）：NVFP4 KV 解码的算法-系统协同设计：双残差 query 分解把 query logit 误差 60%→1%，NVFP4 KV 与 BF16 差 &lt;0.5 点（Qwen3-4B/30B-A3B，7 基准；对比 TRT-LLM 原生 NVFP4 KV 掉 8.5 点）；128K 解码内核 B300 2.99× / RTX PRO 5000 4.01×，端到端峰值吞吐 2.4–3.0×（B300，64K–128K）；覆盖 GQA+MLA 至 770B；MIT 开源（OpenBitSys，vLLM out-of-tree）<sup class="cite">[R26B-BITD]</sup>。</li>
+<li><b>KV 量化的对齐坍塌</b>（NeurIPS 2026）：11 个指令模型 ×5 基准（1894 prompts）系统测量：Mistral-7B 在 1-bit KV（KIVI）下 ppl 仅 1.03× 却丢 15.2% refusal；PCR 训练无关协议（约 35 GPU 分钟）最高恢复 97% 对齐<sup class="cite">[R26B-ALIGN]</sup>。KV 量化的验收维度从 ppl/accuracy 扩展到安全对齐——低比特部署的隐形风险有了量化口径。</li>
+<li><b>FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化</b>（NVIDIA，10-15 正式版+滚动更新）：DSv4 NVFP4 KV sparse-MLA decode 经 <code>backend="cake"</code> 覆盖 SM100/103 数据中心卡；SM120/121 消费级补 NVFP4 prefill 与 DSv4.1 混合缓存（528B FP8 SWA + 288B FP4）；投机/MTP 多 token 验证自动路由 cuDNN 降验证延迟<sup class="cite">[R26B-FI72]</sup>。</li>
+</ul>
 </section>
 <h2 id="refs">参考文献</h2>
 <h3>2026-11-03 增补来源</h3><ol class="refs"><li id="R26-MODELOPT"><b>NVIDIA</b>. <i>NVIDIA/Model-Optimizer</i>. 0.48.0，发布于 2026-11-02；核验 2026-11-03。<a href="https://github.com/NVIDIA/Model-Optimizer/releases/tag/0.48.0">一手来源</a>。</li><li id="R26-DLLM"><b>Tai, Yan, Ding, Yunan et al.</b>. <i>KV Cache Quantization for Diffusion Language Models</i>. arXiv:2610.39853v1，2026-10-29；预印本；核验 2026-11-03。<a href="https://arxiv.org/abs/2610.39853v1">一手来源</a>。</li><li id="R26-MXCODE"><b>Kolhe, Gaurav et al.</b> <i>MXCode: Vector Quantization for MX-Native Inference at Scale</i>. arXiv:2611.00403v1，2026-10-30；预印本，核验 2026-11-03。<a href="https://arxiv.org/abs/2611.00403v1">论文</a>。</li></ol>
+<h3>2026-11-15 增补来源</h3><ol class="refs"><li id="R26B-BITD">Du, Ng, Cheng, Mai（爱丁堡）+ Sheng, Lau（腾讯混元）. BitDecoding-FP4：原生 NVFP4 KV Cache 解码的算法-系统协同设计. arXiv:2611.09825, 2026-11-06. <a href="https://arxiv.org/abs/2611.09825">论文</a> · <a href="https://github.com/OpenBitSys/BitDecoding-FP4">代码（MIT）</a>.</li><li id="R26B-ALIGN">Xu, B. C. 等. KV Cache 量化的对齐坍塌（Alignment Collapse；11 模型×5 基准）. NeurIPS 2026. <a href="https://neurips.cc/virtual/2026/poster/150322">官方一手</a>.</li><li id="R26B-FI72">NVIDIA FlashInfer 团队. FlashInfer v0.7.2（NVFP4 KV decode SM100/103；SM120/121 prefill 与混合缓存；验证路由 cuDNN）. GitHub Release, 2026-10-15 起滚动. <a href="https://github.com/flashinfer-ai/flashinfer/releases/tag/v0.7.2">官方一手</a>.</li></ol>
 
 <p class="small muted">格式：编号. 作者/机构，《标题》，发表 venue 与时间，链接。（资料快照：初稿 2026-08-18，增补至 2026-10-30；2026-11-01 复核本文标出的承重机制与引文，非全部条目重验）</p>
 <ol class="reflist">
