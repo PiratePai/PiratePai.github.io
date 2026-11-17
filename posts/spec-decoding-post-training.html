@@ -160,9 +160,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-09-11">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/spec-decoding-post-training.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -177,7 +177,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#latest">移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -689,7 +689,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 
 <section id="latest" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
-<h2 id="latest-content">更新附录 · 研究进展与发布记录</h2>
+<span id="latest-content" class="anchor"></span>
 
 <p class="lead">以 2026-09 为观察点，投机解码后训练领域的活跃度达到历史峰值。下面按五条主线盘点（均为 arXiv 可查或官方博客可考的工作）。</p>
 
@@ -885,8 +885,8 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

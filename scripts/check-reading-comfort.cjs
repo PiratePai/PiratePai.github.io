@@ -59,7 +59,16 @@ const out=process.env.READER_QA_DIR;
               backgrounds.set(n,composite);return composite;
             }
             function luminance(color) {return color.slice(0,3).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0)}
-            const lowContrast=[],smallProse=[];
+            const lowContrast=[],smallProse=[],pointContrast=[];
+            for (const point of document.querySelectorAll('svg[data-handbook-diagram] [data-diagram-point]')) {
+              const svg=point.closest('svg'),surface=svg.querySelector('rect');
+              const bg=rgb(surface ? style(surface).fill : style(svg).backgroundColor);
+              const opacity=Number(style(point).fillOpacity)*Number(style(point).opacity);
+              const fg=rgb(style(point).fill).slice(0,3).map((v,i)=>v*opacity+bg[i]*(1-opacity));
+              const a=luminance(fg),b=luminance(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+              pointContrast.push({diagram:svg.id,family:point.dataset.diagramPoint,ratio});
+              if(!Number.isFinite(ratio)||ratio<3)lowContrast.push({diagram:svg.id,family:point.dataset.diagramPoint,ratio});
+            }
             const walker=document.createTreeWalker(document.querySelector('.reader-content'),NodeFilter.SHOW_TEXT);
             let n,checked=0;
             while(n=walker.nextNode()) {
@@ -83,7 +92,7 @@ const out=process.env.READER_QA_DIR;
               return number.display!=='inline'||number.verticalAlign!=='baseline'||number.fontSize!==heading.fontSize||parseFloat(number.borderTopWidth)!==0;
             }).map(n=>n.closest('h2').textContent.trim());
             const toolbar=[...document.querySelectorAll('.reader-toolbar button,.reader-toolbar a')].filter(n=>n.getClientRects().length).map(n=>({left:n.getBoundingClientRect().left,right:n.getBoundingClientRect().right}));
-            return {theme:document.documentElement.dataset.readerTheme,checked,lowContrast:lowContrast.slice(0,25),lowContrastCount:lowContrast.length,smallProse,numberIssues,overflow:document.documentElement.scrollWidth>innerWidth+2,toolbarFits:toolbar.every(r=>r.left>=0&&r.right<=innerWidth+1),contentWidth:document.querySelector('.reader-content').clientWidth};
+            return {theme:document.documentElement.dataset.readerTheme,checked,pointContrast,lowContrast:lowContrast.slice(0,25),lowContrastCount:lowContrast.length,smallProse,numberIssues,overflow:document.documentElement.scrollWidth>innerWidth+2,toolbarFits:toolbar.every(r=>r.left>=0&&r.right<=innerWidth+1),contentWidth:document.querySelector('.reader-content').clientWidth};
           });
           results.push({file,width,...audit});
           console.log(JSON.stringify({file,width,...audit}));

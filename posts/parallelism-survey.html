@@ -157,9 +157,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/parallelism-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型并行策略与通信优化：发展历程、原理与未来方向", "url": "https://piratepai.github.io/posts/parallelism-survey.html", "description": "从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。", "inLanguage": "zh-CN", "headline": "大模型并行策略与通信优化：发展历程、原理与未来方向", "datePublished": "2026-08-23", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/parallelism-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型并行策略与通信优化：发展历程、原理与未来方向", "url": "https://piratepai.github.io/posts/parallelism-survey.html", "description": "从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。", "inLanguage": "zh-CN", "headline": "大模型并行策略与通信优化：发展历程、原理与未来方向", "datePublished": "2026-08-23", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/parallelism-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -170,7 +170,7 @@
 <h1>大模型并行策略与通信优化</h1><p class="sub">发展历程 · 原理图解 · 源码实证 · 前沿与未来</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">代码 <b>Megatron-LM · DeepSpeed · DeepEP</b></span><span class="chip">面向 <b>具备深度学习基础的读者</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#zero-memory-figure">重绘ZeRO 分片比较图，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#ch10">NCCL 2.32.6-1 与 2026.11–2027.01 路线图（GENK、IB SHARP 进 GIN）；vLLM 弹性专家并行；K3.1 Pro DCP 数字；HF MoE 训练手册。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#zero-memory-figure">重绘ZeRO 分片比较图，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#ch10">NCCL 2.32.6-1 与 2026.11–2027.01 路线图（GENK、IB SHARP 进 GIN）；vLLM 弹性专家并行；K3.1 Pro DCP 数字；HF MoE 训练手册。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#ch10">正文 11/12 改为 10/11（图 12-1→图 11-1），附录小节 10.1–10.9 改为 附A–附I；移除附录内同名重复标题，交叉引用与目录同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -187,10 +187,10 @@
     <a href="#ch7">⑦ 上下文并行</a>
     <a href="#ch8">⑧ 组合·自动并行</a>
     <a href="#ch9">⑨ 通信优化体系</a>
-    <a href="#ch10">更新附录（展开选读）</a>
-    <a href="#ch11">⑪ 未来方向</a>
-    <a href="#ch12">⑫ 结语</a>
-    <a href="#refs">⑬ 参考资料</a>
+    <a href="#ch11">⑩ 未来方向</a>
+    <a href="#ch12">⑪ 结语</a>
+    <a href="#ch10">更新附录</a>
+    <a href="#refs">参考资料</a>
   </div>
 </nav>
 
@@ -633,7 +633,7 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
   <div class="zh">「我们提出一种(据我们所知)首个在同步训练语义下成功实现零流水线气泡的调度策略。其关键思想是把反向计算拆成两部分:一部分计算对输入的梯度,另一部分计算对参数的梯度……在相近显存限制下,我们的方法吞吐比 1F1B 高至多 23%;放宽显存约束后可进一步提升到 31%。」</div>
   <span class="src">— arXiv 2401.10241 摘要</span>
 </div>
-<p><b>两条后续路线（发表年份不同，不表示先后继承）:</b>① <b>DualPipe / DualPipeV</b>(DeepSeek 开源周 Day 4,2025-02-27;V 形变体由 Sea AI Lab 博客提出并被官方仓库采纳):把流水线做成<b>双向</b>,微批同时从流水线两端灌入,"前向+反向成对块"内部把注意力、all-to-all dispatch、MLP、all-to-all combine 四类组件重排,让 EP 通信与计算完全互相掩盖(详见 6.4 与 9 章);Sea AI Lab 随后指出"双向"导致参数显存翻倍并非必需,用 cut-in-half 把调度切成 V 形即可在几乎保留全部通信掩盖的同时省回一半参数显存,代价是 PP 点对点通信量翻倍(但 PP 通信远小于 EP all-to-all,划算)<sup class="ref">[<a href="#refs">Sea AI Lab 博客, 2025-02</a>]</sup>。② 广度优先流水线(Breadth-First PP,MLSys 2023):让每个 GPU 持有多个细粒度 stage 首尾相连成环,微批"广度优先"地更快走完全程,以小 per-GPU batch 同时拿到高利用率与低显存,52B 模型吞吐较 Megatron-LM 提升最高 43%<sup class="ref">[<a href="#refs">Lamy-Poirier, ServiceNow, MLSys 2023 / arXiv 2211.05953</a>]</sup>;2025 年 Kimi K2 的技术报告将其与虚拟段 1F1B 一同列为流水线设计参考(见第 10 章)。</p>
+<p><b>两条后续路线（发表年份不同，不表示先后继承）:</b>① <b>DualPipe / DualPipeV</b>(DeepSeek 开源周 Day 4,2025-02-27;V 形变体由 Sea AI Lab 博客提出并被官方仓库采纳):把流水线做成<b>双向</b>,微批同时从流水线两端灌入,"前向+反向成对块"内部把注意力、all-to-all dispatch、MLP、all-to-all combine 四类组件重排,让 EP 通信与计算完全互相掩盖(详见 6.4 与 9 章);Sea AI Lab 随后指出"双向"导致参数显存翻倍并非必需,用 cut-in-half 把调度切成 V 形即可在几乎保留全部通信掩盖的同时省回一半参数显存,代价是 PP 点对点通信量翻倍(但 PP 通信远小于 EP all-to-all,划算)<sup class="ref">[<a href="#refs">Sea AI Lab 博客, 2025-02</a>]</sup>。② 广度优先流水线(Breadth-First PP,MLSys 2023):让每个 GPU 持有多个细粒度 stage 首尾相连成环,微批"广度优先"地更快走完全程,以小 per-GPU batch 同时拿到高利用率与低显存,52B 模型吞吐较 Megatron-LM 提升最高 43%<sup class="ref">[<a href="#refs">Lamy-Poirier, ServiceNow, MLSys 2023 / arXiv 2211.05953</a>]</sup>;2025 年 Kimi K2 的技术报告将其与虚拟段 1F1B 一同列为流水线设计参考(见更新附录 附C)。</p>
 <div class="note"><b>本章小结:</b>PP 通信 = 段间小数据点对点(激活),量小但串行依赖强;优化主旋律是<b>调度(scheduling)</b>:GPipe(简单,显存 O(m))→ 1F1B(显存 O(p))→ 交错式(气泡÷v)→ 零气泡(拆 backward 填气泡)→ 广度优先 / DualPipe(V 形、双向,重排掩盖 EP 通信)。PP 是五类并行中"通信最少"的,因此适合跨节点部署(段间流量小),这使它成为万卡级训练的骨干维度。</div>
 </section>
 <section id="ch6">
@@ -648,7 +648,7 @@ input_tensor = p2p_communicator.send_backward_recv_forward(
     <span style="margin-left:auto">气泡占比 <b class="ppx-bubble ppx-stat">–</b> · 峰值在途微批 <b class="ppx-inflight ppx-stat">–</b>/8（决定激活显存）</span>
   </div>
   <canvas></canvas>
-  <div class="ppx-cap">横轴时间、纵轴 4 张卡（流水级），蓝块 = 前向 F，橙块 = 反向 B，斜纹 = 卡在干等的「气泡」。一个反直觉的事实：<b>切换模式会发现 1F1B 的总时间和气泡占比与 GPipe 完全一样</b>——它省的不是时间，而是显存：GPipe 要把 8 个微批的激活全部驻留到反向开始，1F1B「前向一个、就反向一个」，每张卡最多驻留 4 个微批（绿色数字 = 当前时刻在途微批数，红色 = 接近上限）。要真正把气泡压小，需要交错调度（VPP）或零气泡调度（ZB：把反向拆成 dgrad + wgrad，让可延后的 wgrad 去填气泡）——这正是正文 §5.4 与 §10.3 的内容。</div>
+  <div class="ppx-cap">横轴时间、纵轴 4 张卡（流水级），蓝块 = 前向 F，橙块 = 反向 B，斜纹 = 卡在干等的「气泡」。一个反直觉的事实：<b>切换模式会发现 1F1B 的总时间和气泡占比与 GPipe 完全一样</b>——它省的不是时间，而是显存：GPipe 要把 8 个微批的激活全部驻留到反向开始，1F1B「前向一个、就反向一个」，每张卡最多驻留 4 个微批（绿色数字 = 当前时刻在途微批数，红色 = 接近上限）。要真正把气泡压小，需要交错调度（VPP）或零气泡调度（ZB：把反向拆成 dgrad + wgrad，让可延后的 wgrad 去填气泡）——这正是正文 §5.4 与更新附录 附C 的内容。</div>
 </div>
 <style>
 .ppx-demo{border:1px solid var(--line,#2a2f3a); border-radius:14px; background:linear-gradient(180deg,#141822,#11141b); margin:26px 0; overflow:hidden; font-size:14px}
@@ -990,7 +990,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
   <span class="src">— Ulysses 摘要,arXiv 2309.14509,2023-09</span>
 </div>
 <p><b>Ulysses vs Ring 怎么选?</b>Ulysses 通信量 O(N/P)(每卡 q/k/v 各 s/p×h),注意力部分每卡只算本地头的完整序列,且与任意注意力内核(FlashAttention 等)兼容;Ring 每步传 KV 块,总通信量与 Megatron-SP 同为 O(N),但可以完全异步。工程经验:CP 规模小(≤8,节点内 NVLink)时 Ulysses 简单高效;CP 规模大(跨节点、上百卡分一条序列)时 Ring/层级 CP 占优。两者通信量相差 P 倍,但 Ring 的"计算/通信算术强度"要求序列足够长才能掩盖。学界还出现两者混合的 <b>USP(Unified Sequence Parallelism)</b> 与 <b>LoongTrain</b>(2024-06,把注意力并行做成 2D 网格:一维 Ulysses 换头、一维 Ring 传 KV,按头数与序列长自动选配)<sup class="ref">[<a href="#refs">LoongTrain, arXiv 2406.18485, 2024-06</a>]</sup>。2025-01,PyTorch 官方的 torchtitan 用 pass-KV Ring Attention 实现 CP 并跑通 1M 上下文(Llama3-8B,32×H100)<sup class="ref">[<a href="#refs">PyTorch 论坛, 2025-01</a>]</sup>;2026-01,NVIDIA 又发布<b>动态上下文并行(Dynamic CP)</b>,按 batch 内实际序列长度自适应调整 CP 划分,变长训练最高提速 1.48×<sup class="ref">[<a href="#refs">NVIDIA 开发者博客, 2026-01</a>]</sup>。</p>
-<div class="note"><b>本章小结:</b>CP 通信 = 注意力内的 KV 流动,天然"多小笔、可异步",因此掩盖条件最好的 p2p 环传是主流;all-to-all 换头(Ulysses)在 CP 域小时通信量更优;未来"长上下文 + MoE"叠加时,CP 的层级化(a2a+p2p)、动态化,以及模型结构上的稀疏化(第 10 章的 DSA/iRoPE)将共同削减 KV 流量。另注意术语:Megatron 里还有一个"序列并行(SP)"指 LayerNorm 区域沿序列切分(4.3 节),它是 TP 的搭档;本章 CP 才是"一条序列切成多卡"的完整方案,两者可以同时开。</div>
+<div class="note"><b>本章小结:</b>CP 通信 = 注意力内的 KV 流动,天然"多小笔、可异步",因此掩盖条件最好的 p2p 环传是主流;all-to-all 换头(Ulysses)在 CP 域小时通信量更优;未来"长上下文 + MoE"叠加时,CP 的层级化(a2a+p2p)、动态化,以及模型结构上的稀疏化(更新附录 附D 的 DSA/iRoPE)将共同削减 KV 流量。另注意术语:Megatron 里还有一个"序列并行(SP)"指 LayerNorm 区域沿序列切分(4.3 节),它是 TP 的搭档;本章 CP 才是"一条序列切成多卡"的完整方案,两者可以同时开。</div>
 </section>
 <section id="ch8">
 <h2 class="sec"><span class="num">8</span>多维并行组合与自动并行:真实的万卡训练长什么样<span class="roadmap">并行 rank 分组与避免重复计数 → 拓扑感知放置 → 自动并行</span><span class="pill sys">系统</span></h2>
@@ -1030,7 +1030,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <tr><td><b>② 分层放置</b></td><td>让流量走快路</td><td>TP/CP 内层走 NVLink;EP 分层转发 NVLink→RDMA(6.4);CP 的 a2a+p2p 层级模式(7.3);轨优化组网;ZeRO 分桶对齐拓扑;PP scatter/gather 优化(5.3)</td></tr>
 <tr><td><b>③ 时序掩盖</b></td><td>通算重叠(本文主角)</td><td>分桶 all-reduce+独立流(3.3);TP 异步化/内核融合(4.4);PP 梯度同步塞进气泡、1F1B/交错式/零气泡调度(5 章);EP 与共享专家/双微批配对(6.3、DualPipe);CP 环形异步 KV(7.2);DeepEP 零 SM hook(6.4)</td></tr>
 <tr><td><b>④ 协议与内核</b></td><td>换执行引擎</td><td>NCCL→专用内核(MSCCL/DeepEP);网内计算(NVSwitch SHARP/NVLS)由交换机代做规约;GPUDirect RDMA(IBGDA)绕过 CPU;permute+all-to-all+量化融合内核;无损压缩嵌入通信(UCCL-Zip,2026-04)</td></tr>
-<tr><td><b>⑤ 算法协同</b></td><td>改模型换通信</td><td>组受限路由、无辅助损失均衡(不丢 token);容量因子→动态 padding;细粒度专家使 all-to-all 更均匀;同步 SGD→本地多步+低频同步(DiLoCo 等,见第 11 章);注意力稀疏化直接砍 KV 流量(DSA,第 10 章)</td></tr>
+<tr><td><b>⑤ 算法协同</b></td><td>改模型换通信</td><td>组受限路由、无辅助损失均衡(不丢 token);容量因子→动态 padding;细粒度专家使 all-to-all 更均匀;同步 SGD→本地多步+低频同步(DiLoCo 等,见第 10 章);注意力稀疏化直接砍 KV 流量(DSA,更新附录 附D)</td></tr>
 </table>
 <p>对这个框架最好的注脚是 <b>DeepSeek-V3 的训练系统</b>:它同时使用了①(细粒度专家+受限路由+FP8 通信)、②(EP 通信先经 IB 到目标节点、再经 NVLink 精确转发到专家所在卡,20 个 SM 打满两种链路)、③(DualPipe 把"注意力/dispatch/MLP/combine"四类组件在一对正反向块内重排,all-to-all 与 PP 通信全部隐藏)、④(定制 all-to-all 内核、warp 特化、PTX 级调优)、⑤(无辅助损失的负载均衡、不丢 token)。它最终在 2048 张 H800 上把 671B MoE 训到 2.788M GPU 小时(约 557 万美元)——五层不是并列菜单,而是同一道菜的五种佐料。DualPipe 论文给出的气泡账本也与第 5 章衔接:1F1B 为 (PP−1)(F+B),零气泡 ZB1P 为 (PP−1)(F+B−2W),DualPipe 为 (PP/2−1)(F&amp;B+B−3W) 且不随微批数增长。</p>
 <div class="q">
@@ -1076,34 +1076,34 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <section id="ch11">
 <h4>2026-10 下旬增补</h4>
 <ul>
-<li><b>DeepInfer:DeepSeek 生产推理框架开源</b>(2026-10-20,开源一周即超 1.7 万 star):Attention DP/balanced CP + MoE EP + EPLB 进入<b>推理</b>侧,NVIDIA SM100 与华为昇腾 950 双后端(注:开源版不含 KV cache 池化、P/D 分离与跨副本负载均衡,README 明示为待补全项)。这是 §11.5「训练-推理边界消融」的最强实证:EP 不只用于训练,反过来成了推理服务的并行主轴。</li>
+<li><b>DeepInfer:DeepSeek 生产推理框架开源</b>(2026-10-20,开源一周即超 1.7 万 star):Attention DP/balanced CP + MoE EP + EPLB 进入<b>推理</b>侧,NVIDIA SM100 与华为昇腾 950 双后端(注:开源版不含 KV cache 池化、P/D 分离与跨副本负载均衡,README 明示为待补全项)。这是 §10.5「训练-推理边界消融」的最强实证:EP 不只用于训练,反过来成了推理服务的并行主轴。</li>
 <li><b>MoonEP「完美均衡」EP 通信库</b>(Moonshot,H20/EP=8 实测失衡加剧时通信时间几乎平坦,与 DeepEP V2.5 的 <code class="inl">lb_prefetch_weights/lb_reduce_grads</code> 原语互相成就):动态冗余专家 + 静态形状缓冲,「专家复制」线(TopoEP/MegaFlux)的官方化落地。</li>
 <li><b>DeepSpeed v0.19.8(10-20):AutoEP 子系统成形 + DualPipeV 正式并入</b>(PR #8576):跨 MoE 层共享单个 DeepEP buffer、AutoEP+AutoTP 在 ZeRO-3 下折叠、融合 gate+up 分组 GEMM。DeepEP 缓冲与 V 形流水线从「专用组件」变「框架默认路径」。</li>
 <li><b>nccl-extensions 新增 AFD(Attention-FFN Disaggregation)</b>(NVIDIA,10-19 连续三提交):注意力-FFN 解耦的通信支持进入官方扩展,与 DisagMoE/HeterMoE 学术线会师。</li>
-<li><b>Megatron Core v0.19.2(09-18)</b>:路线图上的「1F1B EP A2A overlap」落地且支持 FP4(PR #6135);10 月另出 26.09 系列 5 个 RC。<b>FastEEP</b>(上交,arXiv:2610.18451)把「弹性 EP」带进 serving,是 §11.8 弹性并行预言的首个 serving 侧代表作。<b>Zyphra</b>(arXiv:2610.09372)用专家共激活相关性做放置+token 重排,免费降低跨 rank 流量。</li>
+<li><b>Megatron Core v0.19.2(09-18)</b>:路线图上的「1F1B EP A2A overlap」落地且支持 FP4(PR #6135);10 月另出 26.09 系列 5 个 RC。<b>FastEEP</b>(上交,arXiv:2610.18451)把「弹性 EP」带进 serving,是 §10.8 弹性并行预言的首个 serving 侧代表作。<b>Zyphra</b>(arXiv:2610.09372)用专家共激活相关性做放置+token 重排,免费降低跨 rank 流量。</li>
 </ul>
-<h2 class="sec"><span class="num">11</span>未来发展方向<span class="roadmap">scale-up 域膨胀 → EP 主战场 → 精度下沉 → 边界消融</span><span class="pill fut">未来</span></h2>
-<p class="lead">综合第 10 章的证据,以下八个方向是未来 2~5 年并行策略与通信优化最可能的主战场。每条都标注了当前的最新锚点。</p>
-<h3>11.1 Scale-up 域膨胀,重画并行版图</h3>
+<h2 class="sec"><span class="num">10</span>未来发展方向<span class="roadmap">scale-up 域膨胀 → EP 主战场 → 精度下沉 → 边界消融</span><span class="pill fut">未来</span></h2>
+<p class="lead">综合更新附录的证据,以下八个方向是未来 2~5 年并行策略与通信优化最可能的主战场。每条都标注了当前的最新锚点。</p>
+<h3>10.1 Scale-up 域膨胀,重画并行版图</h3>
 <p>NVLink 域正从 72 卡(GB200)走向 144(Vera Rubin)→ 576(Kyber)乃至规划中的 1152 die;UALink 要做 1024 加速器的开放域。当"一台机架"就有数百卡、数十 TB/s 的域内带宽,<b>TP/EP 会重新搬回域内</b>(Wide-EP 已实测 1.8×/GPU),跨域流量占比被动下降。并行策略将从"8 卡域 + 以太"两域模型演进为"<b>千卡域内 + 标准以太域间</b>"两级模型。随之而来的新问题:域内一致性协议、超大域的故障域与拓扑感知放置。</p>
-<h3>11.2 EP all-to-all 是通信主战场,专用内核 + 框架化 + 可移植后端</h3>
+<h3>10.2 EP all-to-all 是通信主战场,专用内核 + 框架化 + 可移植后端</h3>
 <p>MoE 一统天下后,EP 的 dispatch/combine 取代 TP all-reduce 成为头号通信开销。路线已清晰:专用内核(DeepEP 系、UniEP MegaKernel)→ 框架一等公民(MCore 的 overlap 开关、HybridEP)→ 可移植后端(DeepEP V2 弃 NVSHMEM 转 NCCL Gin)。下一个里程碑是<b>跨厂商、跨网络后端的统一 EP 通信抽象</b>,以及把路由算法、内核与网络拓扑联合优化的"通信-路由协同设计"。</p>
-<h3>11.3 精度下沉到通信与存储</h3>
+<h3>10.3 精度下沉到通信与存储</h3>
 <p>FP8 计算/通信已生产化(DeepSeek-V3、DeepEP),下一步是 <b>NVFP4 训练</b>(Quartet II,2026-01;MCore 已支持)、原生低精度权重(gpt-oss 的 MXFP4)、乃至<b>无损压缩进通信原语</b>(UCCL-Zip:RL 权重同步 +47.5%、KV 传输 -30.1% 延迟)。算术换带宽(量化通信)与表达换带宽(压缩)将并列成为标配。</p>
-<h3>11.4 长上下文:系统(CP)与架构(稀疏注意力)双线合流</h3>
+<h3>10.4 长上下文:系统(CP)与架构(稀疏注意力)双线合流</h3>
 <p>系统线:CP 的层级化(a2a+p2p)、动态化(Dynamic CP)、混合化(USP/LoongTrain 的 2D 注意力并行),以及 torchtitan 式产品化;架构线:DSA、iRoPE、Lightning Attention 直接削减 KV 流量与注意力 FLOPs。1M+ 上下文成为标配时,<b>"架构稀疏化 × CP 并行"的联合最优</b>(哪些层稀疏、哪些层环传、每层 CP 用什么通信模式)是一个尚无标准答案的开放问题;Megatron 已支持逐层 cp_comm_type 混配,正是为它准备的接口。</p>
-<h3>11.5 训练-推理边界消融,解耦式训练萌芽</h3>
+<h3>10.5 训练-推理边界消融,解耦式训练萌芽</h3>
 <p>RL 后训练把"生成"与"训练"解耦成两类集群(veRL/slime/NeMo-RL 的权重流式同步、delta sync;AReaL/APRIL 的异步+staleness 容忍)。同一思想正回流预训练:HeterMoE/DisagMoE 把注意力与专家块放到不同设备组、按负载自适应配比。当万卡集群内部也"按模块解耦",并行策略将从静态划分走向<b>动态、按负载调度的数据流</b>。</p>
-<h3>11.6 自动并行换发:从"搜策略"到"高保真模拟 + 调优"</h3>
+<h3>10.6 自动并行换发:从"搜策略"到"高保真模拟 + 调优"</h3>
 <p>通用自动并行(Alpa 一系)在 2025 年没有续作,但 Charon(2026-05)式的高保真模拟器 + MCore Parallel Folding 式的框架化折叠正在成为务实路线:先在模拟器里扫千万级并行/通信配置,再小规模实测校准。可以预期<b>"LLM 辅助的并行策略设计"</b>(用大模型读拓扑与 profile、生成并验证配置)成为下一阶段热点。</p>
-<h3>11.7 低通信/松散一致性训练:走出数据中心</h3>
+<h3>10.7 低通信/松散一致性训练:走出数据中心</h3>
 <p>同步 SGD 并非物理定律。DiLoCo(2023-11,本地多步+低频同步)证明了跨数据中心训练的可行性;异步 RL 的 staleness 容忍(AReaL η=4~8)证明一定松散度不伤收敛。带宽金字塔最底层(广域 1~10GB/s)一旦可用,"多中心联合训练/弱网训练"将把并行策略研究从"机房内"推向"行星规模"。</p>
-<h3>11.8 绿色与可靠:并行策略的 ESG 与弹性维度</h3>
+<h3>10.8 绿色与可靠:并行策略的 ESG 与弹性维度</h3>
 <p>Kyber 机架 600kW/800VDC、CPO 交换机、光互连都在把"每比特功耗"变成与"每比特带宽"同等级的设计约束;故障域随 scale-up 域变大而变大,<b>弹性并行(elastic parallelism,节点增减时重新划分而不重启)</b>、checkpoint 快速恢复将从事后补救变成并行策略的一等设计目标,这也是 Megatron 2026 路线图的明确条目。</p>
 </section>
 
 <section id="ch12">
-<h2 class="sec"><span class="num">12</span>结语:一张图带走全文<span class="roadmap">五个维度 × 四类原语 × 五层优化,一段话带走全文</span></h2>
+<h2 class="sec"><span class="num">11</span>结语:一张图带走全文<span class="roadmap">五个维度 × 四类原语 × 五层优化,一段话带走全文</span></h2>
 <p>把 12 章内容压成一段话:<b>并行的本质是"按五个维度切分状态(数据/层内矩阵/层段/专家/序列),再用四种集合通信原语(all-reduce、all-gather/reduce-scatter、all-to-all、点对点)把它们缝起来";通信优化的本质是"减量(稀疏/压缩/低精度)、走对路(分层放置)、藏起来(通算掩盖)、换引擎(专用内核)";而 2024 年以来最大的变化,是 MoE 让 EP all-to-all 成为瓶颈,scale-up 域膨胀让"域内并行"扩容,RL 让训练与推理边界消融。</b></p>
 <p>给想动手的本科同学一条路径:(1)在单机上读懂本文 4.2/5.3/6.3 的三段源码,再翻本目录下克隆的 Megatron-LM 仓库对应文件;(2)用 2 张卡跑通 PyTorch DDP,观察 bucket 与通信重叠;(3)用 torchtitan 在 8 卡上分别开 TP/PP/CP/FSDP 各一次,对比吞吐与显存;(4)读 DeepSeek-V3 技术报告第 3 章与 Kimi K2 技术报告 §2.4,画出两套系统的通信时序图。做完这四步,你已经超过大多数面试者了。</p>
 <figure>
@@ -1129,7 +1129,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
   <text class="sm3" x="530" y="134">⑤协同:路由/注意力协同设计</text>
   <text class="sm3" x="530" y="156">→ 目标:T_comm 全部藏进 T_compute</text>
 </svg>
-<figcaption><b>图 12-1:</b>全文一图流:切分维度 × 通信原语 × 优化层次。</figcaption>
+<figcaption><b>图 11-1:</b>全文一图流:切分维度 × 通信原语 × 优化层次。</figcaption>
 </figure>
 </section>
 
@@ -1137,10 +1137,9 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <section id="ch10" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
 <section id="ch10-content">
-<h2 class="sec">更新附录 · 研究进展与发布记录</h2>
 <p class="lead">本章按"模型实践 → 通信库与框架 → 流水线调度 → 长上下文 → 硬件与网络 → RL 后训练系统"六条线盘点。所有条目都给出时间、来源与可点击链接;引号内为来源原文。需要说明:个别坊间流传的说法(如 NVIDIA "TDT"、DeepSeek-R2、"BFPP 用于 Llama 4")在本轮检索中<b>找不到公开可查的原始文献</b>,本文不予收录。</p>
 
-<h3>10.1 万亿 MoE 的训练配置开始"论文级"公开</h3>
+<h3>附A 万亿 MoE 的训练配置开始"论文级"公开</h3>
 <p>2025 年最重要的变化,是头部实验室开始把并行配置写成论文。这让"并行策略"第一次可以跨机构比较:</p>
 <table>
 <tr><th>模型(时间)</th><th>规模(总参/激活)</th><th>并行/通信配置</th></tr>
@@ -1157,64 +1156,64 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </div>
 <p>两条路线的分歧,正好落在第 5、9 章"调度掩盖"光谱的两端:DeepSeek 用<b>重排流水线</b>掩盖重 EP 通信,Kimi 用<b>减轻通信</b>(小 EP + 解耦 W 梯度)让常规交错式 1F1B 就足够。Sea AI Lab 的 DualPipeV 博客(2025-02)则证明 DualPipe 的"双向"并非必需:用"cut-in-half"切成 V 形,参数显存回到 1×,代价是 PP 点对点通信量翻倍("PP 通信相对 EP 通信是小事"),原文:"we show that the Dual part of the DualPipe is actually bad for its 2×parameter redundancy, it is unnecessary and can be removed almost for free."<sup class="ref">[<a href="#refs">Sea AI Lab, 2025-02</a>]</sup></p>
 
-<h3>10.2 通信库与框架:EP 通信的"专门化、产品化"</h3>
+<h3>附B 通信库与框架:EP 通信的"专门化、产品化"</h3>
 <ul>
 <li><b>DeepEP 生态化(2025-02→2026)</b>:开源一周内成为事实标准;随后 Megatron Core v0.12(2025-05)集成 DeepEP dispatcher,v0.14(2025-09)加批级 A2A 重叠开关,v0.15(2025-11)加 HybridEP(GB200/B200/H100)。文档原话:"Batch-level overlapping to hide EP-A2A communication (–overlap-moe-expert-parallel-comm –delay-wgrad-compute)"。DeepEP 本体 2025 年内演进到 V2:"High-throughput and low-latency APIs unified into a single <code>ElasticBuffer</code> interface",后端从 NVSHMEM 换成 NCCL Gin,官方称"up to 1.3x peak performance, while saving up to 4x SM count"。</li>
 <li><b>学术侧的 MoE 通信优化</b>:SwiftMoE(2025-04,自适应专家复制,把专家参数与其优化器状态解耦放置)、HeterMoE(2025-04,注意力/专家解耦到不同设备组)、X-MoE(2025-08,消除 dispatch/combine 激活重复)、UniEP(2026-04,统一 EP MegaKernel,SM 级细粒度调度掩盖)、DisagMoE(2026-05,注意力与 FFN 跨设备组解耦+自适应配比)。</li>
 <li><b>训练栈整体</b>:NVIDIA《Scalable Training of MoE Models with Megatron Core》(2026-03)给出 GB200/GB300 上的完整配方:TP/PP/EP=1/4/64、Parallel Folding、FP8/NVFP4、长上下文,单 GPU 1048/1233 TFLOPS。TP=1 再次印证"TP 淡出、EP/PP 主轴"的趋势;动态 CP(2026-01)按变长序列自适应调整 CP 划分,最高 1.48× 提速。</li>
 </ul>
 
-<h3>10.3 流水线调度:从"零气泡"到"通信全掩盖"</h3>
+<h3>附C 流水线调度:从"零气泡"到"通信全掩盖"</h3>
 <p>2023-11 的零气泡论文(第 5 章)确立了"拆 B/W 填气泡"范式后,2024-2026 的主旋律是把<b>通信</b>也纳入填充对象:DualPipe(2025-02,EP A2A 与 PP 通信全隐藏)、DualPipeV(2025-02,V 形减半参数显存)、Kimi K2 的"解耦 W 梯度 + 最小 EP"(2025-07),以及学界的内存-调度联合优化(OptPipe、Pipeline Parallelism with Controllable Memory,NeurIPS 2024)。评估工具方面,Charon(2026-05)这类细粒度模拟器让"先模拟再上机"成为调度的标准流程。</p>
 
-<h3>10.4 长上下文:系统与架构双线并进</h3>
+<h3>附D 长上下文:系统与架构双线并进</h3>
 <ul>
 <li><b>系统线</b>:PyTorch torchtitan 用 pass-KV Ring Attention 实现 CP,32×H100 上把 Llama3-8B 训到 1M 序列(2025-01,官方帖:"Sequence length scaling to 1M on Llama3-8B model using 32 H100 GPUs");Megatron 的 a2a+p2p 层级 CP 与动态 CP 分别解决"跨节点 CP"与"变长序列";TokenRing(2024-12)用双向通信缓解 Ring Attention 计算-通信重叠难题。</li>
 <li><b>架构线(直接砍 KV/注意力流量)</b>:Llama 4 的 iRoPE + chunked attention(2025-04);DeepSeek V3.2-Exp 首发DSA 稀疏注意力(2025-09-29,官方:"DSA achieves fine-grained sparse attention with minimal impact on output quality — boosting long-context performance &amp; reducing compute cost",API 降价 50%+);MiniMax-M1 的 Lightning Attention 混合架构支撑 1M 上下文(2025-06)。这条线等于把第 9 章的"⑤算法协同"推到了注意力本身。</li>
 </ul>
 
-<h3>10.5 硬件与网络:scale-up 域爆炸 + 开放互连 + 光互联</h3>
+<h3>附E 硬件与网络:scale-up 域爆炸 + 开放互连 + 光互联</h3>
 <ul>
 <li><b>NVLink 域一年三级跳</b>:GB200 NVL72(2024-2025,72 GPU、130TB/s 一致域)→ Vera Rubin NVL144(2026 下半年)→ Kyber 机架 Rubin Ultra <b>NVL576</b>(2027,官方:"a new two-layer all-to-all NVLink topology that will enable developers to scale-up to 576 GPUs")。域变大直接改变并行策略:NVIDIA Wide-EP 博客实测在 NVL72 域内做大 EP,"up to 1.8x higher per-GPU throughput compared to smaller EP configurations"。<b>把 EP 搬进 NVLink 域</b>成为新默认。</li>
 <li><b>开放标准</b>:Ultra Ethernet 1.0 规范(2025-06-11,覆盖软件 API/语义层/RDMA/拥塞控制的完整以太网栈);UALink 200G 1.0(2025-04,单域最多 <b>1024 个加速器</b>的开放 scale-up 互连)。若普及,TP/EP 的"域内"规模不再绑定单一厂商,并行设计从"8 卡 NVLink + N 卡 RDMA"走向"千卡域内 + 标准以太域间"两级模型。</li>
 <li><b>共封装光学(CPO)</b>:NVIDIA 2025-03-18 宣布 Quantum-X(InfiniBand,2025 年底/2026 年初上市)与 Spectrum-X(Ethernet,2026 下半年)Photonics 交换机,把光引擎封装进交换 ASIC,官方称可连接"millions of GPUs across sites"并大幅降能耗,scale-out 侧为超大 EP/CP 通信供给带宽。</li>
 </ul>
 
-<h3>10.6 RL 后训练系统:并行与通信的新前线</h3>
+<h3>附F RL 后训练系统:并行与通信的新前线</h3>
 <p>2025 年起,RL 后训练(RLHF/推理强化)成为与预训练同等重要的负载,也带来全新的通信问题:<b>rollout 引擎与训练器之间的权重同步、轨迹回流与参数版本一致性</b>。代表系统:veRL(字节+清华,混合控制器架构,2025 年重点强化"异步多轮 rollout、大规模 MoE 的 EP 集成、off-policy 异步架构")、slime(清华/智谱,Megatron+SGLang,官方称"RL framework behind GLM-5.2 … GLM-4.5")、NeMo-RL(NVIDIA,2025-08,DTensor 与 Megatron 双后端)。异步化研究同样火热:AReaL(2025-05,NeurIPS 2025)完全解耦生成与训练,官方称"up to 2.77x training speedup compared to synchronous systems with the same number of GPUs";APRIL(2025-09)用超发 rollout+主动中断提升 22.5% 吞吐。通信侧还有 UCCL-Zip(2026-04)把<b>无损压缩</b>嵌入 P2P/集合通信,RL 权重同步提速至多 47.5%。训练与推理的物理/逻辑边界正在同时消融。</p>
 
-<h3>10.7 2026 年 6–10 月:EP 通信库跨厂商、RL 后训练生产化、微秒级时延</h3>
+<h3>附G 2026 年 6–10 月:EP 通信库跨厂商、RL 后训练生产化、微秒级时延</h3>
 <ul>
 <li><b>DeepEP V2.5 与 DeepEP-Ascend(2026-09-29)</b>:V2 的单一 ElasticBuffer 拆分为 <b>EPBuffer / EngramBuffer / PPBuffer / BucketBuffer</b> 四类缓冲 + 共享 BufferAllocator;桶式 CP/DP 集合通信与 PP、Engram(RDMA 远程内存)原语进库;冗余专家的权重预取与 NVLink 梯度规约;彻底移除 V1 与 NVSHMEM 依赖,全部内核经 DeepJIT 运行时编译。更重要的是 <b>DeepEP-Ascend:同一 API 在华为昇腾 950 NPU 上满性能运行</b>,是首个跨厂商 EP 通信库移植,且 PR 协作者包含 NVIDIA NCCL 核心工程师(Sylvain Jeaugey 等)。</li>
 <li><b>Mooncake TransferEngine 生态化(2026)</b>:这个 FAST'25 最佳论文系统已演化为通用 LLM 传输层:加入 PyTorch Ecosystem(2026-02)、SGLang RDMA P2P 权重传输(2026-04)、vLLM 官方收录 Mooncake Store(2026-05)。代表作:SGLang + TransferEngine 的分布式 RL 权重同步,<b>1T 参数 Kimi-K2 权重更新 53s → 7.2s(7×)</b>,零拷贝 RDMA 跨数千 GPU。</li>
 <li><b>Miles v0.1(2026-09-08,RadixArk,slime 的后继者)</b>:面向前沿后训练的全栈生产级系统(SGLang rollout + Megatron/FSDP 双训练后端 + Ray 编排),全异步解耦部署 + TITO(token 级数值保真)+ 低精度训练契约;官方口径:万亿模型超长程科学 RL 下 rollout 吞吐 3×、权重同步 10×、权重转换 30×;已在 Kimi K3 / DeepSeek V4 / GLM-5.2 上实战(GLM-5.2 744B-A40B 在 64×GB300 上做全异步 agentic RL,前 30 步中位步时 263s)。</li>
 <li><b>逼近光速时延的集合通信(2026-07)</b>:NVIDIA 等合作的《Every Microsecond Matters》(arXiv:2607.16100,作者含 NCCL 核心开发者)指出长上下文 decode 的大量<b>小集合通信落在 token 生成关键路径上,微秒都伤性能</b>;给出免 barrier、对称内存、NVLS 多播的设计原则,小/中消息时延达到 scale-up 网络 Speed-of-Light 下界 7% 以内,与 NCCL 2.27 引入的 symmetric memory API 一脉相承。</li>
-<li><b>QUADS(2026-07,含 Qwen 团队作者)</b>:NVFP4 直接用于 MoE RL rollout 会约 150 步崩溃;通过训练-推理误差分解定位<b>激活误差(而非权重误差)</b>为主因(E2M1 网格粗 32×),双侧重对齐(训练侧非对称 QAT + rollout 侧残差激活补偿)后 MoE RL 达 BF16 级精度,rollout 吞吐比 FP8 再高约 16%,是第 11 章"精度下沉"方向的首个 MoE RL 稳定方案。</li>
+<li><b>QUADS(2026-07,含 Qwen 团队作者)</b>:NVFP4 直接用于 MoE RL rollout 会约 150 步崩溃;通过训练-推理误差分解定位<b>激活误差(而非权重误差)</b>为主因(E2M1 网格粗 32×),双侧重对齐(训练侧非对称 QAT + rollout 侧残差激活补偿)后 MoE RL 达 BF16 级精度,rollout 吞吐比 FP8 再高约 16%,是第 10 章"精度下沉"方向的首个 MoE RL 稳定方案。</li>
 <li><b>Megatron-LM v0.16(2026-02)与 2026 Q3 MoE 路线图</b>:Partial CUDA Graph for EP Overlap(降 EP A2A 重叠的 CPU 压力)、<b>Hybrid DP×CP</b>(DP 与 CP 组合的新并行)、<b>Seq1F1B</b>(长上下文训练的流水线高效扩展);路线图上的"1F1B EP A2A Overlap"(用 1F1B 流水线调度隐藏 EP 通信)是 DeepSeek(重排)与 Kimi(减通信)之外的第三条框架级路线。</li>
 <li><b>TopoEP(USTC,2026-09-28)</b>:GPU 原生、拓扑感知的 EP 负载均衡:每个 MoE 层把路由结果转为"热专家复制 + token 重路由"决策,确定性 GPU 求解器在所有 rank 产出比特级一致的计划、无需 host 侧同步;32×H800 + Megatron-LM 上三个 MoE 模型端到端训练吞吐 +6.2%–11.4%。</li>
 <li><b>MSCCL++ 被 ASPLOS 2026 录用</b>(arXiv:2504.09014):集合通信提速至多 5.4×、端到端推理 +15%。</li>
 </ul>
 
-<h3>10.8 2026-10 中下旬速览:NCCL 收编 EP 原语,EP 通信库跨厂商、AFD 解耦进场</h3>
+<h3>附H 2026-10 中下旬速览:NCCL 收编 EP 原语,EP 通信库跨厂商、AFD 解耦进场</h3>
 <ul>
-<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7（注：DeepEP V2.5 起另要求 NCCL ≥ 2.32.3 的 Gin 后端，两条版本线并行；PyPI 截至 2026-10-30 仍为 0.1.0（2026-09-02），v0.3（Compute Fabric Transport + 专用 EP）预告 10 月底发布、尚未上架）):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统:<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%。"EP 原语进通信库"与 DeepEP 形成正面会师,NVIDIA 正亲手兑现 §11.2 预言的"统一 EP 通信抽象"。</li>
+<li><b>NCCL-Extensions 首发:NCCL-EP + NCCL-M2N</b>(NVIDIA,arXiv:2610.07516,2026-10-05,PyPI 包 <code class="inl">nccl-extensions</code> 绑定 NCCL 2.30.7（注：DeepEP V2.5 起另要求 NCCL ≥ 2.32.3 的 Gin 后端，两条版本线并行；PyPI 截至 2026-10-30 仍为 0.1.0（2026-09-02），v0.3（Compute Fabric Transport + 专用 EP）预告 10 月底发布、尚未上架）):把 MoE dispatch/combine 与 RL 训练-推理权重重分片两类模式做进 NCCL 正统:<code class="inl">nccl_ep</code>(基于 NCCL Device API 的 LSA+GIN 算子,token 路由专用 dispatch/combine)与 <code class="inl">nccl_m2n</code>(跨不相交进程组的布局感知 M-to-N 零拷贝重分片,单层 NVLink 域内扇出、跨域只传一份)。论文实测:DeepSeek-V3 256 GPU 上 legacy all-gather+broadcast 的 RL 权重同步占步时 <b>29.4%</b>;单 FFN-MoE 层传输较 flat direct sends 最高 <b>7.9×</b>(9.8 vs 77.3 ms,贴近 SOL);DeepSeek-V3 + NeMo-RL 256×GB200 权重同步 5.78s→2.77s(2.09×),步时 −12.7%。"EP 原语进通信库"与 DeepEP 形成正面会师,NVIDIA 正亲手兑现 §10.2 预言的"统一 EP 通信抽象"。</li>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/ncclep-fig4.svg" loading="lazy" alt="GB200 NVL72 + NDR 上单个 FFN-MoE 层的传输延迟对比（纵" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Fig. 4（arXiv:2610.07516）</b> · 单层 MoE 传输延迟：M2N 9.8ms vs flat direct sends 77.3ms（贴近 SOL）</figcaption>
 </figure>
 
-<li><b>Meta EP-Overlap 与 AutoParallel</b>(PyTorchCon NA 2026 预告,官方博客 2026-09-16):EP-Overlap 以 graph passes 在 TorchTitan <b>GraphTrainer</b> 中实现通用 EP 通信隐藏,不绑定 DualPipe 等特定流水线调度,"任意可用计算都能藏",DeepSeek-V3 上隐藏 <b>76–86%</b> EP 通信、吞吐 ~1.3×;同场 AutoParallel 在模型图上自动搜索并行策略(Llama-3 8B 匹配强手工基线且省 12% 显存);另有 TorchComms 新 torch.distributed API(故障后进程组在线重构、单边 RDMA put/get 窗口),是 §11.6"自动并行换发"的框架级回应。</li>
-<li><b>MegaFlux</b>(Princeton + NVIDIA,arXiv:2610.00671,2026-09-30):megakernel(UniEP/MegaMoE 线)融合了 EP 通信与计算,但专家放置固定、路由倾斜仍产生 straggler(实测慢 7.3–41%)。MegaFlux 把<b>专家复制变成运行时决策</b>:片上 planner(42.6–72 µs)按路由逐层选复制位置,前/后向 megakernel 内流水化复制权重传输与梯度提前规约。8×B200 EP8、147 配置:对固定放置 geomean 前向 1.45×/后向 1.28×;对 Megatron-Core 2.31×/1.53×;vLLM DeepSeek-V4-Pro prefill 端到端 1.13–1.26×,回应了 §11.2 的"通信-路由协同设计"。</li>
-<li><b>Echo:4-bit 张量并行通信</b>(北大/NUS/AMD 等,arXiv:2610.14277,2026-10-14):TP 的 all-reduce 夹在两个依赖 matmul 之间无法掩盖;Echo 把它重构为"量化 all-to-all → owner 高精度求和 → 量化 all-gather"(任意 GPU 数下每元素每次调用至多量化两次),用双时间尺度补偿器控制舍入误差累积。1GB 消息比 16-bit NCCL all-reduce 快 2.09×;4-bit 预训练 10B token 损失仅比 16-bit 高 <0.9%,为 §11.3"精度下沉到通信"再添一员。</li>
+<li><b>Meta EP-Overlap 与 AutoParallel</b>(PyTorchCon NA 2026 预告,官方博客 2026-09-16):EP-Overlap 以 graph passes 在 TorchTitan <b>GraphTrainer</b> 中实现通用 EP 通信隐藏,不绑定 DualPipe 等特定流水线调度,"任意可用计算都能藏",DeepSeek-V3 上隐藏 <b>76–86%</b> EP 通信、吞吐 ~1.3×;同场 AutoParallel 在模型图上自动搜索并行策略(Llama-3 8B 匹配强手工基线且省 12% 显存);另有 TorchComms 新 torch.distributed API(故障后进程组在线重构、单边 RDMA put/get 窗口),是 §10.6"自动并行换发"的框架级回应。</li>
+<li><b>MegaFlux</b>(Princeton + NVIDIA,arXiv:2610.00671,2026-09-30):megakernel(UniEP/MegaMoE 线)融合了 EP 通信与计算,但专家放置固定、路由倾斜仍产生 straggler(实测慢 7.3–41%)。MegaFlux 把<b>专家复制变成运行时决策</b>:片上 planner(42.6–72 µs)按路由逐层选复制位置,前/后向 megakernel 内流水化复制权重传输与梯度提前规约。8×B200 EP8、147 配置:对固定放置 geomean 前向 1.45×/后向 1.28×;对 Megatron-Core 2.31×/1.53×;vLLM DeepSeek-V4-Pro prefill 端到端 1.13–1.26×,回应了 §10.2 的"通信-路由协同设计"。</li>
+<li><b>Echo:4-bit 张量并行通信</b>(北大/NUS/AMD 等,arXiv:2610.14277,2026-10-14):TP 的 all-reduce 夹在两个依赖 matmul 之间无法掩盖;Echo 把它重构为"量化 all-to-all → owner 高精度求和 → 量化 all-gather"(任意 GPU 数下每元素每次调用至多量化两次),用双时间尺度补偿器控制舍入误差累积。1GB 消息比 16-bit NCCL all-reduce 快 2.09×;4-bit 预训练 10B token 损失仅比 16-bit 高 <0.9%,为 §10.3"精度下沉到通信"再添一员。</li>
 <li><b>SC'26 万卡通信压缩评测与优化</b>(浙大/中科院计算所/港中深等,SC 2026 Paper Highlight 场次,报告 2026-11-18):首个万卡级训练上通信压缩的系统评估,"压缩集合通信 × 超大规模网络设计 × 万卡实证"三线合流,细节待 11 月会议公开。</li>
 </ul>
 
-<h3>10.9 ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
+<h3>附I ⚡ 10 月下旬快讯（增补 2026-10-30）</h3>
 <ul>
 <li><b>PyTorch 2.15</b>(PyTorch,10-28):NCCL2 成默认后端并新增 flight recorder;NIXL 单边传输支持 CUDA graph 捕获;FSDP2 的 MoE 门控保 fp32 精度;Apple Silicon grouped_mm 让 MoE 解码快 1.32–1.34×;版本收录 3117 commits,训练栈通信层的"默认选项"之争落定<sup class="ref">[<a href="#r46">PyTorch 2.15, 2026-10-28</a>]</sup>。</li>
-<li><b>INC-MoE:EP dispatch/combine 下沉交换机</b>(华为,10-26,arXiv:2610.36339):把 MoE 的 all-to-all 做成网内 AG/RS(in-network computing),相对并发 ring collectives 的带宽受限通信时间降幅 (N−2)/[2(N−1)];vLLM 即插即用,模拟四节点评估（第五个加速器模拟 INC 交换机）中 prefill TTFT −20~33%、吞吐 +25~50%，尚非真实交换机部署验证,为 §11.2「专用内核」路线再添「换网络引擎」一支<sup class="ref">[<a href="#r47">INC-MoE, 华为, arXiv 2610.36339, 2026-10-26</a>]</sup>。</li>
-<li><b>HyScale:DSA/CSA/QSA 长上下文训练系统</b>(腾讯混元+爱丁堡,10-26,arXiv:2610.32057):GLM-5.1 1M 上下文在 512×H20 上比 Megatron-LM 快 2.07×(选择类算子原本占 47% 步时);CP 层级加速 11.7×@256K;已在腾讯生产部署,是 §11.4「系统×架构合流」的最大号实证<sup class="ref">[<a href="#r48">HyScale, 腾讯混元+爱丁堡, arXiv 2610.32057, 2026-10-26</a>]</sup>。</li>
+<li><b>INC-MoE:EP dispatch/combine 下沉交换机</b>(华为,10-26,arXiv:2610.36339):把 MoE 的 all-to-all 做成网内 AG/RS(in-network computing),相对并发 ring collectives 的带宽受限通信时间降幅 (N−2)/[2(N−1)];vLLM 即插即用,模拟四节点评估（第五个加速器模拟 INC 交换机）中 prefill TTFT −20~33%、吞吐 +25~50%，尚非真实交换机部署验证,为 §10.2「专用内核」路线再添「换网络引擎」一支<sup class="ref">[<a href="#r47">INC-MoE, 华为, arXiv 2610.36339, 2026-10-26</a>]</sup>。</li>
+<li><b>HyScale:DSA/CSA/QSA 长上下文训练系统</b>(腾讯混元+爱丁堡,10-26,arXiv:2610.32057):GLM-5.1 1M 上下文在 512×H20 上比 Megatron-LM 快 2.07×(选择类算子原本占 47% 步时);CP 层级加速 11.7×@256K;已在腾讯生产部署,是 §10.4「系统×架构合流」的最大号实证<sup class="ref">[<a href="#r48">HyScale, 腾讯混元+爱丁堡, arXiv 2610.32057, 2026-10-26</a>]</sup>。</li>
 <li><b>vLLM 追平 DeepInfer</b>(vLLM,10-24):官方推文称 GB300 NVL72 P/D + Wide-EP 配置下,decode 与 DeepInfer 的差距在 batch 8–256 全程 ≤6%(DEP32 vs EP64DP64),开源推理栈的 EP 竞争进入个位数差距阶段<sup class="ref">[<a href="#r49">vLLM 官方博客与推文, 2026-10-23/24</a>]</sup>。</li>
 <li><b>llm-d v1.0</b>(CNCF 社区,10-20):分布式推理参考栈首个正式版:跨 AMD MI355X 的宽 EP(MoRI-EP)、MoRI-IO 分离式与前缀路由进主线,贡献者 500+<sup class="ref">[<a href="#r50">llm-d v1.0, CNCF, 2026-10-20</a>]</sup>。</li>
 <li><b>Google 把 vLLM/SGLang 带上 TPU</b>(Google,10-20):原生 PyTorch TPU 后端(TorchTPU):DP 注意力+EP、双阶段 CP、FP8 KV、TPU Sync 跨主机分离;EP/CP 的并行抽象首次跨 GPU/TPU 可移植<sup class="ref">[<a href="#r51">Google, TorchTPU, 2026-10-20</a>]</sup>。</li>
@@ -1285,7 +1284,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li>DiLoCo, arXiv:2311.08105, 2023-11;Mooncake(KVCache 中心化架构,推理侧), arXiv:2407.00079, 2024-06。</li>
 </ol>
 
-<h3>2026 年 6–10 月最新工作(§10.7)</h3>
+<h3>2026 年 6–10 月最新工作(§附G)</h3>
 <ol start="33" class="ref-list">
 <li>DeepEP V2.5(四缓冲拆分 + 桶式集合通信 + DeepJIT,合并 commit def8651)与 DeepEP-Ascend(昇腾 950 移植), github.com/deepseek-ai/DeepEP, 2026-09-29。</li>
 <li>RadixArk, <i>Miles v0.1: A Full-Stack Production-Ready System for Frontier Post-Training</i>, arXiv:2609.08368, 2026-09-08; github.com/radixark/miles。</li>
@@ -1302,7 +1301,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <li>浙大/中科院计算所/港中深等, <i>Evaluation and Optimization of Communication Compression for 10K-GPU LLM Training</i>, SC 2026(Paper Highlight)。</li>
 </ol>
 
-<h3>2026 年 10 月下旬快讯(§10.9)</h3>
+<h3>2026 年 10 月下旬快讯(§附I)</h3>
 <ol start="46" class="ref-list">
 <li id="r46">PyTorch, <i>PyTorch 2.15</i>(版本发布,3117 commits), 2026-10-28。NCCL2 默认后端 + flight recorder;NIXL 单边传输(可 CUDA graph 捕获);FSDP2 MoE 门控 fp32 保真;Apple Silicon grouped_mm MoE 解码 1.32–1.34×。</li>
 <li id="r47">华为, <i>INC-MoE</i>, arXiv:2610.36339, 2026-10-26。EP dispatch/combine 下沉交换机(网内 AG/RS),相对并发 ring collectives 的带宽受限通信时间降幅 (N−2)/[2(N−1)];vLLM 即插即用,模拟四节点评估（第五个加速器模拟 INC 交换机）中 prefill TTFT −20~33%、吞吐 +25~50%，尚非真实交换机部署验证。<br><a href="https://arxiv.org/abs/2610.36339">https://arxiv.org/abs/2610.36339</a></li>
@@ -1332,8 +1331,8 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 <!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

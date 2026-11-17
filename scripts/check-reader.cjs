@@ -84,18 +84,18 @@ if (out) fs.mkdirSync(out, {recursive:true});
         await page.getByRole('button',{name:'分页阅读',exact:true}).click();
         assert.equal(await page.locator('.reader-page:visible').count(),1,file+': paged view');
         if (width===375) {
-          await page.getByRole('button',{name:'☰ 目录',exact:true}).click();
+          await page.getByRole('button',{name:'目录',exact:true}).click();
           assert.equal(await page.locator('#reader-sidebar').isVisible(),true);
           await page.keyboard.press('Escape');
           assert.equal(await page.locator('#reader-sidebar').isVisible(),false);
-          await page.getByRole('button',{name:'☰ 目录',exact:true}).click();
+          await page.getByRole('button',{name:'目录',exact:true}).click();
           const destination=page.locator('.reader-page-link,.reader-chapter-link').nth(1);
           const summary=destination.locator('..').locator(':scope > summary');
           if (await summary.count()) await summary.click();
           await destination.click();
           assert.equal(await page.locator('#reader-sidebar').isVisible(),false);
         } else {
-          const toggle=page.getByRole('button',{name:'☰ 目录',exact:true});
+          const toggle=page.getByRole('button',{name:'目录',exact:true});
           if (await page.locator('#reader-sidebar').isVisible()) await page.getByRole('button',{name:'收起目录',exact:true}).click();
           await page.reload();
           assert.equal(await page.locator('#reader-sidebar').isVisible(),false,file+': remember collapsed sidebar');
@@ -115,8 +115,22 @@ if (out) fs.mkdirSync(out, {recursive:true});
         }
         if (file==='llm-perf-simulation-2026.html') {
           await page.goto(base+'/posts/'+file+'#rl-demo');
-          await page.locator('#rl-slider').fill('64');
-          assert.equal(await page.locator('#rl-b').textContent(),'64');
+          // Independent reference values for the fixed 7B BF16 / 4096-context teaching case.
+          for (const [batch, ai, kvPercent, dominant] of [
+            [1,'1.0',4,'权重'], [26,'13.0',50,'权重'], [27,'13.3',51,'KV'],
+            [32,'14.4',55,'KV'], [64,'18.5',71,'KV'], [256,'23.7',91,'KV']
+          ]) {
+            await page.getByLabel(/decode batch B/).fill(String(batch));
+            assert.equal(await page.locator('#rl-b').textContent(),String(batch));
+            const verdict=await page.locator('#rl-verdict').textContent();
+            assert(verdict.includes('AI≈'+ai),verdict);
+            assert(verdict.replace(/\s/g,'').includes(dominant+'流量主导'),verdict);
+            assert(verdict.includes('KV '+kvPercent+'%'),verdict);
+            assert(verdict.includes('上限 26 < 屋脊 295，不切换为算力瓶颈'),verdict);
+            const point=await page.locator('#rl-canvas circle').getAttribute('cx');
+            const limit=await page.locator('#rl-canvas line[stroke-dasharray]').getAttribute('x1');
+            assert(Number(point)<Number(limit),'finite batch stays left of the AI limit');
+          }
           await page.goto(base+'/posts/'+file+'#q-demo');
           await page.locator('#q-lambda').fill('35');
           assert.equal(await page.locator('#q-lv').textContent(),'0.35');

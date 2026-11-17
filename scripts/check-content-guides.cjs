@@ -39,7 +39,7 @@ fs.mkdirSync(output,{recursive:true});
         await page.screenshot({path:path.join(output,`${slug}-${width}-dark-chapter.png`),fullPage:false});
         await page.locator('.reader-theme-toggle').click();
         if(width===375){
-          await page.getByRole('button',{name:'☰ 目录',exact:true}).click();
+          await page.getByRole('button',{name:'目录',exact:true}).click();
           await page.locator('.reader-sidebar').getByRole('link',{name:/^5 /}).click();
           await page.locator('#s5').waitFor({state:'visible'});
         }

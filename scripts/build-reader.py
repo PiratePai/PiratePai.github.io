@@ -44,6 +44,11 @@ def style_diagrams(source, slug):
             css = re.sub(r'([^{}]+)\{', lambda x: ','.join(sel.strip() if sel.strip().startswith('#'+ident+' ') else '#'+ident+' '+sel.strip() for sel in x[1].split(','))+'{', m[1])
             return '<style>'+css+'</style>'
         svg = re.sub(r'<style[^>]*>(.*?)</style>', scope, svg, flags=re.S)
+        # Data markers (data-diagram-point) take the strong family color, not the soft background tint.
+        def point_tag(m):
+            return re.sub(r'\bfill="(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)"',
+                          lambda f: 'fill="' + diagram_color(f[1], stroke=True) + '"', m.group())
+        svg = re.sub(r'<[a-zA-Z][^>]*\bdata-diagram-point[^>]*>', point_tag, svg)
         svg = re.sub(r'\b(fill|stroke|stop-color)="(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)"', lambda m:m[1]+'="'+diagram_color(m[2],m[1]=='stroke')+'"', svg)
         svg = re.sub(r'\b(fill|stroke|stop-color)\s*:\s*(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)\b', lambda m:m[1]+':'+diagram_color(m[2],m[1]=='stroke'), svg)
         return svg

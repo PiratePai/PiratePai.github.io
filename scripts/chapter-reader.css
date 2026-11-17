@@ -128,6 +128,14 @@ svg[data-handbook-diagram] { --d-surface:var(--r-surface,#fff); --d-line:var(--r
 .reader-ready[data-reader-theme="dark"] svg[data-handbook-diagram] { --d-blue:#9dbde1; --d-blue-soft:#2b3e53; --d-green:#a2cfc1; --d-green-soft:#293f3a; --d-purple:#c0afdd; --d-purple-soft:#3b344b; --d-amber:#d9c393; --d-amber-soft:#443d2d; --d-red:#deb0b4; --d-red-soft:#48363a; }
 svg[data-handbook-diagram] :is(text,tspan) { fill:var(--r-text,#183b50)!important; }
 svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fill:var(--r-muted,#506c7b)!important; }
+/* Data markers carry their color family in data-diagram-point; strong family color + surface halo
+   keeps points ≥3:1 against the plot background in both themes (WCAG 2.2 · 1.4.11 non-text contrast). */
+svg[data-handbook-diagram] [data-diagram-point] { fill-opacity:1; stroke:var(--d-surface); stroke-width:2px; paint-order:stroke fill; }
+svg[data-handbook-diagram] [data-diagram-point="blue"] { fill:var(--d-blue); }
+svg[data-handbook-diagram] [data-diagram-point="green"] { fill:var(--d-green); }
+svg[data-handbook-diagram] [data-diagram-point="purple"] { fill:var(--d-purple); }
+svg[data-handbook-diagram] [data-diagram-point="amber"] { fill:var(--d-amber); }
+svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
 .reader-content .reader-diagram-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; }
 .reader-content .reader-diagram-scroll svg { display:block; width:100%!important; min-width:var(--diagram-readable-width)!important; max-width:none!important; height:auto; margin:0; }
 .reader-content .reader-diagram-scroll[data-fit] svg { min-width:0!important; }
@@ -171,7 +179,8 @@ svg[data-handbook-diagram] :is(marker path,marker polygon,marker polyline) { fil
 .reader-skip { position:fixed; top:-100px; left:16px; z-index:100020; background:var(--r-active); padding:10px; }
 .reader-skip:focus { top:8px; }
 .reader-arrow { display:inline-flex; align-items:center; justify-content:center; flex:0 0 32px; min-height:36px; border:1px solid var(--r-line); border-radius:6px; }
-.reader-theme-toggle { flex:0 0 34px; padding:6px!important; font-size:18px!important; }
+.reader-theme-toggle { flex:0 0 34px; display:inline-flex; align-items:center; justify-content:center; padding:6px!important; }
+.reader-toolbar .reader-menu-toggle svg { flex:0 0 auto; }
 @media (max-width:980px) {
   .reader-ready body { margin-left:0; padding-top:60px; }
   .reader-toolbar { left:0; height:60px; padding-inline:10px; gap:5px; }

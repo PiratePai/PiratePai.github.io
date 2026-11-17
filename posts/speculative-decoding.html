@@ -198,9 +198,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/speculative-decoding.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码全景：从经典投机采样到 DFlash / DSpark", "url": "https://piratepai.github.io/posts/speculative-decoding.html", "description": "从经典投机采样\"起草—验证\"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。", "inLanguage": "zh-CN", "headline": "投机解码全景：从经典投机采样到 DFlash / DSpark", "datePublished": "2026-08-22", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/speculative-decoding.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码全景：从经典投机采样到 DFlash / DSpark", "url": "https://piratepai.github.io/posts/speculative-decoding.html", "description": "从经典投机采样\"起草—验证\"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。", "inLanguage": "zh-CN", "headline": "投机解码全景：从经典投机采样到 DFlash / DSpark", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/speculative-decoding.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -216,7 +216,7 @@
     <div class="meta"><span class="chip">原稿日期：<b>2026-08-13</b></span><span class="chip">文献范围 <b>2022–2026</b></span><span class="chip">源码 <b>DeepSpec / dflash / EAGLE</b></span></div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#spec-rejection">重绘投机拒绝采样，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">ForeSpark 草稿与验证预算联合调度（vs DSpark 吞吐 1.77×）；K3.1 Pro 官方 DSpark 预览草稿（接受长度 4.597、batch1 3.0×）；vLLM v0.33.0 把 dflash/ngram_gpu/动态投机纳入官方配置。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 编号修订：<a href="#research-appendix">更新附录小节 7.1–7.5 改为 附A–附E（原编号与正文第 8/9 章顺序错位；文内 §7.3 交叉引用同步更新）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#spec-rejection">重绘投机拒绝采样，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">ForeSpark 草稿与验证预算联合调度（vs DSpark 吞吐 1.77×）；K3.1 Pro 官方 DSpark 预览草稿（接受长度 4.597、batch1 3.0×）；vLLM v0.33.0 把 dflash/ngram_gpu/动态投机纳入官方配置。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 编号修订：<a href="#research-appendix">更新附录小节 7.1–7.5 改为 附A–附E（原编号与正文第 8/9 章顺序错位；文内 §7.3 交叉引用同步更新）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#latest">正文 8/9 改为 7/8（消除附录遗留跳号），文内 §8⑥/§9 引用同步；目录顺序对齐正文。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -232,9 +232,9 @@
       <li><a href="#phase1">阶段一（2022–2023）：奠基 —— 经典投机采样</a></li>
       <li><a href="#phase2">阶段二（2024）：自投机与特征级草稿 —— MTP / Medusa / EAGLE</a></li>
       <li><a href="#phase3">阶段三（2025–2026）：并行/块草稿 —— DFlash 与 DSpark</a></li>
-      <li><a href="#latest">更新附录（展开选读）</a></li>
       <li><a href="#future">未来发展方向</a></li>
       <li><a href="#summary">一张表总结所有方法</a></li>
+      <li><a href="#latest">更新附录</a></li>
     </ol>
   </div>
 
@@ -1063,7 +1063,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <div class="note"><b>负载与验证调度：</b>DSpark 将验证长度与<b>引擎负载</b>共同纳入调度，评估时需同时报告单请求延迟和服务吞吐。</div>
 
 <!-- ===================== 7. LATEST ===================== -->
-<h2 id="future"><span class="num">8</span>未来发展方向</h2>
+<h2 id="future"><span class="num">7</span>未来发展方向</h2>
 <p>各路线仍有以下开放问题：</p>
 
 <div class="tl">
@@ -1077,7 +1077,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 </div>
 
 <!-- ===================== 9. SUMMARY ===================== -->
-<h2 id="summary"><span class="num">9</span>一张表总结所有方法</h2>
+<h2 id="summary"><span class="num">8</span>一张表总结所有方法</h2>
 
 <div class="barchart">
   <h4>📊 同台对比：同一模型、同一任务集下的端到端加速</h4>
@@ -1147,7 +1147,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <p class="lead">2026 年 6–10 月，本领域出现三件值得单独记录的事：<b>并行起草从"块"进化到"树"（JetSpec）</b>、<b>DFlash 谱系完成第一次官方扩容（DFlare）</b>、<b>Google 让 Gemma 4 全家族出厂自带 MTP 起草器</b>。</p>
 
 <h4>① JetSpec（2026.06）：一次前向，直接长出一棵草稿树</h4>
-<p><b>动机</b>：EAGLE 式自回归草稿按路径一步步猜，树越深草稿成本越高；DFlash 式块扩散草稿虽然一次前向出整块，但每个位置"各自打分"，拼出来的树可能"单看每条边都合理、合起来互相矛盾"。这正是 §8⑥ 说的"扩展天花板"（大 batch 下并行验证收益饱和）的根源之一。<span class="cite">[17]</span></p>
+<p><b>动机</b>：EAGLE 式自回归草稿按路径一步步猜，树越深草稿成本越高；DFlash 式块扩散草稿虽然一次前向出整块，但每个位置"各自打分"，拼出来的树可能"单看每条边都合理、合起来互相矛盾"。这正是 §7⑥ 说的"扩展天花板"（大 batch 下并行验证收益饱和）的根源之一。<span class="cite">[17]</span></p>
 <p><b>贡献</b>：UCSD Hao AI Lab 训练了一个<b>因果并行草稿头</b>：读入冻结目标模型的融合隐状态，单次前向直接产出一棵<b>草稿树</b>，且树上每条路径的打分都与目标模型的自回归分解对齐，既保住"一次前向"的起草效率，又恢复了路径之间的条件依赖。目标模型用树注意力一次前向验证整棵树，构造上无损。</p>
 <p><b>收益</b>：Qwen3-8B 与 Qwen3-30B-A3B（覆盖 dense 与 MoE）、H100 上数学任务（MATH-500）最高 <b>9.64×</b>，开放对话 4.58×；平均接受长度最高 10.7 token；vLLM fork 已开源。</p>
 <blockquote class="q">
@@ -1345,7 +1345,7 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
   <li id="r36">University of Michigan. <i>Packed-SS（One Call Ahead）</i>：自投机一次调用，验证与起草同前向. arXiv:2610.33379, 2026-10-24.（Nemotron 3B/8B 贪心 vs Linear-SS +3.5–9.3%、vs Quadratic-SS +3.4–32.3%）</li>
   <li id="r37">UCLA. <i>Tale of Two Tradeoffs</i>（扩散力度 × 接受宽松度联合扩展）. arXiv:2610.31819, 2026-10-22.（SDAR 未专训即追平 Uno/DFlash/DSpark 前沿）</li>
 </ol>
-  <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§9 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
+  <p class="muted" style="margin-top:18px">说明：本文所有 <span class="cite">[n]</span> 引用均标注了出处与发表时间；关键论断旁以浅色引文块给出英文原文与中文译文。文中代码分两类：带文件路径标注的取自上述已 clone 仓库的真实源码（仅做注释精简）；带"按论文公式实现"标注的为作者依据论文公式编写的教学版实现。§2.3 的投机采样演示（<code class="inl">demo_speculative_sampling.py</code>）已在本机实测运行，输出为真实结果。加速比为各论文报告值，实际效果随模型、硬件、batch 而异；§8 柱状图注明了"同台对比"与"自报区间"两种口径。</p>
   <p style="margin-top:20px; padding:12px 16px; background:#1c2430; border:1px solid #2d4258; border-left:4px solid #6ea8ff; border-radius:0 8px 8px 0; font-size:.92rem">
     🔗 <b>姊妹篇（2026-09 更新）</b>：训练如何让"草稿-验证"越跑越快：草稿蒸馏（DistillSpec）、解码头训练（Medusa / EAGLE）、目标自投机（LayerSkip）、训练时测试（EAGLE-3）、在策蒸馏与 RL 协同训练（Draft-OPD / DSpark / NVIDIA），结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码，见<a href="spec-decoding-post-training.html">《投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）》</a>。
   </p>
@@ -1363,8 +1363,8 @@ accepted = int(accept_prefix_mask.sum(dim=1)[0].item())
 <!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

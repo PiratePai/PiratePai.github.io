@@ -152,9 +152,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/vit-sparsification.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -172,7 +172,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s6">AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s6">AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#s6">移除更新附录内与生成标题同文的重复 h2；s6-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -947,7 +947,6 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 <section id="s6" class="note" data-research-updates><h2>更新附录 · 研究进展与发布记录</h2>
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
 <section id="s6-content">
-  <h2>更新附录 · 研究进展与发布记录</h2>
 
   <h3>6.1 VLM 视觉 token 压缩的新趋势</h3>
   <p><b>综述定调</b>：2025 年 7 月，NUS / 浙大 / 西湖 / 哥大等联合发表首篇系统性综述，把 token 压缩划分为剪枝、合并、KV 压缩等统一分类法，标志着该方向从"技巧集锦"走向成熟学科<sup class="cite">[Token Compression Survey · arXiv:2507.20198 · 2025-07-27]</sup>；斯坦福同期提出 token 序列压缩的统一多模态计算视角<sup class="cite">[arXiv:2504.17892 · 2025-04-24]</sup>。</p>
@@ -1106,8 +1105,8 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

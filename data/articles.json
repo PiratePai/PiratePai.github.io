@@ -107,7 +107,7 @@
       "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -144,6 +144,13 @@
           "summary": "新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。",
           "anchor": "fig-radix-interactive",
           "evidence": "docs/cost-efficient-inference-2026.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "编号修订",
+          "summary": "正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。",
+          "anchor": "s9",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -152,7 +159,7 @@
       "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -175,6 +182,20 @@
           "summary": "K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。",
           "anchor": "s10",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "编号修订",
+          "summary": "正文 11/12 改为 10/11（消除附录遗留跳号），附录小节 10.1–10.4 改为 附A–附D；旧锚点与文内交叉引用同步。",
+          "anchor": "s10",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "图示修正",
+          "summary": "图 4-1 重构为自洽的 A/B 页表快照：共享前缀块 P1/P4 引用 2、分叉后各占新块，与写时复制说明和交互图一致。",
+          "anchor": "s4",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -183,7 +204,7 @@
       "description": "从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。",
       "published": "2026-10-26",
       "publicationCommit": "b497668aea429d7e7c77cac64cfffacc1147571f",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -213,6 +234,13 @@
           "summary": "SIMPLE 能耗定律（4 参数解析模型）；StepSplit 请求级 Shapley 能耗归因；LM-SimBench 训练仿真器统一基准（含昇腾 NPU 侧）。",
           "anchor": "research-updates",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "交互与图示修正",
+          "summary": "9.2 交互教学目标改为“batch 摊薄权重流量、AI 因 KV 流量饱和”（AI 上限≈26<屋脊 295，不发生瓶颈切换）；图 9-1/9-2 数据点改用语义标记并满足非文本对比度。",
+          "anchor": "rl-demo",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -259,7 +287,7 @@
       "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -282,6 +310,13 @@
           "summary": "K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。",
           "anchor": "research-updates",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "图解可读性",
+          "summary": "图解数据点改用 data-diagram-point 语义标记，浅色/深色主题下均满足 3:1 非文本对比度。",
+          "anchor": "diagram-moe-survey-4",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -290,7 +325,7 @@
       "description": "从显存墙、算力墙与通信墙出发，系统梳理 DP → ZeRO / FSDP、TP / SP、PP、EP、CP 五维并行与通算掩盖等通信优化技术体系及最新进展。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -313,6 +348,13 @@
           "summary": "NCCL 2.32.6-1 与 2026.11–2027.01 路线图（GENK、IB SHARP 进 GIN）；vLLM 弹性专家并行；K3.1 Pro DCP 数字；HF MoE 训练手册。",
           "anchor": "ch10",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "编号修订",
+          "summary": "正文 11/12 改为 10/11（图 12-1→图 11-1），附录小节 10.1–10.9 改为 附A–附I；移除附录内同名重复标题，交叉引用与目录同步。",
+          "anchor": "ch10",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -321,7 +363,7 @@
       "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -344,6 +386,13 @@
           "summary": "BitDecoding-FP4（爱丁堡+腾讯）NVFP4 KV 近无损解码；KV 量化的对齐坍塌（NeurIPS 2026）；FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化。",
           "anchor": "s9",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "编号修订",
+          "summary": "正文 10/11 改为 9/10，附录小节 9.1–9.3 改为 附A–附C；移除附录内同名重复标题（s9-content 锚点保留），交叉引用与目录同步。",
+          "anchor": "s9",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -383,7 +432,7 @@
       "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。",
       "published": "2026-09-11",
       "publicationCommit": "1126cb5bb6bc39354f1320c0f2554d15cd5f1b93",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -399,6 +448,13 @@
           "summary": "SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失\"客观目标\"研究潮。",
           "anchor": "latest",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "结构修订",
+          "summary": "移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。",
+          "anchor": "latest",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -407,7 +463,7 @@
       "description": "从经典投机采样\"起草—验证\"框架的数学原理，到多头预测（MTP）、EAGLE、DFlash / DSpark 等新一代无损加速范式。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -444,6 +500,13 @@
           "summary": "更新附录小节 7.1–7.5 改为 附A–附E（原编号与正文第 8/9 章顺序错位；文内 §7.3 交叉引用同步更新）。",
           "anchor": "research-appendix",
           "evidence": "docs/cost-efficient-inference-2026.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "编号修订",
+          "summary": "正文 8/9 改为 7/8（消除附录遗留跳号），文内 §8⑥/§9 引用同步；目录顺序对齐正文。",
+          "anchor": "latest",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
@@ -514,7 +577,7 @@
       "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。",
       "published": "2026-08-22",
       "publicationCommit": "0943cda2b01ab8f5c146b9cc3285ab7812ead617",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -537,6 +600,13 @@
           "summary": "AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。",
           "anchor": "s6",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "结构修订",
+          "summary": "移除更新附录内与生成标题同文的重复 h2；s6-content 锚点保留。",
+          "anchor": "s6",
+          "evidence": "docs/numbering-and-reader-fixes-20261117.md"
         }
       ]
     },
