@@ -868,6 +868,22 @@
           "evidence": "docs/logical-layout-20261117.md"
         }
       ]
+    },
+    "self-forcing-inference-research": {
+      "title": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）",
+      "description": "以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）为唯一主线案例：源码级解剖块生成与 KV 提交，把存算比、宽容比、KV 缓存、VAE 显存、异构分离、响应延迟串成一条执行链的六个截面（KV 5.62 GiB、块等待 344 ms、roofline 算例），给出 E0–E7 研究对照设计与三项候选创新，并逐条纠正 PixVid 数字的六种误读。",
+      "published": "2026-11-18",
+      "contentUpdated": "2026-11-18",
+      "reviewed": "2026-11-18",
+      "changes": [
+        {
+          "date": "2026-11-18",
+          "kind": "新增专题",
+          "summary": "新增《Self Forcing 流式视频推理》：官方实现源码解剖、六维公式与算例（存算比/宽容比/KV/VAE/异构/响应）、E0–E7 研究设计与 PixVid 口径纠错；含四张 SeeCode 交互图解（六维依赖、状态生命周期、DiT—VAE 分离、控制等待双轨时间线）。",
+          "anchor": "s0",
+          "evidence": "docs/self-forcing-research-20261118.md"
+        }
+      ]
     }
   }
 }
