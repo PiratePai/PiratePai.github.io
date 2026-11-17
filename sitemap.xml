@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://piratepai.github.io/</loc>
-    <lastmod>2026-11-17</lastmod>
+    <lastmod>2026-11-18</lastmod>
+  </url>
+  <url>
+    <loc>https://piratepai.github.io/posts/inference-research-roadmap.html</loc>
+    <lastmod>2026-11-18</lastmod>
   </url>
   <url>
     <loc>https://piratepai.github.io/posts/agent-rl-survey.html</loc>

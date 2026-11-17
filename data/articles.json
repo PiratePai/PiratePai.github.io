@@ -1,7 +1,23 @@
 {
   "siteUrl": "https://piratepai.github.io",
-  "siteUpdated": "2026-11-17",
+  "siteUpdated": "2026-11-18",
   "articles": {
+    "inference-research-roadmap": {
+      "title": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）",
+      "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。",
+      "published": "2026-11-18",
+      "contentUpdated": "2026-11-18",
+      "reviewed": "2026-11-18",
+      "changes": [
+        {
+          "date": "2026-11-18",
+          "kind": "新增专题",
+          "summary": "新增《推理研究路线》：四阶段方法框架、响应延迟指标对照与 PixVid/Runway 案例校准、TurboServe/SlackServe 自适应系统分析、全站 21 篇与教程的四阶段映射；含三张 SeeCode 交互图解（图 0-1 证据流、图 4-1 约束关系、图 6-1 反馈闭环）。",
+          "anchor": "s0",
+          "evidence": "docs/inference-research-roadmap.md"
+        }
+      ]
+    },
     "agent-rl-survey": {
       "title": "Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL",
       "description": "沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。",
