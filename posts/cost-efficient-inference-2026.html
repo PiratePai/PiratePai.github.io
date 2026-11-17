@@ -107,9 +107,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-15">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/cost-efficient-inference-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -121,7 +121,7 @@
   <p class="sub">以一条成本公式贯穿全文——<b>$/百万 tokens =（GPU 时租 × 卡数 × 时间）÷ 实际产出，而质量要作为分母的折扣项</b>——梳理它与"低时延、高吞吐"两个兄弟目标的分野与交汇；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、V3.2 DSA 降价 50%+、分级定价时代；把量化、MoE、缓存复用、P/D 分离、弹性调度、硬件采购逐层换算成同一个分母上的钱；最后给出推理引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
   <div class="meta"><span class="pill">调研日期：<b>2026-11-15</b></span><span class="pill">对象 <b>vLLM v0.32.0 · SGLang v0.5.23 · Dynamo v1.6.2 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11 快照）</span><span class="pill">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill">引用 <b>正文标注出处与时间</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -176,7 +176,12 @@
 
 <p>这份报告回答四个问题：<b>高性价比推理与低时延、高吞吐到底是不是一回事、什么时候冲突；一百万 tokens 的价格由哪些项构成、自己怎么算；四年降了三个数量级的功劳簿怎么分；推理引擎与服务化团队该盯哪些指标、按什么顺序动手</b>。全文沿一条主线展开——<b>高性价比 = 单位成本产出最大化：把 $/M tokens 拆成"GPU 时租 × 卡数 × 时间 ÷ 实际产出"，再乘一个质量折扣项，然后对每一项分别做小</b>。低时延优化的是"时间"里的等待部分，高吞吐优化的是"产出"里的批量部分；高性价比是它们的上层目标函数，还要多管两项它们不管的事：<b>买什么硬件（时租）与质量是否守得住（折扣项）</b>。</p>
 
-<p>为什么是现在？三个变化叠加：（1）<b>价格曲线进入"分级定价"时代</b>。DeepSeek 2026-08 起对 V4 系列实行峰谷分时计价、缓存命中价约为未命中的 1/50，OpenAI/Anthropic/Google 把 Priority/Flex/Batch 与缓存读折扣做成常规档位——价格本身成了成本工程的一部分<sup class="cite">[DSPRICING26]</sup><sup class="cite">[OAIEN]</sup>；（2）<b>降本手段完成了"全家桶"组装</b>。量化走到 NVFP4（B200 上每 token 成本比 FP8 再降 53–60%<sup class="cite">[SEMIX-GLM]</sup>）、KV 池化跨实例复用进入 vLLM/SGLang/LMDeploy/TRT-LLM 主线<sup class="cite">[VLLMMK26]</sup>、P/D 分离与弹性并行有 Dynamo/llm-d/AIBrix 系统层托底<sup class="cite">[DYNAMO1]</sup><sup class="cite">[LLMD10]</sup>；（3）<b>账本公开了</b>。DeepSeek 2025-03 披露了业界第一份推理系统级成本账（545% 理论成本利润率）<sup class="cite">[DS545]</sup>，Epoch AI 把"固定性能价格每季 −47%"做成了可引用的曲线<sup class="cite">[EPOCH26]</sup>——高性价比第一次同时有了目标、手段与刻度。</p>
+<p>为什么是现在？三个变化叠加：</p>
+<ol>
+<li><b>价格曲线进入"分级定价"时代</b>。DeepSeek 2026-08 起对 V4 系列实行峰谷分时计价、缓存命中价约为未命中的 1/50，OpenAI/Anthropic/Google 把 Priority/Flex/Batch 与缓存读折扣做成常规档位——价格本身成了成本工程的一部分<sup class="cite">[DSPRICING26]</sup><sup class="cite">[OAIEN]</sup>。</li>
+<li><b>降本手段完成了"全家桶"组装</b>。量化走到 NVFP4（B200 上每 token 成本比 FP8 再降 53–60%<sup class="cite">[SEMIX-GLM]</sup>）、KV 池化跨实例复用进入 vLLM/SGLang/LMDeploy/TRT-LLM 主线<sup class="cite">[VLLMMK26]</sup>、P/D 分离与弹性并行有 Dynamo/llm-d/AIBrix 系统层托底<sup class="cite">[DYNAMO1]</sup><sup class="cite">[LLMD10]</sup>。</li>
+<li><b>账本公开了</b>。DeepSeek 2025-03 披露了业界第一份推理系统级成本账（545% 理论成本利润率）<sup class="cite">[DS545]</sup>，Epoch AI 把"固定性能价格每季 −47%"做成了可引用的曲线<sup class="cite">[EPOCH26]</sup>——高性价比第一次同时有了目标、手段与刻度。</li>
+</ol>
 
 <div class="citebox"><b>[EPOCH26]</b> Epoch AI. <i>The Plunging Price of Thought.</i> 2026-09-22。原文："<span class="q">Since 2023, the cost of achieving a fixed level of performance in language model inference has declined by an average of 47% every quarter… SOTA-level capabilities initially drop faster, at ~66% per quarter, slowing to ~32% two years later.</span>"（中文译文：自 2023 年以来，在语言模型推理中达到固定性能水平的成本平均每季度下降 47%；SOTA 级能力刚出现时每季约降 66%，两年后放缓到约 32%。）链接：<a href="https://epoch.ai/publications/the-plunging-price-of-thought">epoch.ai</a></div>
 
@@ -298,15 +303,24 @@
 
 <h3>2.3 能耗类：J/token 是被低估的硬通货</h3>
 
-<p>每 token 能耗（J/token）把"算力、带宽、利用率"压成一个物理量。NVIDIA 给出的 GPT-MoE-1.8T 代际曲线：<b>Hopper ≈10 J → Blackwell ≈0.4 J → Blackwell Ultra ≈0.2 J</b>（NVFP4 口径，十年 200,000×）<sup class="cite">[NVFP4]</sup>。但能耗在账本里的位置常被高估：Epoch AI 测算<b>电费只占 GPU TCO 的 10–15%</b>，资本开支主导<sup class="cite">[EPOCHTCO]</sup>——省电的意义更多在散热上限、机柜密度与碳口径，而非直接省钱。2026 年学术侧开始把能耗当一等指标：SIMPLE 定律用 4 个参数闭式拟合每 token 能耗（13 个稠密模型、H100 上 R²=0.969）<sup class="cite">[SIMPLE26]</sup>；Wilhelm 等直接主张把 Energy/Token 列为基准一等公民并做能耗感知路由<sup class="cite">[EPT26]</sup>。</p>
+<p>每 token 能耗（J/token）把"算力、带宽、利用率"压成一个物理量。NVIDIA 给出的 GPT-MoE-1.8T 代际曲线：<b>Hopper ≈10 J → Blackwell ≈0.4 J → Blackwell Ultra ≈0.2 J</b>（NVFP4 口径，十年 200,000×）<sup class="cite">[NVFP4]</sup>。</p>
+<p>但能耗在账本里的位置常被高估：Epoch AI 测算<b>电费只占 GPU TCO 的 10–15%</b>，资本开支主导<sup class="cite">[EPOCHTCO]</sup>——省电的意义更多在散热上限、机柜密度与碳口径，而非直接省钱。</p>
+<p>2026 年学术侧开始把能耗当一等指标：SIMPLE 定律用 4 个参数闭式拟合每 token 能耗（13 个稠密模型、H100 上 R²=0.969）<sup class="cite">[SIMPLE26]</sup>；Wilhelm 等直接主张把 Energy/Token 列为基准一等公民并做能耗感知路由<sup class="cite">[EPT26]</sup>。</p>
 
 <h3>2.4 资产类：TCO 与租金曲线</h3>
 
-<p>SemiAnalysis InferenceMAX 把自部署成本写成一条公式： <b>$/M tokens = TCO($/chip-hr) × 10⁶ ÷ (3600 × tok/s/chip)</b>，其中 TCO 含折旧、电费、机房、网络与运维<sup class="cite">[INFERMAX]</sup>。芯片小时价本身在波动：H100 合约价从 2025-10 的 $1.70 回升到 2026-03 的 $2.35（+38%），B200 在 2026-09 达 $8.01（三个月 +79%，HBM 短缺）<sup class="cite">[GPUIDX]</sup>。<b>租金上行与每 token 成本下行并不矛盾</b>——软件与精度优化的降本速度（如 B200 上两个月 $0.11→$0.02/M 的纯软件 5×<sup class="cite">[NVIDIABLOG]</sup>）跑得比租金快，但把"租卡比去年贵"算进 TCO 是诚实账本的前提。</p>
+<p>SemiAnalysis InferenceMAX 把自部署成本写成一条公式： <b>$/M tokens = TCO($/chip-hr) × 10⁶ ÷ (3600 × tok/s/chip)</b>，其中 TCO 含折旧、电费、机房、网络与运维<sup class="cite">[INFERMAX]</sup>。</p>
+<p>芯片小时价本身在波动：H100 合约价从 2025-10 的 $1.70 回升到 2026-03 的 $2.35（+38%），B200 在 2026-09 达 $8.01（三个月 +79%，HBM 短缺）<sup class="cite">[GPUIDX]</sup>。</p>
+<p><b>租金上行与每 token 成本下行并不矛盾</b>——软件与精度优化的降本速度（如 B200 上两个月 $0.11→$0.02/M 的纯软件 5×<sup class="cite">[NVIDIABLOG]</sup>）跑得比租金快，但把"租卡比去年贵"算进 TCO 是诚实账本的前提。</p>
 
 <h3>2.5 质量调整类：为"答对"付费</h3>
 
-<p>两个口径：（1）<b>每成功任务成本</b>（1.3 的公式，评测篇 4.2 有完整账本）；（2）<b>固定能力价格</b>——Epoch AI 的"固定性能成本"曲线：找能力相同（如 GPQA 同分）的模型比价格，2023 年以来平均每季 −47%<sup class="cite">[EPOCH26]</sup>。市场结构数据：同等能力档，<b>开源模型比闭源便宜约 90%</b>（OpenRouter 大规模交易数据研究）<sup class="cite">[MARKET25]</sup>；tiered 定价研究发现"经济档"价格半衰期仅 1.10 年，且<b>降价的主力是软件/架构创新（TFP 残差约 103.7%）而非 GPU 降价</b><sup class="cite">[TIERED26]</sup>。</p>
+<p>两个口径：</p>
+<ol>
+<li><b>每成功任务成本</b>（1.3 的公式，评测篇 4.2 有完整账本）。</li>
+<li><b>固定能力价格</b>——Epoch AI 的"固定性能成本"曲线：找能力相同（如 GPQA 同分）的模型比价格，2023 年以来平均每季 −47%<sup class="cite">[EPOCH26]</sup>。</li>
+</ol>
+<p>市场结构数据：同等能力档，<b>开源模型比闭源便宜约 90%</b>（OpenRouter 大规模交易数据研究）<sup class="cite">[MARKET25]</sup>；tiered 定价研究发现"经济档"价格半衰期仅 1.10 年，且<b>降价的主力是软件/架构创新（TFP 残差约 103.7%）而非 GPU 降价</b><sup class="cite">[TIERED26]</sup>。</p>
 
 <figure class="fig" id="fig-cost-pipeline"><div style="overflow-x:auto"><div class="flowrow">
 <div class="fbox"><b>资产项</b>时租 R × 卡数 N<small>含折旧/电费/机房（TCO）</small></div><span class="arr">→</span>
@@ -321,7 +335,15 @@
 
 <h3>2.6 跨系统比较的纪律</h3>
 
-<div class="note"><b>引用任何成本数字前问三句</b>：（1）<b>口径</b>——输入/输出/命中哪一格？哪个混合比例？离线吞吐还是 SLO 约束下的 server 吞吐？（2）<b>快照日期</b>——价格与租金随月波动，"DeepSeek 输入 $0.28"是 2025-09-29 的 V3.2 牌价，2026-11 的 flash 谷价已是 $0.15；（3）<b>谁测的</b>——厂商自提交（MLPerf 的传统警示）优于媒体转述，同行评审优于官方博客，官方博客优于匿名评测。本站评测篇 5.2 的横评口径纪律同样适用于成本数字。</div>
+<div class="note">
+<p><b>引用任何成本数字前问三句</b>：</p>
+<ol>
+<li><b>口径</b>——输入/输出/命中哪一格？哪个混合比例？离线吞吐还是 SLO 约束下的 server 吞吐？</li>
+<li><b>快照日期</b>——价格与租金随月波动，"DeepSeek 输入 $0.28"是 2025-09-29 的 V3.2 牌价，2026-11 的 flash 谷价已是 $0.15。</li>
+<li><b>谁测的</b>——厂商自提交（MLPerf 的传统警示）优于媒体转述，同行评审优于官方博客，官方博客优于匿名评测。</li>
+</ol>
+<p>本站评测篇 5.2 的横评口径纪律同样适用于成本数字。</p>
+</div>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -337,7 +359,13 @@
 
 <h3>3.1 2022–2023：系统层革命，先消灭"浪费"</h3>
 
-<p>降本的第一性原理不是让计算更快，而是<b>让已付费的计算不空转</b>。三块基石：（1）<b>Orca</b>（OSDI'22）的迭代级调度：静态批处理在变长负载下吞吐损失可达一个数量级，连续批处理把它拉回，GPT-3 175B 上较静态批处理/FIFO 吞吐最高 36.9×（SLO 约束口径）<sup class="cite">[ORCA22]</sup>；（2）<b>vLLM/PagedAttention</b>（SOSP'23）：KV Cache 碎片从 60–80% 浪费降到 <4%，吞吐较当时系统 2–4×<sup class="cite">[VLLMPA23]</sup>；（3）<b>Sarathi-Serve</b>（OSDI'24）chunked prefill：把 prefill 切块掺进 decode 批，尾延迟约束下服务容量 2.6–5.6×<sup class="cite">[SARATHI24]</sup>。这些工作的共同点：<b>零质量损失、纯系统收益</b>，是所有后续降本的"免费头寸"。</p>
+<p>降本的第一性原理不是让计算更快，而是<b>让已付费的计算不空转</b>。三块基石：</p>
+<ol>
+<li><b>Orca</b>（OSDI'22）的迭代级调度：静态批处理在变长负载下吞吐损失可达一个数量级，连续批处理把它拉回，GPT-3 175B 上较静态批处理/FIFO 吞吐最高 36.9×（SLO 约束口径）<sup class="cite">[ORCA22]</sup>。</li>
+<li><b>vLLM/PagedAttention</b>（SOSP'23）：KV Cache 碎片从 60–80% 浪费降到 <4%，吞吐较当时系统 2–4×<sup class="cite">[VLLMPA23]</sup>。</li>
+<li><b>Sarathi-Serve</b>（OSDI'24）chunked prefill：把 prefill 切块掺进 decode 批，尾延迟约束下服务容量 2.6–5.6×<sup class="cite">[SARATHI24]</sup>。</li>
+</ol>
+<p>这些工作的共同点：<b>零质量损失、纯系统收益</b>，是所有后续降本的"免费头寸"。</p>
 
 <h3>3.2 2024：中国价格战，把"厘时代"打到牌价上</h3>
 
@@ -357,9 +385,11 @@
 
 <h3>3.3 2025：账本公开年——545%、DSA 与"降价逆转"</h3>
 
-<p>2025-03-01，DeepSeek 发布《DeepSeek-V3/R1 推理系统概览》，业界第一次看到推理服务的系统级成本账（完整复盘见 7.4）：226.75 个节点 × 8×H800、按 $2/GPU·h 计日成本 $87,072；理论日收入 $562,027；<b>理论成本利润率 545%</b><sup class="cite">[DS545]</sup>。同年 09-29，V3.2-Exp 引入 <b>DSA（DeepSeek Sparse Attention）</b>，把长上下文的注意力成本从随长度递增拉平，API 一次性降价 50%+：输出 ¥12→¥3（−75%）、输入未命中 ¥4→¥2、命中 ¥0.5→¥0.2<sup class="cite">[DSV32]</sup>——<b>模型结构级的降本直接换算成了牌价</b>。</p>
+<p>2025-03-01，DeepSeek 发布《DeepSeek-V3/R1 推理系统概览》，业界第一次看到推理服务的系统级成本账（完整复盘见 7.4）：226.75 个节点 × 8×H800、按 $2/GPU·h 计日成本 $87,072；理论日收入 $562,027；<b>理论成本利润率 545%</b><sup class="cite">[DS545]</sup>。</p>
+<p>同年 09-29，V3.2-Exp 引入 <b>DSA（DeepSeek Sparse Attention）</b>，把长上下文的注意力成本从随长度递增拉平，API 一次性降价 50%+：输出 ¥12→¥3（−75%）、输入未命中 ¥4→¥2、命中 ¥0.5→¥0.2<sup class="cite">[DSV32]</sup>——<b>模型结构级的降本直接换算成了牌价</b>。</p>
 
-<p>但降价不是单行道。2025 年下半年起出现"降价逆转"：DeepSeek 非推理输出价回调 +50%（¥8→¥12）；智谱、月之暗面、MiniMax、阶跃星辰四家已上调部分 API 价（智东西统计）<sup class="cite">[REVERSAL25]</sup>；智谱 2026-02 提价 30% 即售罄、10 个月 ARR 25 倍（SemiAnalysis 口径）<sup class="cite">[SEMIX-X]</sup>。行业毛利分化：推理提供商混合毛利"应约 60%"（SemiAnalysis）<sup class="cite">[SEMIX-X]</sup>，第三方单源分析实测智谱毛利 24.6%（可信度中等）<sup class="cite">[GLMECON]</sup>，而 DeepSeek 自称推理利润率略高于 80%（经第三方博客转述）<sup class="cite">[GOEDECKE26]</sup>。<b>价格战的上半场拼谁敢亏，下半场拼谁的账本好</b>。</p>
+<p>但降价不是单行道。2025 年下半年起出现"降价逆转"：DeepSeek 非推理输出价回调 +50%（¥8→¥12）；智谱、月之暗面、MiniMax、阶跃星辰四家已上调部分 API 价（智东西统计）<sup class="cite">[REVERSAL25]</sup>；智谱 2026-02 提价 30% 即售罄、10 个月 ARR 25 倍（SemiAnalysis 口径）<sup class="cite">[SEMIX-X]</sup>。</p>
+<p>行业毛利分化：推理提供商混合毛利"应约 60%"（SemiAnalysis）<sup class="cite">[SEMIX-X]</sup>，第三方单源分析实测智谱毛利 24.6%（可信度中等）<sup class="cite">[GLMECON]</sup>，而 DeepSeek 自称推理利润率略高于 80%（经第三方博客转述）<sup class="cite">[GOEDECKE26]</sup>。<b>价格战的上半场拼谁敢亏，下半场拼谁的账本好</b>。</p>
 
 <h3>3.4 2025–2026：分级定价时代——价格本身成为成本工程</h3>
 
@@ -374,7 +404,13 @@
 
 <h3>3.5 度量这条曲线：每季 −47% 与 725 倍/18 个月</h3>
 
-<p>Epoch AI 两份研究给出了可引用的刻度：（1）<b>固定性能价格</b>：2023 年以来平均每季 −47%；SOTA 能力刚出现时每季 −66%，两年后放缓至 −32%；实例：GPQA Diamond 75% 的每题成本从 o3（2025-01）的 $0.30 降到 GPT-5.6 Luna（2026 夏）的 $0.0004，<b>18 个月 725 倍</b>；FrontierMath 同期 377 倍<sup class="cite">[EPOCH26]</sup>。（2）<b>按任务不均衡</b>：六个基准上价格年降幅 9×–900×（中位 50×/年；2024 年后中位 200×/年）<sup class="cite">[EPOCHPRICES]</sup>。Tiered 定价研究补充市场结构：OpenRouter 318 模型 2020–2026 累计降价约 600 倍、经济档半衰期 1.10 年、而旗舰档因 reasoning 溢价（均值 31.5×）不服从指数衰减<sup class="cite">[TIERED26]</sup>。<b>读曲线的正确姿势：降的是"固定能力"的价格，你要的能力越接近 SOTA，降得越慢、越贵</b>。</p>
+<p>Epoch AI 两份研究给出了可引用的刻度：</p>
+<ol>
+<li><b>固定性能价格</b>：2023 年以来平均每季 −47%；SOTA 能力刚出现时每季 −66%，两年后放缓至 −32%；实例：GPQA Diamond 75% 的每题成本从 o3（2025-01）的 $0.30 降到 GPT-5.6 Luna（2026 夏）的 $0.0004，<b>18 个月 725 倍</b>；FrontierMath 同期 377 倍<sup class="cite">[EPOCH26]</sup>。</li>
+<li><b>按任务不均衡</b>：六个基准上价格年降幅 9×–900×（中位 50×/年；2024 年后中位 200×/年）<sup class="cite">[EPOCHPRICES]</sup>。</li>
+</ol>
+<p>Tiered 定价研究补充市场结构：OpenRouter 318 模型 2020–2026 累计降价约 600 倍、经济档半衰期 1.10 年、而旗舰档因 reasoning 溢价（均值 31.5×）不服从指数衰减<sup class="cite">[TIERED26]</sup>。</p>
+<p><b>读曲线的正确姿势：降的是"固定能力"的价格，你要的能力越接近 SOTA，降得越慢、越贵</b>。</p>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -390,17 +426,30 @@
 
 <h3>4.1 量化：精度换吞吐，在 Blackwell 上是"降本第一杠杆"</h3>
 
-<p>量化同时省三样东西：显存（装得下）、带宽（搬得快）、Tensor Core 吞吐（算得快）。代际叠加的量级（MLPerf Llama-2-70B、8 卡离线口径）：以 H100 FP16 为基线，H100 FP8 +29%、H200 FP8 +84%、B200 FP8 +193%、<b>B200 NVFP4 +441%</b><sup class="cite">[MLPERFFP4]</sup>。SemiAnalysis InferenceX 在 GLM-5.1/B200 上的口径：<b>FP4 较 FP8 吞吐 +113%~149%，每 token 成本 −53%~−60%</b>（46 tok/s/用户档：$0.16/M vs $0.35/M）<sup class="cite">[SEMIX-GLM]</sup>。质量侧：DeepSeek-R1-0528 从 FP8 量化到 NVFP4，MMLU-Pro/GPQA/LiveCodeBench 损失 ≤1%（厂商口径）；NVIDIA QAD 报告给的大模型界线——<b>671B 级模型 PTQ 近无损（MATH500 95.4→94.2），小模型需要量化感知蒸馏</b><sup class="cite">[NVFP4QAD]</sup>。<b>工程结论：旗舰模型 + NVFP4 目前是 $/token 的最优点之一，但质量回归必须跑自己的评测集</b>。</p>
+<p>量化同时省三样东西：显存（装得下）、带宽（搬得快）、Tensor Core 吞吐（算得快）。</p>
+<p>代际叠加的量级（MLPerf Llama-2-70B、8 卡离线口径）：以 H100 FP16 为基线，H100 FP8 +29%、H200 FP8 +84%、B200 FP8 +193%、<b>B200 NVFP4 +441%</b><sup class="cite">[MLPERFFP4]</sup>。</p>
+<p>SemiAnalysis InferenceX 在 GLM-5.1/B200 上的口径：<b>FP4 较 FP8 吞吐 +113%~149%，每 token 成本 −53%~−60%</b>（46 tok/s/用户档：$0.16/M vs $0.35/M）<sup class="cite">[SEMIX-GLM]</sup>。</p>
+<p>质量侧：DeepSeek-R1-0528 从 FP8 量化到 NVFP4，MMLU-Pro/GPQA/LiveCodeBench 损失 ≤1%（厂商口径）；NVIDIA QAD 报告给的大模型界线——<b>671B 级模型 PTQ 近无损（MATH500 95.4→94.2），小模型需要量化感知蒸馏</b><sup class="cite">[NVFP4QAD]</sup>。</p>
+<p><b>工程结论：旗舰模型 + NVFP4 目前是 $/token 的最优点之一，但质量回归必须跑自己的评测集</b>。</p>
 
 <div class="analogy">量化像把货运卡车从"每件货物单独包装"改成"标准托盘"：单件防护弱一点（精度损失），但装车快了几倍、一趟运的货多几倍。货越贵重（模型越小、任务越难），越需要专门定制托盘（QAD）而不是直接套用。</div>
 
 <h3>4.2 MoE 与激活稀疏：参数可以贵，激活必须便宜</h3>
 
-<p>MoE 把"模型能力（总参数）"与"每 token 成本（激活参数）"解耦：DeepSeek-V3 671B 总参、每 token 仅激活 37B——<b>能力按 671B 计、算力按 37B 付</b>。腾讯混元 Turbo S（2025-02）用 Hybrid-Mamba-Transformer 结构降 KV 占用，牌价打到输入 0.8 元/M、输出 2 元/M，官方称约为 DeepSeek 同期 API 成本的 1/2~1/4（官方发布，媒体转述）<sup class="cite">[HUNYUANTS]</sup>。部署侧的研究线：Fiddler（ICLR'25）用 CPU 算专家、GPU 算注意力<sup class="cite">[FIDDLER25]</sup>；Pre-gated MoE（ISCA'24）预门控把专家预取与计算重叠，峰值显存降到 GPU-only 的 23%<sup class="cite">[PREGATED24]</sup>；MoE-Infinity（ASPLOS'24）按请求级专家激活矩阵做缓存，个人机器每 token 延迟 3.1–16.7×<sup class="cite">[MOEINF24]</sup>。2026-11 的 SGLang Paged Experts 把"专家按需进出显存"带进主流引擎：16 GB 卡跑超显存 MoE，比 CPU offload 快 12–30×<sup class="cite">[SGLPE]</sup>——<b>MoE 的性价比红利第一次不需要专用引擎就能吃到</b>。</p>
+<p>MoE 把"模型能力（总参数）"与"每 token 成本（激活参数）"解耦：DeepSeek-V3 671B 总参、每 token 仅激活 37B——<b>能力按 671B 计、算力按 37B 付</b>。腾讯混元 Turbo S（2025-02）用 Hybrid-Mamba-Transformer 结构降 KV 占用，牌价打到输入 0.8 元/M、输出 2 元/M，官方称约为 DeepSeek 同期 API 成本的 1/2~1/4（官方发布，媒体转述）<sup class="cite">[HUNYUANTS]</sup>。</p>
+<p>部署侧的研究线：Fiddler（ICLR'25）用 CPU 算专家、GPU 算注意力<sup class="cite">[FIDDLER25]</sup>；Pre-gated MoE（ISCA'24）预门控把专家预取与计算重叠，峰值显存降到 GPU-only 的 23%<sup class="cite">[PREGATED24]</sup>；MoE-Infinity（ASPLOS'24）按请求级专家激活矩阵做缓存，个人机器每 token 延迟 3.1–16.7×<sup class="cite">[MOEINF24]</sup>。</p>
+<p>2026-11 的 SGLang Paged Experts 把"专家按需进出显存"带进主流引擎：16 GB 卡跑超显存 MoE，比 CPU offload 快 12–30×<sup class="cite">[SGLPE]</sup>——<b>MoE 的性价比红利第一次不需要专用引擎就能吃到</b>。</p>
 
 <h3>4.3 投机解码的性价比观：加速 ≠ 省钱</h3>
 
-<p>投机解码通常被归入"低时延"工具箱，但它同时改变每 token 成本，方向不定。三个口径：（1）<b>小 batch 加速</b>：经典场景，接受长度 2–4 时 decode 加速 2–3×（站内投机解码篇全文）；（2）<b>大 batch 仍可能赚</b>：MagicDec 证明长上下文下 batch 32–256 仍有 2.51× 加速（稀疏注意力草稿抵消验证开销）<sup class="cite">[MAGICDEC24]</sup>；（3）<b>能耗口径会反转</b>：《Only Accepted Tokens Count》实测接受率低时每 token 能耗反而升高——教学账本：方案 A 10 J 产出 5 个 token（2 J/token）vs 方案 B 14 J 产出 6 个（2.33 J/token），"接受更多 ≠ 更省电"<sup class="cite">[SPECENERGY]</sup>。带 SLO 目标的调度版：AdaServe 把投机预算按 SLO 定制，违约降 4.3×、goodput 1.9×<sup class="cite">[ADASERVE25]</sup>；TurboSpec 闭环控制草稿长度以 goodput 为目标<sup class="cite">[TURBOSPEC]</sup>。<b>结论：上投机解码前，先算"每成功 token 成本"而不是"每秒 token 数"</b>。</p>
+<p>投机解码通常被归入"低时延"工具箱，但它同时改变每 token 成本，方向不定。三个口径：</p>
+<ol>
+<li><b>小 batch 加速</b>：经典场景，接受长度 2–4 时 decode 加速 2–3×（站内投机解码篇全文）。</li>
+<li><b>大 batch 仍可能赚</b>：MagicDec 证明长上下文下 batch 32–256 仍有 2.51× 加速（稀疏注意力草稿抵消验证开销）<sup class="cite">[MAGICDEC24]</sup>。</li>
+<li><b>能耗口径会反转</b>：《Only Accepted Tokens Count》实测接受率低时每 token 能耗反而升高——教学账本：方案 A 10 J 产出 5 个 token（2 J/token）vs 方案 B 14 J 产出 6 个（2.33 J/token），"接受更多 ≠ 更省电"<sup class="cite">[SPECENERGY]</sup>。</li>
+</ol>
+<p>带 SLO 目标的调度版：AdaServe 把投机预算按 SLO 定制，违约降 4.3×、goodput 1.9×<sup class="cite">[ADASERVE25]</sup>；TurboSpec 闭环控制草稿长度以 goodput 为目标<sup class="cite">[TURBOSPEC]</sup>。</p>
+<p><b>结论：上投机解码前，先算"每成功 token 成本"而不是"每秒 token 数"</b>。</p>
 
 <h3>4.4 路由与级联：90% 的请求用便宜模型就够了</h3>
 
@@ -420,11 +469,17 @@
 
 <h3>5.1 命中价经济学：价目表已经替你算好了</h3>
 
-<p>各厂命中价（2.1 表）本身就是缓存价值的官方标定：DeepSeek 命中价 ≈ 未命中的 1/50（谷时 $0.003 vs $0.15）、Kimi/Anthropic/Gemini 约 1/10、豆包 1/5 加存储计时费。<b>推理侧的机会成本计算</b>：一段 32K 的 system prompt，未命中要付一次完整 prefill（计算 + 时延），命中只付 I/O；对输出同样 1K 的请求，命中能把单请求成本压掉 80–95%（取决于输入输出比与价差）。给引擎团队的两个推论：（1）<b>把可复用前缀放到 prompt 最前面</b>（缓存按前缀匹配，前缀里插一个时间戳就全盘失效）；（2）若用 API，把"我们该不该自建缓存"换成"命中率的每一个百分点值多少钱"——vLLM×Mooncake 的生产数据显示 Agent 负载命中率从 1.7% 提到 92.2%<sup class="cite">[VLLMMK26]</sup>，这就是答案的量级。</p>
+<p>各厂命中价（2.1 表）本身就是缓存价值的官方标定：DeepSeek 命中价 ≈ 未命中的 1/50（谷时 $0.003 vs $0.15）、Kimi/Anthropic/Gemini 约 1/10、豆包 1/5 加存储计时费。<b>推理侧的机会成本计算</b>：一段 32K 的 system prompt，未命中要付一次完整 prefill（计算 + 时延），命中只付 I/O；对输出同样 1K 的请求，命中能把单请求成本压掉 80–95%（取决于输入输出比与价差）。</p>
+<p>给引擎团队的两个推论：</p>
+<ol>
+<li><b>把可复用前缀放到 prompt 最前面</b>（缓存按前缀匹配，前缀里插一个时间戳就全盘失效）。</li>
+<li>若用 API，把"我们该不该自建缓存"换成"命中率的每一个百分点值多少钱"——vLLM×Mooncake 的生产数据显示 Agent 负载命中率从 1.7% 提到 92.2%<sup class="cite">[VLLMMK26]</sup>，这就是答案的量级。</li>
+</ol>
 
 <h3>5.2 单机前缀缓存：从 RadixAttention 到"零开销默认开"</h3>
 
-<p>机制主线（站内推理服务篇 3.3 有图解）：SGLang 的 <b>RadixAttention</b>（NeurIPS'24）用基数树按内容组织历史 KV，新请求沿树匹配最长前缀、命中部分零计算，多轮 Agent 会话典型命中 80%+，吞吐最高 6.4×<sup class="cite">[SGLANG24]</sup>；vLLM V1（2025-01 起）把前缀缓存做成<b>默认开启、零开销</b>——0% 命中时吞吐损失 <1%<sup class="cite">[VLLMV1]</sup>。研究侧的补充：PromptCache（MLSys'24）模块化复用使 TTFT 降 8×（GPU）<sup class="cite">[PROMPTCACHE]</sup>；IC-Cache（SOSP'25）更进一步复用"语义相近"的历史问答，8 个部署吞吐 1.4–5.9×<sup class="cite">[ICCACHE]</sup>——从"精确前缀"走向"语义缓存"，代价是要管好质量边界。</p>
+<p>机制主线（站内推理服务篇 3.3 有图解）：SGLang 的 <b>RadixAttention</b>（NeurIPS'24）用基数树按内容组织历史 KV，新请求沿树匹配最长前缀、命中部分零计算，多轮 Agent 会话典型命中 80%+，吞吐最高 6.4×<sup class="cite">[SGLANG24]</sup>；vLLM V1（2025-01 起）把前缀缓存做成<b>默认开启、零开销</b>——0% 命中时吞吐损失 <1%<sup class="cite">[VLLMV1]</sup>。</p>
+<p>研究侧的补充：PromptCache（MLSys'24）模块化复用使 TTFT 降 8×（GPU）<sup class="cite">[PROMPTCACHE]</sup>；IC-Cache（SOSP'25）更进一步复用"语义相近"的历史问答，8 个部署吞吐 1.4–5.9×<sup class="cite">[ICCACHE]</sup>——从"精确前缀"走向"语义缓存"，代价是要管好质量边界。</p>
 
 <h3>5.3 跨实例 KV 池：把缓存从"单机内存"升级成"机房资源"</h3>
 
@@ -469,7 +524,10 @@
 
 <h3>6.2 P/D 分离的账：什么时候值得养两个池</h3>
 
-<p>Prefill 计算受限、decode 访存受限，混在一个池里互相干扰。分离的收益证据：DistServe（OSDI'24）在 SLO 达标口径下较 vLLM 可承载 2.0–4.6× 请求速率、较 DeepSpeed-MII 7.4×、更紧 SLO 下 12.6×<sup class="cite">[DISTSERVE24]</sup>；Splitwise（ISCA'24）给出成本口径：同型机集群 1.4× 吞吐且成本 −20%，或同成本同功耗预算下 2.35× 吞吐<sup class="cite">[SPLITWISE24]</sup>；TetriInfer 直接以 perf/$ 为目标：混合负载省 38% 资源<sup class="cite">[TETRIINFER]</sup>。代价三条（KV 要跨机传、两池配比要调、显存规划更碎）与配套技术（NIXL、Mooncake Transfer Engine、EPLB 负载均衡）见服务篇 5.3。2026 年的新方向是<b>"分离不再是二选一"</b>：STAR（2025-10）按输入/预测输出长度在 decode 端再调度<sup class="cite">[STAR25]</sup>；DuetServe（2025-11）用单卡 SM 空间复用替代跨卡分离<sup class="cite">[DUETSERVE]</sup>；PPD（ICML'26）发现多轮会话里"部分 prefill 本地做"更划算，Turn2+ 的 TTFT 降约 68%<sup class="cite">[PPD26]</sup>。<b>决策口径：负载 TTFT 与 TPOT 双敏感、规模够大（双池固定成本摊得开）才上全分离；否则 chunked prefill + 单机 P/D 已够</b>。</p>
+<p>Prefill 计算受限、decode 访存受限，混在一个池里互相干扰。分离的收益证据：DistServe（OSDI'24）在 SLO 达标口径下较 vLLM 可承载 2.0–4.6× 请求速率、较 DeepSpeed-MII 7.4×、更紧 SLO 下 12.6×<sup class="cite">[DISTSERVE24]</sup>；Splitwise（ISCA'24）给出成本口径：同型机集群 1.4× 吞吐且成本 −20%，或同成本同功耗预算下 2.35× 吞吐<sup class="cite">[SPLITWISE24]</sup>；TetriInfer 直接以 perf/$ 为目标：混合负载省 38% 资源<sup class="cite">[TETRIINFER]</sup>。</p>
+<p>代价三条（KV 要跨机传、两池配比要调、显存规划更碎）与配套技术（NIXL、Mooncake Transfer Engine、EPLB 负载均衡）见服务篇 5.3。</p>
+<p>2026 年的新方向是<b>"分离不再是二选一"</b>：STAR（2025-10）按输入/预测输出长度在 decode 端再调度<sup class="cite">[STAR25]</sup>；DuetServe（2025-11）用单卡 SM 空间复用替代跨卡分离<sup class="cite">[DUETSERVE]</sup>；PPD（ICML'26）发现多轮会话里"部分 prefill 本地做"更划算，Turn2+ 的 TTFT 降约 68%<sup class="cite">[PPD26]</sup>。</p>
+<p><b>决策口径：负载 TTFT 与 TPOT 双敏感、规模够大（双池固定成本摊得开）才上全分离；否则 chunked prefill + 单机 P/D 已够</b>。</p>
 
 <h3>6.3 弹性、迁移与抢占：把"空的时间"卖出去</h3>
 
@@ -483,7 +541,13 @@
 
 <h3>6.4 多租户与削峰：好价格是调度出来的</h3>
 
-<p>公平性也有成本意义：VTC 虚拟 token 计数（OSDI'24）给多租户加了"服务差异 ≤2×"的硬上界，防止大客户挤走小客户造成的隐性违约<sup class="cite">[FAIRNESS24]</sup>。削峰的两个做法：（1）<b>错峰复用</b>：DeepSeek 披露其集群<b>白天全量推理、夜间腾节点给训练/研究</b><sup class="cite">[DS545]</sup>——同一批卡的日历被排满，摊薄的就是 1.4 节说的"碎片化折旧"；（2）<b>价格杠杆</b>：峰谷计价（3.4 节）本质是让需求曲线配合供给曲线。DynamoLLM（HPCA'25 最佳论文）则证明<b>能耗也能调度</b>：按负载调实例数/并行度/DVFS，满足延迟 SLO 下省 53% 能耗、61% 客户成本<sup class="cite">[DYNAMOLLM]</sup>——调度器顺手把 2.3 节的 J/token 也管了。</p>
+<p>公平性也有成本意义：VTC 虚拟 token 计数（OSDI'24）给多租户加了"服务差异 ≤2×"的硬上界，防止大客户挤走小客户造成的隐性违约<sup class="cite">[FAIRNESS24]</sup>。</p>
+<p>削峰的两个做法：</p>
+<ol>
+<li><b>错峰复用</b>：DeepSeek 披露其集群<b>白天全量推理、夜间腾节点给训练/研究</b><sup class="cite">[DS545]</sup>——同一批卡的日历被排满，摊薄的就是 1.4 节说的"碎片化折旧"。</li>
+<li><b>价格杠杆</b>：峰谷计价（3.4 节）本质是让需求曲线配合供给曲线。</li>
+</ol>
+<p>DynamoLLM（HPCA'25 最佳论文）则证明<b>能耗也能调度</b>：按负载调实例数/并行度/DVFS，满足延迟 SLO 下省 53% 能耗、61% 客户成本<sup class="cite">[DYNAMOLLM]</sup>——调度器顺手把 2.3 节的 J/token 也管了。</p>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -499,11 +563,22 @@
 
 <h3>7.1 硬件性价比曲线：贵 4 倍的卡反而便宜</h3>
 
-<p>1.1 的公式在采购层面的推论：<b>卡的"每 token 成本"= 时租 ÷ 吞吐，而不是时租本身</b>。三个快照数字：H100 合约价 2025-10 为 $1.70、2026-03 回升 $2.35（+38%）；B200 2026-09 达 $8.01（三个月 +79%，HBM 短缺驱动）<sup class="cite">[GPUIDX]</sup>；GB300 NVL72 在 MLPerf v6.1 上单卡离线 16,635 tok/s（gpt-oss-120b）<sup class="cite">[MLPERF61]</sup>。代际吞吐差距更大：NVIDIA 引用 SemiAnalysis InferenceMAX 口径，GB200 NVL72 跑 DeepSeek-R1 较 H200 NVL72 吞吐 15×，叠加 Dynamo 后较"无 Dynamo 的 B200"每卡 7×<sup class="cite">[NVIDIABLOG]</sup>。<b>采购纪律：永远按"目标负载下的 tok/s/芯片 ÷ 芯片时租"排序，而不是按卡价排序；同时把 NVLink 域（NVL72 的 72 卡共享显存带宽）当作计价单位——MoE 时代的吞吐是按"域"出来的</b>。</p>
+<p>1.1 的公式在采购层面的推论：<b>卡的"每 token 成本"= 时租 ÷ 吞吐，而不是时租本身</b>。</p>
+<p>三个快照数字：H100 合约价 2025-10 为 $1.70、2026-03 回升 $2.35（+38%）；B200 2026-09 达 $8.01（三个月 +79%，HBM 短缺驱动）<sup class="cite">[GPUIDX]</sup>；GB300 NVL72 在 MLPerf v6.1 上单卡离线 16,635 tok/s（gpt-oss-120b）<sup class="cite">[MLPERF61]</sup>。</p>
+<p>代际吞吐差距更大：NVIDIA 引用 SemiAnalysis InferenceMAX 口径，GB200 NVL72 跑 DeepSeek-R1 较 H200 NVL72 吞吐 15×，叠加 Dynamo 后较"无 Dynamo 的 B200"每卡 7×<sup class="cite">[NVIDIABLOG]</sup>。</p>
+<p><b>采购纪律：永远按"目标负载下的 tok/s/芯片 ÷ 芯片时租"排序，而不是按卡价排序；同时把 NVLink 域（NVL72 的 72 卡共享显存带宽）当作计价单位——MoE 时代的吞吐是按"域"出来的</b>。</p>
 
 <h3>7.2 能耗与碳：电费不是大头，密度和碳是</h3>
 
-<p>账本事实：电费仅占 GPU TCO 的 10–15%<sup class="cite">[EPOCHTCO]</sup>。但能耗仍以三种方式进入成本：（1）<b>散热与功率上限</b>决定机柜密度——同样机房塞进更多算力等于摊薄房租（TAPAS，ASPLOS'25 研究功率超额认购的收益<sup class="cite">[TAPAS]</sup>）；（2）<b>碳口径</b>开始进采购评估（大客户的 Scope 3）；（3）<b>每 token 能耗</b>是跨代际最公平的效率尺：Hopper ≈10 J → Blackwell ≈0.4 J → Blackwell Ultra ≈0.2 J（NVFP4，GPT-MoE-1.8T 口径）<sup class="cite">[NVFP4]</sup>。软件侧：DGX-H100 特征化显示多数配置可降 ~20% 功率而不损延迟/吞吐<sup class="cite">[GREENER]</sup>；DynamoLLM 在 SLO 内省 53% 能耗<sup class="cite">[DYNAMOLLM]</sup>。水足迹的科普口径（"每 10–50 条回复一瓶水"）已被修正到现代模型短对话约 5 ml/次——引用时用后者<sup class="cite">[WATER26]</sup>。</p>
+<p>账本事实：电费仅占 GPU TCO 的 10–15%<sup class="cite">[EPOCHTCO]</sup>。</p>
+<p>但能耗仍以三种方式进入成本：</p>
+<ol>
+<li><b>散热与功率上限</b>决定机柜密度——同样机房塞进更多算力等于摊薄房租（TAPAS，ASPLOS'25 研究功率超额认购的收益<sup class="cite">[TAPAS]</sup>）。</li>
+<li><b>碳口径</b>开始进采购评估（大客户的 Scope 3）。</li>
+<li><b>每 token 能耗</b>是跨代际最公平的效率尺：Hopper ≈10 J → Blackwell ≈0.4 J → Blackwell Ultra ≈0.2 J（NVFP4，GPT-MoE-1.8T 口径）<sup class="cite">[NVFP4]</sup>。</li>
+</ol>
+<p>软件侧：DGX-H100 特征化显示多数配置可降 ~20% 功率而不损延迟/吞吐<sup class="cite">[GREENER]</sup>；DynamoLLM 在 SLO 内省 53% 能耗<sup class="cite">[DYNAMOLLM]</sup>。</p>
+<p>水足迹的科普口径（"每 10–50 条回复一瓶水"）已被修正到现代模型短对话约 5 ml/次——引用时用后者<sup class="cite">[WATER26]</sup>。</p>
 
 <h3>7.3 定价设计：价目表是最便宜的成本工程</h3>
 
@@ -524,7 +599,9 @@
 <tr><td>免责三条</td><td>V3 定价远低于 R1；仅少部分流量按 API 计费（web/App 免费）；夜间另有 5–7.5 折</td><td>官方明确"实际收入 substantially lower"；<b>且不含训练与研发成本</b><sup class="cite">[DS545]</sup></td></tr>
 </table>
 
-<p>技术要点同样值得抄：跨节点大规模 EP 扩 batch、计算-通信重叠、矩阵乘与 dispatch 用 FP8（与训练一致）、core-attention 与集合通用 BF16——<b>每一项都是前几章的手段在这张账上的落点</b>。后续讨论：社媒按开源推理栈反推其毛利率 84.2–96.1%（二手，KuCoin 转述）；SemiAnalysis 给出行业对照——Anthropic 2024 毛利率 −94%、MiniMax −25%、行业"混合毛利应约 60%"<sup class="cite">[SEMIX-X]</sup>。<b>读 545% 的正确姿势：它证明的是"系统效率能造成多大的价差"，而不是"推理业务躺着赚钱"——免掉的营销、研发与训练成本，正是别家账本上的大头</b>。</p>
+<p>技术要点同样值得抄：跨节点大规模 EP 扩 batch、计算-通信重叠、矩阵乘与 dispatch 用 FP8（与训练一致）、core-attention 与集合通用 BF16——<b>每一项都是前几章的手段在这张账上的落点</b>。</p>
+<p>后续讨论：社媒按开源推理栈反推其毛利率 84.2–96.1%（二手，KuCoin 转述）；SemiAnalysis 给出行业对照——Anthropic 2024 毛利率 −94%、MiniMax −25%、行业"混合毛利应约 60%"<sup class="cite">[SEMIX-X]</sup>。</p>
+<p><b>读 545% 的正确姿势：它证明的是"系统效率能造成多大的价差"，而不是"推理业务躺着赚钱"——免掉的营销、研发与训练成本，正是别家账本上的大头</b>。</p>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -566,7 +643,12 @@
 
 <h3>8.3 观测与归因：钱花到哪个请求上了</h3>
 
-<p>没有归因就没有优化优先级。（1）<b>请求级能耗归因</b>：StepSplit（arXiv 2611.13802）把 Shapley 值方法扩到大批量：每请求能耗 = 自身部分 + 共享均摊，静态批 batch 8–256 下 L1 误差 0.4–4.3%（按 token 均分则为 13.4–61.3%）——<b>"按 token 均摊"是常见的错误归因</b><sup class="cite">[STEPSPLIT]</sup>；（2）<b>先仿真后上机</b>：Vidur（MLSys'24）证明配置搜索可用仿真完成——LLaMA2-70B 最优配置 96 核 CPU 约 1 小时（$9.93/时）替代 42K GPU 小时（约 $218K）的实测搜索；配置错配的代价高达 2×<sup class="cite">[VIDUR24]</sup>（站内性能仿真篇有完整方法论）；（3）<b>口径统一</b>：并发感知成本模型提醒同一硬件不同并发下 $/M 相差 17.5×——归因报告必须带并发与 SLO 上下文<sup class="cite">[CONCOST26]</sup>。</p>
+<p>没有归因就没有优化优先级。</p>
+<ol>
+<li><b>请求级能耗归因</b>：StepSplit（arXiv 2611.13802）把 Shapley 值方法扩到大批量：每请求能耗 = 自身部分 + 共享均摊，静态批 batch 8–256 下 L1 误差 0.4–4.3%（按 token 均分则为 13.4–61.3%）——<b>"按 token 均摊"是常见的错误归因</b><sup class="cite">[STEPSPLIT]</sup>。</li>
+<li><b>先仿真后上机</b>：Vidur（MLSys'24）证明配置搜索可用仿真完成——LLaMA2-70B 最优配置 96 核 CPU 约 1 小时（$9.93/时）替代 42K GPU 小时（约 $218K）的实测搜索；配置错配的代价高达 2×<sup class="cite">[VIDUR24]</sup>（站内性能仿真篇有完整方法论）。</li>
+<li><b>口径统一</b>：并发感知成本模型提醒同一硬件不同并发下 $/M 相差 17.5×——归因报告必须带并发与 SLO 上下文<sup class="cite">[CONCOST26]</sup>。</li>
+</ol>
 
 <h3>8.4 反模式清单</h3>
 <ul>
@@ -742,7 +824,9 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 <li id="NVFP4"><b>NVIDIA.</b> <i>Introducing NVFP4 for Efficient and Accurate Low-Precision Inference.</i> 官方博客；官方一手（能效/token Blackwell 25×、Ultra 50×；GPT-MoE-1.8T 每 token 能耗 Hopper ~10 J → Blackwell ~0.4 J → Ultra ~0.2 J）。</li>
 </ol>
 
-<p style="font-size:12.5px;color:#8a94ab;">注：价格与租金数字随月波动，引用均标注快照日期；"$/M tokens"统一指每百万 tokens。论文数字为论文口径（硬件/模型/负载见各条括注），跨系统不可直接比较；厂商声明（Dynamo 7×/30×、豆包 −63% 等）未经同行评审，按官方一手口径转述。二手信源已标注；智谱毛利 24.6% 为单源分析，可信度中等。开源项目版本事实为 2026-11-15 GitHub 快照。本文与站内推理服务篇（P/D 分离机制）、量化篇（精度细节）、投机解码篇（草稿机制）、KV Cache 篇（缓存压缩）、评测篇（goodput 与每成功任务成本）、性能仿真篇（Vidur 方法论）互补，重叠处已互链。</p>
+<p style="font-size:12.5px;color:#8a94ab;">注：价格与租金数字随月波动，引用均标注快照日期；"$/M tokens"统一指每百万 tokens。论文数字为论文口径（硬件/模型/负载见各条括注），跨系统不可直接比较；厂商声明（Dynamo 7×/30×、豆包 −63% 等）未经同行评审，按官方一手口径转述。二手信源已标注；智谱毛利 24.6% 为单源分析，可信度中等。</p>
+<p style="font-size:12.5px;color:#8a94ab;">开源项目版本事实为 2026-11-15 GitHub 快照。</p>
+<p style="font-size:12.5px;color:#8a94ab;">本文与站内推理服务篇（P/D 分离机制）、量化篇（精度细节）、投机解码篇（草稿机制）、KV Cache 篇（缓存压缩）、评测篇（goodput 与每成功任务成本）、性能仿真篇（Vidur 方法论）互补，重叠处已互链。</p>
 
 </div><!-- /wrap -->
 
@@ -751,7 +835,7 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 </div>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
 <script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>

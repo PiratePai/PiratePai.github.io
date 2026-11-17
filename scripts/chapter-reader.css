@@ -76,6 +76,7 @@ html.reader-ready[data-reader-theme="dark"] {
 .reader-content :is(div,section,aside,details,ul,ol):not(.ppx-demo *):not(svg *) { color:var(--r-text)!important; background-color:transparent!important; }
 .reader-content :is(span,em,i,small,cite,label):not(pre *):not(code *):not(.ppx-demo *):not(svg *) { color:inherit!important; }
 .reader-content :is(.callout,.formula) { color:var(--r-text)!important; background:var(--r-info)!important; border-color:var(--r-line)!important; padding:18px 22px; border-radius:6px; margin:24px 0; }
+.reader-content .callout { font-size:1em!important; }
 .reader-content :is(.card,.note,.box,.qa,.analogy,.summary3,.math,.fig,.fbox,figure) { color:var(--r-text)!important; background:var(--r-surface)!important; border-color:var(--r-line)!important; border-radius:6px; font-size:1em!important; box-shadow:none!important; }
 .reader-content :is(.card,.note,.box,.qa,.analogy,.summary3) { padding:18px 22px!important; margin:24px 0!important; }
 .reader-content :is(.note,.box.info,.qa) { background:var(--r-info)!important; }

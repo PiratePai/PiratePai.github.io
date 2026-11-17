@@ -177,7 +177,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#latest">移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#latest">移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -272,8 +272,8 @@
 <h3>2.2 三步流程与"无损"的直觉证明</h3>
 <p>设目标模型在某位置给出下一个 token 的分布 <code>p(x)</code>，草稿模型给出 <code>q(x)</code>。投机采样（speculative sampling）三步走：</p>
 <ol>
-  <li><b>起草</b>：从 <code>q(x)</code> 采样出候选 token <code>x ~ q</code>（贪心解码时取 argmax）；</li>
-  <li><b>验证</b>：以概率 <code>min(1, p(x)/q(x))</code> 接受 <code>x</code>；</li>
+  <li><b>起草</b>：从 <code>q(x)</code> 采样出候选 token <code>x ~ q</code>（贪心解码时取 argmax）。</li>
+  <li><b>验证</b>：以概率 <code>min(1, p(x)/q(x))</code> 接受 <code>x</code>。</li>
   <li><b>修正</b>：若拒绝，从残差分布 <code>norm(max(0, p − q))</code> 重新采样一个 token。</li>
 </ol>
 
@@ -289,8 +289,8 @@
 
 <p>这个公式是整个"后训练"领域的理论基石，值得多看两眼：</p>
 <ul>
-  <li><b>α 只取决于两个分布的差</b>。想让草稿被接受得多，唯一办法是让 <code>q</code> 逼近 <code>p</code>，这就是"蒸馏"的数学动机；</li>
-  <li>把 <code>Σ min(p,q)</code> 作为损失直接优化很难（min 几乎处处可导、折点可取次梯度；直接优化还需考虑数值稳定与序列前缀存活目标），所以实际训练都用相关的分布匹配目标（L1 本身也不光滑）：前向 KL、反向 KL、JS 散度、L1 距离等。DistillSpec<span class="cite">[6]</span> 系统研究了选哪个；DeepSpec 训练 DSpark 时直接用 <code>|softmax(draft) − softmax(target)|₁</code>（第 8.2 节）；</li>
+  <li><b>α 只取决于两个分布的差</b>。想让草稿被接受得多，唯一办法是让 <code>q</code> 逼近 <code>p</code>，这就是"蒸馏"的数学动机。</li>
+  <li>把 <code>Σ min(p,q)</code> 作为损失直接优化很难（min 几乎处处可导、折点可取次梯度；直接优化还需考虑数值稳定与序列前缀存活目标），所以实际训练都用相关的分布匹配目标（L1 本身也不光滑）：前向 KL、反向 KL、JS 散度、L1 距离等。DistillSpec<span class="cite">[6]</span> 系统研究了选哪个；DeepSpec 训练 DSpark 时直接用 <code>|softmax(draft) − softmax(target)|₁</code>（第 8.2 节）。</li>
   <li>更深的含义：<b>接受率是逐位置变化的</b>。"下一个词是什么"很确定的位置（代码、数学公式的固定模板），哪怕很弱的草稿 α 都接近 1；开放任务中有限容量草稿可能更难匹配目标；但高熵不必然低接受率，q=p 时任意熵都有 α=1。这解释了为什么固定 γ 是浪费，也就有了后来的"自适应停止"一条线（SpecDec++<span class="cite">[12]</span>、DSpark<span class="cite">[18]</span>）。</li>
 </ul>
 
@@ -333,7 +333,13 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Stern, Shazeer &amp; Uszkoreit,《Blockwise Parallel Decoding for Deep Autoregressive Models》, NeurIPS 2018 · arXiv:1811.03115（2018-11-07）[1]</span>
 </blockquote>
 
-<p>它的三个遗产一直流传至今：<b>① 多头预测的训练目标</b>（在原模型输出层后插一个 k 输出的前馈层，对每个位置的"未来 k 个 token"都算交叉熵，这正是六年后 Medusa 头<span class="cite">[7]</span>和 DeepSeek-V3 MTP 模块<span class="cite">[13]</span>的结构原型）；<b>② 并行验证</b>（Transformer 能一次给所有候选位置打分）；<b>③ 前缀接受</b>。它的局限同样启发后人：只支持贪心解码（验证即精确匹配），且需要额外训练，所以 2022 年 Leviathan 等人重新发明这套框架时，最大的卖点恰恰是"免训练 + 任意采样下严格无损"。</p>
+<p>它的三个遗产一直流传至今：</p>
+<ol>
+<li><b>多头预测的训练目标</b>（在原模型输出层后插一个 k 输出的前馈层，对每个位置的"未来 k 个 token"都算交叉熵，这正是六年后 Medusa 头<span class="cite">[7]</span>和 DeepSeek-V3 MTP 模块<span class="cite">[13]</span>的结构原型）。</li>
+<li><b>并行验证</b>（Transformer 能一次给所有候选位置打分）。</li>
+<li><b>前缀接受</b>。</li>
+</ol>
+<p>它的局限同样启发后人：只支持贪心解码（验证即精确匹配），且需要额外训练，所以 2022 年 Leviathan 等人重新发明这套框架时，最大的卖点恰恰是"免训练 + 任意采样下严格无损"。</p>
 
 <h3>4.2 免训练范式的确立（2022–2023）与它的天花板</h3>
 <p>Leviathan 等人<span class="cite">[2]</span>（Google，2022-11）与 Chen 等人<span class="cite">[3]</span>（DeepMind，2023-02）几乎同时提出了投机采样（speculative sampling）：</p>
@@ -344,7 +350,8 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Leviathan, Kalman &amp; Matias,《Fast Inference from Transformers via Speculative Decoding》, ICML 2023 · arXiv:2211.17192（2022-11 首发）[2]</span>
 </blockquote>
 
-<p>但"免训练"的代价写在 <code>α = Σ min(p, q)</code> 里：你只能从"恰好存在的小模型"里挑草稿。Leviathan 等的实验里，把 T5-Small（77M）接在 T5-XXL（11B）上 α≈0.5–0.75（随任务与采样温度浮动）；而换成一个 bigram 表查询模型 α 只有约 0.2。草稿与目标不是"一个模型家族"时，α 会跌得更惨——<b>草稿从哪来、怎么训练它对齐目标，就是"后训练"要解决的全部问题</b>。同年 SpecInfer<span class="cite">[4]</span> 用树状草稿+树注意力把"一次验证多条路径"变成系统组件，让草稿"猜多条路"的容错大幅提高，也为后来所有树/块验证方法铺路。</p>
+<p>但"免训练"的代价写在 <code>α = Σ min(p, q)</code> 里：你只能从"恰好存在的小模型"里挑草稿。Leviathan 等的实验里，把 T5-Small（77M）接在 T5-XXL（11B）上 α≈0.5–0.75（随任务与采样温度浮动）；而换成一个 bigram 表查询模型 α 只有约 0.2。草稿与目标不是"一个模型家族"时，α 会跌得更惨——<b>草稿从哪来、怎么训练它对齐目标，就是"后训练"要解决的全部问题</b>。</p>
+<p>同年 SpecInfer<span class="cite">[4]</span> 用树状草稿+树注意力把"一次验证多条路径"变成系统组件，让草稿"猜多条路"的容错大幅提高，也为后来所有树/块验证方法铺路。</p>
 
 <h2 id="phase2">5 · 阶段二（2023–2024）：草稿的后训练</h2>
 
@@ -364,7 +371,11 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Zhou, Lyu, Rawat, Menon, Rostamizadeh, Kumar, Kagy &amp; Agarwal,《DistillSpec: Improving Speculative Decoding via Knowledge Distillation》, ICLR 2024 · arXiv:2310.08461（2023-10-12）[6]</span>
 </blockquote>
 
-<p>另外两个后来被反复沿用的洞察：① <b>温度对齐</b>：应区分生成训练序列的采样温度与损失内分布温度；DistillSpec 主要配方的师生损失温度均为 1，高温生成数据的实验不等于提高学生蒸馏温度；② 蒸馏的收益和下游任务质量<b>弱相关</b>：一个更"聪明"的学生不一定更会被接受，草稿训练要优化的就是"像"，而不是"好"。</p>
+<p>另外两个后来被反复沿用的洞察：</p>
+<ol>
+<li><b>温度对齐</b>：应区分生成训练序列的采样温度与损失内分布温度；DistillSpec 主要配方的师生损失温度均为 1，高温生成数据的实验不等于提高学生蒸馏温度。</li>
+<li>蒸馏的收益和下游任务质量<b>弱相关</b>：一个更"聪明"的学生不一定更会被接受，草稿训练要优化的就是"像"，而不是"好"。</li>
+</ol>
 
 <h3>5.2 Medusa（2024-01）：把草稿"长"在目标模型身上</h3>
 <p><span class="pill g">训练对象：目标模型外挂的解码头</span><span class="pill b">优化目标：多头交叉熵</span></p>
@@ -393,7 +404,10 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 <h3>5.3 EAGLE-1/2（2024）：在特征空间做自回归</h3>
 <p><span class="pill g">训练对象：特征级草稿头</span><span class="pill b">优化目标：token CE + 特征回归</span></p>
 
-<p>Medusa 的头只看"当前这一个隐状态"，看不见自己已经猜了什么，第 3 个头猜的词与第 1 个头可能互相矛盾。EAGLE<span class="cite">[8]</span>（北大 + 滑铁卢等，ICML 2024）换了个更本质的做法：<b>让草稿头对目标模型的倒数第二层特征做自回归</b>。草稿头（仅一层 Transformer decoder）每步输入"上一位置的目标特征 + 已采样 token 的 embedding（低秩融合后）"，预测下一位置的特征；预测出的特征接上目标模型的 lm_head 得到草稿 token 分布。因为特征比 logits 信息量大得多，草稿"站在目标模型的肩膀上"猜，接受率大幅超越 Medusa。EAGLE-2<span class="cite">[9]</span> 再叠加按草稿置信度动态扩展的草稿树（训练不变、纯推理侧改进），把加速推到 3.05–4.26×（论文自报）。</p>
+<p>Medusa 的头只看"当前这一个隐状态"，看不见自己已经猜了什么，第 3 个头猜的词与第 1 个头可能互相矛盾。EAGLE<span class="cite">[8]</span>（北大 + 滑铁卢等，ICML 2024）换了个更本质的做法：<b>让草稿头对目标模型的倒数第二层特征做自回归</b>。</p>
+<p>草稿头（仅一层 Transformer decoder）每步输入"上一位置的目标特征 + 已采样 token 的 embedding（低秩融合后）"，预测下一位置的特征；预测出的特征接上目标模型的 lm_head 得到草稿 token 分布。</p>
+<p>因为特征比 logits 信息量大得多，草稿"站在目标模型的肩膀上"猜，接受率大幅超越 Medusa。</p>
+<p>EAGLE-2<span class="cite">[9]</span> 再叠加按草稿置信度动态扩展的草稿树（训练不变、纯推理侧改进），把加速推到 3.05–4.26×（论文自报）。</p>
 
 <p>原始 EAGLE 为降低训练成本采用固定数据集，并对目标特征添加均匀噪声以缓解误差累积；不能把“目标实时自采样＋树路径 rollout”前移成其原始配方。EAGLE-3 再以多层特征融合、直接 token 预测和 training-time test 处理多步反馈，后者的特征反馈也不等于完整的 token 自采样 rollout。<a href="https://arxiv.org/html/2401.15077v3">EAGLE §3.2</a> · <a href="https://arxiv.org/html/2503.01840v3">EAGLE-3 §3</a>。</p>
 
@@ -402,7 +416,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 
 <p>前述方法都在"草稿"上做文章；LayerSkip<span class="cite">[10]</span>（Meta FAIR）反过来问：能不能<b>让目标模型自己学会"用一半的层快速思考"</b>？训练配方两味药：</p>
 <ul>
-  <li><b>层丢弃（layer dropout）</b>：训练时随机跳过一些层的残差分支，丢弃率从底层到顶层指数上升（底层几乎不丢、顶层最多丢 p<sub>max</sub>），即 <code>x<sub>l+1</sub> = x<sub>l</sub> + M(p<sub>l,t</sub>)·f<sub>l</sub>(x<sub>l</sub>)</code>，强迫浅层就把信息准备好；</li>
+  <li><b>层丢弃（layer dropout）</b>：训练时随机跳过一些层的残差分支，丢弃率从底层到顶层指数上升（底层几乎不丢、顶层最多丢 p<sub>max</sub>），即 <code>x<sub>l+1</sub> = x<sub>l</sub> + M(p<sub>l,t</sub>)·f<sub>l</sub>(x<sub>l</sub>)</code>，强迫浅层就把信息准备好。</li>
   <li><b>早退损失（early exit loss）</b>：<b>所有层共享同一个 LM 头</b>，每层输出都算交叉熵并加权求和（越深的层权重越大），即 <code>J = Σ<sub>l</sub> ẽ(t,l)·CE(g(x<sub>l+1</sub>), Y)</code>，让任意一层早退都能"读出"像样的下一词分布。</li>
 </ul>
 
@@ -412,7 +426,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Elhoushi 等（Meta FAIR）,《LayerSkip: Enabling Early Exit Inference and Self-Speculative Decoding》· arXiv:2404.16710（2024-04-25）[10]</span>
 </blockquote>
 
-<p>推理时的<b>自投机解码（self-speculative decoding）</b>：前 E 层逐 token 起草（每步在早退层出来直接过 LM 头），再把整段草稿喂给完整模型并行验证。妙处在于<b>KV 缓存完全复用</b>：草稿阶段写下的前 E 层 KV，验证阶段原样接着用（只需为新 token 补算），既省显存又省算力，这正是"自投机"相对外挂草稿的独特优势。速度上 2.16×（CNN/DM 摘要）不及 EAGLE 系，但它在 LLaMA-2 7B/13B/70B 上验证了"改训练目标让模型天然适配投机解码"的可行性。Draft &amp; Verify（2023）跳过部分层起草且无需额外训练；Kangaroo（2024）使用需训练的轻量早退模块与双早退。这是两篇独立工作，不能合并归为同一训练配方<span class="cite">[11]</span>。</p>
+<p>推理时的<b>自投机解码（self-speculative decoding）</b>：前 E 层逐 token 起草（每步在早退层出来直接过 LM 头），再把整段草稿喂给完整模型并行验证。妙处在于<b>KV 缓存完全复用</b>：草稿阶段写下的前 E 层 KV，验证阶段原样接着用（只需为新 token 补算），既省显存又省算力，这正是"自投机"相对外挂草稿的独特优势。</p>
+<p>速度上 2.16×（CNN/DM 摘要）不及 EAGLE 系，但它在 LLaMA-2 7B/13B/70B 上验证了"改训练目标让模型天然适配投机解码"的可行性。</p>
+<p>Draft &amp; Verify（2023）跳过部分层起草且无需额外训练；Kangaroo（2024）使用需训练的轻量早退模块与双早退。这是两篇独立工作，不能合并归为同一训练配方<span class="cite">[11]</span>。</p>
 
 <h3>5.5 SpecDec++（2024-05）：训练"何时停"的决策</h3>
 <p><span class="pill b">训练对象：草稿模型上的接受预测头</span><span class="pill g">优化目标：自适应 γ</span></p>
@@ -425,7 +441,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Huang, Guo &amp; Wang,《SpecDec++: Boosting Speculative Decoding via Adaptive Candidate Lengths》, COLM 2025 · arXiv:2405.19715（2024-05-29）[12]</span>
 </blockquote>
 
-<p>实现上极轻：在草稿模型上接一个小 MLP 二分类头，预测 <code>P(当前 token 会被接受 | 前面都被接受)</code>；训练标签由"目标模型跑一遍草稿序列"自动生成（处理类不平衡用加权 BCE，用 target/draft token 混合构造序列缓解稀疏信号）。推理时把逐位置接受概率连乘，一旦"存在拒绝"的概率超过阈值 h 就停止起草。在 LLaMA-2-Chat 7B/70B 上，比最佳固定长度再提升 7–11%（2.04×/2.26×/2.23×）。这个"训练一个头来决定 γ"的思想，2026 年被 DSpark 的置信度头以几乎相同的数学（前缀存活概率）重新发扬，成为生产系统的标配（第 7.2 节）。</p>
+<p>实现上极轻：在草稿模型上接一个小 MLP 二分类头，预测 <code>P(当前 token 会被接受 | 前面都被接受)</code>；训练标签由"目标模型跑一遍草稿序列"自动生成（处理类不平衡用加权 BCE，用 target/draft token 混合构造序列缓解稀疏信号）。</p>
+<p>推理时把逐位置接受概率连乘，一旦"存在拒绝"的概率超过阈值 h 就停止起草。</p>
+<p>在 LLaMA-2-Chat 7B/70B 上，比最佳固定长度再提升 7–11%（2.04×/2.26×/2.23×）。这个"训练一个头来决定 γ"的思想，2026 年被 DSpark 的置信度头以几乎相同的数学（前缀存活概率）重新发扬，成为生产系统的标配（第 7.2 节）。</p>
 
 <h3>5.6 MTP（2024-12）：把投机解码写进预训练目标</h3>
 <p><span class="pill o">训练对象：主模型的 MTP 模块（预训练时联合训练）</span><span class="pill b">优化目标：多 token 交叉熵</span></p>
@@ -471,7 +489,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="src">— Li, Wei, Zhang &amp; Zhang,《EAGLE-3: Scaling up Inference Acceleration of Large Language Models via Training-Time Test》, NeurIPS 2025 · arXiv:2503.01840（2025-03-03）[15]</span>
 </blockquote>
 
-<p>最重要的发现是<b>草稿训练也存在规模定律</b>：用约 8 倍于 EAGLE-1 的数据（ShareGPT + UltraChat-200K ≈ 53 万条，答案由目标模型重新生成），加速随数据持续上升。这把"草稿后训练"从"炼丹"变成了"工程"：数据和算力可以稳定换来接受率。工程影响同样大：SGLang 团队实测 EAGLE-3 在 batch=64 时仍有 1.38× 吞吐提升（EAGLE-1 已几乎无收益），vLLM / SGLang / TensorRT-LLM 相继合并官方实现，社区很快训出了 Qwen3 全系、gpt-oss-120B、GLM-4.7-Flash 等数十个 EAGLE-3 草稿权重。更早的 MagicDec（2024-08）<span class="cite">[14]</span> 从系统角度补充了一个重要事实：<b>长上下文（KV 缓存读取成为瓶颈）场景下，即使大 batch，投机解码依然净赚</b>，这为 2026 年生产系统全面拥抱草稿扫清了最后疑虑。</p>
+<p>最重要的发现是<b>草稿训练也存在规模定律</b>：用约 8 倍于 EAGLE-1 的数据（ShareGPT + UltraChat-200K ≈ 53 万条，答案由目标模型重新生成），加速随数据持续上升。这把"草稿后训练"从"炼丹"变成了"工程"：数据和算力可以稳定换来接受率。</p>
+<p>工程影响同样大：SGLang 团队实测 EAGLE-3 在 batch=64 时仍有 1.38× 吞吐提升（EAGLE-1 已几乎无收益），vLLM / SGLang / TensorRT-LLM 相继合并官方实现，社区很快训出了 Qwen3 全系、gpt-oss-120B、GLM-4.7-Flash 等数十个 EAGLE-3 草稿权重。</p>
+<p>更早的 MagicDec（2024-08）<span class="cite">[14]</span> 从系统角度补充了一个重要事实：<b>长上下文（KV 缓存读取成为瓶颈）场景下，即使大 batch，投机解码依然净赚</b>，这为 2026 年生产系统全面拥抱草稿扫清了最后疑虑。</p>
 
 <h2 id="phase4">7 · 阶段四（2026）：并行草稿 + 在策后训练 + 生产化</h2>
 
@@ -491,8 +511,8 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 
 <p>训练目标专为投机解码定制，有三处"不一样"：</p>
 <ul>
-  <li><b>锚点式块构造</b>：不用标准块扩散的均匀分块，而是<b>随机采样锚点</b>（anchor）作为每块第一个位置，其余位置 mask，因为推理时草稿永远以上一轮验证产出的 bonus token 为锚。随机锚点同时起到数据增强作用；</li>
-  <li><b>位置加权损失</b>：<code>w<sub>k</sub> = exp(−(k−1)/γ)</code> 指数衰减，因为块内<b>靠前的 token 错了会连累后面全部作废</b>，所以前面的位置更重要；</li>
+  <li><b>锚点式块构造</b>：不用标准块扩散的均匀分块，而是<b>随机采样锚点</b>（anchor）作为每块第一个位置，其余位置 mask，因为推理时草稿永远以上一轮验证产出的 bonus token 为锚。随机锚点同时起到数据增强作用。</li>
+  <li><b>位置加权损失</b>：<code>w<sub>k</sub> = exp(−(k−1)/γ)</code> 指数衰减，因为块内<b>靠前的 token 错了会连累后面全部作废</b>，所以前面的位置更重要。</li>
   <li><b>共享并冻结 embedding 与 lm_head</b>：草稿只是一个"对齐目标表示空间的扩散适配器"，约 42MB 仅指特定配置共享投影的额外权重开销；草稿 Transformer 层也要训练，不能当作全部可训参数量。</li>
 </ul>
 
@@ -507,7 +527,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 <h3>7.2 DSpark（2026-07）：半自回归 + 置信度调度，DeepSeek-V4 的生产答案</h3>
 <p><span class="pill g">训练对象：并行主干 + Markov 顺序头 + 置信度头</span><span class="pill b">优化目标：CE + L1 分布蒸馏 + 接受率回归</span></p>
 
-<p>并行草稿有一个内在缺陷，DSpark<span class="cite">[18]</span>（北大 + DeepSeek）称之为<b>多模态碰撞（multi-modal collision）</b>：块内每个位置独立预测，各自对"所有可能前文"求边际。上下文一旦存在"of course"和"no problem"两种合理续写，并行草稿就可能拼出不存在的"of problem"。论文的位置条件接受率曲线（图 2）量化了这一点：并行草稿第 1 位置的接受率显著<b>高于</b>自回归草稿（0.88 vs 0.81，因为并行草稿可以做得更深），但随位置迅速衰减；自回归草稿反而越猜越准（条件接受率随位置上升）。DSpark 的答案是把两者的长处缝在一起，即<b>半自回归（semi-autoregressive）</b>：</p>
+<p>并行草稿有一个内在缺陷，DSpark<span class="cite">[18]</span>（北大 + DeepSeek）称之为<b>多模态碰撞（multi-modal collision）</b>：块内每个位置独立预测，各自对"所有可能前文"求边际。上下文一旦存在"of course"和"no problem"两种合理续写，并行草稿就可能拼出不存在的"of problem"。</p>
+<p>论文的位置条件接受率曲线（图 2）量化了这一点：并行草稿第 1 位置的接受率显著<b>高于</b>自回归草稿（0.88 vs 0.81，因为并行草稿可以做得更深），但随位置迅速衰减；自回归草稿反而越猜越准（条件接受率随位置上升）。</p>
+<p>DSpark 的答案是把两者的长处缝在一起，即<b>半自回归（semi-autoregressive）</b>：</p>
 
 <div class="grid2">
   <div class="card"><h5>并行主干</h5>深而并行（继承 DFlash 的 KV 注入块扩散主干），一次前向产出整块的 base logits <code>U<sub>1..γ</sub></code>，保住第 1 位的高接受率与 O(1) 起草延迟。</div>
@@ -531,8 +553,8 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 
 <p>解法是把 DistillSpec 时代的 on-policy 思想升级到现代草稿头上，但要绕过两个坑：草稿（外挂头）无法独立滚出高质量长序列（纯自滚出全是复读）；而拿目标辅助滚出（即直接跑投机解码）收集到的序列又服从目标分布，把草稿自己的错误全丢了，恰好丢掉最有价值的训练信号。Draft-OPD 的三步设计：</p>
 <ol>
-  <li><b>带着错误跑 rollout</b>：用投机解码本身收集高质量序列，同时把<b>每个草稿块的起点（anchor）记下来</b>；</li>
-  <li><b>错误位置回放</b>：从每个 anchor 重新喂入草稿<b>当时提议的 token 块</b>（包括被拒的那些），让目标模型在同一前缀上打分，训练态终于对齐推理态；</li>
+  <li><b>带着错误跑 rollout</b>：用投机解码本身收集高质量序列，同时把<b>每个草稿块的起点（anchor）记下来</b>。</li>
+  <li><b>错误位置回放</b>：从每个 anchor 重新喂入草稿<b>当时提议的 token 块</b>（包括被拒的那些），让目标模型在同一前缀上打分，训练态终于对齐推理态。</li>
   <li><b>接受感知的蒸馏目标</b>：被接受的 token 用<b>前向 KL</b>（覆盖目标的多样性），被拒的 token 用<b>反向 KL</b>（专打草稿自己瞎自信的模式），并按 <code>γ<sup>k−1</sup></code>（γ=0.8）位置衰减，块内越靠前的错误越致命。</li>
 </ol>
 
@@ -552,7 +574,9 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
   <span class="note">草稿 φ 与策略 θ 在同一批 rollout token 上联合更新；sg(·) 表示对目标特征截断梯度（草稿不反传回策略）。出处：NVIDIA, arXiv:2609.07108 [21]</span>
 </div>
 
-<p>工程难点在并行策略：EAGLE-3 的训练时测试带来"分支注意力"（标准上下文并行 CP 不支持）、DFlash/DSpark 需要的中间层特征可能躺在流水线并行的远端 stage。该工作用"zigzag 环形注意力 + 秩本地分支注意力合并"扩展 CP，用 <b>TapChannel</b> 旁路传输跨 stage 特征，在 NeMo-RL 里对 8B–122B（Qwen3.5-122B-A10B、GPT-OSS-120B、Nemotron-3.5）模型实现 1.16–1.88× 的端到端训练加速。同一方向还有 FastGRPO（ICLR 2026，并发感知投机解码 + 在线草稿学习）、MTP-RL（ACL 2026，把参数共享的 MTP 模块当草稿做优势感知联合优化）、Bebop（直接以总变差"接受率"为损失训练）等<span class="cite">[22][23]</span>。<b>"投机解码是 RL 后训练的标配组件、草稿是策略的随身学生"</b>，这一判断在 2026 年成为共识。verl、slime、NeMo-RL 等主流 RL 框架均已内置相应支持。</p>
+<p>工程难点在并行策略：EAGLE-3 的训练时测试带来"分支注意力"（标准上下文并行 CP 不支持）、DFlash/DSpark 需要的中间层特征可能躺在流水线并行的远端 stage。该工作用"zigzag 环形注意力 + 秩本地分支注意力合并"扩展 CP，用 <b>TapChannel</b> 旁路传输跨 stage 特征，在 NeMo-RL 里对 8B–122B（Qwen3.5-122B-A10B、GPT-OSS-120B、Nemotron-3.5）模型实现 1.16–1.88× 的端到端训练加速。</p>
+<p>同一方向还有 FastGRPO（ICLR 2026，并发感知投机解码 + 在线草稿学习）、MTP-RL（ACL 2026，把参数共享的 MTP 模块当草稿做优势感知联合优化）、Bebop（直接以总变差"接受率"为损失训练）等<span class="cite">[22][23]</span>。</p>
+<p><b>"投机解码是 RL 后训练的标配组件、草稿是策略的随身学生"</b>，这一判断在 2026 年成为共识。verl、slime、NeMo-RL 等主流 RL 框架均已内置相应支持。</p>
 
 <section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">7.5 草稿工程入口与 Agent 轨迹验收</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p>Model Optimizer 0.48.0 新增 <b>DFlash2DraftModel</b> 工程路径：在 DFlash 的并行草稿骨干中加入分组动态卷积与低秩候选选择器，并给出选择器损失和导出配置。TensorRT Edge-LLM 0.11.1 也扩展了相应草稿的支持。这里能确认的是工具链入口；不能据此推断新模型在所有目标模型上优于 DFlash，也不能把支持导出当成已完成部署复现。<sup class="cite"><a href="#R26-MODELOPT">[R26:MODELOPT]</a><a href="#R26-EDGE">[R26:EDGE]</a></sup></p><p>验收草稿后训练时，除了记录固定验证器下的接受长度，还应记录验证批大小、每轮提交量与能量。新能耗研究说明，同一草稿在代码与对话语料上的接受行为不同；训练收益需要回到实际工作负载检验。保持原有拒绝采样前提，草稿训练或选择器本身不构成“无损”证明。<sup class="cite"><a href="#R26-ENERGY">[R26:ENERGY]</a></sup></p><p><b>10-30 的 TraceSpec 将草稿监督放回 Agent 轨迹。</b>它结合真实执行与固定前缀回放，按状态条件估计连续接受缺口，再分配固定预测预算。汇总接受率随上下文上升，并不排除相同类型的后期浏览动作接受率下降；因此训练采样应区分工具阶段与工作负载。论文报告的回放吞吐也不等于包含浏览器、检索和工具等待的完整任务时延。<sup class="cite"><a href="#R26-TRACE">[R26:TRACE]</a></sup></p>
 </section>
@@ -618,7 +642,8 @@ self.markov_w2 = nn.Linear(markov_rank, vocab_size, bias=False)
 def apply_step_logits(self, logits, token_ids, hidden_states):
     return logits + self.compute_step_bias(token_ids, ...)   # U_k + W2·W1[x_{k-1}]</code></pre>
 
-<p>推理时块内仍是逐 token 采样（<code>sample_block_tokens</code>），但每步只是查表加偏置，延迟开销 0.2–1.3%。置信度头简单到一行（<code>common.py:43-49</code>：<code>AcceptRatePredictor = nn.Linear(input_dim, 1)</code>），训练目标是回归每位置理论接受率 <code>1 − 0.5·|p_draft − p_target|₁</code>（detached，BCE-with-logits，<code>loss.py:152-163</code>）；推理时用于<b>自适应截断</b>（<code>eval/dspark/draft_ops.py:82-93</code>）：块内第一次出现 <code>sigmoid(confidence) &lt; threshold</code> 就把之后的草稿全部丢弃，不再浪费目标算力去验证。</p>
+<p>推理时块内仍是逐 token 采样（<code>sample_block_tokens</code>），但每步只是查表加偏置，延迟开销 0.2–1.3%。</p>
+<p>置信度头简单到一行（<code>common.py:43-49</code>：<code>AcceptRatePredictor = nn.Linear(input_dim, 1)</code>），训练目标是回归每位置理论接受率 <code>1 − 0.5·|p_draft − p_target|₁</code>（detached，BCE-with-logits，<code>loss.py:152-163</code>）；推理时用于<b>自适应截断</b>（<code>eval/dspark/draft_ops.py:82-93</code>）：块内第一次出现 <code>sigmoid(confidence) &lt; threshold</code> 就把之后的草稿全部丢弃，不再浪费目标算力去验证。</p>
 
 <p><b>总损失</b>（<code>deepspec/modeling/dspark/loss.py:255-329</code>）共三项加权，读它就像读 DSpark 论文的方法节：</p>
 
@@ -628,7 +653,9 @@ def apply_step_logits(self, logits, token_ids, hidden_states):
       ) * world_size
 # 另有块内位置衰减：w_k = exp(−k/4.0)，与 DFlash 的 exp(−(k−1)/γ) 同一思想</code></pre>
 
-<p class="muted">一个漂亮的实现细节：<b>DFlash 就是 DSpark 关掉两个头的消融版</b>（指 DeepSpec 训练框架内的对应配置，不能作为两篇论文历史等价的判断）。<code>config/dflash/dflash_qwen3_4b.py:18-27</code> 用同一个 Trainer，设 <code>markov_rank=0</code>、<code>confidence_head_alpha=0.0</code>、CE-only。而验证侧（<code>eval/base_evaluator.py:186-304</code>）对三种算法统一用标准逐 token 拒绝采样：<code>accept = min(1, p_target/p_draft)</code> 连乘取前缀、拒绝处从残差分布重采样；块结构与长度选择须满足正确提议/验证协议。自适应选择还需非前瞻条件：不能用未来已采样候选反过来决定较早 token 是否进入验证，否则会有选择偏差（DSpark §3.2.2、附录 A）。</p>
+<p class="muted">一个漂亮的实现细节：<b>DFlash 就是 DSpark 关掉两个头的消融版</b>（指 DeepSpec 训练框架内的对应配置，不能作为两篇论文历史等价的判断）。<code>config/dflash/dflash_qwen3_4b.py:18-27</code> 用同一个 Trainer，设 <code>markov_rank=0</code>、<code>confidence_head_alpha=0.0</code>、CE-only。</p>
+<p class="muted">而验证侧（<code>eval/base_evaluator.py:186-304</code>）对三种算法统一用标准逐 token 拒绝采样：<code>accept = min(1, p_target/p_draft)</code> 连乘取前缀、拒绝处从残差分布重采样；块结构与长度选择须满足正确提议/验证协议。</p>
+<p class="muted">自适应选择还需非前瞻条件：不能用未来已采样候选反过来决定较早 token 是否进入验证，否则会有选择偏差（DSpark §3.2.2、附录 A）。</p>
 
 <h3>8.3 Medusa：多头训练与典型接受的落地形态</h3>
 
@@ -694,16 +721,22 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p class="lead">以 2026-09 为观察点，投机解码后训练领域的活跃度达到历史峰值。下面按五条主线盘点（均为 arXiv 可查或官方博客可考的工作）。</p>
 
 <h3>9.1 训练目标：从"像目标"到"被接受"</h3>
-<p>一批 2026 年的工作意识到：无论 CE 还是 KL，优化的都是<b>逐 token 的代理目标</b>，而真正的目标是<b>序列级接受长度 τ</b>。LK Losses<span class="cite">[24]</span> 直接推导并优化与接受率等价的损失族；Variational Speculative Decoding<span class="cite">[25]</span> 指出现有方法都在优化"单条贪心轨迹"，提出把"验证与排序"纳入训练目标（token 似然 → 序列接受）；Verification-Aware Training<span class="cite">[26]</span> 让草稿在训练时就感知验证过程本身。这条线呼应了 Leviathan 2023"直接为 α 优化"的预言<span class="cite">[2]</span>，也和 Bebop（用总变差目标训练 MTP）殊途同归。RL 路线的 Learning to Draft<span class="cite">[27]</span> 与更早的 AdaSPEC<span class="cite">[28]</span>（选择性蒸馏）则把"接受长度"直接当作强化信号。</p>
+<p>一批 2026 年的工作意识到：无论 CE 还是 KL，优化的都是<b>逐 token 的代理目标</b>，而真正的目标是<b>序列级接受长度 τ</b>。</p>
+<p>LK Losses<span class="cite">[24]</span> 直接推导并优化与接受率等价的损失族；Variational Speculative Decoding<span class="cite">[25]</span> 指出现有方法都在优化"单条贪心轨迹"，提出把"验证与排序"纳入训练目标（token 似然 → 序列接受）；Verification-Aware Training<span class="cite">[26]</span> 让草稿在训练时就感知验证过程本身。</p>
+<p>这条线呼应了 Leviathan 2023"直接为 α 优化"的预言<span class="cite">[2]</span>，也和 Bebop（用总变差目标训练 MTP）殊途同归。</p>
+<p>RL 路线的 Learning to Draft<span class="cite">[27]</span> 与更早的 AdaSPEC<span class="cite">[28]</span>（选择性蒸馏）则把"接受长度"直接当作强化信号。</p>
 
 <h3>9.2 训练范式：在线化、在策化</h3>
 <p>Draft-OPD<span class="cite">[20]</span> 证明了离线 SFT 的平台期之后，AdaFlash<span class="cite">[29]</span> 把"在策蒸馏 + 自适应步数"带给扩散草稿；ReTrace 用"被拒轨迹"做条件训练。系统侧的 SpecForge<span class="cite">[32]</span>（2026-03）给出了开源的"目标-草稿解耦 + 混合并行 TTT 训练"框架，NVIDIA<span class="cite">[21]</span> 则把协同训练推进到 122B / 256K 上下文 / GB200 规模。可以概括为一个趋势：<b>草稿训练正在从"一次性离线工序"变成"部署后持续进行的在线过程"</b>。</p>
 
 <h3>9.3 草稿架构：并行起草成为主线</h3>
-<p>DFlash<span class="cite">[17]</span> 之后，并行/块级草稿爆发式涌现：DSpark<span class="cite">[18]</span>（半自回归 + 置信度调度）、Domino（并行建模与因果依赖解耦）、P-EAGLE<span class="cite">[33]</span>（EAGLE 的并行化：一次前向产全部 K 个草稿 token，UC Santa Cruz + 亚马逊，gpt-oss-20b 上比 EAGLE-3 再快 1.69×，已并入 vLLM）；PARD/PARD-2（并行草稿适配）、xPress / DDTree / DFlow（扩散草稿的迭代精细化与树化）与 DeLS-Spec（长短期上下文解耦）。理论侧也开始解释并行的边界："并行盲区"（块内缺乏路径信息）与"接受天花板"分析为这条线划定了战场。</p>
+<p>DFlash<span class="cite">[17]</span> 之后，并行/块级草稿爆发式涌现：DSpark<span class="cite">[18]</span>（半自回归 + 置信度调度）、Domino（并行建模与因果依赖解耦）、P-EAGLE<span class="cite">[33]</span>（EAGLE 的并行化：一次前向产全部 K 个草稿 token，UC Santa Cruz + 亚马逊，gpt-oss-20b 上比 EAGLE-3 再快 1.69×，已并入 vLLM）；PARD/PARD-2（并行草稿适配）、xPress / DDTree / DFlow（扩散草稿的迭代精细化与树化）与 DeLS-Spec（长短期上下文解耦）。</p>
+<p>理论侧也开始解释并行的边界："并行盲区"（块内缺乏路径信息）与"接受天花板"分析为这条线划定了战场。</p>
 
 <h3>9.4 系统、调度与新架构适配</h3>
-<p>腾讯 AngelSpec<span class="cite">[30]</span> 观察到"没有一种草稿结构在所有真实负载下最优"，为生产服务做异构草稿编排；D-cut 研究 batch 场景下自适应验证深度剪枝；MoESD、SpecLA 分别把投机解码带进稀疏 MoE 与线性注意力。生产框架侧：vLLM 已有原生 MTP 文档与 P-EAGLE 实现，Red Hat 实测 gpt-oss + 投机解码在 vLLM 上吞吐提升约 19%；SGLang 的 spec-v2 重叠调度器让"起草与验证流水线化"，gpt-oss 上默认开启；Snowflake 的 Arctic Speculator 草稿（gpt-oss-20b/120b，1.7–1.8×）可作为 vLLM 插件直接使用。DeepSeek-V4 线上以 MTP-1 为基线、DSpark 为升级路径，是"草稿后训练进入旗舰服务"的标志性事件<span class="cite">[18]</span>。</p>
+<p>腾讯 AngelSpec<span class="cite">[30]</span> 观察到"没有一种草稿结构在所有真实负载下最优"，为生产服务做异构草稿编排；D-cut 研究 batch 场景下自适应验证深度剪枝；MoESD、SpecLA 分别把投机解码带进稀疏 MoE 与线性注意力。</p>
+<p>生产框架侧：vLLM 已有原生 MTP 文档与 P-EAGLE 实现，Red Hat 实测 gpt-oss + 投机解码在 vLLM 上吞吐提升约 19%；SGLang 的 spec-v2 重叠调度器让"起草与验证流水线化"，gpt-oss 上默认开启；Snowflake 的 Arctic Speculator 草稿（gpt-oss-20b/120b，1.7–1.8×）可作为 vLLM 插件直接使用。</p>
+<p>DeepSeek-V4 线上以 MTP-1 为基线、DSpark 为升级路径，是"草稿后训练进入旗舰服务"的标志性事件<span class="cite">[18]</span>。</p>
 
 <h3>9.5 出厂即带草稿：MTP 成为旗舰标配</h3>
 <p>DeepSeek-V3/V4<span class="cite">[13][18]</span>、gpt-oss（20b/120b 原生 MTP）、Qwen3.5 系列（DFlash 对照表中"native MTP"）、GLM 与 Kimi（社区/厂商 DFlash 草稿）。<b>"预训练目标与推理加速的统一"</b>已从论文主张变成出厂默认。与此同时 EAGLE-3 社区生态空前繁荣：Qwen3 全系（1.7B–235B）、LLaMA-4、gpt-oss-120B、GLM-4.7-Flash 等官方或社区草稿权重数十个，训练门槛降至 8 卡 1–2 天<span class="cite">[15]</span>。</p>
@@ -739,7 +772,8 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p>扩散草稿各位置独立预测，前面一个错误连累整块报废（DSpark 治"后缀衰减"用的是向右看的串行头；DEdit 换一条路）。UCR+AWS+NYU 让草稿先并行 unmask、再做 <b>token 到 token 的迭代"编辑"</b>：后面的 token 作为双向上下文<b>回头修复</b>前面的错误；训练用 ProposalMix（按首轮置信度混合"草稿自己的预测"与"真值 token"），专门教"修错"同时保住对的。<b>收益</b>：Qwen3-4B/8B 贪心解码宏平均加速 <b>5.72×/5.97×</b>；消融显示编辑若改用因果注意力会掉点，说明收益确实来自未来上下文。<span class="cite">[41]</span></p>
 
 <h4>⑤ 机理与规模化补充</h4>
-<p><b>Attention Drift</b>（2026.05，已被 NeurIPS 2026 接收）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解，为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>，再次印证 §5.3 的"草稿训练规模定律"。
+<p><b>Attention Drift</b>（2026.05，已被 NeurIPS 2026 接收）识别出草稿多步生成时注意力逐渐偏移的失效模式，根因与链式残差结构有关、pre-norm 可显著缓解，为 §6"训练时测试（TTT）为何必要"补上了机理注脚<span class="cite">[42]</span>。<b>SpecDiff-2</b>（MLSys 2026 Oral）把扩散草稿器的对齐训练规模化：TPS 平均 +55%、最高 5.5× 加速<span class="cite">[43]</span>。</p>
+<p>工业侧，<b>Gemma 4 全家族出厂自带 MTP 起草器</b>（2026.05，Google 补上"出厂件"最后一块拼图，最高 3×）<span class="cite">[44]</span>；<b>DFlare</b>（北大+腾讯，2026.06）把 DFlash 的单一融合表示扩成逐层融合、训练数据扩容 3 倍，平均墙钟 5.5× 左右<span class="cite">[45]</span>，再次印证 §5.3 的"草稿训练规模定律"。</p>
 
 <table>
   <tr><th>主线</th><th>代表工作（年份）</th><th>主要贡献</th></tr>
@@ -770,13 +804,18 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 <p>verl 项目（字节 Seed 发起的社区）发布 SpeCo 框架：RL 训练与推理共享同一套草稿，<b>训练期保持草稿对齐、部署期直接复用</b>，把"在策蒸馏"（§7）推广为"训练-部署草稿一体化"，与 NVIDIA 模型-系统协同设计博客构成同一趋势的两个落点。<span class="cite">[48]</span></p>
 
 <h4>④ ECHO（2026-10-17，百度 ERNIE）：主干自递归，“预训练自带”首次正面击败后训练草稿器</h4>
-<p><b>范式信号</b>：ECHO 用主干自己的最后一层递归预测每个 horizon：零外挂模块、零草稿对齐损失；Dynamic Depth Sampling 让期望训练深度仅 1.5（深度 3 的开销减半）。10B-A1B MoE 预训练 600B token：深度 3 时 14 基准 36.36，超过 DeepSeek 式外挂 MTP 的 35.38；推理时主干自己当草稿、可外推超出训练深度；在开放高熵生成上反超 EAGLE-3 / DSpark / DFlash 等“后训练草稿器”。这直接挑战本文的主线叙事：草稿能力未必需要“训练一个草稿”，可以“把草稿长在主干里”。代码开源（github.com/ernie-research/ECHO）；论文 arXiv:2610.24766（v1，2026-10-17，百度）<span class="cite">[55]</span>。</p>
+<p><b>范式信号</b>：ECHO 用主干自己的最后一层递归预测每个 horizon：零外挂模块、零草稿对齐损失；Dynamic Depth Sampling 让期望训练深度仅 1.5（深度 3 的开销减半）。</p>
+<p>10B-A1B MoE 预训练 600B token：深度 3 时 14 基准 36.36，超过 DeepSeek 式外挂 MTP 的 35.38；推理时主干自己当草稿、可外推超出训练深度；在开放高熵生成上反超 EAGLE-3 / DSpark / DFlash 等“后训练草稿器”。</p>
+<p>这直接挑战本文的主线叙事：草稿能力未必需要“训练一个草稿”，可以“把草稿长在主干里”。</p>
+<p>代码开源（github.com/ernie-research/ECHO）；论文 arXiv:2610.24766（v1，2026-10-17，百度）<span class="cite">[55]</span>。</p>
 
 <h4>⑤ 微软：Match the Distribution, Not the Compute（2026-10-01）：后训练算力再砍三个数量级</h4>
 <p>冻结 Qwen3-8B，仅用 ≈2.5B 目标自生成 CoT token 做链式 MTP 头后训练（纯交叉熵），MAL 追平/超过联合预训练的 MiMo-7B 草稿链，MTP 训练算力省 10³–10⁴×；另提出链感知近似验证（MAL +12–16%）与自适应 K bandit。本文“后训练 vs 预训练”之争的最强新证据：蒸馏分布比算力规模更关键。</p>
 
 <h4>⑥ γ 旋钮、评测与 agentic 负载（10-18 – 10-20）</h4>
-<p><b>AMTP</b>（Georgia Tech，arXiv:2610.28619）把“选多长的 MTP 视界”建成在线控制问题（survival/hazard 建模 + 次线性 regret），10 组实验 8 组胜固定窗口、最高 +10%，跨模型组态 4.55×，是 SpecDec++/DSpark 置信度头这条“γ 旋钮”线的理论升级版；<b>BitMTP</b>（港理工，arXiv:2610.28500）首次系统研究 MTP×低比特 LLM。<b>When Does Better Acceptance Pay?</b>（百度+北大，arXiv:2610.24993）用受控实验回答“多花算力换接受长度何时划算”。<b>DLite</b>（上交大，arXiv:2610.23787）则证明 agentic 负载需要“免草稿历史”的两阶段训练（同构 teacher 热身），与 §9.7 的“训练你所验证的”形成互补：一个改训练目标，一个改训练数据来源。</p>
+<p><b>AMTP</b>（Georgia Tech，arXiv:2610.28619）把“选多长的 MTP 视界”建成在线控制问题（survival/hazard 建模 + 次线性 regret），10 组实验 8 组胜固定窗口、最高 +10%，跨模型组态 4.55×，是 SpecDec++/DSpark 置信度头这条“γ 旋钮”线的理论升级版；<b>BitMTP</b>（港理工，arXiv:2610.28500）首次系统研究 MTP×低比特 LLM。</p>
+<p><b>When Does Better Acceptance Pay?</b>（百度+北大，arXiv:2610.24993）用受控实验回答“多花算力换接受长度何时划算”。</p>
+<p><b>DLite</b>（上交大，arXiv:2610.23787）则证明 agentic 负载需要“免草稿历史”的两阶段训练（同构 teacher 热身），与 §9.7 的“训练你所验证的”形成互补：一个改训练目标，一个改训练数据来源。</p>
 
 <h4>⑦ 框架侧（10-18/19）</h4>
 <p>vLLM v0.32.0：DFlash/DSpark 草稿 in-graph metadata（#60692）、adaptive block verification（#60945）、DeepSeek-V4 融合 MTP drafting（#58463）；SGLang v0.5.22：DSpark 上 AMD MI350X/MI355X（#41308）、DFlash 家族 block verification（#43012）；FlashInfer v0.7.2 投机验证多 token 行在 B200/B300 自动路由 cuDNN（#5508）。“并行草稿 + 其后训练”已是引擎默认路径。</p>
@@ -869,7 +908,8 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
   <tr id="r55"><td>[55]</td><td>百度（ERNIE）. <a href="https://arxiv.org/abs/2610.24766">ECHO：主干终层自递归预测的“预训练自带”草稿</a>. arXiv:2610.24766（v1）；代码 github.com/ernie-research/ECHO</td><td>2026-10-17</td></tr>
 </table>
 
-<p class="muted">其他文中提到的工业动态来源：vLLM MTP 文档（docs/features/speculative_decoding/mtp.md）、SGLang MTP 博客（lmsys.org，2025-07-17）与 GPT-OSS 博客（2025-08-27）、Red Hat 开发者博客（2026-04-16）、Snowflake Arctic Inference 博客；代码引用自本地克隆的 SafeAILab/EAGLE、FasterDecoding/Medusa、facebookresearch/LayerSkip、deepseek-ai/DeepSpec、z-lab/dflash 仓库（2026-09 快照）。</p>
+<p class="muted">其他文中提到的工业动态来源：vLLM MTP 文档（docs/features/speculative_decoding/mtp.md）、SGLang MTP 博客（lmsys.org，2025-07-17）与 GPT-OSS 博客（2025-08-27）、Red Hat 开发者博客（2026-04-16）、Snowflake Arctic Inference 博客。</p>
+<p class="muted">代码引用自本地克隆的 SafeAILab/EAGLE、FasterDecoding/Medusa、facebookresearch/LayerSkip、deepseek-ai/DeepSpec、z-lab/dflash 仓库（2026-09 快照）。</p>
 
 <footer>
   <p>本文是<a href="../index.html">本站推理效率系列</a>的第 10 篇，与<a href="speculative-decoding.html">《投机解码全景：从经典投机采样到 MTP / DFlash / DSpark》</a>互为姊妹篇：那篇讲"范式与全景"，本篇专讲"训练如何塑造草稿"。相邻主题还可阅读<a href="kv-cache-survey.html">KV Cache 全景</a>与<a href="inference-serving.html">推理服务优化</a>。</p>
@@ -885,7 +925,7 @@ posterior_mask = candidates_prob &gt; threshold    # 模型越"笃定"，门槛�
 
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
 <script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
