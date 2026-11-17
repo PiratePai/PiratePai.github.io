@@ -94,10 +94,10 @@
   }
 </style>
 <!-- site-metadata:start -->
-<meta name="description" content="以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。">
+<meta name="description" content="以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="高性价比大模型推理：从每 token 账本到工程落地（2022–2026）">
-<meta property="og:description" content="以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。">
+<meta property="og:description" content="以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。">
 <meta property="og:url" content="https://piratepai.github.io/posts/cost-efficient-inference-2026.html">
 <meta property="og:site_name" content="Pai&#x27;s Blog">
 <meta property="og:locale" content="zh_CN">
@@ -107,9 +107,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-15">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-18">
 <link rel="canonical" href="https://piratepai.github.io/posts/cost-efficient-inference-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-18", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -118,10 +118,10 @@
 <header class="hero"><div class="inner">
   <p class="kicker" style="color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px">推理经济学 · 2026</p>
 <h1>高性价比大模型推理：从每 token 账本到工程落地（2022–2026）</h1>
-  <p class="sub">以一条成本公式贯穿全文——<b>$/百万 tokens =（GPU 时租 × 卡数 × 时间）÷ 实际产出，而质量要作为分母的折扣项</b>——梳理它与"低时延、高吞吐"两个兄弟目标的分野与交汇；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、V3.2 DSA 降价 50%+、分级定价时代；把量化、MoE、缓存复用、P/D 分离、弹性调度、硬件采购逐层换算成同一个分母上的钱；最后给出推理引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
-  <div class="meta"><span class="pill">调研日期：<b>2026-11-15</b></span><span class="pill">对象 <b>vLLM v0.32.0 · SGLang v0.5.23 · Dynamo v1.6.2 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11 快照）</span><span class="pill">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill">引用 <b>正文标注出处与时间</b></span></div>
+  <p class="sub">以一条成本公式贯穿全文——<b>单位有效产出成本 C_unit = C_total ÷ V_valid：分子是全部已付费资源（含空闲、重试与失败），分母只计通过质量、SLO 与任务成功过滤的有效产出</b>——先划清它与"低时延、高吞吐"的分野与交汇，再把成本拆成可复查的账本；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、分级定价时代；把量化、MoE、缓存复用、P/D 分离、Agent 任务链、硬件采购逐层换算到同一个分母上；以交互视频的"块等待"为反例说明响应延迟如何改写成本可行域；最后给出引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
+  <div class="meta"><span class="pill">调研日期：<b>2026-11-18</b></span><span class="pill">对象 <b>vLLM v0.34.0 · SGLang v0.5.23 · TRT-LLM v1.2.1 · Dynamo v1.6.2 · vLLM-Omni v0.32.0 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11-18 快照）</span><span class="pill">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill">引用 <b>正文标注出处与时间</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -131,70 +131,72 @@
 <ol>
 <li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:700">★ 近期进展（前沿亮点）</a></li>
 <li><a href="#s0">0 导读与大事记：高性价比是什么、和低时延高吞吐有何不同</a></li>
-<li><a href="#s1">1 预备知识：一个 token 的成本账本</a></li>
-<li><a href="#s2">2 指标体系：性价比到底怎么度量</a></li>
+<li><a href="#s1">1 预备知识：一条请求、一份账本与三个目标</a></li>
+<li><a href="#s2">2 单位有效产出成本与可复查账本</a></li>
 <li><a href="#s3">3 发展历程：从"按 token 卖钻石"到分级定价的四年</a></li>
-<li><a href="#s4">4 模型级降本：每个 token 少算一点、少搬一点</a></li>
+<li><a href="#s4">4 模型级降本：每个产出少算一点、少搬一点</a></li>
 <li><a href="#s5">5 缓存级降本：不重算已经算过的</a></li>
-<li><a href="#s6">6 调度级降本：把昂贵的 GPU 时间填满</a></li>
+<li><a href="#s6">6 调度级与任务链降本：把昂贵的 GPU 时间填满、把任务跑成功</a></li>
 <li><a href="#s7">7 集群与商业级：采购曲线、能耗账与定价设计</a></li>
-<li><a href="#s8">8 落地：指标清单、决策树与动手算账</a></li>
-<li><a href="#s9">9 未来方向</a></li>
+<li><a href="#s8">8 视频案例：响应延迟如何改写成本可行域</a></li>
+<li><a href="#s9">9 落地：指标清单、决策树与动手算账</a></li>
+<li><a href="#s10">10 局限与未来方向</a></li>
 <li><a href="#refs">参考文献</a></li>
 </ol>
 </nav>
 
-<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能与价格数字来自所引论文、官方价目页与官方博客，口径与快照日期随引用就地标注；二手转述均标注可信度；开源项目版本为 2026-11-15 的 GitHub 快照。更新记录保留原快照日期。</p><details><summary>代码示例</summary><p>代码 8-1 仅用 Python 标准库，可独立运行复算单位成本、混合价与质量调整口径；它不验证论文性能结论或 GPU 基准，参数请按自家集群与日志替换。</p></details></details>
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能与价格数字来自所引论文、官方价目页与官方博客，口径与快照日期随引用就地标注；二手转述均标注可信度；开源项目版本为 2026-11-18 的 GitHub 快照（本轮重验范围见 10.1）。价格类数字仍为 2026-11-15 快照口径，未重验。</p><details><summary>代码示例</summary><p>代码 9-1 仅用 Python 标准库，可独立运行复算单位成本、混合价与质量调整口径；它不验证论文性能结论或 GPU 基准，参数请按自家集群与日志替换。</p></details></details>
 <section id="reading-path" aria-label="阅读路径与研究问题">
-<div class="note"><b>从这里读起 · 先算账，再动手</b><p><a href="#s1">成本公式</a> → <a href="#s2">指标口径</a> → <a href="#s3">价格史</a> → <a href="#s4">模型级</a> → <a href="#s5">缓存级</a> → <a href="#s6">调度级</a> → <a href="#s7">集群与商业级</a> → <a href="#s8">落地清单</a>。近期发布见"近期进展"。</p><p>本文只做"性价比视角"：量化与投机解码的机制见各自专题，P/D 分离与批处理的系统细节见推理服务篇，每成功任务成本的实验设计见评测篇，仿真先行的方法见性能仿真篇。价格与租金数字随月波动，引用前按 2.6 的纪律重查快照。</p></div>
-<div class="analogy"><b>一个可算的例子：</b>同样 8 张 H100（$2.35/h），零优化自部署（并发 1 请求/秒）按并发感知模型约 $15.25/M tokens；补齐批处理、前缀缓存（命中 80%）与 NVFP4 后，混合价可压到 $1 以下——同一批卡，差一个数量级以上的"每 token 身价"，全部来自五层账本，而非买新卡。</div>
+<div class="note"><b>从这里读起 · 先算账，再动手</b><p><a href="#s1">账本与三目标</a> → <a href="#s2">单位有效产出成本</a> → <a href="#s3">价格史</a> → <a href="#s4">模型级</a> → <a href="#s5">缓存级</a> → <a href="#s6">调度与任务链</a> → <a href="#s7">集群与商业级</a> → <a href="#s8">视频案例</a> → <a href="#s9">落地清单</a>。近期发布见"近期进展"。</p><p>本文只做"性价比视角"：量化与投机解码的机制见各自专题，P/D 分离与批处理的系统细节见推理服务篇，每成功任务成本的实验设计见评测篇，仿真先行的方法见性能仿真篇，VLM 视觉 token 与扩散采样的机制见 ViT 稀疏化与采样效率篇，流式视频服务栈见实时世界模型篇。价格与租金数字随月波动，引用前按 2.7 的纪律重查快照。</p></div>
+<div class="analogy"><b>一个可算的例子：</b>同样 8 张 H100（$2.35/h），零优化自部署（并发 1 请求/秒）按并发感知模型约 $15.25/M tokens；补齐批处理、前缀缓存（命中 80%）与 NVFP4 后，混合价可压到 $1 以下——同一批卡，差一个数量级以上的"每 token 身价"，全部来自六层账本，而非买新卡。</div>
 <h3>用同一组问题比较方案</h3>
 <div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">方案对照 · 窄屏可横向滑动</caption><thead><tr><th>方案</th><th>它改变什么</th><th>何时要重新判断</th></tr></thead><tbody>
 <tr><td>API 直用（含缓存价）</td><td>时租变成牌价；命中价 1/10~1/50</td><td>用量大到自建 TCO 低于牌价，或数据不能出域之外的成本因素</td></tr>
 <tr><td>自建 + 通用引擎</td><td>公式全项可控；先吃系统层免费头寸</td><td>负载 SLO 双敏感或命中率高位后，考虑分离与池化</td></tr>
 <tr><td>专用引擎 / 定制栈</td><td>单模型多倍优化（DeepInfer、Dynamo 模型分支）</td><td>模型锁定深、规模够摊薄定制成本；否则跟随上游</td></tr>
 </tbody></table></div>
-<p><b>值得做的研究：</b>对同一模型同一硬件，记录（缓存命中率、goodput、$/M 三分、J/token）四组数在"裸 vLLM → +批处理调优 → +前缀缓存 → +KV 池 → +NVFP4"五个阶段的曲线。没有这条阶梯，任何"降了 X%"的说法都缺分母。本文代码 8-1 可作起点。</p>
+<p><b>值得做的研究：</b>对同一模型同一硬件，记录（缓存命中率、goodput、$/M 三分、J/token）四组数在"裸 vLLM → +批处理调优 → +前缀缓存 → +KV 池 → +NVFP4"五个阶段的曲线。没有这条阶梯，任何"降了 X%"的说法都缺分母。本文代码 9-1 可作起点。</p>
 </section>
 
 
 <details class="note"><summary><b>近期进展（点击展开）</b></summary>
 <div class="hl-wrap" id="hl">
-<div class="hl-head"><b>前沿亮点</b><i>2026 年 9–11 月 · 与"单位成本"直接相关的发布与数据（详见正文对应章节）</i></div>
+<div class="hl-head"><b>前沿亮点</b><i>2026 年 9–11 月 · 与"单位有效产出成本"直接相关的发布与研究（详见正文对应章节）</i></div>
 <div class="hl-grid">
 <div class="hl-card"><div class="hl-meta"><b>Epoch AI：固定能力的成本每季降 47%</b><span class="hl-date">09-22 · Epoch AI</span></div><p>2023 年以来固定性能推理成本平均每季 −47%，是 DNA 测序降速的 4 倍；SOTA 能力刚出现时每季 −66%。GPQA 75% 的每题成本 18 个月降 725 倍。</p><a class="hl-link" href="#s3">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>vLLM × Mooncake：缓存命中 1.7%→92.2%</b><span class="hl-date">05-06 · vLLM 官方博客</span></div><p>Agent 负载下跨实例 KV 池化带来 3.8× 吞吐、P50 TTFT 降 46 倍，近线性扩展至 60×GB200——"缓存级降本"的年度代表数字。</p><a class="hl-link" href="#s5">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>vLLM v0.34.0：缓存容量白送 14.5%</b><span class="hl-date">11-16 · vllm-project</span></div><p>共享 RoPE 缓存每卡省 11.5 GiB，8×B200 上 KV 容量 +14.5%；可扩展 KV 缓存默认开启（MiniMax-M3@H200 缓存 433k→672k tokens）；GB200 decode 最高 1.95×。</p><a class="hl-link" href="#s5">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Evolving Infra：Agent 自适应服务，TTFT P95 降 14×</b><span class="hl-date">11-09 · arXiv 2611.12304</span></div><p>面向 agent 负载的 P/D 分离运行时（算力分配 + KV 自适应），256×GB300 上 GLM-5.2/Kimi K2.6 平均时延 4.1×、P95 TTFT 14× 优于 Dynamo——"任务链级降本"的代表作。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>Dynamo 1.6.2：把 TCO 写进调度器</b><span class="hl-date">11-05 · ai-dynamo</span></div><p>NVIDIA 数据中心级编排框架：KV 感知路由消除重复 prefill（TTFT 2×）、Planner 按 SLA 最小 TCO 自动扩缩（违约 −80%、TCO 再 −5%）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
 <div class="hl-card"><div class="hl-meta"><b>SGLang v0.5.23：Paged Experts 让小卡跑大 MoE</b><span class="hl-date">11-02 · sgl-project</span></div><p>16 GB 消费级卡跑超显存 MoE，比 CPU offload 快 12–30×；megakernel 使 DeepSeek-V4.1-Flash decode 在 GB300 再 +44%。</p><a class="hl-link" href="#s4">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>纯软件两个月把 $/M tokens 降 5 倍</b><span class="hl-date">2026 · NVIDIA/SemiAnalysis</span></div><p>B200 上 gpt-oss-120b 的每百万 token 成本两个月内 $0.11→$0.02，没有任何硬件更换——软件栈（TRT-LLM 等）仍是降本第一杠杆。</p><a class="hl-link" href="#s7">→ 跳到详情</a></div>
-<div class="hl-card"><div class="hl-meta"><b>MLPerf Inference v6.1：每卡吞吐再翻倍</b><span class="hl-date">09-16 · MLCommons</span></div><p>GB300 NVL72 单卡离线吞吐 16,635 tok/s（gpt-oss-120b）；DeepSeek-R1 单加速器最好成绩同比 +5.7×。基准吞吐 × 租金 = 每 token 成本的工程口径。</p><a class="hl-link" href="#s2">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>PixVid：72 fps 却迟钝，29.4 fps 反而跟手</b><span class="hl-date">11-12 · arXiv 2611.17336</span></div><p>交互视频的"块等待"反例：潜空间 12 帧块吞吐 72.0 fps 但控制到屏幕延迟中位 495 ms；像素空间单帧块 29.4 fps、34 ms——吞吐越过播放线后，块粒度才是响应的瓶颈。</p><a class="hl-link" href="#s8">→ 跳到详情</a></div>
 </div>
 </div>
 </details>
 
 <h2 id="s0"><span class="no">0</span>导读与大事记：高性价比是什么、和低时延高吞吐有何不同</h2>
 
-<p>这份报告回答四个问题：<b>高性价比推理与低时延、高吞吐到底是不是一回事、什么时候冲突；一百万 tokens 的价格由哪些项构成、自己怎么算；四年降了三个数量级的功劳簿怎么分；推理引擎与服务化团队该盯哪些指标、按什么顺序动手</b>。全文沿一条主线展开——<b>高性价比 = 单位成本产出最大化：把 $/M tokens 拆成"GPU 时租 × 卡数 × 时间 ÷ 实际产出"，再乘一个质量折扣项，然后对每一项分别做小</b>。低时延优化的是"时间"里的等待部分，高吞吐优化的是"产出"里的批量部分；高性价比是它们的上层目标函数，还要多管两项它们不管的事：<b>买什么硬件（时租）与质量是否守得住（折扣项）</b>。</p>
+<p>这份报告回答四个问题：<b>高性价比推理与低时延、高吞吐到底是不是一回事、什么时候冲突；单位有效产出成本由哪些项构成、自己怎么算；四年降了三个数量级的功劳簿怎么分；推理引擎与服务化团队该盯哪些指标、按什么顺序动手</b>。全文沿一条主线展开——<b>最小化单位有效产出成本：C_unit = C_total ÷ V_valid。分子 C_total 是统计窗口内全部已付费资源（算力忙碌与闲置、状态与搬运、失败与重试都算钱）；分母 V_valid 只计通过质量、SLO 与任务成功过滤的有效产出，单位是任务、有效 token、图像或视频秒数——单位不同不能跨业务直接横比</b>。低时延优化的是"时间"里的等待部分，高吞吐优化的是"产出"里的批量部分；高性价比是它们的上层目标函数，还要多管两项它们不管的事：<b>买什么硬件（时租）与质量是否守得住（哪些产出能进分母）</b>。</p>
 
 <p>为什么是现在？三个变化叠加：</p>
 <ol>
 <li><b>价格曲线进入"分级定价"时代</b>。DeepSeek 2026-08 起对 V4 系列实行峰谷分时计价、缓存命中价约为未命中的 1/50，OpenAI/Anthropic/Google 把 Priority/Flex/Batch 与缓存读折扣做成常规档位——价格本身成了成本工程的一部分<sup class="cite">[DSPRICING26]</sup><sup class="cite">[OAIEN]</sup>。</li>
-<li><b>降本手段完成了"全家桶"组装</b>。量化走到 NVFP4（B200 上每 token 成本比 FP8 再降 53–60%<sup class="cite">[SEMIX-GLM]</sup>）、KV 池化跨实例复用进入 vLLM/SGLang/LMDeploy/TRT-LLM 主线<sup class="cite">[VLLMMK26]</sup>、P/D 分离与弹性并行有 Dynamo/llm-d/AIBrix 系统层托底<sup class="cite">[DYNAMO1]</sup><sup class="cite">[LLMD10]</sup>。</li>
+<li><b>降本手段完成了"全家桶"组装</b>。量化走到 NVFP4（B200 上每 token 成本比 FP8 再降 53–60%<sup class="cite">[SEMIX-GLM]</sup>）、KV 池化跨实例复用进入 vLLM/SGLang/LMDeploy/TRT-LLM 主线<sup class="cite">[VLLMMK26]</sup>、P/D 分离与弹性并行有 Dynamo/llm-d/AIBrix 系统层托底<sup class="cite">[DYNAMO1]</sup><sup class="cite">[LLMD10]</sup>、vLLM-Omni 把语音/视频等多模态全双工会话与跨阶段 KV 传递做成统一服务框架<sup class="cite">[OMNI]</sup>。</li>
 <li><b>账本公开了</b>。DeepSeek 2025-03 披露了业界第一份推理系统级成本账（545% 理论成本利润率）<sup class="cite">[DS545]</sup>，Epoch AI 把"固定性能价格每季 −47%"做成了可引用的曲线<sup class="cite">[EPOCH26]</sup>——高性价比第一次同时有了目标、手段与刻度。</li>
 </ol>
 
 <div class="citebox"><b>[EPOCH26]</b> Epoch AI. <i>The Plunging Price of Thought.</i> 2026-09-22。原文："<span class="q">Since 2023, the cost of achieving a fixed level of performance in language model inference has declined by an average of 47% every quarter… SOTA-level capabilities initially drop faster, at ~66% per quarter, slowing to ~32% two years later.</span>"（中文译文：自 2023 年以来，在语言模型推理中达到固定性能水平的成本平均每季度下降 47%；SOTA 级能力刚出现时每季约降 66%，两年后放缓到约 32%。）链接：<a href="https://epoch.ai/publications/the-plunging-price-of-thought">epoch.ai</a></div>
 
-<h3>一页纸地图：降本手段的五层账本</h3>
+<h3>一页纸地图：降本手段的六层账本</h3>
 
-<p>全文按"从公式里哪一项下手"把手段归入五层。每层改变公式的一个成分，见效周期与风险各不相同：</p>
+<p>全文按"从公式里哪一项下手"把手段归入六层。每层改变公式的一个成分，见效周期与风险各不相同：</p>
 
 <table>
 <tr><th>层</th><th>改变公式的哪一项</th><th>代表技术 / 事件</th><th>量级示例（口径见正文）</th><th>见效周期</th></tr>
-<tr><td><b>模型级</b><span class="tag ind">工程</span></td><td>每 token 的计算量与搬运量</td><td>FP8/NVFP4 量化、MoE 激活稀疏、投机解码、模型路由</td><td>NVFP4 vs FP8：每 token 成本 −53%~−60%（B200，GLM-5.1）<sup class="cite">[SEMIX-GLM]</sup></td><td>周–月（需质量回归）</td></tr>
-<tr><td><b>缓存级</b><span class="tag sys">系统</span></td><td>免掉重复的 prefill 计算</td><td>前缀缓存、KV 池化（Mooncake）、KV 压缩、MLA</td><td>vLLM×Mooncake：Agent 负载吞吐 3.8×、命中 1.7%→92.2%<sup class="cite">[VLLMMK26]</sup></td><td>周（负载有重复即可）</td></tr>
+<tr><td><b>模型级</b><span class="tag ind">工程</span></td><td>每 token 的计算量与搬运量</td><td>FP8/NVFP4 量化、MoE 激活稀疏、投机解码、模型路由、视觉 token 剪枝</td><td>NVFP4 vs FP8：每 token 成本 −53%~−60%（B200，GLM-5.1）<sup class="cite">[SEMIX-GLM]</sup></td><td>周–月（需质量回归）</td></tr>
+<tr><td><b>缓存级</b><span class="tag sys">系统</span></td><td>免掉重复的 prefill 计算</td><td>前缀缓存、KV 池化（Mooncake）、KV 压缩、MLA、扩散激活缓存</td><td>vLLM×Mooncake：Agent 负载吞吐 3.8×、命中 1.7%→92.2%<sup class="cite">[VLLMMK26]</sup></td><td>周（负载有重复即可）</td></tr>
 <tr><td><b>调度级</b><span class="tag sys">系统</span></td><td>GPU 时间的填充率与 SLO 达标率</td><td>连续批处理、chunked prefill、P/D 分离、弹性扩缩、多租户</td><td>DistServe：SLO 达标容量较 vLLM 2.0–4.6×<sup class="cite">[DISTSERVE24]</sup>；LoongServe：最大吞吐 3.85×<sup class="cite">[LOONG24]</sup></td><td>月（工程改造）</td></tr>
-<tr><td><b>集群级</b><span class="tag sys">系统</span></td><td>时租 × 卡数 × 时间的整体利用率</td><td>混部削峰、错峰定价、NVL72 机架、租赁 vs 自建</td><td>DeepSeek 白天推理/夜间训练同集群复用<sup class="cite">[DS545]</sup></td><td>季（采购与运维）</td></tr>
+<tr><td><b>任务链级</b><span class="tag sys">系统</span></td><td>把多轮任务跑成功：上下文增长与每成功任务成本</td><td>Agent 自适应服务、KV 增长控制、缓存命中/未命中不对称治理</td><td>Evolving Infra：256×GB300 上平均时延 4.1×、P95 TTFT 14× 优于 Dynamo<sup class="cite">[EVOLVINGINFRA]</sup></td><td>月（负载画像先行）</td></tr>
+<tr><td><b>集群级</b><span class="tag sys">系统</span></td><td>时租 × 卡数 × 时间的整体利用率</td><td>混部削峰、错峰定价、NVL72 机架、租赁 vs 自建、异构加速器池化</td><td>DeepSeek 白天推理/夜间训练同集群复用<sup class="cite">[DS545]</sup></td><td>季（采购与运维）</td></tr>
 <tr><td><b>商业级</b><span class="tag ind">工程</span></td><td>价格结构本身</td><td>峰谷分时、缓存命中价、Priority/Flex 分级、按输入长度分档</td><td>豆包 1.6 按区间定价宣称综合成本 −63%<sup class="cite">[DOUBAO16]</sup>；各厂缓存读普遍 1 折</td><td>天（价目表）</td></tr>
 </table>
 
@@ -212,20 +214,24 @@
 <li><span class="t">2026 上半年</span><b>缓存池化进入主线引擎</b>：vLLM 官方博客给出 KV 池化 3.8× 吞吐数字<sup class="cite">[VLLMMK26]</sup>；LMDeploy/TRT-LLM 相继集成 Mooncake Store；llm-d v1.0（2026-10-20 GA）把 P/D 分离与多租户 QoS 做进 K8s<sup class="cite">[LLMD10]</sup>。</li>
 <li><span class="t">2026-08</span><b>峰谷计价时代</b>：DeepSeek V4 系列实行峰谷分时（谷=峰半价）<sup class="cite">[DSPRICING26]</sup>；同期智谱 2026-02 提价 30% 即售罄——价格从"只降不升"转向结构化<sup class="cite">[SEMIX-X]</sup>。</li>
 <li><span class="t">2026-09</span><b>两条刻度线</b>：Epoch AI 固定性能价格每季 −47%<sup class="cite">[EPOCH26]</sup>；MLPerf Inference v6.1（09-16）GB300 单卡离线 16,635 tok/s，DeepSeek-R1 单加速器成绩同比 +5.7×<sup class="cite">[MLPERF61]</sup>。</li>
+<li><span class="t">2026-11</span><b>任务链级成为独立战线</b>：Evolving Infra（11-09）把 agent 负载的算力分配与 KV 自适应做成 P/D 分离运行时，256×GB300 上 P95 TTFT 较 Dynamo 降 14×<sup class="cite">[EVOLVINGINFRA]</sup>；同期多篇工作量化 agent 上下文增长与缓存命中/未命中的成本不对称<sup class="cite">[CACHEENG]</sup><sup class="cite">[BURSTS]</sup>。</li>
+<li><span class="t">2026-11</span><b>引擎侧继续挤账本</b>：vLLM v0.34.0（11-16）共享 RoPE 缓存使 8×B200 KV 容量 +14.5%、GB200 decode 最高 1.95×<sup class="cite">[VLLM34]</sup>；PixVid（11-12）给出交互视频"块等待"的响应延迟反例（72.0 fps 却 495 ms）<sup class="cite">[PIXVID]</sup>。</li>
 </ul>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
-<li><b>高性价比是上层目标函数</b>：低时延、高吞吐各优化成本公式的一项，而性价比还要管"时租"（买什么）与"质量折扣"（值不值）这两件兄弟目标不管的事。</li>
-<li>降本手段已成<b>五层账本</b>：模型级少算、缓存级不重算、调度级填满 GPU、集群级填满日历、商业级设计价格结构——层与层是乘法关系。</li>
-<li>2024 年价格战是"模型级+调度级"的产物，2025–2026 的主线是<b>缓存池化、P/D 分离系统化与分级定价</b>；每季 −47% 的价格曲线由软件贡献了大部分。</li>
+<li><b>高性价比是上层目标函数</b>：C_unit = C_total ÷ V_valid，低时延、高吞吐各优化公式的一项，而性价比还要管"时租"（买什么）与"哪些产出能进分母"（值不值）这两件兄弟目标不管的事。</li>
+<li>降本手段已成<b>六层账本</b>：模型级少算、缓存级不重算、调度级填满 GPU、任务链级把多轮任务跑成功、集群级填满日历、商业级设计价格结构——层与层是乘法关系。</li>
+<li>2024 年价格战是"模型级+调度级"的产物，2025–2026 的主线是<b>缓存池化、P/D 分离系统化、任务链级与分级定价</b>；每季 −47% 的价格曲线由软件贡献了大部分。</li>
 </ol>
 </div>
 
 <!-- S1 -->
-<h2 id="s1"><span class="no">1</span>预备知识：一个 token 的成本账本</h2>
+<h2 id="s1"><span class="no">1</span>预备知识：一条请求、一份账本与三个目标</h2>
 
-<p>写给第一次接触推理经济学的读者：本节只需要"除法"和"租东西按时计费"两个常识。先建立四个概念：成本公式、三个目标的三角形、质量调整成本、账本的隐藏项。</p>
+<p>写给第一次接触推理经济学的读者：本节只需要"除法"和"租东西按时计费"两个常识。先建立四个概念：一条请求的一生（排队、计算、状态）、成本公式、三个目标的三角形、质量调整成本与账本隐藏项。</p>
+
+<p>一条请求的一生：到达后先进<b>排队</b>（等 GPU 席位），然后 <b>prefill</b>（把整个输入算一遍，产出 KV Cache——一份随长度线性增长的<b>状态</b>），再逐 token <b>decode</b>（每步都读写这份状态），最后可能被取消、超时或答错。成本的账就记在这条时间线上：<b>排队时 GPU 在为别人付费，prefill 时算力与写入带宽是主角，decode 时显存带宽与状态容量是主角，失败时已花的钱不会退</b>。第 2 章的账本会把这些逐项列出；本节先把总公式立起来。</p>
 
 <h3>1.1 从 GPU 时租到 $/M tokens：一条除法公式</h3>
 
@@ -256,9 +262,9 @@
 
 <p>$/M tokens 的分子是钱，分母是 token 数；但用户买的从来不是 token，是<b>答对的任务</b>。一次答错触发重试，实际成本翻倍还搭上时延。于是有了质量调整口径：</p>
 
-<pre>每成功任务成本 = 每次调用成本 × 平均调用次数 ÷ 任务成功率</pre>
+<pre>每成功任务成本 = 全部尝试的总成本 ÷ 成功任务数（失败尝试花的钱全部计入分子）</pre>
 
-<p>三种策略的账可能反转：直接回答 2 积分/次、best-of-4 花 6 积分未必更贵——如果它把成功率从 30% 抬到 80%，每成功成本反而从 6.67 降到 7.5 之外更低的档位（该教学账本在评测篇 4.2 有完整表格）。同理，混合价（如 Artificial Analysis 的 7:2:1 缓存:输入:输出加权）对 reasoning 类 1:5 负载会失真最多 5 倍<sup class="cite">[TOKENARENA26]</sup>——<b>先想清楚自己的负载长什么样，再选口径</b>。</p>
+<p>评测篇 4.2 的教学账本给出方向性结论：<b>更多预算可以买到更高成功率，却同时推高每次成功的成本</b>——同一组四道题上，单次作答总成本 4 积分、成功 2 次，每次成功 2 积分；best-of-4 总成本 20、成功 3 次，每次成功约 6.67；自适应策略总成本 12、成功 3 次，每次成功 4。换小模型、降精度、少采样同样要做这道除法：单价便宜一半而成功率掉三成，账反而是亏的。同理，混合价（如 Artificial Analysis 的 7:2:1 缓存:输入:输出加权）对 reasoning 类 1:5 负载会失真最多 5 倍<sup class="cite">[TOKENARENA26]</sup>——<b>先想清楚自己的负载长什么样，再选口径</b>。</p>
 
 <h3>1.4 账本的隐藏项：TCO 不止租金</h3>
 
@@ -272,11 +278,30 @@
 </ol>
 </div>
 
-<h2 id="s2"><span class="no">2</span>指标体系：性价比到底怎么度量</h2>
+<h2 id="s2"><span class="no">2</span>单位有效产出成本与可复查账本</h2>
 
-<p>"性价比"不是玄学词，它有一套可计算的指标族。按"钱从哪出、货从哪进"分五类：价格类、产出类、能耗类、资产类、质量调整类。本节逐个给出定义、口径与陷阱——<b>指标选错，优化方向就会错</b>。</p>
+<p>"性价比"不是玄学词，它有一个可以写下来的目标函数和一套可计算的指标族。本章先立公式与它的六个陷阱，再按"钱从哪出、货从哪进"给出指标族（价格、产出、能耗、资产、质量调整），最后把分子展开成一份可复查的资源账本。<b>指标选错，优化方向就会错</b>。</p>
 
-<h3>2.1 价格类：$/M tokens 的三分口径</h3>
+<h3>2.1 主公式：C_unit = C_total ÷ V_valid</h3>
+
+<pre>C_unit = C_total ÷ V_valid
+  C_total：统计窗口内全部已付费成本（GPU 忙碌与闲置、状态与搬运、失败与重试、冷启动……）
+  V_valid：同一窗口内"有效"产出 —— 满足质量要求、任务成功且不违反对应 SLO 的部分
+  单位：元/任务 · $/有效 M tokens · $/图像 · $/视频秒 —— 单位不同，不能跨业务直接横比</pre>
+
+<p>这个除法看似简单，六类常见"降本"都可能在另一头把账做坏——每一条都对应后文一层手段的失效边界：</p>
+<ol>
+<li><b>加 GPU 降时延，通常抬高单位成本</b>：分母（产出）未必线性增长，分子（已供给算力时间，含新增的闲置）却实打实增长——为 p99 买冗余是合法业务决策，但要按 C_unit 计价，不能只报时延改善。</li>
+<li><b>加大 batch 提吞吐，可能使排队或交互响应违约</b>：超 SLO 的产出进不了 V_valid（goodput 口径），"白赚的吞吐"只抬电费不抬分母。</li>
+<li><b>缓存压缩降存储，可能因解压、临时副本或质量下降把总成本做高</b>：KV 量化/驱逐省的是容量项，重算与精度补偿计入分子（5.4）。</li>
+<li><b>少步采样、缩小模型、减少输出长度改变质量或任务预算</b>：它们不是无损加速——扩散少两步、模型小一档、max_tokens 砍一半，都要重新过质量回归（4.1/4.5/8.4）。</li>
+<li><b>平均质量分数不是线性效用</b>：不能机械地把成本除以 FVD、VBench 或平均评分当"性价比"——FVD 是集合级距离、评分不可当倍数用；质量要作为约束（Q ≥ Q₀）或进入 V_valid 的过滤条件（8.4）。</li>
+<li><b>输出过时、被取消、被丢弃或任务失败时，成本仍在分子</b>：交互场景里被新控制作废的帧、Agent 里失败轮次的 token，都不能计为有效产出。</li>
+</ol>
+
+<p><b>两种问法，同一架天平</b>："成本最小化且满足服务目标"（min C_unit s.t. SLO/质量约束）适合有承诺指标的服务方；"固定预算下最大化有效产出"（max V_valid s.t. C_total ≤ 预算）适合配额制的内部平台。二者可以互相换算：把第一种的最优 C_unit 当单价、用预算除它，就得到第二种的目标产出——但两种问法下的最优配置通常不同，报告里要写清问的是哪一种。这个框架也能概括全站的研究路径：<b>建模提供账本（本章），约束优化定义可行域（8.3），协同设计调整结构与资源（第 4–7 章的手段），自适应处理负载变化（第 6 章的弹性与任务链）</b>。</p>
+
+<h3>2.2 价格类：$/M tokens 的三分口径</h3>
 
 <p>2024 年之后，API 定价普遍拆成三格：<b>输入（缓存未命中）、输入（缓存命中）、输出</b>。三者价差可达 50 倍，只报一个"输入 $X"的对比都是失真的。快照 2026-11-15 的官方牌价（每百万 tokens）：</p>
 
@@ -292,7 +317,7 @@
 
 <p>对比多个模型时要用<b>混合价</b>，但混合比例本身就有学派：Artificial Analysis 现行口径是 <b>7:2:1（命中:输入:输出）</b>，Epoch AI 沿用 <b>3:1（输入:输出）</b>。Token Arena（arXiv 2605.00300）的批评是：真实负载里 RAG 约 10:1–30:1、Agent 5:1–15:1、reasoning 1:5+，错配口径可让对比失真最多 5 倍<sup class="cite">[TOKENARENA26]</sup>。<b>给老板看的成本曲线，必须先用自家历史日志算出真实的输入输出比</b>。</p>
 
-<h3>2.2 产出类：tokens/s/$ 与 goodput</h3>
+<h3>2.3 产出类：tokens/s/$ 与 goodput</h3>
 
 <p>自部署侧的对称指标是<b>每美元产出多少 token</b>（tokens/s/$），它把 1.1 的公式倒过来。三个常见变体：</p>
 <ul>
@@ -301,19 +326,19 @@
 <li><b>并发敏感性</b>：同一硬件、同一模型，成本随并发剧烈变化——并发感知成本模型（arXiv 2606.11690）实测 H100 上 Mixtral-8x7B FP16：<b>1 请求/秒时 $15.25/M tokens，25 请求/秒时 $0.87/M</b>，同一套硬件差 17.5 倍<sup class="cite">[CONCOST26]</sup>。低并发自部署"看起来免费"，其实是按最贵档付费。</li>
 </ul>
 
-<h3>2.3 能耗类：J/token 是被低估的硬通货</h3>
+<h3>2.4 能耗类：J/token 是被低估的硬通货</h3>
 
 <p>每 token 能耗（J/token）把"算力、带宽、利用率"压成一个物理量。NVIDIA 给出的 GPT-MoE-1.8T 代际曲线：<b>Hopper ≈10 J → Blackwell ≈0.4 J → Blackwell Ultra ≈0.2 J</b>（NVFP4 口径，十年 200,000×）<sup class="cite">[NVFP4]</sup>。</p>
 <p>但能耗在账本里的位置常被高估：Epoch AI 测算<b>电费只占 GPU TCO 的 10–15%</b>，资本开支主导<sup class="cite">[EPOCHTCO]</sup>——省电的意义更多在散热上限、机柜密度与碳口径，而非直接省钱。</p>
 <p>2026 年学术侧开始把能耗当一等指标：SIMPLE 定律用 4 个参数闭式拟合每 token 能耗（13 个稠密模型、H100 上 R²=0.969）<sup class="cite">[SIMPLE26]</sup>；Wilhelm 等直接主张把 Energy/Token 列为基准一等公民并做能耗感知路由<sup class="cite">[EPT26]</sup>。</p>
 
-<h3>2.4 资产类：TCO 与租金曲线</h3>
+<h3>2.5 资产类：TCO 与租金曲线</h3>
 
 <p>SemiAnalysis InferenceMAX 把自部署成本写成一条公式： <b>$/M tokens = TCO($/chip-hr) × 10⁶ ÷ (3600 × tok/s/chip)</b>，其中 TCO 含折旧、电费、机房、网络与运维<sup class="cite">[INFERMAX]</sup>。</p>
 <p>芯片小时价本身在波动：H100 合约价从 2025-10 的 $1.70 回升到 2026-03 的 $2.35（+38%），B200 在 2026-09 达 $8.01（三个月 +79%，HBM 短缺）<sup class="cite">[GPUIDX]</sup>。</p>
 <p><b>租金上行与每 token 成本下行并不矛盾</b>——软件与精度优化的降本速度（如 B200 上两个月 $0.11→$0.02/M 的纯软件 5×<sup class="cite">[NVIDIABLOG]</sup>）跑得比租金快，但把"租卡比去年贵"算进 TCO 是诚实账本的前提。</p>
 
-<h3>2.5 质量调整类：为"答对"付费</h3>
+<h3>2.6 质量调整类：为"答对"付费</h3>
 
 <p>两个口径：</p>
 <ol>
@@ -323,22 +348,39 @@
 <p>市场结构数据：同等能力档，<b>开源模型比闭源便宜约 90%</b>（OpenRouter 大规模交易数据研究）<sup class="cite">[MARKET25]</sup>；tiered 定价研究发现"经济档"价格半衰期仅 1.10 年，且<b>降价的主力是软件/架构创新（TFP 残差约 103.7%）而非 GPU 降价</b><sup class="cite">[TIERED26]</sup>。</p>
 
 <figure class="fig" id="fig-cost-pipeline"><div style="overflow-x:auto"><div class="flowrow">
-<div class="fbox"><b>资产项</b>时租 R × 卡数 N<small>含折旧/电费/机房（TCO）</small></div><span class="arr">→</span>
+<div class="fbox"><b>资产项 C_total</b>已供给算力（忙+闲）× 时间<small>含状态、搬运、冷启动、失败重试（2.7 账本）</small></div><span class="arr">→</span>
 <div class="fbox"><b>填充率</b>批处理 / 缓存命中 / 弹性<small>GPU 时间被有效工作填满的比例</small></div><span class="arr">→</span>
-<div class="fbox"><b>产出</b>吞吐 T（tok/s）<small>goodput 口径才计入 SLO 达标部分</small></div><span class="arr">→</span>
-<div class="fbox hl"><b>$/M tokens</b>R×N×10⁶ ÷ (T×3600)<small>命中部分按命中价；峰谷按时段</small></div><span class="arr">→</span>
-<div class="fbox ok"><b>质量调整</b>÷ 任务成功率<small>答错重试的钱都算进来</small></div>
+<div class="fbox"><b>总产出</b>吞吐 T（tok/s）<small>全部生成的 token / 帧，含过时与失败</small></div><span class="arr">→</span>
+<div class="fbox hl"><b>有效产出 V_valid</b>质量 · SLO · 任务成功过滤<small>过时 / 取消 / 违约 / 失败不计入</small></div><span class="arr">→</span>
+<div class="fbox ok"><b>C_unit</b>C_total ÷ V_valid<small>元/任务 · $/有效 M tokens · $/视频秒</small></div>
 </div></div>
-<div class="cap">图 2-1 · 成本核算管道：从资产项到质量调整的五级串联。每一级都是第 4–7 章一层手段的作用点。本文自绘，机制综合自 SemiAnalysis InferenceMAX 公式、DistServe goodput 与并发感知成本模型。</div></figure>
+<div class="cap">图 2-1 · 从成本到有效产出的核算管道：五级串联，每一级都是第 4–8 章一层手段的作用点。本文自绘，机制综合自 SemiAnalysis InferenceMAX 公式、DistServe goodput 与并发感知成本模型。</div></figure>
 
-<figure class="fig" id="fig-cost-pipeline-interactive" style="padding:10px"><iframe src="img/sc-cost-pipeline.html" title="成本核算管道交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 2-2 · 可交互：点动播放沿主管道走一遍账本（资产项 → 填充率 → goodput → 单价 → 质量调整），点击节点看各项的角色，虚线是"把成本抬高或压低"的三个旁路（空闲 / SLO 违约 / 命中折扣）。本文自绘（交互图解）；上方图 2-1 为静态速览。</div></figure>
+<figure class="fig" id="fig-cost-pipeline-interactive" style="padding:10px"><iframe src="img/sc-cost-pipeline.html" title="成本核算管道交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 2-2 · 可交互：点动播放沿主管道走一遍账本（C_total → 填充率 → 总产出 → 有效产出 V_valid → 单位成本），点击节点看各项的角色，虚线是三个旁路——空闲与峰值抬高分子、失败与过时砍掉分母、命中折扣压低分子；窄屏可点图内 Full screen 放大。本文自绘（交互图解，2026-11-18 重绘以纳入 V_valid 分母）；上方图 2-1 为静态速览。</div></figure>
 
-<h3>2.6 跨系统比较的纪律</h3>
+<h3>2.7 成本账本：把分子展开成可复查的资源项</h3>
+
+<p>C_total 不是一个数，而是一张可以逐项对账的清单。按"钱付给什么资源"分组（每项都注明统计窗口与分摊规则，避免双计）：</p>
+
+<table>
+<tr><th>资源组</th><th>账本项</th><th>统计与分摊要点</th></tr>
+<tr><td><b>算力供给</b></td><td>已供给的加速器时间——<b>忙碌与闲置都计</b></td><td>按节点小时计；预留/待机/扩容余量按占用时长分摊到业务，不能只算"忙碌 GPU 时"</td></tr>
+<tr><td><b>通用资源</b></td><td>CPU、主存、存储、网络、缓存层、迁移与数据搬运</td><td>KV 池的 SSD、400G 网卡、跨实例 RDMA 流量都是钱；迁移按"搬迁字节数 × 单价"或占用端口时间分摊</td></tr>
+<tr><td><b>容量占用</b></td><td>模型权重、KV/其他持久状态、临时激活、输出队列的显存/内存占用</td><td>同卡多模型按峰值占用分摊；碎片与峰值预留要显式一行（vLLM v0.34.0 的共享 RoPE 缓存省 11.5 GiB/卡就是这一行的收益<sup class="cite">[VLLM34]</sup>）</td></tr>
+<tr><td><b>切换成本</b></td><td>冷启动、编译、预热、扩缩容与版本切换</td><td>按事件计；AIBrix 的 ModelWarmup、ServerlessLLM 的快冷启都是在压这一行<sup class="cite">[AIBRIX]</sup><sup class="cite">[SERVERLESSLLM]</sup></td></tr>
+<tr><td><b>失败与浪费</b></td><td>失败重试、过时输出、被取消请求、推测解码未采用部分、降级回退</td><td>全部计入分子、不得计入 V_valid；投机解码的草稿 token 按接受率折算浪费比例（4.3）</td></tr>
+<tr><td><b>质量补偿</b></td><td>精度/近似方法的质量损失所需的补偿计算</td><td>量化回归、重试、验证器开销；"近似无损"要附回归集证据，否则补偿成本被隐藏</td></tr>
+<tr><td><b>任务链附加</b></td><td>推理时搜索、验证器、工具调用、Agent 任务链的额外轮次</td><td>按任务聚合而非按请求聚合；记忆注入、上下文重发都要单独一行（6.5）<sup class="cite">[TCA]</sup></td></tr>
+</table>
+
+<p>三个口径务必分开：<b>能耗</b>（J/token，物理量）、<b>采购或租赁成本</b>（TCO，含折旧与资金成本）、<b>计费价格与商业售价</b>（价目表，含毛利与折扣结构）。API 售价不是基础设施成本——租金随市场波动（H100 合约价 2025-10 到 2026-03 涨 38%<sup class="cite">[GPUIDX]</sup>），引用时给来源与日期快照；本文不虚构租金与毛利数字，厂商自报毛利一律标注口径（3.3）。统计窗口要与业务对齐（日/月/结算周期），跨窗口的预留资源按时间比例分摊——<b>双计（同一 GPU 时既算给业务又算给平台）和漏计（夜里空转的折旧没人认领）是账本最常见的两种错</b>。</p>
+
+<h3>2.8 跨系统比较的纪律</h3>
 
 <div class="note">
 <p><b>引用任何成本数字前问三句</b>：</p>
 <ol>
-<li><b>口径</b>——输入/输出/命中哪一格？哪个混合比例？离线吞吐还是 SLO 约束下的 server 吞吐？</li>
+<li><b>口径</b>——输入/输出/命中哪一格？哪个混合比例？离线吞吐还是 SLO 约束下的 server 吞吐？V_valid 的过滤条件是什么？</li>
 <li><b>快照日期</b>——价格与租金随月波动，"DeepSeek 输入 $0.28"是 2025-09-29 的 V3.2 牌价，2026-11 的 flash 谷价已是 $0.15。</li>
 <li><b>谁测的</b>——厂商自提交（MLPerf 的传统警示）优于媒体转述，同行评审优于官方博客，官方博客优于匿名评测。</li>
 </ol>
@@ -347,9 +389,9 @@
 
 <div class="summary3"><b>本章小结</b>
 <ol>
+<li>主公式只有一条除法：<b>C_unit = C_total ÷ V_valid</b>；六个陷阱（加卡、大 batch、压缩、少步/小模型、质量非线性、过时失败）都源于只动一头不看另一头。</li>
 <li>价格必须<b>三分口径</b>（未命中/命中/输出）+ 快照日期；混合价比例要按自家负载校准，错配可失真 5 倍。</li>
-<li>产出指标用 <b>goodput 而非裸吞吐</b>；成本随并发剧烈变化，低并发自部署是隐形的奢侈品。</li>
-<li>J/token、TCO、每成功任务成本各管一段：<b>能耗管密度与碳，TCO 管采购，质量调整管用户真实开销</b>。</li>
+<li>分子要展开成<b>可复查的账本</b>（算力/通用资源/容量/切换/失败/质量补偿/任务链），能耗、TCO 与售价三个口径分开；产出指标用 goodput 而非裸吞吐。</li>
 </ol>
 </div>
 
@@ -420,9 +462,9 @@
 </ol>
 </div>
 
-<h2 id="s4"><span class="no">4</span>模型级降本：每个 token 少算一点、少搬一点</h2>
+<h2 id="s4"><span class="no">4</span>模型级降本：每个产出少算一点、少搬一点</h2>
 
-<p>模型级手段改变的是<b>每个 token 要做多少计算（FLOPs）与搬运多少字节（显存带宽）</b>。它们共同的风险是质量折扣——所以每个手段后面都跟着"质量账"。站内量化篇与投机解码篇已把机制讲透，本章只做"性价比视角"的重读与最新数字。</p>
+<p>模型级手段改变的是<b>每个产出（token、图像、视频秒）要做多少计算（FLOPs）与搬运多少字节（显存带宽）</b>。它们共同的风险是质量折扣——所以每个手段后面都跟着"质量账"。站内量化篇与投机解码篇已把机制讲透，本章只做"性价比视角"的重读、最新数字，并补上此前缺的视觉与多模态一条线。</p>
 
 <h3>4.1 量化：精度换吞吐，在 Blackwell 上是"降本第一杠杆"</h3>
 
@@ -455,21 +497,31 @@
 
 <p>最古老的降本手段：不每次都请最贵的模型。FrugalGPT（2023）查询级联，匹配 GPT-4 效果下成本最高降 98%（API 计费口径）<sup class="cite">[FRUGALGPT]</sup>；RouteLLM（ICLR'25）用偏好数据训练强弱路由器，部分场景成本降 2 倍以上而质量不降<sup class="cite">[ROUTELLM]</sup>。市场给了结构证明：同等能力档，<b>开源模型比闭源便宜约 90%</b><sup class="cite">[MARKET25]</sup>——路由的意义就是让每个请求落到"能力够用的最便宜档"。这条线与站内推理预算篇（test-time-compute）的"自适应预算"是同一枚硬币的两面：那边管"该花多少思考"，这边管"该花谁的钱"。</p>
 
+<h3>4.5 视觉与多模态：VLM 的 token 经济与扩散的步数经济</h3>
+
+<p>站内 20 篇里，VLM 与扩散生成的降本此前没有落到"性价比视角"——本节补上。它们的公式与 LLM 同构，但<b>产出单位不同</b>（图像、视频秒），且"质量折扣"更难标定。</p>
+<ol>
+<li><b>VLM 的视觉 token 是第二个"激活参数"</b>。一张高分辨率图可展开数千视觉 token，prefill 成本被图像主导；FastV/VisionZip/ToMe 一类剪枝（站内 ViT 稀疏化篇详述）相当于给视觉通道做"MoE 式稀疏"——砍 token 就是砍分母侧的计算。但 2026-10 的评测批评指出：<b>留存 token 数与聚合准确率都是坏代理</b>——很多样本随机剪枝或只靠文本捷径也能答对，等量 token 预算的端到端成本可以不同；该文提出 Random-Pass@k 与"保持率约束下的真实加速"（Preservation-Constrained Speedup），把评测拉回"每有效产出的成本"口径<sup class="cite">[VLMPRUNEEVAL]</sup>。缓存侧，VisMemo 把视觉 KV 复用做成 GPU/CPU/SSD 分层缓存，生产 trace 命中率 27.78%→61.45%、8K 输入 prefill 时延最多降 48.3%<sup class="cite">[VISMEMO]</sup>；CodecSight 则用视频编解码器信号替代滑动窗全量重算，让"并发视频流"这类稳态负载的每流成本有界<sup class="cite">[CODECSIGHT]</sup>。</li>
+<li><b>扩散少步不是无损加速</b>。少步蒸馏、ODE 求解器与引导强度调优改变的是每次产出的模型求值次数（站内采样效率篇的同预算算例），质量要按 FVD/VBench 重新验收——少两步省的是分子，掉的是 V_valid 的过滤通过率，与量化一样要过回归，不能因为"都是生成"就当免费午餐。</li>
+<li><b>多模态服务把两个世界的账本接在一起</b>。vLLM-Omni（vllm-project，2026-10-28 v0.32.0）把语音/视觉/生成的全双工会话做成统一 serving 框架，核心卖点正是"跨阶段 KV 与多模态载荷的原生传递"——让 AR 模型到 DiT 的接力不重算上下文<sup class="cite">[OMNI]</sup>；实时世界模型篇 5 章的流式会话与事件级 KV（Hy-Nomas in SGLang）是同一趋势。扩散服务侧，TileCache 把多轮图像编辑的激活缓存压缩复用做成服务级调度，90% SLO 达标下承载 2× 到达率<sup class="cite">[TILECACHE]</sup>——"缓存级降本"第一次跨进扩散范式。</li>
+</ol>
+
 <div class="summary3"><b>本章小结</b>
 <ol>
 <li>量化在 Blackwell+NVFP4 上是<b>降本第一杠杆</b>（$/token −53~60%），大模型 PTQ 近无损、小模型要 QAD。</li>
 <li>MoE 把能力与算力解耦（671B/37B），Paged Experts 让红利进入通用引擎；<b>激活便宜才算便宜</b>。</li>
 <li>投机解码与路由都要按<b>每成功 token 成本</b>结算：接受率低时投机更贵，90% 的请求配得上便宜模型。</li>
+<li>视觉 token 剪枝、扩散少步与多模态接力同属模型级账本：<b>留存 token 数和步数都不是钱，端到端每有效产出的成本才是</b>；剪枝评测要看质量保持约束下的真实加速。</li>
 </ol>
 </div>
 
 <h2 id="s5"><span class="no">5</span>缓存级降本：不重算已经算过的</h2>
 
-<p>推理负载有强烈的重复性：system prompt 千人一面、Agent 多轮对话反复带历史、RAG 反复检索同一批文档。<b>缓存级降本的全部要义：第一次算，之后都不算</b>。它是五层中"零质量损失"的一层（复用的是精确相同的 KV），也是 2025–2026 引擎侧竞争最激烈的一层。</p>
+<p>推理负载有强烈的重复性：system prompt 千人一面、Agent 多轮对话反复带历史、RAG 反复检索同一批文档。<b>缓存级降本的全部要义：第一次算，之后都不算</b>。它是六层中"零质量损失"的一层（复用的是精确相同的 KV），也是 2025–2026 引擎侧竞争最激烈的一层。</p>
 
 <h3>5.1 命中价经济学：价目表已经替你算好了</h3>
 
-<p>各厂命中价（2.1 表）本身就是缓存价值的官方标定：DeepSeek 命中价 ≈ 未命中的 1/50（谷时 $0.003 vs $0.15）、Kimi/Anthropic/Gemini 约 1/10、豆包 1/5 加存储计时费。<b>推理侧的机会成本计算</b>：一段 32K 的 system prompt，未命中要付一次完整 prefill（计算 + 时延），命中只付 I/O；对输出同样 1K 的请求，命中能把单请求成本压掉 80–95%（取决于输入输出比与价差）。</p>
+<p>各厂命中价（2.2 表）本身就是缓存价值的官方标定：DeepSeek 命中价 ≈ 未命中的 1/50（谷时 $0.003 vs $0.15）、Kimi/Anthropic/Gemini 约 1/10、豆包 1/5 加存储计时费。<b>推理侧的机会成本计算</b>：一段 32K 的 system prompt，未命中要付一次完整 prefill（计算 + 时延），命中只付 I/O；对输出同样 1K 的请求，命中能把单请求成本压掉 80–95%（取决于输入输出比与价差）。</p>
 <p>给引擎团队的两个推论：</p>
 <ol>
 <li><b>把可复用前缀放到 prompt 最前面</b>（缓存按前缀匹配，前缀里插一个时间戳就全盘失效）。</li>
@@ -502,9 +554,10 @@
 
 <figure class="fig" id="fig-cache-hit-interactive" style="padding:10px"><iframe src="img/sc-cache-hit-path.html" title="缓存命中路径交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 5-2 · 可交互：沿主路径走一次"本地基数树 → 共享 KV 池 → KV 拉回 → 增量 prefill → decode"，再对比未命中的全量 prefill 兜底路径与写回缓存的闭环；点击节点看各级分别省掉了什么。本文自绘（交互图解）；上方图 5-1 为静态速览。</div></figure>
 
-<h3>5.4 KV 压缩：缓存本身变小，命中更便宜</h3>
+<h3>5.4 KV 压缩与卸载：缓存本身变小，命中更便宜</h3>
 
 <p>第三条线是让缓存本身更便宜：KIVI（ICML'24）2-bit 非对称 KV 量化，峰值显存省 2.6×、batch 至 4×、真实负载吞吐 2.35–3.47×<sup class="cite">[KIVI24]</sup>；DeepSeek-V2 起的 MLA 把 KV 压缩约一个数量级（站内 KV Cache 篇与注意力篇详述）；Cake（ICML'25）让"计算 KV"与"从盘加载 KV"并行互掩，TTFT 平均再降 2.6×<sup class="cite">[CAKE25]</sup>。<b>压缩与池化是乘法</b>：KV 小 4× 意味着同容量池装 4× 的会话、RDMA 搬运时间缩 4×。</p>
+<p>账本侧的两个 2026-11 更新：其一，引擎在"省存放 KV 的每一 GiB"上继续内卷——vLLM v0.34.0（2026-11-16）默认开启可扩展 KV 缓存并以共享 RoPE 缓存每卡省 11.5 GiB，8×B200 上等效 KV 容量 +14.5%<sup class="cite">[VLLM34]</sup>——相当于不动硬件白送缓存容量。其二，卸载介质的<b>磨损与寿命进入成本</b>：Lachesis（2026-10）按数据生命周期把 agent 负载的 KV 分层放到高带宽 Flash，把闪存寿命摊销延长 1.19–3.13×（3.3–12.2 设备年）<sup class="cite">[LACHESIS]</sup>——KV 卸载的账本从"带宽与容量"扩展到"设备折旧"，这是 2.7 账本"容量占用"行的长期版本。</p>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -514,9 +567,9 @@
 </ol>
 </div>
 
-<h2 id="s6"><span class="no">6</span>调度级降本：把昂贵的 GPU 时间填满</h2>
+<h2 id="s6"><span class="no">6</span>调度级与任务链降本：把昂贵的 GPU 时间填满、把多轮任务跑成功</h2>
 
-<p>调度级手段不改变模型也不改变缓存，它改变的是<b>"已付费的 GPU 时间里有多少在产出有效 token"</b>。核心指标从吞吐升级为 goodput，核心动作从"批"升级为"分"与"迁"。机制细节站内推理服务篇第 2/4/5 章有完整拆解，本章聚焦性价比账。</p>
+<p>调度级手段不改变模型也不改变缓存，它改变的是<b>"已付费的 GPU 时间里有多少在产出有效 token"</b>；任务链级手段再把镜头拉远：<b>"一条多轮任务里有多少轮白跑"</b>。核心指标从吞吐升级为 goodput、再到每成功任务成本，核心动作从"批"升级为"分"、"迁"与"适配"。机制细节站内推理服务篇第 2/4/5 章与 Agent 推理系统篇有完整拆解，本章聚焦性价比账。</p>
 
 <h3>6.1 批处理与切块：成本视角的两句话重述</h3>
 
@@ -526,7 +579,7 @@
 
 <p>Prefill 计算受限、decode 访存受限，混在一个池里互相干扰。分离的收益证据：DistServe（OSDI'24）在 SLO 达标口径下较 vLLM 可承载 2.0–4.6× 请求速率、较 DeepSpeed-MII 7.4×、更紧 SLO 下 12.6×<sup class="cite">[DISTSERVE24]</sup>；Splitwise（ISCA'24）给出成本口径：同型机集群 1.4× 吞吐且成本 −20%，或同成本同功耗预算下 2.35× 吞吐<sup class="cite">[SPLITWISE24]</sup>；TetriInfer 直接以 perf/$ 为目标：混合负载省 38% 资源<sup class="cite">[TETRIINFER]</sup>。</p>
 <p>代价三条（KV 要跨机传、两池配比要调、显存规划更碎）与配套技术（NIXL、Mooncake Transfer Engine、EPLB 负载均衡）见服务篇 5.3。</p>
-<p>2026 年的新方向是<b>"分离不再是二选一"</b>：STAR（2025-10）按输入/预测输出长度在 decode 端再调度<sup class="cite">[STAR25]</sup>；DuetServe（2025-11）用单卡 SM 空间复用替代跨卡分离<sup class="cite">[DUETSERVE]</sup>；PPD（ICML'26）发现多轮会话里"部分 prefill 本地做"更划算，Turn2+ 的 TTFT 降约 68%<sup class="cite">[PPD26]</sup>。</p>
+<p>2026 年的新方向是<b>"分离不再是二选一"</b>：STAR（2025-10）按输入/预测输出长度在 decode 端再调度<sup class="cite">[STAR25]</sup>；DuetServe（2025-11）用单卡 SM 空间复用替代跨卡分离<sup class="cite">[DUETSERVE]</sup>；PPD（ICML'26）发现多轮会话里"部分 prefill 本地做"更划算，Turn2+ 的 TTFT 降约 68%<sup class="cite">[PPD26]</sup>；Cascade（2026-08）给每个请求算"SLO 减去预计剩余服务时间"的<b>时延预算</b>，用它同时驱动调度与 KV 管理，生产 trace 上 goodput 最高 2.4×、SLO 违约 −40%<sup class="cite">[CASCADE]</sup>——goodput 目标从"达标/不达标"细化到"每个请求还剩多少预算"。</p>
 <p><b>决策口径：负载 TTFT 与 TPOT 双敏感、规模够大（双池固定成本摊得开）才上全分离；否则 chunked prefill + 单机 P/D 已够</b>。</p>
 
 <h3>6.3 弹性、迁移与抢占：把"空的时间"卖出去</h3>
@@ -534,7 +587,7 @@
 <ul>
 <li><b>请求迁移</b>：Llumnix（OSDI'24，阿里）跨实例 live migration，同尾延迟下省 36% 成本<sup class="cite">[LLUMNIX24]</sup>。</li>
 <li><b>弹性并行</b>：LoongServe（SOSP'24，北大）按请求长度动态伸缩序列并行度，长上下文最大吞吐较 chunked prefill 3.85×、较 P/D 分离 5.81×<sup class="cite">[LOONG24]</sup>。</li>
-<li><b>抢占实例</b>：SpotServe（ASPLOS'24）让推理跑在可中断的 spot 上，真实中断 trace 下 P99 只劣化 2.4–9.1×，<b>实例费省 54%</b><sup class="cite">[SPOTSERVE]</sup>——离线/批处理负载的理想选择。</li>
+<li><b>抢占实例</b>：SpotServe（ASPLOS'24）让推理跑在可中断的 spot 上，真实中断 trace 下 P99 只劣化 2.4–9.1×，<b>实例费省 54%</b><sup class="cite">[SPOTSERVE]</sup>——离线/批处理负载的理想选择。异构版本的 2026 续作 ShuntServe：用 roofline 估计器 + 动态规划在 L4/A10G/L40S 等异构 spot 池上做放置与保输出的活迁移，成本效率（吞吐/美元）较按需同构池 +31.9%（离线）/+31.2%（在线）<sup class="cite">[SHUNT]</sup>。</li>
 <li><b>冷启动</b>：ServerlessLLM（OSDI'24）本地存储层级 + live migration，serverless 场景端到端延迟降 10–200×<sup class="cite">[SERVERLESSLLM]</sup>——弹性扩容的"开机型"成本被压到可用区间。</li>
 <li><b>系统层编排</b>：NVIDIA Dynamo 的 Planner 按 SLA 目标自动扩缩，官方引用的 APSARA 2025 实践为 SLA 违约 −80%、TCO 再 −5%<sup class="cite">[DYNAMO1]</sup>；字节系 AIBrix（已捐 vllm-project）与 Red Hat llm-d（v1.0 GA，2026-10-20）把 P/D 分离、多租户 QoS、KEDA 自动扩缩做进 K8s——<b>"调度级降本"正在从论文变成发行版</b><sup class="cite">[LLMD10]</sup><sup class="cite">[AIBRIX]</sup>。</li>
 </ul>
@@ -547,13 +600,25 @@
 <li><b>错峰复用</b>：DeepSeek 披露其集群<b>白天全量推理、夜间腾节点给训练/研究</b><sup class="cite">[DS545]</sup>——同一批卡的日历被排满，摊薄的就是 1.4 节说的"碎片化折旧"。</li>
 <li><b>价格杠杆</b>：峰谷计价（3.4 节）本质是让需求曲线配合供给曲线。</li>
 </ol>
-<p>DynamoLLM（HPCA'25 最佳论文）则证明<b>能耗也能调度</b>：按负载调实例数/并行度/DVFS，满足延迟 SLO 下省 53% 能耗、61% 客户成本<sup class="cite">[DYNAMOLLM]</sup>——调度器顺手把 2.3 节的 J/token 也管了。</p>
+<p>DynamoLLM（HPCA'25 最佳论文）则证明<b>能耗也能调度</b>：按负载调实例数/并行度/DVFS，满足延迟 SLO 下省 53% 能耗、61% 客户成本<sup class="cite">[DYNAMOLLM]</sup>——调度器顺手把 2.4 节的 J/token 也管了。</p>
+
+<h3>6.5 任务链级：Agent 负载把"每成功任务成本"推到台前</h3>
+
+<p>Agent 负载与单轮请求的差别是结构性的：<b>多轮串行、上下文随轮次膨胀、工具调用穿插、一步失败全链重来</b>。2026 年下半年的集中发现，几乎每条都改写 C_unit 的分子或分母：</p>
+<ul>
+<li><b>Agent 轨迹实际上跑在 batch=1</b>。企业负载框架研究（Citigroup/EY/NVIDIA，2026-10）实测：agent 的顺序步进让 TPOT 主导任务完成时间，<b>每步 2% 的失败率在 20 步后足以抹平 2× 的 decode 优势</b>；按 token 吞吐给引擎排名与按"每成功任务成本"排名会给出不同答案<sup class="cite">[ENTERPRISE]</sup>——V_valid 的过滤在任务层，不在 token 层。</li>
+<li><b>KV 增长是 agent 的头号账本项</b>。Cache Engineering for Agents（清华，2026-10）论证：轨迹超出上下文限制后，<b>KV 的 I/O 与存储成为主导成本</b>，需要主动控制缓存增长<sup class="cite">[CACHEENG]</sup>。配套的归因研究 Total Cost of Agency（2026-09）用两遍精确计数把"记忆注入 token"从普通输入里拆出来：企业级 200 任务基准上<b>记忆注入约占总计费成本的 12%</b>，其中约 28.7% 可在不损精度的前提下去掉<sup class="cite">[TCA]</sup>——观测工具把它们按普通输入计费，账本就看不清。</li>
+<li><b>命中/未命中的成本不对称会放大突发</b>。微软的测量（2026-11）：前缀缓存命中只补约 1K token 的增量 prefill，未命中要重算 10–40K 上下文——这使前缀缓存的 agent 服务<b>亚稳</b>：短暂突发压垮命中率后，吞吐与命中率互相拖累、难以自愈<sup class="cite">[BURSTS]</sup>。缓存级降本（第 5 章）在任务链上有了失效边界。</li>
+<li><b>客户端与服务端的账要一起算</b>。Think or Remember（2026-11）发现：丢弃早期推理内容的上下文策略，在服务端有无缓存复用下，重发成本相差可达 5 倍（1.74× vs 0.34×）——<b>比较上下文策略必须同时说明服务端缓存行为</b><sup class="cite">[EXCHANGE]</sup>。</li>
+<li><b>系统层开始原生适配 agent</b>。Evolving Infra（2026-11）把运行时算力分配与 KV 自适应做进 P/D 分离服务，coding/math/computer-use 负载、GLM-5.2 与 Kimi K2.6、最高 256×GB300 规模上，平均端到端时延较 NVIDIA Dynamo 降 4.1×、P95 TTFT 降 14×<sup class="cite">[EVOLVINGINFRA]</sup>（预印本、厂商侧评测，口径见参考文献）。站内 Agent 推理系统篇的"任务成功成本账本"给的是同一问题的评测视角。</li>
+</ul>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
 <li>调度级的本质是<b>把分母（goodput）抬到 roofline、把分子（空闲时间）压到零</b>：连续批处理+chunked prefill 是没商量的基础项。</li>
-<li>P/D 分离的收益证据充分（goodput 2–7×、成本 −20%），但 2026 的答案是<b>自适应</b>：按长度再调度、SM 复用、部分分离。</li>
-<li>弹性三件套（迁移/抢占/快冷启）+ 系统层（Dynamo/llm-d/AIBrix）让"填满日历"成为产品功能；<b>削峰既靠调度也靠价格</b>。</li>
+<li>P/D 分离的收益证据充分（goodput 2–7×、成本 −20%），但 2026 的答案是<b>自适应</b>：按长度再调度、SM 复用、部分分离、每请求时延预算。</li>
+<li>任务链级是独立战线：<b>agent 跑在 batch=1、KV 增长主导成本、命中率亚稳、每步失败复利</b>——优化对象从"每 token"移到"每成功任务"。</li>
+<li>弹性三件套（迁移/抢占/快冷启）+ 系统层（Dynamo/llm-d/AIBrix/Evolving Infra）让"填满日历"成为产品功能；<b>削峰既靠调度也靠价格</b>。</li>
 </ol>
 </div>
 
@@ -566,6 +631,7 @@
 <p>1.1 的公式在采购层面的推论：<b>卡的"每 token 成本"= 时租 ÷ 吞吐，而不是时租本身</b>。</p>
 <p>三个快照数字：H100 合约价 2025-10 为 $1.70、2026-03 回升 $2.35（+38%）；B200 2026-09 达 $8.01（三个月 +79%，HBM 短缺驱动）<sup class="cite">[GPUIDX]</sup>；GB300 NVL72 在 MLPerf v6.1 上单卡离线 16,635 tok/s（gpt-oss-120b）<sup class="cite">[MLPERF61]</sup>。</p>
 <p>代际吞吐差距更大：NVIDIA 引用 SemiAnalysis InferenceMAX 口径，GB200 NVL72 跑 DeepSeek-R1 较 H200 NVL72 吞吐 15×，叠加 Dynamo 后较"无 Dynamo 的 B200"每卡 7×<sup class="cite">[NVIDIABLOG]</sup>。</p>
+<p>采购的另一个方向是<b>异构与"经济型加速器"</b>：2026-11 的 Cluster Efficiency 研究把非 GPU 经济型加速器（Tenstorrent Blackhole）经快互连池化，在 3 年 TCO 口径下 tokens/$ 达到 8 卡 RTX PRO 6000 Blackwell 服务器的 1.07–2.24×；但互连一慢优势即失（吞吐 −23.5%~−67.4%）<sup class="cite">[CLUSTEREFF]</sup>——"买什么"不只是"买哪代 GPU"，还包括互连拓扑与非 GPU 加速器的性价比核算（站内 CPU-GPU 混合推理篇是同一命题的软件版）。</p>
 <p><b>采购纪律：永远按"目标负载下的 tok/s/芯片 ÷ 芯片时租"排序，而不是按卡价排序；同时把 NVLink 域（NVL72 的 72 卡共享显存带宽）当作计价单位——MoE 时代的吞吐是按"域"出来的</b>。</p>
 
 <h3>7.2 能耗与碳：电费不是大头，密度和碳是</h3>
@@ -611,25 +677,118 @@
 </ol>
 </div>
 
-<h2 id="s8"><span class="no">8</span>落地：指标清单、决策树与动手算账</h2>
+<h2 id="s8"><span class="no">8</span>视频案例：响应延迟如何改写成本可行域</h2>
 
-<p>前七章是"为什么"。这一章是"周一早上做什么"：一张仪表盘、一棵决策树、一套归因方法、一份反模式清单、一段可运行的算账代码。</p>
+<p>前面所有账本都默认"产出单位是 token 或任务"。当产出变成<b>交互式视频流</b>时，三个时间口径必须再分开，否则"高吞吐优化"会把系统推向错误的方向。本章用一个 2026-11-12 的案例把这件事讲透：<b>PixVid</b>（Roblox 等，arXiv:2611.17336）——把预训练潜空间视频模型（Wan2.1-14B 系）搬到像素空间逐帧生成的工作<sup class="cite">[PIXVID]</sup>。它只作为"吞吐、响应和成本不同"的一个案例，机制细节（Self Forcing 因果蒸馏、世界模型谱系）见站内实时世界模型篇，少步采样与求解器见采样效率篇。</p>
 
-<h3>8.1 指标仪表盘：盯这 8 个数</h3>
+<h3>8.1 control-to-screen：第四个时间口径</h3>
+
+<p>视频服务里容易混为一谈的四个量：<b>启动时延</b>（TTFC，第一帧出现）、<b>流式间隔</b>（相邻帧间隔，吞吐的倒数）、<b>平均帧率</b>（FPS）与<b>控制到屏幕时延</b>（control-to-screen：从用户输入一个事件，到第一个反映该事件的可见帧出现）。最后一个由论文定义并计量，包含两部分——<b>等待同块其余控制到齐 + 块生成时间</b>；它与 TTFC、帧间隔、平均 FPS 都不同，也互相推不出。</p>
+
+<div class="citebox"><b>[PIXVID]</b> Song, Y., Chen, S., Rockwell, C. et al.（Roblox / UC Merced / UPenn / UT Austin）. <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336v1，2026-11-12。原文（§1）："<span class="q">Since common latent world models autoregressively generate frames in blocks, the frame corresponding to a control cannot be generated until all controls for the full block are received. This results in a minimum control-to-screen latency proportional to the block size, a barrier that no model-side optimization can remove.</span>"（中文译文：常见潜空间世界模型按块自回归生成帧，与某条控制对应的帧必须等到该块全部控制到齐才能生成。这造成一个与块大小成正比的 control-to-screen 延迟下限——任何模型侧优化都移除不了的屏障。）链接：<a href="https://arxiv.org/abs/2611.17336">arXiv</a> · <a href="https://chenshuo20.github.io/PixVid/">项目页</a></div>
+
+<h3>8.2 论文数字账：吞吐 2.4× 的模型反而更跟手</h3>
+
+<p>论文 §4.5 与附录 B.5 的对照实验（口径：单卡 NVIDIA B200、480×864、4 步因果蒸馏学生模型、81 帧、基座 Wan 原生 16 fps；计时在作者自研 CuTeDSL 内核栈上、local attention 窗口填满后进行——<b>论文口径，非本站运行结果</b>）：</p>
+
+<table>
+<tr><th>配置</th><th>生成块</th><th>最大控制等待</th><th>中位 control-to-screen</th><th>吞吐</th><th>FVD↓</th><th>急转相关 Turn↑</th><th>每帧 DiT TFLOPs</th></tr>
+<tr><td><b>SolarWM</b>（官方 12 帧学生，3 latents）</td><td>12 帧</td><td>11 帧（≤688 ms）</td><td><b>495 ms</b></td><td><b>72.0 fps</b></td><td>53.8</td><td>0.70</td><td>5.6</td></tr>
+<tr><td>SolarWM 官方实现（流式 VAE 解码）</td><td>12 帧</td><td>同上</td><td>1,091 ms</td><td>16.1 fps</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>SolarWM 缩到单 latent（论文重训消融）</td><td>4 帧</td><td>3 帧</td><td>164 ms</td><td>50.4 fps</td><td><b>118.6</b></td><td><b>0.11</b></td><td>—</td></tr>
+<tr><td><b>PixVid</b>（像素空间，逐帧）</td><td>1 帧</td><td>0</td><td><b>34 ms</b></td><td>29.4 fps</td><td>51.1</td><td>0.95</td><td>16.4</td></tr>
+</table>
+
+<p>这张表浓缩了五条教训，每条都是第 2 章某个陷阱的视频版：</p>
+<ol>
+<li><b>control-to-screen 是独立目标</b>：72.0 fps 与 495 ms 同时成立——启动 TTFC、帧间隔、平均 FPS 任何一个都无法推出它。</li>
+<li><b>结构性等待由架构决定，内核优化移除不了</b>：3D VAE 把 4 帧压成 1 个 latent，块必须等齐全部控制才能开算（SolarWM 每四个帧才收到一次相机位姿，急转自然糊掉，Turn 0.70）。论文明确说这是"no model-side optimization can remove"的屏障；是否等待、等多久，取决于控制采样与生成协议的约定，而非算得快慢。</li>
+<li><b>缩小块改善响应，但改变算术强度与质量</b>：单 latent 版把延迟 495→164 ms，FVD 却从 53.8 恶化到 118.6、Turn 从 0.70 崩到 0.11——省下的等待换来了质量折扣；PixVid 逐帧生成则把每帧 DiT 计算抬到 3×（16.4 vs 5.6 TFLOPs）、吞吐降 2.4×，去掉 VAE 解码的同时引入 detailer head 的逐帧特征缓存这类新解码状态。响应的每一档改善都在动分子（计算量）与 V_valid 的过滤条件（质量）。</li>
+<li><b>预生成与更深缓冲能降卡顿，但代价是响应与过时帧</b>（本文推论，论文未测缓冲深度）：把块算在前面、播放吃缓冲，播放平滑度上去了，可缓冲越长，新控制被"埋"在已生成帧里的时间越长，且转向瞬间的旧帧全部变过时产出——成本照记分子，产出不计入 V_valid。</li>
+<li><b>吞吐越过播放帧率只说明平均供给能力</b>：72.0 与 29.4 fps 都超过 16 fps 原生线，都能"实时播放"；但等待是 0–688 ms 的分布、中位 495 ms——平均 FPS 既不保证尾部不卡顿，也不能证明成本最优。SolarWM 的高吞吐"不能缩短它的 control-to-screen"是论文的原话结论。</li>
+</ol>
+
+<figure class="fig" id="fig-block-wait"><div style="overflow-x:auto"><div class="flowrow">
+<div class="fbox"><b>控制到达</b>用户按下"左转"<small>随机落在块内某帧</small></div><span class="arr">→</span>
+<div class="fbox" style="border-color:#ffb454"><b>块等待（潜空间）</b>等齐同块其余控制<small>12 帧块：0–688 ms（≤11 帧），任何内核优化都去不掉</small></div><span class="arr">→</span>
+<div class="fbox"><b>块生成</b>DiT + 解码<small>自研栈 151 ms/12 帧块；官方栈 543+205 ms</small></div><span class="arr">→</span>
+<div class="fbox hl"><b>上屏</b>中位合计 495 ms<small>官方实现 1,091 ms</small></div>
+</div></div>
+<div class="cap">图 8-1 · 潜空间模型一次控制的两段时延：结构性块等待 + 块生成（论文 B.5 口径）。PixVid 单帧块把第一段归零，生成一段即上屏，中位 34 ms。本文自绘，数字来自 PixVid 论文 Tab. 3/Tab. 10（单卡 B200、480×864、4 步蒸馏）。</div></figure>
+
+<figure class="fig" id="fig-responsiveness-interactive" style="padding:10px"><iframe src="img/sc-responsiveness-vs-throughput.html" title="吞吐与响应延迟双目标交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 8-2 · 可交互：吞吐 × 中位 control-to-screen 的双目标散点，三种块粒度同图对比——"高吞吐低响应"与"低吞吐高响应"同时存在，16 fps 播放线（见 8.2 表）两侧都可以自称"实时"；窄屏下图表自动竖排，亦可点图内 Full screen 放大。数据为 PixVid 论文 Tab. 3/Tab. 11 原始坐标（本文转绘，保留真实数值与来源）；不是本站运行结果。</div></figure>
+
+<h3>8.3 把案例写回公式：约束优化视角</h3>
+
+<p>视频交互服务的目标可以写成与 2.1 同构的约束形式：</p>
+
+<pre>min_x  C_unit(x) = C_total(x) ÷ V_valid(x)
+s.t.   Q(x) ≥ Q₀              （质量：FVD/VBench/任务相关指标，如 Turn 相关性）
+       R_p99(x) ≤ R₀           （控制到屏幕延迟的尾部分位，ms）
+       StallRate(x) ≤ ε        （卡顿率：播放间隔超阈值的帧占比）
+       M_peak,g(x) ≤ C_g       （每卡峰值显存：权重 + KV/特征缓存 + 激活）</pre>
+
+<p>决策变量 x 是一组结构与服务选择：<b>块大小</b>（latent 数或帧数）、<b>蒸馏步数</b>、<b>缓冲深度</b>、<b>分辨率/patch 大小</b>、<b>是否去 VAE</b>、算力分配。PixVid 的选择（单帧块 + 4 步 + detailer head）本质是把可行域里"R_p99 ≤ 100 ms 量级"的区域第一次跑通——在这个区域里，12 帧块无论怎么优化内核都不可行（688 ms 的等待下限直接违约），此时<b>V_valid→0，C_unit→∞：约束不可行时，再便宜也无效</b>。反过来，如果业务只有 500 ms 级的容限，12 帧块的高吞吐就是成本最优解——可行域由业务约束定义，不由技术先进性定义。</p>
+
+<p>一个小算例（<b>教学推算，非论文数据</b>）：设单卡时租 $8/h、有效交互会话要求 R_p99 ≤ 120 ms 且 Turn ≥ 0.9。12 帧块方案吞吐 72 fps 但 R_p99 ≈ 839 ms——违约，有效视频秒为 0；单帧方案 29.4 fps、34 ms 达标，每有效视频秒成本 = 8 ÷ 3600 ÷ (29.4/16) ≈ <b>$0.0012/有效视频秒</b>（按播放秒折算）。若放宽 R₀ 到 600 ms，12 帧块进入可行域，其每秒成本反而更低——<b>同一个系统在不同约束下互为最优，这正是"约束优化定义可行域"的含义</b>。顺带一提，研究侧已在给这个可行域找更多入口：交互式视频的投机采样（2026-10）证明大双向块保质量与利用率、但受块边界等待下限约束，投机采样可以移除该下限<sup class="cite">[IVGSPEC]</sup>——与 LLM 的投机解码一样，"预填未来、验证作废"的账要按接受率算进分子。</p>
+
+<p>这段案例也是全站四阶段研究路径的缩影：<b>建模</b>给出账本（本节表格）、<b>约束优化</b>定义可行域（上面的公式）、<b>协同设计</b>同时动结构与资源（PixVid 改的正是架构而非内核）、<b>自适应</b>处理变化（按负载在块大小/缓冲间切换，尚是开放问题）。</p>
+
+<h3>8.4 质量指标不是线性效用</h3>
+
+<p>视频侧还有一个容易踩的坑：把 C_unit 除以 FVD 或 VBench 平均分当"性价比"。FVD 是<b>集合级分布距离</b>，不是"质量倍数"——118.6 对 53.8 不是"质量差 2.2 倍"，也换算不回成本；VBench 各维分数加权方式因业务而异。更贴近交互价值的反而是任务相关指标（Turn 相关性、旋转/平移误差）与人的体感（跟手、卡顿）。<b>正确做法：质量作为约束（Q ≥ Q₀）或 V_valid 的过滤条件，而不是除数</b>——这与 1.3"平均质量分数不是线性效用"是同一条纪律的多模态版。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li><b>control-to-screen 与 TTFC、帧间隔、平均 FPS 是四个不同的量</b>：潜空间时间压缩带来的块等待是结构性下限，内核与吞吐优化都移除不了。</li>
+<li>PixVid 案例：72.0 fps 的 12 帧块中位响应 495 ms，29.4 fps 的单帧块 34 ms——<b>吞吐越过播放线只说明平均供给能力，不保证响应与尾部</b>；缩块的代价是算术强度、吞吐与质量同变。</li>
+<li>把响应写成 R_p99 约束后，<b>可行域由业务容限定义</b>：约束不可行时 V_valid→0；质量指标（FVD/VBench）作约束或过滤，不作除数。</li>
+</ol>
+</div>
+
+<h2 id="s9"><span class="no">9</span>落地：指标清单、决策树与动手算账</h2>
+
+<p>前八章是"为什么"。这一章是"周一早上做什么"：一张五层指标栈、一张仪表盘、一棵决策树、一套归因方法、一份反模式清单、一段可运行的算账代码。</p>
+
+<h3>9.1 五层指标栈：从算子到业务</h3>
+
+<p>降本手段横跨引擎内核到业务报表，先分清每一层"问题是什么、指标是什么"（前两层偏引擎、后两层偏服务化、业务层收口），再看仪表盘：</p>
+
+<table>
+<tr><th>层次</th><th>主要指标与问题</th></tr>
+<tr><td><b>算子 / 模型</b></td><td>FLOPs、有效带宽、真实数据流量（字节搬了多少）、内核开销（launch/占用）、精度与质量——"每产出算了多少、搬了多少、准不准"</td></tr>
+<tr><td><b>状态 / 内存</b></td><td>权重、KV 与其他持久状态、临时激活与输出队列的容量占用与碎片、缓存命中率、重算与迁移量——"状态占了多少、复用了多少"</td></tr>
+<tr><td><b>引擎执行</b></td><td>batch 大小、并行度、填充浪费（padding）、图复用、串行依赖与关键路径——"每一拍 GPU 在算谁的什么"</td></tr>
+<tr><td><b>服务</b></td><td>排队长度、TTFT/TTFC、尾时延（p99）、goodput、取消率、反压与容量——"承诺守没守住、守住了多少产出"</td></tr>
+<tr><td><b>业务</b></td><td>成功任务成本、有效产出成本（C_unit）、交互响应（如 control-to-screen）、质量与单位能耗——"用户花一份钱买到了几份有效产出"</td></tr>
+</table>
+
+<p>每类降本方法按同一组问题登记，避免"只报收益、不报代价"的伪降本：</p>
+
+<table>
+<tr><th>方法类</th><th>何时有用</th><th>如何作用</th><th>改善哪个账本项</th><th>付出什么代价</th><th>怎样避免伪收益</th></tr>
+<tr><td>量化 / 剪枝 / 少步</td><td>质量预算有余量时</td><td>减少每产出的计算与搬运</td><td>算力、带宽、容量</td><td>质量折扣 + 回归补偿计算</td><td>质量保持约束下测真实加速，不看留存 token 数</td></tr>
+<tr><td>缓存 / KV 池化</td><td>负载有重复前缀或多轮</td><td>免掉重复 prefill</td><td>算力（重算）、时延</td><td>状态容量、搬运、设备磨损</td><td>命中率按 token 计；突发下看亚稳（6.5）</td></tr>
+<tr><td>批处理 / 分离 / 调度</td><td>并发足以填满硬件</td><td>提高填充率与 goodput</td><td>算力供给利用率</td><td>排队时延、迁移与传输</td><td>goodput 口径；双池配比要按负载重算</td></tr>
+<tr><td>弹性 / 混部 / 异构</td><td>负载有明显峰谷或可中断</td><td>把空闲时间卖给别的任务</td><td>算力供给（日历）</td><td>冷启动、迁移、可靠性</td><td>计入切换成本与失败重试</td></tr>
+<tr><td>路由 / 级联 / 预算</td><td>请求难度分布宽</td><td>让请求落到够用的最便宜档</td><td>每任务总花费</td><td>路由错误的质量损失</td><td>按每成功任务成本结算（1.3）</td></tr>
+</table>
+
+<h3>9.2 指标仪表盘：盯这 8 个数</h3>
 
 <table>
 <tr><th>指标</th><th>定义</th><th>健康信号</th><th>对应章节</th></tr>
-<tr><td><b>$/M tokens（三分）</b></td><td>输入未命中 / 命中 / 输出各一列</td><td>趋势下行；与牌价对照定自建 vs API</td><td>2.1</td></tr>
-<tr><td><b>tokens/s/$</b></td><td>goodput 口径吞吐 ÷ 时租成本</td><td>换硬件/配置后应单调改善</td><td>2.2</td></tr>
-<tr><td><b>goodput 达标率</b></td><td>SLO 达标请求占比（分位数）</td><td>≥ 目标 SLO（如 90%）；不达标先修承诺再谈降本</td><td>2.2</td></tr>
+<tr><td><b>$/M tokens（三分）</b></td><td>输入未命中 / 命中 / 输出各一列</td><td>趋势下行；与牌价对照定自建 vs API</td><td>2.2</td></tr>
+<tr><td><b>tokens/s/$</b></td><td>goodput 口径吞吐 ÷ 时租成本</td><td>换硬件/配置后应单调改善</td><td>2.3</td></tr>
+<tr><td><b>goodput 达标率</b></td><td>SLO 达标请求占比（分位数）</td><td>≥ 目标 SLO（如 90%）；不达标先修承诺再谈降本</td><td>2.3</td></tr>
 <tr><td><b>缓存命中率</b></td><td>命中 token ÷ 输入 token</td><td>Agent/多轮负载 ≥80%；低于 50% 先修 prompt 结构</td><td>5.1–5.3</td></tr>
 <tr><td><b>MFU / SM 利用率</b></td><td>有效 FLOPs 占比 / 采样窗口</td><td>prefill 池高、decode 池看带宽；持续 <30% 查调度</td><td>6.1</td></tr>
-<tr><td><b>每成功任务成本</b></td><td>调用成本 × 次数 ÷ 成功率</td><td>换小模型/量化后必须复测（可能反转）</td><td>1.3</td></tr>
-<tr><td><b>J/token</b></td><td>整机功率 ÷ 输出吞吐</td><td>与代际参考值对照（H100≈10 J 量级）</td><td>2.3</td></tr>
+<tr><td><b>每成功任务成本</b></td><td>全部尝试成本 ÷ 成功任务数</td><td>换小模型/量化后必须复测（可能反转）</td><td>1.3、6.5</td></tr>
+<tr><td><b>J/token</b></td><td>整机功率 ÷ 输出吞吐</td><td>与代际参考值对照（H100≈10 J 量级）</td><td>2.4</td></tr>
 <tr><td><b>峰谷利用率差</b></td><td>峰值/谷值 GPU 占用比</td><td>差大 → 峰谷定价、混部或弹性接客</td><td>6.4</td></tr>
 </table>
 
-<h3>8.2 决策树：按症状下药</h3>
+<h3>9.3 决策树：按症状下药</h3>
 
 <div class="fig"><div style="overflow-x:auto"><div class="flowrow">
 <div class="fbox"><b>症状定位</b>贵在哪一段？</div><span class="arr">→</span>
@@ -639,9 +798,9 @@
 <div class="fbox">贵在 <b>峰值</b><small>→ SLO 分级 + 峰谷价（7.3）→ 错峰批处理（Flex 5 折思路）</small></div>
 <div class="fbox">贵在 <b>答错重试</b><small>→ 模型路由/级联（4.4）→ 质量回归集 → 每成功任务成本核算（1.3）</small></div>
 </div></div>
-<div class="cap">图 8-1 · 成本症状决策树：先定位"贵在哪"，再选层下药；同层内的顺序即性价比从高到低。本文自绘。</div></div>
+<div class="cap">图 9-1 · 成本症状决策树：先定位"贵在哪"，再选层下药；同层内的顺序即性价比从高到低。本文自绘。</div></div>
 
-<h3>8.3 观测与归因：钱花到哪个请求上了</h3>
+<h3>9.4 观测与归因：钱花到哪个请求上了</h3>
 
 <p>没有归因就没有优化优先级。</p>
 <ol>
@@ -650,17 +809,17 @@
 <li><b>口径统一</b>：并发感知成本模型提醒同一硬件不同并发下 $/M 相差 17.5×——归因报告必须带并发与 SLO 上下文<sup class="cite">[CONCOST26]</sup>。</li>
 </ol>
 
-<h3>8.4 反模式清单</h3>
+<h3>9.5 反模式清单</h3>
 <ul>
 <li><b>用旗舰模型做路由级任务</b>：分类/抽取/改写用小模型或便宜档，市场数据说同能力开源便宜约 90%<sup class="cite">[MARKET25]</sup>。</li>
 <li><b>SLO 过度</b>：所有请求都要 p99 快 = 全员 Priority 价。把流量分层（交互/批处理/离线），每层各自的 SLO 与价格。</li>
 <li><b>只看吞吐不看 goodput</b>：不达 SLO 的吞吐是对着镜子举杠铃；报表里两列必须并排。</li>
 <li><b>缓存价目没设计</b>：自建平台不区分命中/未命中 → 内部用户没有动力把 prompt 写成可缓存的前缀结构。</li>
 <li><b>截断上下文省显存</b>：LMCache 实测命中率减半，省了小钱亏了大钱<sup class="cite">[LMCACHE]</sup>。</li>
-<li><b>跨系统直接比数字</b>：不带口径与快照的 "$X/M" 一律不可比（2.6 纪律）。</li>
+<li><b>跨系统直接比数字</b>：不带口径与快照的 "$X/M" 一律不可比（2.8 纪律）。</li>
 </ul>
 
-<h3>8.5 动手：三十行算清你的 $/M tokens</h3>
+<h3>9.6 动手：三十行算清你的 $/M tokens</h3>
 
 <p>把 1.1 与 1.3 的公式放进标准库 Python（无第三方依赖，口径注释即文档）：</p>
 
@@ -683,7 +842,7 @@ per_task  = blended / QUALITY                           # 质量调整：答错�
 print(f"输出 ${per_m_out:.3f}/M | 输入(未命中) ${per_m_in:.3f}/M | 命中 ${per_m_hit:.4f}/M")
 print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功任务等效 ${per_task:.3f}/M")
 # 例： RATE=2.35, GPUS=8, TOKS_OUT=16000 → 输出 $0.326/M；命中率 0.8 使混合价较全未命中约省 26%</pre>
-<div class="codecap">代码 8-1 · 单位成本计算器：改五个参数即可用于自建集群或 API 对照。质量调整与混合比例是两个最常被漏掉的口径；本站评测篇 4.2 的"每成功任务成本"教学账本与本代码同源。</div>
+<div class="codecap">代码 9-1 · 单位成本计算器：改五个参数即可用于自建集群或 API 对照。质量调整与混合比例是两个最常被漏掉的口径；本站评测篇 4.2 的"每成功任务成本"教学账本与本代码同源。</div>
 
 <div class="summary3"><b>本章小结</b>
 <ol>
@@ -693,10 +852,21 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 </ol>
 </div>
 
-<h2 id="s9"><span class="no">9</span>未来方向</h2>
+<h2 id="s10"><span class="no">10</span>局限与未来方向</h2>
+
+<h3 id="s10-1">10.1 本文结论的边界</h3>
 
 <ul>
-<li><b>从每 token 到每任务</b>：Agent 多步调用把 token 消耗放大 10–100 倍，"每 token 便宜"与"每任务便宜"开始脱钩——质量调整成本、任务级计费（tau-bench 类）会成为主口径（站内推理预算篇与 Agent 推理系统篇已铺开）。</li>
+<li><b>证据口径</b>：本文全部性能与价格数字来自所引论文、官方发布与官方价目页（快照日期随文标注），<b>没有一项是本站自测的 GPU 基准或服务实测</b>；跨系统数字不可直接比较。价格与租金随月波动，2026-11-15 之后未重验的数字仍按原快照口径引用。</li>
+<li><b>案例边界</b>：第 8 章 PixVid 为单篇论文的单卡实验（B200、480×864、4 步蒸馏、81 帧），结论刻画的是"块等待"这一类结构性现象，<b>不构成对任何生产视频服务的评测</b>；其质量与延迟数字是论文自报口径（预印本，尚未同行评审），扩散模型代际迭代快，具体数字有效期有限。"缓冲深度换响应"的账为本文推论，非论文数据。</li>
+<li><b>预印本成熟度</b>：2026 年新增引用中，Evolving Infra、Cache Engineering for Agents、Total Cost of Agency、Bursts、Cascade、ShuntServe、Cluster Efficiency、VisMemo、TileCache、Lachesis、VLM 剪枝评测等均为 arXiv 预印本（个别有厂商背景），机制洞见可引，量级数字须待同行评审与独立复现。</li>
+<li><b>覆盖面</b>：推理预算（test-time compute）、Agent 系统机制、仿真与自动调优方法论分别由站内专题承担，本文只保留成本视角；vLLM-Omni、扩散服务等多模态服务栈的成本形态仍以定性为主——公开的多模态服务级成本账本（类似 DeepSeek 545% 那种）尚未出现。</li>
+</ul>
+
+<h3>10.2 研究问题</h3>
+
+<ul>
+<li><b>从每 token 到每任务</b>：Agent 多步调用把 token 消耗放大 10–100 倍，"每 token 便宜"与"每任务便宜"开始脱钩——6.5 的 2026 年工作已经把任务链级做成独立战线，下一步是任务级计费与"客户端上下文策略 × 服务端缓存"的联合定价（站内推理预算篇与 Agent 推理系统篇已铺开）。</li>
 <li><b>质量感知定价与路由</b>：tiered 定价研究显示旗舰档因 reasoning 溢价不服从指数降价<sup class="cite">[TIERED26]</sup>；按"能力档"而非"模型名"计价（AA 的 Intelligence per $ 是雏形）会倒逼路由器与级联成为标配。</li>
 <li><b>能耗/碳口径标准化</b>：主流基准（MLPerf）尚无能耗与碳的必报项<sup class="cite">[MLPERF61]</sup>；SIMPLE 定律、Energy/Token 倡议与 Shapley 归因正在把 J/token 变成可审计指标<sup class="cite">[SIMPLE26]</sup><sup class="cite">[EPT26]</sup><sup class="cite">[STEPSPLIT]</sup>。</li>
 <li><b>硬件市场波动 vs 效率赛跑</b>：HBM 短缺把 B200 租金三个月推高 79%<sup class="cite">[GPUIDX]</sup>，而纯软件两个月可降 5×<sup class="cite">[NVIDIABLOG]</sup>——租约结构（短约 vs 长约）本身将成为成本工程题目。</li>
@@ -794,6 +964,26 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 <li id="NVFP4QAD"><b>NVIDIA Nemotron Team.</b> <i>Quantization-Aware Distillation for NVFP4 Inference.</i> 技术报告，2026；官方一手（671B PTQ 近无损：MATH500 95.4→94.2；小模型需 QAD）。<a href="https://research.nvidia.com/labs/nemotron/files/NVFP4-QAD-Report.pdf">链接</a>。</li>
 </ol>
 
+<h3>任务链、多模态与视频服务（2026 预印本，本轮新增核验）</h3>
+<ol class="refs">
+<li id="PIXVID"><b>Song, Y., Chen, S., Rockwell, C. et al.（Roblox / UC Merced / UPenn / UT Austin）.</b> <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336v1，2026-11-12；预印本。<a href="https://arxiv.org/abs/2611.17336">链接</a>（第 8 章案例来源：§3.5 块等待、§4.5/附录 B.5 计时，Tab. 3/10/11；对比基座 SolarWM-5B 与蒸馏方法 Self Forcing 见其参考文献 [37][38]，Wan2.1 基座 arXiv:2503.20314；项目页 <a href="https://chenshuo20.github.io/PixVid/">chenshuo20.github.io/PixVid</a>，2026-11-18 核验）。</li>
+<li id="IVGSPEC"><b>Huang, Y. et al.（USTC）.</b> <i>Speculative Sampling in Interactive Video Generation.</i> arXiv:2610.20556，2026-10-14；预印本。<a href="https://arxiv.org/abs/2610.20556">链接</a>（大双向块保质量与利用率但受块边界等待下限约束；投机采样移除该下限）。</li>
+<li id="EVOLVINGINFRA"><b>Kang, H. et al.</b> <i>Evolving Infra: Agent-Adaptive LLM Serving at Scale.</i> arXiv:2611.12304，v1 2026-11-09 / v2 2026-11-12；预印本。<a href="https://arxiv.org/abs/2611.12304">链接</a>（256×GB300、GLM-5.2/Kimi K2.6，平均时延 4.1×、P95 TTFT 14× 优于 Dynamo——论文自报口径，未同行评审）。</li>
+<li id="CACHEENG"><b>（清华大学）.</b> <i>Cache Engineering for Agents.</i> arXiv:2610.28577，2026-10-20；预印本。<a href="https://arxiv.org/abs/2610.28577">链接</a>（轨迹超出上下文限制后 KV 的 I/O 与存储成为主导成本）。</li>
+<li id="TCA"><b>（作者列表以 arXiv 页为准）.</b> <i>Total Cost of Agency: Exact Attribution of Memory Injection Cost in Multi-Agent LLM Workflows.</i> arXiv:2609.23790，2026-09-20；预印本（附代码）。<a href="https://arxiv.org/abs/2609.23790">链接</a>（企业 200 任务基准：记忆注入约占总计费成本 12%，约 28.7% 可无精度损失移除）。</li>
+<li id="BURSTS"><b>Huang, W. &amp; Liu, J.（Microsoft）.</b> <i>Bursts That Outlast Themselves: Persistent Degradation in Prefix-Cached Agent Serving.</i> arXiv:2611.13412，2026-11-10；预印本。<a href="https://arxiv.org/abs/2611.13412">链接</a>（命中 ≈1K token 增量 prefill、未命中重算 10–40K 上下文；系统呈亚稳态）。</li>
+<li id="ENTERPRISE"><b>（Citigroup / EY / NVIDIA）.</b> <i>Evaluating Inference Compute for Generative AI: A Framework for Enterprise Workloads.</i> arXiv:2610.07094，2026-10-05；预印本。<a href="https://arxiv.org/abs/2610.07094">链接</a>（agent 轨迹等效 batch=1、TPOT 主导任务时长；2%/步失败率 20 步后抹平 2× decode 优势）。</li>
+<li id="EXCHANGE"><b>（U. de San Andrés）.</b> <i>Think or Remember: The Exchange Rate of Agentic Inference.</i> arXiv:2611.10982，2026-11-07；预印本。<a href="https://arxiv.org/abs/2611.10982">链接</a>（同一上下文策略的重发成本随服务端缓存行为差达 5 倍量级：1.74× vs 0.34×）。</li>
+<li id="CASCADE"><b>（UBC / Microsoft Azure / NVIDIA）.</b> <i>Cascade: Exploiting SLO-Aware Latency Budget for Fair and High Goodput LLM Inference Serving.</i> arXiv:2608.06557，2026-08-06；预印本。<a href="https://arxiv.org/abs/2608.06557">链接</a>（每请求时延预算联合驱动调度与 KV 管理；生产 trace goodput 2.4×、SLO 违约 −40%）。</li>
+<li id="SHUNT"><b>（汉阳大学）.</b> <i>ShuntServe: Cost-Efficient LLM Serving on Heterogeneous Spot GPU Clusters.</i> arXiv:2606.18600，2026-06-17；预印本。<a href="https://arxiv.org/abs/2606.18600">链接</a>（异构 spot 池放置 + 保输出活迁移；成本效率较按需池 +31.9%/+31.2%）。</li>
+<li id="CLUSTEREFF"><b>（Cambridge / Tenstorrent / HKUST）.</b> <i>Introducing Cluster Efficiency to LLM Serving: Pooling Economical Accelerators over Fast Interconnects.</i> arXiv:2611.02975，v2 2026-11-06；预印本。<a href="https://arxiv.org/abs/2611.02975">链接</a>（3 年 TCO 口径 tokens/$ 1.07–2.24×；慢互连使吞吐 −23.5%~−67.4%）。</li>
+<li id="VISMEMO"><b>（USTC / TeleAI / NUDT）.</b> <i>Visual Cache Reuse for Efficient Multimodal Inference.</i> arXiv:2610.25136，2026-10-18；预印本。<a href="https://arxiv.org/abs/2610.25136">链接</a>（视觉 KV 近似复用 + GPU/CPU/SSD 分层；生产 trace 命中 27.78%→61.45%，8K 输入 prefill 最多 −48.3%）。</li>
+<li id="VLMPRUNEEVAL"><b>Li, G., Chen, G., Shan, S. &amp; Yang, J.（NTU）.</b> <i>Are We Evaluating VLM Token Pruning Right? Looking Beyond Accuracy and Token Count.</i> arXiv:2610.24740，2026-10-17；预印本。<a href="https://arxiv.org/abs/2610.24740">链接</a>（留存 token 数与聚合准确率是坏代理；提出 Random-Pass@k 与 Preservation-Constrained Speedup）。</li>
+<li id="CODECSIGHT"><b>（NTU / 北航 / A*STAR IHPC / GaTech）.</b> <i>CodecSight: Leveraging Video Codec Signals for Efficient Streaming VLM Inference.</i> arXiv:2604.06036，2026-04-07；预印本。<a href="https://arxiv.org/abs/2604.06036">链接</a>（并发视频流的稳态每流成本有界）。</li>
+<li id="TILECACHE"><b>（U Waterloo / George Mason）.</b> <i>TileCache: Serving Multi-Round Diffusion Image Editing with Compressed Activation Caches.</i> arXiv:2611.20246，2026-11-15；预印本。<a href="https://arxiv.org/abs/2611.20246">链接</a>（多轮编辑的激活缓存压缩复用；90% SLO 达标下 2× 到达率）。</li>
+<li id="LACHESIS"><b>（SNU / KAIST / UIUC）.</b> <i>Lachesis: Lifetime-Aware KV Cache Placement for Agent Serving across HBM and High-Bandwidth Flash.</i> arXiv:2610.08378，2026-10-06；预印本。<a href="https://arxiv.org/abs/2610.08378">链接</a>（按生命周期分层放置；高带宽 Flash 寿命摊销 1.19–3.13×）。</li>
+</ol>
+
 <h3>能耗、归因与仿真</h3>
 <ol class="refs">
 <li id="SIMPLE26"><b>Cavagna, H. P. et al.（博洛尼亚大学等）.</b> <i>The SIMPLE Law for Energy Cost of LLM Inference.</i> arXiv:2611.03330（2026-11-02）；预印本（H100 上 R²=0.969）。<a href="https://arxiv.org/abs/2611.03330">链接</a>。</li>
@@ -808,8 +998,10 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 <li id="TOKENARENA26"><b>Token Arena.</b> <i>（混合价口径失真分析）.</i> arXiv:2605.00300；预印本（3:1 口径对 RAG/Agent/reasoning 失真最高 5×）。<a href="https://arxiv.org/abs/2605.00300">链接</a>。</li>
 </ol>
 
-<h3>开源项目与官方发布（快照 2026-11-15，GitHub Releases / 官方博客一手）</h3>
+<h3>开源项目与官方发布（快照 2026-11-18，GitHub Releases / 官方博客一手）</h3>
 <ol class="refs">
+<li id="VLLM34"><b>vllm-project.</b> <i>vLLM v0.34.0 Release.</i> 2026-11-16；官方一手。<a href="https://github.com/vllm-project/vllm/releases">链接</a>（共享 RoPE 缓存每卡省 11.5 GiB、8×B200 KV 容量 +14.5%；可扩展 KV 缓存默认开启；GB200 decode 最高 1.95×。2026-11-18 核验）。</li>
+<li id="OMNI"><b>vllm-project.</b> <i>vLLM-Omni：统一全双工多模态服务框架（v0.32.0，2026-10-28；v0.33.0rc1 2026-11-04）.</i> GitHub，官方一手。<a href="https://github.com/vllm-project/vllm-omni">链接</a>（仓库 2025-09 建立、首发 2025-12；跨阶段 KV 与多模态载荷原生传递；站内实时世界模型篇 5 章有服务栈视角。2026-11-18 核验）。</li>
 <li id="DYNAMO25"><b>NVIDIA.</b> <i>Introducing NVIDIA Dynamo（开源分布式推理编排）.</i> 官方博客，2025-03-18；官方一手。<a href="https://developer.nvidia.com/blog/introducing-nvidia-dynamo-a-low-latency-distributed-inference-framework-for-scaling-reasoning-ai-models">链接</a>（首发口径：R1 可服务请求数最多 30×；Hopper Llama-70B 吞吐 2×）。</li>
 <li id="DYNAMO1"><b>ai-dynamo.</b> <i>Dynamo 仓库（1.0 于 2026-03-15；v1.6.2 2026-11-05）.</i> GitHub，官方一手。<a href="https://github.com/ai-dynamo/dynamo">链接</a>（KV-aware 路由 TTFT 2×；Planner SLA 违约 −80%、TCO −5% 为官方引用的 APSARA 2025 实践）。</li>
 <li id="SGLPE"><b>sgl-project.</b> <i>SGLang v0.5.23 Release（Paged Experts；megakernel）.</i> 2026-11-02；官方一手。<a href="https://github.com/sgl-project/sglang/releases/tag/v0.5.23">链接</a>（Paged Experts 较 CPU offload 快 12–30×；GB300 decode +44%）。</li>
@@ -825,8 +1017,8 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 </ol>
 
 <p style="font-size:12.5px;color:#8a94ab;">注：价格与租金数字随月波动，引用均标注快照日期；"$/M tokens"统一指每百万 tokens。论文数字为论文口径（硬件/模型/负载见各条括注），跨系统不可直接比较；厂商声明（Dynamo 7×/30×、豆包 −63% 等）未经同行评审，按官方一手口径转述。二手信源已标注；智谱毛利 24.6% 为单源分析，可信度中等。</p>
-<p style="font-size:12.5px;color:#8a94ab;">开源项目版本事实为 2026-11-15 GitHub 快照。</p>
-<p style="font-size:12.5px;color:#8a94ab;">本文与站内推理服务篇（P/D 分离机制）、量化篇（精度细节）、投机解码篇（草稿机制）、KV Cache 篇（缓存压缩）、评测篇（goodput 与每成功任务成本）、性能仿真篇（Vidur 方法论）互补，重叠处已互链。</p>
+<p style="font-size:12.5px;color:#8a94ab;">开源项目版本事实为 2026-11-18 GitHub 快照（vLLM/SGLang/TRT-LLM/Dynamo/vLLM-Omni/llm-d/Mooncake/AIBrix/DeepInfer/LMCache 当日重验；价格类快照仍为 2026-11-15 口径，未重验）。"任务链、多模态与视频服务"组全部为预印本，机制可引、量级数字待同行评审。</p>
+<p style="font-size:12.5px;color:#8a94ab;">本文与站内推理服务篇（P/D 分离机制）、量化篇（精度细节）、投机解码篇（草稿机制）、KV Cache 篇（缓存压缩）、评测篇（goodput 与每成功任务成本）、性能仿真篇（Vidur 方法论）、ViT 稀疏化与采样效率篇（视觉 token 与少步机制）、实时世界模型篇（流式视频服务栈）、Agent 推理系统篇（任务成功成本）互补，重叠处已互链。</p>
 
 </div><!-- /wrap -->
 
