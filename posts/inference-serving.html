@@ -139,7 +139,7 @@
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译。正文系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">Kimi K3.1 Pro 权重开放与 day-0 服务栈（AgentX/DCP 数字）；SGLang v0.5.23 Paged Experts 与 megakernel；NEAR AI 披露 SGLang RCE 生产事故；vLLM v0.33.0 投机方法官方化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-pd-interactive">新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-radix-interactive">新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">Kimi K3.1 Pro 权重开放与 day-0 服务栈（AgentX/DCP 数字）；SGLang v0.5.23 Paged Experts 与 megakernel；NEAR AI 披露 SGLang RCE 生产事故；vLLM v0.33.0 投机方法官方化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-pd-interactive">新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-radix-interactive">新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -369,7 +369,9 @@ class CacheAgnosticPolicy(Enum):
 <div class="note"><b>[SGLANGV04]</b> SGLang Team. <i>SGLang v0.4: Zero-Overhead Batch Scheduler, Cache-Aware Load Balancer, Faster Structured Outputs</i>. LMSYS 博客，2024-12-04。原文："we can <b>overlap the CPU scheduling with the GPU computation</b>. The scheduler runs one batch ahead and prepares all the metadata required for the next batch."（译文：把 CPU 调度与 GPU 计算重叠：调度器提前跑一个 batch，把下一步所需的全部元数据先准备好。）链接：<a href="https://www.lmsys.org/blog/2024-12-04-sglang-v0-4">lmsys.org/blog/2024-12-04-sglang-v0-4</a></div>
 
 <h4>从单机调度到集群调度</h4>
-<p>当服务规模到几十上百个实例，调度问题升维成<b>路由问题</b>：这条请求发给哪个实例？核心洞察是：<b>把请求发给已经持有它前缀 KV Cache 的实例最划算</b>。代表工作：SGLang 的 cache-aware 负载均衡（v0.4，缓存命中率提升 3.8×<sup class="cite">[SGLANGV04]</sup>）；Llumnix（OSDI 2024）支持请求在实例间<b>在线迁移</b>（连 KV Cache 一起搬）以平衡负载<sup class="cite">[LLUMNIX24]</sup>；NVIDIA Dynamo（2025）的 KV 感知路由器用 radix 树追踪全集群 KV 位置<sup class="cite">[DYNAMO25]</sup>；llm-d 与 vLLM 语义路由器（2026）进一步按"语义相似度"聚合同类请求。详见第 9 节。</p>
+<p>当服务规模到几十上百个实例，调度问题升维成<b>路由问题</b>：这条请求发给哪个实例？核心洞察是：<b>把请求发给已经持有它前缀 KV Cache 的实例最划算</b>。</p>
+<p>代表工作：SGLang 的 cache-aware 负载均衡（v0.4，缓存命中率提升 3.8×<sup class="cite">[SGLANGV04]</sup>）；Llumnix（OSDI 2024）支持请求在实例间<b>在线迁移</b>（连 KV Cache 一起搬）以平衡负载<sup class="cite">[LLUMNIX24]</sup>；NVIDIA Dynamo（2025）的 KV 感知路由器用 radix 树追踪全集群 KV 位置<sup class="cite">[DYNAMO25]</sup>；llm-d 与 vLLM 语义路由器（2026）进一步按"语义相似度"聚合同类请求。</p>
+<p>详见第 9 节。</p>
 <!-- ============================================================ -->
 <!-- WIDGET:w5 连续批处理 · inference-serving.html -->
 <div class="ppx-demo" id="PPX-W5">
@@ -546,7 +548,7 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <h3>3.1 问题的根源：连续分配 + 静态预留</h3>
 <p>早期系统（包括原始 Orca）为每条请求<b>按其最大可能长度</b>预留一段<b>连续</b>显存放 KV Cache。两个后果：</p>
 <ul>
-<li><b>内部碎片</b>：预留 2048 个位置，实际只用了 200 个，剩下的显存谁也用不了。实测预留浪费通常占总显存的 40%+；</li>
+<li><b>内部碎片</b>：预留 2048 个位置，实际只用了 200 个，剩下的显存谁也用不了。实测预留浪费通常占总显存的 40%+。</li>
 <li><b>外部碎片</b>：连续大块反复申请释放，显存被切割成碎片，明明总量够却分配不出新的连续段。</li>
 </ul>
 <div class="analogy">酒店规定"每位预订客人必须包下从入住日到年底的整层连续房间"，哪怕只住一晚。结果：大量空房被纸面预订锁死（内部碎片），楼层被切得七零八落（外部碎片），新客人反而订不到房。</div>
@@ -562,8 +564,8 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <div class="cap">图 3-1 分页式 KV Cache：每条逻辑序列通过块表（block table）映射到离散物理块，显存利用率接近 100%，外部碎片彻底消失（只剩每条请求平均半个块的内部碎片）。</div>
 </div>
 <ul>
-<li>KV Cache 被切成固定大小的<b>块（block，GPU 上通常 16 个 token/块）</b>，逻辑连续、物理离散；</li>
-<li>按需分配：生成到哪，块分到哪；请求结束，块立刻归还池子。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销；</li>
+<li>KV Cache 被切成固定大小的<b>块（block，GPU 上通常 16 个 token/块）</b>，逻辑连续、物理离散。</li>
+<li>按需分配：生成到哪，块分到哪；请求结束，块立刻归还池子。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销。</li>
 <li>分页带来一个意外礼物：<b>共享</b>。多条请求若前缀相同，物理块可以直接<b>引用计数共享</b>，写时才复制。这就是 vLLM copy-on-write 的来源。</li>
 </ul>
 <p>效果：vLLM 论文报告，相比 FasterTransformer 和 Orca 吞吐最高提升 <b>2–4×</b>（对长复用前缀场景更多），相同显存下可支撑的并发序列数成倍增长；官方博客称对比 HuggingFace Transformers 最高 <b>24×</b> 吞吐<sup class="cite">[VLLM23]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
@@ -703,7 +705,8 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 </ol>
 
 <h3>5.4 生产实践：DeepSeek 的部署披露</h3>
-<p>最著名的 P/D 生产案例是 DeepSeek。其 V3 技术报告（2024-12）明确写了部署拓扑：prefill 与 decode 分开部署；prefill 侧用最小部署单元 4 节点 32 卡做<b>专家并行（EP）</b>，因为 MoE 模型 prefill 时"每 token 激活少量专家"的特性天然适合按专家切分；decode 侧则按 40 卡/单元部署以兼顾通信与负载；训练时顺带训练的 <b>MTP（多 token 预测）模块在推理时直接用作投机解码的 draft 模型</b><sup class="cite">[DSV3]</sup>。2025 年 5 月，LMSYS/SGlang 团队用 12 节点 96 张 H100 复现了这套系统：SGLang + DeepEP（MoE all-to-all 通信库）+ DeepGEMM（FP8 GEMM）+ EPLB（专家并行负载均衡器），单节点达到 52.3k input tokens/s 与 22.3k output tokens/s（2000 token 输入场景）；其中 EPLB 使 prefill 提速 1.49×、decode 提速 2.54×<sup class="cite">[LMSYSEP]</sup>。</p>
+<p>最著名的 P/D 生产案例是 DeepSeek。其 V3 技术报告（2024-12）明确写了部署拓扑：prefill 与 decode 分开部署；prefill 侧用最小部署单元 4 节点 32 卡做<b>专家并行（EP）</b>，因为 MoE 模型 prefill 时"每 token 激活少量专家"的特性天然适合按专家切分；decode 侧则按 40 卡/单元部署以兼顾通信与负载；训练时顺带训练的 <b>MTP（多 token 预测）模块在推理时直接用作投机解码的 draft 模型</b><sup class="cite">[DSV3]</sup>。</p>
+<p>2025 年 5 月，LMSYS/SGlang 团队用 12 节点 96 张 H100 复现了这套系统：SGLang + DeepEP（MoE all-to-all 通信库）+ DeepGEMM（FP8 GEMM）+ EPLB（专家并行负载均衡器），单节点达到 52.3k input tokens/s 与 22.3k output tokens/s（2000 token 输入场景）；其中 EPLB 使 prefill 提速 1.49×、decode 提速 2.54×<sup class="cite">[LMSYSEP]</sup>。</p>
 <div class="note"><b>[DSV3]</b> DeepSeek-AI. <i>DeepSeek-V3 Technical Report</i>. arXiv 2412.19437，2024-12-26。原文（§3.4 Inference and Deployment）："To simultaneously ensure both the Service-Level Objective (SLO) for online services and high throughput, we employ the following deployment strategy that <b>separates the prefilling and decoding stages</b>."（译文：为同时保证在线服务 SLO 与高吞吐，我们采用将 prefill 与 decode 阶段分离的部署策略。）另（§2.5.1 MTP in Inference）："we can also <b>repurpose these MTP modules for speculative decoding</b> to further improve the generation latency."（译文：这些 MTP 模块也可转用于投机解码以进一步降低生成延迟。）链接：<a href="https://arxiv.org/abs/2412.19437">arxiv.org/abs/2412.19437</a></div>
 <div class="note"><b>[LMSYSEP]</b> SGLang Team. <i>Deploying DeepSeek with PD Disaggregation and Large-Scale Expert Parallelism on 96 H100 GPUs</i>. LMSYS 博客，2025-05-05。原文："SGLang achieves a throughput of <b>52.3k input tokens per second and 22.3k output tokens per second per node</b>……EPLB delivers a significant speedup of <b>1.49x (prefill) and 2.54x (decode)</b>."（译文：单节点吞吐 52.3k tokens/s 输入、22.3k tokens/s 输出；EPLB 带来 prefill 1.49×、decode 2.54× 提速。）链接：<a href="https://www.lmsys.org/blog/2025-05-05-large-scale-ep">lmsys.org/blog/2025-05-05-large-scale-ep</a></div>
 
@@ -726,7 +729,8 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>把 E 与 P 混在一起时，视觉编码的大计算量会像超长 prefill 一样造成尖刺，且推理引擎主循环被"等图"阻塞。</p>
 
 <h3>6.2 EPD 框架（ICML 2025）与工业界落地</h3>
-<p>华为（加拿大）+ 西蒙弗雷泽大学团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；其 v4 的 GPU/NPU 视频实验相对 vLLM 报告 TTFT 最高降低 <b>69.2%</b>；此处不再并列缺少同设置定位的 2.4×，也不将其描述为 CPU 编码器基线<sup class="cite">[EPD25]</sup>。工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
+<p>华为（加拿大）+ 西蒙弗雷泽大学团队的 EPD 论文首次系统化了三阶段分离：<b>Encode-Prefill-Decode Disaggregation</b>，把三个阶段放到<b>专用资源</b>上并智能路由；其 v4 的 GPU/NPU 视频实验相对 vLLM 报告 TTFT 最高降低 <b>69.2%</b>；此处不再并列缺少同设置定位的 2.4×，也不将其描述为 CPU 编码器基线<sup class="cite">[EPD25]</sup>。</p>
+<p>工程落地随后而至：vLLM 于 2025-11 合入编码分离、12 月发布官方博客（v0.11.1 起）<sup class="cite">[VLLMEPD]</sup>；llm-d（K8s 原生推理编排）与 SGLang 在 2026 年演示了<b>异构 E/PD</b>：视觉编码放 4 张 Intel Arc Pro B60，语言 P/D 放 1 张 NVIDIA H200，吞吐提升 2.4–2.8×、平均 TTFT 降 69–80%<sup class="cite">[LLMD]</sup>——分离架构首次把"不同厂商、不同档次芯片各司其职"变成工程现实。</p>
 <div class="fig">
 <div class="flowrow">
   <div class="fbox">图像/视频</div><div class="arr">→</div>
@@ -791,9 +795,9 @@ target(大模型): 一次前向并行算 5 个位置的分布，逐个校验：
 <p>关键性质是<b>无损</b>：验证阶段对"小模型猜的每个 token"按两个分布的比值做接受/拒绝采样，数学上保证最终序列分布严格等于大模型自顾自生成的分布<sup class="cite">[LEVIATHAN23]</sup>。加速比取决于接受率：猜得越准，越接近 γ 倍；猜不准则浪费 draft 与多算的验证（验证比串行算 5 步仍便宜得多，因为它们是并行的一次前向）。</p>
 <p>演进脉络：</p>
 <ul>
-<li><b>2022-11 / 2023-02</b>：Leviathan 等（ICML 2023）与 DeepMind 的 Chen 等奠定理论与算法<sup class="cite">[LEVIATHAN23][CHEN23]</sup>；</li>
-<li><b>2023–2024</b>：SpecInfer（树形草稿+级联验证）、Medusa（在主模型上加多个解码头，无需独立小模型）<sup class="cite">[MEDUSA24]</sup>、<b>EAGLE</b> 系列：在<b>特征层面</b>（而非 token 层面）做自回归草拟，EAGLE-1（ICML 2024）接受率与速度大幅领先；EAGLE-2（2024-06）引入上下文相关的动态草稿树；<b>EAGLE-3（2025-03）</b>用多层特征融合再上一个台阶（推理加速 2.5–4×，在 DeepSeek 等开源模型上广泛部署）<sup class="cite">[EAGLE]</sup>；</li>
-<li><b>训练-推理协同</b>：DeepSeek-V3（2024-12）训练时就带上 <b>MTP 模块</b>，推理时直接当 draft 头用，省去单独训练小模型<sup class="cite">[DSV3]</sup>。此后 GLM、Kimi 等新一代模型纷纷跟进"出厂自带投机头"；</li>
+<li><b>2022-11 / 2023-02</b>：Leviathan 等（ICML 2023）与 DeepMind 的 Chen 等奠定理论与算法<sup class="cite">[LEVIATHAN23][CHEN23]</sup>。</li>
+<li><b>2023–2024</b>：SpecInfer（树形草稿+级联验证）、Medusa（在主模型上加多个解码头，无需独立小模型）<sup class="cite">[MEDUSA24]</sup>、<b>EAGLE</b> 系列：在<b>特征层面</b>（而非 token 层面）做自回归草拟，EAGLE-1（ICML 2024）接受率与速度大幅领先；EAGLE-2（2024-06）引入上下文相关的动态草稿树；<b>EAGLE-3（2025-03）</b>用多层特征融合再上一个台阶（推理加速 2.5–4×，在 DeepSeek 等开源模型上广泛部署）<sup class="cite">[EAGLE]</sup>。</li>
+<li><b>训练-推理协同</b>：DeepSeek-V3（2024-12）训练时就带上 <b>MTP 模块</b>，推理时直接当 draft 头用，省去单独训练小模型<sup class="cite">[DSV3]</sup>。此后 GLM、Kimi 等新一代模型纷纷跟进"出厂自带投机头"。</li>
 <li><b>免模型草稿</b>：n-gram / prompt lookup，直接从 prompt 里抄片段当草稿，对 RAG、代码编辑、Agent（输出大量复述输入）意外有效且零成本。LinkedIn 2026 年披露其生产 vLLM 栈用 n-gram 投机获得 4× 并发能力与 66% 的 P90 时延下降<sup class="cite">[LINKEDIN26]</sup>。</li>
 </ul>
 <div class="note"><b>[LEVIATHAN23]</b> Leviathan, Kalman, Matias (Google). <i>Fast Inference from Transformers via Speculative Decoding</i>. ICML 2023（arXiv 2211.17192，2022-11）。原文（摘要大意译文）："我们证明投机采样可以<b>在不改变输出分布</b>的前提下，用小模型起草、大模型验证，实现 2–3 倍加速。" 链接：<a href="https://arxiv.org/abs/2211.17192">arxiv.org/abs/2211.17192</a></div>
@@ -965,22 +969,35 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <h3>附G 2026-10 中下旬速览：双引擎大版本与"模型 day-0 定制"白热化</h3>
 <p>四条新动态：<b>KV 传输从"P→D 单行道"升级为双向 + push</b>（vLLM）；<b>新模型的 day-0 优化成为引擎竞争力</b>（DeepSeek-V4.1-Flash 三周提速 5×）；<b>Meta 把 P/D 弹性做成"可撤销租约"</b>（Crossflow）；<b>Rubin NVL72 上市即有双引擎支持</b>。</p>
 <ul>
-<li><b>vLLM 双向 KV 传输</b>（AWS，2026-10-12）：P/D 分离中 KV 只能 P→D 单向流动，多轮 Agent 每轮都要全量重算已生成部分。NIXL 连接器扩展出 <b>D→P 反向 READ</b>：decode 节点按 TTL 480s 保留 KV 块，路由器按 conversation_id 把块元数据附到下一轮 prefill，GLM-5-FP8 的 20K token 多轮 TTFT <b>2334ms → 702ms（3.3×）</b><sup class="cite">[VLLMBIKV]</sup>。两天后的 <b>NIXL push 连接器</b>（AWS+Mistral，2026-10-14，随 vLLM v0.32.0 发布）再进一步：decode 侧提前注册目标块，prefill 一完成即由后台线程 WRITE，传输建立完全移出关键路径，TTFT 最高再降约 3×、TPOT 改善约 30%<sup class="cite">[VLLMNIXLPUSH]</sup>。</li>
+<li>
+<p><b>vLLM 双向 KV 传输</b>（AWS，2026-10-12）：P/D 分离中 KV 只能 P→D 单向流动，多轮 Agent 每轮都要全量重算已生成部分。NIXL 连接器扩展出 <b>D→P 反向 READ</b>：decode 节点按 TTL 480s 保留 KV 块，路由器按 conversation_id 把块元数据附到下一轮 prefill，GLM-5-FP8 的 20K token 多轮 TTFT <b>2334ms → 702ms（3.3×）</b><sup class="cite">[VLLMBIKV]</sup>。</p>
+<p>两天后的 <b>NIXL push 连接器</b>（AWS+Mistral，2026-10-14，随 vLLM v0.32.0 发布）再进一步：decode 侧提前注册目标块，prefill 一完成即由后台线程 WRITE，传输建立完全移出关键路径，TTFT 最高再降约 3×、TPOT 改善约 30%<sup class="cite">[VLLMNIXLPUSH]</sup>。</p>
+</li>
 <li><b>DeepSeek-V4.1-Flash on vLLM</b>（与 Inferact，2026-10-07）：新模型的未知算子/新执行模式倒逼引擎进化：SWA bounded replay（层 21–39 几乎跳过全部 prompt prefill，prefill 计算省 30–40%）、<b>可断 PIECEWISE CUDA Graph</b>（呼应 §9.6"可断图"方向）、MegaAttention/Mega-Gate 融合内核（1.14–1.51×）。发布三周内：AgentX（GB300）低并发 1.9×、150 TPS 约束下吞吐 <b>5.3×</b><sup class="cite">[VLLMDS41]</sup>。</li>
-<li><b>Crossflow</b>（Meta，arXiv:2609.27085，2026-09-22，上期遗漏）：与 FluidPD 同题竞争的工业界方案：不改节点角色，decode 节点发布<b>短时可撤销多资源租约</b>（compute/KV/传输/预期输出），集群调度器原子预留 + 缓存感知准入（SGLang 上 6.7K 行实现）。真实机群中未缓存输入/输出 token 比值的分钟级峰均比达 4.7×，静态 P/D 必然搁置算力。token 吞吐相对静态 P/D 几何平均 <b>+16.2–17.4%</b>、高负载最高 +43.4%，所有测点 TTFT 均下降<sup class="cite">[CROSSFLOW26]</sup>。</li>
-
+<li><b>Crossflow</b>（Meta，arXiv:2609.27085，2026-09-22，上期遗漏）：与 FluidPD 同题竞争的工业界方案：不改节点角色，decode 节点发布<b>短时可撤销多资源租约</b>（compute/KV/传输/预期输出），集群调度器原子预留 + 缓存感知准入（SGLang 上 6.7K 行实现）。真实机群中未缓存输入/输出 token 比值的分钟级峰均比达 4.7×，静态 P/D 必然搁置算力。token 吞吐相对静态 P/D 几何平均 <b>+16.2–17.4%</b>、高负载最高 +43.4%，所有测点 TTFT 均下降<sup class="cite">[CROSSFLOW26]</sup>。
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
-<img src="img/crossflow-fig1.svg" loading="lazy" alt="某真实聊天负载六小时内"prefill / decode 需求比值"的逐分钟变化" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
+<img src="img/crossflow-fig1.svg" loading="lazy" alt="聊天负载中 prefill 与 decode 需求比值随时间的变化" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
 <figcaption style="font-size:12.5px;color:#aeb4bd;margin-top:8px;line-height:1.7;border-top:1px dashed #2a2f3a;padding-top:8px"><b style="color:#ffb454">原文 Figure 1（arXiv:2609.27085）</b> · 六小时内 P/D 需求比值剧烈波动——静态配比必然失衡</figcaption>
 </figure>
+</li>
+
+
 
 <li><b>Vera Rubin NVL72 day-0</b>：vLLM 以 MoE locality domains + FlashInfer 0.7.0 内核实现 day-0（AgentX 每芯片吞吐为 GB200 NVL72 的 <b>7.8×</b>，2026-10-09）<sup class="cite">[VERARUBIN26]</sup>；SGLang × NVIDIA Dynamo 组合随后给出 Qwen3.8 Flash Next 每芯片最高 <b>6.6×</b>、每 token 建模成本最多低 76% 的口径（vs GB300，2026-10-14）。新硬件红利能否兑现，越来越取决于引擎的 day-0 响应速度。</li>
 </ul>
-<div class="note"><b>同窗口值得知道</b> ① NVIDIA Dynamo 的<b>会话感知推理</b>（2026-10-08）：以统一 Session ID 把请求级基础设施升级为"程序感知"系统（会话路由、跨引擎共享 KV 池索引、KvHint 程序化缓存迁移），KV Cache 综述 §附D 有详述<sup class="cite">[DYNAMOSESSION]</sup>。② SOSP'26（9.29–10.2，布拉格）serving 方向：腾讯+北大的 <b>Janus</b> 多模型生产服务、MSR 的 <b>LLM-42</b> 确定性投机推理、上交+阿里的 <b>ACDC</b> 离线推理。③ <b>TokenRouter</b>（清华+CMU，arXiv:2610.12242，窗口内 alphaXiv 最热）：token 级路由的多模型服务系统，吞吐 2.01–64.15×，是 §附D"语义路由"的学术深化。</div>
+<div class="note">
+<p><b>同窗口值得知道</b></p>
+<ol>
+<li>NVIDIA Dynamo 的<b>会话感知推理</b>（2026-10-08）：以统一 Session ID 把请求级基础设施升级为"程序感知"系统（会话路由、跨引擎共享 KV 池索引、KvHint 程序化缓存迁移），KV Cache 综述 §附D 有详述<sup class="cite">[DYNAMOSESSION]</sup>。</li>
+<li>SOSP'26（9.29–10.2，布拉格）serving 方向：腾讯+北大的 <b>Janus</b> 多模型生产服务、MSR 的 <b>LLM-42</b> 确定性投机推理、上交+阿里的 <b>ACDC</b> 离线推理。</li>
+<li><b>TokenRouter</b>（清华+CMU，arXiv:2610.12242，窗口内 alphaXiv 最热）：token 级路由的多模型服务系统，吞吐 2.01–64.15×，是 §附D"语义路由"的学术深化。</li>
+</ol>
+</div>
 
 <!-- ============================================================ -->
 <h4>① vLLM v0.32.0（10-18）与 SGLang v0.5.22（10-19）：三天两大版本</h4>
-<p><b>vLLM v0.32.0</b>（814 commits/363 贡献者）：NVFP4 KV cache 铺满 SM8x/SM12x/SM90 并覆盖稀疏注意力模型；GLM-5.x 默认 FP8 KV；Model Runner V2（GPU n-gram speculator、Elastic EP、MLA 模型 PP+PCP）；cascade attention 移除；Python ≥ 3.11。<b>SGLang v0.5.22</b>（950 PR）：DeepSeek-V4.1 在 H200 每卡输出吞吐 +2.1–2.3×；<b>首次跑通 AMD MI350X/MI355X</b>（DSpark 投机解码 1.9×）；P/D 的 prefill-complete decode KV 分配（吞吐 +26.8%、p95 TTFT −48.9%）；HiCache 新增 SeaweedFS L3 后端（L3 TTFT 降 3.5–4.7×）；并修复混合线性模型在"投机解码 + 结构化输出"同开时的 Mamba 状态恢复 bug。</p>
+<p><b>vLLM v0.32.0</b>（814 commits/363 贡献者）：NVFP4 KV cache 铺满 SM8x/SM12x/SM90 并覆盖稀疏注意力模型；GLM-5.x 默认 FP8 KV；Model Runner V2（GPU n-gram speculator、Elastic EP、MLA 模型 PP+PCP）；cascade attention 移除；Python ≥ 3.11。</p>
+<p><b>SGLang v0.5.22</b>（950 PR）：DeepSeek-V4.1 在 H200 每卡输出吞吐 +2.1–2.3×；<b>首次跑通 AMD MI350X/MI355X</b>（DSpark 投机解码 1.9×）；P/D 的 prefill-complete decode KV 分配（吞吐 +26.8%、p95 TTFT −48.9%）；HiCache 新增 SeaweedFS L3 后端（L3 TTFT 降 3.5–4.7×）；并修复混合线性模型在"投机解码 + 结构化输出"同开时的 Mamba 状态恢复 bug。</p>
 
 <h4>② Kimi K3 day-0 三连发（10-16，vLLM 官方博客）</h4>
 <p>NVIDIA/Inferact/Red Hat 合作为 Kimi K3 打造 <b>megakernel 专用解码路径</b>：每层 130µs/23 kernels → 69µs/13 kernels，16×GB300 batch-1 + DSpark 达 <b>842 tok/s</b>（比 stock vLLM 快 1.73×），AgentX P90 交互性 +80%，并公开"AI 辅助生成内核的安全合入流程"；同日还有 Kimi K3 on MI355X（AgentX 每卡吞吐追平 HGX B300）与 Reflection Beam day-0。<b>"新模型 day-0 深度定制"</b>已成引擎竞争主战场。</p>
@@ -989,7 +1006,9 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <p>统一量化表示（WnA16/W8A8/W4A8/W4A4，稠密 + MoE）+ JIT 三层配置（编译约 1.8s vs CUTLASS 约 23s）；MoE 换 W4A8 使 DeepSeek 端到端吞吐 +14–43%、TTFT −25–32%；覆盖 Turing→Blackwell，v0.32.0 起在 SM90 默认取代 Marlin，算是 §8.1"算子层融合"的最新注脚。</p>
 
 <h4>④ 弹性与多极化（10-19/20）与 agentic 负载研究</h4>
-<p>vLLM <b>Elastic EP</b> 近零停机扩缩容（对应 v0.32.0 MRV2 特性）与 <b>TorchTPU</b> 后端回归，服务化"可伸缩性"与硬件多极化两条支线并行。学界：<b>DLite</b>（上交大，10-16）证明 agentic 负载需要免草稿历史的投机解码；<b>Prorsa</b>（PKU+小米，10-12）把 P/D 分离引入 agentic RL rollout；SNU（10-19）探索 GPU + 存算一体的混合 P/D。<b>When the KV Cache Is Slower Than the GPU</b>（Multiverse，10-15）用远程 KV 层 × 上下文并行 prefill 回答"当 KV 比算力更慢怎么办"。</p>
+<p>vLLM <b>Elastic EP</b> 近零停机扩缩容（对应 v0.32.0 MRV2 特性）与 <b>TorchTPU</b> 后端回归，服务化"可伸缩性"与硬件多极化两条支线并行。</p>
+<p>学界：<b>DLite</b>（上交大，10-16）证明 agentic 负载需要免草稿历史的投机解码；<b>Prorsa</b>（PKU+小米，10-12）把 P/D 分离引入 agentic RL rollout；SNU（10-19）探索 GPU + 存算一体的混合 P/D。</p>
+<p><b>When the KV Cache Is Slower Than the GPU</b>（Multiverse，10-15）用远程 KV 层 × 上下文并行 prefill 回答"当 KV 比算力更慢怎么办"。</p>
 
 
 <h3>⚡ 11 月上旬快讯（增补 2026-11-15）</h3>
@@ -1074,7 +1093,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
 <script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>

@@ -1,13 +1,13 @@
 {
   "siteUrl": "https://piratepai.github.io",
-  "siteUpdated": "2026-11-15",
+  "siteUpdated": "2026-11-17",
   "articles": {
     "agent-rl-survey": {
       "title": "Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL",
       "description": "沿 RLHF → RLVR / GRPO → Agent RL 的范式演进，覆盖数据飞轮、Rollout 引擎、异步 RL 与多模态 RL 四大主线，结合 verl / AReaL / slime 源码解析。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -44,6 +44,13 @@
           "summary": "新增图 2-2 交互图解：Agent RL 数据飞轮一圈的运转顺序（保留原图 2-1；见 docs/research-refresh-20261115.md）。",
           "anchor": "fig-flywheel-interactive",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -52,7 +59,7 @@
       "description": "沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -75,6 +82,13 @@
           "summary": "新增图 0-1 交互图解：2014–2026 注意力结构演进时间线，三时期对照本章大事记（见 docs/research-refresh-20261115.md）。",
           "anchor": "fig-attention-timeline",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -83,7 +97,7 @@
       "description": "以 2026-10 开源的 deepseek-ai/DeepInfer 为标本，贯通 FT → TRT-LLM → Orca → vLLM → SGLang → PD 分离的演进史与十层技术栈（图编译 / 算子 / 两阶段 / 调度 / KV / 并行 / 量化投机 / MoE 长上下文 / 取舍 / 全链路）。还含一个请求从 Recipe 编码到流式返回的全过程追踪、横评口径纪律与 2025–2026 前沿。",
       "published": "2026-10-31",
       "publicationCommit": "1b68d9a3375a51832f61128e94ef6165e87989d4",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -99,6 +113,13 @@
           "summary": "NVIDIA Dynamo 转向逐模型 dev 分支、TRT-LLM 稳定版停更；vLLM v0.33.0 × SGLang v0.5.23 双周节奏；DeepInfer 仓库动态（Q&A v0.2、star 26k）。",
           "anchor": "research-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -151,6 +172,13 @@
           "summary": "正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。",
           "anchor": "s9",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -196,6 +224,13 @@
           "summary": "图 4-1 重构为自洽的 A/B 页表快照：共享前缀块 P1/P4 引用 2、分叉后各占新块，与写时复制说明和交互图一致。",
           "anchor": "s4",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -241,6 +276,13 @@
           "summary": "9.2 交互教学目标改为“batch 摊薄权重流量、AI 因 KV 流量饱和”（AI 上限≈26<屋脊 295，不发生瓶颈切换）；图 9-1/9-2 数据点改用语义标记并满足非文本对比度。",
           "anchor": "rl-demo",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -249,7 +291,7 @@
       "description": "沿 ACT → Universal Transformer → COCONUT / Huginn / HRM / TRM → Ouro / PLT 的演进主线，结合 recurrent-pretraining 与 coconut 源码解析三明治结构、输入注入、截断反传与 KV 跨循环复用，盘点 2026 产业化进展与未来方向。",
       "published": "2026-09-15",
       "publicationCommit": "04f6a9d9c75471bcb1f136a913bcdc13731f904f",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -279,6 +321,13 @@
           "summary": "NVIDIA 开源首个 looped 语言模型 Dory1.0-4B（弹性深度、NVFP4 QAT）；字节 Seed 开源 Cola2 连续潜空间语言模型权重。",
           "anchor": "latest",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -317,6 +366,13 @@
           "summary": "图解数据点改用 data-diagram-point 语义标记，浅色/深色主题下均满足 3:1 非文本对比度。",
           "anchor": "diagram-moe-survey-4",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -355,6 +411,13 @@
           "summary": "正文 11/12 改为 10/11（图 12-1→图 11-1），附录小节 10.1–10.9 改为 附A–附I；移除附录内同名重复标题，交叉引用与目录同步。",
           "anchor": "ch10",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -393,6 +456,13 @@
           "summary": "正文 10/11 改为 9/10，附录小节 9.1–9.3 改为 附A–附C；移除附录内同名重复标题（s9-content 锚点保留），交叉引用与目录同步。",
           "anchor": "s9",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -401,7 +471,7 @@
       "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。",
       "published": "2026-10-29",
       "publicationCommit": "42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -424,6 +494,13 @@
           "summary": "NVIDIA Cosmos 交互式世界仿真框架；World Labs Atlas 正式版与 Frameboy；Hy-Nomas 进 SGLang 主分支并在 TPU 达成严格实时 720p。",
           "anchor": "research-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -455,6 +532,13 @@
           "summary": "移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。",
           "anchor": "latest",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -507,6 +591,13 @@
           "summary": "正文 8/9 改为 7/8（消除附录遗留跳号），文内 §8⑥/§9 引用同步；目录顺序对齐正文。",
           "anchor": "latest",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -515,7 +606,7 @@
       "description": "以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。",
       "published": "2026-10-31",
       "publicationCommit": "7946637a17e9be96a25975af0c3f4d246bb33b84",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -538,6 +629,13 @@
           "summary": "新增图 3-2 交互图解：缺失专家在三级存储间的取用路径（保留原图 3-1 全量布局；见 docs/research-refresh-20261115.md）。",
           "anchor": "fig-strata-interactive",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -546,7 +644,7 @@
       "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。",
       "published": "2026-10-11",
       "publicationCommit": "8f48de7b6f91249cf99bb0b68e455bc9f89fb25e",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -569,6 +667,13 @@
           "summary": "Together Compiler 持续编译系统（<24h 2.6× TPS、agent 实验 252×）；KernelMosaic CUDA 内核生成数据集（14,566 任务）。",
           "anchor": "research-updates",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -607,6 +712,13 @@
           "summary": "移除更新附录内与生成标题同文的重复 h2；s6-content 锚点保留。",
           "anchor": "s6",
           "evidence": "docs/numbering-and-reader-fixes-20261117.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -615,7 +727,7 @@
       "description": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -631,6 +743,13 @@
           "summary": "SemiAnalysis TPUv7 首批 AgentX 结果（三方军备事实标准）；AMD GLM-5.2 AgentX 官方验证驱动调优记录。",
           "anchor": "s6-frontier-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -639,7 +758,7 @@
       "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -655,6 +774,13 @@
           "summary": "Claude Fable 5.2 effort 档位把推理预算产品化；ADP-HT 按路径预算在线路由；小模型 SC 门控负结果。",
           "anchor": "s5-frontier-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -663,7 +789,7 @@
       "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -679,6 +805,13 @@
           "summary": "Evolving Infra 按会话状态在线重排 P/D（vs Dynamo 延迟最高降 4.1×）；Δτ-Bench 工具生态漂移评测；tau-bench 2.0.0。",
           "anchor": "s4-frontier-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -687,7 +820,7 @@
       "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -703,6 +836,13 @@
           "summary": "AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。",
           "anchor": "s5-frontier-20261115",
           "evidence": "docs/research-refresh-20261115.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     },
@@ -710,7 +850,7 @@
       "title": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）",
       "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。",
       "published": "2026-11-15",
-      "contentUpdated": "2026-11-15",
+      "contentUpdated": "2026-11-17",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -719,6 +859,13 @@
           "summary": "新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。",
           "anchor": "s0",
           "evidence": "docs/cost-efficient-inference-2026.md"
+        },
+        {
+          "date": "2026-11-17",
+          "kind": "逻辑排版",
+          "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
+          "anchor": "reading-path",
+          "evidence": "docs/logical-layout-20261117.md"
         }
       ]
     }
