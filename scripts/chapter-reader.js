@@ -19,7 +19,8 @@
   const clean = node => node.textContent.replace(/\s+/g, ' ').trim();
   function label(node) {
     const copy = node.cloneNode(true);
-    copy.querySelectorAll('sup,.roadmap,.sub').forEach(n => n.remove());
+    // Outline text only: drop citations and decorative badges/pills, keep the heading's own words.
+    copy.querySelectorAll('sup,.roadmap,.sub,.pill,.badge,.tag,.cite,[aria-hidden="true"]').forEach(n => n.remove());
     copy.querySelectorAll('.no,.num').forEach(n => n.after(document.createTextNode(' ')));
     return clean(copy);
   }
@@ -202,10 +203,11 @@
     viewport.setAttribute('aria-label', '图解，可横向滚动');
     const controls = element('div', 'reader-ui reader-diagram-tools');
     controls.append(element('span', '', '文字保持可读 · 窄屏可左右滑动'));
-    const fit = element('button', '', '整图预览'); fit.type = 'button'; fit.setAttribute('aria-pressed', 'false');
+    // Action-labelled toggle: the label names what clicking does, so no aria-pressed (WAI-ARIA button pattern).
+    const fit = element('button', '', '整图预览'); fit.type = 'button';
     fit.addEventListener('click', () => {
       const fitted = viewport.toggleAttribute('data-fit');
-      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览'; fit.setAttribute('aria-pressed', String(fitted));
+      fit.textContent = fitted ? '恢复可读尺寸' : '整图预览';
     });
     controls.append(fit); svg.before(controls, viewport); viewport.append(svg);
   });
@@ -247,7 +249,15 @@
   scroll.append(element('p', 'reader-nav-label', '文章目录'), nav);
   sidebar.append(head, scroll);
   const toolbar = element('div', 'reader-ui reader-toolbar');
-  const toggle = element('button', '', '☰ 目录'); toggle.type = 'button'; toggle.setAttribute('aria-controls', sidebar.id);
+  // Icons are inline SVG so toolbar glyphs never depend on font fallback; visible text stays as the label.
+  const icon = d => '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false" style="vertical-align:-2px">' + d + '</svg>';
+  const ICONS = {
+    menu: icon('<path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>'),
+    sun: icon('<circle cx="8" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.3v1.8M8 12.9v1.8M1.3 8h1.8M12.9 8h1.8M3.3 3.3l1.3 1.3M11.4 11.4l1.3 1.3M12.7 3.3l-1.3 1.3M4.6 11.4l-1.3 1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'),
+    moon: icon('<path d="M13.2 9.6A5.7 5.7 0 1 1 6.4 2.8a4.6 4.6 0 1 0 6.8 6.8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>')
+  };
+  const toggle = element('button', 'reader-menu-toggle'); toggle.type = 'button'; toggle.setAttribute('aria-controls', sidebar.id);
+  toggle.innerHTML = ICONS.menu + ' 目录';
   const toolbarHome = element('a', 'reader-home', '首页'); toolbarHome.href = '../index.html';
   const status = element('span', 'reader-toolbar-label'); status.setAttribute('aria-live', 'polite');
   const currentTitle = element('span', 'reader-current-title');
@@ -258,10 +268,9 @@
   const themeButton = element('button', 'reader-theme-toggle'); themeButton.type = 'button';
   function showTheme() {
     html.dataset.readerTheme = theme;
-    themeButton.textContent = theme === 'dark' ? '☀' : '☾';
+    themeButton.innerHTML = theme === 'dark' ? ICONS.sun : ICONS.moon;
     themeButton.setAttribute('aria-label', theme === 'dark' ? '切换为浅色主题' : '切换为深色主题');
     themeButton.title = themeButton.getAttribute('aria-label');
-    themeButton.setAttribute('aria-pressed', String(theme === 'paper'));
   }
   themeButton.addEventListener('click', () => {
     theme = theme === 'dark' ? 'paper' : 'dark'; showTheme();
@@ -318,7 +327,7 @@
     currentTitle.textContent = current.chapter.title + ' · ';
     counter.textContent = full ? '全文' : (localIndex + 1) + ' / ' + current.chapter.pages.length;
     status.title = current.title;
-    mode.textContent = full ? '分页阅读' : '全文阅读'; mode.setAttribute('aria-pressed', String(full));
+    mode.textContent = full ? '分页阅读' : '全文阅读';
     skip.href = '#' + current.id;
     const index = pages.indexOf(current);
     [previousButton, nextButton].forEach((a, i) => {

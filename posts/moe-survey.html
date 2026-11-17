@@ -146,9 +146,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/moe-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "url": "https://piratepai.github.io/posts/moe-survey.html", "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。", "inLanguage": "zh-CN", "headline": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "datePublished": "2026-08-22", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/moe-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "url": "https://piratepai.github.io/posts/moe-survey.html", "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。", "inLanguage": "zh-CN", "headline": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/moe-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -165,7 +165,7 @@
     <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#moe-route-combine">重绘MoE 路由与合并，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#moe-route-combine">重绘MoE 路由与合并，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图解可读性：<a href="#diagram-moe-survey-4">图解数据点改用 data-diagram-point 语义标记，浅色/深色主题下均满足 3:1 非文本对比度。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -483,10 +483,10 @@ loss<sub>bal</sub> = α · n · Σ<sub>i=1..n</sub> <span class="i">f<sub>i</sub
     <rect x="120" y="215" width="720" height="52" rx="10" fill="var(--d-surface)" stroke="var(--d-line)"/>
     <text x="480" y="237" text-anchor="middle" fill="var(--d-surface)">本批 token（每张卡持有一份，颜色 = 目标专家所在 GPU）</text>
     <g font-family="JetBrains Mono">
-      <circle cx="200" cy="252" r="8" fill="var(--d-blue-soft)"/><circle cx="222" cy="252" r="8" fill="var(--d-blue-soft)"/><circle cx="244" cy="252" r="8" fill="var(--d-green-soft)"/>
-      <circle cx="266" cy="252" r="8" fill="var(--d-blue-soft)"/><circle cx="288" cy="252" r="8" fill="var(--d-amber-soft)"/><circle cx="310" cy="252" r="8" fill="var(--d-green-soft)"/>
-      <circle cx="470" cy="252" r="8" fill="var(--d-green-soft)"/><circle cx="492" cy="252" r="8" fill="var(--d-amber-soft)"/><circle cx="514" cy="252" r="8" fill="var(--d-blue-soft)"/>
-      <circle cx="536" cy="252" r="8" fill="var(--d-amber-soft)"/><circle cx="740" cy="252" r="8" fill="var(--d-amber-soft)"/><circle cx="762" cy="252" r="8" fill="var(--d-green-soft)"/>
+      <circle cx="200" cy="252" r="8" data-diagram-point="blue" fill="var(--d-blue-soft)"/><circle cx="222" cy="252" r="8" data-diagram-point="blue" fill="var(--d-blue-soft)"/><circle cx="244" cy="252" r="8" data-diagram-point="green" fill="var(--d-green-soft)"/>
+      <circle cx="266" cy="252" r="8" data-diagram-point="blue" fill="var(--d-blue-soft)"/><circle cx="288" cy="252" r="8" data-diagram-point="amber" fill="var(--d-amber-soft)"/><circle cx="310" cy="252" r="8" data-diagram-point="green" fill="var(--d-green-soft)"/>
+      <circle cx="470" cy="252" r="8" data-diagram-point="green" fill="var(--d-green-soft)"/><circle cx="492" cy="252" r="8" data-diagram-point="amber" fill="var(--d-amber-soft)"/><circle cx="514" cy="252" r="8" data-diagram-point="blue" fill="var(--d-blue-soft)"/>
+      <circle cx="536" cy="252" r="8" data-diagram-point="amber" fill="var(--d-amber-soft)"/><circle cx="740" cy="252" r="8" data-diagram-point="amber" fill="var(--d-amber-soft)"/><circle cx="762" cy="252" r="8" data-diagram-point="green" fill="var(--d-green-soft)"/>
     </g>
     <line x1="200" y1="207" x2="160" y2="122" stroke="var(--d-blue)" stroke-width="1.5" marker-end="url(#arr4)"/>
     <line x1="266" y1="207" x2="440" y2="122" stroke="var(--d-green)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arr5)"/>
@@ -1562,8 +1562,8 @@ A：<b>不是，但是 MoE 的「近亲」</b>。CogVideoX 的 Expert Transforme
 <!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

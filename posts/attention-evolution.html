@@ -58,6 +58,9 @@
   .box.good{border-left-color:var(--ok); background:#113219;}
   /* 表格 */
   table{border-collapse:collapse; width:100%; margin:14px 0; font-size:.86em;}
+  /* 版本名整体一行，避免首列在窄屏断成两截；长表由表格自身横向滚动 */
+  .fa-versions th:first-child,.fa-versions td:first-child{white-space:nowrap}
+  .fa-versions{display:block;max-width:100%;overflow-x:auto}
   th,td{border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top;}
   th{background:var(--bg2);}
   tr:nth-child(even) td{background:#1c2126;}
@@ -685,7 +688,7 @@ Kimi K2（arXiv:2507.20534, 2025-07）也采用 MLA，说明 MLA 已成为国产
 本地仓库 <code>repos/flash-attention</code> 即官方实现（含 CUDA/Triton 内核与哈达玛精度工具）。</p>
 
 <h3>5.2 一代一代榨硬件</h3>
-<table>
+<table class="fa-versions">
 <tr><th>版本</th><th>时间</th><th>核心改动</th><th>关键数字</th></tr>
 <tr><td>FlashAttention-1</td><td>2022-05</td><td>IO 感知 tiling + 在线 softmax + 反向重计算</td><td>省 10× 显存；GPT-2 训练 3×；BERT-large 比 MLPerf 纪录快 15%</td></tr>
 <tr><td>FlashAttention-2</td><td>2023-07<br><span class="cite">[Dao, arXiv:2307.08691]</span></td><td>减少非矩阵乘 FLOPs、序列维并行、warp 分工</td><td>比 FA1 快 ~2×，A100 上 225 TFLOPs/s（72% 利用率），"reaching 50-73% of the theoretical maximum FLOPs/s on A100"</td></tr>
@@ -752,7 +755,7 @@ KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注�
 用改造版 FlashAttention 内核输出的注意力图做自蒸馏（Llama-3.1-8B 仅需 0.5B token、约 40 A100 小时），
 自发学出 A 形、竖条等长上下文常见模式。原文："SeerAttention achieves highly linear speedup over dense configurations, delivering a 7.3× speedup with 90% sparsity on sequences of 128k."（译：相对稠密配置呈高度线性加速，128K 序列、90% 稀疏度下实现 7.3× 加速。）</p>
 
-<p>同期还有 XAttention（反対角线打分做块选择, arXiv:2503.16428, 2025-03）等；FLA 库 v0.5.2（2026-07）已内置 NSA 训练/解码内核与 DSA 参考实现，Gated Slot Attention-2 正在合入主库（2026-10）。
+<p>同期还有 XAttention（反对角线打分做块选择, arXiv:2503.16428, 2025-03）等；FLA 库 v0.5.2（2026-07）已内置 NSA 训练/解码内核与 DSA 参考实现，Gated Slot Attention-2 正在合入主库（2026-10）。
 2026 年的新方向包括"免训练原生稀疏"（Training-Free Native Sparse Attention, OpenReview 2026，声称最高 16× 压缩）
 与潜空间稀疏（SALS, NeurIPS 2025）等，细节仍在快速演化。</p>
 
@@ -1341,8 +1344,8 @@ FLA 库覆盖 40+ 线性注意力变体，在 NVIDIA/AMD/Intel 三家都做了�
 
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

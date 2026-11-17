@@ -106,6 +106,8 @@
   .cell.hl{border-color:var(--blue); background:#111e32;}
   .cell.dim{border-style:dashed; color:#aeb4bd; background:#1c2126;}
   .cell.kv{border-color:#81612c; background:#322711;}
+  #kv-page-table .cell{min-width:64px;flex-basis:64px}
+  #kv-page-table .kv-physical-pool{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
   .lbl{font-size:12px; color:var(--muted); margin:6px 2px 2px;}
   .arrow{color:#aeb4bd; font-size:15px; align-self:center; padding:0 2px;}
   .stacklayer{
@@ -191,9 +193,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-15">
+<meta property="article:modified_time" content="2026-11-17">
 <link rel="canonical" href="https://piratepai.github.io/posts/kv-cache-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "KV Cache 技术全景：从原理到前沿（2017–2026）", "url": "https://piratepai.github.io/posts/kv-cache-survey.html", "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。", "inLanguage": "zh-CN", "headline": "KV Cache 技术全景：从原理到前沿（2017–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-15", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/kv-cache-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "KV Cache 技术全景：从原理到前沿（2017–2026）", "url": "https://piratepai.github.io/posts/kv-cache-survey.html", "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。", "inLanguage": "zh-CN", "headline": "KV Cache 技术全景：从原理到前沿（2017–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/kv-cache-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -235,9 +237,9 @@
   <a class="l2" href="#s9-1">9.1 线性注意力 = 固定大小的记忆</a>
   <a class="l2" href="#s9-2">9.2 工业界混战：3:1 的经验设计点与适用边界</a>
   <a class="l2" href="#s9-3">9.3 MiniMax-M2 的"反悔"</a>
-  <a href="#s10">更新附录（展开选读）</a>
-  <a href="#s11">11. 未来发展方向</a>
-  <a href="#s12">12. 动手实验（10 分钟入门）</a>
+  <a href="#s11">10. 未来发展方向</a>
+  <a href="#s12">11. 动手实验（10 分钟入门）</a>
+  <a href="#s10">更新附录</a>
   <a href="#refs">参考文献</a>
 </nav>
 
@@ -250,7 +252,7 @@
   <div class="sub">结构压缩 · 分页管理 · 前缀复用 · 量化 · 稀疏驱逐 · 分层卸载 · 混合架构</div>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">七条路线 <b>少存 / 管好 / 别重算 / 存粗 / 扔掉 / 分层 / 不用</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s10">K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s10">K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s10">正文 11/12 改为 10/11（消除附录遗留跳号），附录小节 10.1–10.4 改为 附A–附D；旧锚点与文内交叉引用同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图示修正：<a href="#s4">图 4-1 重构为自洽的 A/B 页表快照：共享前缀块 P1/P4 引用 2、分叉后各占新块，与写时复制说明和交互图一致。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -477,24 +479,28 @@ k   = concat(k_C, k_rope)   # 与 RoPE 部分拼接得到完整 K
 <li>显存不足时按请求粒度换出（swap）或重算（recompute）作为"抢占式调度"的恢复手段。</li>
 </ul>
 
-<div class="fig">
+<div class="fig" id="kv-page-table">
   <div class="row">
-    <div style="flex:1.2; min-width:220px">
-      <div class="lbl">逻辑序列（请求 A 的 KV，按 token）</div>
+    <div style="flex:1.2; min-width:260px">
+      <div class="lbl">逻辑序列 A（按 token 切块；页表 A：块0→P1、块1→P4、块2→P6）</div>
       <div class="row">
-        <div class="cell">块0<br>t0–t15</div><div class="cell">块1<br>t16–t31</div><div class="cell">块2<br>t32–t47</div><div class="cell dim">块3<br>(待写)</div>
+        <div class="cell hl">块0<br>t0–t15</div><div class="cell hl">块1<br>t16–t31</div><div class="cell">块2<br>t32–t47</div><div class="cell dim">块3<br>(待写)</div>
+      </div>
+      <div class="lbl">逻辑序列 B（前两块与 A 相同＝共享前缀，块 2 起分叉；页表 B：块0→P1、块1→P4、块2→P2）</div>
+      <div class="row">
+        <div class="cell hl">块0<br>= A 块0</div><div class="cell hl">块1<br>= A 块1</div><div class="cell">块2<br>B 独有</div>
       </div>
     </div>
     <div class="arrow">──页表──▶</div>
-    <div style="flex:1.4; min-width:260px">
+    <div style="flex:1.4; min-width:280px">
       <div class="lbl">物理显存块池（全局共享，按需分配）</div>
-      <div class="row">
-        <div class="cell dim">P0</div><div class="cell">P1<br>A:块0</div><div class="cell">P2<br>B:块0</div><div class="cell">P3<br>A:块1</div>
-        <div class="cell">P4<br>A+B共享</div><div class="cell dim">P5</div><div class="cell">P6<br>A:块2</div><div class="cell dim">P7</div>
+      <div class="row kv-physical-pool">
+        <div class="cell dim">P0<br>空闲</div><div class="cell hl">P1<br>A/B:块0<br>引用 2</div><div class="cell">P2<br>B:块2<br>引用 1</div><div class="cell dim">P3<br>空闲</div>
+        <div class="cell hl">P4<br>A/B:块1<br>引用 2</div><div class="cell dim">P5<br>空闲</div><div class="cell">P6<br>A:块2<br>引用 1</div><div class="cell dim">P7<br>空闲</div>
       </div>
     </div>
   </div>
-  <div class="cap">图 4-1 分页 KV：请求 A 的逻辑块映射到分散的物理块；请求 B 与 A 前缀相同时可直接共享物理块（引用计数 ≥ 2，写时复制）。显著减少外部碎片与预留浪费，仍可能有最后一个未满块及元数据开销。</div>
+  <div class="cap">图 4-1 分页 KV（同一时刻的快照）：页表 A 把逻辑块映射到互不相邻的物理块 P1、P4、P6，无需为整条序列预留连续空间；B 与 A 共享前缀（逻辑块 0、1），页表直接指向同一物理块 P1、P4——引用计数为 2、只读共享；分叉后各写各的新块（A:块2→P6，B:块2→P2），不复用对方的物理块。若某条序列要向共享的<b>未满</b>块追加写入，先复制到新物理块再写（写时复制），原块引用计数减 1（见下方交互图）。仍可能有最后一个未满块与页表元数据开销。</div>
 </div>
 
 <p><b>后续演进</b>：PagedAttention 已是全行业事实标准（SGLang、TensorRT-LLM、LMDeploy 等均采用分页 KV）。与它配套的两个调度技术值得知道：<b>chunked prefill</b>（Sarathi-Serve，OSDI 2024）把长 prompt 切成小块逐块预填充，插入解码批次中，避免一个 100K prompt 独占 GPU 拖垮所有人的 token 间隔<sup class="c"><a href="#ref-14">[14]</a></sup>；<b>P/D 分离</b>（DistServe，OSDI 2024）把预填充和解码放到不同 GPU 池，消除两阶段互相干扰<sup class="c"><a href="#ref-15">[15]</a></sup>。P/D 分离后 KV 必须跨卡搬运，这直接催生了第 8 节的整条"以 KV 为中心"的系统线。</p>
@@ -981,7 +987,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 </div>
 
 <!-- ================================================================ -->
-<h2 id="s11"><span class="no">11</span>未来发展方向</h2>
+<h2 id="s11"><span class="no">10</span>未来发展方向</h2>
 <ol>
 <li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:600">近期进展 · 2026-10 下旬</a></li>
 <li><b>算法-系统协同设计（co-design）成为默认方法论。</b>NSA 的教训（理论加速 ≠ 墙上时钟加速）已被广泛接受：未来的稀疏/压缩算法必须带着内存对齐、Tensor Core 友好、与 GQA/MLA 兼容的约束去设计；反过来，调度器要理解模型的稀疏模式（如 DSA 的索引）来做预取。2026 年的系统感知综述已把这条列为首要方向<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
@@ -995,7 +1001,7 @@ o_t = S_tᵀ @ q_t              # 读出：用当前 q 查询记忆
 </ol>
 
 <!-- ================================================================ -->
-<h2 id="s12"><span class="no">12</span>动手实验：10 分钟摸到真实的 KV Cache</h2>
+<h2 id="s12"><span class="no">11</span>动手实验：10 分钟摸到真实的 KV Cache</h2>
 <p>用 <code>uv</code>（现代 Python 环境管理器）在本机起一个最小推理服务，观察前缀缓存与量化开关的效果：</p>
 <pre><code># 1) 建环境并安装 vLLM（需要 CUDA GPU；首次约几分钟）
 uv venv .venv &amp;&amp; source .venv/bin/activate   # Windows Git Bash 用 Scripts/activate
@@ -1017,7 +1023,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <p>以下按原资料快照保留发布脉络；版本公告与自报最大值不能替代同条件机制比较。未给出一手落点的条目只作检索线索，不参与本文结论。</p>
 <span class="anchor" id="s10-content"></span>
 
-<h3>10.1 学界：从"压缩缓存"到"重识缓存"</h3>
+<h3>附A 学界：从"压缩缓存"到"重识缓存"</h3>
 <ul>
 <li><b>综述走向系统视角</b>：TMLR 2025 的 KV cache 管理综述（arXiv:2412.19442，2024-12）确立了 token 级 / 层级 / 模型级的三层分类法<sup class="c"><a href="#ref-62">[62]</a></sup>；2026-07 的新综述（arXiv:2607.08057）则强调"系统感知"的 KV 优化：把压缩算法与调度、分层存储联合设计<sup class="c"><a href="#ref-63">[63]</a></sup>。</li>
 <li><b>重要性度量升级</b>：从"历史注意力分数"走向"预期注意力"。NVIDIA 等的 Expected Attention（arXiv:2510.00636，2025-10）从未来 query 分布出发估计 token 重要性，避免"现在不重要≠将来不重要"的错误<sup class="c"><a href="#ref-64">[64]</a></sup>；KeepKV（arXiv:2504.09936，2025-04）等研究无损化的周期压缩。</li>
@@ -1028,7 +1034,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <li><b>线性注意力继续内卷</b>：Gated DeltaNet-2（2026-05，关注度（不作为技术证据））解耦擦除与写入地址<sup class="c"><a href="#ref-60">[60]</a></sup>；同期还有稀疏状态扩展、核化线性注意力等一批工作冲击"固定状态的容量墙"。</li>
 </ul>
 
-<h3>10.2 业界：基础设施定型，模型侧激进换代</h3>
+<h3>附B 业界：基础设施定型，模型侧激进换代</h3>
 <table>
 <tr><th>时间</th><th>事件</th><th>意义</th></tr>
 <tr><td>2025-01</td><td>vLLM V1 alpha（1.7×，前缀缓存默认开）</td><td>分页 + 前缀缓存成为不可关闭的默认底座；V0 已于年内移除，1.0 进入 RFC<sup class="c"><a href="#ref-13">[13]</a></sup></td></tr>
@@ -1042,7 +1048,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <tr><td>2026-06 / 09</td><td>MiniMax-M3 采用 MSA 稀疏注意力（KV 选块按 GQA 组进行）<sup class="c"><a href="#ref-76">[76]</a></sup>；DeepSeek-V4.1-Flash 把全局 KV 压到 <b>890 字节/token</b>（MXFP4 QAT + 跨层共享）<sup class="c"><a href="#ref-77">[77]</a></sup></td><td>模型侧"KV 产量"再降一个数量级；KV 压缩与注意力结构彻底合流</td></tr>
 </table>
 
-<h3>10.3 2026 年秋（9–10 月）：负结果、统一理论与新交互范式</h3>
+<h3>附C 2026 年秋（9–10 月）：负结果、统一理论与新交互范式</h3>
 <p class="lead">这一波新工作的共同气质是<b>反思与收敛</b>：有人证明"随机驱逐就能打平 SOTA"，有人用 roofline 模型统一了全部五个技术家族，也有人让模型自己"声明"要读哪段缓存。</p>
 
 <h4>① Random Attention：一场"负结果"冲击（Salesforce+UIUC，2026.09）</h4>
@@ -1055,7 +1061,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </div>
 
 <h4>② The KV Cache Is the New Memory Wall：统一理论（2026.09）</h4>
-<p>这篇 28 页立场文用 <b>roofline 模型</b>统一量化五大家族（量化、驱逐、分页、前缀共享、分层卸载），给出可检验的结论：低于特定上下文长度时压缩 KV 几乎没有端到端收益；分页/前缀共享<b>无损但只解决"容量"</b>，量化/驱逐才真正降<b>带宽</b>；并提出统一 KV 表示（单一分页布局同时携带 per-block 精度与保留掩码）与拓扑感知放置（B200 上最高 2×、MI300X 上 8× 的恢复空间），把本文 §11"量化与驱逐的联合理论"方向形式化了<sup class="c"><a href="#ref-78">[78]</a></sup>。</p>
+<p>这篇 28 页立场文用 <b>roofline 模型</b>统一量化五大家族（量化、驱逐、分页、前缀共享、分层卸载），给出可检验的结论：低于特定上下文长度时压缩 KV 几乎没有端到端收益；分页/前缀共享<b>无损但只解决"容量"</b>，量化/驱逐才真正降<b>带宽</b>；并提出统一 KV 表示（单一分页布局同时携带 per-block 精度与保留掩码）与拓扑感知放置（B200 上最高 2×、MI300X 上 8× 的恢复空间），把本文 §10"量化与驱逐的联合理论"方向形式化了<sup class="c"><a href="#ref-78">[78]</a></sup>。</p>
 
 <h4>③ xKV：跨层共享低秩子空间（ICML 2026）</h4>
 <p>各层 KV 的主奇异向量高度对齐（CKA 验证）→ prefill 时对分组层做联合 SVD，共享一套 token 基 + 每层小重构矩阵；免训练、兼容 MLA。<b>收益</b>：最高 <b>8×</b> KV 压缩；叠加 4-bit 量化达 <b>25.6×</b>；端到端最高 4.23× 加速<sup class="c"><a href="#ref-80">[80]</a></sup>。与 CLA（§3.3"层间共享"）同一思想的后训练版本。同期 <b>OSCAR</b>（2026.05）用离线谱协方差旋转让 <b>INT2</b> KV 在长上下文可用<sup class="c"><a href="#ref-81">[81]</a></sup>；<b>QuantMLA</b>（2026.09）沿 SnapMLA 指出的"MLA×低位量化不兼容"问题做函数对齐的双路量化<sup class="c"><a href="#ref-84">[84]</a></sup>。</p>
@@ -1070,8 +1076,8 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 
 <div class="box tip"><b class="t">2026 年的一条主线判断</b>如果 2023 年的关键词是"分页"，2024 年是"复用与压缩"，2025 年是"分层与混合"，那么 2026 年的关键词是<b>"以 KV 为中心的算力经济学"</b>：模型结构（MLA/稀疏/混合）决定 KV 的"产量"，缓存系统（Mooncake/LMCache/Dynamo）决定 KV 的"周转率"，而 API 计费（写贵读廉）把这一切翻译成价格信号反馈给应用开发者。学界与业界的努力正在这三层之间打通接口。</div>
 
-<h3>10.4 2026-10 中下旬速览：会话成为一等公民，Agent 负载重塑缓存语义</h3>
-<p class="lead">五件新事把 §10.3 的三个信号各自落地：<b>NVIDIA Dynamo 把"会话"变成路由与缓存的一等原语</b>；<b>高带宽闪存（HBF）以"写入寿命"为约束进入 KV 分层</b>（Lachesis + Berkeley 表征）；<b>驱逐研究回应 Random Attention 的挑战</b>（LORE-KV：用"未来的 query"打分）；<b>LMCache 团队的商业化平台 Tensormesh 发布</b>。</p>
+<h3>附D 2026-10 中下旬速览：会话成为一等公民，Agent 负载重塑缓存语义</h3>
+<p class="lead">五件新事把 §附C 的三个信号各自落地：<b>NVIDIA Dynamo 把"会话"变成路由与缓存的一等原语</b>；<b>高带宽闪存（HBF）以"写入寿命"为约束进入 KV 分层</b>（Lachesis + Berkeley 表征）；<b>驱逐研究回应 Random Attention 的挑战</b>（LORE-KV：用"未来的 query"打分）；<b>LMCache 团队的商业化平台 Tensormesh 发布</b>。</p>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/kvcache-map.svg" loading="lazy" alt="本篇综述的七条战线一图总览：结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸" style="display:block;width:100%;height:auto;background:transparent;padding:0;box-sizing:border-box;max-width:880px;margin:0 auto">
@@ -1096,7 +1102,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 </div>
 
 <h4>② Lachesis（SNU/KAIST/UIUC，2026-10-06）：按"数据活多久"决定放哪层</h4>
-<p>高带宽闪存（HBF）容量约为 HBM 一个数量级、读带宽同级，但<b>写入寿命有限</b>。Lachesis 指出 Agent KV 的生命周期由 harness 决定且大多可在写入前知晓（reasoning 段 66–83% 的写入只活一轮；lead-agent 段寿命为 sub-agent 的 4.0–6.1×），于是沿时间/结构/worker 三条轴预测寿命、在写入前决定 HBM 或 HBF。<b>收益</b>：HBF 寿命较 HBM-first 延长 1.19–3.13×（紧 SLO 24×7 满载仍超 5 年保修），HBM 吸收 8.2–19.5× 写入量<sup class="c"><a href="#ref-86">[86]</a></sup>。同期的 <b>HBF 系统表征</b>（UC Berkeley + FuriosaAI）给出 HBM–HBF–host 三级层级与缓冲式缓存感知调度：相对纯 HBM 完成时间 −36.1–87.7%，调度使 HBF 预估写入寿命从 1.21 年延至 14.82 年<sup class="c"><a href="#ref-87">[87]</a></sup>。§11 方向六"存储硬件入场"落到了具体介质。</p>
+<p>高带宽闪存（HBF）容量约为 HBM 一个数量级、读带宽同级，但<b>写入寿命有限</b>。Lachesis 指出 Agent KV 的生命周期由 harness 决定且大多可在写入前知晓（reasoning 段 66–83% 的写入只活一轮；lead-agent 段寿命为 sub-agent 的 4.0–6.1×），于是沿时间/结构/worker 三条轴预测寿命、在写入前决定 HBM 或 HBF。<b>收益</b>：HBF 寿命较 HBM-first 延长 1.19–3.13×（紧 SLO 24×7 满载仍超 5 年保修），HBM 吸收 8.2–19.5× 写入量<sup class="c"><a href="#ref-86">[86]</a></sup>。同期的 <b>HBF 系统表征</b>（UC Berkeley + FuriosaAI）给出 HBM–HBF–host 三级层级与缓冲式缓存感知调度：相对纯 HBM 完成时间 −36.1–87.7%，调度使 HBF 预估写入寿命从 1.21 年延至 14.82 年<sup class="c"><a href="#ref-87">[87]</a></sup>。§10 方向六"存储硬件入场"落到了具体介质。</p>
 
 <figure style="margin:22px 0;padding:14px 16px 10px;background:rgba(23,26,33,.55);border:1px solid #2a2f3a;border-radius:12px">
 <img src="img/lachesis-fig1.svg" loading="lazy" alt="左上：普通请求与 agent 会话的"读窗口"对比（会话跨请求延续）；左：上下文" style="display:block;width:100%;height:auto;border-radius:6px;background:#fff;padding:6px;box-sizing:border-box;">
@@ -1110,7 +1116,7 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 
 
 <h4>③ LORE-KV（2026-10-06）：驱逐该用"未来的 query"打分</h4>
-<p>对 Random Attention（§10.3①）的正面回应：驱逐发生在未来 query 未知时。与其问"读 prompt 时什么重要"，不如<b>采样 M 条短自回归续写作为"未来轨迹"</b>，按投影 leave-one-out 注意力输出删除代价打分、按轨迹可靠性加权。等精度下缓存效率 1.50–1.63×（128K 领先 AnDPro 达 +11.65 点）；代价是一次性压缩开销 1.46–2.77× 墙钟<sup class="c"><a href="#ref-88">[88]</a></sup>。问题不在"要不要打分"，而在"用哪组 query 打分"。</p>
+<p>对 Random Attention（§附C①）的正面回应：驱逐发生在未来 query 未知时。与其问"读 prompt 时什么重要"，不如<b>采样 M 条短自回归续写作为"未来轨迹"</b>，按投影 leave-one-out 注意力输出删除代价打分、按轨迹可靠性加权。等精度下缓存效率 1.50–1.63×（128K 领先 AnDPro 达 +11.65 点）；代价是一次性压缩开销 1.46–2.77× 墙钟<sup class="c"><a href="#ref-88">[88]</a></sup>。问题不在"要不要打分"，而在"用哪组 query 打分"。</p>
 
 <h4>④ 商业化：Tensormesh Platform（LMCache 母公司，2026-10-14）</h4>
 <p>LMCache 团队（CEO 为共同作者 Junchen Jiang，累计融资 $28.5M，投资方含 NVentures / AMD Ventures / CoreWeave）推出首个企业级 KV 缓存管理平台：多级缓存（HBM/CPU/存储）、前缀与非前缀缓存（CacheBlend）、P2P KV 传输、缓存全生命周期控制，vLLM 与 NVIDIA Dynamo 已验证，"KV 是数据"完成了<b>开源 → 商业化</b>闭环<sup class="c"><a href="#ref-89">[89]</a></sup>。窗口内另见 Kioxia 的 KV-Repurpose 非前缀复用测试床（arXiv:2610.13060）与 Apple 的 KV-Kaizen（arXiv:2609.37988）：存储厂商与端侧厂商相继入场。</p>
@@ -1267,8 +1273,8 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=5ca28f911f38">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=efa9874587be"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=94d6fdef326c">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>
