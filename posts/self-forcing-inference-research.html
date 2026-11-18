@@ -200,7 +200,7 @@
 <div class="fbox"><b>⑨ 客户端缓冲</b><small>抗抖动的代价是更慢响应</small></div><span class="arr">→</span>
 <div class="fbox"><b>⑩ 显示</b><small>用户看到画面</small></div>
 </div>
-<p style="font-size:13px;color:#8a94ab;margin-top:4px">图 0-2 · 本文自绘：Self Forcing 流式推理执行链。高亮三步（④⑤⑦）是每块必然发生的三段计算；②的"等齐"只存在于面向控制的扩展里——官方 1.3B 文生视频实现没有控制输入接口（见 2.4 节），此时链条退化为"离线整段生成"或 demo 式"逐块推送"。</p>
+<p>图 0-2 · 本文自绘：Self Forcing 流式推理执行链。高亮三步（</p><ul><li></li><li>⑦）是每块必然发生的三段计算</li><li>的"等齐"只存在于面向控制的扩展里——官方 1.3B 文生视频实现没有控制输入接口（见 2.4 节），此时链条退化为"离线整段生成"或 demo 式"逐块推送"。</li></ul>
 
 <p>六个维度各管一段：</p>
 <ul>
@@ -214,7 +214,7 @@
 
 <figure class="fig" id="fig-six-dims-interactive" style="padding:10px"><iframe src="img/sc-sf-six-dims.html" title="六维分析依赖图交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 0-1 · 可交互：点击播放沿"读历史 → latent 块 → 传输 → 解码"主路径走一遍，再点六个维度节点看它们分别约束链条的哪一段、最终如何汇入 min C_total/V_valid。本文自绘（交互图解，SeeCode 生成）；执行链事实综合自 Self-Forcing 仓库 <code>pipeline/causal_inference.py</code> 与 PixVid 论文 §3.5。</div></figure>
 
-<div class="note"><b>本文的边界</b><p>①本文所有显存/FLOPs/耗时数字是<b>源码形状推算 + 假设算例</b>，不是 GPU 实测；实测属于第 4 章 E0/E1 的待办。②官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）<b>没有用户动作控制接口</b>，响应延迟分析是面向"控制条件扩展"的架构模型（2.4 节）。③PixVid 的交互数字属于 SolarWM-5B 衍生模型，本文只用它做<b>机制对照</b>，不当成 Self Forcing 1.3B 的结果（3.6 节）。</p></div>
+<div class="note"><b>本文的边界</b><ul><li>本文所有显存/FLOPs/耗时数字是<b>源码形状推算 + 假设算例</b>，不是 GPU 实测；实测属于第 4 章 E0/E1 的待办。</li><li>官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）<b>没有用户动作控制接口</b>，响应延迟分析是面向"控制条件扩展"的架构模型（2.4 节）。</li><li>PixVid 的交互数字属于 SolarWM-5B 衍生模型，本文只用它做<b>机制对照</b>，不当成 Self Forcing 1.3B 的结果（3.6 节）。</li></ul></div>
 
 <h3>大事记时间线</h3>
 
@@ -401,7 +401,7 @@
 
 <p>这张表给出本节的核心判断：<b>I ≈ 4,700–5,100 FLOP/B，比屋脊点 295 高一个数量级以上，此简化模型预测块计算偏向算力受限；实际瓶颈还需包含真实 HBM 流量、kernel 利用率与调度开销后测量</b>。对照单 token LLM decode：每步 F ≈ 2×参数量、D ≈ s×(权重+KV)，只计权重时 I ≈ 2/s ≈ 1 FLOP/B（bf16）；加入 KV 流量后更低，比屋脊低两个数量级——这就是"视频块不能照搬 LLM decode 的访存受限结论"的定量版本。原因是结构性的：视频块每前向 <b>4,680 个 token 一起算</b>（q 很大），权重搬一次被 4,680 个 token 摊薄；decode 每次只有 1 个 token，权重搬一次只服务一个 token。</p>
 
-<div class="note"><b>逻辑字节 ≠ 真实 HBM 流量</b><p>表 3-1 的 D 是"逻辑上必须访问的字节"。真实流量 = 逻辑字节 × 布局因子 θ：①L2/SMEM 复用（相邻层间权重驻留、attention 分块复用 K/V）会把 θ 压到 &lt;1；②不良布局（KV 非连续、头维切分错位）会把 θ 推到 &gt;1；③5 次前向读同一份 KV，若片上放不下就要真读 5 遍。本文一律用显式参数 θ 表达，不用隐含假设。另外注意 t<sub>block</sub> 是<b>成本分解</b>：commit 与维护影响的是"下一块的开销"，并不全部落在当前块的响应路径上（3.6 节会把哪些项真正串行讲清楚）。</p></div>
+<div class="note"><b>逻辑字节 ≠ 真实 HBM 流量</b><p>表 3-1 的 D 是"逻辑上必须访问的字节"。真实流量 = 逻辑字节 × 布局因子 θ：</p><ul><li>L2/SMEM 复用（相邻层间权重驻留、attention 分块复用 K/V）会把 θ 压到 &lt;1</li><li>不良布局（KV 非连续、头维切分错位）会把 θ 推到 &gt;1</li><li>5 次前向读同一份 KV，若片上放不下就要真读 5 遍。本文一律用显式参数 θ 表达，不用隐含假设。另外注意 t<sub>block</sub> 是<b>成本分解</b>：commit 与维护影响的是"下一块的开销"，并不全部落在当前块的响应路径上（3.6 节会把哪些项真正串行讲清楚）。</li></ul></div>
 
 <pre>import sys
 GiB = 1024**3
@@ -441,7 +441,7 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 </table>
 <p style="font-size:12.5px;color:#8a94ab;margin-top:-6px">表 3-2 · 规格口径（厂商 HBM 规格；有效带宽通常为规格的 60–80%，比较时要么全用规格、要么全用实测，不可混用）。</p>
 
-<p>三个使用纪律：<b>①ρ 不能独立决定设备优劣</b>——4090 与 H100 的 ρ 几乎相同（42），但容量差 3.3 倍、算力差 6 倍以上；ρ 只是"状态放置"维度的刻度。<b>②区分峰值与有效</b>——表 3-2 是规格；做期限推断时用 BW_eff。<b>③ρ 定义的是"可行域"</b>——例如 81 帧满槽 KV 5.62 GiB + 权重 + VAE + 输出，在 24 GB 的 4090 上已经贴近极限（官方 demo 恰好"单卡 4090 实时"，靠的是 FP8 与 TAEHV 压输出侧），要并发 B&gt;1 或更长会话就必须切分或卸载，这直接把问题推向 3.5 的异构分离。</p>
+<p>三个使用纪律：</p><ul><li><b>ρ 不能独立决定设备优劣</b>——4090 与 H100 的 ρ 几乎相同（42），但容量差 3.3 倍、算力差 6 倍以上；ρ 只是"状态放置"维度的刻度。</li><li><b>区分峰值与有效</b>——表 3-2 是规格；做期限推断时用 BW_eff。</li><li><b>ρ 定义的是"可行域"</b>——例如 81 帧满槽 KV 5.62 GiB + 权重 + VAE + 输出，不能仅由这些部分之和判定 24 GB 的 4090 已接近容量极限；还需测量文本编码器、激活及解码路径。并发或会话增长后若超过可用容量，才需要压缩、切分或卸载，这直接把问题推向 3.5 的异构分离。</li></ul>
 
 <div class="analogy">宽容比像<b>图书馆的开架速度</b>：ρ 高 = 书库传送带快（同样藏书量每秒能取更多次）；但传送带快不等于书库大——24 GB 与 192 GB 的卡可以一样"快"（ρ 同为 42），藏书量差 8 倍。决定"这份档案（5.62 GiB KV）放哪"要先看容量装不装得下，再看取用的频度（3.1 的访问放大）配不配得上这个 ρ。</div>
 
@@ -453,7 +453,7 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 
 <p>四个口径必须分开，否则必错：<b>分配槽位</b>（源码预分配 32,760 token：K/V 各 <code>[B, 32760, 12, 128]</code>，30 层，bf16 → B=1 时 <b>5.6236 GiB</b>，这是形状推算）；<b>有效历史</b>（第 k 块后 m = 4,680k token，对应 0.2678 GiB/latent 递增）；<b>当前块</b>（去噪期间被反复覆写的 4,680 token 中间量，不额外占槽）；<b>实际读取长度</b>（注意力窗口 = min(max_attention_size, 已写入量)）。另有 <b>cross-KV</b> 每层 <code>[B, 512, 12, 128]</code>、整段只算一次：30 层合计 <b>0.0879 GiB</b>——它小到常被忽略，但 3.3 末尾会看到它是换文本条件时必须失效的缓存之一；还需重新做文本编码，并判断历史状态语义是否有效。</p>
 
-<div class="note"><b>三个常犯的乘法错误</b><p>①<b>持久容量不乘去噪次数</b>：S=4 次去噪读的是同一份 KV，不复制 4 份——乘的是"读取流量"（3.1 的访问放大），不是显存。②<b>槽位不乘块数</b>：预分配 32,760 是上限（恰好等于 81 帧整段），7 块写满即止。③<b>不乘层数之外又乘注意力头</b>：h_kv·d_h = 1,536 = d，12 头×128 已经是全部维度。</p></div>
+<div class="note"><b>三个常犯的乘法错误</b><ul><li><b>持久容量不乘去噪次数</b>：S=4 次去噪读的是同一份 KV，不复制 4 份——乘的是"读取流量"（3.1 的访问放大），不是显存。</li><li><b>槽位不乘块数</b>：预分配 32,760 是上限（恰好等于 81 帧整段），7 块写满即止。</li><li><b>不乘层数之外又乘注意力头</b>：h_kv·d_h = 1,536 = d，12 头×128 已经是全部维度。</li></ul></div>
 
 <p><b>布局：官方"覆写追加"与语义相同的 ring/paged。</b>官方实现的写入是：当前块 KV 直接写进槽位 <code>[local_start:local_end]</code>（块内多次前向覆写、commit 定稿），块指针只前进——等价于连续追加。超容量的滑窗分支用的是 <b>shift/clone</b>：把 <code>[sink+evicted, ...]</code> 克隆左移、尾部插入新 KV——语义正确，但每次驱逐拷贝几乎整个窗口（O(window) 字节）。LLM 服务里的 <b>ring/paged</b> 布局在语义上完全等价（同样的"最老先出 + sink 保留"），可避免整窗搬移；元数据更新、非连续 attention 寻址与 kernel 支持仍有成本。第 4 章 E2 组把这个差距列为独立对照：预测收益 = 每块省下的窗口拷贝字节 ÷ BW（若搬移接近 5.6236 GiB 的默认容量，按一次读取加一次写入约 12.08 GB，在 3.35 TB/s 峰值下理想传输下界约 3.6 ms；实际窗口及测量值需另报，长会话高频驱逐时非可忽略）。</p>
 
@@ -471,7 +471,7 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 
 <p>各项：M_W 是 Wan2.1 VAE 解码器权重（<b>127M 参数</b><sup class="cite">[WAN21]</sup>，fp32 权重约 0.51 GB，推理常驻）；feature-cache 是因果 3D 卷积的历史特征缓存（<code>cached_decode</code>，缓存深度 CACHE_T=2，只留最近特征——这正是"因果缓存"的意义：时间上只依赖过去，所以过去的特征可以被最近 k 帧替代而非全保留）；workspace 是反卷积中间激活；output 是已解码未发送的帧缓冲。逐项量级（832×480，标注假设）：81 帧 uint8 输出 ≈ 97 MB；fp32 中间表示 ×4 ≈ 388 MB；因果缓存每层保留最近 2 帧 feature，1/2 分辨率、128 通道 fp32 约 50 MB/帧量级——<b>上述单项不能推出 VAE 总峰值；完整峰值须按具体解码路径测量</b>（fp32 累积口径），相对 5.62 GiB 的 KV 不是主导项，但叠加权重与输出后足以在 24 GB 卡上改变余量。</p>
 
-<p>四个工程语义：<b>①累积 vs 及时释放</b>——离线 <code>decode_to_pixel(use_cache=False)</code> 一次性解 21 latent、输出全部驻留；流式路径逐块解码、块内输出发送后即可释放，峰值差一个"累积输出"项。②<b>FP32 转换</b>——VLM 习惯里 VAE 常以 fp32 跑（数值敏感），权重+激活口径都要按 4 字节算，与 DiT 的 bf16 不同。③<b>反压</b>——输出队列有界且消费端（网络/客户端）变慢时，生成端必须暂停或丢弃：这是"慢消费端"负载（E6）要测的形态。④<b>空间 tiling 可以、时间 tiling 受限</b>——因果时间卷积的输出依赖历史特征，时间维不能随意切块；空间 tiling 也需处理卷积感受野、重叠与接缝，是高分辨率下的省显存手段。</p>
+<p>四个工程语义：</p><ul><li><b>累积 vs 及时释放</b>——离线 <code>decode_to_pixel(use_cache=False)</code> 一次性解 21 latent、输出全部驻留；流式路径逐块解码、块内输出发送后即可释放，峰值差一个"累积输出"项。</li><li><b>FP32 转换</b>——VLM 习惯里 VAE 常以 fp32 跑（数值敏感），权重+激活口径都要按 4 字节算，与 DiT 的 bf16 不同。</li><li><b>反压</b>——输出队列有界且消费端（网络/客户端）变慢时，生成端必须暂停或丢弃：这是"慢消费端"负载（E6）要测的形态。</li><li><b>空间 tiling 可以、时间 tiling 受限</b>——因果时间卷积的输出依赖历史特征，时间维不能随意切块；空间 tiling 也需处理卷积感受野、重叠与接缝，是高分辨率下的省显存手段。</li></ul>
 
 <div class="note"><b>区分三种"显存"</b><p>allocated（张量实际申请）/ reserved（分配器缓存池，≥ allocated）/ nvidia-smi 的设备占用（≥ reserved，含上下文与碎片）。比较方案时必须同口径——E1/E3 组的报表统一用 allocated 峰值 + reserved 峰值两列。</p></div>
 
@@ -497,7 +497,7 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 <tr><td>异构阶段分离（如 H100+L40S）</td><td>1×H100 + 1×L40S</td><td>同上 + 异构启动差</td><td>VAE 侧慢但便宜；需 n 配比</td><td>t_xfer 同量级；关键路径仍在 DiT（算力大头）</td><td>同上 + 迁移时双份状态峰值</td></tr>
 </table>
 
-<p>三条纪律：<b>①独立实例假设</b>——R_block 公式假设各实例服务时间独立稳定，突发与抢占会打破它（E4 要测）。<b>②首块、稳态、交互关键路径是三条不同的账</b>——分离改善稳态吞吐（重叠），但把传输与对齐放进每块路径；对"首个可见帧"它通常更慢。<b>③更低的流水间隔 ≠ 更低的单次控制响应</b>——节拍是均值概念，响应是分位数概念（3.6）。<b>状态迁移</b>：实例调度/故障切换要搬 KV（5.62 GiB 量级）+ VAE 缓存，迁移期间新旧两份并存，峰值翻倍——TurboServe 报告 GPU 间状态迁移可压到 23–30 ms（NCCL 直传）<sup class="cite">[TURBOSERVE]</sup>，但那是工程优化后的结果，不是免费能力。相关工作：DisagFusion 把 Encoder/DiT/Decoder 拆三段并做实例比例弹性<sup class="cite">[DISAGFUSION]</sup>；PipeDiT 的 DeDiVAE 把去噪组与解码组解耦<sup class="cite">[PIPDIT]</sup>；DDiT 在单系统内就地调整各阶段并行度<sup class="cite">[DDIT]</sup>——第 5 章按相关度归队。</p>
+<p>三条纪律：</p><ul><li><b>独立实例假设</b>——R_block 公式假设各实例服务时间独立稳定，突发与抢占会打破它（E4 要测）。</li><li><b>首块、稳态、交互关键路径是三条不同的账</b>——分离改善稳态吞吐（重叠），但把传输与对齐放进每块路径；对"首个可见帧"它通常更慢。</li><li><b>更低的流水间隔 ≠ 更低的单次控制响应</b>——节拍是均值概念，响应是分位数概念（3.6）。</li></ul><p><b>状态迁移</b>：实例调度/故障切换要搬 KV（5.62 GiB 量级）+ VAE 缓存，迁移期间新旧两份并存，峰值翻倍——TurboServe 报告 GPU 间状态迁移可压到 23–30 ms（NCCL 直传）<sup class="cite">[TURBOSERVE]</sup>，但那是工程优化后的结果，不是免费能力。相关工作：DisagFusion 把 Encoder/DiT/Decoder 拆三段并做实例比例弹性<sup class="cite">[DISAGFUSION]</sup>；PipeDiT 的 DeDiVAE 把去噪组与解码组解耦<sup class="cite">[PIPDIT]</sup>；DDiT 在单系统内就地调整各阶段并行度<sup class="cite">[DDIT]</sup>——第 5 章按相关度归队。</p>
 
 <figure class="fig" id="fig-sf-disagg-interactive" style="padding:10px"><iframe src="img/sc-sf-disagg.html" title="DiT—VAE 异构分离关键路径交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 3-2 · 可交互：沿"latent 块 → 跨链路 → 解码"主路径走一遍流水，点击节点看 KV/VAE 缓存各自的状态亲和与三条节拍上限（n_D/t_D、n_V/t_V、BW/M）。本文自绘（交互图解，SeeCode 生成）。</div></figure>
 
@@ -714,7 +714,7 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 <li id="UNSTEP"><b>UnStep</b>（港大等）. 免训练运行时栈协同加速 Self Forcing；arXiv:2609.32518，2026-09。站内 <a href="vit-sparsification.html">ViT 稀疏化篇</a> §6 引用。</li>
 <li id="MONARCHRT"><b>MonarchRT</b>（CMU + Morpheus AI）. 结构化稠密注意力实时视频生成；arXiv:2602.12271，NeurIPS 2026。站内 ViT 稀疏化篇引用。</li>
 </ol>
-<p style="font-size:12.5px;color:#8a94ab;">注：①源码事实为 guandeh17/Self-Forcing @ 33593df（2025-09-12 main 快照）的静态阅读结果，不是运行验证；结构数字中"30 层/1,536/8,960/12"同时有仓库内配置与推理管线硬编码双重证据，模型 config.json 为仓库外下载件。②PixVid 数字为论文报告口径（单卡 B200、480×864、4 步、CuTeDSL 内核、窗口填满后计时），中位等待 344 ms 为 495−151 的隐含分解、与 (N−1)/(2f) 公式一致，论文未明文印出该数；引用时按"隐含值"表述。③本文全部耗时/吞吐/显存推算（表 3-1/3-2 等）为形状推算 + 假设效率参数，非 GPU 实测；复算脚本见代码 3-1。④arXiv 编号与日期均于 2026-11-18 逐条核对；PixVid 代码发布状态、SlackServe 开源状态以当日检索为准。</p>
+<p>注：</p><ul><li>源码事实为 guandeh17/Self-Forcing @ 33593df（2025-09-12 main 快照）的静态阅读结果，不是运行验证；结构数字中"30 层/1,536/8,960/12"同时有仓库内配置与推理管线硬编码双重证据，模型 config.json 为仓库外下载件。</li><li>PixVid 数字为论文报告口径（单卡 B200、480×864、4 步、CuTeDSL 内核、窗口填满后计时），中位等待 344 ms 为 495−151 的隐含分解、与 (N−1)/(2f) 公式一致，论文未明文印出该数；引用时按"隐含值"表述。</li><li>本文全部耗时/吞吐/显存推算（表 3-1/3-2 等）为形状推算 + 假设效率参数，非 GPU 实测；复算脚本见代码 3-1。</li><li>arXiv 编号与日期均于 2026-11-18 逐条核对；PixVid 代码发布状态、SlackServe 开源状态以当日检索为准。</li></ul>
 <p style="font-size:12.5px;color:#8a94ab;">本文与站内实时世界模型篇（动作接口与 serving 栈）、KV Cache 篇（通用机制）、量化篇（KV 压缩数字）、ViT 稀疏化篇（UnStep/MonarchRT）、推理服务篇（P/D 分离）、高性价比篇（成本口径）互补，重叠处已互链。</p>
 
 </div><!-- /wrap -->
