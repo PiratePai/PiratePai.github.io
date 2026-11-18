@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:#7f8b9c;margin:-6px 0 14px;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;line-height:1.6;}
+  th{background:#1c2733;color:#cfe3f7;}
+  tr:nth-child(even){background:#151b23;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:14px 20px;margin:22px 0;}
+  .summary3 b{color:#7fe0bd;}
+  .summary3 ol{margin:8px 0 2px;padding-left:24px;}
+  .summary3 li{margin:5px 0;line-height:1.7;}
+  .timeline{list-style:none;margin:16px 0;padding-left:0;border-left:2px solid #3e5770;}
+  .timeline li{position:relative;margin:0 0 16px 22px;padding-left:10px;}
+  .timeline .t{display:inline-block;min-width:74px;font-family:Consolas,monospace;font-size:12.5px;color:#41d1a7;margin-right:8px;}
+  .timeline li::before{content:"";position:absolute;left:-27px;top:9px;width:9px;height:9px;border-radius:50%;background:#41d1a7;box-shadow:0 0 0 3px rgba(65,209,167,.18);}
+  .pill{display:inline-block;padding:2px 12px;border-radius:999px;background:#20344a;border:1px solid #375876;color:#bcd6f2;font-size:12.5px;margin:2px 6px 2px 0;}
+  .tag{display:inline-block;font-size:10.5px;padding:1px 8px;border-radius:999px;margin-left:8px;vertical-align:2px;}
+  .tag.sys{background:#1d3348;color:#7fc0ff;border:1px solid #2f5a7d;}
+  .tag.paper{background:#23324d;color:#b9a6ff;border:1px solid #46538a;}
+  .tag.ind{background:#173d33;color:#7fe0bd;border:1px solid #2c6a55;}
+  .fig{background:#141a22;border:1px solid #2a3442;border-radius:10px;padding:14px 16px;margin:18px 0;}
+  .fig .cap{font-size:12.5px;color:#8a94ab;margin-top:8px;line-height:1.6;}
+  .flowrow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:12px 0;}
+  .fbox{flex:1 1 120px;min-width:120px;background:#182230;border:1px solid #375876;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55;}
+  .fbox b{color:#cfe3f7;}
+  .fbox.hl{border-color:#41d1a7;background:#12251f;}
+  .fbox.ok{border-color:#3d89d2;}
+  .fbox small{color:#8a94ab;font-size:11.5px;display:block;margin-top:4px;}
+  .arr{align-self:center;color:#5f7d9c;font-size:18px;padding:0 2px;}
+  ol.refs{font-size:13px;color:#aeb4bd;padding-left:26px;}
+  ol.refs li{margin:7px 0;line-height:1.65;}
+  ol.refs i{color:#c9d4e2;}
+  ol.refs a{color:#6ea8ff;}
+  .hl-wrap{border-radius:14px;background:linear-gradient(120deg,rgba(65,209,167,.14),rgba(110,168,255,.10) 55%,rgba(157,123,255,.12));border:1px solid rgba(65,209,167,.35);padding:14px 14px 16px;margin:18px 0;}
+  .hl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .hl-head b{color:#7fe0bd;font-size:15.5px;letter-spacing:.02em}
+  .hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+  .hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+  .hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+  .hl-card:hover{border-color:rgba(65,209,167,.45)}
+  .hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .hl-meta b{color:#e8eaed;font-size:14px}
+  .hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+  .hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+  .hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+  .hl-card .hl-link:hover{text-decoration:underline}
+  @media(max-width:760px){
+    header.hero h1{font-size:26px;}
+    .toc ol{columns:1;}
+    table{font-size:12.5px;display:block;overflow-x:auto;}
+  }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）">
+<meta property="og:description" content="以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。">
+<meta property="og:url" content="https://piratepai.github.io/posts/inference-research-roadmap.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-18">
+<meta property="article:modified_time" content="2026-11-18">
+<link rel="canonical" href="https://piratepai.github.io/posts/inference-research-roadmap.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "url": "https://piratepai.github.io/posts/inference-research-roadmap.html", "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。", "inLanguage": "zh-CN", "headline": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "datePublished": "2026-11-18", "dateModified": "2026-11-18", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-research-roadmap.html"}</script>
+<!-- site-metadata:end -->
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
+
+<header class="hero"><div class="inner">
+  <p class="kicker" style="color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px">研究方法 · 2026</p>
+<h1>推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）</h1>
+  <p class="sub">把站内 既有专题放回一条可操作的研究主线上——<b>先解释"请求为什么慢、状态为什么占内存"（性能建模），再在质量与服务目标下求"单位有效产出成本"最小（约束优化），然后让模型结构、执行粒度与资源放置一起被选择（协同设计），最后在条件变化时靠反馈调整而不抵消收益（自适应系统）</b>。四阶段不是历史进化链，也不必逐级通关：每个阶段独立产出证据，可以并行进入。本文补上专题之间缺的那层"如何组织研究问题"，并把响应延迟（control-to-screen）作为一类一等公民约束讲清楚——高吞吐不等于低响应，PixVid 用 29.4 fps 换 34 ms 的实测就是证明。</p>
+  <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">对象 <b>PixVid arXiv:2611.17336v1 · TurboServe arXiv:2606.19271 · SlackServe arXiv:2606.15319 · Runway Characters arXiv:2611.05642 · Andes arXiv:2404.16283v2</b>（2026-11-18 快照）</span><span class="pill chip">比较口径 <b>固定资源 / 固定时延 / 固定成本三种，随文标注</b></span><span class="pill chip">引用 <b>正文标注出处与时间；预印本单独标明</b></span></div>
+<!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-18">2026-11-18</time> · 新增专题：<a href="#s0">新增《推理研究路线》：四阶段方法框架、响应延迟指标对照与 PixVid/Runway 案例校准、TurboServe/SlackServe 自适应系统分析、全站 21 篇与教程的四阶段映射；含三张 SeeCode 交互图解（图 0-1 证据流、图 4-1 约束关系、图 6-1 反馈闭环）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/inference-research-roadmap.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/inference-research-roadmap.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="目录">
+<b>📁 目录</b>（无 JavaScript 环境可直接按序号阅读）
+<ol>
+<li style="list-style:none;margin-left:-18px"><a href="#hl" style="color:#41d1a7;font-weight:700">★ 近期进展（前沿亮点）</a></li>
+<li><a href="#s0">0 导读与大事记：一条主线、四个阶段、不要进化链</a></li>
+<li><a href="#s1">1 预备知识：四个阶段在做什么、指标怎么读</a></li>
+<li><a href="#s2">2 阶段一 性能建模：请求为什么慢、状态为什么占内存</a></li>
+<li><a href="#s3">3 阶段二 约束优化：质量与服务目标下的单位成本</a></li>
+<li><a href="#s4">4 响应延迟：从吞吐到 control-to-screen</a></li>
+<li><a href="#s5">5 阶段三 协同设计：模型、运行时与硬件一起选</a></li>
+<li><a href="#s6">6 阶段四 自适应系统：反馈闭环与切换成本</a></li>
+<li><a href="#s7">7 全站映射：既有专题与教程如何服务四个阶段</a></li>
+<li><a href="#s8">8 局限、方法纪律与未来方向</a></li>
+<li><a href="#refs">参考文献</a></li>
+</ol>
+</nav>
+
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>性能与延迟数字来自所引论文正文与附录（PixVid 数字逐项对照 arXiv:2611.17336v1 的 §3.5、§4.5、表 3/10/11 与附录 B.5 核验），口径与快照日期随引用就地标注；二手转述均标注可信度；开源项目版本为 2026-11-18 的快照。除标注"推算"外，本文不运行任何模型或硬件实验；比较三种口径（固定资源/固定时延/固定成本）贯穿全文，跨系统数字不可直接比。</p><details><summary>小算例</summary><p>文中算例（2.3 块耗时三口径、4.3 块等待下界、4.4 缓冲深度）均只使用论文已发表的数字与四则运算，给出每一步；它们是口径演示，不是性能预测。</p></details></details>
+<section id="reading-path" aria-label="阅读路径与研究问题">
+<div class="note"><b>从这里读起 · 先看地图，再进专题</b><p><a href="#s1">四个阶段是什么</a> → <a href="#s2">性能建模</a> → <a href="#s3">约束优化</a> → <a href="#s4">响应延迟</a> → <a href="#s5">协同设计</a> → <a href="#s6">自适应系统</a> → <a href="#s7">全站映射表</a>。近期发布见"近期进展"。</p><p>本文只做"研究路线视角"：机制细节留给专题——KV 与分页见 <a href="kv-cache-survey.html">KV Cache 篇</a>，批处理与 P/D 分离见 <a href="inference-serving.html">推理服务篇</a>，算子与编译见 <a href="custom-inference-engines-2026.html">定制引擎篇</a>，单位成本账本见 <a href="cost-efficient-inference-2026.html">高性价比推理篇</a>，仿真器见 <a href="llm-perf-simulation-2026.html">性能仿真篇</a>，实验纪律见 <a href="inference-evaluation.html">评测篇</a>。动手实验路径见<a href="https://piratepai.github.io/pi-infer-book/">《动手学习大模型推理加速》教程</a>。</p></div>
+<div class="analogy"><b>一个可查的例子：</b>PixVid（Roblox，2026-11）把交互视频模型从 12 帧一块改成逐帧生成：吞吐从 72.0 fps 掉到 29.4 fps（<b>变慢 2.4 倍</b>），但按键到画面的中位延迟从 495 ms 降到 34 ms（<b>快 14.6 倍</b>）<sup class="cite">[PIXVID26]</sup>。同一论文中的两种模型，两个指标给出方向相反的结论——这就是为什么"先定口径再谈优化"是这条研究路线的第一课。</div>
+<h3>用同一组问题比较四个阶段</h3>
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">阶段对照 · 窄屏可横向滑动</caption><thead><tr><th>阶段</th><th>核心问题</th><th>产出什么证据</th><th>读完应能回答</th></tr></thead><tbody>
+<tr><td>性能建模</td><td>请求为何慢、状态为何占内存</td><td>瓶颈归因（计算/访存/容量/通信/排队/串行依赖）</td><td>"慢在哪"能落到一项可测的账</td></tr>
+<tr><td>约束优化</td><td>满足质量与服务目标时如何降成本</td><td>可行域内的最优点与 Pareto 边界</td><td>哪些配置合法、其中哪个最省</td></tr>
+<tr><td>协同设计</td><td>模型结构、执行粒度、资源放置如何共同选择</td><td>联合设计点（如块大小、分离边界、KV 语义）</td><td>模型改一点，系统随之改哪些</td></tr>
+<tr><td>自适应系统</td><td>条件变化时如何调整而不抵消收益</td><td>闭环策略及其切换成本与失效边界</td><td>何时切换、切换本身花多少</td></tr>
+</tbody></table></div>
+</section>
+
+
+<details class="note"><summary><b>近期进展（点击展开）</b></summary>
+<div class="hl-wrap" id="hl">
+<div class="hl-head"><b>前沿亮点</b><i>2026 年 5–11 月 · 与"研究路线"直接相关的发布与数据（详见正文对应章节）</i></div>
+<div class="hl-grid">
+<div class="hl-card"><div class="hl-meta"><b>PixVid：吞吐换响应的 14.6 倍</b><span class="hl-date">11-12 · Roblox</span></div><p>像素空间逐帧生成：29.4 fps（低于 SolarWM 的 72.0）换 34 ms control-to-screen；附录 B.5 给出 495 ms = 等待 0–688 ms + 块计算 151 ms 的完整拆分。</p><a class="hl-link" href="#s4">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Runway Characters：57B 视频 DiT 跑进实时</b><span class="hl-date">11-03 · Runway</span></div><p>24 fps、每 chunk 166.7 ms 死线、batch=1：写时 KV 维护砍 91% 缓存整备，7 周生产 99.5% 会话 &gt;23.5 fps；附录 B 的缓冲模拟是"缓冲换延迟"的教科书算例。</p><a class="hl-link" href="#s4">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>TurboServe：流式视频首个专用服务系统</b><span class="hl-date">06-17 · 上交/生数/清华</span></div><p>会话放置 + GPU 供给联合在线调度：最坏 chunk 延迟 −37.5%、GPU 成本 −37.2%（生产 trace，最大 64×B300）；迁移开销 23–30 ms 只占 chunk 2–3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>SlackServe：用播放富余量统一信号</b><span class="hl-date">06-13 · 北大 Hetu</span></div><p>以 playout slack（生成进度领先播放进度的余量）跨流排序算力、流内按质量下限选保真度：连续播放比 1.64–3.29×、TTFC 降 1.61–9.65×（16×H100）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>GAUSS：SLO 时代的负载感知仿真</b><span class="hl-date">10-27 · Microsoft</span></div><p>解析 + 蒙特卡洛混合建模，按延迟 SLO 口径输出舰队容量与账单，而非单一吞吐数——"性能建模"阶段 2026 年的代表作。</p><a class="hl-link" href="#s2">→ 跳到详情</a></div>
+<div class="hl-card"><div class="hl-meta"><b>Andes：流式 QoE 的形式化（纠误）</b><span class="hl-date">2024-04 · 密歇根大学</span></div><p>QoE = 1 − S_delay/S_whole，把"体验"变成可优化的量；注意它是密歇根/UIUC/Cisco 的 arXiv 预印本，网传"阿里 KDD 论文"不成立。</p><a class="hl-link" href="#s3">→ 跳到详情</a></div>
+</div>
+</div>
+</details>
+
+<h2 id="s0"><span class="no">0</span>导读与大事记：一条主线、四个阶段、不要进化链</h2>
+
+<p>这份报告回答四个问题：<b>推理研究的问题空间怎么组织成一条可执行的路线；四个阶段各自吃什么输入、产出什么证据、在哪里失效；响应延迟为什么不是吞吐的倒数、该怎么定义和约束；站内 既有专题与 16 章教程分别服务哪个阶段</b>。全文主线一句话——<b>推理系统研究 = 在质量与服务约束下最小化单位有效产出成本，手段沿"建模 → 优化 → 协同设计 → 自适应"逐层获得能力</b>。</p>
+
+<p>先把一个容易误读的关系说清楚。本站已有的四条线索——<b>推理 infra（基础能力）、高性价比推理（优化目标）、定制推理引擎（实现载体）、自演进/自适应推理（反馈闭环）</b>——是<b>同一个体系的四个侧面，不是前后相继的历史阶段</b>：</p>
+
+<table>
+<tr><th>侧面</th><th>它回答的问题</th><th>对应研究阶段</th><th>站内对应</th></tr>
+<tr><td><b>推理 infra</b><span class="tag sys">系统</span></td><td>有哪些可控制手段（算子、缓存、调度、并行、部署）</td><td>四个阶段共同的基础能力</td><td><a href="inference-serving.html">推理服务</a> · <a href="parallelism-survey.html">并行</a> · <a href="custom-inference-engines-2026.html">引擎</a></td></tr>
+<tr><td><b>高性价比推理</b><span class="tag ind">工程</span></td><td>目标函数是什么（$/M tokens、goodput、单位有效产出成本）</td><td>阶段二约束优化的目标</td><td><a href="cost-efficient-inference-2026.html">高性价比推理</a></td></tr>
+<tr><td><b>定制推理引擎</b><span class="tag sys">系统</span></td><td>手段在哪里落地（编译、算子、运行时、分离边界）</td><td>阶段三协同设计的载体</td><td><a href="custom-inference-engines-2026.html">定制引擎</a> · <a href="strata-hybrid-inference.html">混合部署</a></td></tr>
+<tr><td><b>自适应推理</b><span class="tag paper">研究</span></td><td>条件变了怎么办（观测、预测、策略、切换成本）</td><td>阶段四反馈闭环</td><td><a href="training-free-autotune-2026.html">自动调优</a> · <a href="agent-inference-systems.html">Agent 在线系统</a></td></tr>
+</table>
+
+<p>同样，<b>四个研究阶段也不构成"所有项目必须逐级通关"的流程</b>。阶段一是"慢在哪"的证据，阶段二是"在合法配置里选最省"的证据，阶段三是"把模型与系统一起改"的证据，阶段四是"条件变化时守得住"的证据。一个具体项目可以只做一个阶段（例如只做算子融合，属于阶段三的一个点），也可以从阶段四的问题倒着进入（例如先发现自适应策略抖动，再回头补阶段一的模型）。路线的价值在于<b>让每个工作说清楚自己在哪一层、依赖哪些下层的证据、给哪些上层供货</b>，而不是规定先后。</p>
+
+<h3>一页纸地图：四阶段的证据流</h3>
+
+<p>下图是本文的骨架，也建议作为组织自己的研究笔记或综述的模板：<b>每个阶段吃上层的"问题与约束"，向下层的"可控变量"要手段，向右产出自己的证据；证据不够格，就不要往下一阶段走</b>。</p>
+
+<figure class="fig" id="fig-roadmap-stages-interactive" style="padding:10px"><iframe src="img/sc-roadmap-four-stages.html" title="四阶段证据流交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 0-1 · 可交互：依次点亮四个阶段，看每个阶段吃什么输入（问题/约束）、控什么变量、产出什么证据、在哪里失效；点击节点看该阶段的代表工作与站内专题入口。本文自绘（交互图解）。</div></figure>
+
+<table>
+<tr><th>阶段</th><th>核心问题</th><th>应解释的内容</th><th>失效边界（超出即不适用）</th></tr>
+<tr><td><b>1 性能建模</b></td><td>请求为何慢、状态为何占内存</td><td>FLOPs、HBM 流量、容量、通信、排队、串行依赖与关键路径</td><td>模型未校准、负载漂移、尾部事件（见 2.4）</td></tr>
+<tr><td><b>2 约束优化</b></td><td>满足质量与服务目标时如何降低成本</td><td>多目标权衡、goodput、单位有效产出成本与可行域</td><td>约束本身选错口径（见 3.4）；质量非线性不可折算</td></tr>
+<tr><td><b>3 协同设计</b></td><td>模型结构、执行粒度和资源放置如何共同选择</td><td>KV 语义、块大小、解码器、分离边界及状态管理</td><td>联合搜索空间爆炸；跨层假设互相失效（见 5.4）</td></tr>
+<tr><td><b>4 自适应系统</b></td><td>条件变化时如何调整而不抵消收益</td><td>观测、预测、策略、切换成本、迟滞、质量约束与反馈</td><td>切换成本高于收益、观测滞后、策略震荡（见 6.4）</td></tr>
+</table>
+
+<h3>大事记时间线</h3>
+
+<ul class="timeline">
+<li><span class="t">2009-04</span><b>Roofline 模型</b>（Williams/Waterman/Patterson，CACM）：把性能拆成"算力屋顶 × 访存带宽"两条线上的可达上界，之后所有"这个 kernel 是算力受限还是带宽受限"的问法都源于此<sup class="cite">[ROOFLINE09]</sup>。</li>
+<li><span class="t">2020-11</span><b>Ansor</b>（OSDI 2020）：搜索空间 + 进化搜索 + 张量程序自动生成，把"算子调优"从手艺变成可复现的搜索问题——阶段一建模为阶段三搜索供货的早期样板<sup class="cite">[ANSOR20]</sup>。</li>
+<li><span class="t">2022-05</span><b>FlashAttention</b>（NeurIPS 2022）：把注意力的 IO 复杂度从二次降到线性（精确计算），证明"建模说清了 HBM 流量，优化才知道搬什么"——阶段一→阶段三的经典通道<sup class="cite">[FLASHATTN22]</sup>。</li>
+<li><span class="t">2022-07</span><b>Orca</b>（OSDI 2022）：迭代级调度 + 连续批处理，把"请求间串行等待"从账本里基本抹掉；变长真实负载吞吐最高提升 36.9×<sup class="cite">[ORCA22]</sup>。</li>
+<li><span class="t">2023-06</span><b>vLLM / PagedAttention</b>（SOSP 2023）：操作系统式分页管理 KV，显存浪费从 60–80% 降到 &lt;4%——"状态为何占内存"的建模直接变成运行时机制<sup class="cite">[VLLMPA23]</sup>。</li>
+<li><span class="t">2024-04</span><b>Andes</b>：形式化流式文本服务的 QoE = 1 − S_delay/S_whole，批评 TPOT 不足以刻画体验；token 粒度抢占调度 + 客户端 pacer，同算力 QoE 最高 4.7×<sup class="cite">[ANDES24]</sup>。</li>
+<li><span class="t">2024-05</span><b>Vidur</b>（MLSys 2024）：仿真式框架先在模拟器里搜并行/批处理配置再上机，论文评测的推理时延误差低于 9%——阶段一为阶段二供货的标志<sup class="cite">[VIDUR24]</sup>。</li>
+<li><span class="t">2024-06</span><b>Mooncake</b>（arXiv 2024-06-29，FAST 2025 收录）：KVCache 中心的分离架构，把"缓存"从实例资源升格为全局池——协同设计里状态管理的代表作<sup class="cite">[MOONCAKE25]</sup>。</li>
+<li><span class="t">2024-07</span><b>分离与不打洞的一年</b>：DistServe（OSDI'24）概念化 goodput 并论证 P/D 分池<sup class="cite">[DISTSERVE24]</sup>；Splitwise（ISCA'24）给出分池的能耗/成本边界<sup class="cite">[SPLITWISE24]</sup>；Sarathi-Serve（OSDI'24）用 chunked prefill 给出单机替代<sup class="cite">[SARATHI24]</sup>；Llumnix（OSDI'24）做请求级动态调度与跨实例迁移<sup class="cite">[LLUMNIX24]</sup>。</li>
+<li><span class="t">2025-06</span><b>Self Forcing</b>：自生成历史训练 + 因果少步蒸馏，让视频扩散模型逐 chunk 流式生成——之后所有流式视频服务系统的模型底座<sup class="cite">[SELFFORCE25]</sup>。</li>
+<li><span class="t">2025-06</span><b>DDiT</b>：文生视频管线（T5→DiT→VAE）解耦控制面 + 单步粒度贪心资源分配，p99 延迟最多降 1.44×<sup class="cite">[DDIT25]</sup>；同年 11 月 <b>PipeDiT</b>（后中 AAAI-26）用任务级流水线 + 模型解耦在 8 卡系统取得 1.06–4.02× 加速<sup class="cite">[PIPEDIT26]</sup>。</li>
+<li><span class="t">2026-05</span><b>DisagFusion</b>：扩散服务按 encoder/DiT/decoder 拆分部署 + 异步流水 + 预测-反馈弹性调度，吞吐最高 +3.4–20.5×<sup class="cite">[DISAGFUSION26]</sup>；此后 Frontier（05）、SLIM（07）、GAUSS（10）把 LLM 仿真推向 SLO 口径<sup class="cite">[FRONTIER26]</sup><sup class="cite">[GAUSS26]</sup>。</li>
+<li><span class="t">2026-06</span><b>流式视频服务系统成批出现</b>：TurboServe（会话放置+自动扩缩闭环）<sup class="cite">[TURBOSERVE26]</sup>与 SlackServe（playout slack 统一信号）<sup class="cite">[SLACKSERVE26]</sup>先后挂出，标志"自适应阶段"的研究对象从 LLM 扩展到流式视频。</li>
+<li><span class="t">2026-11</span><b>响应延迟成为一等指标</b>：Runway Characters 公开 57B 视频 DiT 的实时服务全账（24 fps、99.5% 会话达标、缓冲模拟）<sup class="cite">[RUNWAY26]</sup>；PixVid 用 495→34 ms 的实测把"吞吐-响应倒挂"钉死在论文数据上<sup class="cite">[PIXVID26]</sup>。</li>
+</ul>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li><b>四个侧面不是进化链</b>：infra 是能力、性价比是目标、定制引擎是载体、自适应是闭环；四个研究阶段是证据的不同层次，不是必须逐级通关的流程。</li>
+<li>路线的组织原则：<b>每项工作说清自己在哪个阶段、吃什么约束、控什么变量、产出什么证据</b>。</li>
+<li>2026 年的新变化：流式视频把 <b>control-to-screen 响应延迟</b>推成一等指标，服务系统研究（TurboServe/SlackServe/Runway）与模型研究（PixVid）在同一约束下会师。</li>
+</ol>
+</div>
+
+<!-- S1 -->
+<h2 id="s1"><span class="no">1</span>预备知识：四个阶段在做什么、指标怎么读</h2>
+
+<p>写给第一次组织研究问题的本科生：本节只需要"账本"和"带约束的除法"两个常识。先把四个阶段各用一句人话+一个类比立住，再给一张指标词典。</p>
+
+<h3>1.1 四个阶段，四句人话</h3>
+
+<p><b>性能建模</b>：在跑任何实验之前，用纸笔算出时间与显存去了哪里。输入是模型结构（层数、注意力形态、KV 每层多少字节）、硬件参数（算力峰值、HBM 带宽与容量、互连带宽）与负载描述（到达率、长度分布）；输出是一张<b>瓶颈归因表</b>——某一步慢，是因为算不动（compute-bound）、搬不动（memory-bound）、装不下（capacity）、传不快（communication）、排不上队（queueing）还是必须等前一步（串行依赖）。</p>
+
+<div class="analogy">性能建模像体检报告而不是药方：它只回答"堵塞在哪根血管"，不负责疏通。Roofline 就是第一张标准体检单——横轴"每字节算多少次"（运算强度），纵轴可达性能，屋顶是算力峰值、屋檐是带宽×运算强度，一个点落在哪，瓶颈就在哪<sup class="cite">[ROOFLINE09]</sup>。</div>
+
+<p><b>约束优化</b>：把"越快越好/越大越好"换成"在边界内最省"。质量下限（Q ≥ Q₀）、响应上界（R_p99 ≤ R₀）、显存上界（M ≤ C）圈出<b>可行域</b>；目标函数是单位有效产出的成本；优化的全部内容就是在可行域里找最优点，并画出"再要快 10% 要多花多少钱"的边界。</p>
+
+<div class="analogy">约束优化像在预算内点菜：钱（成本）、时间（上菜时限）、忌口（质量红线）都定死了，要的是"每一块钱买到的满足感"最大——而不是把最贵的菜全上一遍。可行域外再诱人的配置（比如把 batch 拉到吞吐峰值）都是"白赚的吞吐、丢掉的承诺"。</div>
+
+<p><b>协同设计</b>：承认模型结构、执行粒度、资源放置是<b>一组要一起解的变量</b>。KV 的语义（MHA/GQA/MLA 决定每 token 状态多少字节）改变缓存与通信的行为；生成的块大小（视频模型一次生成几帧）决定响应延迟的硬下限；分离边界（prefill/decode/解码器各占多少卡）改变成本曲线。任何一层单独"最优"，拼起来可能整体次优。</p>
+
+<div class="analogy">协同设计像装修前先一起看户型：不能先买好沙发（模型结构）再发现门进不去（运行时放不下），也不能只改水电（运行时）却不管房间用途（模型语义）。PixVid 干的就是"把墙拆了"——改掉 VAE 的时间压缩，让每帧独立成块，系统的响应延迟才有 34 ms 的可能<sup class="cite">[PIXVID26]</sup>。</div>
+
+<p><b>自适应系统</b>：负载、硬件状态、模型质量都会漂移，静态最优解会过期。自适应系统 = <b>观测（测什么）→ 预测（用什么模型外推）→ 策略（切换到哪个配置）→ 执行（切换本身花多少）</b>的闭环，外加迟滞（hysteresis，防止在阈值附近反复横跳）与回退路径。它不是无条件更优：策略切换、状态迁移、权重重载都占资源，错判时还会放大损失。</p>
+
+<div class="analogy">自适应系统像恒温器而不是空调遥控器：遥控器只响应你的设定（静态配置），恒温器持续测温（观测）、预测趋势（预测）、决定启停（策略）、并容忍 ±0.5°C 的死区以免压缩机频繁启停（迟滞与切换成本）。TurboServe 的会话迁移就带这个特征：只有"预期延迟下降大于迁移成本"才动<sup class="cite">[TURBOSERVE26]</sup>。</div>
+
+<h3>1.2 指标词典：一张表读清"快"的七种含义</h3>
+
+<p>"这个系统很快"在推理语境下至少有七种互不相同的含义。本站各专题分别深入过它们，这里给出统一对照——<b>读任何性能数字前，先问它在测哪一格</b>：</p>
+
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">指标对照 · 窄屏可横向滑动</caption><thead><tr><th>指标</th><th>定义（口径要点）</th><th>单位</th><th>它没说什么</th><th>深入阅读</th></tr></thead><tbody>
+<tr><td><b>吞吐</b></td><td>稳态单位时间产出：tok/s（文本）、fps（视频帧）</td><td>产出/秒</td><td>不含尾部分布，不含交互响应</td><td><a href="inference-serving.html">服务篇</a> 1.4</td></tr>
+<tr><td><b>TTFT / TPOT</b></td><td>首 token 时延 / 逐 token 间隔（流式文本）</td><td>ms</td><td>TPOT 均值不刻画阅读中的"卡一下"体验<sup class="cite">[ANDES24]</sup></td><td><a href="inference-evaluation.html">评测篇</a> 2.1</td></tr>
+<tr><td><b>goodput</b></td><td>SLO 达标请求的吞吐（不达标不计入）</td><td>tok/s</td><td>SLO 口径本身要先行声明</td><td><a href="cost-efficient-inference-2026.html">性价比篇</a> 2.2</td></tr>
+<tr><td><b>TTFC / 首 chunk</b></td><td>服务侧：请求发出到第一个流式 chunk 交付</td><td>ms</td><td>首 chunk 快 ≠ 后续控制能及时生效（见 4.2）</td><td><sup class="cite">[SLACKSERVE26]</sup></td></tr>
+<tr><td><b>流式间隔</b></td><td>相邻 chunk 的交付间隔分布（含尾部）</td><td>ms / 分位数</td><td>均值合格不代表 p99 不卡顿</td><td><sup class="cite">[RUNWAY26]</sup></td></tr>
+<tr><td><b>播放连续性</b></td><td>stall 率 / 连续播放比：画面冻结或跳帧的频率与时长</td><td>%、次/分</td><td>与缓冲深度耦合——连续性可以买，代价是延迟（4.4）</td><td><sup class="cite">[SLACKSERVE26]</sup></td></tr>
+<tr><td><b>control-to-screen</b></td><td>输入事件（按键）到<b>第一个反映该事件</b>的画面上屏</td><td>ms</td><td>不能用"任意下一帧"代替；含块等待（4.3）</td><td><sup class="cite">[PIXVID26]</sup></td></tr>
+<tr><td><b>任务完成时间 / 单位有效产出成本</b></td><td>端到端完成一个任务的时间；C_total/V_valid（3.2）</td><td>s；$/有效产出</td><td>V_valid 的验收判据必须写清</td><td><a href="agent-inference-systems.html">Agent 篇</a> · <a href="test-time-compute.html">预算篇</a></td></tr>
+</tbody></table></div>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>四阶段一句话：<b>建模给体检报告、优化在边界内找最省、协同设计把墙拆了一起改、自适应用闭环守住漂移下的收益</b>。</li>
+<li>"快"有七种含义（吞吐/TTFT/TPOT/goodput/TTFC/连续性/control-to-screen），<b>先对口径再比较</b>；每个指标的"没说什么"与"说什么"同样重要。</li>
+<li>两个指标可以方向相反（吞吐降、响应升），这不是矛盾，而是目标空间是多维的证据。</li>
+</ol>
+</div>
+
+<!-- S2 -->
+<h2 id="s2"><span class="no">2</span>阶段一 性能建模：请求为什么慢、状态为什么占内存</h2>
+
+<p><b>输入条件</b>：模型结构（层数 L、隐维 d、KV 每层字节数）、硬件（峰值算力、HBM 带宽/容量、互连）、负载（到达过程、长度分布、并发上界）。<b>核心问题</b>：延迟的时间去了哪、显存被什么占满。<b>输出证据</b>：瓶颈归因——任意一步被标成计算/访存/容量/通信/排队/串行依赖之一（或其组合），且数字对得上。</p>
+
+<h3>2.1 六本账：时间与显存的所有去处</h3>
+
+<p>一份合格的性能模型至少记六本账，任何"慢"都能落进其中一本：</p>
+
+<table>
+<tr><th>账本</th><th>记什么</th><th>代表问法</th><th>代表工作</th></tr>
+<tr><td><b>计算账</b></td><td>FLOPs = 2×参数量（每 token），乘 batch 与序列形状</td><td>"这一步是算力受限吗"</td><td>Roofline<sup class="cite">[ROOFLINE09]</sup>；站内仿真篇的算子账本</td></tr>
+<tr><td><b>访存账</b></td><td>权重 + KV + 激活的字节 ÷ HBM 带宽；decode 常是权重搬运主导</td><td>"搬运要多久"</td><td>FlashAttention 的 IO 分析<sup class="cite">[FLASHATTN22]</sup>；attention roofline</td></tr>
+<tr><td><b>容量账</b></td><td>KV 字节/token × 上下文长 × 并发 ≤ HBM 容量</td><td>"状态为何占内存、还能开几个并发"</td><td>PagedAttention 的浪费分析<sup class="cite">[VLLMPA23]</sup>；<a href="kv-cache-survey.html">KV 篇</a></td></tr>
+<tr><td><b>通信账</b></td><td>TP all-reduce / EP all-to-all / KV 传输的字节 ÷ 互连带宽</td><td>"切到多卡后通信吃掉多少"</td><td><a href="parallelism-survey.html">并行篇</a>；Runway 的 fused GEMM+all-reduce<sup class="cite">[RUNWAY26]</sup></td></tr>
+<tr><td><b>排队账</b></td><td>到达率 × 服务时间的队列行为（M/G/1 类、离散事件）</td><td>"请求在等谁"</td><td>排队论框架<sup class="cite">[QUEUEKV26]</sup><sup class="cite">[IBMQ26]</sup>；GAUSS<sup class="cite">[GAUSS26]</sup></td></tr>
+<tr><td><b>串行依赖账</b></td><td>关键路径上必须先后完成的步骤（自回归解码、块内去噪步、流水深度）</td><td>"并行也压不下去的那段是多少"</td><td>PixVid 的块等待下界<sup class="cite">[PIXVID26]</sup>；Runway 的三步在途流水<sup class="cite">[RUNWAY26]</sup></td></tr>
+</table>
+
+<p>注意最后两本账是吞吐优化的"天花板"：排队决定并发收益，串行依赖决定延迟下限。前四本优化得再好，第五本让请求干等、第六本让按键后必须等齐一整块控制，时间还是下不来——这正是 4.3 的伏笔。</p>
+
+<h3>2.2 三种建模路径：解析、排队、离散事件仿真</h3>
+
+<p><b>解析模型</b>（closed-form）：把每步延迟写成参数公式，最快但最粗。SIMPLE 能耗定律（4 参数解析模型）是 2026 年的代表，站内仿真篇已综述。<b>排队论</b>：把服务台-到达过程抽象成队列，直接回答"多小的并发才稳定"与"SLO 违约率"——2026 年出现两篇直接面向 SLO 的模型：把 KV 容量约束纳入稳定性分析<sup class="cite">[QUEUEKV26]</sup>，以及用于 SLO 驱动自动扩缩的近似排队模型<sup class="cite">[IBMQ26]</sup>。<b>离散事件仿真</b>：逐请求逐 token 推进事件时钟，Vidur 证明它能准确到"先仿真搜配置再上机"（论文评测的推理时延误差低于 9%，站内仿真篇专述）<sup class="cite">[VIDUR24]</sup>；2026 年的 GAUSS 把解析与蒙特卡洛混合，按 SLO 口径输出舰队容量与账单<sup class="cite">[GAUSS26]</sup>，Frontier 与 SLIM 分别扩展到分离部署与饱和区建模<sup class="cite">[FRONTIER26]</sup><sup class="cite">[SLIM26]</sup>，KernelSight-LM 则下沉到 kernel 级<sup class="cite">[KERNELSIGHT26]</sup>。</p>
+
+<div class="citebox"><b>[GAUSS26]</b> Microsoft. <i>GAUSS: A Workload-Aware Analytical and Monte-Carlo Simulator for LLM Inference Serving.</i> arXiv:2610.37989，2026-10-27（预印本）。原文："<span class="q">LLM inference has become an operational workload that fleets must provision, monitor, and bill against latency service-level objectives (SLOs). A single throughput number cannot…</span>"（中文译文：LLM 推理已成为需要按延迟 SLO 供给、监控与计费的运维负载，单一吞吐数字不再够用。）链接：<a href="https://arxiv.org/abs/2610.37989">arXiv</a>。这条引用代表建模阶段的新共识：<b>建模的输出从"吞吐"变成"SLO 口径下的容量与成本"</b>。</div>
+
+<h3>2.3 小算例：同一模型，三个"每块耗时"</h3>
+
+<p>建模阶段最容易犯的错是<b>口径混用</b>。以 PixVid 论文里的 SolarWM（12 帧一块、16 fps、单卡 B200）为例，"生成一个块要多久"有三个截然不同的数<sup class="cite">[PIXVID26]</sup>：</p>
+
+<table>
+<tr><th>口径</th><th>怎么算</th><th>数值</th><th>含义与陷阱</th></tr>
+<tr><td>稳态吞吐的倒数</td><td>12 帧 ÷ 72.0 fps</td><td>≈166.7 ms</td><td><b>不是</b>单块响应耗时：72 fps 含块间流水重叠，逐块执行并不串行地花 166.7 ms</td></tr>
+<tr><td>自定义栈实测块计算</td><td>论文 B.5 直接计时（优化 CuTeDSL 内核）</td><td><b>151 ms</b></td><td>集齐控制后 GPU 真正算一个块的时间；与吞吐倒数的差就是流水重叠</td></tr>
+<tr><td>官方实现的块计算</td><td>DiT 543 ms + 流式 VAE 解码 205 ms</td><td><b>748 ms</b>（16.1 fps）</td><td>同一模型、不同实现，差近 5×——"模型慢"常常是"实现慢"</td></tr>
+</table>
+
+<p>三个数都对，回答的是三个问题。比较任何两个系统的"每块耗时"前，先确认它们在同一口径上；这也是站内评测篇反复强调的纪律。用户提供的分析材料里"12/72≈167 ms"的拆分正是把第一种口径当成了第二种——<b>稳态 FPS 的倒数不能普遍当作单块响应耗时</b>，正式数字以论文附录 B.5 的 151 ms 为准。</p>
+
+<h3>2.4 失效边界：模型什么时候骗你</h3>
+
+<p>性能模型的四类系统性失效，每类都有文献反例：<b>（i）未校准</b>——解析模型的常数（kernel 效率、通信利用率）必须用少量实测锚定，Vidur 的校准协议就是为此设计<sup class="cite">[VIDUR24]</sup>；<b>（ii）稳态假设</b>——真实负载有突发与长尾会话，TurboServe 的生产 trace 显示活跃会话数在 30 分钟内剧烈起伏，静态模型会系统性低估尾部<sup class="cite">[TURBOSERVE26]</sup>；<b>（iii）尾部事件</b>——Runway 每 42 步一次的位置重置步耗时 263 ms（超预算 96 ms），稳态均值完全掩盖它，只有分布建模可见<sup class="cite">[RUNWAY26]</sup>；<b>（iv）跨层耦合</b>——单算子最优不等于端到端最优，Ansor 已经证明搜索必须带着上下文代价模型做<sup class="cite">[ANSOR20]</sup>。<b>下一阶段为何需要它</b>：约束优化的可行域边界（最大并发、最坏延迟）全部由阶段一的模型给出；没有可信的模型，"优化"只是试错。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>性能建模 = 六本账（计算/访存/容量/通信/排队/串行依赖），任何"慢"与"占内存"都要能落到具体一本。</li>
+<li>三种路径各司其职：解析快而粗、排队管 SLO、离散事件仿真支撑配置搜索；2026 年的代表（GAUSS）把输出统一到 <b>SLO 口径的容量与成本</b>。</li>
+<li>口径纪律：稳态吞吐倒数 ≠ 单块响应耗时（SolarWM 三口径 151/166.7/748 ms 的例子）；未校准、稳态假设、尾部事件、跨层耦合是模型骗你的四种方式。</li>
+</ol>
+</div>
+
+<!-- S3 -->
+<h2 id="s3"><span class="no">3</span>阶段二 约束优化：质量与服务目标下的单位成本</h2>
+
+<p><b>输入条件</b>：阶段一的模型（预测不同配置的延迟/显存/吞吐）、质量评估器（能对输出打分）、成本结构（时租、能耗、摊销）。<b>核心问题</b>：在质量与服务目标都满足的前提下，单位有效产出的成本最小是多少。<b>可控变量</b>：批大小、并行度、量化档位、投机参数、分离配比、路由策略等。<b>输出证据</b>：可行域内的最优点、Pareto 前沿、以及对"每个约束值多少成本"的灵敏度。</p>
+
+<h3>3.1 把目标写成带约束的除法</h3>
+
+<p>约束优化阶段的第一件事是把目标函数写下来。一个适用于文本与视频的抽象形式（各符号含义随后展开）：</p>
+
+<pre>min_x   C_total(x) / V_valid(x)          # 单位有效产出成本（目标）
+s.t.    Q_k(x) ≥ Q0,k   对每个质量维度 k  # 质量：多维向量，逐维约束
+        R_p99(x) ≤ R0                    # 响应延迟：按输入事件口径（见 §4）
+        StallRate(x) ≤ ε                 # 播放连续性：卡顿率（流式媒体）
+        M_peak,g(x) ≤ C_g                # 每台设备 g 的峰值显存</pre>
+
+<p>这个形式有四个要点。<b>第一，目标在分子分母各占一项</b>：降成本（分子）与提升有效产出（分母）都是优化，压价不等于优化。<b>第二，质量是约束不是权重</b>——把质量乘进目标函数（比如除以 VBench 分数）隐含"质量线性折算成钱"的假设，通常不成立（3.3）。<b>第三，约束彼此可能冲突</b>：R_p99 收紧可能压缩可行 batch、推高成本；约束未激活时最优解也可能不变——这条"约束-成本"曲线本身就是阶段二的核心产出。<b>第四，它不是性能预测</b>：在未经校准的模型上解这个式子得到的数字只用于比较配置，不能当作部署后的延迟承诺（这是与阶段一的分工）。</p>
+
+<h3>3.2 V_valid：定义"有效"产出</h3>
+
+<p>V_valid（有效产出）必须写清单位与<b>通过条件</b>，否则整个目标函数无意义。两种典型定义：</p>
+
+<table>
+<tr><th>负载</th><th>V_valid 的单位</th><th>通过条件（示例）</th><th>常见错误</th></tr>
+<tr><td>文本任务</td><td>个/小时（通过的完整回答）</td><td>单元测试通过 / 可解析 JSON / 评审通过；且在 R_p99 内交付</td><td>把生成 token 数当 V_valid——答错的 token 不是产出</td></tr>
+<tr><td>流式视频</td><td>秒（无卡顿且过质检的播放时长）</td><td>StallRate ≤ ε 且质量分（如逐 chunk 校验）过阈值</td><td>把生成帧数当 V_valid——被跳帧冻结毁掉的段落不是产出</td></tr>
+</table>
+
+<p>站内性价比篇对 goodput 与质量调整成本给了完整定义与手算例子（<a href="cost-efficient-inference-2026.html#s2">指标体系一章</a>），本文不重复；这里只强调本阶段特有的一点：<b>goodput 的 SLO 口径必须包含响应延迟类约束</b>（对交互负载是 R_p99 或 control-to-screen，见 §4），只约束吞吐的 goodput 会把"卡顿但量大"的系统误判为优。</p>
+
+<h3>3.3 质量是非线性的：PixVid 的两个指标打架</h3>
+
+<p>为什么质量只能当约束（Q_k ≥ Q0,k 逐维）而不能折进分母？PixVid 与 SolarWM 的对比给了直接证据——<b>同一个系统对，两个质量指标给出相反的排序</b><sup class="cite">[PIXVID26]</sup>：</p>
+
+<table>
+<tr><th>质量维度</th><th>SolarWM（潜空间 12 帧块）</th><th>PixVid（像素单帧块）</th><th>排序</th></tr>
+<tr><td>FVD（视频质量，越低越好）</td><td>53.8</td><td>51.1</td><td>PixVid 略好</td></tr>
+<tr><td>转向相关性 Turn（控制精度）</td><td>0.70</td><td><b>0.95</b></td><td>PixVid 显著好</td></tr>
+<tr><td>相机旋转误差（越低越好）</td><td>4.24°</td><td>5.44°</td><td><b>SolarWM 更好</b>（长滚出漂移）</td></tr>
+</table>
+
+<p>FVD 说五五开、Turn 说碾压、旋转误差说 PixVid 反而更差（81 帧长滚出的累计漂移）。若把任何一个单一分数除进成本，结论都随选哪个分数而翻转。正确做法是<b>把每个质量维度当独立约束，分别定阈值</b>；"性价比"只在约束都满足后比较成本。同理，VBench、FVD、平均主观分都不自带线性效用——一分 VBench 值多少美元没有普适答案。</p>
+
+<h3>3.4 三种比较口径：固定资源 / 固定时延 / 固定成本</h3>
+
+<p>比较两个系统时必须先固定一件事，有三种合法口径，回答三个不同问题：</p>
+
+<table>
+<tr><th>口径</th><th>固定什么</th><th>比较什么</th><th>典型结论形态</th><th>文献示例</th></tr>
+<tr><td><b>固定资源</b></td><td>同卡数同机</td><td>吞吐 / 延迟谁好</td><td>"同 8×H100 上 X 比 Y 快 n×"</td><td>Sarathi-Serve vs vLLM（同机尾延迟约束下容量 2.6–5.6×）<sup class="cite">[SARATHI24]</sup></td></tr>
+<tr><td><b>固定时延</b></td><td>同 SLO（R_p99 等）</td><td>达到它最少花多少资源/成本</td><td>"同 SLO 下 X 省 n% 卡"</td><td>Llumnix：同尾延迟省 36% 成本<sup class="cite">[LLUMNIX24]</sup>；TurboServe：同最坏 chunk 延迟下 GPU 成本 −37.2%<sup class="cite">[TURBOSERVE26]</sup></td></tr>
+<tr><td><b>固定成本</b></td><td>同预算</td><td>买到多少达标产出</td><td>"同钱 X 多交付 n× goodput"</td><td>Splitwise：同成本/功耗 2.35× 吞吐<sup class="cite">[SPLITWISE24]</sup></td></tr>
+</table>
+
+<p>三种口径的结论不可互换，跨口径比较是最常见的"田忌赛马"式错误。2026 年约束优化线的新进展集中在把"约束"本身精细化：Cascade 把 SLO 延迟预算显式建模并追求公平与高 goodput<sup class="cite">[CASCADE26]</sup>，GoodServe 面向 Agent 负载按端到端 deadline 定义 goodput 并全局协同路由<sup class="cite">[GOODSERVE26]</sup>，VelServe 专门治理解码间隔的尾部抖动（tail-calibrated scheduling）<sup class="cite">[VELSERVE26]</sup>。它们共同的方向：<b>从"均值吞吐"走向"按约束定义的有效产出"</b>——Andes 两年多前播的种子（QoE 形式化）正在长成一片。</p>
+
+<div class="citebox"><b>[ANDES24]</b> Liu, J., Chung, J.-W., Wu, Z. et al.（密歇根大学/UIUC/Cisco）. <i>Andes: Defining and Enhancing Quality-of-Experience in LLM-Based Text Streaming Services.</i> arXiv:2404.16283，v1 2024-04-25 / v2 2024-12-13（预印本；未查到正式会议收录，网传"阿里 KDD 2024"不成立）。原文："<span class="q">QoE is formalized as 1 − S_delay/S_whole…</span>"（中文译文：QoE 被形式化为 1 − S_delay/S_whole——实际消费时间线相对理想时间线的偏差面积归一化。）链接：<a href="https://arxiv.org/abs/2404.16283">arXiv</a>。Andes 用 TTFT 与 TDS（token 交付速度）做评估指标，并批评 TPOT 均值不足以刻画流式体验；机制上用 token 粒度抢占调度 + 客户端 pacer，同算力 QoE 最高 4.7×。</div>
+
+<h3>3.5 失效边界与对下一阶段的供货</h3>
+
+<p>约束优化的三类失效：<b>（i）约束口径错</b>——用吞吐 SLO 代替响应 SLO，会把交互体验失败的系统判为优（§4 整章展开）；<b>（ii）可行域时变</b>——负载漂移让今天的解明天违约，这正是阶段四存在的理由；<b>（iii）离散跳跃</b>——许多变量（并行度、分离配比）不连续，解析最优解落在不可实现的点上，需要搜索或整数规划。<b>对阶段三供货</b>：当可行域内所有配置都无法满足约束（或成本仍太高），说明"在现有模型结构下无解"，必须改模型本身——这就进入协同设计。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>目标函数是一条带约束的除法：min C_total/V_valid，s.t. 质量（逐维）、响应 p99、卡顿率、峰值显存；<b>质量是约束不是折扣系数</b>。</li>
+<li>V_valid 必须写清单位与通过条件；只约束吞吐的 goodput 对交互负载是错口径。</li>
+<li>比较前先定口径（固定资源/固定时延/固定成本），三口径结论不可互换；2026 年主线是把约束精细化到延迟预算、deadline 与尾部抖动。</li>
+</ol>
+</div>
+
+<!-- S4 -->
+<h2 id="s4"><span class="no">4</span>响应延迟：从吞吐到 control-to-screen</h2>
+
+<p>本章是四个阶段共享的一块地基：把"响应延迟"从吞吐的阴影里拉出来，作为一等约束。所有数字来自 2026 年两篇一手论文（PixVid、Runway Characters），口径逐项核对原文。</p>
+
+<h3>4.1 为什么吞吐不等于响应：结构性等待</h3>
+
+<p>自回归视频模型按块生成：一个块必须等齐块内所有帧的控制信号（按键、视角）才能开始推理。潜空间模型用 3D VAE 把 4 帧压成 1 个 latent，SolarWM 的标准配置一个块 3 个 latent = 12 帧——新按键最多要等 11 帧的时间控制才集齐。PixVid 论文 §3.5 的原话把这件事的性质说死了：</p>
+
+<div class="citebox"><b>[PIXVID26]</b> Song, Y. et al.（Roblox/UC Merced 等）. <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336，2026-11-12（预印本）。原文："<span class="q">a new control waits for the rest of its block, a delay that no throughput-side optimization can remove… SolarWM's extra throughput cannot shorten its control-to-screen latency.</span>"（中文译文：新控制必须等齐它所在块的其余控制，这一延迟任何吞吐侧优化都无法消除……SolarWM 多出来的吞吐缩短不了它的 control-to-screen 延迟。）链接：<a href="https://arxiv.org/abs/2611.17336">arXiv</a> · <a href="https://chenshuo20.github.io/PixVid/">项目页</a>。</div>
+
+<p>论文 §4.5 的实测（单卡 B200、同样 4 步因果蒸馏、同样内核）：SolarWM 吞吐 72.0 fps、中位 control-to-screen 495 ms；PixVid 每帧计算量约为其 3 倍（16.4 vs 5.6 TFLOPs/帧）、吞吐 29.4 fps、中位 34 ms。两者都超过 Wan 基座的 16 fps 播放线——<b>都"实时"，只有一个"跟手"</b>。</p>
+
+<h3>4.2 指标对照与五条关系</h3>
+
+<p>把 1.2 的词典展开成"谁决定谁"的关系网：</p>
+
+<figure class="fig" id="fig-latency-constraints-interactive" style="padding:10px"><iframe src="img/sc-roadmap-latency-constraints.html" title="延迟与成本约束关系交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 4-1 · 可交互：吞吐、TTFC、流式间隔、缓冲深度、播放连续性与 control-to-screen 之间的因果与冲突边；点击节点看定义与正反例，红色边是"改善 A 恶化 B"的冲突关系。本文自绘（交互图解），例证数字见正文 4.2–4.4。</div></figure>
+
+<p>五条必须记住的关系，每条配一手证据：</p>
+
+<p><b>（i）平均 FPS 够，不保证尾部不卡。</b>Runway Characters 稳态产能 24.8 fps（超过 24 fps 播放线），但每 42 步一次的位置重置步耗时 263 ms——超预算 96 ms；这些 2.4% 的异常步在均值里几乎看不见，却足以冻结画面（音频随帧一起停）<sup class="cite">[RUNWAY26]</sup>。播放连续性取决于<b>间隔分布的尾部、缓冲深度与并发</b>，不是平均吞吐。</p>
+
+<p><b>（ii）播放缓冲买连续性，卖交互响应。</b>Runway 附录 B 的模拟：生成领先播放 1 步（s=1）时，每个重置步让播放卡约 100 ms（约 10 次/分钟）；领先 2 步（排一个 166.7 ms 的 chunk）后，重置的超支被缓冲吸收，零卡顿——代价是<b>在途 chunk 变多</b>：连同排队音频、去噪、解码与播放缓冲，3–5 个 chunk 同时在途，这直接决定了对话回合与打断（barge-in）的延迟<sup class="cite">[RUNWAY26]</sup>。缓冲是拿交互延迟换连续性，两头都要的企业只能买更多算力。</p>
+
+<p><b>（iii）首块快，不等于控制生效快。</b>服务侧 TTFC（请求到第一个流式 chunk）可以很小——流水线上已经在出块；但用户新按的一个键要等<b>包含它</b>的块才能上屏。SlackServe 把 TTFC 当服务指标优化（降 1.61–9.65×），同时用 playout slack 管连续播放比<sup class="cite">[SLACKSERVE26]</sup>；PixVid 论文则把 control-to-screen 定义为"等待同块控制 + 生成时间"两部分之和——<b>服务 TTFC 与 control-to-screen 是两个指标，不可互相顶替</b>。</p>
+
+<p><b>（iv）低延迟、高吞吐、高性价比是三个目标。</b>PixVid 用 2.4× 的吞吐损失换 14.6× 的响应提升（用户价值判断）；Runway 用 batch=1（吞吐最差）满足每用户死线（产品约束）；TurboServe 在两者之间按最坏 chunk 延迟与 GPU 成本联合优化<sup class="cite">[TURBOSERVE26]</sup>。它们可能相互促进（更好的内核同时提升三者），也可能冲突（本节全部例子）——<b>先声明目标空间，再谈优化</b>。</p>
+
+<p><b>（v）响应时间必须定义"输入事件"与"第一个反映该事件的输出"。</b>PixVid 的定义是 control-to-screen：从按键到<b>包含该动作的第一帧</b>上屏，含块等待与生成<sup class="cite">[PIXVID26]</sup>。用"任意下一帧"代替会高估跟手性：SolarWM 每 4 帧才收到一个相机位姿，急转弯被摊到邻帧上，Turn 相关性只有 0.70，而逐帧接收控制的 PixVid 是 0.95——响应口径错了，质量账也会跟着错。</p>
+
+<h3>4.3 小算例：块等待下界及其条件依赖</h3>
+<p>块等待下界取决于控制采样、等齐协议、覆盖/取消与推测策略。PixVid 附录 B.5 的 SolarWM 对照在单卡 B200、480×864、4 步去噪下报告中位 495 ms（约 344 ms 等待 + 151 ms 块计算），属于论文模型侧口径，不包含完整公网链路。逐项拆分、one-latent 消融与适用边界统一见<a href="self-forcing-inference-research.html#s36">视频案例篇 3.6 节</a><sup class="cite">[PIXVID26]</sup>。本篇只用它说明：结构约束与执行加速需要分开建模。</p>
+<h3>4.4 Runway 算例：一条死线的全账</h3>
+
+<p>Runway Characters 给了罕见的"实时约束全账"：24 fps ⇒ 每 4 帧 chunk 166.7 ms 死线、batch=1（单用户独占）、3 步在途流水（去噪 i ‖ 解码 i−1 ‖ 播放 i−2）、99.5% 会话平均 &gt;23.5 fps（7 周生产遥测）、回合中位 2.13 s（语音代理占 1.42 s、管线占 0.49 s）<sup class="cite">[RUNWAY26]</sup>。三条工程经验值得抄：一是<b>找到"每次读取都重复的整块工作"</b>——240 次注意力调用每次都重做全缓存的 RoPE/量化/移位，占每步 29%，移到写入时做一次后砍掉 91% 缓存整备（69.7→6.2 ms）；二是<b>给每个优化留回退开关</b>——fused 内核上线数周后在生产输入上翻车被一键回滚，之后才重新启用（6.3 再谈）；三是<b>测量自己的测量</b>——GPU 事件时钟漂移 58–65 ms、浏览器"音频结束"标记跟声音不对齐，两处仪器误差都靠交叉核对才揪出来。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>论文模型侧 control-to-screen = 块等待 + 块生成；公网端到端还需计入排队、传输、缓冲与显示。<b>块等待是结构性的</b>（等齐控制），吞吐优化消除不了；SolarWM 495 ms = 中位等待 ≈344 + 计算 151（论文 B.5）。</li>
+<li>五条关系：均值够≠尾部不卡；缓冲买连续性卖交互；首块快≠控制生效；三目标可冲突；响应必须按"事件→首个反映事件的输出"定义。</li>
+<li>块等待下界依赖四个前提（控制采样/等齐/覆盖取消/推测），不是普适定律；PixVid 证明块结构是模型语义、服务侧改不动，one-latent 消融（164 ms、FVD 118.6）说明改一半更糟。</li>
+</ol>
+</div>
+
+<!-- S5 -->
+<h2 id="s5"><span class="no">5</span>阶段三 协同设计：模型、运行时与硬件一起选</h2>
+
+<p><b>输入条件</b>：阶段二判定"现有结构下无解"（约束不可满足或成本过高）。<b>核心问题</b>：模型结构、执行粒度、资源放置作为联合变量一起选择时，解空间长什么样。<b>输出证据</b>：联合设计点及其在阶段二目标下的位置（比"单层最优拼接"好多少）。</p>
+
+<h3>5.1 五个协同层与代表工作</h3>
+
+<table>
+<tr><th>协同层</th><th>模型侧变量</th><th>运行时/硬件侧变量</th><th>代表工作（联合点）</th></tr>
+<tr><td><b>KV 语义</b></td><td>MHA→MQA/GQA/MLA/sparse：每 token 状态字节</td><td>缓存组织（分页/前缀树/池化）、传输协议</td><td>PagedAttention（语义变了就要新管理）<sup class="cite">[VLLMPA23]</sup>；Mooncake（KV 升格为全局池）<sup class="cite">[MOONCAKE25]</sup>；<a href="kv-cache-survey.html">KV 篇</a>综述</td></tr>
+<tr><td><b>生成块大小</b></td><td>时间压缩率（latent/帧）、单帧 vs 多帧块</td><td>响应延迟下界、缓存写入粒度、蒸馏目标</td><td>PixVid（12 帧→1 帧，495→34 ms；计算量 ×3 由模型侧吸收）<sup class="cite">[PIXVID26]</sup></td></tr>
+<tr><td><b>解码器与流水</b></td><td>VAE decoder vs 轻量 detailer head</td><td>解码独占 GPU、流水深度、chunk 死线</td><td>Runway（解码单独一张卡，否则 TP 组等最慢成员直接超时）<sup class="cite">[RUNWAY26]</sup>；PipeDiT（DeDiVAE 解耦）<sup class="cite">[PIPEDIT26]</sup></td></tr>
+<tr><td><b>分离边界</b></td><td>prefill/decode 的计算形态差异</td><td>分池配比、KV 传输、弹性并行</td><td>DistServe/Splitwise（边界在哪最省）<sup class="cite">[DISTSERVE24]</sup><sup class="cite">[SPLITWISE24]</sup>；DisagFusion（encoder/DiT/decoder 三段拆分 + 弹性调度）<sup class="cite">[DISAGFUSION26]</sup>；DDiT（单步粒度分配）<sup class="cite">[DDIT25]</sup></td></tr>
+<tr><td><b>算子与数值</b></td><td>注意力的 IO 复杂度、FP8 写入格式</td><td>tiling、融合、all-reduce 折进 GEMM</td><td>FlashAttention<sup class="cite">[FLASHATTN22]</sup>；Ansor 搜索<sup class="cite">[ANSOR20]</sup>；Runway 写时 KV + fused FP8 GEMM/规约<sup class="cite">[RUNWAY26]</sup></td></tr>
+</table>
+
+<h3>5.2 案例：PixVid 的墙是怎么拆的</h3>
+
+<p>PixVid 展示了一次完整的跨层重新议价：<b>模型侧</b>放弃 3D VAE 的时间压缩，每个 token 绑定单帧 1×p×p 像素块，输出头换成时间因果卷积 detailer（解码开销逐帧恒定）；<b>训练侧</b>用 x-prediction + 更大噪声 shift + Self Forcing 因果蒸馏，把双向模型改造成 4 步逐帧生成的因果学生；<b>运行时侧</b>逐帧块意味着块等待归零、KV 每帧写入；<b>代价侧</b>每帧 DiT 计算量 ×3.0、吞吐 ÷2.4、81 帧长滚出相机漂移更高（旋转误差 5.44° vs 4.24°，作者明确留作 future work）<sup class="cite">[PIXVID26]</sup>。这就是协同设计的典型形状：<b>没有一层是免费的，收益与代价都跨层结转</b>——如果只看吞吐（阶段二的单一口径）会否决它，只看响应会高估它。</p>
+
+<h3>5.3 案例：Runway 的"写入时"原则</h3>
+
+<p>Runway Characters 的核心优化一句话可以带走：<b>把"每次读取都重复的整块工作"移到写入时做一次</b>。KV 缓存 5,788 槽、每步 240 次注意力调用、每次只新写 757 token——旧实现每次读都对全缓存重做 RoPE、重量化 FP8、移位窗口，占每步 29%（69.7 ms）；改成环形缓存 + 写入时一次性 RoPE/量化 + 位置重置时的增量旋转（Δ=−42 的仿射结构使"重旋转"可加性成立）后只剩 6.2 ms<sup class="cite">[RUNWAY26]</sup>。这个原则与 PagedAttention（把管理成本从"搬内容"降到"改页表"）、Mooncake（把 KV 从实例资源变成可寻址的全局对象）同源：<b>状态被谁写、被谁读、多久读一次，决定了运行时的正确设计</b>。</p>
+
+<h3>5.4 失效边界</h3>
+
+<p>协同设计的三类失效：<b>（i）搜索空间爆炸</b>——层间变量组合是乘法关系，Ansor 一层就要分层搜索空间 + 进化算法 + 预剪枝才可解<sup class="cite">[ANSOR20]</sup>，跨层联合只能靠结构化假设（比如固定 KV 语义搜放置）；<b>（ii）跨层假设失效</b>——为旧块结构调优的缓存策略在单帧块下前提消失；反过来 PixVid 的 detailer 依赖"DiT 已捕获全局结构"的分工假设，换小模型未必成立；<b>（iii）迁移成本</b>——联合设计点越深，锁进特定模型/硬件组合越深（Runway 的整套栈绑定 TP-3 + 独立解码 GPU 的拓扑）。<b>对阶段四供货</b>：协同设计产出的是静态最优点；负载与硬件状态漂移时守住它的任务交给自适应系统。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>协同设计把 KV 语义、块大小、解码器/流水、分离边界、算子数值五层当<b>一组联合变量</b>；任何单层最优拼接都可能整体次优。</li>
+<li>PixVid：拆掉 VAE 时间压缩换来 34 ms 响应，代价跨层结转（计算 ×3、吞吐 ÷2.4、长滚出漂移）；Runway：写入时原则砍掉 91% 缓存整备。</li>
+<li>失效方式：搜索空间爆炸、跨层假设失效、深设计点强锁定；产出的静态最优交给阶段四去守住。</li>
+</ol>
+</div>
+
+<!-- S6 -->
+<h2 id="s6"><span class="no">6</span>阶段四 自适应系统：反馈闭环与切换成本</h2>
+
+<p><b>输入条件</b>：静态最优解存在但环境漂移（负载、硬件状态、模型质量、价格）。<b>核心问题</b>：如何调整而不抵消收益。<b>输出证据</b>：闭环策略在漂移 trace 上的表现 + 切换成本账 + 失效时的回退路径。</p>
+
+<h3>6.1 闭环的五个环节</h3>
+
+<figure class="fig" id="fig-adaptive-loop-interactive" style="padding:10px"><iframe src="img/sc-roadmap-adaptive-loop.html" title="自适应反馈闭环交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 6-1 · 可交互：沿闭环走一圈（观测→预测→策略→执行→反馈），点击节点看每个环节的可选实现与已知翻车案例；右侧红色旁路是切换成本与迟滞——没有它们的闭环会在负载抖动时震荡。本文自绘（交互图解）。</div></figure>
+
+<p><b>观测</b>：测什么、多快测一次（TurboServe 用滑动窗口提取需求与波动信号；Runway 的 worker 自测 fps 并逐 10 s 上报）。<b>预测</b>：从外推（简单的负载趋势）到仿真（GAUSS 直接按 SLO 口径模拟扩缩后果）<sup class="cite">[GAUSS26]</sup>。<b>策略</b>：规则（min-max 再平衡）、优化（在线调度问题）、学习（策略训练）。<b>执行</b>：扩缩容、迁移、降级、重路由——每个都有真实成本。<b>反馈</b>：执行后的延迟/成本回流观测，闭环闭合。</p>
+
+<h3>6.2 三条实现路径：离线搜索、在线控制、自动生成</h3>
+
+<table>
+<tr><th>路径</th><th>在哪找最优</th><th>代表</th><th>边界</th></tr>
+<tr><td><b>离线搜索</b></td><td>部署前在模型/仿真器上搜配置空间</td><td>Ansor（张量程序）<sup class="cite">[ANSOR20]</sup>；Vidur（并行/批配置）<sup class="cite">[VIDUR24]</sup>；<a href="training-free-autotune-2026.html">自动调优篇</a>综述</td><td>负载漂移后过期；搜索成本高</td></tr>
+<tr><td><b>在线控制</b></td><td>部署后按观测持续调整</td><td>TurboServe（放置+扩缩闭环）<sup class="cite">[TURBOSERVE26]</sup>；SlackServe（slack 信号三级优先）<sup class="cite">[SLACKSERVE26]</sup>；ACP（上下文并行度自适应）<sup class="cite">[ACP26]</sup>；Evolving Infra（按会话状态在线重排 P/D，站内 <a href="agent-inference-systems.html">Agent 篇</a>）</td><td>观测滞后、策略震荡、切换成本</td></tr>
+<tr><td><b>自动生成实现</b></td><td>让机器写代码/内核再验证</td><td>Together Compiler、KernelMosaic（站内自动调优篇 2026-11 增补）</td><td>生成的正确性与性能验证是主要瓶颈</td></tr>
+</table>
+
+<p>三条路径不是互斥的选项，而是闭环的不同环节可以各选一条：离线搜索给策略一个良好初值，在线控制负责跟踪漂移，自动生成补足长尾算子。组织一个自适应系统时的有用分工是把<b>语义理解</b>（这个请求/会话需要什么质量与状态）、<b>策略决策</b>（在该状态下选哪个配置）与<b>运行时执行</b>（切换、迁移、恢复）拆成三个明确接口——TurboServe 的 workload detector / 两个 controller / session manager 正是这个三分法<sup class="cite">[TURBOSERVE26]</sup>。没有必要为此引入 Agent 协作框架或额外依赖：闭环的每个环节都有更简单的确定性实现。</p>
+
+<h3>6.3 切换成本、迟滞与回退：闭环的三道保险</h3>
+
+<p><b>自适应不是无条件更优</b>，2026 年的三篇一手工作恰好各给一道保险的证据：</p>
+
+<p><b>保险一：切换成本要记账。</b>TurboServe 的会话 GPU 间迁移（NCCL 传状态 + 所有权更新）实测 23–30 ms，占每 chunk 2–3%；论文明确"只有预期延迟下降大于迁移成本才触发"——迁移本身占资源，把这条规则去掉就会为了微小收益反复搬状态。消融也印证：去掉迁移 GPU 成本 +15%、去掉自动扩缩 +42.9%（固定时延口径）<sup class="cite">[TURBOSERVE26]</sup>。LLM 侧还要多一层考虑：视频生成是计算受限的，TurboServe 选择不用重算做状态恢复（与 LLM 服务里常见的 prefill 重算相反）——<b>切换成本的形态取决于哪一侧受限</b>。</p>
+
+<p><b>保险二：状态不能廉价迁移时，弹性要换形式。</b>交互世界模型的 KV 状态每步几乎全部重写、多 GB 常驻，哈佛的 exact-state serving 分析指出这种状态无法像 LLM 请求那样中断-迁移-恢复，弹性必须以"无状态控制面 + 有状态工作面"的形式设计<sup class="cite">[EXACTSTATE26]</sup>；TurboServe 的 suspend/resume（GPU→CPU 卸载）与 DHSched 的做法同属这一族。<b>迟滞</b>（hysteresis）是同原理的时间版：扩容阈值与缩容阈值留出死区，防止负载在阈值附近抖动导致集群反复加减机器。</p>
+
+<p><b>保险三：每个优化都要有回退路径。</b>Runway 的 fused FP8 GEMM+all-reduce 内核在基准里表现良好、上线数周后在生产输入多样性下失败，被一键回滚（配置开关切回朴素路径），修复后才重新启用<sup class="cite">[RUNWAY26]</sup>。他们把"每个优化保留 plain path 的开关"写进工程守则，并把"策略替换连续两次慢会话的 worker"实现了但关闭，直到其决策被生产日志验证——<b>闭环里最贵的环节是策略本身出错的时候</b>。</p>
+
+<h3>6.4 失效边界与质量约束</h3>
+
+<p>自适应系统的失效清单：<b>观测滞后</b>（等指标恶化才动作，错过突发）、<b>策略震荡</b>（无迟滞时在两个配置间横跳，TurboServe 论文的时间线快照显示扩缩容与再平衡在两个时间尺度上各自动作，正是为了避免互相打架）、<b>降级失控</b>（SlackServe 的按 chunk 降保真度必须带质量下限——Bi-Modal Pareto Routing 只在质量地板之上选配置，否则连续播放是保住了、画质跌穿产品红线<sup class="cite">[SLACKSERVE26]</sup>）、<b>反馈污染</b>（Runway 发现测量仪器自身漂移 58–65 ms，污染反馈回路）。质量约束在阶段四的角色与阶段二一致：<b>自适应调整的是成本与时延的分配，永远不许越质量红线</b>。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>自适应闭环 = 观测→预测→策略→执行→反馈，三条实现路径（离线搜索/在线控制/自动生成）按环节组合，不必引入 Agent 框架。</li>
+<li>三道保险各有 2026 年一手证据：切换成本记账（TurboServe 迁移 23–30 ms 只占 2–3% 才值得做）、状态不可廉价迁移时换弹性形式（exact-state + 迟滞）、每个优化留回退开关（Runway fused 内核回滚）。</li>
+<li>降级必须带质量地板（SlackServe），反馈回路要先验证自己的仪器（Runway 时钟漂移）；<b>自适应调整分配，不越质量红线</b>。</li>
+</ol>
+</div>
+
+<!-- S7 -->
+<h2 id="s7"><span class="no">7</span>全站映射：既有专题与教程如何服务四个阶段</h2>
+
+<p>本站的知识目录按<b>概念依赖</b>组织（先基础、再方法、后系统与验证），四个研究阶段按<b>问题层次</b>组织——两套坐标交叉，一篇文章自然服务多个阶段。新增<a href="self-forcing-inference-research.html">Self Forcing 研究案例（第 23 篇）</a>贯穿四类问题，可在读完本篇后按需进入。下表是导航图：<b>不建议按行或列通读，建议带着一个具体问题进来，顺着它需要的阶段走出去</b>。动手实验路径对应 16 章<a href="https://piratepai.github.io/pi-infer-book/">《动手学习大模型推理加速》教程</a>（章号在括号里）。</p>
+
+<div style="overflow-x:auto"><table><caption style="text-align:left;color:#aeb4bd;font-size:12px">四阶段 × 站内资源 · 窄屏可横向滑动</caption><thead><tr><th>阶段</th><th>站内专题（服务该阶段的部分）</th><th>教程章节</th><th>建议进入时机</th></tr></thead><tbody>
+<tr><td><b>1 性能建模</b></td><td><a href="llm-perf-simulation-2026.html">性能仿真</a>（算子账本/Roofline/请求仿真） · <a href="inference-evaluation.html">评测</a>（指标与口径） · <a href="attention-evolution.html">注意力演进</a>（IO 复杂度视角） · <a href="quantization-survey.html">量化</a>（数值成本）</td><td>第 3 章算账计时、第 4 章 KV 容量、第 14 章 DiT 循环</td><td>任何优化动手之前</td></tr>
+<tr><td><b>2 约束优化</b></td><td><a href="cost-efficient-inference-2026.html">高性价比推理</a>（成本账本与 goodput） · <a href="inference-serving.html">推理服务</a>（批处理/SLO） · <a href="test-time-compute.html">推理预算</a>（质量-计算权衡） · <a href="inference-evaluation.html">评测</a>（失败边界与对照）</td><td>第 5 章质量预算、第 9 章批处理调度、第 15 章容量配置</td><td>有了模型瓶颈归因、要选配置时</td></tr>
+<tr><td><b>3 协同设计</b></td><td><a href="kv-cache-survey.html">KV Cache</a>（语义与管理协同） · <a href="custom-inference-engines-2026.html">定制引擎</a>（十层栈联合） · <a href="parallelism-survey.html">并行</a>（放置与通信） · <a href="strata-hybrid-inference.html">混合部署</a>（存储层次协同） · <a href="diffusion-flow-sampling.html">扩散采样</a>（步数-质量协同） · <a href="realtime-world-models-2026.html">实时世界模型</a>（流式生成与块结构）</td><td>第 6 章 FlashAttention、第 8 章执行优化、第 11 章 P/D 分离、第 12 章 MoE 放置</td><td>约束优化判定"现有结构无解"时</td></tr>
+<tr><td><b>4 自适应系统</b></td><td><a href="training-free-autotune-2026.html">自动调优</a>（搜索与在线调优） · <a href="agent-inference-systems.html">Agent 在线系统</a>（Evolving Infra、状态恢复） · <a href="inference-serving.html">推理服务</a>（弹性与调度前沿） · <a href="realtime-world-models-2026.html">实时世界模型</a>（服务栈前沿）</td><td>第 15 章生产部署、第 16 章综合实战</td><td>部署后负载开始漂移时</td></tr>
+</tbody></table></div>
+
+<p>其余专题（<a href="moe-survey.html">MoE</a>、<a href="speculative-decoding.html">投机解码</a>、<a href="spec-decoding-post-training.html">草稿后训练</a>、<a href="loop-transformer-survey.html">Loop Transformer</a>、<a href="vit-sparsification.html">ViT 稀疏化</a>、<a href="agent-rl-survey.html">Agent RL</a>）横跨阶段一与阶段三：它们首先改变"计算账"的条目（模型级手段），落地时都要重议运行时假设。这样组织的好处是<b>旧专题不用搬家</b>：知识目录继续按依赖讲机制，本页只回答"研究问题怎么排"。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>概念依赖目录与研究阶段坐标交叉，<b>一篇文章服务多个阶段</b>，不强制一对一归类。</li>
+<li>教程第 3/4/14 章服务建模，第 5/9/15 章服务约束优化，第 6/8/11/12 章服务协同设计，第 15/16 章服务自适应。</li>
+<li>使用方式：带着问题进来 → 找到它所在阶段 → 沿表跳到专题读机制 → 回到本页对齐口径。</li>
+</ol>
+</div>
+
+<!-- S8 -->
+<h2 id="s8"><span class="no">8</span>局限、方法纪律与未来方向</h2>
+
+<h3>8.1 本文自身的边界</h3>
+
+<p>（i）本文不运行任何模型或硬件实验，所有数字转引自所引论文的正文与附录，<b>代码阅读与论文核验不等于运行验证</b>；（ii）视频/流式服务文献非常年轻——TurboServe、SlackServe、DisagFusion、Runway、PixVid、GAUSS 等截至 2026-11-18 均为预印本（PipeDiT 除外，AAAI-26 已收录），数字未经同行复现，引用时保留版本号；（iii）跨系统数字（如 TurboServe 的 chunk 延迟与 Runway 的 step 延迟）<b>口径不同不可直接比</b>：前者是多会话共卡的最坏 chunk，后者是单用户独占的死线达成。</p>
+
+<h3>8.2 方法纪律清单（给开始研究的人）</h3>
+
+<ol>
+<li><b>先写口径再跑实验</b>：响应延迟按"输入事件→首个反映事件的输出"定义；比较前固定资源/时延/成本三者之一。</li>
+<li><b>质量逐维约束</b>，不当线性折扣；每个质量维度单独定阈值与测量协议。</li>
+<li><b>报分布不报均值</b>：至少 p50/p99 + 异常事件率（Runway 的 reset 步是教学案例）。</li>
+<li><b>切换成本入账</b>：自适应系统的收益表必须减去迁移/重载/降级成本，并给回退路径。</li>
+<li><b>测量自己的测量</b>：时钟漂移、标记错位、遥测口径都曾误导过一线团队<sup class="cite">[RUNWAY26]</sup>。</li>
+</ol>
+
+<h3>8.3 开放问题</h3>
+
+<p>（i）<b>块结构的自适应议价</b>：PixVid 证明块大小是模型语义、服务侧改不动；能否在训练时就让块大小可变（或推测式先行生成+迟到控制校验），把 4.3 的四个前提变成运行时可选项？（ii）<b>exact-state 服务的弹性理论</b>：状态不可廉价迁移时，容量规划与迟滞设计还缺少一套像排队论那样可算的框架<sup class="cite">[EXACTSTATE26]</sup>；（iii）<b>仿真闭环化</b>：GAUSS 类 SLO 仿真器与在线控制器的直接对接（仿真器当预测环节）的校准、漂移与开销是本文建议进一步核查的研究方向；本文未完成足以证明空白的系统查新；（iv）<b>响应延迟的标准化基准</b>：control-to-screen 已有单篇论文级测量，缺跨系统的公开基准与统一 trace。</p>
+
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>本文边界：不做实验、预印本占多数、跨口径数字不可比；引用保留版本与日期。</li>
+<li>五条方法纪律：先口径、质量逐维、报分布、切换入账、验证仪器。</li>
+<li>四个开放问题：可变块结构、exact-state 弹性理论、仿真-控制闭环、响应延迟基准。</li>
+</ol>
+</div>
+
+
+<h2 id="refs">参考文献</h2>
+
+<h3>经典机制（同行评审）</h3>
+<ol class="refs">
+<li id="ROOFLINE09"><b>Williams, S., Waterman, A., Patterson, D.</b> <i>The Roofline: An Insightful Visual Performance Model for Multicore Architectures.</i> Communications of the ACM 52(4):65–76，2009-04；同行评审。<a href="https://doi.org/10.1145/1490452.1490675">链接</a>。</li>
+<li id="ANSOR20"><b>Zheng, L. et al.</b> <i>Ansor: Generating High-Performance Tensor Programs for Deep Learning.</i> OSDI 2020；同行评审。<a href="https://www.usenix.org/conference/osdi20/presentation/zheng">链接</a>。</li>
+<li id="FLASHATTN22"><b>Dao, T. et al.</b> <i>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness.</i> NeurIPS 2022；arXiv:2205.14135（2022-05-27）。<a href="https://arxiv.org/abs/2205.14135">链接</a>。</li>
+<li id="ORCA22"><b>Yu, G.-I. et al.</b> <i>Orca: A Distributed Serving System for Transformer-Based Generative Models.</i> OSDI 2022；同行评审。<a href="https://www.usenix.org/conference/osdi22/presentation/yu">链接</a>。</li>
+<li id="VLLMPA23"><b>Kwon, W. et al.</b> <i>Efficient Memory Management for Large Language Model Serving with PagedAttention.</i> SOSP 2023；arXiv:2309.06180（2023-09）。<a href="https://arxiv.org/abs/2309.06180">链接</a>。</li>
+<li id="ANDES24"><b>Liu, J., Chung, J.-W., Wu, Z. et al.（密歇根大学/UIUC/Cisco）.</b> <i>Andes: Defining and Enhancing Quality-of-Experience in LLM-Based Text Streaming Services.</i> arXiv:2404.16283，v1 2024-04-25 / v2 2024-12-13；预印本（未查到正式会议收录；2026-11-18 核验）。<a href="https://arxiv.org/abs/2404.16283">链接</a>（QoE = 1 − S_delay/S_whole；评估用 TTFT 与 TDS；同算力 QoE 最高 4.7×）。</li>
+<li id="DISTSERVE24"><b>Zhong, Y. et al.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large LLM Serving.</i> OSDI 2024；arXiv:2401.09670（2024-01-18）。<a href="https://arxiv.org/abs/2401.09670">链接</a>。</li>
+<li id="SPLITWISE24"><b>Patel, P. et al.</b> <i>Splitwise: Efficient Generative LLM Inference Using Phase Splitting.</i> ISCA 2024；arXiv:2311.18677（2023-11-30）。<a href="https://arxiv.org/abs/2311.18677">链接</a>。</li>
+<li id="SARATHI24"><b>Agrawal, A. et al.</b> <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve.</i> OSDI 2024；arXiv:2403.02310（2024-03-04）。<a href="https://arxiv.org/abs/2403.02310">链接</a>。</li>
+<li id="LLUMNIX24"><b>Sun, B. et al.</b> <i>Llumnix: Dynamic Scheduling for Large Language Model Serving.</i> OSDI 2024；arXiv:2406.03243（2024-06-05）。<a href="https://arxiv.org/abs/2406.03243">链接</a>。</li>
+<li id="VIDUR24"><b>Agrawal, A. et al.</b> <i>Vidur: A Large-Scale Simulation Framework for LLM Inference.</i> MLSys 2024；arXiv:2405.05465（2024-05-08）；论文评测的推理时延误差低于 9%。<a href="https://arxiv.org/abs/2405.05465">链接</a>。</li>
+<li id="MOONCAKE25"><b>Qin, R. et al.</b> <i>Mooncake: A KVCache-Centric Disaggregated Architecture for LLM Serving.</i> FAST 2025；arXiv:2407.00079（2024-06-29）。<a href="https://arxiv.org/abs/2407.00079">链接</a>。</li>
+<li id="SELFFORCE25"><b>Huang, X. et al.（Adobe Research）.</b> <i>Self Forcing: Bridging Training and Inference in Autoregressive Video Diffusion.</i> arXiv:2506.08009（2025-06）；预印本；<a href="https://self-forcing.github.io/">项目页</a>。站内 <a href="realtime-world-models-2026.html">实时世界模型篇</a>综述其机制。</li>
+</ol>
+
+<h3>2025–2026 系统与建模工作（除标注外均为预印本，2026-11-18 快照）</h3>
+<ol class="refs">
+<li id="DDIT25"><b>Huang, H. et al.</b> <i>DDiT: Dynamic Resource Allocation for Diffusion Transformer Model Serving.</i> arXiv:2506.13497（2025-06-16）；预印本。<a href="https://arxiv.org/abs/2506.13497">链接</a>（T2V 管线解耦控制面 + 单步粒度贪心分配；p99 延迟最多降 1.44×）。</li>
+<li id="PIPEDIT26"><b>Wang, S., Wang, Q., Shi, S.（哈工大深圳）.</b> <i>PipeDiT: Accelerating Diffusion Transformers in Video Generation with Task Pipelining and Model Decoupling.</i> AAAI-26（Vol. 40 No. 12, pp. 10092–10100）；arXiv:2511.12056（2025-11-15）。<a href="https://arxiv.org/abs/2511.12056">链接</a>（PipeSP + DeDiVAE；8 卡系统 1.06–4.02×）。</li>
+<li id="DISAGFUSION26"><b>Zha, H. et al.</b> <i>DisagFusion: Asynchronous Pipeline Parallelism and Elastic Scheduling for Disaggregated Diffusion Serving.</i> arXiv:2605.25550（2026-05-25）；预印本。<a href="https://arxiv.org/abs/2605.25550">链接</a>（encoder/DiT/decoder 拆分 + 预测-反馈弹性调度；吞吐 3.4–20.5×）。</li>
+<li id="SLACKSERVE26"><b>Xia, Y., Yuan, H., Ling, S. et al.（北大 Hetu 团队等）.</b> <i>Adaptive Resource Management and Quality Control for Streaming Video Generation.</i>（系统名 SlackServe）arXiv:2606.15319（2026-06-13）；预印本。<a href="https://arxiv.org/abs/2606.15319">链接</a>（playout slack 统一信号；连续播放比 1.64–3.29×、TTFC 降 1.61–9.65×，16×H100）。</li>
+<li id="TURBOSERVE26"><b>Jiang, Y., Wang, H., Bao, H. et al.（上交/生数/清华）.</b> <i>TurboServe: Serving Streaming Video Generation Efficiently and Economically.</i> arXiv:2606.19271（2026-06-17）；预印本；代码 <a href="https://github.com/shengshu-ai/TurboServe">github.com/shengshu-ai/TurboServe</a>。<a href="https://arxiv.org/abs/2606.19271">链接</a>（最坏 chunk 延迟 −37.5%、GPU 成本 −37.2%；迁移 23–30 ms 占 2–3%；生产 trace，最大 64×B300）。</li>
+<li id="RUNWAY26"><b>Agarwal, R. et al.（Runway）.</b> <i>Runway Characters: Serving a 57B Video Diffusion Transformer for Real-Time Conversation.</i> arXiv:2611.05642（2026-11-03）；预印本。<a href="https://arxiv.org/abs/2611.05642">链接</a>（24 fps/166.7 ms 死线/batch=1；缓存整备 69.7→6.2 ms；7 周生产 99.5% 会话 &gt;23.5 fps；附录 B 缓冲模拟）。</li>
+<li id="PIXVID26"><b>Song, Y., Chen, S., Rockwell, C. et al.（Roblox/UC Merced 等）.</b> <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336（2026-11-12）；预印本。<a href="https://arxiv.org/abs/2611.17336">链接</a> · <a href="https://chenshuo20.github.io/PixVid/">项目页</a>（495→34 ms；吞吐 72.0→29.4 fps；附录 B.5：等待 0–688 ms + 块计算 151 ms；one-latent 消融 164 ms/FVD 118.6/Turn 0.11）。</li>
+<li id="GAUSS26"><b>Microsoft.</b> <i>GAUSS: A Workload-Aware Analytical and Monte-Carlo Simulator for LLM Inference Serving.</i> arXiv:2610.37989（2026-10-27）；预印本。<a href="https://arxiv.org/abs/2610.37989">链接</a>。</li>
+<li id="FRONTIER26"><b>Frontier: Towards Comprehensive and Accurate LLM Inference Simulation.</b> arXiv:2605.21312（2026-05-20）；预印本。<a href="https://arxiv.org/abs/2605.21312">链接</a>。</li>
+<li id="SLIM26"><b>SLIM: Saturation-Aware Lightweight Performance Modeling for LLM Serving.</b> arXiv:2607.29575（2026-07-31）；预印本。<a href="https://arxiv.org/abs/2607.29575">链接</a>。</li>
+<li id="QUEUEKV26"><b>A Queueing-Theoretic Framework for Stability Analysis of LLM Inference with KV Cache Memory Constraints.</b> arXiv:2605.04595（2026-05-06）；预印本。<a href="https://arxiv.org/abs/2605.04595">链接</a>。</li>
+<li id="IBMQ26"><b>IBM T.J. Watson Research Center.</b> <i>An Approximate Queueing Model of LLM Inference Serving for SLO-Driven Autoscaling.</i> arXiv:2609.20957（2026-09-17）；预印本。<a href="https://arxiv.org/abs/2609.20957">链接</a>。</li>
+<li id="KERNELSIGHT26"><b>AWS / Boston University.</b> <i>KernelSight-LM: A Kernel-Level LLM Inference Simulator.</i> arXiv:2606.28565（2026-06-26）；预印本；站内<a href="llm-perf-simulation-2026.html">性能仿真篇</a>已综述。<a href="https://arxiv.org/abs/2606.28565">链接</a>。</li>
+<li id="CASCADE26"><b>Cascade: Exploiting SLO-Aware Latency Budget for Fair and High Goodput LLM Inference Serving.</b> arXiv:2608.06557（2026-08-06）；预印本。<a href="https://arxiv.org/abs/2608.06557">链接</a>。</li>
+<li id="GOODSERVE26"><b>GoodServe: Globally-coordinated Routing of Agentic LLM Inferences for High Goodput.</b> arXiv:2605.16867（2026-05-16）；预印本。<a href="https://arxiv.org/abs/2605.16867">链接</a>。</li>
+<li id="VELSERVE26"><b>VelServe: Taming Decode Jitters in LLM Inference with Tail-Calibrated Scheduling.</b> arXiv:2611.18392（2026-11-13）；预印本。<a href="https://arxiv.org/abs/2611.18392">链接</a>。</li>
+<li id="EXACTSTATE26"><b>Harvard University.</b> <i>Stateful Worlds, Stateless Elasticity: Exact-State Serving for Interactive World Models.</i> arXiv:2607.10389（2026-07-11）；预印本。<a href="https://arxiv.org/abs/2607.10389">链接</a>。</li>
+<li id="ACP26"><b>Adaptive Context Parallelism for Production LLM Serving.</b> arXiv:2609.04774（2026-09-04）；预印本。<a href="https://arxiv.org/abs/2609.04774">链接</a>。</li>
+</ol>
+<p style="font-size:12.5px;color:#7f8b9c">注：预印本指 arXiv 版本未经同行评审，收录状态以各论文页为准，本文统一标注 2026-11-18 快照日期；同行评审条目标注会议/期刊。高被引或热度标签未列入本文引用——如需引用量请按引用当天在 Semantic Scholar / Google Scholar 复核。站内专题链接指向本站对应综述，其各自的完整参考列表以原专题为准。性能数字均为原论文口径，跨系统不可直接比较。</p>
+
+<footer style="text-align:center;padding:40px 0 0;">
+<img src="https://komarev.com/ghpvc/?username=PiratePai&style=flat-square&color=6ea8ff&label=views" alt="profile views" style="vertical-align:-5px;height:22px">
+</footer>
+</div>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<!-- chapter-reader:end -->
+</body>
+</html>

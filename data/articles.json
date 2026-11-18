@@ -848,10 +848,10 @@
     },
     "cost-efficient-inference-2026": {
       "title": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）",
-      "description": "以一条成本公式贯穿：$/百万 tokens 怎么算、指标三分口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/集群/商业五层降本手段，以及引擎与服务化的指标清单、决策树与动手算账。",
+      "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。",
       "published": "2026-11-15",
-      "contentUpdated": "2026-11-17",
-      "reviewed": "2026-11-15",
+      "contentUpdated": "2026-11-18",
+      "reviewed": "2026-11-18",
       "changes": [
         {
           "date": "2026-11-15",
@@ -866,6 +866,66 @@
           "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
+        },
+        {
+          "date": "2026-11-18",
+          "kind": "研究修订",
+          "summary": "主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。",
+          "anchor": "s2",
+          "evidence": "docs/cost-efficient-refresh-20261118.md"
+        },
+        {
+          "date": "2026-11-18",
+          "kind": "整合审查",
+          "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
+          "anchor": "reading-path",
+          "evidence": "docs/pr-integration-review-20261118.md"
+        }
+      ]
+    },
+    "inference-research-roadmap": {
+      "title": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）",
+      "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。",
+      "published": "2026-11-18",
+      "contentUpdated": "2026-11-18",
+      "reviewed": "2026-11-18",
+      "changes": [
+        {
+          "date": "2026-11-18",
+          "kind": "新增专题",
+          "summary": "新增《推理研究路线》：四阶段方法框架、响应延迟指标对照与 PixVid/Runway 案例校准、TurboServe/SlackServe 自适应系统分析、全站 21 篇与教程的四阶段映射；含三张 SeeCode 交互图解（图 0-1 证据流、图 4-1 约束关系、图 6-1 反馈闭环）。",
+          "anchor": "s0",
+          "evidence": "docs/inference-research-roadmap.md"
+        },
+        {
+          "date": "2026-11-18",
+          "kind": "整合审查",
+          "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
+          "anchor": "reading-path",
+          "evidence": "docs/pr-integration-review-20261118.md"
+        }
+      ]
+    },
+    "self-forcing-inference-research": {
+      "title": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）",
+      "description": "以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）为唯一主线案例：源码级解剖块生成与 KV 提交，把存算比、宽容比、KV 缓存、VAE 显存、异构分离、响应延迟串成一条执行链的六个截面（KV 5.62 GiB、块等待 344 ms、roofline 算例），给出 E0–E7 研究对照设计与三项候选创新，并逐条纠正 PixVid 数字的六种误读。",
+      "published": "2026-11-18",
+      "contentUpdated": "2026-11-18",
+      "reviewed": "2026-11-18",
+      "changes": [
+        {
+          "date": "2026-11-18",
+          "kind": "新增专题",
+          "summary": "新增《Self Forcing 流式视频推理》：官方实现源码解剖、六维公式与算例（存算比/宽容比/KV/VAE/异构/响应）、E0–E7 研究设计与 PixVid 口径纠错；含四张 SeeCode 交互图解（六维依赖、状态生命周期、DiT—VAE 分离、控制等待双轨时间线）。",
+          "anchor": "s0",
+          "evidence": "docs/self-forcing-research-20261118.md"
+        },
+        {
+          "date": "2026-11-18",
+          "kind": "整合审查",
+          "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
+          "anchor": "reading-path",
+          "evidence": "docs/pr-integration-review-20261118.md"
         }
       ]
     }
