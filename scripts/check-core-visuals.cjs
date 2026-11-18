@@ -94,6 +94,7 @@ const demos=[['kv-cache-survey','kv-block-map'],['moe-survey','moe-route-combine
   }
   assert.deepEqual(errors,[]);
   const nojs=await browser.newContext({javaScriptEnabled:false,viewport:{width:375,height:900}}),fallback=await nojs.newPage();
+  await nojs.route('**/*',r=>new URL(r.request().url()).origin===new URL(base).origin?r.continue():r.abort());
   for(const [file,id] of [...demos,['parallelism-survey','zero-memory-figure']]){
    await fallback.goto(base+'/posts/'+file+'.html');assert(await fallback.locator('#'+id+' .core-stage').innerText());
   }
