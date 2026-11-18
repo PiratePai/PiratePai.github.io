@@ -183,8 +183,10 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
 .reader-theme-toggle { flex:0 0 34px; display:inline-flex; align-items:center; justify-content:center; padding:6px!important; }
 .reader-toolbar .reader-menu-toggle svg { flex:0 0 auto; }
 @media (max-width:980px) {
-  .reader-ready body { margin-left:0; padding-top:60px; }
-  .reader-toolbar { left:0; height:60px; padding-inline:10px; gap:5px; }
+  .reader-ready body { margin-left:0; padding-top:64px; }
+  .reader-toolbar { left:0; height:64px; padding-inline:10px; gap:5px; }
+  /* Common controls keep at least a 44px touch target on phones. */
+  .reader-toolbar button, .reader-toolbar a { min-height:44px; }
   .reader-toolbar button { white-space:nowrap; padding:7px 8px; font-size:13px; }
   .reader-sidebar { width:min(310px,86vw); }
   .reader-ready:not(.reader-collapsed) .reader-backdrop { display:block; position:fixed; inset:0; background:#0007; border:0; border-radius:0; z-index:100011; }
@@ -202,8 +204,10 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
   .reader-content pre { padding:16px!important; font-size:13px!important; }
   .reader-pager { gap:10px; font-size:13px; }
   .reader-pager-status { max-width:64px; }
-  .reader-current-title,.reader-pager-top { display:none; }
-  .reader-toolbar-label { text-align:center; white-space:nowrap; font-size:12px; }
+  /* The current chapter stays visible as the phone reader's location cue. */
+  .reader-current-title { display:block; max-width:38vw; overflow:hidden; text-overflow:ellipsis; }
+  .reader-pager-top { display:none; }
+  .reader-toolbar-label { text-align:left; white-space:nowrap; font-size:12px; }
   .reader-ready .tl:has(.when)::before { left:5px; }
   .reader-ready .tl:has(.when) li { padding-left:24px; }
   .reader-ready .tl .when { position:static; display:block; width:auto; text-align:left; }
@@ -214,6 +218,7 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
   .reader-toolbar button { padding-inline:6px; font-size:12px; }
   .reader-toolbar > button[aria-controls] { font-size:0; }
   .reader-toolbar > button[aria-controls]::after { content:'目录'; font-size:12px; }
+  .reader-current-title { display:none; }
   .reader-arrow { flex-basis:26px; }
   .reader-theme-toggle { flex-basis:28px; }
   .reader-ready .reader-content { padding-inline:18px; }

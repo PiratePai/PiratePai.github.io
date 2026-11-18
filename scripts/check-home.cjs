@@ -8,6 +8,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const base = process.argv[2] || 'http://127.0.0.1:8947';
 const metadata = require('../data/articles.json');
+const documents = {...metadata.articles, ...(metadata.pages || {})};
+// The homepage lists articles by editorial number, registry pages after them.
+const orderedDocuments = Object.entries(documents).sort((a, b) => (a[1].number ?? 1e9) - (b[1].number ?? 1e9) || a[0].localeCompare(b[0]));
 const output = process.env.HOME_QA_DIR;
 if (output) fs.mkdirSync(output, {recursive:true});
 
@@ -28,7 +31,7 @@ if (output) fs.mkdirSync(output, {recursive:true});
         changes:[...group.querySelectorAll('.update-changes a')].map(a=>a.getAttribute('href'))
       })));
       for (const group of updates) {
-        const expected = Object.entries(metadata.articles).filter(([,a])=>a.changes.some(c=>c.date===group.day));
+        const expected = orderedDocuments.filter(([,a])=>a.changes.some(c=>c.date===group.day));
         assert.deepEqual(group.articles,expected.map(([slug])=>'posts/'+slug+'.html'));
         assert.equal(new Set(group.articles).size,group.articles.length,'One title per article and date');
         assert.ok(group.summary.endsWith(`· ${expected.length} 篇`));
@@ -51,13 +54,13 @@ if (output) fs.mkdirSync(output, {recursive:true});
         await page.waitForFunction(({nav,id})=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#'+id,{nav,id});
       }
       if (width===1440) {
-        await page.goto(base+'/#systems');
-        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#systems',nav);
-        await navigateStage('core');
+        await page.goto(base+'/#topic-execution');
+        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#topic-execution',nav);
+        await navigateStage('topic-algorithms');
         await page.goBack();
-        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#systems',nav);
+        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#topic-execution',nav);
         await page.goForward();
-        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#core',nav);
+        await page.waitForFunction(nav=>document.querySelector(nav+' a[aria-current]')?.getAttribute('href')==='#topic-algorithms',nav);
       }
 
       await page.goto(base+'/?q='+encodeURIComponent('量化'));
@@ -111,7 +114,7 @@ if (output) fs.mkdirSync(output, {recursive:true});
     await page.goto(base+'/');
     await page.locator('.update-group summary').first().click();
     const latest = await page.locator('.update-group[open] time').getAttribute('datetime');
-    const articles = Object.values(metadata.articles).filter(a=>a.changes.some(c=>c.date===latest));
+    const articles = orderedDocuments.filter(([,a])=>a.changes.some(c=>c.date===latest)).map(([,a])=>a);
     assert.equal(await page.locator('.update-group[open] .update-title').count(),articles.length);
     assert.equal(await page.locator('.update-group[open] .update-changes a').count(),articles.flatMap(a=>a.changes.filter(c=>c.date===latest)).length);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);

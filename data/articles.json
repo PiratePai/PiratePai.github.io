@@ -1,6 +1,6 @@
 {
   "siteUrl": "https://piratepai.github.io",
-  "siteUpdated": "2026-11-17",
+  "siteUpdated": "2026-11-19",
   "articles": {
     "agent-rl-survey": {
       "title": "Agent 与强化学习技术全景：数据飞轮 · Rollout 引擎 · 异步 RL · 多模态 RL",
@@ -52,7 +52,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 16,
+      "topic": "agent",
+      "short": "Agent 与强化学习技术全景：数据飞轮与异步 RL",
+      "meta": "强化学习 · RLHF 到 Agent RL",
+      "related": []
     },
     "attention-evolution": {
       "title": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）",
@@ -90,6 +95,20 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
+      ],
+      "number": 1,
+      "topic": "structure",
+      "short": "注意力结构演进：从 MHA 到 MLA 与混合架构",
+      "meta": "结构层 · 改变模型本身",
+      "related": [
+        {
+          "slug": "kv-cache-survey",
+          "text": "KV Cache"
+        },
+        {
+          "slug": "vit-sparsification",
+          "text": "ViT 稀疏化"
+        }
       ]
     },
     "custom-inference-engines-2026": {
@@ -121,6 +140,20 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
+      ],
+      "number": 9,
+      "topic": "execution",
+      "short": "定制化大模型推理引擎全景：到 DeepInfer",
+      "meta": "全景层 · 定制推理引擎",
+      "related": [
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
+        },
+        {
+          "slug": "inference-serving",
+          "text": "推理服务"
+        }
       ]
     },
     "inference-serving": {
@@ -128,7 +161,7 @@
       "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-17",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -179,6 +212,31 @@
           "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "5.6 部署快照补充研究判断登记表第 1 条（缓存感知路由 vs 最短队列路由）的入口链接。",
+          "anchor": "research-20261103",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 8,
+      "topic": "execution",
+      "short": "大模型推理服务优化：批处理、调度与分离部署",
+      "meta": "系统层 · 调度与服务",
+      "related": [
+        {
+          "slug": "moe-survey",
+          "text": "MoE"
+        },
+        {
+          "slug": "parallelism-survey",
+          "text": "并行策略"
+        },
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
         }
       ]
     },
@@ -187,7 +245,7 @@
       "description": "结构压缩、分页管理、前缀复用、量化、稀疏驱逐、分层卸载、混合架构：七条战线梳理二十余项代表性工作与 2025–2026 最新动态。",
       "published": "2026-08-23",
       "publicationCommit": "60dddd862da11c747a9b378d8d2874ecd993748e",
-      "contentUpdated": "2026-11-17",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -231,6 +289,27 @@
           "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "新增 4.3 逐步推演（两请求×三逻辑块的页表状态转移表）与 5.4 观测账本（容量/命中/TTFT 三本账、命中收益被传输或排队抵消的教学边界、vLLM APC 设计文档与固定提交测试的证据口径分层）；5.1 增加共享两完整前缀块 6→4 的算例与写时复制边界框；文末补 2026-11-19 来源两条。",
+          "anchor": "kv-page-steps",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 3,
+      "topic": "algorithms",
+      "short": "KV Cache 技术全景：从原理到前沿",
+      "meta": "显存层 · 管理 KV Cache",
+      "related": [
+        {
+          "slug": "quantization-survey",
+          "text": "模型量化"
+        },
+        {
+          "slug": "strata-hybrid-inference",
+          "text": "CPU-GPU 混合推理"
         }
       ]
     },
@@ -284,6 +363,16 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
+      ],
+      "number": 11,
+      "topic": "measurement",
+      "short": "大模型性能仿真：从算子账本到请求曲线",
+      "meta": "仿真层 · 不部署就预估性能",
+      "related": [
+        {
+          "slug": "custom-inference-engines-2026",
+          "text": "定制推理引擎"
+        }
       ]
     },
     "loop-transformer-survey": {
@@ -329,7 +418,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 13,
+      "topic": "structure",
+      "short": "Loop Transformer：循环深度与测试时算力",
+      "meta": "模型架构 · 循环深度与潜空间推理",
+      "related": []
     },
     "moe-survey": {
       "title": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来",
@@ -374,7 +468,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 2,
+      "topic": "structure",
+      "short": "混合专家（MoE）全景：从原理到应用",
+      "meta": "模型架构 · 稀疏专家",
+      "related": []
     },
     "parallelism-survey": {
       "title": "大模型并行策略与通信优化：发展历程、原理与未来方向",
@@ -419,7 +518,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 7,
+      "topic": "execution",
+      "short": "大模型并行策略与通信优化",
+      "meta": "系统层 · 切分与通信",
+      "related": []
     },
     "quantization-survey": {
       "title": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告",
@@ -464,6 +568,24 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
+      ],
+      "number": 4,
+      "topic": "algorithms",
+      "short": "模型量化在 LLM / VLM / DiT 中的原理与代码",
+      "meta": "压缩层 · 降低数值精度",
+      "related": [
+        {
+          "slug": "inference-serving",
+          "text": "推理服务"
+        },
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
+        },
+        {
+          "slug": "kv-cache-survey",
+          "text": "KV Cache"
+        }
       ]
     },
     "realtime-world-models-2026": {
@@ -502,7 +624,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 15,
+      "topic": "visual",
+      "short": "实时交互世界模型全景",
+      "meta": "世界模型 · 实时交互与因果流式",
+      "related": []
     },
     "spec-decoding-post-training": {
       "title": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）",
@@ -540,7 +667,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 6,
+      "topic": "algorithms",
+      "short": "投机解码的后训练：从草稿蒸馏到 DSpark",
+      "meta": "推理加速 · 草稿训练与蒸馏",
+      "related": []
     },
     "speculative-decoding": {
       "title": "投机解码全景：从经典投机采样到 DFlash / DSpark",
@@ -599,6 +731,16 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
+      ],
+      "number": 5,
+      "topic": "algorithms",
+      "short": "投机解码全景：从经典投机采样到 DFlash / DSpark",
+      "meta": "算法层 · 改变解码方式",
+      "related": [
+        {
+          "slug": "spec-decoding-post-training",
+          "text": "草稿后训练"
+        }
       ]
     },
     "strata-hybrid-inference": {
@@ -637,7 +779,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 10,
+      "topic": "execution",
+      "short": "大模型 CPU-GPU 混合推理：专家卸载与分层缓存",
+      "meta": "端侧推理 · MoE 卸载",
+      "related": []
     },
     "training-free-autotune-2026": {
       "title": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）",
@@ -675,7 +822,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 12,
+      "topic": "measurement",
+      "short": "Training-free 优化与 Agent 自动调优",
+      "meta": "研究工具 · 自动调优",
+      "related": []
     },
     "vit-sparsification": {
       "title": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）",
@@ -720,14 +872,19 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 14,
+      "topic": "visual",
+      "short": "ViT 稀疏化：结构稀疏、Token 压缩与步间缓存",
+      "meta": "视觉效率 · Token 压缩与缓存复用",
+      "related": []
     },
     "inference-evaluation": {
       "title": "大模型性能评测与可复现实验：指标、对照、账本与失败边界",
       "description": "从请求时间线、TTFT/TPOT 与有效吞吐，到质量约束、对照矩阵和实验归档；附可运行的 Python 统计工具、人工教学账本及目标 GPU 实验协议。",
       "published": "2026-11-04",
       "publicationCommit": null,
-      "contentUpdated": "2026-11-17",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-15",
       "changes": [
         {
@@ -750,6 +907,27 @@
           "summary": "按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。",
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "1.1 新增“时间线作为机制专题坐标系”段落：链接 KV Cache 分页逐步推演、5.4 观测账本与推理服务的 Chunked Prefill / P/D 分离，说明各机制落到本表口径的哪个量上。",
+          "anchor": "s1",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 17,
+      "topic": "measurement",
+      "short": "大模型性能评测与可复现实验",
+      "meta": "性能验证 · 实验方法",
+      "related": [
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
+        },
+        {
+          "slug": "llm-perf-simulation-2026",
+          "text": "性能仿真"
         }
       ]
     },
@@ -782,7 +960,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 18,
+      "topic": "algorithms",
+      "short": "推理时计算与自适应预算：采样、验证与路由",
+      "meta": "推理策略 · 质量与计算",
+      "related": []
     },
     "agent-inference-systems": {
       "title": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测",
@@ -813,7 +996,12 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 19,
+      "topic": "agent",
+      "short": "Agent 在线推理系统：上下文、调度与恢复",
+      "meta": "Agent 运行时 · 推理系统",
+      "related": []
     },
     "diffusion-flow-sampling": {
       "title": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏",
@@ -844,13 +1032,18 @@
           "anchor": "reading-path",
           "evidence": "docs/logical-layout-20261117.md"
         }
-      ]
+      ],
+      "number": 20,
+      "topic": "visual",
+      "short": "扩散与 Flow 模型的采样效率：求解器与少步蒸馏",
+      "meta": "扩散与 Flow · 采样效率",
+      "related": []
     },
     "cost-efficient-inference-2026": {
       "title": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）",
       "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。",
       "published": "2026-11-15",
-      "contentUpdated": "2026-11-18",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-18",
       "changes": [
         {
@@ -880,6 +1073,35 @@
           "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
           "anchor": "reading-path",
           "evidence": "docs/pr-integration-review-20261118.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。",
+          "anchor": "video-response",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 21,
+      "topic": "measurement",
+      "short": "高性价比大模型推理：从每 token 账本到工程落地",
+      "meta": "系统层 · 推理经济学",
+      "related": [
+        {
+          "slug": "inference-serving",
+          "text": "推理服务"
+        },
+        {
+          "slug": "quantization-survey",
+          "text": "模型量化"
+        },
+        {
+          "slug": "inference-evaluation",
+          "text": "评测与复现实验"
+        },
+        {
+          "slug": "llm-perf-simulation-2026",
+          "text": "性能仿真"
         }
       ]
     },
@@ -887,7 +1109,7 @@
       "title": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）",
       "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。",
       "published": "2026-11-18",
-      "contentUpdated": "2026-11-18",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-18",
       "changes": [
         {
@@ -903,6 +1125,31 @@
           "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
           "anchor": "reading-path",
           "evidence": "docs/pr-integration-review-20261118.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "导读新增与研究判断登记表的分工说明（方法是地图、判断是带日期的赌注）并互链。",
+          "anchor": "s0",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 22,
+      "topic": "measurement",
+      "short": "推理研究路线：建模、约束优化、协同设计与自适应",
+      "meta": "研究方法 · 指标与口径",
+      "related": [
+        {
+          "slug": "llm-perf-simulation-2026",
+          "text": "性能仿真"
+        },
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
+        },
+        {
+          "slug": "inference-evaluation",
+          "text": "评测与复现实验"
         }
       ]
     },
@@ -910,7 +1157,7 @@
       "title": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）",
       "description": "以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）为唯一主线案例：源码级解剖块生成与 KV 提交，把存算比、宽容比、KV 缓存、VAE 显存、异构分离、响应延迟串成一条执行链的六个截面（KV 5.62 GiB、块等待 344 ms、roofline 算例），给出 E0–E7 研究对照设计与三项候选创新，并逐条纠正 PixVid 数字的六种误读。",
       "published": "2026-11-18",
-      "contentUpdated": "2026-11-18",
+      "contentUpdated": "2026-11-19",
       "reviewed": "2026-11-18",
       "changes": [
         {
@@ -926,6 +1173,91 @@
           "summary": "明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。",
           "anchor": "reading-path",
           "evidence": "docs/pr-integration-review-20261118.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读路径样板",
+          "summary": "3.6 开头新增四个时间定义对照表；3.6.1.1 新增 62.5 ms 控制间隔、50 ms 生成显示的可动手核对块等待算例（N=1/4/8 → 50/237.5/487.5 ms，标注教学假设与改块的三重影响）；章末衔接成本篇 s8/s9/video-response 与研究判断登记表。",
+          "anchor": "sf-block-wait-example",
+          "evidence": "docs/site-redesign-20261119.md"
+        }
+      ],
+      "number": 23,
+      "topic": "visual",
+      "short": "Self Forcing 流式视频推理：六维建模与响应延迟",
+      "meta": "研究延伸 · 流式视频推理系统",
+      "related": [
+        {
+          "slug": "realtime-world-models-2026",
+          "text": "实时世界模型"
+        },
+        {
+          "slug": "kv-cache-survey",
+          "text": "KV Cache"
+        },
+        {
+          "slug": "diffusion-flow-sampling",
+          "text": "扩散采样效率"
+        },
+        {
+          "slug": "cost-efficient-inference-2026",
+          "text": "高性价比推理"
+        }
+      ]
+    }
+  },
+  "topics": [
+    {
+      "id": "structure",
+      "name": "模型结构与状态",
+      "zone": "专题",
+      "blurb": "注意力、专家路由与循环深度：结构决定每个 token 的计算量与状态量，是后续所有优化的共同分母。"
+    },
+    {
+      "id": "algorithms",
+      "name": "推理算法与计算预算",
+      "zone": "专题",
+      "blurb": "KV Cache、量化、投机解码与推理时计算：在固定结构下降低每次生成的成本，并用预算控制质量。"
+    },
+    {
+      "id": "execution",
+      "name": "执行引擎与在线服务",
+      "zone": "专题",
+      "blurb": "并行通信、服务调度与定制引擎：把方法放进连续批处理、P/D 分离与在线服务负载。"
+    },
+    {
+      "id": "measurement",
+      "name": "性能建模、评测与成本",
+      "zone": "专题",
+      "blurb": "仿真、自动调优、可复现实验、成本账本与研究方法：定义指标、验证收益、算清单价。"
+    },
+    {
+      "id": "visual",
+      "name": "图像、视频与世界模型",
+      "zone": "工作负载专区",
+      "blurb": "视觉生成负载的效率问题：Token 稀疏化、少步采样、流式视频执行链与世界模型服务。"
+    },
+    {
+      "id": "agent",
+      "name": "Agent 训练与执行",
+      "zone": "工作负载专区",
+      "blurb": "Agent 负载的训练与执行：rollout 引擎、异步 RL、工具等待与恢复、任务级成本。"
+    }
+  ],
+  "pages": {
+    "research-judgments": {
+      "title": "研究判断登记表：缓存路由、Agent 成本与交互视频",
+      "description": "三条带日期的技术预判：缓存感知路由对最短队列、Agent 每 token 单价对每次成功任务成本、交互视频吞吐对响应。每条记录问题、负载、机制依据、基线、固定变量、观测指标、否定条件、证据状态与拟回看日期。",
+      "published": "2026-11-19",
+      "contentUpdated": "2026-11-19",
+      "reviewed": "2026-11-19",
+      "changes": [
+        {
+          "date": "2026-11-19",
+          "kind": "新增页面",
+          "summary": "建立集中可达的研究判断登记表：三条预判（缓存感知路由、Agent 任务成本、交互视频吞吐与响应）逐条给出适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、证据状态与拟回看日期；与推理服务、评测、成本、研究路线、Self Forcing 与 KV Cache 专题双向连接。",
+          "anchor": "s0",
+          "evidence": "docs/site-redesign-20261119.md"
         }
       ]
     }

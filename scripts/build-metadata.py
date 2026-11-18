@@ -1,8 +1,11 @@
-"""Build article dates, scoped change records, SEO metadata and the sitemap.
+"""Build article dates, scoped change records, topic structure, SEO metadata and the sitemap.
 
 Edit data/articles.json; dates are editorial data, never the build clock.
+Topic membership, article numbering and catalog blurbs live in the same file so
+the homepage navigation, counts and archive are generated, not hand-maintained.
 """
 import argparse
+from collections import Counter
 from datetime import date
 from html import escape
 import json
@@ -11,6 +14,15 @@ import re
 import xml.etree.ElementTree as ET
 
 from site_assets import ROOT, asset_url, preserve_line_endings
+
+# Old five-stage catalog anchors still resolve to the topic that inherited them.
+TOPIC_ALIASES = {
+    'structure': 'chapters-foundations',
+    'algorithms': 'chapters-optimization',
+    'execution': 'chapters-execution',
+    'measurement': 'chapters-evaluation',
+    'visual': 'chapters-research',
+}
 
 
 def block(source, name, content, before):
@@ -23,39 +35,108 @@ def block(source, name, content, before):
     return source.replace(before, generated + '\n' + before, 1)
 
 
+def check_record_dates(slug, item, kind):
+    for field in ('published', 'contentUpdated', 'reviewed'):
+        date.fromisoformat(item[field])
+    if not item['published'] <= item['contentUpdated'] or item['reviewed'] > item['contentUpdated']:
+        raise ValueError(f'Inconsistent dates: {slug}')
+    if item['contentUpdated'] != max(change['date'] for change in item['changes']):
+        raise ValueError(f'Content date must match a change record: {slug}')
+    for change in item['changes']:
+        date.fromisoformat(change['date'])
+        source = (ROOT / 'posts' / (slug + '.html')).read_text(encoding='utf-8')
+        if not re.search(r'\bid=["\x27]' + re.escape(change['anchor']) + r'["\x27]', source):
+            raise ValueError(f'Missing change anchor: {slug}#{change["anchor"]}')
+        if not (ROOT / change['evidence']).is_file():
+            raise ValueError(f'Missing change evidence: {change["evidence"]}')
+
+
+def validate_topics(data):
+    """Numbers are unique, membership single, every article filed, no empty or unknown topic."""
+    topics = data.get('topics')
+    if not isinstance(topics, list) or not topics:
+        raise ValueError('data/articles.json must define the topic list')
+    ids = [topic['id'] for topic in topics]
+    if len(ids) != len(set(ids)):
+        raise ValueError('Duplicate topic id')
+    for topic in topics:
+        for field in ('id', 'name', 'zone', 'blurb'):
+            if not topic.get(field):
+                raise ValueError(f'Topic missing {field}: {topic}')
+        if topic['zone'] not in ('专题', '工作负载专区'):
+            raise ValueError(f'Unknown topic zone: {topic["zone"]}')
+    articles = data['articles']
+    numbers = sorted(item['number'] for item in articles.values())
+    if numbers != list(range(1, len(articles) + 1)):
+        raise ValueError('Article numbers must be unique and contiguous from 1')
+    counts = Counter()
+    for slug, item in articles.items():
+        if item['topic'] not in ids:
+            raise ValueError(f'Unknown topic for {slug}: {item["topic"]}')
+        counts[item['topic']] += 1
+        for field in ('short', 'meta'):
+            if not item.get(field):
+                raise ValueError(f'Article missing {field}: {slug}')
+        for link in item.get('related', []):
+            if link['slug'] not in articles or link['slug'] == slug:
+                raise ValueError(f'Invalid related link for {slug}: {link["slug"]}')
+    for topic in ids:
+        if not counts[topic]:
+            raise ValueError(f'Empty topic: {topic}')
+
+
 def load_metadata():
     data = json.loads((ROOT / 'data/articles.json').read_text(encoding='utf-8'))
-    if set(data['articles']) != {p.stem for p in (ROOT / 'posts').glob('*.html')}:
-        raise ValueError('Metadata must cover every article exactly once')
+    posts = {p.stem for p in (ROOT / 'posts').glob('*.html')}
+    if set(data['articles']) | set(data.get('pages', {})) != posts or set(data['articles']) & set(data.get('pages', {})):
+        raise ValueError('Metadata must cover every article and page exactly once')
     for slug, item in data['articles'].items():
-        for field in ('published', 'contentUpdated', 'reviewed'):
-            date.fromisoformat(item[field])
-        if not item['published'] <= item['contentUpdated'] or item['reviewed'] > item['contentUpdated']:
-            raise ValueError(f'Inconsistent dates: {slug}')
-        if item['contentUpdated'] != max(change['date'] for change in item['changes']):
-            raise ValueError(f'Content date must match a change record: {slug}')
-        for change in item['changes']:
-            date.fromisoformat(change['date'])
-            source = (ROOT / 'posts' / (slug + '.html')).read_text(encoding='utf-8')
-            if not re.search(r'\bid=["\x27]' + re.escape(change['anchor']) + r'["\x27]', source):
-                raise ValueError(f'Missing change anchor: {slug}#{change["anchor"]}')
-            if not (ROOT / change['evidence']).is_file():
-                raise ValueError(f'Missing change evidence: {change["evidence"]}')
+        check_record_dates(slug, item, 'article')
+    for slug, item in data.get('pages', {}).items():
+        check_record_dates(slug, item, 'page')
+    validate_topics(data)
     return data
+
+
+def numbered_articles(data):
+    return sorted(data['articles'].items(), key=lambda item: item[1].get('number', 0))
+
+
+def format_ranges(numbers):
+    runs, start, previous = [], numbers[0], numbers[0]
+    for number in numbers[1:]:
+        if number == previous + 1:
+            previous = number
+            continue
+        runs.append((start, previous))
+        start = previous = number
+    runs.append((start, previous))
+    return '、'.join(f'{a}–{b}' if b > a else f'{a}' for a, b in runs)
+
+
+def topic_members(data, topic_id):
+    return [slug for slug, item in numbered_articles(data) if item['topic'] == topic_id]
 
 
 def seo(data, item=None, slug=None):
     site = data['siteUrl']
     url = site + (f'/posts/{slug}.html' if slug else '/')
     title = item['title'] if item else "Pai's Blog · 大模型效率技术知识全景"
-    description = item['description'] if item else f'{len(data["articles"])} 篇中文大模型效率技术综述：从注意力、缓存与解码，到并行、服务、性能验证、推理预算与 Agent 系统。按阅读路线、实际问题或最近更新进入专题。'
-    schema = {'@context': 'https://schema.org', '@type': 'BlogPosting' if item else 'WebSite',
+    if item and slug:
+        description = item['description']
+    elif item:
+        description = item['description']
+    else:
+        description = (f'{len(data["articles"])} 篇中文大模型效率技术综述：从模型结构、推理算法、执行引擎，到性能评测、成本账本、'
+                       '视觉生成与 Agent 负载。按实际问题、专题或研究判断进入。')
+    page = slug in data.get('pages', {})
+    schema = {'@context': 'https://schema.org', '@type': 'WebPage' if page else ('BlogPosting' if item else 'WebSite'),
               'name': title, 'url': url, 'description': description, 'inLanguage': 'zh-CN'}
     if item:
         schema.update(headline=title, datePublished=item['published'], dateModified=item['contentUpdated'],
                       author={'@type': 'Person', 'name': 'PiratePai', 'url': 'https://github.com/PiratePai'},
                       image=site + '/assets/social-card.png', mainEntityOfPage=url)
-    tags = [('name', 'description', description), ('property', 'og:type', 'article' if item else 'website'),
+    tags = [('name', 'description', description), ('property', 'og:type', 'article' if item and not page else 'website'),
             ('property', 'og:title', title), ('property', 'og:description', description),
             ('property', 'og:url', url), ('property', 'og:site_name', "Pai's Blog"),
             ('property', 'og:locale', 'zh_CN'), ('property', 'og:image', site + '/assets/social-card.png'),
@@ -88,17 +169,22 @@ def maintenance(item, slug):
             '</details></div>')
 
 
+def all_documents(data):
+    """Articles in editorial order first, registry pages after them."""
+    return list(numbered_articles(data)) + list(data.get('pages', {}).items())
+
+
 def recent_updates(data):
     groups = {}
-    for slug, item in data['articles'].items():
+    for slug, item in all_documents(data):
         for change in item['changes']:
             groups.setdefault(change['date'], {}).setdefault(slug, []).append(change)
     updates = '<p>同一天每篇文章列一次，条目下保留各处修改的直达链接。页面维护不改变研究资料的核验日期。</p>'
     for day, articles in sorted(groups.items(), reverse=True):
-        label = '专题新增与内容修订' if any(c['kind'] == '新增专题' for changes in articles.values() for c in changes) else '内容更新'
+        label = '专题新增与内容修订' if any(c['kind'] in ('新增专题', '新增页面') for changes in articles.values() for c in changes) else '内容更新'
         updates += f'<details class="update-group"><summary><time datetime="{day}">{day}</time> · {label} · {len(articles)} 篇</summary><ul class="update-articles">'
         for slug, changes in articles.items():
-            item = data['articles'][slug]
+            item = data['articles'].get(slug) or data['pages'][slug]
             updates += f'<li><a class="update-title" href="posts/{slug}.html">{escape(item["title"])}</a><ul class="update-changes">'
             for change in changes:
                 updates += (f'<li><a href="posts/{slug}.html#{escape(change["anchor"], quote=True)}">{escape(change["kind"])}</a>'
@@ -108,10 +194,72 @@ def recent_updates(data):
     return updates
 
 
+def topic_nav(data):
+    """Sidebar: the six topics with generated counts."""
+    links = []
+    for topic in data['topics']:
+        count = len(topic_members(data, topic['id']))
+        links.append(f'<a href="#topic-{topic["id"]}">{escape(topic["name"])}<span>{count} 篇</span></a>')
+    return '\n'.join(links)
+
+
+def mobile_topic_nav(data):
+    links = [f'<a href="#topic-{topic["id"]}">{escape(topic["name"])}（{len(topic_members(data, topic["id"]))} 篇）</a>'
+             for topic in data['topics']]
+    links += [
+        '<a href="#problems">按问题查找</a>',
+        '<a href="posts/research-judgments.html">研究判断</a>',
+        '<a href="#recent-updates">最近更新</a>',
+        f'<a href="#all-articles">全部 {len(data["articles"])} 篇目录</a>',
+        '<a href="https://piratepai.github.io/pi-infer-book/" target="_blank" rel="noopener">动手实验 · 在线书</a>',
+    ]
+    return '\n'.join(links)
+
+
+def topic_index(data):
+    """Short six-topic index right after the problem entries."""
+    cards = []
+    for topic in data['topics']:
+        members = topic_members(data, topic['id'])
+        scope = '工作负载专区' if topic['zone'] == '工作负载专区' else f'第 {format_ranges([data["articles"][s]["number"] for s in members])} 篇'
+        workload = ' workload' if topic['zone'] == '工作负载专区' else ''
+        cards.append(f'<div class="topic-card{workload}"><h3><a href="#topic-{topic["id"]}">{escape(topic["name"])}'
+                     f'<span aria-hidden="true"> →</span></a></h3>'
+                     f'<p class="topic-scope">{escape(scope)} · {len(members)} 篇综述</p>'
+                     f'<p class="topic-blurb">{escape(topic["blurb"])}</p></div>')
+    return '\n'.join(cards)
+
+
+def article_entry(data, slug, item):
+    related = ''.join(f'<a href="posts/{link["slug"]}.html">{escape(link["text"])}</a>' for link in item.get('related', []))
+    related = f'<p class="related">关联阅读：{related}</p>' if related else ''
+    return (f'<article class="article-entry" id="article-{slug}">'
+            f'<h3><span class="chapter-number">{item["number"]}.</span><a href="posts/{slug}.html">{escape(item["short"])}</a></h3>'
+            f'<p class="article-summary">{escape(item["description"])}</p>'
+            f'<p class="article-meta">{escape(item["meta"])}</p>{related}</article>')
+
+
+def topic_catalog(data):
+    """Full archive: every article exactly once, filed under its one topic."""
+    groups = []
+    for topic in data['topics']:
+        members = topic_members(data, topic['id'])
+        numbers = [data['articles'][slug]['number'] for slug in members]
+        alias = TOPIC_ALIASES.get(topic['id'])
+        alias = f'<span class="archive-alias" id="{alias}" aria-hidden="true"></span>' if alias else ''
+        zone = ' · 工作负载专区' if topic['zone'] == '工作负载专区' else ''
+        entries = '\n'.join(article_entry(data, slug, data['articles'][slug]) for slug in members)
+        groups.append(f'<section class="archive-group" id="topic-{topic["id"]}">{alias}'
+                      f'<h3>{escape(topic["name"])}<span class="group-zone">{escape(topic["zone"])}</span></h3>'
+                      f'<p class="group-range">第 {format_ranges(numbers)} 篇{zone} · 共 {len(members)} 篇</p>\n'
+                      f'{entries}\n</section>')
+    return '\n'.join(groups)
+
+
 def build():
     data = load_metadata()
     outputs = {}
-    for slug, item in data['articles'].items():
+    for slug, item in all_documents(data):
         path = ROOT / 'posts' / (slug + '.html')
         source = path.read_text(encoding='utf-8')
         source = re.sub(r'<title>.*?</title>', lambda _: '<title>' + escape(item['title']) + '</title>', source, count=1, flags=re.S)
@@ -122,6 +270,10 @@ def build():
     # Old manually maintained description is superseded by the generated block.
     home = re.sub(r'<meta name="description"[^>]*>\s*', '', home, count=1) if '<!-- site-metadata:start -->' not in home else home
     home = block(home, 'site-metadata', seo(data), '</head>')
+    home = block(home, 'topic-nav', topic_nav(data), '</nav>')
+    home = block(home, 'mobile-topic-nav', mobile_topic_nav(data), '</details>')
+    home = block(home, 'topic-index', topic_index(data), '</section>')
+    home = block(home, 'topic-catalog', topic_catalog(data), '</section>')
     home = block(home, 'recent-updates', recent_updates(data), '</main>')
     for slug, item in data['articles'].items():
         pattern = r'(<article class="article-entry" id="article-' + re.escape(slug) + r'">)(.*?)(</article>)'
@@ -137,7 +289,9 @@ def build():
     ns = 'http://www.sitemaps.org/schemas/sitemap/0.9'
     ET.register_namespace('', ns)
     sitemap = ET.Element(f'{{{ns}}}urlset')
-    for path, modified in [('/', data['siteUpdated'])] + [(f'/posts/{slug}.html', item['contentUpdated']) for slug, item in data['articles'].items()]:
+    documents = [('/', data['siteUpdated'])] + [
+        (f'/posts/{slug}.html', item['contentUpdated']) for slug, item in all_documents(data)]
+    for path, modified in documents:
         url = ET.SubElement(sitemap, 'url')
         ET.SubElement(url, 'loc').text = data['siteUrl'] + path
         ET.SubElement(url, 'lastmod').text = modified
@@ -160,4 +314,4 @@ if __name__ == '__main__':
                 path.write_bytes(preserve_line_endings(raw, content).encode('utf-8'))
     if args.check and changed:
         raise SystemExit('Metadata is stale: ' + ', '.join(changed))
-    print(f'{"CHECK" if args.check else "BUILD"} metadata, dates and sitemap: {len(changed)} changed')
+    print(f'{"CHECK" if args.check else "BUILD"} metadata, topics, dates and sitemap: {len(changed)} changed')

@@ -10,6 +10,43 @@
     return Array.from(new Set(normalize(query).split(/\s+/).filter(Boolean)));
   }
 
+  // Small, curated alias table: exact normalized queries map to one definition entry.
+  // Keep aliases narrow; broad words stay in ordinary full-text results.
+  const TERM_ENTRIES = [
+    {aliases: ['ttft', '首 token 延迟', '首token延迟', '首 token 时延', '首字时延', '首字延迟', 'time to first token', 'first token latency'],
+     label: 'TTFT（首 token 延迟）的定义与口径',
+     url: 'posts/inference-evaluation.html#s1',
+     note: '排队、prefill 与流式输出在同一条客户端时间线上；表 1-1 给出 TTFT 的两种口径差别。'},
+    {aliases: ['p/d 分离', 'pd 分离', 'p d 分离', 'prefill decode 分离', 'prefill-decode 分离', 'prefill/decode 分离', 'pd disaggregation'],
+     label: 'P/D 分离（Prefill 与 Decode 分离部署）',
+     url: 'posts/inference-serving.html#s5',
+     note: '推理服务篇第 5 章：动机、三篇奠基工作、代价与配套技术，含请求全路径交互图。'},
+    {aliases: ['分页管理', 'pagedattention', '页表管理'],
+     label: 'KV Cache 的分页管理（PagedAttention）',
+     url: 'posts/kv-cache-survey.html#s4',
+     note: 'KV Cache 篇第 4 章：页表、按需分配、非连续物理映射与逐步推演表。'},
+    {aliases: ['self forcing', 'self-forcing'],
+     label: 'Self Forcing 流式视频推理',
+     url: 'posts/self-forcing-inference-research.html#s0',
+     note: '专题首页：块生成与 KV 提交的源码解剖，六维建模与 E0–E7 研究对照。'},
+    {aliases: ['goodput', '有效吞吐'],
+     label: 'goodput（有效吞吐）的定义与分母',
+     url: 'posts/inference-evaluation.html#s2',
+     note: '同时满足首 token、输出间隔与总延迟上限的成功请求速率；失败请求不能从分母消失。'},
+    {aliases: ['块等待', 'control to screen', '控制到屏幕时延'],
+     label: '控制到屏幕时延与块等待',
+     url: 'posts/self-forcing-inference-research.html#s36',
+     note: '块等待公式 W=(N−1)/f 的推导、62.5 ms 间隔下的可核对算例与三种控制语义。'}
+  ];
+
+  function matchTerm(query) {
+    const key = normalize(query);
+    if (!key) return null;
+    return TERM_ENTRIES.find(function (entry) {
+      return entry.aliases.some(function (alias) { return normalize(alias) === key; });
+    }) || null;
+  }
+
   function prepare(documents) {
     return documents.map(function (doc) {
       return {
@@ -93,7 +130,7 @@
     return validateIndex(await response.json());
   }
 
-  if (typeof module !== 'undefined' && module.exports) module.exports = {normalize: normalize, prepare: prepare, search: search, readIndex: readIndex};
+  if (typeof module !== 'undefined' && module.exports) module.exports = {normalize: normalize, prepare: prepare, search: search, readIndex: readIndex, matchTerm: matchTerm, termEntries: TERM_ENTRIES};
   if (typeof document === 'undefined') return;
 
   const form = document.getElementById('site-search');
@@ -101,6 +138,7 @@
   const input = document.getElementById('search-input');
   const clear = document.getElementById('search-clear');
   const region = document.getElementById('search-results');
+  const termCard = document.getElementById('search-term');
   const status = document.getElementById('search-status');
   const message = document.getElementById('search-message');
   const list = document.getElementById('search-list');
@@ -155,7 +193,22 @@
     syncNavigation();
     list.replaceChildren();
     message.replaceChildren();
+    termCard.replaceChildren();
+    termCard.hidden = !active;
     if (!active) { status.textContent = ''; return; }
+    const entry = matchTerm(query);
+    if (entry) {
+      // Term entries are built from textContent only; queries never become HTML.
+      const label = document.createElement('b');
+      label.textContent = '术语 · ' + entry.label;
+      const link = document.createElement('a');
+      link.href = entry.url;
+      link.textContent = '进入定义章节';
+      const note = document.createElement('span');
+      note.className = 'term-note';
+      note.textContent = entry.note;
+      termCard.append(label, link, note);
+    }
     const terms = termsFor(query);
     const results = search(documents || fallback, query);
     status.textContent = terms.length ? '找到 ' + results.length + ' 篇相关文章' : '请输入中文、英文或数字关键词';
@@ -199,7 +252,7 @@
     if (input.value.trim() && !failed) loadIndex(false);
   }
   function syncNavigation() {
-    const active = input.value.trim() ? '' : location.hash || '#start';
+    const active = input.value.trim() ? '' : location.hash;
     document.querySelectorAll('.stage-nav a, .mobile-nav a').forEach(function (link) {
       if (link.getAttribute('href') === active) link.setAttribute('aria-current', 'location');
       else link.removeAttribute('aria-current');

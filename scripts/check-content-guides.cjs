@@ -58,7 +58,8 @@ fs.mkdirSync(output,{recursive:true});
       }
     }
     await page.goto(base);
-    const articles=fs.readdirSync(path.join(__dirname,'../posts')).filter(name=>name.endsWith('.html'));
+    const metadata=require('../data/articles.json');
+    const articles=fs.readdirSync(path.join(__dirname,'../posts')).filter(name=>name.endsWith('.html')&&!Object.keys(metadata.pages||{}).includes(name.replace(/\.html$/,'')));
     assert.equal(await page.locator('.article-entry').count(),articles.length);
     for (const [query,slug] of [['可复算账本','inference-evaluation'],['预算预留','test-time-compute'],['幂等','agent-inference-systems'],['时间网格','diffusion-flow-sampling']]) {
       await page.locator('#search-input').fill(query);
@@ -68,6 +69,8 @@ fs.mkdirSync(output,{recursive:true});
     assert.deepEqual(errors,[]);
     await context.close();
     const plain = await browser.newContext({javaScriptEnabled:false,viewport:{width:375,height:900}});
+    // Same offline policy as the JS context: third-party counters otherwise stall the load event.
+    await plain.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
     const p = await plain.newPage();
     for (const slug of slugs) {
       await p.goto(`${base}/posts/${slug}.html`);

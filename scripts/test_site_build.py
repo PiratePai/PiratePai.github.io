@@ -3,6 +3,7 @@ from html.parser import HTMLParser
 import importlib.util
 import json
 from pathlib import Path
+import re
 import struct
 import unittest
 from urllib.parse import urlsplit
@@ -82,11 +83,13 @@ class PublicationTests(unittest.TestCase):
         source = (ROOT / 'index.html').read_text(encoding='utf-8')
         fragment = source.split('<!-- recent-updates:start -->')[1].split('<!-- recent-updates:end -->')[0]
         actual = Updates(fragment).groups
-        days = sorted({c['date'] for a in data['articles'].values() for c in a['changes']}, reverse=True)
+        documents = metadata.all_documents(data)
+        days = sorted({c['date'] for a in data['articles'].values() for c in a['changes']} |
+                      {c['date'] for a in data.get('pages', {}).values() for c in a['changes']}, reverse=True)
         self.assertEqual([g['date'] for g in actual], days)
         for group in actual:
             titles, links = [], []
-            for slug, item in data['articles'].items():
+            for slug, item in documents:
                 changes = [c for c in item['changes'] if c['date'] == group['date']]
                 if changes:
                     titles.append(f'posts/{slug}.html')
@@ -110,7 +113,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_unique_metadata_and_editorial_dates(self):
         data = metadata.load_metadata()
-        for slug, item in data['articles'].items():
+        for slug, item in metadata.all_documents(data):
             source = (ROOT / 'posts' / (slug + '.html')).read_text(encoding='utf-8')
             page = Head(source)
             with self.subTest(slug=slug):
@@ -132,7 +135,7 @@ class PublicationTests(unittest.TestCase):
         root = ET.parse(ROOT / 'sitemap.xml')
         actual = {n.find('s:loc', ns).text: n.find('s:lastmod', ns).text for n in root.findall('s:url', ns)}
         expected = {data['siteUrl'] + '/': data['siteUpdated']}
-        expected.update({data['siteUrl'] + '/posts/' + slug + '.html': a['contentUpdated'] for slug, a in data['articles'].items()})
+        expected.update({data['siteUrl'] + '/posts/' + slug + '.html': a['contentUpdated'] for slug, a in metadata.all_documents(data)})
         self.assertEqual(actual, expected)
 
     def test_share_image_is_a_real_1200_by_630_png(self):
@@ -147,10 +150,39 @@ class PublicationTests(unittest.TestCase):
         for slug in data['articles']:
             self.assertEqual(source.count(f'id="article-{slug}"'), 1)
         self.assertIn('href="posts/attention-evolution.html#reading-path"', source)
-        for anchor in ('problems', 'recent-updates', 'knowledge-map', 'all-articles'):
+        for anchor in ('problems', 'recent-updates', 'knowledge-map', 'all-articles', 'topics'):
             self.assertIn(f'id="{anchor}"', source)
         self.assertEqual(Head(source).canonicals, ['https://piratepai.github.io/'])
         self.assertIn('data-index-gzip-url="search-index.json.gz?v=', source)
+
+    def test_generated_topic_structure_matches_editorial_data(self):
+        data = metadata.load_metadata()
+        source = (ROOT / 'index.html').read_text(encoding='utf-8')
+        for fragment, label in ((source.split('<!-- topic-catalog:start -->')[1].split('<!-- topic-catalog:end -->')[0], 'catalog'),):
+            for topic in data['topics']:
+                with self.subTest(zone=label, topic=topic['id']):
+                    self.assertIn(f'id="topic-{topic["id"]}"', fragment)
+                    self.assertIn(f'href="#topic-{topic["id"]}"', source)
+            listed = re.findall(r'id="article-([a-z0-9-]+)"', fragment)
+            self.assertEqual(sorted(listed), sorted(data['articles']))
+            self.assertEqual(len(listed), len(set(listed)), 'each article filed exactly once')
+            numbers = [int(n) for n in re.findall(r'<span class="chapter-number">(\d+)\.</span>', fragment)]
+            self.assertEqual(sorted(numbers), list(range(1, len(data['articles']) + 1)), 'catalog keeps editorial numbering')
+            for alias in metadata.TOPIC_ALIASES.values():
+                self.assertIn(f'id="{alias}"', fragment)
+        # Duplicate numbering, membership gaps and dead topics fail the build itself.
+        broken = json.loads(json.dumps(data))
+        broken['articles']['kv-cache-survey']['number'] = 1
+        with self.assertRaises(ValueError):
+            metadata.validate_topics(broken)
+        broken = json.loads(json.dumps(data))
+        broken['articles']['kv-cache-survey']['topic'] = 'not-a-topic'
+        with self.assertRaises(ValueError):
+            metadata.validate_topics(broken)
+        broken = json.loads(json.dumps(data))
+        broken['topics'] = broken['topics'][:5]
+        with self.assertRaises(ValueError):
+            metadata.validate_topics(broken)
 
 
 if __name__ == '__main__':

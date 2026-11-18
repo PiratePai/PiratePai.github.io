@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究判断登记表：缓存路由、Agent 成本与交互视频</title>
+<style>
+  :root{
+    --ink:#6ea8ff; --muted:#aeb4bd; --line:#445569; --bg:#1b2128; --card:#171a21;
+    --accent:#6ea8ff; --accent2:#9d7bff; --ok:#41d1a7; --warn:#ffb454;
+    --code-bg:#0f1b2a; --code-ink:#d7e3f0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.75;font-size:16px;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 80px;}
+  header.hero{background:linear-gradient(135deg,#6ea8ff 0%,#6ea8ff 60%,#6ea8ff 100%);color:#aeb4bd;padding:56px 24px 40px;margin-bottom:32px;}
+  header.hero .inner{max-width:1080px;margin:0 auto;}
+  header.hero h1{margin:0 0 12px;font-size:34px;line-height:1.3;}
+  header.hero p.sub{margin:0;font-size:17px;opacity:.92;max-width:860px;}
+  header.hero .meta{margin-top:18px;font-size:13px;opacity:.8;}
+  h2{font-size:26px;margin:56px 0 6px;padding-bottom:8px;border-bottom:3px solid var(--accent);color:#6ea8ff;}
+  h2 .no{color:var(--accent);margin-right:8px;font-family:Consolas,monospace;}
+  h3{font-size:20px;margin:32px 0 6px;color:#6ea8ff;}
+  h4{font-size:17px;margin:22px 0 4px;color:#6ea8ff;}
+  p{margin:10px 0;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:0 1px 3px rgba(16,42,67,.06);}
+  .toc{background:#16212c;border:1px solid #375876;border-radius:10px;padding:18px 26px;margin:8px 0 24px;}
+  .toc h3{margin:4px 0 10px;}
+  .toc ol{margin:0;padding-left:22px;columns:2;column-gap:40px;}
+  .toc li{margin:4px 0;break-inside:avoid;}
+  .toc a{color:var(--accent);text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  sup.cite{color:var(--accent);font-weight:600;font-size:11px;white-space:nowrap;}
+  sup.cite a{color:inherit;text-decoration:none;}
+  .note{background:#152029;border-left:4px solid #3e5770;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:14.5px;}
+  .note b{color:#e8eaed;}
+  .citebox{background:#141d26;border-left:4px solid #7a5a2e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:12.8px;color:var(--muted);line-height:1.7;}
+  .citebox b{color:#ffb454;}
+  .citebox .q{color:#8fa8c8;font-style:italic;}
+  .analogy{background:#312612;border-left:4px solid #7f632e;padding:10px 16px;margin:12px 0;border-radius:0 8px 8px 0;font-size:15px;}
+  .analogy::before{content:"🍽 类比 ";font-weight:700;color:#ffb454;}
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:8px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6;font-family:Consolas,"Cascadia Code",Menlo,monospace;margin:10px 0;}
+  code{font-family:Consolas,Menlo,monospace;}
+  p code, li code, td code{background:#1a2128;color:#6ea8ff;padding:1px 6px;border-radius:4px;font-size:13.5px;}
+  .codecap{font-size:12.5px;color:#7f8b9c;margin:-6px 0 14px;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top;line-height:1.6;}
+  th{background:#1c2733;color:#cfe3f7;}
+  tr:nth-child(even){background:#151b23;}
+  .summary3{background:#141f1a;border:1px solid #2c4a3c;border-radius:10px;padding:14px 20px;margin:22px 0;}
+  .summary3 b{color:#7fe0bd;}
+  .summary3 ol{margin:8px 0 2px;padding-left:24px;}
+  .summary3 li{margin:5px 0;line-height:1.7;}
+  .timeline{list-style:none;margin:16px 0;padding-left:0;border-left:2px solid #3e5770;}
+  .timeline li{position:relative;margin:0 0 16px 22px;padding-left:10px;}
+  .timeline .t{display:inline-block;min-width:74px;font-family:Consolas,monospace;font-size:12.5px;color:#41d1a7;margin-right:8px;}
+  .timeline li::before{content:"";position:absolute;left:-27px;top:9px;width:9px;height:9px;border-radius:50%;background:#41d1a7;box-shadow:0 0 0 3px rgba(65,209,167,.18);}
+  .pill{display:inline-block;padding:2px 12px;border-radius:999px;background:#20344a;border:1px solid #375876;color:#bcd6f2;font-size:12.5px;margin:2px 6px 2px 0;}
+  .tag{display:inline-block;font-size:10.5px;padding:1px 8px;border-radius:999px;margin-left:8px;vertical-align:2px;}
+  .tag.sys{background:#1d3348;color:#7fc0ff;border:1px solid #2f5a7d;}
+  .tag.paper{background:#23324d;color:#b9a6ff;border:1px solid #46538a;}
+  .tag.ind{background:#173d33;color:#7fe0bd;border:1px solid #2c6a55;}
+  .fig{background:#141a22;border:1px solid #2a3442;border-radius:10px;padding:14px 16px;margin:18px 0;}
+  .fig .cap{font-size:12.5px;color:#8a94ab;margin-top:8px;line-height:1.6;}
+  .flowrow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:12px 0;}
+  .fbox{flex:1 1 120px;min-width:120px;background:#182230;border:1px solid #375876;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55;}
+  .fbox b{color:#cfe3f7;}
+  .fbox.hl{border-color:#41d1a7;background:#12251f;}
+  .fbox.ok{border-color:#3d89d2;}
+  .fbox small{color:#8a94ab;font-size:11.5px;display:block;margin-top:4px;}
+  .arr{align-self:center;color:#5f7d9c;font-size:18px;padding:0 2px;}
+  ol.refs{font-size:13px;color:#aeb4bd;padding-left:26px;}
+  ol.refs li{margin:7px 0;line-height:1.65;}
+  ol.refs i{color:#c9d4e2;}
+  ol.refs a{color:#6ea8ff;}
+  .hl-wrap{border-radius:14px;background:linear-gradient(120deg,rgba(65,209,167,.14),rgba(110,168,255,.10) 55%,rgba(157,123,255,.12));border:1px solid rgba(65,209,167,.35);padding:14px 14px 16px;margin:18px 0;}
+  .hl-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .hl-head b{color:#7fe0bd;font-size:15.5px;letter-spacing:.02em}
+  .hl-head i{color:#aeb4bd;font-size:12.5px;font-style:normal}
+  .hl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(max-width:720px){.hl-grid{grid-template-columns:1fr}}
+  .hl-card{background:#1b2127;border:1px solid #2a2f3a;border-radius:10px;padding:12px 14px;transition:border-color .15s ease}
+  .hl-card:hover{border-color:rgba(65,209,167,.45)}
+  .hl-meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .hl-meta b{color:#e8eaed;font-size:14px}
+  .hl-date{color:#6ea8ff;font-size:11.5px;white-space:nowrap}
+  .hl-card p{margin:6px 0 2px;color:#aeb4bd;font-size:12.8px;line-height:1.68}
+  .hl-card .hl-link{color:#6ea8ff;font-size:12px;text-decoration:none}
+  .hl-card .hl-link:hover{text-decoration:underline}
+  .formula{background:#0f1b2a;border:1px solid #2a3a52;border-radius:8px;padding:12px 16px;margin:12px 0;font-family:"Cambria Math","STIX Two Math",Georgia,serif;font-size:16.5px;color:#d7e3f0;overflow-x:auto;line-height:1.9;}
+  .formula .fid{float:right;color:#7f8b9c;font-size:12px;font-family:Consolas,monospace;}
+  @media(max-width:760px){
+    header.hero h1{font-size:26px;}
+    .toc ol{columns:1;}
+    table{font-size:12.5px;display:block;overflow-x:auto;}
+  }
+</style>
+<!-- site-metadata:start -->
+<meta name="description" content="三条带日期的技术预判：缓存感知路由对最短队列、Agent 每 token 单价对每次成功任务成本、交互视频吞吐对响应。每条记录问题、负载、机制依据、基线、固定变量、观测指标、否定条件、证据状态与拟回看日期。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="研究判断登记表：缓存路由、Agent 成本与交互视频">
+<meta property="og:description" content="三条带日期的技术预判：缓存感知路由对最短队列、Agent 每 token 单价对每次成功任务成本、交互视频吞吐对响应。每条记录问题、负载、机制依据、基线、固定变量、观测指标、否定条件、证据状态与拟回看日期。">
+<meta property="og:url" content="https://piratepai.github.io/posts/research-judgments.html">
+<meta property="og:site_name" content="Pai&#x27;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://piratepai.github.io/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="article:published_time" content="2026-11-19">
+<meta property="article:modified_time" content="2026-11-19">
+<link rel="canonical" href="https://piratepai.github.io/posts/research-judgments.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "研究判断登记表：缓存路由、Agent 成本与交互视频", "url": "https://piratepai.github.io/posts/research-judgments.html", "description": "三条带日期的技术预判：缓存感知路由对最短队列、Agent 每 token 单价对每次成功任务成本、交互视频吞吐对响应。每条记录问题、负载、机制依据、基线、固定变量、观测指标、否定条件、证据状态与拟回看日期。", "inLanguage": "zh-CN", "headline": "研究判断登记表：缓存路由、Agent 成本与交互视频", "datePublished": "2026-11-19", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/research-judgments.html"}</script>
+<!-- site-metadata:end -->
+</head>
+<body>
+<div style="position:fixed;left:18px;bottom:18px;z-index:99999;"><a href="../index.html" style="display:inline-block;padding:9px 16px;border-radius:999px;background:rgba(23,26,33,.92);color:#6ea8ff;text-decoration:none;font-size:14px;font-family:system-ui,sans-serif;border:1px solid #2a2f3a;box-shadow:0 4px 18px rgba(0,0,0,.45);">← 返回首页</a></div>
+
+<header class="hero"><div class="inner">
+  <p class="kicker" style="color:#41d1a7;letter-spacing:.22em;font-size:13px;font-weight:700;margin:0 0 6px">研究判断 · 登记表</p>
+<h1>研究判断登记表：带日期、可回看的技术预判</h1>
+  <p class="sub">把散落在综述里的技术预判集中成一张登记表：每条记录<b>问题、适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、当前证据状态与拟回看日期</b>。研究路线篇是方法入口，本表是带日期的判断——到期回看时，只对照预先写下的否定条件与观测指标更新状态，不事后挪门柱。</p>
+  <div class="meta"><span class="pill chip">登记日期：<b>2026-11-19</b></span><span class="pill chip">条目 <b>3 条</b></span><span class="pill chip">证据状态 <b>全部为待验证假设（未做实验）</b></span><span class="pill chip">口径 <b>机制依据来自站内源码核对与论文口径，非本站实测</b></span></div>
+<!-- article-maintenance:start -->
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-19">2026-11-19</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-19">2026-11-19</time> · 新增页面：<a href="#s0">建立集中可达的研究判断登记表：三条预判（缓存感知路由、Agent 任务成本、交互视频吞吐与响应）逐条给出适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、证据状态与拟回看日期；与推理服务、评测、成本、研究路线、Self Forcing 与 KV Cache 专题双向连接。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/research-judgments.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<!-- article-maintenance:end -->
+</header>
+
+<div class="wrap">
+<nav class="toc" aria-label="目录">
+<b>📁 目录</b>（无 JavaScript 环境可直接按序号阅读）
+<ol>
+<li><a href="#s0">0 怎么用这张表：字段与证据分层</a></li>
+<li><a href="#j1">判断 1 缓存感知路由 vs 最短队列路由</a></li>
+<li><a href="#j2">判断 2 Agent 的 token 单价 vs 每次成功任务成本</a></li>
+<li><a href="#j3">判断 3 交互视频吞吐 vs 响应（同卡 vs 流水线分离）</a></li>
+<li><a href="#refs">参考文献与来源口径</a></li>
+</ol>
+</nav>
+
+<details class="note" id="evidence-scope"><summary>来源与代码示例</summary><p>本表的机制依据全部来自站内已有核验：论文报告口径、源码静态阅读与教学推算，各自的快照日期在引用处标注。本站<b>没有运行为这些判断设计的任何实验</b>；三条判断的证据状态均为"待验证假设"。回看时新增的证据按"论文报告 / 源码核对 / 教学推算 / 模拟 / 独立实测"分层登记，不混淆层级。</p></details>
+
+<section id="reading-path" aria-label="阅读路径与使用方式">
+<div class="note"><b>从这里读起 · 先字段，后条目</b><p><a href="#s0">字段与证据分层</a> → <a href="#j1">判断 1</a> → <a href="#j2">判断 2</a> → <a href="#j3">判断 3</a>。</p><p>本表与<a href="inference-research-roadmap.html">研究路线篇</a>互补：路线篇回答"怎么组织研究"，本表回答"站内当前押注了什么、什么时候核对"。每条判断双向链接到提供机制依据的专题；从<a href="inference-serving.html#s5">推理服务</a>、<a href="cost-efficient-inference-2026.html#s5">成本篇</a>与<a href="self-forcing-inference-research.html#s36">Self Forcing 篇</a>也能跳回本表。</p></div>
+</section>
+
+<h2 id="s0"><span class="no">0</span>怎么用这张表：字段与证据分层</h2>
+<p class="lead">一条"研究判断"是一个可证伪的预判：它在明确的负载与指标下，比较两个具体方案，并预先写下什么结果出现就推翻它。</p>
+<ul>
+<li><b>九个字段</b>：问题、适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、当前证据状态、拟回看日期。缺少否定条件的判断不收进本表——那只是愿望。</li>
+<li><b>证据分层</b>：论文报告（他人实验）、源码核对（静态阅读）、教学推算（本站算例）、模拟（本站仿真）、独立实测（本站运行）、待验证假设（尚无实验）。当前三条判断均为最后一类；机制依据本身有各自的分层与快照日期。</li>
+<li><b>回看纪律</b>：到期只对照预先写下的否定条件与观测指标更新状态；条件不够用时新增判断，不改旧判断的胜负标准。排序不变时，记录使其成立的负载条件与结论边界，不外推。</li>
+<li><b>日期语义</b>：登记日期是判断写下的日子；拟回看日期按证据预期更新节奏定（本表统一 3 个月）。界面、索引或排版调整不改变任何字段。</li>
+</ul>
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>判断必须带否定条件与回看日期，否则不登记。</li>
+<li>证据分层写明；"待验证假设"不得写成已有实验支持。</li>
+<li>回看时对照预写标准更新，不事后挪门柱；排序不变也要记录条件。</li>
+</ol>
+</div>
+
+<h2 id="j1"><span class="no">1</span>判断 1：缓存感知路由能否胜过最短队列路由</h2>
+<p class="lead">有共享 KV 池（或高前缀复用负载）时，把请求派去"已有它前缀"的实例（缓存感知路由）是否比派去"队列最短"的实例（最短队列路由）更优？</p>
+<ul>
+<li><b>适用负载</b>：多轮 Agent 会话与固定系统提示的高复用流量（Mooncake 披露线上负载理论前缀复用率上限约 55%，论文问答场景可达 90%<sup class="cite"><a href="#MOONCAKE">[MOONCAKE]</a></sup>）；对照组为低复用、请求间前缀基本独立的负载。</li>
+<li><b>机制依据</b>：命中免去整块 prefill 计算，但缓存块可能不在本机——传输时间与排队时间都会吃掉收益（<a href="kv-cache-survey.html#kv-capacity-ttft">KV Cache 篇 5.4 边界算例</a>：命中省 16 ms、拥塞时传输要 40 ms 的教学反例）。</li>
+<li><b>最强基线</b>：同资源下的最短队列路由（含 P/D 分离部署的默认调度）。</li>
+<li><b>固定变量</b>：相同实例数与型号、相同模型与精度、相同缓存容量与淘汰策略、相同请求集；只变路由策略。</li>
+<li><b>观测指标</b>：P95 TTFT（口径按<a href="inference-evaluation.html#s1">评测篇表 1-1</a>，含排队）、goodput、命中 token 数、跨实例传输字节与耗时、排队时长。负载三档：高复用、低复用、突发。</li>
+<li><b>否定条件</b>：在高复用负载下缓存感知路由的 P95 TTFT 与 goodput 均不优于最短队列（差值落入测量噪声），或其收益完全被传输开销抵消 → 判断不成立，记录负载与带宽条件。</li>
+<li><b>当前证据状态</b>：待验证假设。Mooncake 的生产数字是"缓存为中心调度"的论文报告口径，未在同等对照下与最短队列路由比较。</li>
+<li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
+</ul>
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>比较对象是同资源下的最短队列路由，不是"无缓存"。</li>
+<li>三档负载分开报；P95 TTFT 用含排队的客户端口径。</li>
+<li>命中 token 是机制量，收益要看延迟与 goodput 的最终分布。</li>
+</ol>
+</div>
+
+<h2 id="j2"><span class="no">2</span>判断 2：Agent 配置按 token 单价与按每次成功任务成本的排序何时一致</h2>
+<p class="lead">同一个 Agent 任务集上，按"每百万 token 价格"给模型/引擎配置排序，与按"每次成功任务成本"排序，什么时候给出相同答案、什么时候反转？</p>
+<p class="lead">背景证据：企业负载研究实测 agent 顺序步进跑在 batch=1，每步 2% 的失败率在 20 步后足以抹平 2× 的 decode 优势——按 token 吞吐排名与按每成功任务成本排名会给出不同答案（论文报告口径，见<a href="cost-efficient-inference-2026.html#s6">成本篇 6.5</a>）。</p>
+<ul>
+<li><b>适用负载</b>：多步工具调用 Agent 任务（coding / computer-use / 多轮检索），验收门槛可机器判定；对照组为单轮问答。</li>
+<li><b>机制依据</b>：任务级成本把失败、重试、工具等待与恢复计入分子，把"验收通过的任务"定为分母（<a href="cost-efficient-inference-2026.html#s2">C_unit = C_total ÷ V_valid</a>）；token 单价两者都不含。</li>
+<li><b>最强基线</b>：同一任务集上 token 单价最低的配置（含前缀缓存命中的有效单价）。</li>
+<li><b>固定变量</b>：相同任务集与验收门槛、相同预算上限、相同重试与超时策略、相同工具环境；只变模型/引擎配置。</li>
+<li><b>观测指标</b>：任务成功率、每次成功任务成本（含失败与重试的 token 与等待）、token 单价（名义与命中后）、工具等待占比、恢复成功率。预先定义"排序不变"的记录方式：两种排序的一致性统计量及反转发生的任务长度分布。</li>
+<li><b>否定条件</b>：在全部任务集上两种排序一致（含长任务与高失败率子集）→ 判断无区分度，token 单价是足够代理；记录任务长度与失败率范围。</li>
+<li><b>当前证据状态</b>：待验证假设。现有证据是论文报告的个别对照点，未做过同任务集、同门槛、同预算的系统排序比较。</li>
+<li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
+</ul>
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>分母是验收通过的任务，不是 token；失败成本留在分子。</li>
+<li>排序一致与否按预定义的统计量记录，反转要标出任务长度条件。</li>
+<li>预算、门槛与重试策略固定，否则两个排序都不可比。</li>
+</ol>
+</div>
+
+<h2 id="j3"><span class="no">3</span>判断 3：交互视频在同资源下，同卡与流水线分离的选型是否随响应约束改变</h2>
+<p class="lead">同资源清单、同质量门槛下，流式视频服务用"同卡放全栈"还是"DiT—VAE 流水线分离"，加上响应约束（P95 控制到屏幕时延）后，排序会不会变？</p>
+<ul>
+<li><b>适用负载</b>：交互式流式视频（固定块粒度与控制频率，负载形态按<a href="self-forcing-inference-research.html#s4">Self Forcing 篇 E4/E6 组</a>的稳态与突发两档）。</li>
+<li><b>机制依据</b>：分离提高稳态吞吐节拍，但首块、稳态与交互关键路径是三条账——更低的流水间隔不自动降低单次控制响应（<a href="self-forcing-inference-research.html#s35">该篇 3.5</a>）；块等待 (N−1)/f 是模型侧优化移除不了的结构项（<a href="self-forcing-inference-research.html#sf-block-wait-example">3.6.1.1 算例</a>）。</li>
+<li><b>最强基线</b>：同资源清单下的同卡部署（含相同块粒度与缓冲深度）。</li>
+<li><b>固定变量</b>：相同卡数与型号、相同模型与精度、相同分辨率/帧率/块粒度/缓冲、相同质量门（FVD 与任务相关指标作约束不作除数）；只变放置。</li>
+<li><b>观测指标</b>：P95 控制到屏幕时延（版本号判定首个有效响应）、卡顿率、有效视频秒数（V_valid 口径：过时与被丢弃帧不计产出、成本照记）、吞吐。响应约束两档：无约束与 P95 ≤ 阈值。</li>
+<li><b>否定条件</b>：加入响应约束前后排序都不变（分离始终占优或始终劣），且响应约束不可行时 V_valid 归零的边界一致 → 响应约束不改变选型，判断无区分度；记录质量门与负载条件。</li>
+<li><b>当前证据状态</b>：待验证假设。PixVid 的 495 ms vs 34 ms 是架构对照（像素空间 vs 潜空间），不是放置对照；TurboServe/SlackServe 报告的是各自系统的绝对数字，未做同资源放置比较。</li>
+<li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
+</ul>
+<div class="summary3"><b>本章小结</b>
+<ol>
+<li>比较的是放置（同卡 vs 分离），架构与块粒度全部固定。</li>
+<li>响应约束两档分别报排序；V_valid 过滤过时帧、成本照记。</li>
+<li>现有论文数字不能替代同资源对照，结论等本判断的实验或新论文。</li>
+</ol>
+</div>
+
+<h2 id="refs">参考文献与来源口径</h2>
+<ol class="refs">
+<li id="MOONCAKE"><b>Ruoyu Qin, Zheming Li, et al.</b>（Moonshot AI）. <i>Mooncake: Trading More Storage for Less Computation.</i> FAST 2025 最佳论文；arXiv:2407.00079，v1 2024-07-01。复用率与调度数字为论文报告口径。<a href="https://arxiv.org/abs/2407.00079">arXiv</a></li>
+<li id="DISTSERVE"><b>Yinmin Zhong, et al.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving.</i> OSDI 2024；arXiv:2401.09670，v1 2024-01-18。TTFT/TPOT 双指标服务能力与 P/D 分离动机。<a href="https://arxiv.org/abs/2401.09670">arXiv</a></li>
+<li id="PIXVIDJR"><b>Yanke Song, et al.</b>（Roblox 等）. <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336，v1 2026-11-12。块等待与吞吐-响应对照的论文口径（单卡 B200、480×864、4 步）。<a href="https://arxiv.org/abs/2611.17336">arXiv</a></li>
+<li id="SFJR"><b>Xun Huang, et al.</b> <i>Self Forcing: Bridging the Train-Test Gap in Autoregressive Video Diffusion.</i> NeurIPS 2025 Spotlight；arXiv:2506.08009，v1 2025-06-09。<a href="https://arxiv.org/abs/2506.08009">arXiv</a></li>
+<li id="ENTERPRISEJR"><b>企业负载 Agent 框架研究</b>（Citigroup/EY/NVIDIA，2026-10）。batch=1 步进、每步失败率复利与每成功任务成本排序反转；转引自<a href="cost-efficient-inference-2026.html#refs">成本篇参考文献</a>（该篇含完整出处与口径标注）。</li>
+</ol>
+<p>注：</p><ul><li>站内机制依据的快照日期以各专题文内标注为准：vLLM 设计文档与测试快照 2026-11-19（KV Cache 篇文末来源），Self-Forcing 源码 commit 33593df（2026-11-18 核对），Mooncake/DistServe/PixVid 为论文报告口径。</li><li>本表三条判断均为待验证假设；截至登记日，站内未运行任何为其设计的实验。回看记录将追加在各条目下方并注明证据分层。</li></ul>
+<p style="font-size:12.5px;color:#8a94ab;">本表与站内研究路线篇（方法入口）、推理服务篇（P/D 与调度）、KV Cache 篇（缓存机制）、成本篇（任务链成本）、Self Forcing 篇（响应建模）与评测篇（指标口径）互链。</p>
+
+</div><!-- /wrap -->
+
+<div style="text-align:center;color:#8a94ab;font-size:12px;padding:12px 0 20px">
+  <a href="https://github.com/PiratePai" target="_blank" rel="noopener" title="PiratePai 的 profile views 计数（GitHub 主页与站点共用同一计数器）"><img src="https://komarev.com/ghpvc/?username=PiratePai&amp;style=flat-square&amp;color=6ea8ff&amp;label=views" alt="profile views" style="vertical-align:middle;height:20px"></a>
+</div>
+<!-- chapter-reader:start -->
+<link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=64114dcadbe1">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<!-- chapter-reader:end -->
+</body>
+</html>
