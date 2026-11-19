@@ -108,6 +108,13 @@
           "summary": "在 6 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "修正标准注意力的类比，保留对可见位置加权汇总的含义。",
+          "anchor": "s2",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 1,
@@ -131,7 +138,7 @@
       "published": "2026-10-31",
       "publicationCommit": "1b68d9a3375a51832f61128e94ef6165e87989d4",
       "contentUpdated": "2026-11-20",
-      "reviewed": "2026-11-15",
+      "reviewed": "2026-11-20",
       "changes": [
         {
           "date": "2026-11-03",
@@ -160,6 +167,13 @@
           "summary": "在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正第 1、3、5 章的字数与 token、CUDA Graph 重放及 Sarathi-Serve 表格；局部核验固定地址缓冲机制和该容量实验，不扩大其他项目与版本的核验范围。",
+          "anchor": "s1",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 9,
@@ -651,6 +665,13 @@
           "summary": "在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正跨时间步量化类比，删除改动幅度必然单调下降的假设。",
+          "anchor": "s7",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 4,
@@ -764,6 +785,13 @@
           "summary": "在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正第 1、5 章的接受规则、低批量稠密解码条件和学生自生成前文类比。",
+          "anchor": "why",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 6,
@@ -835,6 +863,13 @@
           "summary": "在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正第 2、5 章的接受规则及草稿复用类比，区分接受与事实正确性。",
+          "anchor": "core",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 5,
@@ -890,6 +925,13 @@
           "summary": "在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "删除与工程章主题不对应的预取类比，保留原技术内容。",
+          "anchor": "s6",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 10,
@@ -904,7 +946,7 @@
       "published": "2026-10-11",
       "publicationCommit": "8f48de7b6f91249cf99bb0b68e455bc9f89fb25e",
       "contentUpdated": "2026-11-20",
-      "reviewed": "2026-11-15",
+      "reviewed": "2026-11-20",
       "changes": [
         {
           "date": "2026-11-04",
@@ -940,6 +982,13 @@
           "summary": "在 2 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正解码瓶颈的适用条件；局部核验 Sarathi-Serve 的批大小与成本分析、稀疏 MoE 的专家选择，不扩大其他版本与实验的核验范围。",
+          "anchor": "s1",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 12,
@@ -997,6 +1046,13 @@
           "summary": "在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正跨步缓存类比，明确去噪迭代与视频帧的区别。",
+          "anchor": "s5",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 14,
@@ -1192,6 +1248,13 @@
           "summary": "在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正少步蒸馏类比，解释学生一步对齐教师两步的结果。",
+          "anchor": "s5",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 20,
@@ -1205,7 +1268,7 @@
       "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。",
       "published": "2026-11-15",
       "contentUpdated": "2026-11-20",
-      "reviewed": "2026-11-18",
+      "reviewed": "2026-11-20",
       "changes": [
         {
           "date": "2026-11-15",
@@ -1255,6 +1318,13 @@
           "summary": "在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "原理校正",
+          "summary": "校正第 5–6 章的前缀匹配、缓存计费与性能外推；局部核验 APC 设计及固定源码、SGLang 部署命中率、vLLM V1 缓存开销和 Sarathi-Serve 容量实验。",
+          "anchor": "s5",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 21,

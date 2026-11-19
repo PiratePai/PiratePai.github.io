@@ -121,7 +121,7 @@
   <p class="sub">以一条成本公式贯穿全文——<b>单位有效产出成本 C_unit = C_total ÷ V_valid：分子是全部已付费资源（含空闲、重试与失败），分母只计通过质量、SLO 与任务成功过滤的有效产出</b>——先划清它与"低时延、高吞吐"的分野与交汇，再把成本拆成可复查的账本；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、分级定价时代；把量化、MoE、缓存复用、P/D 分离、Agent 任务链、硬件采购逐层换算到同一个分母上；以交互视频的"块等待"为反例说明响应延迟如何改写成本可行域；最后给出引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
   <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">对象 <b>vLLM v0.34.0 · SGLang v0.5.23 · TRT-LLM v1.2.1 · Dynamo v1.6.2 · vLLM-Omni v0.32.0 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11-18 快照）</span><span class="pill chip">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill chip">引用 <b>正文标注出处与时间</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#video-response">8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径勘误：<a href="#s6">核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-20">2026-11-20</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#video-response">8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径勘误：<a href="#s6">核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理校正：<a href="#s5">校正第 5–6 章的前缀匹配、缓存计费与性能外推；局部核验 APC 设计及固定源码、SGLang 部署命中率、vLLM V1 缓存开销和 Sarathi-Serve 容量实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-audit-fixes-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -203,7 +203,7 @@
 <h3>大事记时间线</h3>
 
 <ul class="timeline">
-<li><span class="t">2022-09</span><b>Orca</b>（OSDI 2022）提出迭代级调度与连续批处理：真实变长负载下吞吐损失从"一个数量级"降到接近零，系统级降本的第一块基石<sup class="cite">[ORCA22]</sup>。</li>
+<li><span class="t">2022-09</span><b>Orca</b>（OSDI 2022）提出迭代级调度与连续批处理：减少静态批处理在变长负载下的空闲等待，为系统级降本提供调度基础<sup class="cite">[ORCA22]</sup>。</li>
 <li><span class="t">2023-06</span><b>vLLM / PagedAttention</b>（SOSP 2023）把操作系统式分页引入 KV Cache：显存浪费从 60–80% 降到 <4%，吞吐较 FasterTransformer/Orca 等当时系统 2–4×、较 HuggingFace TGI 峰值 24×——"不买新卡的第一降本"<sup class="cite">[VLLMPA23]</sup>。</li>
 <li><span class="t">2024-05</span><b>中国价格战</b>：DeepSeek V2（¥1/M 输入）→ 智谱 → 豆包 0.8 元/M（比行业均价低 99.3%，"厘时代"）→ 腾讯/阿里/百度跟进、百度轻量模型免费。API 价格一年降 90%+<sup class="cite">[PRICWAR24]</sup>。</li>
 <li><span class="t">2024-07</span><b>顶会"分离年"</b>：DistServe（OSDI'24，goodput 概念化）与 Splitwise（ISCA'24）论证 prefill/decode 分池各自的收益边界；Sarathi-Serve（OSDI'24）给出不打洞的单机替代方案 chunked prefill<sup class="cite">[DISTSERVE24]</sup><sup class="cite">[SPLITWISE24]</sup><sup class="cite">[SARATHI24]</sup>。同期 LoongServe（SOSP 2024）提出弹性序列并行<sup class="cite">[LOONG24]</sup>。</li>
@@ -517,22 +517,24 @@
 </div>
 
 <h2 id="s5"><span class="no">5</span>缓存级降本：不重算已经算过的</h2>
-<div class="analogy">两个人拿同一本书来问不同的问题。先翻好共同要看的那几页，第二个人来时可以接着用。要是两个人读的是不同版本，就得先看那些页是不是还是同样的内容。</div>
+<div class="analogy">两个人从头读同一版书，前面已经一起读过的那一段，可以接着用留下的记录。读到内容不同的地方，就从那里分别往下读。只有中间某几页一样，还不能直接借用那几页的旧记录。</div>
 
-<p>推理负载有强烈的重复性：system prompt 千人一面、Agent 多轮对话反复带历史、RAG 反复检索同一批文档。<b>缓存级降本的全部要义：第一次算，之后都不算</b>。它是六层中"零质量损失"的一层（复用的是精确相同的 KV），也是 2025–2026 引擎侧竞争最激烈的一层。</p>
+<p>system prompt、Agent 对话历史和 RAG 文档可能在请求间重复。<b>精确前缀缓存复用已计算的 KV，减少重复 Prefill</b>。它要求 token 前缀及模型、位置、适配器等影响计算的条件兼容；后续生成仍要读取缓存并执行计算。精确复用与本章后述的压缩、语义缓存分别评估质量边界。<sup class="cite"><a href="#APC">[APC]</a></sup></p>
 
 <h3>5.1 命中价经济学：价目表已经替你算好了</h3>
 
-<p>各厂命中价（2.2 表）本身就是缓存价值的官方标定：DeepSeek 命中价 ≈ 未命中的 1/50（谷时 $0.003 vs $0.15）、Kimi/Anthropic/Gemini 约 1/10、豆包 1/5 加存储计时费。<b>推理侧的机会成本计算</b>：一段 32K 的 system prompt，未命中要付一次完整 prefill（计算 + 时延），命中只付 I/O；对输出同样 1K 的请求，命中能把单请求成本压掉 80–95%（取决于输入输出比与价差）。</p>
+<p>API 账单应按服务商的实际命中规则和计费项计算。设命中输入、未命中输入和输出的 token 数分别为 N<sub>h</sub>、N<sub>u</sub>、N<sub>o</sub>，对应每 token 单价为 p<sub>h</sub>、p<sub>u</sub>、p<sub>o</sub>，则基础费用为 N<sub>h</sub>p<sub>h</sub> + N<sub>u</sub>p<sub>u</sub> + N<sub>o</sub>p<sub>o</sub>，另计缓存写入、存储等项目。第 2.2 节价格表是其标注日期的快照，具体节省比例需代入实际输入输出量和当期价格。</p>
+<p>自部署的资源账本另算：命中可省去复用前缀的大部分 Prefill，但仍有缓存匹配、读取、必要传输、末 token 计算及后续 Decode。即使全部提示词的 KV 已存在，vLLM 的标准 APC 路径仍需得到末 token 的 logits，按块对齐时可能重算末块；完整边界见<a href="inference-serving.html#s3">推理服务篇第 3 章</a>。<sup class="cite"><a href="#APC">[APC]</a><a href="#APCSRC">[APCSRC]</a></sup></p>
 <p>给引擎团队的两个推论：</p>
 <ol>
-<li><b>把可复用前缀放到 prompt 最前面</b>（缓存按前缀匹配，前缀里插一个时间戳就全盘失效）。</li>
+<li><b>把可复用前缀放到 prompt 最前面</b>（缓存按前缀匹配；插入时间戳会使变化位置及其后续前缀失配，之前满足完整块条件的前缀仍可能复用）。</li>
 <li>若用 API，把"我们该不该自建缓存"换成"命中率的每一个百分点值多少钱"——vLLM×Mooncake 的生产数据显示 Agent 负载命中率从 1.7% 提到 92.2%<sup class="cite">[VLLMMK26]</sup>，这就是答案的量级。</li>
 </ol>
 
-<h3>5.2 单机前缀缓存：从 RadixAttention 到"零开销默认开"</h3>
+<h3>5.2 单机前缀缓存：命中收益与管理开销</h3>
 
-<p>机制主线（站内推理服务篇 3.3 有图解）：SGLang 的 <b>RadixAttention</b>（NeurIPS'24）用基数树按内容组织历史 KV，新请求沿树匹配最长前缀、命中部分零计算，多轮 Agent 会话典型命中 80%+，吞吐最高 6.4×<sup class="cite">[SGLANG24]</sup>；vLLM V1（2025-01 起）把前缀缓存做成<b>默认开启、零开销</b>——0% 命中时吞吐损失 <1%<sup class="cite">[VLLMV1]</sup>。</p>
+<p>SGLang 的 <b>RadixAttention</b> 用基数树匹配最长前缀并复用历史 KV。论文按复用输入 token 数与输入 token 总数之比计算命中率；Chatbot Arena 部署中，LLaVA-Next-34B 和 Vicuna-33B 分别为 52.4% 和 74.1%。这些是特定模型与流量的结果，不能作为任意 Agent 负载的预期。<sup class="cite"><a href="#SGLANG24">[SGLANG24]</a></sup></p>
+<p>vLLM V1 的 2025-01-27 发布博客说明默认开启前缀缓存，并在文中测试条件下报告 0% 命中率时吞吐损失低于 1%。这里的“零开销”是架构目标与该基准下的近似描述，不能理解为缓存匹配、管理和读取完全免费。<sup class="cite"><a href="#VLLMV1">[VLLMV1]</a></sup></p>
 <p>研究侧的补充：PromptCache（MLSys'24）模块化复用使 TTFT 降 8×（GPU）<sup class="cite">[PROMPTCACHE]</sup>；IC-Cache（SOSP'25）更进一步复用"语义相近"的历史问答，8 个部署吞吐 1.4–5.9×<sup class="cite">[ICCACHE]</sup>——从"精确前缀"走向"语义缓存"，代价是要管好质量边界。</p>
 
 <h3>5.3 跨实例 KV 池：把缓存从"单机内存"升级成"机房资源"</h3>
@@ -577,7 +579,8 @@
 
 <h3>6.1 批处理与切块：成本视角的两句话重述</h3>
 
-<p>连续批处理（Orca）解决"席位空转"：变长负载下吞吐损失从数量级降到接近零<sup class="cite">[ORCA22]</sup>；chunked prefill（Sarathi-Serve）解决"宴会赶走薯条"：prefill 切块掺批，尾延迟约束下服务容量 2.6–5.6×<sup class="cite">[SARATHI24]</sup>。性价比账：这两项对 $/M tokens 的贡献是<b>把公式分母（吞吐）抬到硬件 roofline 附近</b>，而且零质量损失、纯软件——<b>任何还没做这两项的自部署，都在按 2–5 倍的溢价付费</b>。</p>
+<p>Orca 的迭代级调度允许已完成请求及时退出、等待请求加入，减少静态批处理的空闲计算。<sup class="cite">[ORCA22]</sup> Sarathi-Serve 用切块 Prefill 与持续 Decode 组批，在论文的尾延迟约束下，相对 vLLM，Mistral-7B 单张 A100 的服务容量提高 2.6 倍；Falcon-180B 在 8 张 A100、2 路流水线和 4 路张量并行配置下最高为 5.6 倍。两项数字对应不同模型与部署条件。<sup class="cite">[SARATHI24]</sup></p>
+<p>这些机制能改善特定负载下的资源利用率，<b>单位成本收益需要在相同模型、到达率、质量和 SLO 下测量</b>。低负载时可能没有足够请求组成大批次；不能把论文的服务容量倍数直接换成所有部署的费用倍数。</p>
 
 <h3>6.2 P/D 分离的账：什么时候值得养两个池</h3>
 
@@ -944,7 +947,9 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 <li id="MOONCAKE25"><b>Qin, R. et al.（清华大学/Moonshot AI）.</b> <i>Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving.</i> FAST 2025（最佳论文）；arXiv:2407.00079（2024-06-24）；真实负载多承载 75% 请求、模拟 +525%。<a href="https://arxiv.org/abs/2407.00079">链接</a>。</li>
 <li id="MKREPO"><b>kvcache-ai.</b> <i>Mooncake 仓库与 README（v0.3.14，2026-11-03；引擎集成矩阵与生产数据）.</i> GitHub，官方一手。<a href="https://github.com/kvcache-ai/Mooncake">链接</a>。</li>
 <li id="VLLMMK26"><b>vLLM Team.</b> <i>vLLM × Mooncake：agent 负载 KV 池化实测.</i> 官方博客，2026-05-06；官方一手（吞吐 3.8×、P50 TTFT −46×、命中 1.7%→92.2%、60×GB200 近线性）。</li>
-<li id="VLLMV1"><b>vLLM Team.</b> <i>vLLM V1：统一调度器与零开销前缀缓存（alpha）.</i> 官方博客，2025-01-27；官方一手（0% 命中吞吐损失 &lt;1%，默认开启）。</li>
+<li id="APC"><b>vLLM 项目.</b> <i>Automatic Prefix Caching.</i> 官方滚动设计文档，首发日期未标注；2026-11-20 核验父块哈希、完整块复用及附加标识。<a href="https://docs.vllm.ai/en/stable/design/prefix_caching/">文档</a>。</li>
+<li id="APCSRC"><b>vLLM 项目.</b> <i>KVCacheManager.</i> 提交 d2da27eb2d；2026-11-20 核验末 token 计算边界。<a href="https://github.com/vllm-project/vllm/blob/d2da27eb2defb88377636fba83d9a41ad35bf44d/vllm/v1/core/kv_cache_manager.py">固定提交源码</a>。</li>
+<li id="VLLMV1"><b>vLLM Team.</b> <i>vLLM V1: A Major Upgrade to vLLM’s Core Architecture.</i> 官方博客，2025-01-27；0% 命中时吞吐损失低于 1% 为该文基准结果，2026-11-20 局部核验。<a href="https://vllm.ai/blog/2025-01-27-v1-alpha-release">链接</a>。</li>
 <li id="SGLANG24"><b>Zheng, L. et al.（UC Berkeley/LMSYS）.</b> <i>SGLang: Efficient Execution of Structured Language Model Programs.</i> NeurIPS 2024；arXiv:2312.07104（2023-12-12）；RadixAttention 吞吐最高 6.4×。<a href="https://arxiv.org/abs/2312.07104">链接</a>。</li>
 <li id="PROMPTCACHE"><b>Gim, I. et al.（Yale）.</b> <i>Prompt Cache: Modular Attention Reuse for Low-Latency Inference.</i> MLSys 2024；arXiv:2311.04934（2023-11-07）；TTFT 降 8×（GPU）/60×（CPU）。<a href="https://arxiv.org/abs/2311.04934">链接</a>。</li>
 <li id="CACHEGEN24"><b>Liu, Y. et al.（UMass Amherst/UChicago）.</b> <i>CacheGen: KV Cache Compression and Streaming for Fast LLM Serving.</i> SIGCOMM 2024；arXiv:2310.07240（2023-10-11）；TTFT 缩短 3.7×、字节流 1/4.3。<a href="https://arxiv.org/abs/2310.07240">链接</a>。</li>
