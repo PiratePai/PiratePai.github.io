@@ -993,7 +993,7 @@
         {
           "date": "2026-11-20",
           "kind": "原理校正",
-          "summary": "校正解码瓶颈的适用条件；局部核验 Sarathi-Serve 的批大小与成本分析、稀疏 MoE 的专家选择，不扩大其他版本与实验的核验范围。",
+          "summary": "校正解码瓶颈的适用条件；局部核验 Sarathi-Serve 的批大小与成本分析、稀疏 MoE 的专家选择，不扩大其他版本与实验的核验范围。同步补充第 1.2 节前缀缓存命中率的特定基准条件。",
           "anchor": "s1",
           "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
@@ -1329,7 +1329,7 @@
         {
           "date": "2026-11-20",
           "kind": "原理校正",
-          "summary": "校正第 5–6 章的前缀匹配、缓存计费与性能外推；局部核验 APC 设计及固定源码、SGLang 部署命中率、vLLM V1 缓存开销和 Sarathi-Serve 容量实验。",
+          "summary": "校正第 5–6 章的前缀匹配、缓存计费与性能外推；局部核验 APC 设计及固定源码、SGLang 部署命中率、vLLM V1 缓存开销和 Sarathi-Serve 容量实验。同步校正第 5 章图内节点、输入缓存与输出计费的区分，以及第 9.2 节命中率目标口径。",
           "anchor": "s5",
           "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
