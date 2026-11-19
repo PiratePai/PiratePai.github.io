@@ -87,15 +87,15 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-04">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/test-time-compute.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "url": "https://piratepai.github.io/posts/test-time-compute.html", "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。", "inLanguage": "zh-CN", "headline": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "datePublished": "2026-11-04", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/test-time-compute.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "url": "https://piratepai.github.io/posts/test-time-compute.html", "description": "系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。", "inLanguage": "zh-CN", "headline": "推理时计算与自适应预算：采样、验证、搜索与模型路由", "datePublished": "2026-11-04", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/test-time-compute.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
 <div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
 <header class="hero"><div class="inner"><p class="kicker">推理策略 · 质量与计算 · 2026</p><h1>推理时计算与自适应预算：采样、验证、搜索与模型路由</h1><p class="sub">系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。</p><div class="meta"><span class="pill">调研与核验：2026-11-04</span><span class="pill">一手论文核验；教学预算账本；无模型性能复现</span></div></div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s5-frontier-20261115">Claude Fable 5.2 effort 档位把推理预算产品化；ADP-HT 按路径预算在线路由；小模型 SC 门控负结果。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/test-time-compute.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">系统梳理并行采样、Best-of-N、过程验证、串行修正、预算控制和大小模型路由；区分候选覆盖率与最终正确率，连接服务负载、任务质量和完整成本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s5-frontier-20261115">Claude Fable 5.2 effort 档位把推理预算产品化；ADP-HT 按路径预算在线路由；小模型 SC 门控负结果。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/test-time-compute.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap"><nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">关键进展与实践入口</a></li><li><a href="#s0">0 导读：把额外计算变成可验证的答案收益</a></li><li><a href="#s1">1 预备知识：质量、算力、费用和等待时间</a></li><li><a href="#s2">2 并行采样：从多数投票到 Best-of-N</a></li><li><a href="#s3">3 验证器与搜索：判断下一步是否值得扩展</a></li><li><a href="#s4">4 串行推理：思考长度、修正与提前停止</a></li><li><a href="#s5">5 自适应预算与大小模型路由</a></li><li><a href="#s6">6 与推理服务、缓存和 Agent 的连接</a></li><li><a href="#s7">7 对照实验：怎样证明预算花得值得</a></li><li><a href="#s8">8 研究边界与下一步</a></li><li><a href="#refs">参考文献与来源口径</a></li></ol></nav><div class="hl-wrap" id="hl"><style>
@@ -136,6 +136,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>比较之前写清费用、计算量和墙钟约束。</li><li>候选集包含正确答案，不保证选择器能找到它。</li><li>独立采样公式是教学上界分析的起点，真实错误相关性需要测量。</li></ol></div>
 
 <h2 id="s2">2 并行采样：从多数投票到 Best-of-N</h2>
+<div class="analogy" id="principle-notes-20261120"><p>三个人各做一遍题，可以选大家写得最多的那个答案，也可以请老师挑一份最有道理的。几个人可能恰好犯同一个错，所以写得人多也得看答案对不对。</p></div>
 <h3 id="s2-1">2.1 两种选择规则</h3>
 <p>Self-Consistency 对多个推理路径的最终答案做聚合，适用于答案可以规范化并比较一致性的任务。它不要求每个路径都相同。<sup class="cite"><a href="#ref-SC">[SC]</a></sup></p>
 <p>Best-of-N 则使用评分器给完整候选排序，取分数最高者；评分器可以是规则、可执行测试或学习到的奖励模型。</p>
@@ -147,6 +148,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>多数投票依赖答案可比较，Best-of-N 依赖评分器可靠。</li><li>分别测量候选覆盖率与最终选择正确率。</li><li>并行候选能增加计算与显存压力，延迟收益要放进实际负载验证。</li></ol></div>
 
 <h2 id="s3">3 验证器与搜索：判断下一步是否值得扩展</h2>
+<div class="analogy"><p>有两条路都能往前走。可以等走到终点才看对不对，也可以每过一个路口先查路标。早一点发现走错就能少走一段，但路标看错时也可能把正确的路放丢。</p></div>
 <h3 id="s3-1">3.1 结果奖励与过程奖励</h3>
 <p>结果奖励模型（ORM）给完整答案评分；过程奖励模型（PRM）给中间步骤反馈。过程监督研究在 MATH 场景比较了这两类监督信号，并公开步骤标注数据。其证据针对论文模型与任务，不能直接推出任何 PRM 在所有领域都优于结果判定。<sup class="cite"><a href="#ref-PRM">[PRM]</a></sup></p>
 <p>步骤分数需要聚合成候选分数。取最小值强调最弱一步，取乘积会受到步骤数和校准误差影响，取平均则可能掩盖一个致命错误。要在留出的完整任务上校准聚合规则；“语言流畅”“看起来严谨”都不能作为已验证正确性的同义词。</p>
@@ -170,6 +172,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>思考长度是策略参数，更多文字不等于更高正确率。</li><li>为最终答案、工具执行和验收预留预算。</li><li>提前停止与升级都要在留出集校准，并统计错误决策。</li></ol></div>
 
 <h2 id="s5">5 自适应预算与大小模型路由</h2>
+<div class="analogy"><p>一堆拼图里，有的看一眼就知道该放哪，有的要多试几次。多试要留给还有机会拼好的那几块。刚拿起一块时猜它有多难，猜错了就可能把时间用在没用的地方。</p></div>
 <h3 id="s5-1">5.1 给不同题目不同预算</h3>
 <p>Snell 等研究发现，推理时计算策略的效果随题目难度变化，由此研究按题目自适应分配计算。<sup class="cite"><a href="#ref-TTC">[TTC]</a></sup> 这提供了一条方法论：先估计收益曲线，再选择预算档位。线上难度未知，论文分析中的难度划分与实际可部署的难度预测器必须分开。</p>
 <div class="citebox"><b>[TTC] Charlie Snell 等.</b> <i>Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters</i>，arXiv:2408.03314，2024-08-06。原文：<span class="q">“critically varies depending on the difficulty of the prompt”</span>（效果会显著随输入问题的难度而变化。）<a href="https://arxiv.org/abs/2408.03314">原文</a>。</div>
@@ -204,6 +207,7 @@ return finalize_with_reserved_budget(observed_state)</code></pre>
 <p>算法层：ADP-HT 把"路由+重试"写成 K-bit 路径上下文赌徒机加背包问题，在 GPQA 流式请求上用 $0.81 解出 682 题，对比 OpenRouter 的 cost-saving AutoRouter（372 题）与默认档（≤15 题）<sup class="cite"><a href="#ref-ADPHT">[ADPHT]</a></sup>。</p>
 <p>另一个值得注意的负结果：在 ≤1B 小模型上，对简单题目门控跳过 Self-Consistency 可省 36–79% 计算而不掉点——"每题必采样 N 次"并不是铁律<sup class="cite"><a href="#ref-SCGATE">[SCGATE]</a></sup>。</p>
 <h2 id="s6">6 与推理服务、缓存和 Agent 的连接</h2>
+<div class="analogy"><p>一位客人一下请了好几个人帮忙，如果每个人都排在队首，后面的人就一直轮不到。可以先给这位客人定下总共能用多少帮手，再分别安排他们。</p></div>
 <h3 id="s6-1">6.1 一个请求变成多个排队实体</h3>
 <p>Best-of-N 会把一个用户任务展开成多个生成请求。如果每条分支都获得独立的高优先级，少量复杂任务就可能挤压其他用户。本文建议为“任务”建立统一标识与在途预算，在任务级限制扇出，在请求级做组批；达到截止时间时将取消传播到生成、验证器和工具。</p>
 <p>串行深推理通常拉长占用时间；并行探索则增加同时驻留的 KV。调度器可以按剩余时间、分支价值和可抢占性研究策略，但这些估计会出错。应比较相同用户任务到达率下的达标成功数，不能只比较解码 token/秒。</p>

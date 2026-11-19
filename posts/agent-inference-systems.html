@@ -87,15 +87,15 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-04">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/agent-inference-systems.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "url": "https://piratepai.github.io/posts/agent-inference-systems.html", "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。", "inLanguage": "zh-CN", "headline": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "datePublished": "2026-11-04", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/agent-inference-systems.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "url": "https://piratepai.github.io/posts/agent-inference-systems.html", "description": "从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。", "inLanguage": "zh-CN", "headline": "Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测", "datePublished": "2026-11-04", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/agent-inference-systems.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
 <div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
 <header class="hero"><div class="inner"><p class="kicker">Agent 运行时 · 推理系统 · 2026</p><h1>Agent 在线推理系统：上下文、工具调度、状态恢复与任务评测</h1><p class="sub">从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。</p><div class="meta"><span class="pill">调研与核验：2026-11-04</span><span class="pill">一手来源核验；本地 SQLite 故障注入；无生产系统基准</span></div></div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s4-frontier-20261115">Evolving Infra 按会话状态在线重排 P/D（vs Dynamo 延迟最高降 4.1×）；Δτ-Bench 工具生态漂移评测；tau-bench 2.0.0。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/agent-inference-systems.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从任务状态与关键路径出发，贯通上下文管理、KV 复用、工具并行、背压、检查点与幂等恢复；附本地故障注入示例和任务成功成本账本。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s4-frontier-20261115">Evolving Infra 按会话状态在线重排 P/D（vs Dynamo 延迟最高降 4.1×）；Δτ-Bench 工具生态漂移评测；tau-bench 2.0.0。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/agent-inference-systems.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap"><nav class="toc" aria-label="文章目录"><h3>目录</h3><ol><li><a href="#hl">关键进展与实践入口</a></li><li><a href="#s0">0 导读：从一次生成到一项可恢复的任务</a></li><li><a href="#s1">1 预备知识：状态机、上下文与记忆</a></li><li><a href="#s2">2 时间与费用：找到任务的关键路径</a></li><li><a href="#s3">3 上下文工程：减少输入而保留任务依据</a></li><li><a href="#s4">4 工具与模型调度：并行、限流与背压</a></li><li><a href="#s5">5 持久化与恢复：检查点为何还不够</a></li><li><a href="#s6">6 可观测性：把一项任务拆成可归因的记录</a></li><li><a href="#s7">7 评测：状态验收、消融与故障矩阵</a></li><li><a href="#s8">8 工程选型与研究边界</a></li><li><a href="#refs">参考文献与来源口径</a></li></ol></nav><div class="hl-wrap" id="hl"><style>
@@ -132,6 +132,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>任务事实应独立于某一次提示词保存。</li><li>上下文、检查点、长期记忆和 KV 分别解决不同问题。</li><li>压缩与缓存可以优化读取过程，最终状态仍需可追溯。</li></ol></div>
 
 <h2 id="s2">2 时间与费用：找到任务的关键路径</h2>
+<div class="analogy" id="principle-notes-20261120"><p>两个人同时找剪刀和纸，做手工要等两样都拿到。剪刀先拿来时，等的还是纸。只让先到的人更快一点，通常不能让手工更早开始。</p></div>
 <h3 id="s2-1">2.1 用依赖图计算等待</h3>
 <p>一个任务由模型调用、工具调用、排队、存储和验收等节点组成；依赖边表示后一项必须等待前一项。没有资源争用时，任务时间至少是依赖图中最长路径的时长。真实系统还要加上资源排队与重试。把所有节点耗时相加，会高估已经并行的部分；只看模型时间，又会低估任务等待。</p>
 <table><caption>表 2-1 · 人工构造的关键路径例子，不是服务实测</caption><thead><tr><th>阶段</th><th>时长</th><th>依赖</th></tr></thead><tbody><tr><td>第一次模型调用</td><td>1 秒</td><td>任务开始</td></tr><tr><td>工具 A / 工具 B</td><td>8 秒 / 5 秒</td><td>都依赖第一次调用；相互无依赖</td></tr><tr><td>最终模型调用</td><td>1 秒</td><td>等待 A、B</td></tr><tr><td>验收与保存</td><td>0.2 秒</td><td>等待最终输出</td></tr></tbody></table>
@@ -153,6 +154,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>上下文优化要保住约束、事实与证据引用。</li><li>摘要和检索各有误差，应以完整任务结果验证。</li><li>前缀缓存按实际 token 复用，压缩收益需扣除重算与额外调用。</li></ol></div>
 
 <h2 id="s4">4 工具与模型调度：并行、限流与背压</h2>
+<div class="analogy"><p>两个人可以同时去找红笔和蓝笔。但写字的人得等笔拿到才开始。如果两个人同时想擦黑板上的同一行，先定谁改、谁接着看，才不会互相擦掉。</p></div>
 <h3 id="s4-1">4.1 先检查依赖，再决定并发</h3>
 <p>独立的只读查询可以并行；读取工具 A 的结果再构造工具 B 参数时必须串行。共享文件、同一数据库对象或同一外部资源的写入，应明确冲突处理与提交顺序。多个 Agent 分支共享任务预算，生成候选计划与真正执行计划分开记录。</p>
 <p>模型服务善于组批生成；工具可能等待网络、磁盘或外部任务。工具等待期间，运行时可以释放工作线程或计算槽，但是否保留会话 KV 取决于缓存策略。等待期间的缓存占用、重载成本和下一轮延迟，应一起比较。</p>
@@ -169,6 +171,7 @@
 <p>评测侧，Δτ-Bench（10-25）用 1,588 个可执行多轮任务、42 个域、6 个连续生态版本量化"工具接口漂移下的适应性"：最强组合任务成功率仅 42.3%<sup class="cite"><a href="#ref-DTAU">[DTAU]</a></sup>。</p>
 <p>Sierra 的 tau-bench 2.0.0 也在 10-19 加入多语言（沿用 pass^k 重复计分），提醒旧版 retail/airline 域已冻结过时<sup class="cite"><a href="#ref-TAU2">[TAU2]</a></sup>。</p>
 <h2 id="s5">5 持久化与恢复：检查点为何还不够</h2>
+<div class="analogy"><p>去店里买东西前把清单写好，回家后打勾。如果付款时电话断了，清单上可能还没打勾，店里却已经收了钱。再付一次之前，要先查这笔钱有没有付过。</p></div>
 <h3 id="s5-1">5.1 保存什么，何时恢复</h3>
 <p>一个检查点至少保存任务 ID、逻辑步骤 ID、状态版本、已完成动作、结果引用、剩余预算和下一动作。LangGraph 的 checkpointer 保存线程执行状态，持久化存储可以支持中断后的恢复；内存实现则不能跨进程重启保留。<sup class="cite"><a href="#ref-PERSIST">[PERSIST]</a></sup> 故障处理还涉及重试、超时和恢复语义，具体支持应按所用版本核对。<sup class="cite"><a href="#ref-FAULT">[FAULT]</a></sup></p>
 <div class="citebox"><b>[PERSIST] LangChain 项目.</b> <i>LangGraph Persistence</i>，官方滚动文档，首发日期未标注；核验快照 2026-11-04。原文：<span class="q">“resume after an interruption, recover from a failure”</span>（在中断后继续，并从失败中恢复。）<a href="https://docs.langchain.com/oss/python/langgraph/persistence">原文</a>。</div>
@@ -193,6 +196,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>事件记录应还原依赖、重试、版本与费用。</li><li>任务时间与请求时间分别统计，超时是截断观察。</li><li>成功标签来自独立验收，日志本身不产生正确性证据。</li></ol></div>
 
 <h2 id="s7">7 评测：状态验收、消融与故障矩阵</h2>
+<div class="analogy"><p>有人说「积木都收好了」。验收时打开盒子数一数，就能知道它们是不是真的都在里面。想知道这件事能不能每次做好，就多试几次，每次都打开盒子。</p></div>
 <h3 id="s7-1">7.1 验收最终状态</h3>
 <p>τ-bench 比较交互结束后的数据库状态与目标状态，并用 pass<sup>k</sup> 研究重复运行可靠性。<sup class="cite"><a href="#ref-TAU">[TAU]</a></sup> 这里的 pass<sup>k</sup> 关注多次运行均成功，不能与“多个候选至少一个成功”的 pass@k 混用。自己的任务应定义相应最终判据：代码测试是否通过、产物字段是否满足要求、业务对象是否处在正确状态。</p>
 <p>任务环境也要固定版本和初始快照。每次运行从同一状态开始，不能让上次产生的文件、缓存或外部修改使后续任务变简单；如果研究跨会话记忆，则把允许保留的状态作为独立实验条件写清。</p>

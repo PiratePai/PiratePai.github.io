@@ -91,9 +91,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-31">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/strata-hybrid-inference.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型 CPU-GPU 混合推理：从专家卸载到分层缓存", "url": "https://piratepai.github.io/posts/strata-hybrid-inference.html", "description": "以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。", "inLanguage": "zh-CN", "headline": "大模型 CPU-GPU 混合推理：从专家卸载到分层缓存", "datePublished": "2026-10-31", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/strata-hybrid-inference.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型 CPU-GPU 混合推理：从专家卸载到分层缓存", "url": "https://piratepai.github.io/posts/strata-hybrid-inference.html", "description": "以开源引擎 Strata 为引，拆解 125B MoE 跑进 12 GB 显卡的三级存储、自适应专家缓存、CPU 专家与 MTP 投机解码；对照 llama.cpp / KTransformers / Fiddler / PowerInfer / Splash 谱系的原理、实测与生态位，含选型速查。", "inLanguage": "zh-CN", "headline": "大模型 CPU-GPU 混合推理：从专家卸载到分层缓存", "datePublished": "2026-10-31", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/strata-hybrid-inference.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -105,7 +105,7 @@
   <p class="sub">以单模型引擎 Strata 为引，拆解"RTX 5070 12 GB + 64 GB 内存 + 6 核 CPU"的普通 PC 如何把 125B 总参、6B 激活的 Qwen3.8-Flash-Next 跑到 95 tok/s：三级存储的字节账本、自适应专家缓存、CPU 专家与 MTP 投机解码的三方并发，再到与 llama.cpp / KTransformers / Fiddler / PowerInfer 谱系的原理对照与生态位分析。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-10-29</b></span><span class="chip">对象 <b>Strata 0.2.7 · engine 0.1.52</b>（main，2026-10-28）</span><span class="chip">模型 <b>Qwen3.8-Flash-Next · DeepSeek-V4.1-Flash</b></span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-31">2026-10-31</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-20261115">SGLang v0.5.23 Paged Experts 把专家卸载带进主流引擎（比 CPU offload 快 12–30×）；AdaOffload 多 GPU 专家卸载；llama.cpp moe-cache 子系统化与 SYCL -ncmoe；补录 KTransformers v0.7.2 CPU 驻留专家微调。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-strata-interactive">新增图 3-2 交互图解：缺失专家在三级存储间的取用路径（保留原图 3-1 全量布局；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/7946637a17e9be96a25975af0c3f4d246bb33b84">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-31">2026-10-31</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-20261115">SGLang v0.5.23 Paged Experts 把专家卸载带进主流引擎（比 CPU offload 快 12–30×）；AdaOffload 多 GPU 专家卸载；llama.cpp moe-cache 子系统化与 SYCL -ncmoe；补录 KTransformers v0.7.2 CPU 驻留专家微调。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-strata-interactive">新增图 3-2 交互图解：缺失专家在三级存储间的取用路径（保留原图 3-1 全量布局；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/7946637a17e9be96a25975af0c3f4d246bb33b84">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -272,6 +272,7 @@
 </div>
 
 <h2 id="s2"><span class="no">2</span>目标模型：Qwen3.8-Flash-Next 为什么"家用机友好"</h2>
+<div class="analogy" id="principle-notes-20261120"><p>两座书房藏的书一样多。要是同一个问题在一座书房只需翻少数几本，在另一座却要拿出很多本，跑书架的时间就会不同。看一回要搬多少东西，比只数总藏书更能解释当时有多忙。</p></div>
 
 <p>Strata 的第一篇文章叫 <i>Running a 125-Billion-Parameter Model on a Normal PC</i>（2026-09）。要理解引擎，先看它伺候的模型长什么样。Qwen3.8-Flash-Next 的设计者明确按"每 token 搬运字节数"给每个结构定价[STRATAPAPER26][QWEN38NEXT26]：</p>
 
@@ -353,7 +354,8 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <li><b>整层循环一张图</b>：48 层每层的"稠密 + 三方专家"被捕获成按窗口大小分桶的 CUDA Graph，消除逐 kernel 启动开销。</li>
 </ul>
 
-<div class="analogy">像一家小餐馆只有一个灶台（GPU）、一个帮厨（CPU）和一个传菜员（DMA 复制引擎）：灶台炒所有菜都要用的底料（稠密权重）和冰柜里常备的菜（缓存专家）；帮厨在库房（RAM）就地处理冷门菜；传菜员把一部分冷门菜直接搬进后厨。三路同时进行，一层等的是最慢的那一路。所以 Strata 说自己的引擎是"平衡的"：GPU 等 CPU 约 13 ms、CPU 等 GPU 约 14 ms，谁也闲不下来。</div>
+<div class="analogy"><p>厨师在灶上做手边有材料的菜，帮厨做另一道菜，送货的人去取下一道菜的材料。能同时做的活可以排在一起。要等的材料到了，下一道菜才能开做。</p></div>
+<p>三路工作可重叠，一层完成仍取决于最慢的路径。原报告中 GPU 等 CPU 约 13 ms，CPU 等 GPU 约 14 ms<sup class="cite">[STRATAPAPER26]</sup>。</p>
 <figure class="fig" id="fig-strata-interactive" style="padding:10px"><iframe src="img/sc-strata-tiers.html" title="Strata 三级存储交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 3-2 · 可交互：一个缺失专家在三级存储间的取用路径——GPU 缓存未命中 → PCIe DMA 到系统内存 → CPU 就地计算写回；SSD 侧 n-gram 表经 mmap 预读；点击节点可看各级容量与带宽。本文自绘（交互图解），机制综合自 Strata 0.2.7 论文与源码实测（12 GB GPU + 64 GB RAM 跑 125B MoE）；上图 3-1 为全量布局。</div></figure>
 
 
@@ -522,6 +524,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 </div>
 
 <h2 id="s6"><span class="no">6</span>工程深处：论文没写、但代码里有的东西</h2>
+<div class="analogy"><p>如果每次都能早一点知道下一道菜要用什么，就可以先把东西从远处取来。猜错了，拿来的东西会白占地方，也白跑一趟。要看真正少等的时间能不能抵过这些白跑。</p></div>
 
 <p>读仓库文档（docs/ 目录 80+ 篇）能挖出比论文更"真"的工程。挑四件：</p>
 

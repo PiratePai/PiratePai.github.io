@@ -146,9 +146,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/moe-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "url": "https://piratepai.github.io/posts/moe-survey.html", "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。", "inLanguage": "zh-CN", "headline": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/moe-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "url": "https://piratepai.github.io/posts/moe-survey.html", "description": "从稀疏门控与负载均衡的经典原理出发，梳理 Mixtral、DeepSeek-V3、MoE-LLaVA、DiT-MoE 等模型中 MoE 架构的设计演进与未来方向。", "inLanguage": "zh-CN", "headline": "混合专家（MoE）全景：从原理到 LLM / VLM / DiT 的应用与未来", "datePublished": "2026-08-22", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/moe-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -165,7 +165,7 @@
     <span class="chip">源码分析：<b>DeepSeek-V3 / mistral-src / MoE-LLaVA / DiT-MoE / HunyuanImage-3 官方仓库（均已克隆至本目录）</b></span>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#moe-route-combine">重绘MoE 路由与合并，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图解可读性：<a href="#diagram-moe-survey-4">图解数据点改用 data-diagram-point 语义标记，浅色/深色主题下均满足 3:1 非文本对比度。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#moe-route-combine">重绘MoE 路由与合并，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">K3.1 Pro 权重兑现开放；700B–1T 开源 MoE 密集期（Reflection Beam、Mistral Large 4、Hy4）；HuggingFace《Ultimate MoE Training Handbook》。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图解可读性：<a href="#diagram-moe-survey-4">图解数据点改用 data-diagram-point 语义标记，浅色/深色主题下均满足 3:1 非文本对比度。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -235,6 +235,7 @@
 
 <span class="anchor" id="s1"></span>
 <h2 class="sec" id="ch1"><span class="num">1</span>MoE 原理入门<span class="roadmap">基石一：稀疏激活 → 基石二：路由器 → 基石三：负载均衡 → 基石四：系统并行</span><span class="pill fund">基础</span></h2>
+<div class="analogy" id="principle-notes-20261120"><p>几位老师分着改题，收卷的人按题型把每张卷子送给其中几位。冷门桌子会空着，热门桌子会堆满卷子。要让大家都快点交回卷子，还得留心每张桌子分到了多少。</p></div>
 
 <h3>1.1 基石一：从「密集」到「稀疏」，为什么要 MoE</h3>
 <p>标准 Transformer 里，每个 token 都要走完<b>同一套</b>全连接网络（FFN），所有参数都被激活，这就是 <b>dense（密集）模型</b>。模型越大，计算量与参数量同步增长，又贵又慢。</p>
@@ -635,6 +636,7 @@ root.querySelector('.ppx-play').addEventListener('click',function(){playing=!pla
 <!-- ===================== 第三章 LLM ===================== -->
 <span class="anchor" id="s3"></span>
 <h2 class="sec" id="ch3"><span class="num">3</span>MoE 在大语言模型（LLM）中的应用<span class="roadmap">本章逻辑：开源引爆(Mixtral) → 结构革新(DeepSeekMoE) → 均衡革新(无辅助损失) → 训练革新(MTP/稳定性) → 万亿俱乐部</span><span class="pill llm">LLM</span></h2>
+<div class="analogy"><p>几位同学有时会把各自的卷子都递给同一位老师。这位老师越忙，后来的卷子就越要等。分卷子时多看一眼每张桌子的工作量，可以让其他老师也用得上。</p></div>
 <p class="lead">LLM 是 MoE 落地最成熟、收益最大的领域。本章的叙事主线是「三代革新」：<b>结构革新</b>（专家怎么切）、<b>均衡革新</b>（负载怎么调）、<b>训练革新</b>（目标函数与稳定性）。</p>
 
 <h3>3.1 Mixtral 8x7B：把 MoE 带入主流开源世界</h3>
@@ -1032,6 +1034,7 @@ moe_loss, moe_losses = <span class="v">None</span>, []
 <!-- ===================== 第五章 DiT ===================== -->
 <span class="anchor" id="s5"></span>
 <h2 class="sec" id="ch5"><span class="num">5</span>MoE 在扩散 Transformer（DiT）中的应用<span class="roadmap">本章逻辑：为何适合MoE → 路由范式三次进化 → 新共识「架构优先于路由」 → 工业落地全景(Wan2.2→Mamoda→HunyuanImage3→MAGI-2) → MoE vs 稠密的算力账 → 设计模式清单</span><span class="pill dit">DiT</span></h2>
+<div class="analogy"><p>画画时，开头只看得出大致轮廓，快画完时才去补细节。有些办法让不同的人帮忙处理不同阶段，也有办法按画面里的小块分工。先看交给谁的是整次工作，还是画面的一小块。</p></div>
 <p class="lead">DiT（Peebles &amp; Xie, ICCV 2023）把扩散模型的骨干从 U-Net 换成 Transformer，成为 Sora、SD3、Flux 等的基础。把 MoE 加进 DiT 在 2024 年是学术前沿，到 2025–2026 已进入<b>工业落地期</b>（HunyuanImage 3.0 的 80B/13B、MAGI-2 的 114B/6B 都是产品级 MoE-DiT）。</p>
 <p class="lead">注意这里有<b>两种动机并存</b>：学术侧看中的是「<b>按难度分配算力</b>」，工业侧则更接近 LLM 的逻辑：「<b>在受限激活算力下把容量做到最大</b>」（§5.6）。</p>
 <p class="lead">与此同时，稠密阵营以「压 token 数」对抗「压激活参数」（§5.7），两条路线的竞争远未结束。</p>

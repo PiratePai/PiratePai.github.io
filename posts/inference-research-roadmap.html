@@ -107,9 +107,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-18">
-<meta property="article:modified_time" content="2026-11-19">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/inference-research-roadmap.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "url": "https://piratepai.github.io/posts/inference-research-roadmap.html", "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。", "inLanguage": "zh-CN", "headline": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "datePublished": "2026-11-18", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-research-roadmap.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "url": "https://piratepai.github.io/posts/inference-research-roadmap.html", "description": "以一条研究主线组织推理技术：性能建模→质量与 SLO 约束下的效率优化→模型-运行时-硬件协同设计→基于反馈的自适应系统；含响应延迟与吞吐的指标对照、PixVid/TurboServe/SlackServe/Runway Characters 案例校准，以及全站 21 篇专题与教程的四阶段映射。", "inLanguage": "zh-CN", "headline": "推理研究路线：性能建模、约束优化、协同设计与自适应系统（2009–2026）", "datePublished": "2026-11-18", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-research-roadmap.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -121,7 +121,7 @@
   <p class="sub">把站内 既有专题放回一条可操作的研究主线上——<b>先解释"请求为什么慢、状态为什么占内存"（性能建模），再在质量与服务目标下求"单位有效产出成本"最小（约束优化），然后让模型结构、执行粒度与资源放置一起被选择（协同设计），最后在条件变化时靠反馈调整而不抵消收益（自适应系统）</b>。四阶段不是历史进化链，也不必逐级通关：每个阶段独立产出证据，可以并行进入。本文补上专题之间缺的那层"如何组织研究问题"，并把响应延迟（control-to-screen）作为一类一等公民约束讲清楚——高吞吐不等于低响应，PixVid 用 29.4 fps 换 34 ms 的实测就是证明。</p>
   <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">对象 <b>PixVid arXiv:2611.17336v1 · TurboServe arXiv:2606.19271 · SlackServe arXiv:2606.15319 · Runway Characters arXiv:2611.05642 · Andes arXiv:2404.16283v2</b>（2026-11-18 快照）</span><span class="pill chip">比较口径 <b>固定资源 / 固定时延 / 固定成本三种，随文标注</b></span><span class="pill chip">引用 <b>正文标注出处与时间；预印本单独标明</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-18">2026-11-18</time> · 新增专题：<a href="#s0">新增《推理研究路线》：四阶段方法框架、响应延迟指标对照与 PixVid/Runway 案例校准、TurboServe/SlackServe 自适应系统分析、全站 21 篇与教程的四阶段映射；含三张 SeeCode 交互图解（图 0-1 证据流、图 4-1 约束关系、图 6-1 反馈闭环）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/inference-research-roadmap.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#s0">导读新增与研究判断登记表的分工说明（方法是地图、判断是带日期的赌注）并互链。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/inference-research-roadmap.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-18">2026-11-18</time> · 新增专题：<a href="#s0">新增《推理研究路线》：四阶段方法框架、响应延迟指标对照与 PixVid/Runway 案例校准、TurboServe/SlackServe 自适应系统分析、全站 21 篇与教程的四阶段映射；含三张 SeeCode 交互图解（图 0-1 证据流、图 4-1 约束关系、图 6-1 反馈闭环）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/inference-research-roadmap.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#s0">导读新增与研究判断登记表的分工说明（方法是地图、判断是带日期的赌注）并互链。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/inference-research-roadmap.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -330,6 +330,7 @@
 
 <!-- S3 -->
 <h2 id="s3"><span class="no">3</span>阶段二 约束优化：质量与服务目标下的单位成本</h2>
+<div class="analogy" id="principle-notes-20261120"><p>买午饭时，要在下课前拿到，也得是自己能吃的。先把来不及送到或不能吃的去掉，再在剩下的里面比价。最便宜的一家，可能早就被划掉了。</p></div>
 
 <p><b>输入条件</b>：阶段一的模型（预测不同配置的延迟/显存/吞吐）、质量评估器（能对输出打分）、成本结构（时租、能耗、摊销）。<b>核心问题</b>：在质量与服务目标都满足的前提下，单位有效产出的成本最小是多少。<b>可控变量</b>：批大小、并行度、量化档位、投机参数、分离配比、路由策略等。<b>输出证据</b>：可行域内的最优点、Pareto 前沿、以及对"每个约束值多少成本"的灵敏度。</p>
 
@@ -399,6 +400,7 @@ s.t.    Q_k(x) ≥ Q0,k   对每个质量维度 k  # 质量：多维向量，逐
 
 <!-- S4 -->
 <h2 id="s4"><span class="no">4</span>响应延迟：从吞吐到 control-to-screen</h2>
+<div class="analogy"><p>别人不停地递给你一叠画，递得很快。你告诉他现在想换成另一种画，要等你真的看到新画才算有响应。旧画送得再多，也没有让那张新画更早到。</p></div>
 
 <p>本章是四个阶段共享的一块地基：把"响应延迟"从吞吐的阴影里拉出来，作为一等约束。所有数字来自 2026 年两篇一手论文（PixVid、Runway Characters），口径逐项核对原文。</p>
 
@@ -444,6 +446,7 @@ s.t.    Q_k(x) ≥ Q0,k   对每个质量维度 k  # 质量：多维向量，逐
 
 <!-- S5 -->
 <h2 id="s5"><span class="no">5</span>阶段三 协同设计：模型、运行时与硬件一起选</h2>
+<div class="analogy"><p>做个书架，要一起量墙的宽度、想好书怎么放、找得到什么木板。光挑最大的板子，可能放不进屋里。把三件事一起改，才有机会做出正好能用的书架。</p></div>
 
 <p><b>输入条件</b>：阶段二判定"现有结构下无解"（约束不可满足或成本过高）。<b>核心问题</b>：模型结构、执行粒度、资源放置作为联合变量一起选择时，解空间长什么样。<b>输出证据</b>：联合设计点及其在阶段二目标下的位置（比"单层最优拼接"好多少）。</p>
 
@@ -480,6 +483,7 @@ s.t.    Q_k(x) ≥ Q0,k   对每个质量维度 k  # 质量：多维向量，逐
 
 <!-- S6 -->
 <h2 id="s6"><span class="no">6</span>阶段四 自适应系统：反馈闭环与切换成本</h2>
+<div class="analogy"><p>饭快凉了，可以把保温灯打开。每次一凉一点就开、一暖一点就关，切换本身也费力。先看温度变了多久、这一次切换能省下多少，再决定要不要动。</p></div>
 
 <p><b>输入条件</b>：静态最优解存在但环境漂移（负载、硬件状态、模型质量、价格）。<b>核心问题</b>：如何调整而不抵消收益。<b>输出证据</b>：闭环策略在漂移 trace 上的表现 + 切换成本账 + 失效时的回退路径。</p>
 

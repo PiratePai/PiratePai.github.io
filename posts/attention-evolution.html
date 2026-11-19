@@ -136,9 +136,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/attention-evolution.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）", "url": "https://piratepai.github.io/posts/attention-evolution.html", "description": "沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。", "inLanguage": "zh-CN", "headline": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/attention-evolution.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）", "url": "https://piratepai.github.io/posts/attention-evolution.html", "description": "沿 MHA → MQA → GQA → MLA 的结构压缩主线，经 FlashAttention 的系统侧革命，到稀疏注意力、DeltaNet 家族与混合架构的工业落地。", "inLanguage": "zh-CN", "headline": "注意力结构演进：从 MHA 到 MLA、线性注意力与混合架构（2014–2026）", "datePublished": "2026-08-23", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/attention-evolution.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -151,7 +151,7 @@
   <div class="subtitle">一篇原理向技术综述：原理 · 代码 · 发展历程（2014–2026）· 未来方向</div>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">源码 <b>nanoGPT · LLaMA · DeepSeek-V3 · flash-linear-attention · FlashAttention · vLLM · SGLang</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">Bifocal 等内存蒸馏对比回应 SWA vs 线性注意力论战；Hy4 正式版 GA（Gated DSA、1M 上下文）；SinkState 线性注意力状态压缩；Pavlichenko 架构长文。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-attention-timeline">新增图 0-1 交互图解：2014–2026 注意力结构演进时间线，三时期对照本章大事记（见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">Bifocal 等内存蒸馏对比回应 SWA vs 线性注意力论战；Hy4 正式版 GA（Gated DSA、1M 上下文）；SinkState 线性注意力状态压缩；Pavlichenko 架构长文。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-attention-timeline">新增图 0-1 交互图解：2014–2026 注意力结构演进时间线，三时期对照本章大事记（见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 6 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -239,6 +239,7 @@ MHA、MQA、GQA、MLA、FlashAttention，到稀疏注意力、线性注意力、
 <div class="hl-card"><div class="hl-meta"><b>46+16 混合注意力</b><span class="hl-date">10-15 · Meta</span></div><p>Muse Spark Open：62 层中 46 层 SWA（2048/RoPE）+16 层全局 NoPE、GQA 128/16，KV 缩 3.7×、1M 上下文。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>Bifocal 等内存对比：论战首个严格后续</b><span class="hl-date">11-02 · Hugging Face</span></div><p>等内存蒸馏 Qwen3-4B 四个学生（每层 576 token 预算）：短答 SWA 略胜（+0.7~1.5 分）；AIME/HMMT 长答（约 7,600 token/答）Bifocal 15.5% vs SWA 13.8%；全层替换后 128K 解码约 195 tok/s 与 SWA 持平。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>Hy4 正式版：Gated DSA 旗舰 GA</b><span class="hl-date">11-04 · 腾讯</span></div><p>770B-A49B（预览口径）+1M 上下文正式发布，首次具备图像理解与 GUI/CLI computer-use；权重"数日内"开放。iHC/IndexCache 等缓存侧结构随之进入开源生态。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>SinkState：线性注意力状态也能压</b><span class="hl-date">11-10 · 上交系</span></div><p>发现 Mamba-2/GDN/KDA 线性层的 QKV 集中于稳定低维子空间（linear attention sink）：在线 SVD 存循环状态，4–120B 混合模型峰值状态内存最高 −2.6×、解码 +1.58×，精度不变。</p><a class="hl-link" href="#s11">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="s1"><span class="no">1</span>前史：注意力是怎么被发明的（2014–2017）</h2>
+<div class="analogy" id="principle-notes-20261120"><p>听完一个很长的故事，只把它抄在一张小纸上，很难把每个名字都抄进去。讲到某个人时，可以翻回故事里介绍他的那一页。这样就不用只靠开头那张小纸。</p></div>
 
 <h3>1.1 问题背景：RNN 翻译机的"定长向量瓶颈"</h3>
 <p>2013–2014 年的主流机器翻译模型是<b>编码器–解码器（Encoder–Decoder）</b>结构：一个 RNN
@@ -286,6 +287,7 @@ Luong et al.（2015）随后系统对比了打分函数的选型（dot / general
 
 <!-- ============================================================ -->
 <h2 id="s2"><span class="no">2</span>基石：缩放点积注意力与多头机制（MHA）</h2>
+<div class="analogy"><p>找一本关于月亮的书时，先看书架上的标签，再从贴得最合适的几本书里找内容。几个小朋友也可以各拿不同的问题去找，最后把找到的内容放在一起。</p></div>
 
 <h3>2.1 查询–键–值：一个图书馆式的比喻</h3>
 <p>自注意力把每个 token 的表示 <span class="f">x<sub>t</sub></span> 投影成三个向量：
@@ -588,6 +590,7 @@ root.querySelector('.ppx-temp').addEventListener('input',function(){temp=+this.v
 <!-- /WIDGET:w2 -->
 
 <h2 id="s4"><span class="no">4</span>低秩压缩：MLA（DeepSeek）——用数学换显存</h2>
+<div class="analogy"><p>几张图都要用同一幅底图。把底图留一份，再按各张图的画法描出来，可以少存几张图。电脑能省多少地方，要看它学到的那份底图能保住多少细节。</p></div>
 
 <h3>4.1 思路：KV 缓存的"内容"其实是低秩的</h3>
 <p>GQA 靠"少存几个头"省显存，是<b>拍脑袋砍结构</b>；DeepSeek-V2 提出的 <b>MLA（Multi-head Latent Attention）</b>
@@ -674,6 +677,7 @@ MLA 的处理：把键拆成"内容部分"（低秩压缩，不带位置）和"�
 
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>不改结构、改算法：FlashAttention 与 IO 优化</h2>
+<div class="analogy"><p>桌上空间很小，就从柜子里分次取纸。每次取来一摞，先把这一摞能做的计算都做完，再取下一摞。最后交出去的结果照原来的规则算，中间的大表也不用整张抄回柜子。</p></div>
 
 <h3>5.1 洞察：GPU 的瓶颈是显存 IO，不是 FLOPs</h3>
 <p>从 2017 到 2022，大家都在改注意力的<b>数学</b>（稀疏化、线性化）。Tri Dao 等人的 FlashAttention 换了个角度：
@@ -770,6 +774,7 @@ KV 缓存切成固定大小的块，逻辑块→物理块用页表映射，注�
 <section class="research-refresh" aria-labelledby="research-20261103"><h3 id="research-20261103">6.3 原生稀疏、层次索引与内核适配</h3><p class="muted">核验：2026-11-03 · 新论文与工程快照</p><p><b>Prism 把“该看哪些块”放进视听模型的训练过程。</b>它先把视频划成时空区域，结合视频特征变化和音频对视觉的影响，决定区域内的块形状，再按查询选择注意力块。这里稀疏的是交互连接，不是直接删除图像 token；它也不是给任意预训练模型套上就能复用的免训练插件。论文首发 2026-10-04，项目 10-06 开放训练、推理与预览权重，11-03 核验仍将 Prism-pro 列为待发布。<sup class="cite"><a href="#R26-PRISMP">[R26:PRISMP]</a><a href="#R26-PRISM">[R26:PRISM]</a></sup></p><p><b>FlashMLA 的算法名称不能代替版本兼容表。</b>2026-09-30 的破坏性更新移除了 Hopper 与部分旧模型支持，并改变低精度 KV 格式。复用旧代码示例时，应连同 GPU 架构、模型、缓存布局和仓库提交一起固定；“支持 MLA”不足以保证一个内核能加载所有 MLA 模型。<sup class="cite"><a href="#R26-FLASHMLA">[R26:FLASHMLA]</a></sup></p><p><b>10-30 首发、11-02 修订：ZHA 把索引成本也计入复杂度。</b>它对缓存中的 Key 摘要递归构树，查询自顶向下选取稀疏位置；树深可增长，因此不能只计算最后一次稀疏 QK，而忽略路由。论文通过短程 KL 蒸馏改造已有模型，属于需要训练的近似路线；对极长上下文的外推还使用性能模型，不能读成已经在十亿 token 上完成端到端部署实测。<sup class="cite"><a href="#R26-ZHA">[R26:ZHA]</a></sup></p>
 </section>
 <h2 id="s7"><span class="no">7</span>线性注意力：把注意力写成 RNN（2020–2026）</h2>
+<div class="analogy"><p>如果每加一个数，只想知道到现在一共有多少，可以边加边记一个总数。以后不用把旧账单都翻出来。可要是想知道某一天加了多少，光凭总数就找不回那一项。</p></div>
 
 <h3>7.1 核心技巧：用结合律交换乘法顺序</h3>
 <p>softmax 注意力 O(n²) 的根源是必须先算出完整的 n×n 打分矩阵。</p>
@@ -874,6 +879,7 @@ RWKV-7（arXiv:2503.14456, 2025-03）则把状态转移做成动态演化的低�
 
 <!-- ============================================================ -->
 <h2 id="s8"><span class="no">8</span>Delta 规则家族：DeltaNet → Gated DeltaNet → KDA → GDN-2</h2>
+<div class="analogy"><p>本子上已经写着「小林坐三号位」。小林换到五号位时，先看本子里写了什么，再把那条改掉。每次只把新座位添上去，旧的和新的就会都留在同一条记录里。</p></div>
 
 <h3>8.1 换一个目标函数：从"只写不擦"到"写前先擦"</h3>
 <p>Schlag 等人 2021 年的"Linear Transformers are Secretly Fast Weight Programmers"（ICML 2021, arXiv:2102.11174）

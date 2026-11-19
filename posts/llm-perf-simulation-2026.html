@@ -126,9 +126,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-26">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/llm-perf-simulation-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型性能仿真：从算子账本到请求曲线", "url": "https://piratepai.github.io/posts/llm-perf-simulation-2026.html", "description": "从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。", "inLanguage": "zh-CN", "headline": "大模型性能仿真：从算子账本到请求曲线", "datePublished": "2026-10-26", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/llm-perf-simulation-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型性能仿真：从算子账本到请求曲线", "url": "https://piratepai.github.io/posts/llm-perf-simulation-2026.html", "description": "从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs / 权重 / 激活 / KV 的记账公式、并行通信、Roofline 瓶颈分析与请求级离散事件仿真。以 DeepSeek-V4.1-Flash 与 MiniMax-H3 为双案例，附可改 config 的 llsim 原型。", "inLanguage": "zh-CN", "headline": "大模型性能仿真：从算子账本到请求曲线", "datePublished": "2026-10-26", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/llm-perf-simulation-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -139,7 +139,7 @@
   <p class="sub">不部署就回答"这套模型+硬件+配置能跑多快、要多少显存、扛得住多少 QPS"。从 Vidur 到 KernelSight-LM 的仿真器版图，到逐算子 FLOPs/权重/激活/KV 的记账方法，再到 Roofline 与请求级离散事件仿真的完整推导；全程以 DeepSeek-V4.1-Flash（AR-LLM）与 MiniMax-H3（全模态 DiT）为双案例，并给出一个可改 config 的开源原型。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-10-26</b></span><span class="chip">案例 <b>DeepSeek-V4.1-Flash · MiniMax-H3</b></span><span class="chip">源码 <b>vLLM 0.32 · vLLM-Omni 0.30</b> + 自研 llsim 原型</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-26">2026-10-26</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-llm-perf-simulation-2026-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">SIMPLE 能耗定律（4 参数解析模型）；StepSplit 请求级 Shapley 能耗归因；LM-SimBench 训练仿真器统一基准（含昇腾 NPU 侧）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 交互与图示修正：<a href="#rl-demo">9.2 交互教学目标改为“batch 摊薄权重流量、AI 因 KV 流量饱和”（AI 上限≈26&lt;屋脊 295，不发生瓶颈切换）；图 9-1/9-2 数据点改用语义标记并满足非文本对比度。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/b497668aea429d7e7c77cac64cfffacc1147571f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-26">2026-10-26</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-04">2026-11-04</time> · 图解排版：<a href="#diagram-llm-perf-simulation-2026-1">调整手绘图的字号、布局与主题，不扩大原资料的核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">SIMPLE 能耗定律（4 参数解析模型）；StepSplit 请求级 Shapley 能耗归因；LM-SimBench 训练仿真器统一基准（含昇腾 NPU 侧）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 交互与图示修正：<a href="#rl-demo">9.2 交互教学目标改为“batch 摊薄权重流量、AI 因 KV 流量饱和”（AI 上限≈26&lt;屋脊 295，不发生瓶颈切换）；图 9-1/9-2 数据点改用语义标记并满足非文本对比度。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/b497668aea429d7e7c77cac64cfffacc1147571f">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -443,6 +443,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>并行与通信策略如何改写账本</h2>
+<div class="analogy" id="principle-notes-20261120"><p>两个人分做一张拼图，能各拼各的一半。最后要把两边拿到一起，边上的几块也可能要来回借。每人桌面上更空了，交接却多了一份活。</p></div>
 <p>同一模型换并行策略，四本账（计算量、权重、激活、KV 的分布与搬运）全变。下表按"每卡权重 / 每层每步通信量 / KV 与激活 / 适用场景"归纳（通信公式为单层单步近似：T=本步 token 数、d=hidden、b=字节数）：</p>
 <div class="card">
 <table>
@@ -519,6 +520,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 </div>
 <!-- ============================================================ -->
 <h2 id="s8"><span class="no">8</span>特性开关下的峰值账本</h2>
+<div class="analogy"><p>把做蛋糕时用过的盆列出来，会得到一串名字。要知道桌子最少得多大，要看哪一刻同时摆了最多的盆。有些盆在下一只端来前已经拿走。</p></div>
 <p>"模型在不同推理特性开启时，访存/显存/权重/激活/KV 的峰值是多少"。把第 4 节的静态账本放进第 7 节的引擎特性里，得到一张 what-if 表（llsim 的 <code>features</code> 模块即按此建模；数字以 8×H100、TP8/EP8、32K 上下文、batch 32 为基准场景）：</p>
 <div class="card">
 <table>
@@ -537,6 +539,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s9"><span class="no">9</span>Roofline：分层瓶颈图示分析</h2>
+<div class="analogy"><p>一小时能洗很多盘子，前提是有人不断把脏盘子送来。送得慢，就得等盘子。送得快，而洗得慢，盘子就堆在门口。先找出哪一步慢，才知道该加谁的人手。</p></div>
 <p>Roofline 只需要一个公式：t = max(FLOPs/峰值算力, 字节数/峰值带宽)。KernelSight-LM 在此基础上加了两个修正：<b>效率系数 η</b>（≥1，衡量离屋顶多远）与<b>波量化 u</b>（blocks 不是 SM 整数倍时的空转），再加 kernel 启动下限 t₀<sup class="cite">[KERNELSIGHT26]</sup>：</p>
 <pre>t = max( t_roof · η ,  t₀ ),   t_roof = max( (F_comp / P_peak) · u ,  F_mem / BW_peak )</pre>
 <p class="codecap"><b>式 9-1</b> KernelSight-LM 式 (2)。u=ceil(B/N_SM)·N_SM/B≥1，是波量化的时间惩罚（B 为 thread block 数，与 batch 符号区分）；η 等效率参数需按 kernel 家族及形状校准。Tier A 不测目标设备，Tier B 使用目标微基准，两档不能混称；这就是"数据手册 + 一次微基准"两档精度的全部秘密。</p>
@@ -589,6 +592,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s10"><span class="no">10</span>请求级仿真：从 QPS 到 TTFT/TPOT 曲线</h2>
+<div class="analogy"><p>只知道店员做一杯饮料要多久，还算不出下一位客人等多久。要一边记顾客什么时候进门，一边记柜台什么时候腾出手。有人同时来，就在同一张时间表上排队。</p></div>
 <p>算子级模型回答"一步多快"，请求级仿真回答"用户等多久"。做法是<b>离散事件仿真</b>：请求按泊松流到达，调度器逐事件推进，这就是 Vidur 与 KernelSight-LM 的骨架，后者干脆"逐行复刻 vLLM v1 调度器"<sup class="cite">[KERNELSIGHT26]</sup>。llsim 的 <code>serving.py</code> 实现了同样的核心循环：</p>
 <pre>每步：
   1) 到达事件入等待队列

@@ -107,9 +107,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-15">
-<meta property="article:modified_time" content="2026-11-19">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/cost-efficient-inference-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -121,7 +121,7 @@
   <p class="sub">以一条成本公式贯穿全文——<b>单位有效产出成本 C_unit = C_total ÷ V_valid：分子是全部已付费资源（含空闲、重试与失败），分母只计通过质量、SLO 与任务成功过滤的有效产出</b>——先划清它与"低时延、高吞吐"的分野与交汇，再把成本拆成可复查的账本；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、分级定价时代；把量化、MoE、缓存复用、P/D 分离、Agent 任务链、硬件采购逐层换算到同一个分母上；以交互视频的"块等待"为反例说明响应延迟如何改写成本可行域；最后给出引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
   <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">对象 <b>vLLM v0.34.0 · SGLang v0.5.23 · TRT-LLM v1.2.1 · Dynamo v1.6.2 · vLLM-Omni v0.32.0 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11-18 快照）</span><span class="pill chip">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill chip">引用 <b>正文标注出处与时间</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#video-response">8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径勘误：<a href="#s6">核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#video-response">8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径勘误：<a href="#s6">核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -279,6 +279,7 @@
 </div>
 
 <h2 id="s2"><span class="no">2</span>单位有效产出成本与可复查账本</h2>
+<div class="analogy" id="principle-notes-20261120"><p>一筐里烤了十块饼干，八块烤好了，两块烤焦了。面粉和烤箱时间十块都用了。算每块能吃的饼干花了什么，要把整筐的花费分到那八块上。</p></div>
 
 <p>"性价比"不是玄学词，它有一个可以写下来的目标函数和一套可计算的指标族。本章先立公式与它的六个陷阱，再按"钱从哪出、货从哪进"给出指标族（价格、产出、能耗、资产、质量调整），最后把分子展开成一份可复查的资源账本。<b>指标选错，优化方向就会错</b>。</p>
 
@@ -516,6 +517,7 @@
 </div>
 
 <h2 id="s5"><span class="no">5</span>缓存级降本：不重算已经算过的</h2>
+<div class="analogy"><p>两个人拿同一本书来问不同的问题。先翻好共同要看的那几页，第二个人来时可以接着用。要是两个人读的是不同版本，就得先看那些页是不是还是同样的内容。</p></div>
 
 <p>推理负载有强烈的重复性：system prompt 千人一面、Agent 多轮对话反复带历史、RAG 反复检索同一批文档。<b>缓存级降本的全部要义：第一次算，之后都不算</b>。它是六层中"零质量损失"的一层（复用的是精确相同的 KV），也是 2025–2026 引擎侧竞争最激烈的一层。</p>
 
@@ -569,6 +571,7 @@
 </div>
 
 <h2 id="s6"><span class="no">6</span>调度级与任务链降本：把昂贵的 GPU 时间填满、把多轮任务跑成功</h2>
+<div class="analogy"><p>一趟车坐了很多人，也要看有多少人最后到了自己的站。有人半路换车，有人到晚了，这一趟照样用了车和油。把车坐满和把人按时送到，是两件要一起算的事。</p></div>
 
 <p>调度级手段不改变模型也不改变缓存，它改变的是<b>"已付费的 GPU 时间里有多少在产出有效 token"</b>；任务链级手段再把镜头拉远：<b>"一条多轮任务里有多少轮白跑"</b>。核心指标从吞吐升级为 goodput、再到每成功任务成本，核心动作从"批"升级为"分"、"迁"与"适配"。机制细节站内推理服务篇第 2/4/5 章与 Agent 推理系统篇有完整拆解，本章聚焦性价比账。</p>
 
@@ -680,6 +683,7 @@
 </div>
 
 <h2 id="video-response"><span class="no">8</span>视频案例：响应延迟如何改写成本可行域</h2>
+<div class="analogy"><p>你按下开关，盯着灯什么时候变亮，这是一段等待。旁边一排灯一秒能亮多少次，是另一个数。想让开关用起来顺手，要记住每次按下到看见变化的时间。</p></div>
 
 <p>前面所有账本都默认"产出单位是 token 或任务"。当产出变成<b>交互式视频流</b>时，三个时间口径必须再分开，否则"高吞吐优化"会把系统推向错误的方向。本章用一个 2026-11-12 的案例把这件事讲透：<b>PixVid</b>（Roblox 等，arXiv:2611.17336）——把预训练潜空间视频模型（Wan2.1-14B 系）搬到像素空间逐帧生成的工作<sup class="cite">[PIXVID]</sup>。它只作为"吞吐、响应和成本不同"的一个案例，机制细节（Self Forcing 因果蒸馏、世界模型谱系）见站内实时世界模型篇，少步采样与求解器见采样效率篇。</p>
 

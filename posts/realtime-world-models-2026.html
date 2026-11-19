@@ -94,9 +94,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-29">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/realtime-world-models-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "实时交互世界模型全景：从看视频到进世界（2024–2026）", "url": "https://piratepai.github.io/posts/realtime-world-models-2026.html", "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。", "inLanguage": "zh-CN", "headline": "实时交互世界模型全景：从看视频到进世界（2024–2026）", "datePublished": "2026-10-29", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/realtime-world-models-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "实时交互世界模型全景：从看视频到进世界（2024–2026）", "url": "https://piratepai.github.io/posts/realtime-world-models-2026.html", "description": "四大范式（端到端像素 / 引擎+神经渲染 / 显式状态 / 3D 原生）与发展历程；分析 Genie 4、Matrix-Game 4.0、LingBot-World 2.0、腾讯 HY 家族（含 10-21 开源、10-27 发布论文的 Hy-Nomas）、微软 Code Video Model、Oneira 与 NVIDIA Cosmos 3。前沿部分覆盖长时一致性、少步蒸馏与动作感知缓存，以及 vLLM-Omni/Dynamo/WebRTC 服务栈与各家 roadmap。", "inLanguage": "zh-CN", "headline": "实时交互世界模型全景：从看视频到进世界（2024–2026）", "datePublished": "2026-10-29", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/realtime-world-models-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -108,7 +108,7 @@
   <p class="sub">Genie 4（10-27）刚发布，Matrix-Game 4.0（10-15）刚开源，LingBot-World 2.0 把连续交互推到一小时，实时交互世界模型正在从"能动的视频"变成"可进入的世界"。本文讨论：<b>因果流式视频模型（每块 4 帧、干净预测回写 KV） × 记忆机制（滑窗 / 检索 / 3D / 外部引擎状态） × 实时化（少步蒸馏 + 动作感知缓存） × 服务栈（vLLM-Omni / Dynamo / WebRTC 全链路）</b>；四大范式、十三个前沿模型逐一拆解，并解释各机制的前置概念。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-10-29</b></span><span class="chip">对象 <b>Genie 4 · Matrix-Game 4.0 · LingBot-World 2.0 · HY-World 1.5/2.0 · Hy-Nomas · Code Video Model · Oneira · Cosmos 3</b></span><span class="chip">源码核对（非性能复现） <b>Matrix-Game-4（main）· lingbot-world-v2 · CodeVideoModel</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-29">2026-10-29</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看视频采样的评测模板。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-20261115">NVIDIA Cosmos 交互式世界仿真框架；World Labs Atlas 正式版与 Frameboy；Hy-Nomas 进 SGLang 主分支并在 TPU 达成严格实时 720p。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-29">2026-10-29</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看视频采样的评测模板。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-20261115">NVIDIA Cosmos 交互式世界仿真框架；World Labs Atlas 正式版与 Frameboy；Hy-Nomas 进 SGLang 主分支并在 TPU 达成严格实时 720p。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 2 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/42ed44e9c6b9a383bfc99b5af9318a96d9e80a6c">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -488,6 +488,7 @@
 </div>
 
 <h2 id="s4"><span class="no">4</span>三大共性技术：长时一致性、实时化、动作可控</h2>
+<div class="analogy" id="principle-notes-20261120"><p>你走出一个房间，转一圈又回来，想再看到刚才放下的杯子。画面就算每一张都很清楚，杯子消失或换了位置也会破坏这件事。测试时要走回去看，才知道画面有没有把旧事情接上。</p></div>
 
 <p>剥开七种答案的皮，所有系统都在解三道共同的题。本章把散落各模型里的技术按"题目"重新归队。这也是把新论文快速定位的老方法：先问它解的是哪道题。</p>
 
@@ -535,6 +536,7 @@
 </div>
 
 <h2 id="s5"><span class="no">5</span>推理框架与服务栈：把世界模型当服务跑起来</h2>
+<div class="analogy"><p>你按一下往前走，画好下一张图后，还要把图送到屏幕上。两个人一秒里画完的图一样多，其中一个可能总攒好几张才一起送。手什么时候觉得画面动了，要从按下去那一刻开始数。</p></div>
 
 <p>世界模型落地为"可玩的产品"需要的不只是模型，它需要一整套与 LLM serving 形似而又不同的服务栈。2026 年这条栈第一次成型：<b>推理引擎（vLLM-Omni / SGLang Diffusion / TensorRT-LLM）→ 编排层（Dynamo）→ 流媒体（WebRTC）→ 客户端对齐</b>。</p>
 

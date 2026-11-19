@@ -126,9 +126,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-23">
-<meta property="article:modified_time" content="2026-11-19">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/inference-serving.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型推理服务优化：技术发展史、原理与前沿展望", "url": "https://piratepai.github.io/posts/inference-serving.html", "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。", "inLanguage": "zh-CN", "headline": "大模型推理服务优化：技术发展史、原理与前沿展望", "datePublished": "2026-08-23", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-serving.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "大模型推理服务优化：技术发展史、原理与前沿展望", "url": "https://piratepai.github.io/posts/inference-serving.html", "description": "从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译，结合 vLLM / SGLang / XGrammar 源码。", "inLanguage": "zh-CN", "headline": "大模型推理服务优化：技术发展史、原理与前沿展望", "datePublished": "2026-08-23", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/inference-serving.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -139,7 +139,7 @@
   <p class="sub">从 Continuous Batching、PagedAttention、Chunked Prefill，到 P/D 与 E-P-D 分离、采样与结构化输出、图编译。正文系统性讲解，并结合 vLLM / SGLang / XGrammar 源码与 2024–2026 年业界、学界最新进展。</p>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">源码 <b>vLLM · SGLang · XGrammar</b>（main 分支）</span><span class="chip">引用 <b>正文标注出处与时间</b></span></div>
 </div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">Kimi K3.1 Pro 权重开放与 day-0 服务栈（AgentX/DCP 数字）；SGLang v0.5.23 Paged Experts 与 megakernel；NEAR AI 披露 SGLang RCE 生产事故；vLLM v0.33.0 投机方法官方化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-pd-interactive">新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-radix-interactive">新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#research-20261103">5.6 部署快照补充研究判断登记表第 1 条（缓存感知路由 vs 最短队列路由）的入口链接。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读试点：<a href="#s5">P/D 分离小节增加语义锚点、在线书实验入口，并支持连续读本章及章内跳转。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">Kimi K3.1 Pro 权重开放与 day-0 服务栈（AgentX/DCP 数字）；SGLang v0.5.23 Paged Experts 与 megakernel；NEAR AI 披露 SGLang RCE 生产事故；vLLM v0.33.0 投机方法官方化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-pd-interactive">新增图 5-2 交互图解：P/D 分离架构的请求全路径（保留原图 5-1 静态速览；见 docs/research-refresh-20261115.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 图解与来源：<a href="#fig-radix-interactive">新增图 3-3 交互图解：基数树前缀缓存的结构生长与 LRU 淘汰（保留原图 3-2 匹配示例；见 docs/cost-efficient-inference-2026.md）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10 改为 9（未来方向 10.1–10.6→9.1–9.6），附录小节 9.0–9.6 改为 附A–附G；移除附录内同名重复标题（s9-content 锚点保留）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#research-20261103">5.6 部署快照补充研究判断登记表第 1 条（缓存感知路由 vs 最短队列路由）的入口链接。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读试点：<a href="#s5">P/D 分离小节增加语义锚点、在线书实验入口，并支持连续读本章及章内跳转。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 6 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -283,6 +283,7 @@
 
 <!-- ============================================================ -->
 <h2 id="s2"><span class="no">2</span>批处理与调度：Continuous Batching</h2>
+<div class="analogy" id="principle-notes-20261120"><p>车上有人先到站下了车，空出的座位就可以给下一位乘客。车继续走，其他乘客也继续坐。这比等整车人都到站再接新乘客更容易把座位用上。</p></div>
 
 <h3>2.1 起点：静态批处理为什么糟糕</h3>
 <p>2022 年之前的推理服务（如早期 HuggingFace Transformers pipeline、FasterTransformer）使用<b>请求级批处理（request-level / static batching）</b>：攒够 N 条请求凑成一个 batch，一起进模型，<b>一起结束</b>。</p>
@@ -543,32 +544,35 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <!-- /WIDGET:w5 -->
 
 <h2 id="s3"><span class="no">3</span>显存管理：PagedAttention 与前缀缓存</h2>
-<p>Continuous Batching 解决了"算力空转"，但 2023 年的 vLLM 团队发现另一个瓶颈：<b>KV Cache 的显存管理糟蹋了多达 60–80% 的可用显存</b>，直接限制了 batch 大小（也就是限制了 Decode 吞吐）<sup class="cite">[VLLM23]</sup>。</p>
+<p>Continuous Batching 允许请求在生成过程中加入或离开批次。并发序列的 KV Cache 总量仍受显存容量约束。PagedAttention 让 KV 按需分块存放，前缀缓存复用已算出的 KV。前者可以扩大批次，后者可以减少新请求的 Prefill 计算<sup class="cite">[VLLM23][APC]</sup>。</p>
 
 <h3>3.1 问题的根源：连续分配 + 静态预留</h3>
+<div class="analogy"><p>书架上有两个空位，中间隔着一本书。想把两本书挨着放，这两个空位就用不上。还有几个空位已经给别人留好，现在也借不到。</p></div>
 <p>早期系统（包括原始 Orca）为每条请求<b>按其最大可能长度</b>预留一段<b>连续</b>显存放 KV Cache。两个后果：</p>
 <ul>
-<li><b>内部碎片</b>：预留 2048 个位置，实际只用了 200 个，剩下的显存谁也用不了。实测预留浪费通常占总显存的 40%+。</li>
+<li><b>内部碎片</b>：例如按 2,048 个 token 预留，序列最终只用 200 个位置，剩下的 1,848 个位置在请求结束前无法让给其他序列。论文把仍可能写入的位置单列为预留空间。</li>
 <li><b>外部碎片</b>：连续大块反复申请释放，显存被切割成碎片，明明总量够却分配不出新的连续段。</li>
 </ul>
-<div class="analogy">酒店规定"每位预订客人必须包下从入住日到年底的整层连续房间"，哪怕只住一晚。结果：大量空房被纸面预订锁死（内部碎片），楼层被切得七零八落（外部碎片），新客人反而订不到房。</div>
+<p>在 vLLM 论文比较的旧系统中，实际存入 KV 的位置占 KV Cache 空间的 <b>20.4% 至 38.2%</b>，其余空间是预留或碎片。分母是 KV Cache 空间<sup class="cite">[VLLM23，图 2–3]</sup>。</p>
+
 
 <h3>3.2 PagedAttention（vLLM, SOSP 2023）：把操作系统搬进显存</h3>
-<p>vLLM 的答案直白得漂亮：<b>既然操作系统 50 年前就解决了这个问题，就把那套方案照搬过来</b>：虚拟内存 + 分页<sup class="cite">[VLLM23]</sup>。</p>
+<div class="analogy"><p>画越画越多，就装进一样大的盒子里。装满一盒，再拿一盒。盒子可以放在不同的书架上，只要照着纸上写的顺序去找，就能按原来的顺序看画。</p></div>
+<p>vLLM 借鉴操作系统的分页。服务用块表把序列中按 token 排列的逻辑块映射到显存里的物理块。Decode 内核按块表读取历史键和值（K 和 V）<sup class="cite">[VLLM23]</sup>。</p>
 <div class="fig">
 <div class="flowrow">
   <div class="fbox"><b>逻辑 KV 序列</b><br>req A: [0][1][2][3][4]...</div>
   <div class="arr">通过<b>块表</b>映射→</div>
   <div class="fbox hl"><b>物理块池</b><br>块#7 块#19 块#3 ...<br>每块 16 个 token 的 KV<br><b>不必连续！</b></div>
 </div>
-<div class="cap">图 3-1 分页式 KV Cache：每条逻辑序列通过块表（block table）映射到离散物理块，显存利用率接近 100%，外部碎片彻底消失（只剩每条请求平均半个块的内部碎片）。</div>
+<div class="cap">图 3-1 分页式 KV Cache：每条逻辑序列通过块表（block table）映射到离散物理块，固定块池消除了因要求连续分配而产生的外部碎片。顺序填充时，只会在序列末块留下未用位置。本文自绘，参考 vLLM 论文图 6。</div>
 </div>
 <ul>
-<li>KV Cache 被切成固定大小的<b>块（block，GPU 上通常 16 个 token/块）</b>，逻辑连续、物理离散。</li>
-<li>按需分配：生成到哪，块分到哪；请求结束，块立刻归还池子。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销。</li>
-<li>分页带来一个意外礼物：<b>共享</b>。多条请求若前缀相同，物理块可以直接<b>引用计数共享</b>，写时才复制。这就是 vLLM copy-on-write 的来源。</li>
+<li>KV Cache 被切成固定大小的<b>块（block）</b>。论文中的默认大小是每块 16 个 token。</li>
+<li>生成到哪，块就分到哪。请求结束后降低引用计数，无人引用的块回到可分配队列。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销。</li>
+<li>多个候选序列可以通过引用计数共享同一前缀的物理块。候选要写入仍在共享的块时，先为它复制一份（copy-on-write）<sup class="cite">[VLLM23]</sup>。</li>
 </ul>
-<p>效果：vLLM 论文报告，相比 FasterTransformer 和 Orca 吞吐最高提升 <b>2–4×</b>（对长复用前缀场景更多），相同显存下可支撑的并发序列数成倍增长；官方博客称对比 HuggingFace Transformers 最高 <b>24×</b> 吞吐<sup class="cite">[VLLM23]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
+<p>效果：vLLM 论文报告，在相近延迟下，对比 FasterTransformer 和 Orca 的服务吞吐为 <b>2–4 倍</b><sup class="cite">[VLLM23]</sup>。发布博客按 ShareGPT 的输入和输出长度分布，在 A10G／A100 上测试 LLaMA-7B／13B，其中相对 Hugging Face Transformers 的服务吞吐最高为 <b>24 倍</b><sup class="cite">[VLLMBLOG]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
 <div class="note"><b>[VLLM23]</b> Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP 2023（2023-10）；软件 vLLM 于 2023-06 开源。原文："we propose PagedAttention, an attention algorithm <b>inspired by the virtual memory and paging techniques employed by operating systems</b>"（译文：我们提出 PagedAttention，一个受操作系统虚拟内存与分页技术启发的注意力算法）。链接：<a href="https://arxiv.org/abs/2309.06180">arxiv.org/abs/2309.06180</a></div>
 <p>落到代码：vLLM V1 的 <code>KVCacheManager</code> 负责"查缓存 → 分配新块 → 释放/驱逐"全流程：</p>
 <pre><code># repos/vllm/vllm/v1/core/kv_cache_manager.py (main @ 2026-08-23，方法清单节选)
@@ -582,9 +586,18 @@ class KVCacheManager:
 <p class="codecap"><b>代码 3-1</b> KV 块管理器：分页、前缀缓存、淘汰的统一入口（<code>vllm/v1/core/kv_cache_manager.py:118</code> 起）。</p>
 
 <h3>3.3 前缀缓存（Prefix Caching）与 RadixAttention</h3>
+<div class="analogy">
+  <p><b>为什么后半句一样，也得重新算？</b> 两段话从头一样的部分，可以用上次留下的记录。</p>
+  <p>一段故事说「小熊捡到一颗糖。它把东西放进口袋。」另一段说「小熊捡到一块石头。它把东西放进口袋。」最后一句一样，口袋里的东西却变了。这个例子用来说明前后两句的关系。电脑实际留下的是算出来的一串数字。</p>
+  <p>电脑从开头一小段一小段地比。对得上的部分可以接着用。上次算最后一句时，前面说的是糖。这次换成了石头，后面的记录也得跟着新故事再算一遍。</p>
+  <ul>
+    <li><a href="#apc-hash">自动前缀缓存（APC）</a> · vLLM 怎么知道前面哪几块一样。</li>
+    <li><a href="#radix-match">RadixAttention</a> · SGLang 怎么把共同的开头存到一起。</li>
+  </ul>
+</div>
 <p>分页共享解决"同时在场"的请求，那<b>先后到达</b>的请求呢？真实负载里前缀重复极多：系统提示词、few-shot 示例、多轮对话历史、Agent 的固定工具描述……每条新请求把同样几万 token 的前缀重算一遍是纯粹的浪费。</p>
-<p><b>自动前缀缓存（Automatic Prefix Caching, APC）</b>：请求完成后不销毁它的 KV 块，而是按前缀哈希留在池中；新请求到达时先查<b>前缀哈希表</b>，命中的块直接挂到自己的块表上（引用计数 +1），只有未命中的部分需要计算。淘汰用 LRU。vLLM 自 2023 年底支持，V1 起默认开启<sup class="cite">[VLLMV1]</sup>。</p>
-<p>SGLang 把这个思想做到极致，起名 <b>RadixAttention</b>（2023-12）：用一个<b>基数树（radix tree）</b>组织所有历史 KV：从根到叶的每条路径就是一段真实出现过的前缀<sup class="cite">[SGLANG24]</sup>。基数树共享公共前缀节点，所以"多轮对话历史逐轮延长"这种场景可以精确增量复用；配合前述 LPM 缓存感知调度，缓存收益进一步放大。</p>
+<p id="apc-hash"><b>自动前缀缓存（Automatic Prefix Caching，APC）</b>复用已计算的完整 KV 块。缓存键包括父块哈希、当前块的 token 和必要的附加标识。新请求把命中的块加入块表并增加引用计数。无人引用的块可暂留在池中，空间紧张时按 LRU（最近最少使用）策略淘汰。vLLM V1 默认开启 APC。即使全提示词的 KV 已缓存，仍需计算末 token 的 logits，按块对齐时可能重算整个末块<sup class="cite">[APC][VLLMV1][VLLMSRC]</sup>。</p>
+<p id="radix-match"><b>SGLang RadixAttention</b> 用基数树（radix tree）组织历史 KV。每条边可记录一段 token，多个请求共享相同的开头。新请求沿树寻找最长匹配前缀。论文方案通过引用计数保护正在使用的节点，优先淘汰最久未用且无人引用的叶节点。多轮会话可以增量复用历史，缓存感知调度可以优先处理匹配前缀较长的请求<sup class="cite">[SGLANG24]</sup>。</p>
 <div class="fig">
 <pre style="margin:0;background:#0f1b2a;color:#d7e3f0;">
 RadixAttention 基数树（节点 = 一段 token 序列的 KV）
@@ -594,8 +607,10 @@ RadixAttention 基数树（节点 = 一段 token 序列的 KV）
    /        \                       \
 [第3轮问题] [第4轮问题]          [问题Q2]   ← Q2 复用 系统+文档B 全部 KV
 </pre>
-<div class="cap">图 3-2 基数树按内容组织历史 KV：新请求沿树匹配最长前缀，命中部分零计算。多轮 Agent 会话的典型命中率可达 80%+。</div>
+<div class="cap">图 3-2 基数树按内容组织历史 KV。新请求沿树匹配最长前缀。本文自绘，参考 SGLang 论文图 3。</div>
 </div>
+
+<p>SGLang 论文以复用的输入 token 数除以输入 token 总数计算命中率。特定基准为 50% 至 99%，Chatbot Arena 两个部署观测为 52.4% 和 74.1%。这些结果对应各自负载，长输出由 Decode 主导时，Prefill 的收益对总延迟可能很小<sup class="cite">[SGLANG24]</sup>。</p>
 
 <figure class="fig" id="fig-radix-interactive" style="padding:10px"><iframe src="img/sc-radix-prefix.html" title="基数树前缀缓存交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 3-3 · 可交互：一棵基数树的生长与淘汰——system prompt 与工具描述作为热点前缀被所有会话共享，会话历史逐层生长，新问题落在叶子（本轮增量 prefill），冷会话被 LRU 逐出。点击节点可看各前缀的规模与角色。本文自绘（交互图解），机制综合自 SGLang RadixAttention 论文（NeurIPS 2024）与 sglang 仓库 radix_cache.py（main @ 2026-08-23）；上图 3-2 为一次匹配过程示例。</div></figure>
 <pre><code># repos/sglang/python/sglang/srt/mem_cache/radix_cache.py (main @ 2026-08-23)
@@ -604,13 +619,13 @@ class RadixCache(BasePrefixCache):
     def insert(self, params) -> InsertResult:       # 完成后写入树
     def cache_finished_req(self, ...):              # 请求结束，KV 归树管理</code></pre>
 <p class="codecap"><b>代码 3-2</b> SGLang RadixCache 的三个核心入口（<code>python/sglang/srt/mem_cache/radix_cache.py:303</code> 起；2026 年主干已提供 C++ 实现以降低树操作开销）。</p>
-<div class="note"><b>[SGLANG24]</b> Zheng, Yin, Xie, Sun, Huang, Yu, Cao, Kozyrakis, Stoica, Gonzalez, Barrett, Sheng. <i>SGLang: Efficient Execution of Structured Language Model Programs</i>. NeurIPS 2024（arXiv 2023-12-11）。原文："Unlike existing systems that discard the KV cache after a generation request finishes, our system <b>retains the cache for prompts and generation results in a radix tree</b>, enabling efficient prefix search, reuse, insertion, and eviction."（译文：与现有系统在请求结束后丢弃 KV Cache 不同，我们把 prompt 与生成结果的缓存保留在一棵基数树中，实现高效的前缀查找、复用、插入与淘汰。）链接：<a href="https://arxiv.org/abs/2312.07104">arxiv.org/abs/2312.07104</a></div>
+<div class="note"><b>[SGLANG24]</b> Zheng, Yin, Xie, Sun, Huang, Yu, Cao, Kozyrakis, Stoica, Gonzalez, Barrett, Sheng. <i>SGLang: Efficient Execution of Structured Language Model Programs</i>. NeurIPS 2024（arXiv 2023-12-12）。原文："Unlike existing systems that discard the KV cache after a generation request finishes, our system <b>retains the cache for prompts and generation results in a radix tree</b>, enabling efficient prefix search, reuse, insertion, and eviction."（译文：与现有系统在请求结束后丢弃 KV Cache 不同，我们把 prompt 与生成结果的缓存保留在一棵基数树中，实现高效的前缀查找、复用、插入与淘汰。）链接：<a href="https://arxiv.org/abs/2312.07104">arxiv.org/abs/2312.07104</a></div>
 
 <h3>3.4 更远一步：KV Cache 的分层与跨机</h3>
 <p>GPU 显存终究有限，而前缀缓存的价值随时间累积。2024 年起出现了把 KV Cache 当作<b>一等公民的数据</b>来经营的趋势：</p>
 <ul>
 <li><b>分层 KV 存储</b>：GPU 显存（热）→ CPU DRAM（温）→ 本地 SSD / 远端存储（冷）。代表：LMCache（2024）、Mooncake 的分布式 KVCache 池（DRAM+SSD）<sup class="cite">[MOONCAKE25]</sup>、DeepSeek 3FS/hf3fs、FlexKV；vLLM 现在有一整套可插拔 KV 连接器接口（见代码 3-3）。</li>
-<li><b>跨请求/跨实例共享</b>：集群级路由尽量把请求送到"缓存了它前缀"的实例（第 2.3 与第 9 节）。</li>
+<li><b>跨请求与跨实例共享</b>：缓存命中可减少 Prefill。选择实例时，还要比较排队和必要的 KV 传输时间。Mooncake 用这些量估计返回首 token 的时间（第 2.3 与第 9 节）<sup class="cite">[MOONCAKE25]</sup>。</li>
 </ul>
 <pre><code># repos/vllm/vllm/distributed/kv_transfer/kv_connector/v1/  (main @ 2026-08-23)
 lmcache_connector.py    mooncake/     nixl/         hf3fs/
@@ -621,6 +636,7 @@ flexkv_connector.py     offloading/   multi_connector.py ...
 
 <!-- ============================================================ -->
 <h2 id="s4"><span class="no">4</span>Chunked Prefill：把长 Prefill 切成块</h2>
+<div class="analogy"><p>有个人要读一整页，旁边几个人每次只等一句回答。可以让长文先读一小段，排进几句等待中的回答，再继续读下一段。长文还是要读完，但其他人不用一直等。</p></div>
 
 <h3>4.1 问题：一条 32K 的 prompt 能让所有人卡顿</h3>
 <p>Continuous Batching 里，prefill 和 decode 混在同一个引擎。当一条超长 prompt 进来，它的一次 prefill 是<b>一个巨大的计算尖刺</b>：比如 32K token 的一次前向，在 A100 上要几百毫秒。而 decode 每步只要 10–20 ms。灾难场景：</p>
@@ -665,6 +681,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <div class="card"><b>小结：</b>PagedAttention 管理"KV 放在哪"，前缀缓存管理"KV 能不能再用一次"，chunked prefill 管理"每次算多少"。三者叠加，构成了 colocated（混部）引擎的完整形态。但混部终究是"一锅烩"，下一节我们走出单机。</div>
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>P/D 分离：Prefill 与 Decode 各回各家</h2>
+<div class="analogy"><p>一家店可以让一个人先读长订单，另一个人照着读好的记录一道一道出菜。两个人能各按自己的速度做事。换手时，记录必须送到后一个人手上。</p></div>
 
 <p>实践见在线书的<a href="https://piratepai.github.io/pi-infer-book/chapters/ch11.html">第 11 章「P/D 分离与 KV 传输」</a>。</p>
 <h3 id="pd-motivation">5.1 动机：混部的天花板</h3>
@@ -750,6 +767,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>分离的刀口并不止于 E/P/D 三段。2026 年 7 月，vLLM 发布 <b>AFD（Attention-FFN Disaggregation）插件</b>：对超大 MoE 模型，把注意力计算与 FFN/专家计算分到不同 worker，按需各自扩容<sup class="cite">[VLLMAFD]</sup>。学界也有针对 MoE 的类似"专家卸载"研究。可以看到一条清晰的趋势线：<b>从"按请求"调度 → "按阶段"调度 → "按算子类别"调度</b>，粒度越来越细，单元越来越像可独立伸缩的微服务。</p>
 <!-- ============================================================ -->
 <h2 id="s7"><span class="no">7</span>采样与结构化输出</h2>
+<div class="analogy"><p>填电话号码的格子时，每一格都只能写数字。先把字母从眼前的选项里拿掉，接下来还能在数字里挑。即使每格都写得合规，号码也可能填错。</p></div>
 <p>前六节都在"算得快"，本节处理"生成什么"：模型每步输出的是一个覆盖整个词表（如 15 万 token）的概率分布，<b>从这个分布里怎么挑出下一个 token</b>，既影响文本质量，也直接是服务系统的热路径代码。</p>
 
 <h3>7.1 解码策略小史：从贪心到动态截断</h3>
@@ -839,6 +857,7 @@ def fill_bitmask(self, bitmask: torch.Tensor, idx: int) -> None:
 
 <!-- ============================================================ -->
 <h2 id="s8"><span class="no">8</span>图编译与执行优化</h2>
+<div class="analogy"><p>如果手工课每天都要按同一套顺序领剪刀、纸和胶水，可以把这套动作排好，一声令下就照着做。纸张大小或步骤换了，之前排好的动作也可能要重新准备。</p></div>
 <p>前面所有技术决定了"算什么"，本节讲"怎么算得快"：从算子（kernel）到计算图（graph）两个层面压榨硬件。理解本节只需一个事实：<b>Decode 阶段一次前向包含几百~几千个小 GPU kernel 调用，每个只算几微秒，而"从 CPU 发射一个 kernel 到 GPU"本身就要几微秒</b>，发射开销与计算同量级，GPU 大量时间在"等下一个指令"。</p>
 
 <h3>8.1 算子层：融合与 IO 感知</h3>
@@ -1028,6 +1047,9 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <ol class="refs">
 <li id="ORCA22">Yu, Jeong, Kim, Kim, Chun. <i>Orca: A Distributed Serving System for Transformer-Based Generative Models</i>. <b>OSDI 2022</b>. <a href="https://www.usenix.org/conference/osdi22/presentation/yu">链接</a></li>
 <li id="VLLM23">Kwon et al. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. <b>SOSP 2023</b>（vLLM 2023-06 开源）. <a href="https://arxiv.org/abs/2309.06180">arXiv:2309.06180</a></li>
+<li id="VLLMBLOG"><b>Kwon 等</b>. <i>vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention</i>. 发布博客，2023-06-20。<a href="https://vllm.ai/blog/2023-06-20-vllm">链接</a></li>
+<li id="APC"><b>vLLM 项目</b>. <i>Automatic Prefix Caching</i>. <a href="https://docs.vllm.ai/en/stable/design/prefix_caching/">设计文档</a></li>
+<li id="VLLMSRC"><b>vLLM 项目</b>. KVCacheManager，提交 <code>d2da27eb2d</code>，2026-11-20 核对。<a href="https://github.com/vllm-project/vllm/blob/d2da27eb2defb88377636fba83d9a41ad35bf44d/vllm/v1/core/kv_cache_manager.py">源码</a></li>
 <li id="SARATHI23">Agrawal et al. <i>SARATHI: Efficient LLM Inference on GPUs via Piggybacking Decodes with Chunked Prefills</i>. arXiv 2023-08. <a href="https://arxiv.org/abs/2308.16369">arXiv:2308.16369</a></li>
 <li id="SARATHISERVE24">Agrawal, Kedia, Panwar, Mohan, Kwatra, Gulavani, Tumanov, Ramjee. <i>Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve</i>. <b>OSDI 2024</b>. <a href="https://www.usenix.org/conference/osdi24/presentation/agrawal">链接</a>（arXiv 2024-03-04, 2403.02310）</li>
 <li id="DISTSERVE24">Zhong et al. <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized LLM Serving</i>. <b>OSDI 2024</b>. <a href="https://www.usenix.org/conference/osdi24/presentation/zhong-yinmin">链接</a>（arXiv 2024-01-18, 2401.09670）</li>
