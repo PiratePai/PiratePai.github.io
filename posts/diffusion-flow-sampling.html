@@ -86,14 +86,14 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-04">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/diffusion-flow-sampling.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "url": "https://piratepai.github.io/posts/diffusion-flow-sampling.html", "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。", "inLanguage": "zh-CN", "headline": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "datePublished": "2026-11-04", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/diffusion-flow-sampling.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "url": "https://piratepai.github.io/posts/diffusion-flow-sampling.html", "description": "从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。", "inLanguage": "zh-CN", "headline": "扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏", "datePublished": "2026-11-04", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/diffusion-flow-sampling.html"}</script>
 <!-- site-metadata:end -->
 </head><body>
 <div style="position:fixed;bottom:16px;left:16px;z-index:50"><a href="../index.html" aria-label="返回首页" class="pill">← 首页</a></div>
 <header class="hero"><div class="inner"><p class="kicker">生成模型 · 采样与推理效率 · 2026</p><h1>扩散与 Flow 模型的采样效率：求解器、时间步、引导与少步蒸馏</h1><p class="sub">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</p><div class="meta"><span class="pill">资料核验 2026-11-04</span><span class="pill">Diffusers v0.35.1 源码</span><span class="pill">Python 标量实验</span></div></div><!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s5-frontier-20261115">AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/diffusion-flow-sampling.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-04">2026-11-04</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 新增专题：<a href="#s0">从同样四次模型求值的算例出发，比较求解器、时间步分配、CFG 和少步训练。结合 FLUX 配置与图像、视频评测，判断缓存、稀疏化和量化何时能缩短端到端延迟。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s5-frontier-20261115">AGAVE 区间积分 CFG 1-NFE（WACV 2027）；History Forcing 少步蒸馏历史监督；Microsoft SMD 与 StepX-OPD 蒸馏管线简化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/diffusion-flow-sampling.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 <div class="wrap">
@@ -156,6 +156,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>确定每个张量代表噪声、干净样本还是速度。</li><li>Flow Matching 的训练路径和实际生成轨迹需要分别理解。</li><li>核对调度器的时间轴、尺度和末端处理，再切换算法。</li></ol></div>
 
 <h2 id="s2">2 求解器 · 相同模型预算能走多远</h2>
+<div class="analogy" id="principle-notes-20261120">在一条弯路上问路，问一次就走很远，会少问几次。到了转弯的地方，先停下来再问，可以少走错一截。两种走法谁更好，还得数问路花了多少时间和最后走到哪里。</div>
 <h3 id="s2-ddim">2.1 DDIM、Euler 和高阶方法各省了什么</h3>
 <p>DDIM 允许沿训练时间点的子序列生成。在确定性设置 η=0 下，从当前点估计干净样本和噪声，再按下一时间点的系数重组状态。保留更多中间点，就有更多次纠正方向的机会。这里可调整的是采样过程，原检查点的预测接口仍须匹配。<sup class="cite"><a href="#ref-DDIM">[DDIM]</a></sup></p>
 <p>对常微分方程（ODE）<code>dx/dt = f(x,t)</code>，Euler 在步首取一次方向并前进一步。Heun 先用这个方向预测终点，再在预测点取第二个方向，用两者的平均值修正本步。后者在光滑场上有更高的收敛阶，每个完整步也多一次场求值。某些采样器在最后一个端点退回 Euler，实际 NFE 应从执行路径数出。<sup class="cite"><a href="#ref-EDM">[EDM]</a></sup></p>
@@ -194,6 +195,7 @@ for method, steps in [("Euler", 4), ("Heun", 2)]:
 <div class="summary3"><b>本章小结</b><ol><li>比较积分精度时固定场求值次数，并注明启动与末步成本。</li><li>多阶段方法在本步追加预测，多步方法利用前步历史。</li><li>解析例子能验证更新公式，图像质量仍由生成实验衡量。</li></ol></div>
 
 <h2 id="s3">3 时间网格 · 有限的步数放在哪里</h2>
+<div class="analogy">如果只能停三次，就把停下来的机会留给最需要看方向的地方。三次都按同样远近摆开，也可以三次都落在弯比较多的一段。停的次数一样，走过的路线可能不一样。</div>
 <h3 id="s3-grid">3.1 时间均匀、噪声均匀与误差均匀</h3>
 <p>同样四段路可以设在等间隔时间 t、等间隔噪声 σ，或接近等间隔的对数信噪比上。信噪比为 α²/σ²，取对数后，噪声跨几个数量级的变化更容易比较。t 到 σ 的变换通常是非线性的，所以界面里同样写着“四步”的两套网格，实际访问的噪声区域可能不同。对数坐标在端点可能发散，复现时应保存完整数列与真实的端点处理方式。<sup class="cite"><a href="#ref-EDM">[EDM]</a></sup><sup class="cite"><a href="#ref-DPM">[DPM]</a></sup></p>
 <p>设精确轨迹的局部弯曲程度较大，用长直线跨过这里就容易偏离。把采样点移到这一区域可以降低局部误差，但要从别处挪走点，而且早期误差可能传递到后续。因而“总在高噪声区加点”或“总在末端加点”都需要结合模型、求解器和任务验证。Align Your Steps 直接针对模型、求解器和数据优化时间表，给出了固定步数下比较网格的实验范式。<sup class="cite"><a href="#ref-AYS">[AYS]</a></sup></p>
@@ -203,6 +205,7 @@ for method, steps in [("Euler", 4), ("Heun", 2)]:
 <div class="summary3"><b>本章小结</b><ol><li>保存实际被访问的时间点，连同时间与噪声的转换规则。</li><li>在固定模型、引导、求解器和 NFE 的条件下只改变网格。</li><li>样本自适应策略还需统计调度开销与批处理表现。</li></ol></div>
 
 <h2 id="s4">4 引导强度如何改变一次求值的成本</h2>
+<div class="analogy">看着同一张草图，先听一次普通建议，再听一次加了题目要求的建议。比一比两种建议差在哪儿，就知道沿哪个方向多改一点。多改也会把听错的部分一起放大。</div>
 <h3 id="s4-cfg">4.1 把引导后的场、样本分支与网络调用分开计数</h3>
 <p>无分类器引导（classifier-free guidance，CFG）让模型在同一状态和时间下分别给出无条件预测 u 和有条件预测 c，以 <code>u + s(c − u)</code> 合成为更新方向。这里采用 s=1 时得到 c 的约定。增大 s 会放大条件信号，也会放大两分支预测差异中的误差。在少步设置下应重新选择引导强度。<sup class="cite"><a href="#ref-CFG">[CFG]</a></sup><sup class="cite"><a href="#ref-DPMpp">[DPM++]</a></sup></p>
 <p>假设每张图走 12 步 Euler，每步都需要两分支。按本文口径，共有 12 次引导后的场求值和 24 次单样本分支求值。若正负分支分别跑，网络调用 24 次。若实现将两者沿 batch 维拼接，则调用 12 次，每次处理双倍的样本数。两种方式还可能占用不同的显存和墙钟时间。单看模型调用计数，会漏掉每次调用实际处理的数据量。</p>
@@ -215,6 +218,7 @@ for method, steps in [("Euler", 4), ("Heun", 2)]:
 <div class="summary3"><b>本章小结</b><ol><li>报告场求值、分支样本数、网络调用和实际 batch。</li><li>区分网络内的引导条件和需要第二次前向的外部引导。</li><li>把少步权重与对应的时间表及引导配置一起复现。</li></ol></div>
 
 <h2 id="s5">5 少步生成需要学会什么</h2>
+<div class="analogy">有两种教画法。一种要求学生跟着老师每一笔走。另一种只要求画出来的一组画和老师的画差不多。用第二种方法时，学生的某一张画可以和老师那一张不同。</div>
 <h3 id="s5-targets">5.1 三种蒸馏目标怎样压缩多步教师</h3>
 <table><caption>表 5-1 · 按学生收到的监督信号整理，来源为各方法的原始论文</caption><thead><tr><th>训练目标</th><th>一个训练样本如何产生信号</th><th>验证时观察什么</th></tr></thead><tbody>
 <tr><td>渐进蒸馏 <sup class="cite"><a href="#ref-PD">[PD]</a></sup></td><td>教师连续走两步，学生从同一起点走一步，学习到达教师的端点。下一轮以学生作为新教师，继续将步数减半。</td><td>比较约定时间网格上的学生误差，观察连续几轮压缩后细节能否保留。</td></tr>

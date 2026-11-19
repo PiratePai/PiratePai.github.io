@@ -160,9 +160,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-09-11">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/spec-decoding-post-training.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "url": "https://piratepai.github.io/posts/spec-decoding-post-training.html", "description": "沿\"草稿蒸馏 → 解码头训练 → 目标自投机 → 训练时测试 → 在策蒸馏与 RL 协同训练\"的演进主线，结合 EAGLE / Medusa / LayerSkip / DeepSpec / DFlash 源码解析训练目标与损失设计，并盘点 2026 最新进展。", "inLanguage": "zh-CN", "headline": "投机解码的后训练：从草稿蒸馏到 DSpark（2023–2026）", "datePublished": "2026-09-11", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/spec-decoding-post-training.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -177,7 +177,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#latest">移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-09-11">2026-09-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#latest">SpecOPD 分支并行在线策略蒸馏（监督 token 吞吐 16.09×、接受长度 +41.45%）；REAL Loss 与 TVP 的草稿损失&quot;客观目标&quot;研究潮。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#latest">移除更新附录内与生成标题同文的重复 h2；latest-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/1126cb5bb6bc39354f1320c0f2554d15cd5f1b93">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -233,6 +233,7 @@
 <div class="hl-card"><div class="hl-meta"><b>xPress 训练配方上游化</b><span class="hl-date">10-22 · UIUC SSAIL</span></div><p>对着活 vLLM 验证器在线训练草稿，checkpoint 免转换直接被 vllm serve 加载；2026-10-22 合入 main，v0.33 起搭载（晚于 v0.32.0）。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>SpecOPD：分支并行在线策略蒸馏</b><span class="hl-date">11-02 · 阿里 Qwen App 等</span></div><p>分支打包成提议树共享前缀计算：监督 token 吞吐 16.09×（vs 顺序 rollout OPD），平均接受长度 +41.45%，对 AR 解码最高 3.56×；覆盖 8B–125B 目标 × DFlash/DSpark/V2 × 四域。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>草稿损失"客观目标"研究潮</b><span class="hl-date">10-31 / 11-10</span></div><p>REAL Loss 用路径权重无偏估计+Rao-Blackwellization 把梯度方差降 52~58%、接受长度 4.792；TVP 系统对比显示 TV 类损失比 CE +9.8% 接受长度、比公开 DFlash2 配方 +6.2~12.9%。</p><a class="hl-link" href="#latest">→ 跳到详情</a></div></div></div></details>
 
 <h2 id="why">1 · 为什么投机解码需要"后训练"？</h2>
+<div class="analogy" id="principle-notes-20261120">一个人先写几句，另一个人负责检查。先写的人如果经常在第一句就写错，后面的几句也得跟着重来。练习要看的是他能不能多写出几句可接着用的话。</div>
 
 <p class="lead">如果你还不了解投机解码（Speculative Decoding），一句话：<b>让一个小而快的"草稿模型"先一口气写几个词，再让大模型一次前向把它们全部批改，只要批改通过就一并采纳</b>。因为大模型解码的瓶颈不是计算而是"每生成一个 token 都要把全部权重从显存读一遍"，所以"读一遍、产出多个 token"天然省时间。而且经过精心的拒绝采样设计，输出的概率分布和 大模型直接生成<b>完全一致（无损）</b>。本站<a href="speculative-decoding.html">《投机解码全景》</a>已用 50 行代码验证过这个"无损"性质，本文不再重复。</p>
 
@@ -354,6 +355,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 <p>同年 SpecInfer<span class="cite">[4]</span> 用树状草稿+树注意力把"一次验证多条路径"变成系统组件，让草稿"猜多条路"的容错大幅提高，也为后来所有树/块验证方法铺路。</p>
 
 <h2 id="phase2">5 · 阶段二（2023–2024）：草稿的后训练</h2>
+<div class="analogy">学生拿到半张作文时，要学着接上老师原本会写的话。只看从头到尾都写好的作文，练到的接法和临时接在一段新文字后面，可能不一样。</div>
 
 <h3>5.1 DistillSpec（2023-10）：草稿蒸馏的开山</h3>
 <p><span class="pill g">训练对象：外部草稿模型</span><span class="pill b">优化目标：KL / TVD 蒸馏</span></p>
@@ -463,6 +465,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 
 <p>消融显示 MTP 让模型本身在 GSM8K/HumanEval 等基准显著变强（例如小规模实验 HumanEval 20.7→26.8）；而推理时第 2 个 token 的接受率高达 <b>85–90%</b>，配合投机解码把解码速度提升 <b>1.8 倍</b>（V3 官方部署即 MTP-1 配置）。这一"训练-推理双赢"的设计被 gpt-oss、Qwen、GLM、Kimi 等新一代旗舰模型普遍采纳，也反过来启发了 EAGLE-3 的架构（第 6 节）。学界随后还出现了 FastMTP<span class="cite">[31]</span> 等加速 MTP 训练/推理的工作。</p>
 <h2 id="phase3">6 · 阶段三（2025）：训练目标与架构的协同进化 —— EAGLE-3</h2>
+<div class="analogy">老师先递来一张便条。小朋友照着它写一张自己的。下一轮，他把自己刚写的那张带回来，接着写下去。这样练到的是怎么接着自己的记录往下走。</div>
 
 <p><span class="pill g">训练对象：特征级草稿头（升级版）</span><span class="pill b">优化目标：纯 token CE + 训练时测试</span></p>
 

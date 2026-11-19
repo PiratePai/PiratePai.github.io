@@ -152,9 +152,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/vit-sparsification.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "url": "https://piratepai.github.io/posts/vit-sparsification.html", "description": "2017–2026 视觉 Transformer 效率技术全景：Attention 结构稀疏、ToMe / FastV / VisionZip 等 Token 压缩方法与 TeaCache 等步间缓存技术在 VLM 与 DiT 中的应用。", "inLanguage": "zh-CN", "headline": "ViT 稀疏化技术梳理：从原理到 VLM 与 DiT 的应用（2020–2026）", "datePublished": "2026-08-22", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/vit-sparsification.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -172,7 +172,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s6">AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#s6">移除更新附录内与生成标题同文的重复 h2；s6-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">对照少步、缓存与稀疏化的组合。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s6">AB-Attention 视频 DiT 块稀疏（跳 89–92% 注意力 PSNR +4.4dB）；港大少步 AR 视频免训练 token 剪枝；补录混元 Prism 稀疏注意力原生训练。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 结构修订：<a href="#s6">移除更新附录内与生成标题同文的重复 h2；s6-content 锚点保留。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -242,6 +242,7 @@
 <div class="hl-card"><div class="hl-meta"><b>Rescuing Your Pruning</b><span class="hl-date">10-24 · 东方理工+上交等</span></div><p>压缩感知后训练把 grounding retention 4.0→64.8，说明"在哪剪"比"剪多少"更重要。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>AB-Attention：跳 89–92% 注意力仍高保真</b><span class="hl-date">10-29 · InfRec-Cardinal</span></div><p>免训练三件套（块内查询聚类选择器 IBCS + 包含概率加权采样 SIP + 细粒度 KV 装载内核）：Wan2.1/HunyuanVideo 上比最强基线 PSNR 最高 +4.4dB，端到端 2.23×。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>少步 AR 视频的免训练 token 剪枝</b><span class="hl-date">11-05 · 港大</span></div><p>少步蒸馏后既有 caching 大量失效：识别跨帧静态冗余+跨步早收敛冗余，用模型自身去噪轨迹的早期干净估计在线定位——零重训、零辅助预测器。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>混元 Prism：稀疏注意力进原生训练（补录）</b><span class="hl-date">10-05 · 复旦+腾讯+浙大</span></div><p>2K（2560×1440）音视频联合训练比全注意力快 2.5× 且质量更优；默认稀疏率 0.75（每 query 块仅看 25% key 块），对比 Kling3/Wan3.0/Seedance-2.5/MOVA。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
 <h2><span class="num">1</span>预备知识：图像是如何变成"一串词"的</h2>
+<div class="analogy" id="principle-notes-20261120">把一张大照片裁成小方块，每块先记下里面看见的东西，再看哪些小块要互相参照。人脸在两块纸上时，光看一块就读不出整个表情。</div>
   <p class="lead">要看懂 ViT 稀疏化，只需先弄清四件事：ViT 怎么处理图像、Self-Attention 为什么是 O(N²)、自回归模型的 KV Cache 是什么、DiT 的去噪循环在算什么。后面所有稀疏化方法，都是在这四个计算结构的某处"偷工减料"。</p>
 
   <h3>1.1 ViT：图像切块 → 序列 → Transformer</h3>
@@ -292,6 +293,7 @@
 <!-- ================================================================ -->
 <section id="s2">
   <h2><span class="num">2</span>概念地图：稀疏化的三大技术族</h2>
+<div class="analogy">看一张拼图时，可以少看几对小块，可以先把很像的两块合起来看，也可以沿用刚刚看过的结果。三种做法省的是不同的活，丢掉的线索也可能不同。</div>
   <p class="lead">所有方法都可以放进下面这张地图。判断一个新方法时，先问三个问题：它动的是<b>注意力结构</b>、<b>序列长度</b>，还是<b>计算复用</b>？是<b>训练时学出来的</b>还是<b>免训练的</b>？信号来自<b>哪里</b>（注意力分数 / 特征相似度 / 文本引导）？</p>
 
   <div class="ascii">                        ┌──────────────── ViT 稀疏化 ────────────────┐
@@ -703,6 +705,7 @@ root.querySelectorAll('.ppx-mode').forEach(function(b){
 <!-- ================================================================ -->
 <section id="s4">
   <h2><span class="num">4</span>VLM 中的稀疏化：让"视觉 token 爆炸"降级（含代码解析）</h2>
+<div class="analogy">同一张照片里，天空占了好多小方块，问的却是路牌上的字。可以让电脑少处理几块天空。要是把路牌边上的那一小块也省掉，字就可能读不全。</div>
 
   <h3>4.1 问题定义：为什么 VLM 的视觉 token 这么贵</h3>
   <p>以 LLaVA 系为代表的 VLM = CLIP-ViT 视觉编码器 + 投影层 + LLM 解码器。图像被编码为数百至上万个 token 后<b>拼进 LLM 的输入序列</b>：</p>
@@ -815,6 +818,7 @@ hidden_states_save = torch.cat([dominant_tokens, contextual_tokens], dim=1)  <sp
 <!-- ================================================================ -->
 <section id="s5">
   <h2><span class="num">5</span>DiT / 视频生成中的稀疏化（含代码解析）</h2>
+<div class="analogy">一段影片里，有些地方很多张都相近，有些东西一眨眼就跑到另一边。重复的地方可以试着沿用上一次的结果，变化快的地方要看仔细。省下的时间要和画面少了哪些细节一起看。</div>
 
   <h3>5.1 问题定义：N² × T 的双重爆炸</h3>
   <p>视频 DiT（CogVideoX、HunyuanVideo、Wan2.1、Flux…）把<b>所有帧的所有 patch + 文本 token</b> 拼成一条长序列做 3D 全注意力，再重复 30–50 个去噪步。720p×128 帧的 HunyuanVideo 序列长约 12 万（33 个压缩帧 × 3600 token + 文本），注意力占端到端延迟 80%+，单 A100 需约 1 小时生成 5 秒视频<sup class="cite">[SVG]</sup>。因此 DiT 稀疏化天然分三条线：</p>

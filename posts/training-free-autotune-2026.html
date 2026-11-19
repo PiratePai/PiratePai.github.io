@@ -131,9 +131,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-10-11">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/training-free-autotune-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "url": "https://piratepai.github.io/posts/training-free-autotune-2026.html", "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。", "inLanguage": "zh-CN", "headline": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "datePublished": "2026-10-11", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/training-free-autotune-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "url": "https://piratepai.github.io/posts/training-free-autotune-2026.html", "description": "从不修改权重的优化方法出发，梳理自动调优的技术地图、Agent 研究线与 GPU / NPU 实验流程。", "inLanguage": "zh-CN", "headline": "Training-free 推理优化与 Agent 自动调优全景（2024–2026）：MiniMax-H3 × ZCode 调优方案（GPU/NPU）", "datePublished": "2026-10-11", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/training-free-autotune-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -176,7 +176,7 @@
   <h1>Training-free 推理优化与 Agent 自动调优全景（2024–2026）<br>—— MiniMax-H3 × ZCode 实战（GPU / NPU 双流程）</h1>
   <div class="sub">2026-10-12 · v3（H3 运行框架修正为 vLLM-Omni；流程细化为四站式闭环 + 人在回路 RUNBOOK）· <b>2026-10-30 历史增补</b>（版本事实与 Agent 自动优化最新动态，见前沿亮点与 §2 快讯）· 综合开源项目（NVIDIA / 字节 / 华为 / Red Hat / 清华 / UC Berkeley）、arXiv 论文与推理框架版本及 Roadmap · 原理与实现</div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-11">2026-10-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">Together Compiler 持续编译系统（&lt;24h 2.6× TPS、agent 实验 252×）；KernelMosaic CUDA 内核生成数据集（14,566 任务）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/8f48de7b6f91249cf99bb0b68e455bc9f89fb25e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-10-11">2026-10-11</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#related-methods-20261104">补充通往评测、推理预算或 Agent 在线运行专题的链接；未扩大旧文资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/content-gaps-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#research-updates">Together Compiler 持续编译系统（&lt;24h 2.6× TPS、agent 实验 252×）；KernelMosaic CUDA 内核生成数据集（14,566 任务）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 2 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/8f48de7b6f91249cf99bb0b68e455bc9f89fb25e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -233,6 +233,7 @@
 原文：“CUDA Agent achieves state-of-the-art results on KernelBench, delivering 100%, 100%, and 92% faster rate over torch.compile on KernelBench Level-1/2/3 splits.” 译：在 KernelBench 三个难度级上，分别有 100%/100%/92% 的用例快于 torch.compile。</small></div>
 
 <h2 id="s1"><span class="no">1</span>为什么不动权重也能加速：原理与成本</h2>
+<div class="analogy" id="principle-notes-20261120">同一张食谱可以把需要的东西先在桌上摆好，也可以每做一步再找下一样。两个人照同一份步骤做，后者中途来回跑得更多。换做法之后，要用同样的方法检查做出来的东西。</div>
 <p>“Training-free（免训练）推理优化”指的是<b>无需额外训练目标模型；量化仍可改变权重数值表示，草稿或优化 Agent 自身也可能经过训练</b>，只改变模型运行时的“环境”：执行哪个算子、数据存哪、按什么顺序算、用什么精度算，来降低延迟和显存、提高吞吐。为什么这能奏效？因为训练得到的权重只决定了“算什么”，而<b>“怎么算”存在巨大的浪费</b>。</p>
 
 <h3 id="s1-1">1.1 一分钟硬件经济课：卡在哪</h3>
@@ -331,6 +332,7 @@
 <p>这是本文主题，单独成章（§3）。先给一个坐标系：<b>谁</b>（通用编码 Agent / 专门 RL 训出的模型 / 多 Agent 系统）×<b>优化什么</b>（kernel / 框架配置 / 编译器本身）×<b>怎么保证不坏</b>（验证门）。</p>
 
 <h2 id="s3"><span class="no">3</span>Agent 自动优化：三条研究线与三个教训</h2>
+<div class="analogy">试几种叠纸盒的办法时，每一种先看折出来的盒子能不能站住，再数折了多久。折得很快但盒子散了，那张时间表不能说它更好。留下通过检查的办法，才有得比较。</div>
 
 <h3 id="s3-1">3.1 三条研究线</h3>
 <h4>线 A：Agent 写 kernel（2024 萌芽 → 2026 爆发）</h4>

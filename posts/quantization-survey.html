@@ -168,9 +168,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-08-22">
-<meta property="article:modified_time" content="2026-11-17">
+<meta property="article:modified_time" content="2026-11-20">
 <link rel="canonical" href="https://piratepai.github.io/posts/quantization-survey.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-17", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "url": "https://piratepai.github.io/posts/quantization-survey.html", "description": "从浮点与定点表示、PTQ / QAT 基础讲起，覆盖 GPTQ、AWQ、SmoothQuant 等主流方法的原理与代码实现，以及三类架构上的系统实践。", "inLanguage": "zh-CN", "headline": "量化技术在 LLM / VLM / DiT 中的原理、代码与前沿 — 综述报告", "datePublished": "2026-08-22", "dateModified": "2026-11-20", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/quantization-survey.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -189,7 +189,7 @@
     </div>
   </div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-17">2026-11-17</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看量化与少步采样的组合实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">BitDecoding-FP4（爱丁堡+腾讯）NVFP4 KV 近无损解码；KV 量化的对齐坍塌（NeurIPS 2026）；FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10/11 改为 9/10，附录小节 9.1–9.3 改为 附A–附C；移除附录内同名重复标题（s9-content 锚点保留），交叉引用与目录同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-22">2026-08-22</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-20">2026-11-20</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 关联阅读：<a href="#sampling-efficiency-crossref">查看量化与少步采样的组合实验。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/diffusion-flow-sampling.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s9">BitDecoding-FP4（爱丁堡+腾讯）NVFP4 KV 近无损解码；KV 量化的对齐坍塌（NeurIPS 2026）；FlashInfer v0.7.2 起 NVFP4 KV 生态全栈化。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s9">正文 10/11 改为 9/10，附录小节 9.1–9.3 改为 附A–附C；移除附录内同名重复标题（s9-content 锚点保留），交叉引用与目录同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-20">2026-11-20</time> · 原理解读：<a href="#principle-notes-20261120">在 4 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/plain-language-principles-20261120.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/0943cda2b01ab8f5c146b9cc3285ab7812ead617">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -285,6 +285,7 @@
 
 <!-- ============================================================ -->
 <h2 id="s2"><span class="no">2</span>五分钟补齐基础：定点数与量化公式</h2>
+<div class="analogy" id="principle-notes-20261120">把一把尺子的刻度画稀一些，长度就只能记成离它最近的那一格。两格隔多远，决定能记得多细。先定从哪里开始编号，再写下量到了第几格。</div>
 
 <h3>2.1 量化在数学上就是"除—取整—乘回"</h3>
 <p>把一个浮点数 x 用 b-bit 整数近似，只需要一个缩放因子 <code>scale</code> 和一个零点 <code>zero</code>：</p>
@@ -544,6 +545,7 @@ root.querySelector('.ppx-resample').addEventListener('click',sample);
 <p>KV Cache 单独放在 §5。</p>
 
 <h3>4.1 8-bit 时代与"离群值"的发现：LLM.int8() <span class="tag">2022.08 · NeurIPS 2022</span></h3>
+<div class="analogy">一张表上的数字大多很小，只有几项特别大。要用同样粗的刻度记所有数字，相近的数字之间的差别容易被抹掉。可以把那几个大数另记，给剩下的数字留出更细的刻度。</div>
 
 <p>故事从一次"翻车"开始。2022 年之前大家都觉得 INT8 很成熟，但 Dettmers 等人发现：模型超过约 6.7B 后，激活值中会出现<strong>固定的、幅度极大的离群维度（emergent outlier features）</strong>：它们集中在少数几个隐藏维度上、幅度可达正常值的 100 倍，而且从浅层一直持续到深层。这会把 per-tensor 的 scale 撑得巨大，让 99.9% 的"正常"值全部塌缩到 0 附近，精度崩溃。</p>
 
@@ -797,6 +799,7 @@ def smooth_ln_fcs(ln, fcs, act_scales, alpha=0.5):
 
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>KV Cache 量化：长上下文的关键</h2>
+<div class="analogy">做菜时，一开始印好的菜谱可以慢慢改好再印。客人讲的新要求却要当场记。要把这些现场笔记写得更短，得想好怎么保住最难记的那些数字。</div>
 
 <h3>5.1 KV Cache 为什么是"新瓶颈"</h3>
 <p>自回归生成时，每个 token 的注意力 Key/Value 要缓存下来供后续 token 使用，避免重复计算。它的大小：</p>
@@ -919,6 +922,7 @@ dequantized = input_in_groups * scale + mn</code></pre>
 
 <!-- ============================================================ -->
 <h2 id="s7"><span class="no">7</span>DiT 的量化：扩散模型与众不同</h2>
+<div class="analogy">画画时，开头每一笔改动大，快画好时每一笔改动小。想给每一笔都换成刻度更粗的工具，就得在不同进度都试一试。只拿快画好的那几笔来试，会漏掉开头的变化。</div>
 
 <h3>7.1 为什么扩散模型的量化更难</h3>
 <div class="note" id="sampling-efficiency-crossref"><b>关联阅读</b><p>换成少步权重或提高引导强度后，校准数据也要覆盖新的采样轨迹。<a href="diffusion-flow-sampling.html#s6-combine">查看量化与少步采样的组合实验</a></p></div>
