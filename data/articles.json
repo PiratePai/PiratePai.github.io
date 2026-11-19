@@ -268,6 +268,13 @@
           "summary": "在 6 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
+        },
+        {
+          "date": "2026-11-20",
+          "kind": "图示校正",
+          "summary": "同步校正前缀缓存共享图中的复用范围与命中率口径，沿用正文已核验来源。",
+          "anchor": "s3",
+          "evidence": "docs/plain-language-audit-fixes-20261120.md"
         }
       ],
       "number": 8,

@@ -253,7 +253,7 @@
   <small class="cite"><span class="src">[Fast Inference from Transformers via Speculative Decoding, ICML 2023]</span>原文要点：rejective sampling 保证了输出分布与目标模型一致。</small></li>
   <li><b>算子与图优化（改菜谱）</b>：FlashAttention（2022–2024）把注意力改成分块计算避免物化巨大注意力矩阵，从算法上把 memory-bound 的 softmax 注意力变成接近 compute-bound；torch.compile/CUDA Graph 消除 Python 与 kernel 启动开销。这是“写更快代码”的杠杆，也是 Agent 最擅长介入的杠杆。
   <small class="cite"><span class="src">[FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness, NeurIPS 2022]</span>译要点：以 IO 复杂度为目标重新组织注意力计算，精确（非近似）但更快更省显存。</small></li>
-  <li><b>缓存复用（抄上一题的答案）</b>：多轮 Agent 场景里，请求之间共享大段前缀 → prefix caching（SGLang RadixAttention 命中率可达 80%+）；扩散模型相邻去噪步的特征变化很小 → 步间特征缓存（TeaCache 一族）。这是“内容层面的杠杆”，收益经常最大。</li>
+  <li><b>缓存复用（抄上一题的答案）</b>：多轮 Agent 场景里，请求之间共享大段前缀 → prefix caching（SGLang RadixAttention 在论文特定基准上的命中率为 50%–99%，以复用输入 token 数占比计，见<a href="inference-serving.html#s3">推理服务篇第 3 章</a>）；扩散模型相邻去噪步的特征变化很小 → 步间特征缓存（TeaCache 一族）。这是“内容层面的杠杆”，收益经常最大。</li>
 </ol>
 
 <h3 id="s1-3">1.3 多模态生成模型（DiT）特殊在哪</h3>
