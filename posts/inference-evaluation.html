@@ -137,7 +137,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>先说明计时从哪里开始，结束在什么事件。</li><li>平均 TPOT、逐 token ITL 和完整任务耗时是不同指标。</li><li>固定并发与固定到达率应分别实验，过载时仍保留积压和失败。</li></ol></div>
 
 <h2 id="s2">2 指标：从吞吐走到有效吞吐与质量</h2>
-<div class="analogy" id="principle-notes-20261120"><p>一家店一小时发出十杯饮料，其中两杯送错了，三杯等太久。数做了几杯，和数有多少人按时拿到想要的饮料，会得到不同的数。</p></div>
+<div class="analogy" id="principle-notes-20261120">一家店一小时发出十杯饮料，其中两杯送错了，三杯等太久。数做了几杯，和数有多少人按时拿到想要的饮料，会得到不同的数。</div>
 <h3 id="s2-1">2.1 goodput 的单位与分母</h3>
 <p>在长度为 T 秒的观察窗口内，完成吞吐为成功请求数/T；输出吞吐为成功请求生成的 token 总数/T。本文的 SLO goodput 定义为：<b>同时满足首 token、输出间隔、总延迟上限的成功请求数/T</b>，单位是请求/秒。SLO 是服务目标，例如 TTFT ≤ 300 ms；这些阈值由应用确定，本文教学阈值不构成部署建议。DistServe 研究的核心也是受延迟约束的服务能力。<sup class="cite"><a href="#ref-DIST">[DIST]</a></sup></p>
 <div class="citebox"><b>[DIST] Yinmin Zhong 等.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving</i>，OSDI 2024；arXiv:2401.09670，首次提交 2024-01-18，v3 2024-06-06。原文：<span class="q">“within both TTFT and TPOT constraints”</span>（同时处在 TTFT 和 TPOT 两项约束内。）<a href="https://arxiv.org/abs/2401.09670">原文</a>。</div>
@@ -163,7 +163,7 @@
 <div class="summary3"><b>本章小结</b><ol><li>短长输入、短长输出、冷热点和负载必须分层。</li><li>保存模型、环境、请求集及配置的不可变标识。</li><li>组合实验先查兼容性，再做四格消融，不乘论文加速比。</li></ol></div>
 
 <h2 id="s4">4 可复算账本：六条请求与三种任务策略</h2>
-<div class="analogy"><p>有人拿到满意的答案，有人等到最后也没拿到。两个人都用了时间和东西。算每得到一次合格结果花了多少，就要把白忙的那一份一起算进去。</p></div>
+<div class="analogy">有人拿到满意的答案，有人等到最后也没拿到。两个人都用了时间和东西。算每得到一次合格结果花了多少，就要把白忙的那一份一起算进去。</div>
 <h3 id="s4-1">4.1 在没有模型的机器上运行</h3>
 <p>从仓库根目录运行下面两条命令。工具只使用 Python 标准库，不调用模型、不连接服务，也不下载数据。输入、统计程序和期望结果一起提交，便于读者修改边界条件。</p>
 <pre><code>python examples/efficiency-lab/evaluate.py examples/efficiency-lab/synthetic
@@ -193,7 +193,7 @@ vllm bench serve --backend vllm --host 127.0.0.1 --port 8000 --model /models/pin
 <div class="summary3"><b>本章小结</b><ol><li>先留下一份完整基线，再扩大扫描矩阵。</li><li>官方压测结果必须核对格式与口径后才能进入本站账本。</li><li>真实质量与硬件性能实验尚未执行，命令和清单提供可复现起点。</li></ol></div>
 
 <h2 id="s6">6 从结果回到瓶颈：归因与发布</h2>
-<div class="analogy"><p>看到有条队走得慢，可以先记下每个人在哪一步等最久。下次只把那一步加快，看看整条队是不是真的快了。只知道队长了，还不知道该改哪儿。</p></div>
+<div class="analogy">看到有条队走得慢，可以先记下每个人在哪一步等最久。下次只把那一步加快，看看整条队是不是真的快了。只知道队长了，还不知道该改哪儿。</div>
 <h3 id="s6-1">6.1 一张表组织诊断</h3>
 <table><caption>表 6-1 · 本文建议的诊断顺序；均为待验证假设</caption><thead><tr><th>现象</th><th>先核对</th><th>后续实验</th></tr></thead><tbody><tr><td>低负载快，高负载差</td><td>排队、工作空间、有效批大小</td><td>同到达率与同达标率分别比较</td></tr><tr><td>首 token 改善，任务仍慢</td><td>输出长度、工具等待、后处理</td><td>整条任务时间线及关键路径</td></tr><tr><td>量化省显存但未提速</td><td>后端是否实际调用低精度 kernel</td><td>算子 profile 与形状分布</td></tr><tr><td>仿真预测与实测偏离</td><td>输入分布、通信、编译和缓存命中</td><td>在校准集拟合参数，在留出负载验证</td></tr><tr><td>平均质量稳定，长任务失败</td><td>截断、摘要丢事实、工具协议变化</td><td>按任务长度与失败原因拆分</td></tr></tbody></table>
 <p>一份可审阅结论应是：“在模型 revision X、硬件 H、请求分布 W、质量阈值 Q 下，配置 A 相对基线的指标如何变化”。<b>只在采样过的范围内声明结论</b>；不同模型、不同长度或另一种并行拓扑属于外推。容量模型的用途是提出下一次实验，不是替代校准。</p>

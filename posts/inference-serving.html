@@ -283,7 +283,7 @@
 
 <!-- ============================================================ -->
 <h2 id="s2"><span class="no">2</span>批处理与调度：Continuous Batching</h2>
-<div class="analogy" id="principle-notes-20261120"><p>车上有人先到站下了车，空出的座位就可以给下一位乘客。车继续走，其他乘客也继续坐。这比等整车人都到站再接新乘客更容易把座位用上。</p></div>
+<div class="analogy" id="principle-notes-20261120">车上有人先到站下了车，空出的座位就可以给下一位乘客。车继续走，其他乘客也继续坐。这比等整车人都到站再接新乘客更容易把座位用上。</div>
 
 <h3>2.1 起点：静态批处理为什么糟糕</h3>
 <p>2022 年之前的推理服务（如早期 HuggingFace Transformers pipeline、FasterTransformer）使用<b>请求级批处理（request-level / static batching）</b>：攒够 N 条请求凑成一个 batch，一起进模型，<b>一起结束</b>。</p>
@@ -547,17 +547,17 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <p>Continuous Batching 允许请求在生成过程中加入或离开批次。并发序列的 KV Cache 总量仍受显存容量约束。PagedAttention 让 KV 按需分块存放，前缀缓存复用已算出的 KV。前者可以扩大批次，后者可以减少新请求的 Prefill 计算<sup class="cite">[VLLM23][APC]</sup>。</p>
 
 <h3>3.1 问题的根源：连续分配 + 静态预留</h3>
-<div class="analogy"><p>书架上有两个空位，中间隔着一本书。想把两本书挨着放，这两个空位就用不上。还有几个空位已经给别人留好，现在也借不到。</p></div>
+<div class="analogy">书架上有一排格子。有人先留了五格，最后只放了两本书，先前那三格一直空着，别人也借不到。另一边有两个空位，中间隔着一本书，想把两本书挨着放也放不下。</div>
 <p>早期系统（包括原始 Orca）为每条请求<b>按其最大可能长度</b>预留一段<b>连续</b>显存放 KV Cache。两个后果：</p>
 <ul>
-<li><b>内部碎片</b>：例如按 2,048 个 token 预留，序列最终只用 200 个位置，剩下的 1,848 个位置在请求结束前无法让给其他序列。论文把仍可能写入的位置单列为预留空间。</li>
+<li><b>预留空间和内部碎片</b>：例如按 2,048 个 token 预留，未写入的位置暂时无法让给其他序列。论文把此后实际写入的位置在写入前计为预留空间。若序列结束时只用了 200 个位置，始终没用到的 1,848 个位置属于内部碎片。</li>
 <li><b>外部碎片</b>：连续大块反复申请释放，显存被切割成碎片，明明总量够却分配不出新的连续段。</li>
 </ul>
-<p>在 vLLM 论文比较的旧系统中，实际存入 KV 的位置占 KV Cache 空间的 <b>20.4% 至 38.2%</b>，其余空间是预留或碎片。分母是 KV Cache 空间<sup class="cite">[VLLM23，图 2–3]</sup>。</p>
+<p>在 vLLM 论文比较的旧系统中，实际存入 KV 的位置占 KV Cache 空间的 <b>20.4% 至 38.2%</b>，其余空间是预留或碎片。分母是 KV Cache 空间，详见论文图 2–3<sup class="cite">[VLLM23]</sup>。</p>
 
 
 <h3>3.2 PagedAttention（vLLM, SOSP 2023）：把操作系统搬进显存</h3>
-<div class="analogy"><p>画越画越多，就装进一样大的盒子里。装满一盒，再拿一盒。盒子可以放在不同的书架上，只要照着纸上写的顺序去找，就能按原来的顺序看画。</p></div>
+<div class="analogy">画越画越多，就装进一样大的盒子里。装满一盒，再拿一盒。盒子可以放在不同的书架上，只要照着纸上写的顺序去找，就能按原来的顺序看画。</div>
 <p>vLLM 借鉴操作系统的分页。服务用块表把序列中按 token 排列的逻辑块映射到显存里的物理块。Decode 内核按块表读取历史键和值（K 和 V）<sup class="cite">[VLLM23]</sup>。</p>
 <div class="fig">
 <div class="flowrow">
@@ -572,7 +572,7 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <li>生成到哪，块就分到哪。请求结束后降低引用计数，无人引用的块回到可分配队列。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销。</li>
 <li>多个候选序列可以通过引用计数共享同一前缀的物理块。候选要写入仍在共享的块时，先为它复制一份（copy-on-write）<sup class="cite">[VLLM23]</sup>。</li>
 </ul>
-<p>效果：vLLM 论文报告，在相近延迟下，对比 FasterTransformer 和 Orca 的服务吞吐为 <b>2–4 倍</b><sup class="cite">[VLLM23]</sup>。发布博客按 ShareGPT 的输入和输出长度分布，在 A10G／A100 上测试 LLaMA-7B／13B，其中相对 Hugging Face Transformers 的服务吞吐最高为 <b>24 倍</b><sup class="cite">[VLLMBLOG]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
+<p>效果：vLLM 论文报告，在相近延迟下，对比 FasterTransformer 和 Orca 的服务吞吐为 <b>2–4 倍</b><sup class="cite">[VLLM23]</sup>。发布博客按 ShareGPT 的输入和输出长度分布，分别在 A10G 上测试 LLaMA-7B、在 A100 上测试 LLaMA-13B。每次请求生成一个输出时，相对 Hugging Face Transformers 的服务吞吐最高为 <b>24 倍</b><sup class="cite">[VLLMBLOG]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
 <div class="note"><b>[VLLM23]</b> Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP 2023（2023-10）；软件 vLLM 于 2023-06 开源。原文："we propose PagedAttention, an attention algorithm <b>inspired by the virtual memory and paging techniques employed by operating systems</b>"（译文：我们提出 PagedAttention，一个受操作系统虚拟内存与分页技术启发的注意力算法）。链接：<a href="https://arxiv.org/abs/2309.06180">arxiv.org/abs/2309.06180</a></div>
 <p>落到代码：vLLM V1 的 <code>KVCacheManager</code> 负责"查缓存 → 分配新块 → 释放/驱逐"全流程：</p>
 <pre><code># repos/vllm/vllm/v1/core/kv_cache_manager.py (main @ 2026-08-23，方法清单节选)
@@ -587,13 +587,9 @@ class KVCacheManager:
 
 <h3>3.3 前缀缓存（Prefix Caching）与 RadixAttention</h3>
 <div class="analogy">
-  <p><b>为什么后半句一样，也得重新算？</b> 两段话从头一样的部分，可以用上次留下的记录。</p>
-  <p>一段故事说「小熊捡到一颗糖。它把东西放进口袋。」另一段说「小熊捡到一块石头。它把东西放进口袋。」最后一句一样，口袋里的东西却变了。这个例子用来说明前后两句的关系。电脑实际留下的是算出来的一串数字。</p>
+  <b>为什么最后一句一样，也得重新算？</b> 只有从开头就对得上的部分，才能用上次留下的记录。
+  <p>一段故事说「小熊捡到一颗糖。它把东西放进口袋。」另一段说「小熊捡到一块石头。它把东西放进口袋。」最后一句一样，口袋里的东西却变了。</p>
   <p>电脑从开头一小段一小段地比。对得上的部分可以接着用。上次算最后一句时，前面说的是糖。这次换成了石头，后面的记录也得跟着新故事再算一遍。</p>
-  <ul>
-    <li><a href="#apc-hash">自动前缀缓存（APC）</a> · vLLM 怎么知道前面哪几块一样。</li>
-    <li><a href="#radix-match">RadixAttention</a> · SGLang 怎么把共同的开头存到一起。</li>
-  </ul>
 </div>
 <p>分页共享解决"同时在场"的请求，那<b>先后到达</b>的请求呢？真实负载里前缀重复极多：系统提示词、few-shot 示例、多轮对话历史、Agent 的固定工具描述……每条新请求把同样几万 token 的前缀重算一遍是纯粹的浪费。</p>
 <p id="apc-hash"><b>自动前缀缓存（Automatic Prefix Caching，APC）</b>复用已计算的完整 KV 块。缓存键包括父块哈希、当前块的 token 和必要的附加标识。新请求把命中的块加入块表并增加引用计数。无人引用的块可暂留在池中，空间紧张时按 LRU（最近最少使用）策略淘汰。vLLM V1 默认开启 APC。即使全提示词的 KV 已缓存，仍需计算末 token 的 logits，按块对齐时可能重算整个末块<sup class="cite">[APC][VLLMV1][VLLMSRC]</sup>。</p>
@@ -610,7 +606,7 @@ RadixAttention 基数树（节点 = 一段 token 序列的 KV）
 <div class="cap">图 3-2 基数树按内容组织历史 KV。新请求沿树匹配最长前缀。本文自绘，参考 SGLang 论文图 3。</div>
 </div>
 
-<p>SGLang 论文以复用的输入 token 数除以输入 token 总数计算命中率。特定基准为 50% 至 99%，Chatbot Arena 两个部署观测为 52.4% 和 74.1%。这些结果对应各自负载，长输出由 Decode 主导时，Prefill 的收益对总延迟可能很小<sup class="cite">[SGLANG24]</sup>。</p>
+<p>SGLang 论文以复用的输入 token 数除以输入 token 总数计算命中率。特定基准为 50% 至 99%，Chatbot Arena 的 LLaVA-Next-34B 与 Vicuna-33B 部署分别为 52.4% 和 74.1%。这些结果对应各自负载，长输出由 Decode 主导时，Prefill 的收益对总延迟可能很小<sup class="cite">[SGLANG24]</sup>。</p>
 
 <figure class="fig" id="fig-radix-interactive" style="padding:10px"><iframe src="img/sc-radix-prefix.html" title="基数树前缀缓存交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 3-3 · 可交互：一棵基数树的生长与淘汰——system prompt 与工具描述作为热点前缀被所有会话共享，会话历史逐层生长，新问题落在叶子（本轮增量 prefill），冷会话被 LRU 逐出。点击节点可看各前缀的规模与角色。本文自绘（交互图解），机制综合自 SGLang RadixAttention 论文（NeurIPS 2024）与 sglang 仓库 radix_cache.py（main @ 2026-08-23）；上图 3-2 为一次匹配过程示例。</div></figure>
 <pre><code># repos/sglang/python/sglang/srt/mem_cache/radix_cache.py (main @ 2026-08-23)
@@ -636,7 +632,7 @@ flexkv_connector.py     offloading/   multi_connector.py ...
 
 <!-- ============================================================ -->
 <h2 id="s4"><span class="no">4</span>Chunked Prefill：把长 Prefill 切成块</h2>
-<div class="analogy"><p>有个人要读一整页，旁边几个人每次只等一句回答。可以让长文先读一小段，排进几句等待中的回答，再继续读下一段。长文还是要读完，但其他人不用一直等。</p></div>
+<div class="analogy">有个人要读一整页，旁边几个人每次只等一句回答。可以让长文先读一小段，排进几句等待中的回答，再继续读下一段。长文还是要读完，但其他人不用一直等。</div>
 
 <h3>4.1 问题：一条 32K 的 prompt 能让所有人卡顿</h3>
 <p>Continuous Batching 里，prefill 和 decode 混在同一个引擎。当一条超长 prompt 进来，它的一次 prefill 是<b>一个巨大的计算尖刺</b>：比如 32K token 的一次前向，在 A100 上要几百毫秒。而 decode 每步只要 10–20 ms。灾难场景：</p>
@@ -681,7 +677,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <div class="card"><b>小结：</b>PagedAttention 管理"KV 放在哪"，前缀缓存管理"KV 能不能再用一次"，chunked prefill 管理"每次算多少"。三者叠加，构成了 colocated（混部）引擎的完整形态。但混部终究是"一锅烩"，下一节我们走出单机。</div>
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>P/D 分离：Prefill 与 Decode 各回各家</h2>
-<div class="analogy"><p>一家店可以让一个人先读长订单，另一个人照着读好的记录一道一道出菜。两个人能各按自己的速度做事。换手时，记录必须送到后一个人手上。</p></div>
+<div class="analogy">一家店可以让一个人先读长订单，另一个人照着读好的记录一道一道出菜。两个人能各按自己的速度做事。换手时，记录必须送到后一个人手上。</div>
 
 <p>实践见在线书的<a href="https://piratepai.github.io/pi-infer-book/chapters/ch11.html">第 11 章「P/D 分离与 KV 传输」</a>。</p>
 <h3 id="pd-motivation">5.1 动机：混部的天花板</h3>
@@ -767,7 +763,7 @@ num_new_tokens = min(num_new_tokens, token_budget, ...)         # ← 被 token 
 <p>分离的刀口并不止于 E/P/D 三段。2026 年 7 月，vLLM 发布 <b>AFD（Attention-FFN Disaggregation）插件</b>：对超大 MoE 模型，把注意力计算与 FFN/专家计算分到不同 worker，按需各自扩容<sup class="cite">[VLLMAFD]</sup>。学界也有针对 MoE 的类似"专家卸载"研究。可以看到一条清晰的趋势线：<b>从"按请求"调度 → "按阶段"调度 → "按算子类别"调度</b>，粒度越来越细，单元越来越像可独立伸缩的微服务。</p>
 <!-- ============================================================ -->
 <h2 id="s7"><span class="no">7</span>采样与结构化输出</h2>
-<div class="analogy"><p>填电话号码的格子时，每一格都只能写数字。先把字母从眼前的选项里拿掉，接下来还能在数字里挑。即使每格都写得合规，号码也可能填错。</p></div>
+<div class="analogy">填电话号码的格子时，每一格都只能写数字。先把字母从眼前的选项里拿掉，接下来还能在数字里挑。即使每格都写得合规，号码也可能填错。</div>
 <p>前六节都在"算得快"，本节处理"生成什么"：模型每步输出的是一个覆盖整个词表（如 15 万 token）的概率分布，<b>从这个分布里怎么挑出下一个 token</b>，既影响文本质量，也直接是服务系统的热路径代码。</p>
 
 <h3>7.1 解码策略小史：从贪心到动态截断</h3>
@@ -857,7 +853,7 @@ def fill_bitmask(self, bitmask: torch.Tensor, idx: int) -> None:
 
 <!-- ============================================================ -->
 <h2 id="s8"><span class="no">8</span>图编译与执行优化</h2>
-<div class="analogy"><p>如果手工课每天都要按同一套顺序领剪刀、纸和胶水，可以把这套动作排好，一声令下就照着做。纸张大小或步骤换了，之前排好的动作也可能要重新准备。</p></div>
+<div class="analogy">如果手工课每天都要按同一套顺序领剪刀、纸和胶水，可以把这套动作排好，一声令下就照着做。纸张大小或步骤换了，之前排好的动作也可能要重新准备。</div>
 <p>前面所有技术决定了"算什么"，本节讲"怎么算得快"：从算子（kernel）到计算图（graph）两个层面压榨硬件。理解本节只需一个事实：<b>Decode 阶段一次前向包含几百~几千个小 GPU kernel 调用，每个只算几微秒，而"从 CPU 发射一个 kernel 到 GPU"本身就要几微秒</b>，发射开销与计算同量级，GPU 大量时间在"等下一个指令"。</p>
 
 <h3>8.1 算子层：融合与 IO 感知</h3>
@@ -1056,7 +1052,7 @@ passes/                # 图优化 pass（融合、重排等）</code></pre>
 <li id="SPLITWISE24">Choukse et al. <i>Splitwise: Efficient Generative LLM Inference Using Phase Splitting</i>. <b>ISCA 2024</b>（arXiv 2023-11-30）. <a href="https://arxiv.org/abs/2311.18677">arXiv:2311.18677</a> · <a href="https://www.microsoft.com/en-us/research/blog/splitwise-improves-gpu-usage-by-splitting-llm-inference-phases/">微软博客</a></li>
 <li id="MOONCAKE25">Qin et al. <i>Mooncake: Trading More Storage for Less Computation — A KVCache-centric Disaggregated Architecture for LLM Serving</i>. <b>FAST 2025</b>（arXiv 2024-06-29, 2407.00079）. <a href="https://arxiv.org/abs/2407.00079">arXiv:2407.00079</a> · <a href="https://github.com/kvcache-ai/Mooncake">GitHub</a></li>
 <li id="EPD25">Singh et al. <i>Efficiently Serving Large Multimodal Models Using EPD Disaggregation</i>. <b>ICML 2025</b>（arXiv 2025-01-10, 2501.05460）. <a href="https://arxiv.org/abs/2501.05460">arXiv:2501.05460</a></li>
-<li id="SGLANG24">Zheng et al. <i>SGLang: Efficient Execution of Structured Language Model Programs</i>. <b>NeurIPS 2024</b>（arXiv 2023-12-11, 2312.07104）. <a href="https://arxiv.org/abs/2312.07104">arXiv:2312.07104</a></li>
+<li id="SGLANG24">Zheng et al. <i>SGLang: Efficient Execution of Structured Language Model Programs</i>. <b>NeurIPS 2024</b>（arXiv 2023-12-12，2312.07104）. <a href="https://arxiv.org/abs/2312.07104">arXiv:2312.07104</a></li>
 <li id="VLLMV1">vLLM Team. <i>vLLM V1: A Major Upgrade to vLLM's Core Architecture</i>. vLLM 博客, <b>2025-01-27</b>. <a href="https://vllm.ai/blog/2025-01-27-v1-alpha-release">链接</a></li>
 <li id="VLLMEPD">vLLM Team. <i>Encoder Disaggregation for Scalable Multimodal Model Serving (EPD)</i>. vLLM 博客, <b>2025-12-15</b>. <a href="https://vllm.ai/blog/2025-12-15-vllm-epd">链接</a></li>
 <li id="VLLMSINGLEPD">vLLM Team. <i>Why Your Single-Node vLLM Setup Needs Prefill-Decode Disaggregation</i>（AMD MI300X / MORI-IO 单机 P/D）. vLLM 博客, <b>2026</b>. <a href="https://vllm.ai/blog">链接</a></li>

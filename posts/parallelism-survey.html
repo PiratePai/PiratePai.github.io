@@ -391,7 +391,7 @@
 </section>
 <section id="ch3">
 <h2 class="sec"><span class="num">3</span>数据并行:从 DP、DDP 到 ZeRO 与 FSDP<span class="roadmap">DP 显存冗余 → ZeRO 三级切片 → FSDP → 梯度同步与参数聚合的不同通信窗口</span><span class="pill dp">数据并行 DP</span></h2>
-<div class="analogy" id="principle-notes-20261120"><p>两个人各拿着同一本练习册做不同的题，做完后一起改同一份规则。如果书太厚，也可以平时各保管一部分，哪页要用就先凑齐那页。这样省了每个人的桌面，临时传纸的次数却会增加。</p></div>
+<div class="analogy" id="principle-notes-20261120">两个人各拿着同一本练习册做不同的题，做完后一起改同一份规则。如果书太厚，也可以平时各保管一部分，哪页要用就先凑齐那页。这样省了每个人的桌面，临时传纸的次数却会增加。</div>
 <div class="tl">
   <div class="e"><div class="yr">2014</div><div class="t">ImageNet 双卡</div></div>
   <div class="e"><div class="yr">2017</div><div class="t">PyTorch DistributedDataParallel</div></div>
@@ -458,7 +458,7 @@ self.reduce_and_partitions_stream = (
 </section>
 <section id="ch4">
 <h2 class="sec"><span class="num">4</span>张量并行(TP)与序列并行(SP):把一层切开算<span class="roadmap">Megatron TP 切法 → f / g 算子源码 → 序列并行 SP → 异步 TP</span><span class="pill tp">张量并行 TP</span></h2>
-<div class="analogy"><p>算一张大表时，一人算上半张，一人算下半张。要交出一整张表时，把两块接起来。若两人算的是同一个总数的两部分，就得先相加。先看怎么分，才知道最后要怎么合。</p></div>
+<div class="analogy">算一张大表时，一人算上半张，一人算下半张。要交出一整张表时，把两块接起来。若两人算的是同一个总数的两部分，就得先相加。先看怎么分，才知道最后要怎么合。</div>
 <div class="tl">
   <div class="e"><div class="yr">2019-09</div><div class="t">Megatron-LM 论文(TP)</div></div>
   <div class="e"><div class="yr">2021-04</div><div class="t">Megatron SC'21(TP×PP 协同调优)</div></div>
@@ -968,7 +968,7 @@ global_probs = all_to_all(self.ep_group, permuted_probs, ...)</pre>
 </section>
 <section id="ch7">
 <h2 class="sec"><span class="num">7</span>上下文并行(CP)与长序列训练<span class="roadmap">Ring Attention → Megatron CP 与 Ulysses → 动态 CP</span><span class="pill cp">上下文 CP</span></h2>
-<div class="analogy"><p>全班分开读一本长故事，每组读手里的几页。回答关于某一页的问题时，常要借到别组的页。各组可以轮着把手里的页传下去，自己的问题就用收到的页接着算。</p></div>
+<div class="analogy">全班分开读一本长故事，每组读手里的几页。回答关于某一页的问题时，常要借到别组的页。各组可以轮着把手里的页传下去，自己的问题就用收到的页接着算。</div>
 <div class="tl">
   <div class="e"><div class="yr">2023-09</div><div class="t">DeepSpeed-Ulysses</div></div>
   <div class="e"><div class="yr">2023-10</div><div class="t">Ring Attention</div></div>
@@ -1055,7 +1055,7 @@ output        = _SeqAllToAll.apply(self.spg, context_layer, self.gather_idx, sel
 </section>
 <section id="ch8">
 <h2 class="sec"><span class="num">8</span>多维并行组合与自动并行:真实的万卡训练长什么样<span class="roadmap">并行 rank 分组与避免重复计数 → 拓扑感知放置 → 自动并行</span><span class="pill sys">系统</span></h2>
-<div class="analogy"><p>同一批同学可以既按桌子分组，也按排队顺序分组。数人数时，要看两种分组有没有用到同一个人。表上多了一种分法，教室里的人数不会跟着增加。</p></div>
+<div class="analogy">同一批同学可以既按桌子分组，也按排队顺序分组。数人数时，要看两种分组有没有用到同一个人。表上多了一种分法，教室里的人数不会跟着增加。</div>
 
 <h3>8.1 五个维度怎么拼在一起</h3>
 <p>生产级训练从不只用一种并行,而是按 rank 组定义组合各维度:<code>world_size = TP × PP × CP × DP_dense</code>（DP_dense 是稠密层的数据并行组；专家另有 ETP、EP、DP_expert 分组，EP 与稠密 DP 使用的设备集合可以重叠，不能再无条件乘一次 EP。例如 W=8、TP=2、PP=CP=1，则 DP_dense=4；EP=4 是在已有 8 卡内重新分组）。划分的核心依据是第 2 章的金字塔:<b>通信频繁的维度放高带宽域,通信稀疏的维度放低带宽域</b>。下面这张对比表是全文的"总账本",建议反复回看:</p>

@@ -295,7 +295,7 @@
 <div class="hl-card"><div class="hl-meta"><b>Hy-Memory-30B-A3B 开源</b><span class="hl-date">10-15 · 腾讯混元</span></div><p>首个专做 agent 长期记忆写入的开源模型，token 开销 −39.3%。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>Targeted Guidance：on-policy 定向引导</b><span class="hl-date">11-03 · Cursor+UC Berkeley</span></div><p>仅在失败 turn 注入文本反馈的 on-policy 自蒸馏：Qwen3-Coder-30B 上难学判据（Markdown 规范）奖励 0.85 vs GRPO 0.00，coding pass@1 不降（0.33 vs 0.33）——纯 RL 探索不足的轻量解法。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>tokin：token-native RL 网关</b><span class="hl-date">2026-11 · 开源</span></div><p>以 API 网关根治 harness 文本化导致的 retokenization 漂移（TITO）：tokin+slime 全异步训练 Qwen3.8-27B（3+3 节点 8×H200），held-out MiMo pass@1 0.50→0.80（+29.8 点）。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div><div class="hl-card"><div class="hl-meta"><b>K3.1 Pro day-0 零失配 RL</b><span class="hl-date">11-04 · Moonshot×vLLM</span></div><p>首个 day-0 "zero-mismatch" RL：vLLM 与 Megatron log-prob 位级一致、100 步 KL 恰为 0；AIME mean@8 0.451→0.664。rollout 引擎与训练框架的数值一致性成为发布级验收项。</p><a class="hl-link" href="#s6">→ 跳到详情</a></div></div></div></details>
 
 <h2 class="sec" id="s1"><span class="num">1</span>预备知识：RL for LLM 的基本概念<span class="roadmap">MDP → 策略梯度 → PPO → RLHF → RLVR/GRPO → Agent RL</span></h2>
-<div class="analogy" id="principle-notes-20261120"><p>小朋友走迷宫，走到出口就能拿到贴纸。每一步往哪走，要看它后来能不能到出口。有条路第一步走得顺，却可能一直绕回原处。</p></div>
+<div class="analogy" id="principle-notes-20261120">小朋友走迷宫，走到出口就能拿到贴纸。每一步往哪走，要看它后来能不能到出口。有条路第一步走得顺，却可能一直绕回原处。</div>
 
 <h3>1.1 强化学习的基本过程</h3>
 <p>强化学习(RL)研究的问题是:<b>一个"智能体"(agent)如何通过不断试错,学会在"环境"(environment)里采取让长期回报最大的行为</b>。它由五个要素构成,记住这张对照表就够用了:</p>
@@ -395,7 +395,7 @@ A<sub>i</sub> = (r<sub>i</sub> − mean(r<sub>1..G</sub>)) / std(r<sub>1..G</sub
 
 <!-- ============================================================ -->
 <h2 class="sec" id="s2"><span class="num">2</span>Agent 数据飞轮<span class="roadmap">任务合成 → 环境规模化 → 轨迹采集 → 筛选/课程 → 训练 → 弱点诊断回流</span></h2>
-<div class="analogy"><p>老师批完一叠练习，发现大家老在同一道题上错，就给下一次练习多放几道这种题。练完还要看错在哪里，再改下一叠。这样才能查出反复做题有没有补上原来的弱点。</p></div>
+<div class="analogy">老师批完一叠练习，发现大家老在同一道题上错，就给下一次练习多放几道这种题。练完还要看错在哪里，再改下一叠。这样才能查出反复做题有没有补上原来的弱点。</div>
 
 <p class="lead"><b>太长不看:</b>"数据飞轮"指一个能自我强化的闭环:模型用得越多 → 产生越多交互轨迹与失败样本 → 从中自动合成更好的训练数据(任务、环境、课程)→ 模型变强 → 能合成更难的任务。2025 年开源侧最完整的飞轮样本是阿里通义 DeepResearch 与复旦 AgentGym-RL,商业侧是 Kimi K2 / GLM-4.5 的 agentic 后训练流水线。它本质上是把传统"人工标注数据集"换成了"<b>可自动生成、自动验证、自动升级难度</b>的数据工厂"。</p>
 
@@ -524,7 +524,7 @@ slime/
 
 <!-- ============================================================ -->
 <h2 class="sec" id="s3"><span class="num">3</span>Rollout 引擎:RL 的"油门与车轮"<span class="roadmap">训推形态差异 → 推理引擎三件套 → 混合引擎(colocate)→ 服务化解耦(disaggregated)→ rollout 加速技巧</span></h2>
-<div class="analogy"><p>老师想让学生练得更好，先得让学生做一批题。学生写出的答案和做题过程，是下一轮批改的材料。等着交卷的时间，也算在这次练习里。</p></div>
+<div class="analogy">老师想让学生练得更好，先得让学生做一批题。学生写出的答案和做题过程，是下一轮批改的材料。等着交卷的时间，也算在这次练习里。</div>
 
 <p class="lead"><b>太长不看:</b>rollout 就是"让当前模型去生成一批训练样本(回答或交互轨迹)"。它占 RL 训练 60–80% 的墙钟时间,却只能借用<b>推理引擎</b>(vLLM/SGLang)来跑,而推理引擎的权重组织方式与训练引擎完全不同。于是诞生了两派架构:<b>混合引擎</b>(训推同卡,权重就地切换,省卡但有"模式切换"开销)和<b>解耦架构</b>(rollout 独立成服务,权重广播同步,灵活但要跨机传参)。2025–2026 的趋势是后者与"rollout-as-a-service"。</p>
 
@@ -628,7 +628,7 @@ batch = compute_advantage(...)                         <span class="c"># ③ 组
 
 <!-- ============================================================ -->
 <h2 class="sec" id="s4"><span class="num">4</span>异步 Rollout 与异步 RL<span class="roadmap">木桶效应 → 三档异步谱系 → staleness 控制与回放 → 六大系统横评 → Agent 时代为何异步是刚需</span></h2>
-<div class="analogy"><p>有几位同学在做题，老师收到一份就能先批一份。但如果老师已经教过新方法，桌上还有旧作业。老师得知道那张作业是在什么时候写的。</p></div>
+<div class="analogy">有几位同学在做题，老师收到一份就能先批一份。但如果老师已经教过新方法，桌上还有旧作业。老师得知道那张作业是在什么时候写的。</div>
 
 <p class="lead"><b>太长不看:</b>同步 RL 里,每一步训练都要<b>等最慢的那条 rollout 结束</b>(木桶效应),而且"生成 GPUs 忙、训练 GPUs 闲"与"训练忙、生成闲"交替出现,平均 GPU 利用率常常不到一半。异步 RL 把"生成"与"训练"解耦成两条永不停歇的流水线:代价是训练用的数据可能来自<b>几步之前的旧权重</b>(off-policy / 数据过期 staleness)。全部技术围绕一个问题:<b>旧到什么程度还能用?怎么控制它别太旧?</b></p>
 

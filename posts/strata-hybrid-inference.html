@@ -272,7 +272,7 @@
 </div>
 
 <h2 id="s2"><span class="no">2</span>目标模型：Qwen3.8-Flash-Next 为什么"家用机友好"</h2>
-<div class="analogy" id="principle-notes-20261120"><p>两座书房藏的书一样多。要是同一个问题在一座书房只需翻少数几本，在另一座却要拿出很多本，跑书架的时间就会不同。看一回要搬多少东西，比只数总藏书更能解释当时有多忙。</p></div>
+<div class="analogy" id="principle-notes-20261120">两座书房藏的书一样多。要是同一个问题在一座书房只需翻少数几本，在另一座却要拿出很多本，跑书架的时间就会不同。看一回要搬多少东西，比只数总藏书更能解释当时有多忙。</div>
 
 <p>Strata 的第一篇文章叫 <i>Running a 125-Billion-Parameter Model on a Normal PC</i>（2026-09）。要理解引擎，先看它伺候的模型长什么样。Qwen3.8-Flash-Next 的设计者明确按"每 token 搬运字节数"给每个结构定价[STRATAPAPER26][QWEN38NEXT26]：</p>
 
@@ -354,7 +354,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 <li><b>整层循环一张图</b>：48 层每层的"稠密 + 三方专家"被捕获成按窗口大小分桶的 CUDA Graph，消除逐 kernel 启动开销。</li>
 </ul>
 
-<div class="analogy"><p>厨师在灶上做手边有材料的菜，帮厨做另一道菜，送货的人去取下一道菜的材料。能同时做的活可以排在一起。要等的材料到了，下一道菜才能开做。</p></div>
+<div class="analogy">厨师在灶上做手边有材料的菜，帮厨做另一道菜，送货的人去取下一道菜的材料。能同时做的活可以排在一起。要等的材料到了，下一道菜才能开做。</div>
 <p>三路工作可重叠，一层完成仍取决于最慢的路径。原报告中 GPU 等 CPU 约 13 ms，CPU 等 GPU 约 14 ms<sup class="cite">[STRATAPAPER26]</sup>。</p>
 <figure class="fig" id="fig-strata-interactive" style="padding:10px"><iframe src="img/sc-strata-tiers.html" title="Strata 三级存储交互图解" loading="lazy" style="width:100%;height:620px;border:0;border-radius:10px;background:#f6f5f1;display:block"></iframe><div class="cap">图 3-2 · 可交互：一个缺失专家在三级存储间的取用路径——GPU 缓存未命中 → PCIe DMA 到系统内存 → CPU 就地计算写回；SSD 侧 n-gram 表经 mmap 预读；点击节点可看各级容量与带宽。本文自绘（交互图解），机制综合自 Strata 0.2.7 论文与源码实测（12 GB GPU + 64 GB RAM 跑 125B MoE）；上图 3-1 为全量布局。</div></figure>
 
@@ -524,7 +524,7 @@ GPU  ：门控读 → 混合器 → 门控写 → 路由器 → [门铃：把选
 </div>
 
 <h2 id="s6"><span class="no">6</span>工程深处：论文没写、但代码里有的东西</h2>
-<div class="analogy"><p>如果每次都能早一点知道下一道菜要用什么，就可以先把东西从远处取来。猜错了，拿来的东西会白占地方，也白跑一趟。要看真正少等的时间能不能抵过这些白跑。</p></div>
+<div class="analogy">如果每次都能早一点知道下一道菜要用什么，就可以先把东西从远处取来。猜错了，拿来的东西会白占地方，也白跑一趟。要看真正少等的时间能不能抵过这些白跑。</div>
 
 <p>读仓库文档（docs/ 目录 80+ 篇）能挖出比论文更"真"的工程。挑四件：</p>
 

@@ -443,7 +443,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s5"><span class="no">5</span>并行与通信策略如何改写账本</h2>
-<div class="analogy" id="principle-notes-20261120"><p>两个人分做一张拼图，能各拼各的一半。最后要把两边拿到一起，边上的几块也可能要来回借。每人桌面上更空了，交接却多了一份活。</p></div>
+<div class="analogy" id="principle-notes-20261120">两个人分做一张拼图，能各拼各的一半。最后要把两边拿到一起，边上的几块也可能要来回借。每人桌面上更空了，交接却多了一份活。</div>
 <p>同一模型换并行策略，四本账（计算量、权重、激活、KV 的分布与搬运）全变。下表按"每卡权重 / 每层每步通信量 / KV 与激活 / 适用场景"归纳（通信公式为单层单步近似：T=本步 token 数、d=hidden、b=字节数）：</p>
 <div class="card">
 <table>
@@ -520,7 +520,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 </div>
 <!-- ============================================================ -->
 <h2 id="s8"><span class="no">8</span>特性开关下的峰值账本</h2>
-<div class="analogy"><p>把做蛋糕时用过的盆列出来，会得到一串名字。要知道桌子最少得多大，要看哪一刻同时摆了最多的盆。有些盆在下一只端来前已经拿走。</p></div>
+<div class="analogy">把做蛋糕时用过的盆列出来，会得到一串名字。要知道桌子最少得多大，要看哪一刻同时摆了最多的盆。有些盆在下一只端来前已经拿走。</div>
 <p>"模型在不同推理特性开启时，访存/显存/权重/激活/KV 的峰值是多少"。把第 4 节的静态账本放进第 7 节的引擎特性里，得到一张 what-if 表（llsim 的 <code>features</code> 模块即按此建模；数字以 8×H100、TP8/EP8、32K 上下文、batch 32 为基准场景）：</p>
 <div class="card">
 <table>
@@ -539,7 +539,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s9"><span class="no">9</span>Roofline：分层瓶颈图示分析</h2>
-<div class="analogy"><p>一小时能洗很多盘子，前提是有人不断把脏盘子送来。送得慢，就得等盘子。送得快，而洗得慢，盘子就堆在门口。先找出哪一步慢，才知道该加谁的人手。</p></div>
+<div class="analogy">一小时能洗很多盘子，前提是有人不断把脏盘子送来。送得慢，就得等盘子。送得快，而洗得慢，盘子就堆在门口。先找出哪一步慢，才知道该加谁的人手。</div>
 <p>Roofline 只需要一个公式：t = max(FLOPs/峰值算力, 字节数/峰值带宽)。KernelSight-LM 在此基础上加了两个修正：<b>效率系数 η</b>（≥1，衡量离屋顶多远）与<b>波量化 u</b>（blocks 不是 SM 整数倍时的空转），再加 kernel 启动下限 t₀<sup class="cite">[KERNELSIGHT26]</sup>：</p>
 <pre>t = max( t_roof · η ,  t₀ ),   t_roof = max( (F_comp / P_peak) · u ,  F_mem / BW_peak )</pre>
 <p class="codecap"><b>式 9-1</b> KernelSight-LM 式 (2)。u=ceil(B/N_SM)·N_SM/B≥1，是波量化的时间惩罚（B 为 thread block 数，与 batch 符号区分）；η 等效率参数需按 kernel 家族及形状校准。Tier A 不测目标设备，Tier B 使用目标微基准，两档不能混称；这就是"数据手册 + 一次微基准"两档精度的全部秘密。</p>
@@ -592,7 +592,7 @@ T 为 packed token 行数，M 为唯一 timestep/条件行数；AdaLN 参数不�
 
 <!-- ============================================================ -->
 <h2 id="s10"><span class="no">10</span>请求级仿真：从 QPS 到 TTFT/TPOT 曲线</h2>
-<div class="analogy"><p>只知道店员做一杯饮料要多久，还算不出下一位客人等多久。要一边记顾客什么时候进门，一边记柜台什么时候腾出手。有人同时来，就在同一张时间表上排队。</p></div>
+<div class="analogy">只知道店员做一杯饮料要多久，还算不出下一位客人等多久。要一边记顾客什么时候进门，一边记柜台什么时候腾出手。有人同时来，就在同一张时间表上排队。</div>
 <p>算子级模型回答"一步多快"，请求级仿真回答"用户等多久"。做法是<b>离散事件仿真</b>：请求按泊松流到达，调度器逐事件推进，这就是 Vidur 与 KernelSight-LM 的骨架，后者干脆"逐行复刻 vLLM v1 调度器"<sup class="cite">[KERNELSIGHT26]</sup>。llsim 的 <code>serving.py</code> 实现了同样的核心循环：</p>
 <pre>每步：
   1) 到达事件入等待队列

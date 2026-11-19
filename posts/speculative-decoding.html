@@ -290,7 +290,7 @@
 
 <!-- ===================== 2. CORE ===================== -->
 <h2 id="core"><span class="num">2</span>核心思想：用"草稿+验证"换并发</h2>
-<div class="analogy" id="principle-notes-20261120"><p>一个人先写出几个字，另一个人按自己的规则一起检查。开头几字检查通过，就能留下来。遇到第一个没通过的字，后面是在错误开头上写的，也得重新接着写。</p></div>
+<div class="analogy" id="principle-notes-20261120">一个人先写出几个字，另一个人按自己的规则一起检查。开头几字检查通过，就能留下来。遇到第一个没通过的字，后面是在错误开头上写的，也得重新接着写。</div>
 
 <p>投机解码（Speculative Decoding）的核心范式是 <strong>"草稿（draft）+ 验证（verify）"</strong>：</p>
 
@@ -657,7 +657,7 @@ root.querySelector('.ppx-q').addEventListener('input',function(){acc=+this.value
 
 <!-- ===================== 5. PHASE 2 ===================== -->
 <h2 id="phase2"><span class="num">5</span>阶段二（2024）：自投机与特征级草稿</h2>
-<div class="analogy"><p>有人读完一句话，脑子里已经有了接下去的线索。可以请他自己先写几字给自己查，也可以请另一个人起草。这里省下的是另找一个人读同样那句话的工夫。</p></div>
+<div class="analogy">有人读完一句话，脑子里已经有了接下去的线索。可以请他自己先写几字给自己查，也可以请另一个人起草。这里省下的是另找一个人读同样那句话的工夫。</div>
 <p>2024 年的工作，核心思路是：<b>"别再用外面的小模型了——大模型自己就藏着未来的线索，让它的某些部件直接当草稿。"</b>这样既省了独立草稿，又让草稿质量大幅提升。这一阶段有三个里程碑：Medusa、EAGLE、MTP。</p>
 
 <h3>5.1 Medusa：给大模型装上多个"预测头"</h3>
@@ -846,7 +846,7 @@ P_i = softmax(out_head(h_k))
 
 <!-- ===================== 6. PHASE 3 ===================== -->
 <h2 id="phase3"><span class="num">6</span>阶段三（2025–2026）：并行 / 块草稿 —— DFlash 与 DSpark</h2>
-<div class="analogy"><p>起草时，可以一格接一格地写，也可以先试着把几格一起填上。一起填比较快，但哪一格能真的留下，仍要经过后面的检查。</p></div>
+<div class="analogy">起草时，可以一格接一格地写，也可以先试着把几格一起填上。一起填比较快，但哪一格能真的留下，仍要经过后面的检查。</div>
 <p>前面所有方法的草稿（除 Medusa/Lookahead 外）都是<b>自回归</b>的，要串行生成 γ 个 token，草稿耗时 <code class="inl">T<sub>draft</sub> = γ · t<sub>step</sub></code> 线性增长。这逼着草稿只能做得很浅（EAGLE-3 只有 1 层），草稿质量被压住，整体加速卡在 2–3×。</p>
 <div class="formula">自回归草稿：T<sub>draft</sub> = γ · t<sub>step</sub>　　→　　并行草稿：T<sub>draft</sub> = t<sub>parallel</sub>（与 γ 几乎无关）</div>
 

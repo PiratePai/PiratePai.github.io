@@ -251,7 +251,7 @@
 <p>大语言模型生成文本的唯一动作是：<b>给定前面所有 token，预测下一个 token 的概率分布，采样一个，拼回去，再来</b>。你要它写 1000 字的回答，它就要做 1000 次几乎一样的"向前计算"。这个循环叫<b>自回归（autoregressive）</b>。它和传统 CV 模型"一张图进来、一个标签出去"的一次前向完全不同：<b>传统推理服务的全部假设（一次请求 = 一次计算）在这里都不成立</b>，这就是为什么 TensorFlow Serving 时代的"模型服务器"搬不动 LLM。</p>
 
 <h3>1.2 两阶段：prefill 与 decode，两种完全不同的计算</h3>
-<div class="analogy" id="principle-notes-20261120"><p>先读完别人递来的纸，再接着写回答。读纸时，可以把后面要查的东西先记下。写回答时，每写一点，都能看已留下的记录，再决定接着写什么。</p></div>
+<div class="analogy" id="principle-notes-20261120">先读别人递来的纸，再接着写回答。读纸时能扫一眼看到好几行，把后面要查的东西先记下来。写回答时要一点一点往下写。每写一点，都能翻看已有的记录，再决定下一点写什么。</div>
 <p>对应到模型，Prefill 可以并行处理输入位置并建立 KV Cache。常规 Decode 逐步生成，频繁读取模型权重和历史 KV。两阶段因此有不同的计算与访存需求。</p>
 
 <div class="fig">
@@ -431,7 +431,7 @@
 </div>
 
 <h3>3.1 计算图与编译：把"逐算子的解释执行"变成"整图的机器码"</h3>
-<div class="analogy"><p>做一顿饭，如果每做一步都要停下来查下一步，停顿就会积起来。若多道菜的做法可以事先排好，就能连着做。有些步骤还可以一口气做完，省去中途放回案板再拿起来的工夫。</p></div>
+<div class="analogy">做一顿饭，如果每做一步都要停下来查下一步，停顿就会积起来。若多道菜的做法可以事先排好，就能连着做。有些步骤还可以一口气做完，省去中途放回案板再拿起来的工夫。</div>
 <p>这一层做四件事：</p>
 <ol>
 <li><b>计算图解析</b>：把 HuggingFace checkpoint（safetensors + config.json）加载进来，在引擎里重建为自家 IR（中间表示）。vLLM 为每个模型族手写 <code>*ForCausalLM</code> 执行类；TensorRT-LLM 走 ONNX/权重转换 + builder 编译为 engine plan；llama.cpp 需要转 GGUF。</li>
@@ -714,8 +714,8 @@ def execute_model_step(step):          # ZOS=零开销调度 默认开启
     prev_step_state = curr_step_state</pre>
 <p class="codecap">代码 4-1 · 依据 DeepInfer 源码 <code>deepinfer/worker/worker.py</code> L88–189（main 分支 2026-10 快照）改写的伪代码。QA 文档口径："while the GPU runs forward(N) → sample(N), the CPU concurrently runs schedule(N+1) → launch_forward(N+1) → post-process(N−1)"，并注明该思路"following existing implementations (SGLang, NanoFlow)"<sup class="cite">[DIQA26]</sup>。</p>
 
-<div class="analogy"><p>洗衣机在洗下一桶衣服时，人可以同时晾上一桶。两件事能一起做，是因为晾上一桶用不到正在洗的衣服。要是衣服还在桶里，人就得等。</p></div>
-<p>这对应 GPU 前向、上一批 CPU 后处理和下一批调度的重叠。串行执行时，CPU 的批调度与后处理会推迟下一步 Decode，尤其会拖慢单步只有几毫秒的负载<sup class="cite">[SGLANG24]</sup>。</p>
+<div class="analogy">洗衣机在洗下一桶衣服时，人可以同时晾上一桶。两件事能一起做，是因为晾上一桶用不到正在洗的衣服。要是衣服还在桶里，人就得等。</div>
+<p>这对应 GPU 前向、上一批 CPU 后处理和下一批调度的重叠。串行执行时，CPU 的批调度与后处理会推迟下一步 Decode，尤其会拖慢单步只有几毫秒的负载<sup class="cite">[SGLANG24][VLLMV1]</sup>。</p>
 
 <h4>4.4.2 ZOS 下"迟到一步"的元数据修正</h4>
 <p>延迟一拍的后处理带来一个连锁问题：调度第 N+1 步时，第 N 步的采样结果（尤其投机解码<b>实际接受了几个 draft token</b>）还没回来，CPU 侧每个请求的 seqlen_q/seqlen_k 是过期的。</p>

@@ -534,7 +534,7 @@
         {
           "date": "2026-11-20",
           "kind": "原理解读",
-          "summary": "在 3 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
+          "summary": "在 2 章补充或改写关键原理的白话说明，保留专业论证、图表和代码。",
           "anchor": "principle-notes-20261120",
           "evidence": "docs/plain-language-principles-20261120.md"
         }
