@@ -219,6 +219,13 @@
           "summary": "5.6 部署快照补充研究判断登记表第 1 条（缓存感知路由 vs 最短队列路由）的入口链接。",
           "anchor": "research-20261103",
           "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "阅读试点",
+          "summary": "P/D 分离小节增加语义锚点、在线书实验入口，并支持连续读本章及章内跳转。",
+          "anchor": "s5",
+          "evidence": "docs/site-redesign-20261119.md"
         }
       ],
       "number": 8,
@@ -295,6 +302,13 @@
           "kind": "阅读路径样板",
           "summary": "新增 4.3 逐步推演（两请求×三逻辑块的页表状态转移表）与 5.4 观测账本（容量/命中/TTFT 三本账、命中收益被传输或排队抵消的教学边界、vLLM APC 设计文档与固定提交测试的证据口径分层）；5.1 增加共享两完整前缀块 6→4 的算例与写时复制边界框；文末补 2026-11-19 来源两条。",
           "anchor": "kv-page-steps",
+          "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "技术勘误与阅读试点",
+          "summary": "据 PagedAttention 论文图 2 修正历史利用率，分开核算静态预留、按需分配与共享块，并修正排队反例。增加章内跳转、本章连续阅读及在线书实验入口。",
+          "anchor": "kv-capacity-ttft",
           "evidence": "docs/site-redesign-20261119.md"
         }
       ],
@@ -914,6 +928,13 @@
           "summary": "1.1 新增“时间线作为机制专题坐标系”段落：链接 KV Cache 分页逐步推演、5.4 观测账本与推理服务的 Chunked Prefill / P/D 分离，说明各机制落到本表口径的哪个量上。",
           "anchor": "s1",
           "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "实验入口",
+          "summary": "从时延定义直达在线书第 3 章的计时与性能定位实验。",
+          "anchor": "s1",
+          "evidence": "docs/site-redesign-20261119.md"
         }
       ],
       "number": 17,
@@ -1080,6 +1101,13 @@
           "summary": "8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。",
           "anchor": "video-response",
           "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "证据口径勘误",
+          "summary": "核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。",
+          "anchor": "s6",
+          "evidence": "docs/site-redesign-20261119.md"
         }
       ],
       "number": 21,
@@ -1180,6 +1208,13 @@
           "summary": "3.6 开头新增四个时间定义对照表；3.6.1.1 新增 62.5 ms 控制间隔、50 ms 生成显示的可动手核对块等待算例（N=1/4/8 → 50/237.5/487.5 ms，标注教学假设与改块的三重影响）；章末衔接成本篇 s8/s9/video-response 与研究判断登记表。",
           "anchor": "sf-block-wait-example",
           "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "图解与术语",
+          "summary": "块等待增加静态表之外的可操作算例；对照 PixVid 附录 B.5，将每帧计算量与算术强度分开。",
+          "anchor": "sf-block-wait-example",
+          "evidence": "docs/site-redesign-20261119.md"
         }
       ],
       "number": 23,
@@ -1257,6 +1292,13 @@
           "kind": "新增页面",
           "summary": "建立集中可达的研究判断登记表：三条预判（缓存感知路由、Agent 任务成本、交互视频吞吐与响应）逐条给出适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、证据状态与拟回看日期；与推理服务、评测、成本、研究路线、Self Forcing 与 KV Cache 专题双向连接。",
           "anchor": "s0",
+          "evidence": "docs/site-redesign-20261119.md"
+        },
+        {
+          "date": "2026-11-19",
+          "kind": "证据口径与判定规则",
+          "summary": "纠正 Agent 证据分类及 Mooncake v1 日期，明确路由取舍、视频响应门槛与对照排序规则。",
+          "anchor": "j2",
           "evidence": "docs/site-redesign-20261119.md"
         }
       ]

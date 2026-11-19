@@ -27,6 +27,37 @@ const diagrams=fs.readdirSync(path.join(__dirname,'../posts/img')).filter(f=>/^s
      assert(await page.locator('#'+id).isVisible());
     }
    }
+   await page.goto(base+'/posts/self-forcing-inference-research.html#sf-block-wait-example');
+   const demo=page.locator('#sf-block-wait-demo');
+   for(const [value,total] of [['4','237.5'],['1','50'],['8','487.5']]) {
+    await demo.locator('select').selectOption(value);
+    assert((await demo.locator('output').textContent()).endsWith('总计 '+total+' ms。'));
+   }
+   for(const [slug,chapter,target] of [
+    ['kv-cache-survey','s4','kv-page-steps'],
+    ['inference-serving','s5','fig-pd-interactive']
+   ]) {
+    await page.goto(base+'/posts/'+slug+'.html#'+chapter);
+    await page.locator('html.reader-ready').waitFor();
+    const jump=page.locator('.reader-chapter-jump');
+    await jump.locator('summary').click();
+    await jump.getByRole('button',{name:'连续读本章'}).click();
+    await page.waitForFunction(()=>new URL(location.href).searchParams.get('view')==='chapter');
+    assert.equal(await page.locator('.reader-chapter:not([hidden])').count(),1);
+    assert(await page.locator('.reader-page:not([hidden])').count()>1);
+    await jump.locator('summary').click();
+    await jump.locator('a[href="#'+target+'"]').click();
+    await page.waitForFunction(id=>location.hash==='#'+id,target);
+    await page.waitForFunction(id=>{
+     const rect=document.getElementById(id).getBoundingClientRect();
+     const toolbar=document.querySelector('.reader-toolbar').getBoundingClientRect();
+     return rect.top>=toolbar.bottom && rect.top<innerHeight;
+    },target);
+    assert.equal(await jump.getAttribute('open'),null);
+    await jump.locator('summary').click();
+    await jump.getByRole('button',{name:'恢复分页'}).click();
+    assert.equal(await page.locator('.reader-page:not([hidden])').count(),1);
+   }
    for(const file of diagrams) {
     await page.goto(`${base}/posts/img/${file}`);
     const svg=page.locator('svg.sc-svg').first();
@@ -67,6 +98,9 @@ const diagrams=fs.readdirSync(path.join(__dirname,'../posts/img')).filter(f=>/^s
    assert(await page.locator('#refs').isVisible());
    assert(await page.locator('h2').count()>=7);
   }
+  await page.goto(base+'/posts/self-forcing-inference-research.html#sf-block-wait-example');
+  assert.equal(await page.locator('#sf-block-wait-demo').isVisible(),false);
+  assert((await page.locator('#sf-block-wait-example ~ table').first().textContent()).includes('487.5 ms'));
   for(const file of diagrams) {
    await page.goto(`${base}/posts/img/${file}`);
    assert(await page.locator('svg.sc-svg').isVisible());

@@ -20,7 +20,7 @@ button { cursor: pointer; }
 .nav-label { color: var(--muted); font-size: 13px; margin: 28px 0 8px; }
 .stage-nav { display: grid; gap: 4px; }
 .stage-nav a { display: flex; gap: 8px; justify-content: space-between; padding: 8px 12px; margin-inline: -12px; text-decoration: none; color: var(--secondary); border-radius: 4px; font-size: 15px; }
-.stage-nav a span { font-size: 12px; align-self: center; }
+.stage-nav a span { font-size: 12px; align-self: center; white-space: nowrap; }
 .stage-nav a:hover, .stage-nav a[aria-current] { color: #145d5b; background: var(--selected); }
 .topic-nav a { display: block; padding-block: 4px; color: var(--secondary); font-size: 14px; text-decoration: none; }
 .topic-nav a:hover { color: var(--accent); text-decoration: underline; }
@@ -130,6 +130,8 @@ mark { background: #d8ebe3; color: #143f38; padding: 0 1px; }
 .search-term a { margin-right: 14px; }
 .search-term .term-note { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
 .problem-guide, .guide, .recent-updates { margin-bottom: 40px; }
+#more-problems > summary { padding-block: 10px; color: var(--accent); font-weight: 600; cursor: pointer; }
+#more-problems .problem-list { margin-top: 12px; }
 .problem-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 36px; }
 .problem-list > div { border-top: 1px solid var(--line); padding-top: 14px; }
 .problem-list h3 { font-size: 17px; margin: 0 0 6px; }
@@ -172,8 +174,8 @@ mark { background: #d8ebe3; color: #143f38; padding: 0 1px; }
   .mobile-brand { display: block; color: var(--ink); font-size: 22px; font-weight: 600; text-decoration: none; }
   .search-form { order: 3; width: 100%; }
   .topbar-links { margin-left: auto; }
-  .mobile-nav { display: block; order: 4; flex-basis: 100%; margin-top: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
-  .mobile-nav summary { cursor: pointer; color: var(--accent); padding: 6px 0; min-height: 40px; }
+  .mobile-nav { display: block; margin-top: 4px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .mobile-nav summary { cursor: pointer; color: var(--accent); padding: 8px 0; min-height: 44px; }
   .mobile-nav nav { display: flex; flex-wrap: wrap; gap: 10px 22px; padding: 10px 0 4px; }
   .mobile-nav nav a { padding-block: 4px; }
   h1 { font-size: 28px; margin-top: 24px; }

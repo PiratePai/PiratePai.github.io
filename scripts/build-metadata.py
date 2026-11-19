@@ -21,7 +21,6 @@ TOPIC_ALIASES = {
     'algorithms': 'chapters-optimization',
     'execution': 'chapters-execution',
     'measurement': 'chapters-evaluation',
-    'visual': 'chapters-research',
 }
 
 

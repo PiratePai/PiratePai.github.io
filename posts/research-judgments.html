@@ -123,7 +123,7 @@
   <p class="sub">把散落在综述里的技术预判集中成一张登记表：每条记录<b>问题、适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、当前证据状态与拟回看日期</b>。研究路线篇是方法入口，本表是带日期的判断——到期回看时，只对照预先写下的否定条件与观测指标更新状态，不事后挪门柱。</p>
   <div class="meta"><span class="pill chip">登记日期：<b>2026-11-19</b></span><span class="pill chip">条目 <b>3 条</b></span><span class="pill chip">证据状态 <b>全部为待验证假设（未做实验）</b></span><span class="pill chip">口径 <b>机制依据来自站内源码核对与论文口径，非本站实测</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-19">2026-11-19</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-19">2026-11-19</time> · 新增页面：<a href="#s0">建立集中可达的研究判断登记表：三条预判（缓存感知路由、Agent 任务成本、交互视频吞吐与响应）逐条给出适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、证据状态与拟回看日期；与推理服务、评测、成本、研究路线、Self Forcing 与 KV Cache 专题双向连接。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/research-judgments.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-19">2026-11-19</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-19">2026-11-19</time> · 新增页面：<a href="#s0">建立集中可达的研究判断登记表：三条预判（缓存感知路由、Agent 任务成本、交互视频吞吐与响应）逐条给出适用负载、机制依据、最强基线、固定变量、观测指标、否定条件、证据状态与拟回看日期；与推理服务、评测、成本、研究路线、Self Forcing 与 KV Cache 专题双向连接。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径与判定规则：<a href="#j2">纠正 Agent 证据分类及 Mooncake v1 日期，明确路由取舍、视频响应门槛与对照排序规则。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/research-judgments.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -169,7 +169,7 @@
 <li><b>最强基线</b>：同资源下的最短队列路由（含 P/D 分离部署的默认调度）。</li>
 <li><b>固定变量</b>：相同实例数与型号、相同模型与精度、相同缓存容量与淘汰策略、相同请求集；只变路由策略。</li>
 <li><b>观测指标</b>：P95 TTFT（口径按<a href="inference-evaluation.html#s1">评测篇表 1-1</a>，含排队）、goodput、命中 token 数、跨实例传输字节与耗时、排队时长。负载三档：高复用、低复用、突发。</li>
-<li><b>否定条件</b>：在高复用负载下缓存感知路由的 P95 TTFT 与 goodput 均不优于最短队列（差值落入测量噪声），或其收益完全被传输开销抵消 → 判断不成立，记录负载与带宽条件。</li>
+<li><b>否定条件</b>：预先约定 TTFT 非劣容差与 goodput 最小增量。在高复用负载下，只有 P95 TTFT 未越过非劣容差且 goodput 增量达到门槛，才判缓存感知胜出。若 goodput 增加但 TTFT 劣化超限，记录为取舍，判胜出条件未满足。差值区间跨过门槛时记为证据不足。</li>
 <li><b>当前证据状态</b>：待验证假设。Mooncake 的生产数字是"缓存为中心调度"的论文报告口径，未在同等对照下与最短队列路由比较。</li>
 <li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
 </ul>
@@ -183,7 +183,7 @@
 
 <h2 id="j2"><span class="no">2</span>判断 2：Agent 配置按 token 单价与按每次成功任务成本的排序何时一致</h2>
 <p class="lead">同一个 Agent 任务集上，按"每百万 token 价格"给模型/引擎配置排序，与按"每次成功任务成本"排序，什么时候给出相同答案、什么时候反转？</p>
-<p class="lead">背景证据：企业负载研究实测 agent 顺序步进跑在 batch=1，每步 2% 的失败率在 20 步后足以抹平 2× 的 decode 优势——按 token 吞吐排名与按每成功任务成本排名会给出不同答案（论文报告口径，见<a href="cost-efficient-inference-2026.html#s6">成本篇 6.5</a>）。</p>
+<p class="lead">机制线索来自 Ali 等的独立失败模型。按每步失败概率 2%、顺序执行 20 步计算，一次跑完的概率约为 66.8%。失败是否耗尽整次预算、能否从检查点继续，都影响成功成本。模型推演和分母的解释见<a href="cost-efficient-inference-2026.html#s6">成本篇 6.5</a>。</p>
 <ul>
 <li><b>适用负载</b>：多步工具调用 Agent 任务（coding / computer-use / 多轮检索），验收门槛可机器判定；对照组为单轮问答。</li>
 <li><b>机制依据</b>：任务级成本把失败、重试、工具等待与恢复计入分子，把"验收通过的任务"定为分母（<a href="cost-efficient-inference-2026.html#s2">C_unit = C_total ÷ V_valid</a>）；token 单价两者都不含。</li>
@@ -191,7 +191,7 @@
 <li><b>固定变量</b>：相同任务集与验收门槛、相同预算上限、相同重试与超时策略、相同工具环境；只变模型/引擎配置。</li>
 <li><b>观测指标</b>：任务成功率、每次成功任务成本（含失败与重试的 token 与等待）、token 单价（名义与命中后）、工具等待占比、恢复成功率。预先定义"排序不变"的记录方式：两种排序的一致性统计量及反转发生的任务长度分布。</li>
 <li><b>否定条件</b>：在全部任务集上两种排序一致（含长任务与高失败率子集）→ 判断无区分度，token 单价是足够代理；记录任务长度与失败率范围。</li>
-<li><b>当前证据状态</b>：待验证假设。现有证据是论文报告的个别对照点，未做过同任务集、同门槛、同预算的系统排序比较。</li>
+<li><b>当前证据状态</b>：待验证假设。独立失败模型只说明成功概率随步数累积下降。本站尚无同任务集、同门槛、同预算的排序对照。</li>
 <li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
 </ul>
 <div class="summary3"><b>本章小结</b>
@@ -206,11 +206,11 @@
 <p class="lead">同资源清单、同质量门槛下，流式视频服务用"同卡放全栈"还是"DiT—VAE 流水线分离"，加上响应约束（P95 控制到屏幕时延）后，排序会不会变？</p>
 <ul>
 <li><b>适用负载</b>：交互式流式视频（固定块粒度与控制频率，负载形态按<a href="self-forcing-inference-research.html#s4">Self Forcing 篇 E4/E6 组</a>的稳态与突发两档）。</li>
-<li><b>机制依据</b>：分离提高稳态吞吐节拍，但首块、稳态与交互关键路径是三条账——更低的流水间隔不自动降低单次控制响应（<a href="self-forcing-inference-research.html#s35">该篇 3.5</a>）；块等待 (N−1)/f 是模型侧优化移除不了的结构项（<a href="self-forcing-inference-research.html#sf-block-wait-example">3.6.1.1 算例</a>）。</li>
+<li><b>机制依据</b>：分离可能缩短稳态流水间隔。首块、稳态和交互关键路径分别测量——更低的流水间隔不自动降低单次控制响应（<a href="self-forcing-inference-research.html#s35">该篇 3.5</a>）；块等待 (N−1)/f 是模型侧优化移除不了的结构项（<a href="self-forcing-inference-research.html#sf-block-wait-example">3.6.1.1 算例</a>）。</li>
 <li><b>最强基线</b>：同资源清单下的同卡部署（含相同块粒度与缓冲深度）。</li>
 <li><b>固定变量</b>：相同卡数与型号、相同模型与精度、相同分辨率/帧率/块粒度/缓冲、相同质量门（FVD 与任务相关指标作约束不作除数）；只变放置。</li>
-<li><b>观测指标</b>：P95 控制到屏幕时延（版本号判定首个有效响应）、卡顿率、有效视频秒数（V_valid 口径：过时与被丢弃帧不计产出、成本照记）、吞吐。响应约束两档：无约束与 P95 ≤ 阈值。</li>
-<li><b>否定条件</b>：加入响应约束前后排序都不变（分离始终占优或始终劣），且响应约束不可行时 V_valid 归零的边界一致 → 响应约束不改变选型，判断无区分度；记录质量门与负载条件。</li>
+<li><b>观测指标</b>：P95 控制到屏幕时延（版本号判定首个有效响应）、卡顿率、有效视频秒数（V_valid 口径：过时与被丢弃帧不计产出、成本照记）、吞吐。预定两档。无响应门槛时按单位时间的有效视频产出排序；响应档固定 P95 ≤ 800 ms（采用 Self Forcing 篇的示例门槛），先筛掉未达标配置，再按相同产出指标排序。两档的质量门保持一致。</li>
+<li><b>否定条件</b>：若两档首选保持一致，记录该负载下没有观察到选型变化。若两个方案均未达到 800 ms，记录为无可行解；若两个方案的产出差在测量误差内，记录为证据不足。</li>
 <li><b>当前证据状态</b>：待验证假设。PixVid 的 495 ms vs 34 ms 是架构对照（像素空间 vs 潜空间），不是放置对照；TurboServe/SlackServe 报告的是各自系统的绝对数字，未做同资源放置比较。</li>
 <li><b>拟回看日期</b>：<b>2027-02-19</b>。</li>
 </ul>
@@ -224,7 +224,7 @@
 
 <h2 id="refs">参考文献与来源口径</h2>
 <ol class="refs">
-<li id="MOONCAKE"><b>Ruoyu Qin, Zheming Li, et al.</b>（Moonshot AI）. <i>Mooncake: Trading More Storage for Less Computation.</i> FAST 2025 最佳论文；arXiv:2407.00079，v1 2024-07-01。复用率与调度数字为论文报告口径。<a href="https://arxiv.org/abs/2407.00079">arXiv</a></li>
+<li id="MOONCAKE"><b>Ruoyu Qin, Zheming Li, et al.</b>（Moonshot AI）. <i>Mooncake: Trading More Storage for Less Computation.</i> FAST 2025 最佳论文；arXiv:2407.00079，首次提交 2024-06-24。复用率与调度数字为论文报告口径。<a href="https://arxiv.org/abs/2407.00079v1">arXiv v1</a></li>
 <li id="DISTSERVE"><b>Yinmin Zhong, et al.</b> <i>DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving.</i> OSDI 2024；arXiv:2401.09670，v1 2024-01-18。TTFT/TPOT 双指标服务能力与 P/D 分离动机。<a href="https://arxiv.org/abs/2401.09670">arXiv</a></li>
 <li id="PIXVIDJR"><b>Yanke Song, et al.</b>（Roblox 等）. <i>Back to Pixels: Lifting Latent Video Diffusion into Pixel Space.</i> arXiv:2611.17336，v1 2026-11-12。块等待与吞吐-响应对照的论文口径（单卡 B200、480×864、4 步）。<a href="https://arxiv.org/abs/2611.17336">arXiv</a></li>
 <li id="SFJR"><b>Xun Huang, et al.</b> <i>Self Forcing: Bridging the Train-Test Gap in Autoregressive Video Diffusion.</i> NeurIPS 2025 Spotlight；arXiv:2506.08009，v1 2025-06-09。<a href="https://arxiv.org/abs/2506.08009">arXiv</a></li>
@@ -240,8 +240,8 @@
 </div>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=64114dcadbe1">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=3a4742c1c9a2">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=cc32604007e5"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

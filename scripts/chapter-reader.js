@@ -6,6 +6,7 @@
   if (!guide || !originalTOC) return;
   const root = guide.parentElement;
   const html = document.documentElement;
+  const chapterPilot = html.hasAttribute('data-reader-chapter-pilot');
   root.classList.add('reader-content');
   let theme = 'paper';
   try { theme = localStorage.getItem('reader-theme') === 'dark' ? 'dark' : 'paper'; } catch (_) {}
@@ -278,6 +279,17 @@
   });
   showTheme();
   toolbar.append(toolbarHome, toggle, previousButton, status, nextButton, themeButton, mode);
+  let jump, jumpSummary, jumpLinks, chapterMode, indexedChapter;
+  if (chapterPilot) {
+    jump = element('details', 'reader-chapter-jump');
+    jumpSummary = element('summary', '', '章内跳转');
+    const panel = element('div', 'reader-chapter-panel');
+    chapterMode = element('button'); chapterMode.type = 'button';
+    jumpLinks = element('nav'); jumpLinks.setAttribute('aria-label', '本章小节与图解');
+    panel.append(chapterMode, jumpLinks);
+    jump.append(jumpSummary, panel);
+    toolbar.append(jump);
+  }
   const backdrop = element('button', 'reader-ui reader-backdrop'); backdrop.type = 'button'; backdrop.setAttribute('aria-label', '关闭目录'); backdrop.tabIndex = -1;
   const skip = link('跳到正文', pages[0].id, 'reader-ui reader-skip');
   document.body.append(skip, backdrop, sidebar, toolbar);
@@ -285,7 +297,7 @@
   const pagers = [element('nav', 'reader-ui reader-pager')];
   pagers.forEach(p => p.setAttribute('aria-label', '阅读翻页'));
   root.append(pagers[0]);
-  let current = pages[0], collapsed = true, full = false;
+  let current = pages[0], collapsed = true, full = false, chapterOnly = false;
   function setCollapsed(value, remember, focus) {
     collapsed = value; html.classList.toggle('reader-collapsed', value); sidebar.hidden = value;
     toggle.setAttribute('aria-expanded', String(!value));
@@ -300,6 +312,7 @@
   mobile.addEventListener('change', () => setCollapsed(mobile.matches || saved, false, false));
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !collapsed) { setCollapsed(true, true, true); return; }
+    if (e.key === 'Escape' && jump?.open) { jump.open = false; jumpSummary.focus(); return; }
     if (e.key === 'Tab' && mobile.matches && !collapsed) {
       const focusables = Array.from(sidebar.querySelectorAll('a,button,summary')).filter(n => n.getClientRects().length);
       const first = focusables[0], last = focusables.at(-1);
@@ -312,11 +325,15 @@
     return pages.find(p => p.node === target || p.node.contains(target)) || pages.find(p => target.contains(p.node));
   }
   function render(shouldScroll) {
-    full = new URL(location.href).searchParams.get('view') === 'all';
+    const view = new URL(location.href).searchParams.get('view');
+    full = view === 'all';
+    chapterOnly = chapterPilot && view === 'chapter';
     let id = ''; try { id = decodeURIComponent(location.hash.slice(1)); } catch (_) {}
     const target = id ? document.getElementById(id) : null;
     current = pageFor(target) || pages[0];
-    pages.forEach(p => { p.node.hidden = !full && p !== current; });
+    pages.forEach(p => {
+      p.node.hidden = !full && (chapterOnly ? p.chapter !== current.chapter : p !== current);
+    });
     flows.slice().reverse().forEach(f => { f.hidden = !full && !f.querySelector('.reader-page:not([hidden])'); });
     chapters.forEach(c => {
       c.node.hidden = !full && c !== current.chapter;
@@ -325,18 +342,33 @@
     navLinks.forEach(a => a.removeAttribute('aria-current')); current.link.setAttribute('aria-current', 'page');
     const localIndex = current.chapter.pages.indexOf(current);
     currentTitle.textContent = current.chapter.title + ' · ';
-    counter.textContent = full ? '全文' : (localIndex + 1) + ' / ' + current.chapter.pages.length;
-    status.title = current.title;
+    counter.textContent = full ? '全文' : chapterOnly ? '本章' : (localIndex + 1) + ' / ' + current.chapter.pages.length;
+    status.title = current.chapter.title;
     mode.textContent = full ? '分页阅读' : '全文阅读';
     skip.href = '#' + current.id;
     const index = pages.indexOf(current);
+    const chapterIndex = chapters.indexOf(current.chapter);
     [previousButton, nextButton].forEach((a, i) => {
-      const p = pages[index + (i ? 1 : -1)];
+      const offset = i ? 1 : -1;
+      const p = chapterOnly ? chapters[chapterIndex + offset]?.pages[0] : pages[index + offset];
       a.hidden = full || !p;
+      a.setAttribute('aria-label', i ? (chapterOnly ? '下一章' : '下一页') : (chapterOnly ? '上一章' : '上一页'));
       if (p) { a.href = '#' + p.id; a.title = p.title; }
     });
+    if (jump) {
+      chapterMode.textContent = chapterOnly ? '恢复分页' : '连续读本章';
+      if (indexedChapter !== current.chapter) {
+        indexedChapter = current.chapter;
+        const targets = indexedChapter.node.querySelectorAll('h3[id],h4[id],figure[id]');
+        jumpLinks.replaceChildren(link('本章开头', indexedChapter.id), ...Array.from(targets, node => {
+          const caption = node.querySelector('figcaption,.cap');
+          const name = caption ? label(caption).split(' · ')[0] : label(node);
+          return link(name || node.getAttribute('aria-label') || '图解', node.id);
+        }));
+      }
+    }
     pagers.forEach(pager => {
-      pager.replaceChildren(); pager.hidden = full;
+      pager.replaceChildren(); pager.hidden = full || chapterOnly;
       const previous = pages[index - 1], next = pages[index + 1];
       pager.append(previous ? link((previous.chapter === current.chapter ? '← 上一页：' : '← 上一章：') + previous.title, previous.id) : element('span', '', '已是首页'));
       pager.append(element('span', 'reader-pager-status', '章内 ' + (localIndex + 1) + ' / ' + current.chapter.pages.length));
@@ -355,11 +387,23 @@
     if (!url.hash) url.hash = current.id;
     history.pushState(null, '', url); render(true);
   });
+  if (chapterMode) chapterMode.addEventListener('click', () => {
+    const url = new URL(location.href);
+    if (chapterOnly) url.searchParams.delete('view'); else url.searchParams.set('view', 'chapter');
+    if (!url.hash) url.hash = current.chapter.id;
+    jump.open = false;
+    jumpSummary.focus({preventScroll:true});
+    history.pushState(null, '', url); render(true);
+  });
   // Same-anchor clicks must still close a mobile drawer and reveal folded targets.
   document.addEventListener('click', e => {
     const a = e.target.closest('a'); if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === '_blank') return;
     const url = new URL(a.href, location.href);
     if (url.origin !== location.origin || url.pathname !== location.pathname || url.search !== location.search || !url.hash) return;
+    if (jump?.contains(a)) {
+      jump.open = false;
+      jumpSummary.focus({preventScroll:true});
+    }
     if (mobile.matches && !collapsed) setCollapsed(true, false, false);
     if (url.hash === location.hash) render(true);
   });

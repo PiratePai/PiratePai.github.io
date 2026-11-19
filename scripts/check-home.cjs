@@ -24,6 +24,35 @@ if (output) fs.mkdirSync(output, {recursive:true});
       const errors = [];
       page.on('pageerror', e => errors.push(e.message));
       await page.goto(base + '/');
+      assert.equal(await page.locator('.archive-group .article-entry').count(), Object.keys(metadata.articles).length);
+      assert.equal(await page.locator('#problems .problem-list > div').count(), 4);
+      if (width === 375) {
+        await page.goto(base + '/#all-articles');
+        const headingIsBelowHeader = selector => page.waitForFunction(selector => {
+          const heading = document.querySelector(selector).getBoundingClientRect();
+          return heading.top >= document.querySelector('.topbar').getBoundingClientRect().bottom && heading.bottom <= innerHeight;
+        }, selector);
+        await headingIsBelowHeader('#archive-heading');
+        await page.locator('.mobile-nav summary').click();
+        await page.locator('.mobile-nav a[href="#topic-visual"]').click();
+        assert.equal(await page.locator('.mobile-nav[open]').count(),0);
+        await headingIsBelowHeader('#topic-visual h3');
+      }
+      for (const [query,target] of [
+        ['首字时延','posts/inference-evaluation.html#s1'],
+        ['TTFT','posts/inference-evaluation.html#s1'],
+        ['P/D 分离','posts/inference-serving.html#s5']
+      ]) {
+        await page.goto(base+'/?q='+encodeURIComponent(query));
+        const term = page.locator('#search-term a');
+        await term.waitFor();
+        await page.locator('#search-input').press('Enter');
+        await page.waitForFunction(()=>!document.querySelector('#search-message').textContent);
+        assert.equal(await term.getAttribute('href'),target);
+        assert(await term.evaluate(a=>document.activeElement===a));
+        assert.equal(await page.locator('.empty-state').count(),0);
+      }
+      await page.goto(base+'/');
       const updates = await page.locator('.update-group').evaluateAll(groups => groups.map(group => ({
         day:group.querySelector('time').dateTime,
         summary:group.querySelector('summary').textContent,
@@ -65,6 +94,7 @@ if (output) fs.mkdirSync(output, {recursive:true});
 
       await page.goto(base+'/?q='+encodeURIComponent('量化'));
       await page.locator('#search-list a[href*="quantization-survey"]').waitFor();
+      assert.equal(await page.locator('#search-term').isVisible(),false);
       await page.locator('.topbar-links a[href="#all-articles"]').click();
       await page.waitForFunction(()=>location.hash==='#all-articles');
       assert.equal(await page.locator('#reading-content').isVisible(),true);

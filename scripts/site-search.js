@@ -139,6 +139,12 @@
   const clear = document.getElementById('search-clear');
   const region = document.getElementById('search-results');
   const termCard = document.getElementById('search-term');
+  const termLabel = document.createElement('b');
+  const termLink = document.createElement('a');
+  const termNote = document.createElement('span');
+  termLink.textContent = '进入定义章节';
+  termNote.className = 'term-note';
+  termCard.append(termLabel, termLink, termNote);
   const status = document.getElementById('search-status');
   const message = document.getElementById('search-message');
   const list = document.getElementById('search-list');
@@ -193,25 +199,20 @@
     syncNavigation();
     list.replaceChildren();
     message.replaceChildren();
-    termCard.replaceChildren();
-    termCard.hidden = !active;
+    const entry = active ? matchTerm(query) : null;
+    termCard.hidden = !entry;
     if (!active) { status.textContent = ''; return; }
-    const entry = matchTerm(query);
     if (entry) {
-      // Term entries are built from textContent only; queries never become HTML.
-      const label = document.createElement('b');
-      label.textContent = '术语 · ' + entry.label;
-      const link = document.createElement('a');
-      link.href = entry.url;
-      link.textContent = '进入定义章节';
-      const note = document.createElement('span');
-      note.className = 'term-note';
-      note.textContent = entry.note;
-      termCard.append(label, link, note);
+      // Keep the link alive when the index finishes loading and results refresh.
+      termLabel.textContent = '术语 · ' + entry.label;
+      termLink.href = entry.url;
+      termNote.textContent = entry.note;
     }
     const terms = termsFor(query);
     const results = search(documents || fallback, query);
-    status.textContent = terms.length ? '找到 ' + results.length + ' 篇相关文章' : '请输入中文、英文或数字关键词';
+    status.textContent = entry
+      ? '已找到术语定义，另有 ' + results.length + ' 篇正文匹配'
+      : terms.length ? '找到 ' + results.length + ' 篇相关文章' : '请输入中文、英文或数字关键词';
     if (!documents) {
       message.appendChild(document.createTextNode(failed ? '章节索引暂时无法加载，当前搜索文章标题与摘要。' : '正在载入章节索引，先显示标题与摘要结果。'));
       if (failed) {
@@ -233,7 +234,7 @@
       const snippet = document.createElement('p'); highlighted(snippet, result.snippet, terms); item.appendChild(snippet);
       list.appendChild(item);
     });
-    if (terms.length && !results.length) {
+    if (!entry && terms.length && !results.length) {
       const item = document.createElement('li'); item.className = 'empty-state';
       const title = document.createElement('strong'); title.textContent = '没有找到匹配内容';
       const hint = document.createElement('p'); hint.textContent = '试试更短的关键词，例如“量化”“KV Cache”或“分页”。多个词会共同匹配同一章节。';
@@ -274,7 +275,8 @@
   input.addEventListener('compositionend', function () { composing = false; update(); });
   form.addEventListener('submit', function (event) {
     event.preventDefault(); clearTimeout(timer); update();
-    const first = list.querySelector('h3 a'); if (first) first.focus();
+    const first = termCard.hidden ? list.querySelector('h3 a') : termLink;
+    if (first) first.focus();
   });
   clear.addEventListener('click', function () { input.value = ''; update(); input.focus(); });
   more.addEventListener('click', function () {
@@ -287,6 +289,15 @@
   document.addEventListener('click', function (event) {
     const link = event.target.closest('a[href^="#"]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
+    const menu = link.closest('.mobile-nav');
+    let id = ''; try { id = decodeURIComponent(link.hash.slice(1)); } catch (_) {}
+    const target = document.getElementById(id);
+    if (menu && target) {
+      menu.open = false;
+      target.tabIndex = -1;
+      target.focus({preventScroll: true});
+      requestAnimationFrame(function () { target.scrollIntoView({block: 'start'}); });
+    }
     if (input.value || new URL(location.href).searchParams.has('q')) {
       event.preventDefault();
       clearTimeout(timer);
@@ -297,8 +308,6 @@
       // Keep the search entry intact so Back can restore its query and results.
       history.pushState(null, '', url);
       restoreLocation();
-      let id = ''; try { id = decodeURIComponent(url.hash.slice(1)); } catch (_) {}
-      const target = document.getElementById(id);
       if (target) target.scrollIntoView({block: 'start'});
     }
   });

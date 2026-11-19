@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-reader-chapter-pilot>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -252,7 +252,7 @@
   <div class="sub">结构压缩 · 分页管理 · 前缀复用 · 量化 · 稀疏驱逐 · 分层卸载 · 混合架构</div>
   <div class="meta"><span class="chip">原稿日期：<b>2026-08-23</b></span><span class="chip">七条路线 <b>少存 / 管好 / 别重算 / 存粗 / 扔掉 / 分层 / 不用</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s10">K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s10">正文 11/12 改为 10/11（消除附录遗留跳号），附录小节 10.1–10.4 改为 附A–附D；旧锚点与文内交叉引用同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图示修正：<a href="#s4">图 4-1 重构为自洽的 A/B 页表快照：共享前缀块 P1/P4 引用 2、分叉后各占新块，与写时复制说明和交互图一致。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#kv-page-steps">新增 4.3 逐步推演（两请求×三逻辑块的页表状态转移表）与 5.4 观测账本（容量/命中/TTFT 三本账、命中收益被传输或排队抵消的教学边界、vLLM APC 设计文档与固定提交测试的证据口径分层）；5.1 增加共享两完整前缀块 6→4 的算例与写时复制边界框；文末补 2026-11-19 来源两条。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-08-23">2026-08-23</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-15">2026-11-15</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-04">2026-11-04</time> · 图解与来源：<a href="#kv-block-map">重绘KV 分页与写时复制，核对图示机制与来源。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/core-visuals-redesign-20261104.md">范围说明</a></li><li><time datetime="2026-11-03">2026-11-03</time> · 资料核验：<a href="#research-20261103">增补本专题的一手来源与工程快照，核验范围限于本次增补。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261103.md">范围说明</a></li><li><time datetime="2026-11-15">2026-11-15</time> · 前沿增补：<a href="#s10">K3.1 Pro sparse-MLA 缓存结构（DSA indexer 132 字节/token、top-2048）；LowRAM 测试时 value 摊销（26.9× 组合压缩）；ADKV 入选 NeurIPS 2026。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/research-refresh-20261115.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 编号修订：<a href="#s10">正文 11/12 改为 10/11（消除附录遗留跳号），附录小节 10.1–10.4 改为 附A–附D；旧锚点与文内交叉引用同步。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 图示修正：<a href="#s4">图 4-1 重构为自洽的 A/B 页表快照：共享前缀块 P1/P4 引用 2、分叉后各占新块，与写时复制说明和交互图一致。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/numbering-and-reader-fixes-20261117.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#kv-page-steps">新增 4.3 逐步推演（两请求×三逻辑块的页表状态转移表）与 5.4 观测账本（容量/命中/TTFT 三本账、命中收益被传输或排队抵消的教学边界、vLLM APC 设计文档与固定提交测试的证据口径分层）；5.1 增加共享两完整前缀块 6→4 的算例与写时复制边界框；文末补 2026-11-19 来源两条。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 技术勘误与阅读试点：<a href="#kv-capacity-ttft">据 PagedAttention 论文图 2 修正历史利用率，分开核算静态预留、按需分配与共享块，并修正排队反例。增加章内跳转、本章连续阅读及在线书实验入口。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commit/60dddd862da11c747a9b378d8d2874ecd993748e">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -746,7 +746,7 @@ root.querySelector('.ppx-reset').addEventListener('click',reset);
 <!-- /WIDGET:w3 -->
 
 <h3 id="kv-page-steps">4.3 逐步推演：两个请求怎么落进物理块池</h3>
-<p class="lead">上面看的是快照。这里把同一组请求拆成一步步可核对的状态转移：<b>教学设定</b>——块大小 16 token；请求 A、B 各有三个逻辑块，B 的前两块与 A 相同（共享前缀），块 2 起分叉；物理池 P0–P7 中 P1、P4、P6 由分配器按空闲表顺序给出（初始碎片来自先前已结束的请求），与图 4-1 的最终快照一致。</p>
+<p class="lead">上面看的是快照。这里把同一组请求拆成一步步可核对的状态转移：<b>教学设定</b>——块大小 16 token；请求 A、B 各有三个逻辑块，B 的前两块与 A 相同（共享前缀），块 2 起分叉；物理池 P0–P7 中 P1、P4、P6 由分配器按空闲表顺序给出（空闲表中的块号可以不连续），与图 4-1 的最终快照一致。</p>
 <table>
 <tr><th>步</th><th>事件</th><th>页表状态</th><th>物理块池变化</th></tr>
 <tr><td>1</td><td>A 的 prefill 写满逻辑块 0</td><td>A：块0→P1</td><td>P1 分配给 A，引用 1。按需分配：此刻只为已写入的 16 个 token 占用显存</td></tr>
@@ -756,7 +756,7 @@ root.querySelector('.ppx-reset').addEventListener('click',reset);
 <tr><td>5</td><td>B 的逻辑块 2 分叉，写入独有内容</td><td>B：块0→P1、块1→P4、块2→P2</td><td>P2 新分配，引用 1；A 的 P6 不受影响</td></tr>
 <tr><td>6</td><td>稳态快照</td><td>见上两列</td><td>8 个物理块中 4 个在用（P1、P4 共享，P6、P2 独有）+ 页表元数据；没有任何按最大长度的预留</td></tr>
 </table>
-<p><b>它解决了什么</b>：旧的连续预留方式必须为每条请求一次性圈出一段按最大输出长度计算的<b>连续</b>显存——本例里 A、B 若各按 4 块预留（多预留一块给未知输出），共需 8 块连续空间，实际只用到 6 块，且两个"整段连续"要求在碎片化的池子里可能直接放不下（外部碎片），请求只能排队。分页后：只为已写的块付费（内部碎片只剩最后一个未满块），物理位置任意（外部碎片被页表吸收），共享前缀不再复制。这些收益的<b>观测口径</b>见 5.4：容量看实际分配与预留的差，延迟看 TTFT 的实际分布。</p>
+<p><b>它解决了什么</b>：旧的连续预留方式必须为每条请求一次性圈出一段按最大输出长度计算的<b>连续</b>显存——本例里 A、B 若各按 4 块预留（多预留一块给未知输出），共需 8 块连续空间，实际只用到 6 块，且两个"整段连续"要求在碎片化的池子里可能直接放不下（外部碎片），请求只能排队。分页后：按当前需要从固定大小的块池领取块（每条序列尾块仍可有空位），物理位置可以不连续。开启前缀复用后，匹配的完整块还可供两条请求同时引用。这些收益的<b>观测口径</b>见 5.4：容量看实际分配与预留的差，延迟看 TTFT 的实际分布。</p>
 <p>每一步都可以对照 4.2 节的源码复核：<code>allocate_slots</code> 的第 ③ 步对应本表第 1–3、5 步的按需分配；<code>find_longest_cache_hit</code> 对应第 4 步的前缀命中。想看这些状态在时间上怎么被排队与批处理影响，见<a href="inference-evaluation.html#s1">评测篇的请求时间线</a>——那里定义了排队、prefill、decode 与流式输出在客户端时钟上的位置。</p>
 
 <h2 id="s5"><span class="no">5</span>前缀复用：能不算，就不算</h2>
@@ -839,7 +839,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
 <div class="box tip"><b class="t">应用侧启示</b>把不变的内容（系统提示、工具定义、参考文档、历史轨迹）放在 prompt <b>最前面</b>且保持逐字节稳定，把变化的内容放最后。这是免费获得数倍降本与 TTFT 改善的第一杠杆。各家命中判定都是"前缀逐字节相同"（DeepSeek 以 64 token 为最小落盘单位）。</div>
 
 <h3 id="kv-capacity-ttft">5.4 观测账本：容量与 prefill/TTFT 分开记</h3>
-<p class="lead">分页管理回答"显存装得下吗"，前缀复用回答"这 32 个 token 要不要重算"。两个问题的观测项不同，混在一个指标里两头都说不清。<a href="inference-evaluation.html#s1">评测篇第 1 章</a>定义了 TTFT 的客户端口径（含排队），这里的账目可以直接填进那边的请求账本。</p>
+<p class="lead">分页管理回答"显存装得下吗"，前缀复用回答"这 32 个 token 要不要重算"。两个问题的观测项不同，混在一个指标里两头都说不清。<a href="inference-evaluation.html#s1">评测篇第 1 章</a>定义了 TTFT 的客户端口径（含排队），这里的账目可以直接填进那边的请求账本。动手实验见在线书的<a href="https://piratepai.github.io/pi-infer-book/chapters/ch04.html">第 4 章「KV Cache：从复用到内存管理」</a>。</p>
 <div class="fig"><div class="flowrow">
 <div class="fbox"><b>容量账</b><small>实际分配 vs 预留</small></div><span class="arr">→</span>
 <div class="fbox"><b>命中账</b><small>命中 token 与省下的 prefill</small></div><span class="arr">→</span>
@@ -847,9 +847,9 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
 </div><div class="cap">图 5-1 · 本文自绘：同一组机制的三本账——容量看块，复用看 token，收益最终要看带排队的 TTFT 与 goodput（口径见评测篇表 1-1 与 2.1）。</div></div>
 <p><b>容量观测项</b>（对应 4.3 的每一步）：</p>
 <ul>
-<li><b>实际分配</b>（allocated）：此刻真正占用的物理块数，按请求和全局各记一份；</li>
-<li><b>预留口径</b>（reserved）：对照实验里按最大长度静态预留会占用的块数——两者之差就是分页消除的浪费（vLLM 论文的 20.4%–38.2% 就是这个口径<sup class="c"><a href="#ref-12">[12]</a></sup>）；</li>
-<li><b>共享块引用计数</b>：引用 &gt;1 的块数与节省的块数（4.3 里 2 块 × 引用 2 = 省 2 块）；</li>
+<li><b>按需分配</b>。教学例中两条请求各用 3 块。关闭共享时，按需分配从静态预留的 8 块降到实际占用的 6 块。这里统计块池使用量，与 GPU 分配器已预留的显存分开记录。</li>
+<li><b>前缀共享</b>。前两个块各供两条请求引用，相比各自存一份节省 <code>2 × (2 − 1) = 2</code> 块，物理占用从 6 块降到 4 块。</li>
+<li><b>历史利用率</b>。PagedAttention 论文图 2 报告旧系统中实际 token 状态只占 KV Cache 内存的 20.4%–38.2%。这是旧系统的利用率，教学例中的页表和共享收益另算。<sup class="c"><a href="#ref-12">[12]</a></sup></li>
 <li><b>未满尾块</b>与页表元数据：分页后剩余的固定开销。</li>
 </ul>
 <p><b>前缀复用观测项</b>：</p>
@@ -858,7 +858,7 @@ def evict(num_tokens):                   # 驱逐：小顶堆按 LRU 弹叶子
 <li><b>减少的 prefill 计算</b>：命中 token × 每 token prefill 成本（FLOPs 或时间）；</li>
 <li><b>实际 TTFT</b>：含排队、含缓存查找开销的端到端分布——命中只是让请求更快"能被算"，不保证它更快"被算完"。</li>
 </ul>
-<p><b>边界算例：命中收益会被排队或传输吃掉</b>（教学假设，非实测）。设某请求命中 2 块（32 token）：若 prefill 吞吐按 2,000 token/s 计，省下的计算约 16 ms。第一种情况——缓存块在远端节点（Mooncake 类全局 KV 池或 P/D 分离的 prefill 副本<sup class="c"><a href="#ref-45">[45]</a></sup>）：每块 KV 假设 0.5 MB，网络带宽 100 MB/s 时传输约 10 ms，净收益只剩 6 ms；带宽降到 25 MB/s（拥塞）时传输要 40 ms，TTFT 反而比本地重算更差。第二种情况——本机命中但 decode 批已满：请求省了 prefill 却仍在 admission 队列里等位置，TTFT 分布不动，命中的收益体现在吞吐（同一时间服务更多请求），不在延迟。两条边界对应的研究判断（缓存感知路由什么时候赢最短队列路由）登记在<a href="research-judgments.html#j1">研究判断登记表</a>。</p>
+<p><b>边界算例：命中收益会被排队或传输吃掉</b>（教学假设，非实测）。设某请求命中 2 块（32 token）：若 prefill 吞吐按 2,000 token/s 计，省下的计算约 16 ms。第一种情况——缓存块在远端节点（Mooncake 类全局 KV 池或 P/D 分离的 prefill 副本<sup class="c"><a href="#ref-45">[45]</a></sup>）：每块 KV 假设 0.5 MB，网络带宽 100 MB/s 时传输约 10 ms，净收益只剩 6 ms；带宽降到 25 MB/s（拥塞）时传输要 40 ms，TTFT 反而比本地重算更差。第二种情况——缓存感知路由把请求送到更忙的实例。若多排队 20 ms，即使省下 16 ms 的 prefill，TTFT 仍比本地重算多 4 ms。实际比较还要检查其他路径耗时和负载分布。两条边界对应的研究判断（缓存感知路由什么时候赢最短队列路由）登记在<a href="research-judgments.html#j1">研究判断登记表</a>。</p>
 <p><b>对照与证据口径</b>：本节的块数账与 4.3 状态转移是教学简化（块大小、池子规模为设定值）；PagedAttention 论文给出的是 2023 年系统的实测口径<sup class="c"><a href="#ref-12">[12]</a></sup>；vLLM V1 的当前行为（完整块哈希、默认开启、近零开销）来自设计文档与源码静态阅读（快照见文末来源）<sup class="cite"><a href="#V26-APCDOC">[V26:APCDOC]</a></sup>；固定提交快照下与 KV 管理相关的测试（<code>tests/v1/core/</code> 的 <code>test_prefix_caching.py</code>、<code>test_prompt_block_hash_vectors.py</code>、<code>test_single_type_kv_cache_manager.py</code> 等）已核对存在与覆盖意图<sup class="cite"><a href="#V26-TESTS">[V26:TESTS]</a></sup>——本站未运行这些测试，"独立运行通过"属于 vLLM CI 的证据，不属于本站。对照另一极端，Self Forcing 的固定提交 KV 管理（每块覆写追加、滑窗驱逐、无跨请求复用）见<a href="self-forcing-inference-research.html#s33">视频案例篇 3.3 节</a>：同一类"块"在不同系统里承担完全不同的语义。</p>
 
 <!-- ================================================================ -->
@@ -1376,8 +1376,8 @@ vllm serve Qwen/Qwen2.5-1.5B-Instruct \
 <!-- core-visuals:end -->
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=64114dcadbe1">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=3a4742c1c9a2">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=cc32604007e5"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>
