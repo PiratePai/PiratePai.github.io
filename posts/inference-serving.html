@@ -550,7 +550,7 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <div class="analogy">书架上有一排格子。有人先留了五格，最后只放了两本书，先前那三格一直空着，别人也借不到。另一边有两个空位，中间隔着一本书，想把两本书挨着放也放不下。</div>
 <p>早期系统（包括原始 Orca）为每条请求<b>按其最大可能长度</b>预留一段<b>连续</b>显存放 KV Cache。两个后果：</p>
 <ul>
-<li><b>预留空间和内部碎片</b>：例如按 2,048 个 token 预留，未写入的位置暂时无法让给其他序列。论文把此后实际写入的位置在写入前计为预留空间。若序列结束时只用了 200 个位置，始终没用到的 1,848 个位置属于内部碎片。</li>
+<li><b>预留空间和内部碎片</b>：例如按 2,048 个 token 预留，未写入的位置暂时无法让给其他序列。论文把尚未写入、但后续会写入的位置计为预留空间。若序列结束时只用了 200 个位置，始终没用到的 1,848 个位置属于内部碎片。</li>
 <li><b>外部碎片</b>：连续大块反复申请释放，显存被切割成碎片，明明总量够却分配不出新的连续段。</li>
 </ul>
 <p>在 vLLM 论文比较的旧系统中，实际存入 KV 的位置占 KV Cache 空间的 <b>20.4% 至 38.2%</b>，其余空间是预留或碎片。分母是 KV Cache 空间，详见论文图 2–3<sup class="cite">[VLLM23]</sup>。</p>
@@ -572,7 +572,7 @@ root.querySelector('.ppx-skew').addEventListener('change',function(){skew=this.c
 <li>生成到哪，块就分到哪。请求结束后降低引用计数，无人引用的块回到可分配队列。配合迭代级调度，进出 batch 无需整批等待，但仍有块表、引用计数、调度及必要的复制开销。</li>
 <li>多个候选序列可以通过引用计数共享同一前缀的物理块。候选要写入仍在共享的块时，先为它复制一份（copy-on-write）<sup class="cite">[VLLM23]</sup>。</li>
 </ul>
-<p>效果：vLLM 论文报告，在相近延迟下，对比 FasterTransformer 和 Orca 的服务吞吐为 <b>2–4 倍</b><sup class="cite">[VLLM23]</sup>。发布博客按 ShareGPT 的输入和输出长度分布，分别在 A10G 上测试 LLaMA-7B、在 A100 上测试 LLaMA-13B。每次请求生成一个输出时，相对 Hugging Face Transformers 的服务吞吐最高为 <b>24 倍</b><sup class="cite">[VLLMBLOG]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
+<p>效果：vLLM 论文报告，在相近延迟下，对比 FasterTransformer 和 Orca 的服务吞吐为 <b>2–4 倍</b><sup class="cite">[VLLM23]</sup>。发布博客按 ShareGPT 的输入和输出长度分布，分别在 A10G 上测试 LLaMA-7B、在 A100 上测试 LLaMA-13B。每个请求只生成一个完整回答时，相对 Hugging Face Transformers 的服务吞吐最高为 <b>24 倍</b><sup class="cite">[VLLMBLOG]</sup>。PagedAttention 之外，vLLM 还把 Orca 的 continuous batching 工程化为开箱即用，此后"vLLM 类引擎"成为事实标准。</p>
 <div class="note"><b>[VLLM23]</b> Kwon, Li, Zhuang, Sheng, Zheng, Yu, Gonzalez, Zhang, Stoica. <i>Efficient Memory Management for Large Language Model Serving with PagedAttention</i>. SOSP 2023（2023-10）；软件 vLLM 于 2023-06 开源。原文："we propose PagedAttention, an attention algorithm <b>inspired by the virtual memory and paging techniques employed by operating systems</b>"（译文：我们提出 PagedAttention，一个受操作系统虚拟内存与分页技术启发的注意力算法）。链接：<a href="https://arxiv.org/abs/2309.06180">arxiv.org/abs/2309.06180</a></div>
 <p>落到代码：vLLM V1 的 <code>KVCacheManager</code> 负责"查缓存 → 分配新块 → 释放/驱逐"全流程：</p>
 <pre><code># repos/vllm/vllm/v1/core/kv_cache_manager.py (main @ 2026-08-23，方法清单节选)

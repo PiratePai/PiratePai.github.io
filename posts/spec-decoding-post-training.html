@@ -465,7 +465,7 @@ alpha = sum(min(p[k], q[k]) for k in p)     # 理论接受率 = Σ min(p,q)
 
 <p>消融显示 MTP 让模型本身在 GSM8K/HumanEval 等基准显著变强（例如小规模实验 HumanEval 20.7→26.8）；而推理时第 2 个 token 的接受率高达 <b>85–90%</b>，配合投机解码把解码速度提升 <b>1.8 倍</b>（V3 官方部署即 MTP-1 配置）。这一"训练-推理双赢"的设计被 gpt-oss、Qwen、GLM、Kimi 等新一代旗舰模型普遍采纳，也反过来启发了 EAGLE-3 的架构（第 6 节）。学界随后还出现了 FastMTP<span class="cite">[31]</span> 等加速 MTP 训练/推理的工作。</p>
 <h2 id="phase3">6 · 阶段三（2025）：训练目标与架构的协同进化 —— EAGLE-3</h2>
-<div class="analogy">老师每次念出故事的下一句。小朋友用这句话和自己上一回写的便条，再写一张便条。这样练到的是接着自己的记录往下走，故事的字句仍由老师给。</div>
+<div class="analogy">老师先递来一张便条。小朋友照着它写一张自己的。下一轮，他把自己刚写的那张带回来，接着写下去。这样练到的是怎么接着自己的记录往下走。</div>
 
 <p><span class="pill g">训练对象：特征级草稿头（升级版）</span><span class="pill b">优化目标：纯 token CE + 训练时测试</span></p>
 
