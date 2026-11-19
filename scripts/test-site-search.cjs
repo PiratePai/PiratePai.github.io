@@ -2,7 +2,7 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const {prepare, search, readIndex} = require('./site-search.js');
+const {prepare, search, readIndex, matchTerm} = require('./site-search.js');
 const index = JSON.parse(fs.readFileSync(path.join(__dirname, '../search-index.json'), 'utf8'));
 const docs = prepare(index.documents);
 
@@ -29,6 +29,26 @@ test('chapter query lands on a matching chapter rather than just the article', (
   assert.ok(result);
   assert.match(result.url, /#s4$/);
   assert.ok(result.snippet.length > 0);
+});
+test('term aliases converge on one definition entry and stay narrow', () => {
+  // TTFT variants all point at the same definition chapter.
+  const expected = 'posts/inference-evaluation.html#s1';
+  for (const query of ['TTFT', 'ttft', '首 token 延迟', '首token延迟', '首字时延', 'Time to First Token']) {
+    const term = matchTerm(query);
+    assert.ok(term, query);
+    assert.equal(term.url, expected, query);
+  }
+  // P/D disaggregation variants reach the serving chapter.
+  for (const query of ['P/D 分离', 'PD 分离', 'prefill-decode 分离']) {
+    assert.equal(matchTerm(query).url, 'posts/inference-serving.html#s5', query);
+  }
+  // Direct chapter and topic entries keep working.
+  assert.equal(matchTerm('分页管理').url, 'posts/kv-cache-survey.html#s4');
+  assert.equal(matchTerm('Self Forcing').url, 'posts/self-forcing-inference-research.html#s0');
+  // Broad or partial queries must not trigger a pinned term.
+  for (const query of ['', '推理', '缓存', '分页', 'TT', '首 token 延迟是多少', 'KV Cache']) {
+    assert.equal(matchTerm(query), null, query);
+  }
 });
 test('multiword search requires all terms in a single article section', () => {
   const fixture = prepare([{title:'Example',url:'posts/example.html',sections:[{heading:'a',anchor:'a',text:'alpha'},{heading:'b',anchor:'b',text:'beta'}]}]);

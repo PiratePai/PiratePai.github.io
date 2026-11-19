@@ -109,9 +109,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-18">
-<meta property="article:modified_time" content="2026-11-18">
+<meta property="article:modified_time" content="2026-11-19">
 <link rel="canonical" href="https://piratepai.github.io/posts/self-forcing-inference-research.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）", "url": "https://piratepai.github.io/posts/self-forcing-inference-research.html", "description": "以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）为唯一主线案例：源码级解剖块生成与 KV 提交，把存算比、宽容比、KV 缓存、VAE 显存、异构分离、响应延迟串成一条执行链的六个截面（KV 5.62 GiB、块等待 344 ms、roofline 算例），给出 E0–E7 研究对照设计与三项候选创新，并逐条纠正 PixVid 数字的六种误读。", "inLanguage": "zh-CN", "headline": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）", "datePublished": "2026-11-18", "dateModified": "2026-11-18", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/self-forcing-inference-research.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）", "url": "https://piratepai.github.io/posts/self-forcing-inference-research.html", "description": "以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生）为唯一主线案例：源码级解剖块生成与 KV 提交，把存算比、宽容比、KV 缓存、VAE 显存、异构分离、响应延迟串成一条执行链的六个截面（KV 5.62 GiB、块等待 344 ms、roofline 算例），给出 E0–E7 研究对照设计与三项候选创新，并逐条纠正 PixVid 数字的六种误读。", "inLanguage": "zh-CN", "headline": "Self Forcing 流式视频推理：六维建模与响应延迟研究方案（2025–2026）", "datePublished": "2026-11-18", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/self-forcing-inference-research.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -123,7 +123,7 @@
   <p class="sub">以官方 Self Forcing（Wan2.1-T2V-1.3B 衍生、chunk-wise 因果生成）为唯一主线案例，把<b>存算比、宽容比、异构分离、KV 缓存、VAE 显存和响应延迟</b>串成一条执行链上的六个截面——每个维度给出可复算的公式与数字（KV 5.62 GiB、块等待 344 ms、吞吐上界算例），并给出 E0–E7 的研究对照设计与三项候选创新；顺带纠正把 PixVid 论文数字误读成 Self Forcing 1.3B 结果的常见错误。本文是<b>文献与源码研究 + 研究方案设计</b>：不运行模型，不做性能或质量实验。</p>
   <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">源码核对 <b>guandeh17/Self-Forcing @ 33593df（2025-09-12 main 快照）</b></span><span class="pill chip">对照论文 <b>PixVid arXiv:2611.17336v1（2026-11-12）</b></span><span class="pill chip">口径 <b>正文算例均为形状推算/假设算例，非实测</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-18">2026-11-18</time> · 新增专题：<a href="#s0">新增《Self Forcing 流式视频推理》：官方实现源码解剖、六维公式与算例（存算比/宽容比/KV/VAE/异构/响应）、E0–E7 研究设计与 PixVid 口径纠错；含四张 SeeCode 交互图解（六维依赖、状态生命周期、DiT—VAE 分离、控制等待双轨时间线）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/self-forcing-research-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/self-forcing-inference-research.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-18">2026-11-18</time> · 新增专题：<a href="#s0">新增《Self Forcing 流式视频推理》：官方实现源码解剖、六维公式与算例（存算比/宽容比/KV/VAE/异构/响应）、E0–E7 研究设计与 PixVid 口径纠错；含四张 SeeCode 交互图解（六维依赖、状态生命周期、DiT—VAE 分离、控制等待双轨时间线）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/self-forcing-research-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#sf-block-wait-example">3.6 开头新增四个时间定义对照表；3.6.1.1 新增 62.5 ms 控制间隔、50 ms 生成显示的可动手核对块等待算例（N=1/4/8 → 50/237.5/487.5 ms，标注教学假设与改块的三重影响）；章末衔接成本篇 s8/s9/video-response 与研究判断登记表。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 图解与术语：<a href="#sf-block-wait-example">块等待增加静态表之外的可操作算例；对照 PixVid 附录 B.5，将每帧计算量与算术强度分开。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/self-forcing-inference-research.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -512,7 +512,17 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 
 <h3 id="s36">3.6 响应延迟：从一次控制到一帧画面</h3>
 
-<p>前五维都是"钱"（成本、容量、带宽、放置），这一维是"时间"。定义响应延迟：</p>
+<p>前五维都是"钱"（成本、容量、带宽、放置），这一维是"时间"。先立四个定义——它们互相推不出，视频服务里最常被混为一谈：</p>
+
+<table>
+<tr><th>定义</th><th>量什么</th><th>容易和它混淆的</th></tr>
+<tr><td><b>首帧时间</b>（TTFC）</td><td>从会话开始到第一帧出现</td><td>它说明"多快开始播"，与控制无关</td></tr>
+<tr><td><b>帧间隔</b></td><td>相邻可见帧的时间差（分布）</td><td>分布不能由平均吞吐推出；一次长停顿即卡顿</td></tr>
+<tr><td><b>平均帧率</b>（FPS）</td><td>单位时间产出的帧数（均值）</td><td>越过播放线只说明平均供给，不保证尾部不卡</td></tr>
+<tr><td><b>控制到屏幕时延</b>（control-to-screen，本文 R_u）</td><td>从用户输入一个事件，到首个反映该事件的可见帧出现</td><td>与前三个都不同；成本篇 8.1 把它列为第四个时间口径</td></tr>
+</table>
+
+<p>本文聚焦第四个。定义响应延迟：</p>
 
 <div class="formula">R<sub>u</sub> = t<sub>首个反映控制 u 的可视帧</sub> − t<sub>输入 u</sub><span class="fid">控制到画面</span></div>
 
@@ -527,6 +537,30 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 <p>W_j 是 0 到 W_max 之间的等差序列（对称分布），所以常见中位数约定下中位等待 = E[W]。代入 <b>N=12、f=16</b>：W_max = 11/16 = <b>687.5 ms</b>，E[W] = 11/32 = <b>343.75 ≈ 344 ms</b>。PixVid 论文附录 B.5 的分解与此吻合：SolarWM 的延迟 = 等待（0–688 ms）+ 块计算 151 ms → 151–839 ms，中位 495 ms——即 <b>495 = 151 + 344</b>（344 是 495−151 的隐含值，与公式一致）<sup class="cite">[PIXVID]</sup>。单 latent 块（N=4）：W_max = 187.5 ms、E[W] = 93.75 ms——论文实测单 latent SolarWM 中位 164 ms ≈ 94 + 70（其块计算）量级一致。</p>
 
 <div class="note"><b>公式的适用边界</b><p>上述推导对应"等齐块内条件"协议。<b>连续随机到达、块头采样后保持（S&amp;H）、允许取消/覆盖/重算</b>等协议的等待分布各不相同（例如块头锁定语义下，块头之后到达的控制只能进下一块，等待分布右偏），须另行推导，不能混用 (N−1)/(2f)。另一个易错点：<b>一般分位数不能相加</b>——"中位等待 + 中位计算 ≠ 联合中位"只有在两项独立且其一为常数时才近似成立；报分位数要报联合分布的实测/模拟分位。</p></div>
+
+<h4 id="sf-block-wait-example">3.6.1.1 动手核对：62.5 ms 控制间隔下的块等待算例</h4>
+
+<p>把公式放进一个可以在纸面上逐行核对的算例。<b>教学假设</b>：控制按固定间隔 1/f 到达，f = 16，即每 <b>62.5 ms</b> 一条；每块要等齐 N 条控制才开算；生成与显示时间合并固定为 <b>t<sub>g</sub> = 50 ms</b>（假设不随 N 变化）。块内<b>首条</b>控制（j = 0，最坏相位）的等待是 W<sub>0</sub> = (N−1)/f，因此：</p>
+
+<div class="formula">R<sub>first</sub> = (N − 1) / f + t<sub>g</sub><span class="fid">块内首条控制的响应（等齐协议，最坏相位）</span></div>
+
+<table>
+<tr><th>每块等齐的控制数 N</th><th>块等待 (N−1)×62.5 ms</th><th>+ 生成与显示 50 ms</th><th>块内首条控制到屏幕</th></tr>
+<tr><td>1（逐个处理）</td><td>0 ms</td><td>50 ms</td><td><b>50 ms</b></td></tr>
+<tr><td>4</td><td>3 × 62.5 = 187.5 ms</td><td>50 ms</td><td><b>237.5 ms</b></td></tr>
+<tr><td>8</td><td>7 × 62.5 = 437.5 ms</td><td>50 ms</td><td><b>487.5 ms</b></td></tr>
+</table>
+
+<div class="note block-wait-demo" id="sf-block-wait-demo" hidden>
+<label for="sf-block-wait-size">每块要等齐的控制数</label>
+<select id="sf-block-wait-size"><option value="1">1 条</option><option value="4" selected>4 条</option><option value="8">8 条</option></select>
+<div class="block-wait-track" aria-hidden="true"><span class="block-wait-input"></span><span class="block-wait-render"></span></div>
+<div class="block-wait-scale" aria-hidden="true"><span>0</span><span>250</span><span>500 ms</span></div>
+<p><output for="sf-block-wait-size" aria-live="polite">等齐输入 187.5 ms，加上生成与显示 50 ms，总计 237.5 ms。</output></p>
+</div>
+<p>逐行复算：N=4 时第 4 条控制在第 3×62.5 = 187.5 ms 到达，块才能开算，再经 50 ms 生成与显示，首条控制 237.5 ms 上屏；N=8 同理 7×62.5 + 50 = 487.5 ms。等待项随 N 线性增长，生成项不变——这就是"块粒度决定响应下限"的定量形式，沿用图 3-3 的控制频率（图中比较的是论文里的 12 帧块与逐帧生成）。</p>
+
+<div class="note"><b>这些是假设下的教学数字</b><p>本表不是 PixVid 或 Self Forcing 的实测结果：t<sub>g</sub> = 50 ms 与"生成时间不随 N 变"都是设定。实际系统改块大小会同时改变三件事——<b>质量</b>（PixVid 单 latent 消融：FVD 53.8→118.6、Turn 0.70→0.11，见 <a href="cost-efficient-inference-2026.html#video-response">成本篇视频案例</a>的对照表）、<b>每帧计算量</b>（PixVid 的 DiT 约需 16.4 TFLOP/帧，SolarWM 约为 5.6 TFLOP/帧）与<b>服务协议</b>（3.6.2 的三种控制语义改变等待分布本身）。因此不能按本表线性外推"缩小块就省 250 ms"；块粒度 × 缓冲 × 取消策略的联合实验是 E6 组的负责任做法，否定条件见 <a href="#s4">第 4 章对照组总表</a>。</p></div>
 
 <h4>3.6.2 三种控制语义与"首个有效响应"的判定</h4>
 
@@ -558,6 +592,8 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 <p>最后一条正面结论同样要保留：PixVid 论文诚实给出了权衡的另一面——单帧生成让每帧 DiT 计算量 ≈3×、吞吐降为 0.41×，81 帧长滚出的相机误差更高（Rot 5.44° vs 4.24°，作者归因于更长位姿序列上的漂移累积），FVD 则各长度都更低（51.1 vs 53.8）<sup class="cite">[PIXVID]</sup>。<b>"延迟改善"与"吞吐/长序列精度"是同一枚硬币的两面，引用时不能只挑延迟。</b></p>
 
 <div class="note"><b>首块 9 帧、稳态 12 帧，与"不要由首块推断控制协议"</b><p>官方 1.3B 配置（<code>independent_first_frame: false</code>、b=3）下：首块 3 latent 解码 12 帧丢前 3 帧输出 9 帧、稳态块 12 帧（demo.py 的 <code>pixels[:, 3:]</code> 丢帧逻辑），9+6×12=81。这个首块/稳态差异是 <b>VAE 时间压缩的重建对齐</b>造成的，<b>不是</b>控制协议的一部分——不能从"首块 9 帧"反推出任何控制等待结论；做控制扩展时，等待结构由你自己选择的控制语义（3.6.2）决定。</p></div>
+
+<p><b>把这一维接到其他专题</b>（跳过去会看到什么）：<a href="cost-efficient-inference-2026.html#video-response">成本篇视频案例章</a>用同一组 PixVid 数字演示响应约束如何改写成本可行域——吞吐 72 fps 与中位 495 ms 同时成立，p99 约束一收紧，高吞吐方案直接出局；<a href="cost-efficient-inference-2026.html#s8">该篇落地章</a>给出把 R<sub>p99</sub> 写进指标清单与决策树的工程做法；<a href="cost-efficient-inference-2026.html#s9">局限与未来方向章</a>说明这类结论的边界与开放问题。<a href="inference-research-roadmap.html#s3">研究路线篇</a>把"响应作为约束"放进四阶段方法的约束优化层。围绕"同资源下交互视频的吞吐与响应怎么权衡"的可回看判断，登记在<a href="research-judgments.html#j3">研究判断登记表第 3 条</a>。</p>
 
 <div class="summary3"><b>本章小结（后两维）</b>
 <ol>
@@ -724,8 +760,25 @@ print(f"W_max={(N-1)/f*1e3:.1f} ms  E[W]={(N-1)/(2*f)*1e3:.2f} ms  151+344={151+
 </div>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=3a4742c1c9a2">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=cc32604007e5"></script>
 <!-- chapter-reader:end -->
+<script>
+(() => {
+  const demo = document.getElementById('sf-block-wait-demo');
+  const size = demo.querySelector('select');
+  const result = demo.querySelector('output');
+  const generationMs = 50;
+  function render() {
+    const waitMs = (Number(size.value) - 1) * 62.5;
+    demo.style.setProperty('--wait-width', (waitMs / 500 * 100) + '%');
+    result.textContent = '等齐输入 ' + waitMs + ' ms，加上生成与显示 ' + generationMs +
+      ' ms，总计 ' + (waitMs + generationMs) + ' ms。';
+  }
+  size.addEventListener('change', render);
+  render();
+  demo.hidden = false;
+})();
+</script>
 </body>
 </html>

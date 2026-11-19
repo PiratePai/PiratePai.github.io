@@ -107,9 +107,9 @@
 <meta property="og:image:alt" content="Pai&#x27;s Blog，大模型效率技术综述">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="article:published_time" content="2026-11-15">
-<meta property="article:modified_time" content="2026-11-18">
+<meta property="article:modified_time" content="2026-11-19">
 <link rel="canonical" href="https://piratepai.github.io/posts/cost-efficient-inference-2026.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-18", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "name": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "url": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html", "description": "以单位有效产出成本 C_unit = C_total ÷ V_valid 贯穿：可复查的资源账本、三分价格口径与 goodput、2024 价格战与 DeepSeek 545% 账本复盘、模型/缓存/调度/任务链/集群/商业六层降本手段、Agent 任务链成本与 PixVid 视频响应延迟案例，以及引擎与服务化的指标清单、决策树与动手算账。", "inLanguage": "zh-CN", "headline": "高性价比大模型推理：从每 token 账本到工程落地（2022–2026）", "datePublished": "2026-11-15", "dateModified": "2026-11-19", "author": {"@type": "Person", "name": "PiratePai", "url": "https://github.com/PiratePai"}, "image": "https://piratepai.github.io/assets/social-card.png", "mainEntityOfPage": "https://piratepai.github.io/posts/cost-efficient-inference-2026.html"}</script>
 <!-- site-metadata:end -->
 </head>
 <body>
@@ -121,7 +121,7 @@
   <p class="sub">以一条成本公式贯穿全文——<b>单位有效产出成本 C_unit = C_total ÷ V_valid：分子是全部已付费资源（含空闲、重试与失败），分母只计通过质量、SLO 与任务成功过滤的有效产出</b>——先划清它与"低时延、高吞吐"的分野与交汇，再把成本拆成可复查的账本；复盘 2024 中国价格战、DeepSeek 545% 成本利润率披露、分级定价时代；把量化、MoE、缓存复用、P/D 分离、Agent 任务链、硬件采购逐层换算到同一个分母上；以交互视频的"块等待"为反例说明响应延迟如何改写成本可行域；最后给出引擎与服务化团队该盯的指标清单、决策树与动手算账代码。</p>
   <div class="meta"><span class="pill chip">调研日期：<b>2026-11-18</b></span><span class="pill chip">对象 <b>vLLM v0.34.0 · SGLang v0.5.23 · TRT-LLM v1.2.1 · Dynamo v1.6.2 · vLLM-Omni v0.32.0 · Mooncake v0.3.14 · llm-d v1.0.0</b>（2026-11-18 快照）</span><span class="pill chip">定价口径 <b>官方价目页快照，币种与日期随文标注</b></span><span class="pill chip">引用 <b>正文标注出处与时间</b></span></div>
 <!-- article-maintenance:start -->
-<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-18">2026-11-18</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
+<div class="article-maintenance"><div class="article-dates"><span>首次发布 <time datetime="2026-11-15">2026-11-15</time></span> <span aria-hidden="true">·</span> <span>内容更新 <time datetime="2026-11-19">2026-11-19</time></span> <span aria-hidden="true">·</span> <span>最近核验 <time datetime="2026-11-18">2026-11-18</time></span></div><details id="article-history"><summary>变更记录与核验范围</summary><p>核验日期只对应以下记录中的资料，不表示全文所有历史结论均已重新核验。论文报告、源码核对与独立复现，以正文各处的说明为准。</p><ul><li><time datetime="2026-11-15">2026-11-15</time> · 新增专题：<a href="#s0">新增《高性价比大模型推理》：成本账本与指标体系、价格战与降本历程、五层降本手段、DeepSeek 545% 案例复盘与落地清单；含两张 SeeCode 交互图解（图 2-2 成本核算管道、图 5-2 缓存命中路径）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-inference-2026.md">范围说明</a></li><li><time datetime="2026-11-17">2026-11-17</time> · 逻辑排版：<a href="#reading-path">按语义拆分段落、并列项与更新条目，整理提示框及图文结构；保留技术结论和来源，不扩大资料核验范围。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/logical-layout-20261117.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 研究修订：<a href="#s2">主公式升级为单位有效产出成本 C_unit=C_total/V_valid（2.1 六个陷阱与两种问法、2.7 资源项账本、9.1 两层指标栈）；新增 4.5 视觉与多模态、6.5 Agent 任务链成本、第 8 章 PixVid 视频响应延迟案例（图 8-2 交互散点）；按 2026-11-18 重验引擎版本并修订 1.3 教学账目错误。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/cost-efficient-refresh-20261118.md">范围说明</a></li><li><time datetime="2026-11-18">2026-11-18</time> · 整合审查：<a href="#reading-path">明确研究方法、成本目标与视频案例的分工；修正公式、源码边界及导航，核验范围见整合审查记录。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/pr-integration-review-20261118.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 阅读路径样板：<a href="#video-response">8.3 的跨文链接补充“跳过去会看到什么”说明并衔接研究判断登记表第 3 条；5.3 衔接判断 1（缓存感知路由）；6.5 衔接判断 2（token 单价 vs 每成功任务成本）。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li><li><time datetime="2026-11-19">2026-11-19</time> · 证据口径勘误：<a href="#s6">核对预印本第 3 节，说明 Agent 失败与重跑为理论推演，补充假设与可复算概率。</a> <a href="https://github.com/PiratePai/PiratePai.github.io/blob/main/docs/site-redesign-20261119.md">范围说明</a></li></ul><p>首次发布以<a href="https://github.com/PiratePai/PiratePai.github.io/commits/main/posts/cost-efficient-inference-2026.html">本仓库首次收录</a>为准；原稿日期与历史实验快照保留在正文。</p></details></div>
 <!-- article-maintenance:end -->
 </header>
 
@@ -542,6 +542,7 @@
 <li><b>KV 当数据搬运</b>：CacheGen（SIGCOMM'24）把 KV 流式压缩传输，TTFT 缩短 3.7×、字节流压到 1/4.3<sup class="cite">[CACHEGEN24]</sup>；CacheBlend（EuroSys'25 最佳论文）解决"多条预计算 KV 拼接会掉质量"的问题——选择性重算 10% 左右 token，TTFT 2.2–3.3×、吞吐 2.8–5×<sup class="cite">[CACHEBLEND25]</sup>。</li>
 <li><b>反直觉教训</b>：LMCache（UChicago）实测，业界常用的上下文截断会把前缀缓存命中率<b>砍半</b>——为省显存做的截断，反而把缓存的钱亏掉了<sup class="cite">[LMCACHE]</sup>。</li>
 </ul>
+<p>有了共享 KV 池，调度器就多了一个自由度：把请求派去"已有它前缀"的实例，还是派去最短的队列？两者的适用负载、否定条件与拟回看日期登记在<a href="research-judgments.html#j1">研究判断登记表第 1 条</a>；KV Cache 篇 5.4 的边界算例（命中收益被传输或排队吃掉）是它的最小反例。</p>
 
 <figure class="fig" id="fig-cache-hit-path"><div style="overflow-x:auto"><div class="flowrow">
 <div class="fbox"><b>请求到达</b>system prompt + 历史 + 问题</div><span class="arr">→</span>
@@ -606,10 +607,11 @@
 
 <p>Agent 负载与单轮请求的差别是结构性的：<b>多轮串行、上下文随轮次膨胀、工具调用穿插、一步失败全链重来</b>。2026 年下半年的集中发现，几乎每条都改写 C_unit 的分子或分母：</p>
 <ul>
-<li><b>Agent 轨迹实际上跑在 batch=1</b>。企业负载框架研究（Citigroup/EY/NVIDIA，2026-10）实测：agent 的顺序步进让 TPOT 主导任务完成时间，<b>每步 2% 的失败率在 20 步后足以抹平 2× 的 decode 优势</b>；按 token 吞吐给引擎排名与按"每成功任务成本"排名会给出不同答案<sup class="cite">[ENTERPRISE]</sup>——V_valid 的过滤在任务层，不在 token 层。</li>
+<li><b>失败与恢复会改变成功任务的成本</b>。Ali 等的预印本用独立失败模型分析 Agent 执行，未开展原始测量。若每步失败概率为 2%，一项 20 步任务一次跑完的概率约为 66.8%。在每次尝试都按完整任务成本计费的简化条件下，平均每次成功需要约 1.50 次尝试。若失败提前结束或启用检查点，实际支出还要按重跑范围和恢复开销核算。<sup class="cite"><a href="#ENTERPRISE">[ENTERPRISE]</a></sup></li>
 <li><b>KV 增长是 agent 的头号账本项</b>。Cache Engineering for Agents（清华，2026-10）论证：轨迹超出上下文限制后，<b>KV 的 I/O 与存储成为主导成本</b>，需要主动控制缓存增长<sup class="cite">[CACHEENG]</sup>。配套的归因研究 Total Cost of Agency（2026-09）用两遍精确计数把"记忆注入 token"从普通输入里拆出来：企业级 200 任务基准上<b>记忆注入约占总计费成本的 12%</b>，其中约 28.7% 可在不损精度的前提下去掉<sup class="cite">[TCA]</sup>——观测工具把它们按普通输入计费，账本就看不清。</li>
 <li><b>命中/未命中的成本不对称会放大突发</b>。微软的测量（2026-11）：前缀缓存命中只补约 1K token 的增量 prefill，未命中要重算 10–40K 上下文——这使前缀缓存的 agent 服务<b>亚稳</b>：短暂突发压垮命中率后，吞吐与命中率互相拖累、难以自愈<sup class="cite">[BURSTS]</sup>。缓存级降本（第 5 章）在任务链上有了失效边界。</li>
 <li><b>客户端与服务端的账要一起算</b>。Think or Remember（2026-11）发现：丢弃早期推理内容的上下文策略，在服务端有无缓存复用下，重发成本相差可达 5 倍（1.74× vs 0.34×）——<b>比较上下文策略必须同时说明服务端缓存行为</b><sup class="cite">[EXCHANGE]</sup>。</li>
+<li><b>排序问题交给登记表</b>。"按 token 单价与按每次成功任务成本给配置排序何时一致"是可回看的研究判断：同一任务集、验收门槛与预算下的对照设计登记在<a href="research-judgments.html#j2">研究判断登记表第 2 条</a>，本节的证据构成它的机制依据。</li>
 <li><b>系统层开始原生适配 agent</b>。Evolving Infra（2026-11）把运行时算力分配与 KV 自适应做进 P/D 分离服务，coding/math/computer-use 负载、GLM-5.2 与 Kimi K2.6、最高 256×GB300 规模上，平均端到端时延较 NVIDIA Dynamo 降 4.1×、P95 TTFT 降 14×<sup class="cite">[EVOLVINGINFRA]</sup>（预印本、厂商侧评测，口径见参考文献）。站内 Agent 推理系统篇的"任务成功成本账本"给的是同一问题的评测视角。</li>
 </ul>
 
@@ -730,7 +732,7 @@ s.t.   Q(x) ≥ Q₀              （质量效用下限；FVD 等越低越好的
 
 <p>决策变量 x 包括块大小、蒸馏步数、缓冲深度、分辨率、解码结构与资源分配。论文报告的是中位响应，不能据此断言 p99 ≤ 100 ms，也不能用平均 FPS 判定成本最优。12 帧块的等待支持范围约为 0–688 ms；这是最大等待的量级，不是每次请求都要付出的最小延迟。是否满足尾延迟约束，需要同一负载下的分布测量。</p>
 <p>一个教学算例（以下尾延迟与质量门均为假设，不是论文测量）：设时租 $8/h，两个方案分别具有吞吐 72 与 29.4 fps、p99 响应 839 与 50 ms，且都通过同一质量门。若要求 p99 ≤ 120 ms，只有第二个方案可行。在持续满载、所有输出均被消费且有效的假设下，其每有效播放秒成本为 8 ÷ 3600 ÷ (29.4/16) ≈ $0.0012。放宽到 900 ms 后两者才都可行，第一方案按同一假设约为 $0.00049。单会话生成超出播放速率但未被消费的帧不算有效产出；质量门、利用率或消费方式变化时应重算，不能据此宣布实际模型最优。</p>
-<p>完整的块等待推导与消融口径见<a href="self-forcing-inference-research.html#s36">视频案例篇 3.6 节</a>；如何把该问题组织成建模与验证任务，见<a href="inference-research-roadmap.html#s3">研究路线篇</a>。交互视频投机生成提供了改变等待协议的研究方向，但仍需按接受率、废弃产出与验证成本记账<sup class="cite">[IVGSPEC]</sup>。</p>
+<p>完整的块等待推导与消融口径见<a href="self-forcing-inference-research.html#s36">视频案例篇 3.6 节</a>（跳过去会看到：62.5 ms 控制间隔下可动手核对的块等待算例表，以及首帧时间、帧间隔、平均帧率与控制到屏幕时延四个定义）；如何把该问题组织成建模与验证任务，见<a href="inference-research-roadmap.html#s3">研究路线篇</a>。"同资源、同质量门下对照同卡与流水线分离"的可回看判断登记在<a href="research-judgments.html#j3">研究判断登记表第 3 条</a>。交互视频投机生成提供了改变等待协议的研究方向，但仍需按接受率、废弃产出与验证成本记账<sup class="cite">[IVGSPEC]</sup>。</p>
 <p>这段案例也是全站四阶段研究路径的缩影：<b>建模</b>给出账本（本节表格）、<b>约束优化</b>定义可行域（上面的公式）、<b>协同设计</b>同时动结构与资源（PixVid 改的正是架构而非内核）、<b>自适应</b>处理变化（按负载在块大小/缓冲间切换，尚是开放问题）。</p>
 
 <h3>8.4 质量指标不是线性效用</h3>
@@ -971,7 +973,7 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 <li id="CACHEENG"><b>（清华大学）.</b> <i>Cache Engineering for Agents.</i> arXiv:2610.28577，2026-10-20；预印本。<a href="https://arxiv.org/abs/2610.28577">链接</a>（轨迹超出上下文限制后 KV 的 I/O 与存储成为主导成本）。</li>
 <li id="TCA"><b>（作者列表以 arXiv 页为准）.</b> <i>Total Cost of Agency: Exact Attribution of Memory Injection Cost in Multi-Agent LLM Workflows.</i> arXiv:2609.23790，2026-09-20；预印本（附代码）。<a href="https://arxiv.org/abs/2609.23790">链接</a>（企业 200 任务基准：记忆注入约占总计费成本 12%，约 28.7% 可无精度损失移除）。</li>
 <li id="BURSTS"><b>Huang, W. &amp; Liu, J.（Microsoft）.</b> <i>Bursts That Outlast Themselves: Persistent Degradation in Prefix-Cached Agent Serving.</i> arXiv:2611.13412，2026-11-10；预印本。<a href="https://arxiv.org/abs/2611.13412">链接</a>（命中 ≈1K token 增量 prefill、未命中重算 10–40K 上下文；系统呈亚稳态）。</li>
-<li id="ENTERPRISE"><b>（Citigroup / EY / NVIDIA）.</b> <i>Evaluating Inference Compute for Generative AI: A Framework for Enterprise Workloads.</i> arXiv:2610.07094，2026-10-05；预印本。<a href="https://arxiv.org/abs/2610.07094">链接</a>（agent 轨迹等效 batch=1、TPOT 主导任务时长；2%/步失败率 20 步后抹平 2× decode 优势）。</li>
+<li id="ENTERPRISE"><b>（Citigroup / EY / NVIDIA）.</b> <i>Evaluating Inference Compute for Generative AI: A Framework for Enterprise Workloads.</i> arXiv:2610.07094，2026-10-05；预印本。<a href="https://arxiv.org/html/2610.07094#S3">第 3 节公式（5）与图 2</a>（执行与失败恢复的理论模型，作者未做原始测量）。</li>
 <li id="EXCHANGE"><b>（U. de San Andrés）.</b> <i>Think or Remember: The Exchange Rate of Agentic Inference.</i> arXiv:2611.10982，2026-11-07；预印本。<a href="https://arxiv.org/abs/2611.10982">链接</a>（同一上下文策略的重发成本随服务端缓存行为差达 5 倍量级：1.74× vs 0.34×）。</li>
 <li id="CASCADE"><b>（UBC / Microsoft Azure / NVIDIA）.</b> <i>Cascade: Exploiting SLO-Aware Latency Budget for Fair and High Goodput LLM Inference Serving.</i> arXiv:2608.06557，2026-08-06；预印本。<a href="https://arxiv.org/abs/2608.06557">链接</a>（每请求时延预算联合驱动调度与 KV 管理；生产 trace goodput 2.4×、SLO 违约 −40%）。</li>
 <li id="SHUNT"><b>（汉阳大学）.</b> <i>ShuntServe: Cost-Efficient LLM Serving on Heterogeneous Spot GPU Clusters.</i> arXiv:2606.18600，2026-06-17；预印本。<a href="https://arxiv.org/abs/2606.18600">链接</a>（异构 spot 池放置 + 保输出活迁移；成本效率较按需池 +31.9%/+31.2%）。</li>
@@ -1026,8 +1028,8 @@ print(f"混合价(输入:输出={IN_OUT_RATIO}:1) ${blended:.3f}/M | 每成功�
 </div>
 <!-- chapter-reader:start -->
 <link rel="stylesheet" href="../assets/reading-theme.css?v=2caac6eab01b">
-<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=55f986509fc1">
-<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=bcfe23129bd2"></script>
+<link rel="stylesheet" id="chapter-reader-style" href="../scripts/chapter-reader.css?v=3a4742c1c9a2">
+<script id="chapter-reader-script" src="../scripts/chapter-reader.js?v=cc32604007e5"></script>
 <!-- chapter-reader:end -->
 </body>
 </html>

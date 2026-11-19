@@ -182,9 +182,25 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
 .reader-arrow { display:inline-flex; align-items:center; justify-content:center; flex:0 0 32px; min-height:36px; border:1px solid var(--r-line); border-radius:6px; }
 .reader-theme-toggle { flex:0 0 34px; display:inline-flex; align-items:center; justify-content:center; padding:6px!important; }
 .reader-toolbar .reader-menu-toggle svg { flex:0 0 auto; }
+.reader-chapter-jump { flex:none; }
+.reader-chapter-jump > summary { cursor:pointer; color:var(--r-link); }
+.reader-chapter-panel { position:absolute; z-index:1; inset:100% 12px auto auto; box-sizing:border-box; width:min(420px, calc(100% - 24px)); max-height:55vh; overflow:auto; overscroll-behavior:contain; padding:12px; background:var(--r-bg); border:1px solid var(--r-line); }
+.reader-chapter-jump:not([open]) > .reader-chapter-panel { display:none; }
+.reader-chapter-panel a { display:block; padding:8px 4px; text-decoration:underline; text-underline-offset:3px; }
+.reader-chapter-panel button { margin-bottom:8px; }
+.block-wait-demo select { margin-left:8px; padding:4px; font:inherit; min-height:44px; color:var(--r-text); background:var(--r-surface); border:1px solid var(--r-line); }
+.block-wait-track { display:flex; height:12px; margin-top:12px; background:var(--r-soft); border:1px solid var(--r-line); }
+.block-wait-input { width:var(--wait-width); background:var(--r-link); }
+.block-wait-render { width:10%; background:repeating-linear-gradient(135deg, var(--r-muted) 0 3px, var(--r-bg) 3px 6px); }
+.block-wait-scale { display:flex; justify-content:space-between; color:var(--r-muted); font-size:.8em; font-variant-numeric:tabular-nums; }
 @media (max-width:980px) {
-  .reader-ready body { margin-left:0; padding-top:60px; }
-  .reader-toolbar { left:0; height:60px; padding-inline:10px; gap:5px; }
+  .reader-ready body { margin-left:0; padding-top:90px; }
+  .reader-toolbar { left:0; height:90px; display:grid; grid-template-columns:auto auto auto auto auto minmax(64px,1fr); padding-inline:10px; gap:4px 5px; }
+  .reader-toolbar .reader-arrow { min-width:32px; }
+  .reader-toolbar .reader-arrow[hidden] { display:none; }
+  .reader-toolbar > button:not(.reader-menu-toggle,.reader-theme-toggle) { grid-column:6; justify-self:end; }
+  /* Common controls keep at least a 44px touch target on phones. */
+  .reader-toolbar button, .reader-toolbar a { min-height:44px; }
   .reader-toolbar button { white-space:nowrap; padding:7px 8px; font-size:13px; }
   .reader-sidebar { width:min(310px,86vw); }
   .reader-ready:not(.reader-collapsed) .reader-backdrop { display:block; position:fixed; inset:0; background:#0007; border:0; border-radius:0; z-index:100011; }
@@ -202,8 +218,13 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
   .reader-content pre { padding:16px!important; font-size:13px!important; }
   .reader-pager { gap:10px; font-size:13px; }
   .reader-pager-status { max-width:64px; }
-  .reader-current-title,.reader-pager-top { display:none; }
-  .reader-toolbar-label { text-align:center; white-space:nowrap; font-size:12px; }
+  /* The current chapter stays visible as the phone reader's location cue. */
+  .reader-current-title { display:inline; }
+  .reader-pager-top { display:none; }
+  .reader-toolbar-label { grid-row:2; grid-column:1/-1; text-align:left; font-size:12px; }
+  .reader-toolbar:has(.reader-chapter-jump) .reader-toolbar-label { grid-column:1/-2; }
+  .reader-chapter-jump { grid-row:2; grid-column:-2/-1; justify-self:end; font-size:12px; white-space:nowrap; }
+  .reader-chapter-panel { white-space:normal; overflow-wrap:anywhere; }
   .reader-ready .tl:has(.when)::before { left:5px; }
   .reader-ready .tl:has(.when) li { padding-left:24px; }
   .reader-ready .tl .when { position:static; display:block; width:auto; text-align:left; }
@@ -214,6 +235,7 @@ svg[data-handbook-diagram] [data-diagram-point="red"] { fill:var(--d-red); }
   .reader-toolbar button { padding-inline:6px; font-size:12px; }
   .reader-toolbar > button[aria-controls] { font-size:0; }
   .reader-toolbar > button[aria-controls]::after { content:'目录'; font-size:12px; }
+  .reader-toolbar .reader-arrow { min-width:26px; }
   .reader-arrow { flex-basis:26px; }
   .reader-theme-toggle { flex-basis:28px; }
   .reader-ready .reader-content { padding-inline:18px; }
